@@ -1,4 +1,4 @@
-* example directory
+* code_from_what_genotype_next directory
 
 ** origin of the files  
   - I copy the code from "what_genotype_next": https://github.com/rdiaz02/what_genotype_next
@@ -12,7 +12,7 @@
     - Recall you need to download the Schill code from  https://github.com/RudiSchill/MHN.
       - I've added it here after downloading.
   - Sequence of cp done:
-    - cd ./examples
+    - cd ./what_genotype_next
     - cp -a ~/tmp/MHN .
     - rm -r -f ./MHN/.git
     - cp ../../what_genotype_next/run-biol-examples/*.R .

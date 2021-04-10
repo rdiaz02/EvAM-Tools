@@ -300,10 +300,11 @@ run.cbn <- function(x,
                     init.poset = "linear", ## could be OT?
                     dirname = NULL,
                     addname = NULL, 
-                    temp = 1, steps = max(25, ncol(x)^2),
+                    temp = 1, 
+                    steps = max(200, ncol(x)^2), ## was max(25, 
                     silent = TRUE,
                     ##                    type.out = "adjmat",
-                    eparam = 0.05,
+                    eparam = 0.05, ## 0.05
                     rmfile = TRUE,
                     cores = 1,
                     custom.poset = NULL
