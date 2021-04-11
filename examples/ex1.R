@@ -152,36 +152,6 @@ plot_DAG_fg(out, dB)
 
 
 
-## Very weird behaviour with CBN
-N <- 100
-na <- N
-ne <- N + round(10 * runif(1))
-nab <- 2*N  + round( 10 * runif(1))
-nabc <- N
-nabcd <- 1.6 * N + round( 10 * runif(1))
-nef <- 2.3 * N + round( 10 * runif(1))
-naef <- 2.3 * N + round( 10 * runif(1))
-nae <- 1.9 * N + round( 10 * runif(1))
-
-nabc <- N + round( 10 * runif(1))
-n00 <- 5  ## 1000 + round( 10 * runif(1))
-dB <- matrix(
-    c(
-        rep(c(1, 0, 0), na)
-      , rep(c(0, 1, 0), nb)         
-      , rep(c(0, 0, 1), nc)
-      , rep(c(1, 1, 0), nab)
-      , rep(c(1, 0, 1), nac)        
-      , rep(c(1, 1, 1), nabc)
-      , rep(c(0, 0, 0), n00)
-    ), ncol = 3, byrow = TRUE
-)
-colnames(dB) <- LETTERS[1:3]
-## dB <- dB[, sample(ncol(dB))]
-## dB <- dB[sample(nrow(dB)), ]
-out <- all_methods_2_trans_mat(dB)
-plot_DAG_fg(out, dB)
-
 
 
 
@@ -276,3 +246,105 @@ plot_DAG_fg(out, db2)
 db3 <- rm_wt(db2, 1  )
 out3 <- all_methods_2_trans_mat(db3)
 plot_DAG_fg(out3, db3)
+
+
+
+
+
+## We cannot simulate a case where there both A and B strong
+## effect, but joint increases fitness very little
+## MHN can capture that
+## Simulating data under posets
+true_p1 <- matrix(0, nrow = 4, ncol = 4)
+true_p1[3, 4] <- 1
+lambda_s <- 1
+simGenotypes <- mccbn::sample_genotypes(20000, true_p1,
+                                        sampling_param = 1,
+                                        lambdas = c(5, 5, .5, .4))
+db2 <- simGenotypes$obs_events
+colnames(db2) <- LETTERS[1:4]
+sampledGenotypes(db2)
+out <- all_methods_2_trans_mat(db2)
+plot_DAG_fg(out, db2)
+
+
+
+## We get the negative from MHN, but transitions
+## are screwed up
+
+## This is a case where A and B huge fitness effects
+## but further additions do not add much.
+## D depends on C.
+
+## Interesting that we get a negative coeff.
+## for C on A and B. But mild for A or B on C.
+## Should be the other way around.
+
+N <- 1000
+na <- 4 * N
+nb <- 4* N + round( 100 * runif(1))
+nc <- N + round( 100 * runif(1))
+nab <- N + round( 100 * runif(1))
+nac <- N + round( 100 * runif(1))
+nbc <- N + round( 100 * runif(1))
+ncd <- N + round( 100 * runif(1))
+nabc <- N + round( 100 * runif(1))
+nacd <- N + round( 100 * runif(1))
+nbcd <- N + round( 100 * runif(1))
+nabcd <- N + round( 100 * runif(1))
+n00 <- 20 # und( 10 * runif(1))
+dB <- matrix(
+    c(
+        rep(c(1, 0, 0, 0), na) 
+      , rep(c(0, 1, 0, 0), nb)
+      , rep(c(0, 0, 1, 0), nc)
+      , rep(c(1, 1, 0, 0), nab)
+      , rep(c(1, 0, 1, 0), nac)
+      , rep(c(0, 1, 1, 0), nbc)
+      , rep(c(0, 0, 1, 1), ncd)
+      , rep(c(1, 1, 1, 0), nabc)
+      , rep(c(1, 0, 1, 1), nacd)
+      , rep(c(0, 1, 1, 1), nbcd)
+      , rep(c(1, 1, 1, 1), nabcd)      
+      , rep(c(0, 0, 0, 0), n00)
+    ), ncol = 4, byrow = TRUE
+)
+colnames(dB) <- LETTERS[1:4]
+out <- all_methods_2_trans_mat(dB)
+plot_DAG_fg(out, dB)
+
+
+N <- 1000
+na <- 12 * N
+nb <- 13 * N + round( 100 * runif(1))
+nc <- 9 * N + round( 100 * runif(1))
+nab <- .0 * N + round( 100 * runif(1))
+nac <- .5 * N + round( 100 * runif(1))
+nbc <- .5 * N + round( 100 * runif(1))
+ncd <- N + round( 100 * runif(1))
+nabc <- .1 * N + round( 100 * runif(1))
+nacd <- N + round( 100 * runif(1))
+nbcd <- N + round( 100 * runif(1))
+nabcd <- N + round( 100 * runif(1))
+n00 <- 20 # und( 10 * runif(1))
+dB <- matrix(
+    c(
+        rep(c(1, 0, 0, 0), na) 
+      , rep(c(0, 1, 0, 0), nb)
+      , rep(c(0, 0, 1, 0), nc)
+      , rep(c(1, 1, 0, 0), nab)
+      , rep(c(1, 0, 1, 0), nac)
+      , rep(c(0, 1, 1, 0), nbc)
+      , rep(c(0, 0, 1, 1), ncd)
+      , rep(c(1, 1, 1, 0), nabc)
+      , rep(c(1, 0, 1, 1), nacd)
+      , rep(c(0, 1, 1, 1), nbcd)
+      , rep(c(1, 1, 1, 1), nabcd)      
+      , rep(c(0, 0, 0, 0), n00)
+    ), ncol = 4, byrow = TRUE
+)
+colnames(dB) <- LETTERS[1:4]
+out <- all_methods_2_trans_mat(dB)
+plot_DAG_fg(out, dB)
+
+
