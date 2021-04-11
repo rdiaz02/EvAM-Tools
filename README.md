@@ -1,4 +1,4 @@
-* License and copyright
+# License and copyright
 
 All original code here is released under the GPL v3 license.
 
@@ -15,9 +15,9 @@ This repository includes code by:
 
 
 
-* Directory code_from_what_genotype_next 
+# Directory code_from_what_genotype_next 
 
-** origin of the files  
+## Origin of the files  
   - I copy the code from "what_genotype_next": https://github.com/rdiaz02/what_genotype_next
     - Directories:
       - what_genotype_next/run-biol-examples is examples
@@ -59,7 +59,7 @@ This repository includes code by:
       (./configure, make)
 
 
-* Other optional code
+# Other optional code
   - MC-CBN: https://github.com/cbg-ethz/MC-CBN
   - For now, the default is not to use MC-CBN. If you want to use it, you'll
   need to install the MC-CBN package. Note that you need older versions of
