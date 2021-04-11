@@ -47,6 +47,11 @@
 
 date()
 
+## Set it to TRUE if you want to load MCCBN, which requires
+## having it installed. It then tests the MCCBN functionality too.
+MCCBN_INSTALLED <- TRUE
+
+
 ## Since we are not parallelizing here, you might want to set
 thiscores <- 1
 ## export OPENBLAS_NUM_THREADS=thiscores
@@ -93,7 +98,9 @@ source("pre-process.R", echo = FALSE, max.deparse.length = 0)
 source("ot-process.R", echo = FALSE, max.deparse.length = 0)
 ## source("dip-process.R", echo = FALSE, max.deparse.length = 0)  ## No longer using it
 source("cbn-process.R", echo = FALSE, max.deparse.length = 0)
-source("mccbn-process.R", echo = FALSE, max.deparse.length = 0)
+
+if(MCCBN_INSTALLED)
+    source("mccbn-process.R", echo = FALSE, max.deparse.length = 0)
 
 registerDoSEQ() ## for TRONCO
 
@@ -1688,11 +1695,12 @@ rm(cpm_out_others1)
 test_others <- function(data) {
     data <- as.matrix(data)
     data <- df_2_mat_integer(data)
-    cpm_out_others2 <- all_methods(data, do_MCCBN = TRUE)
+    cpm_out_others2 <- all_methods(data, do_MCCBN = MCCBN_INSTALLED)
+
     mm <- c("OT",
-            ## "CAPRESE", "CAPRI_BIC", "CAPRI_AIC",
+            "CAPRESE", "CAPRI_BIC", "CAPRI_AIC",
             "CBN_ot"
-           , "MCCBN")
+           , "MCCBN")[c(TRUE, rep(FALSE, 3), TRUE, MCCBN_INSTALLED)]
 
     mm0  <- lapply(cpm_out_others2[mm], cpm_access_genots_paths_w)
     mmSM <- lapply(cpm_out_others2[mm], cpm_access_genots_paths_w_simplified)
@@ -1706,22 +1714,23 @@ test_others <- function(data) {
     ## Identical Weighted transition matrices
     wg0 <- lapply(mm0[c("OT" ,
                         "MCCBN"
-                      , "CBN_ot")],
+                      , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
                   function(x) x$trans_mat_genots)
-    wgSM <- lapply(mmSM[c("OT" , "MCCBN"
-                        , "CBN_ot")],
+    wgSM <- lapply(mmSM[c("OT" ,
+                          "MCCBN"
+                        , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
                    function(x) x$trans_mat_genots)
     wgSMm <- lapply(wgSM, as.matrix)
     expect_equal(wg0, wgSMm)
 
     ## Diagonal
     td0 <- lapply(mm0[c("MCCBN",
-        "CBN_ot")],
+        "CBN_ot")[c(MCCBN_INSTALLED, TRUE)]],
                   function(x)
                       trans_rate_to_trans_mat(x$weighted_fgraph,
                                               method = "uniformization")) 
     tdSM <- lapply(mmSM[c("MCCBN",
-        "CBN_ot")],
+        "CBN_ot")[c(MCCBN_INSTALLED, TRUE)]],
                    function(x)
                        trans_rate_to_trans_mat(x$weighted_fgraph,
                                                method = "uniformization")) 
@@ -1730,11 +1739,11 @@ test_others <- function(data) {
 
     ## recheck competing exponentials done differently
     wg2 <- lapply(mm0[c("OT", "MCCBN"
-                      , "CBN_ot")],
+                      , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
                   function(x) trans_rate_to_trans_mat(x$weighted_fgraph,
                                                       method = "competingExponentials"))
     wg2SM <- lapply(mmSM[c("OT", "MCCBN"
-                         , "CBN_ot")],
+                         , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
                     function(x) as.matrix(trans_rate_to_trans_mat(x$weighted_fgraph,
                                                                   method = "competingExponentials")))
     expect_equal(wg2, wg2SM)
