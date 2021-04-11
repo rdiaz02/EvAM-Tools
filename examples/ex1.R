@@ -9,7 +9,9 @@ igraph_options(vertex.label.cex = 1.5)
 igraph_options(edge.label.cex = 1.5)
 
 
-## Remove a fraction of the WT
+## Remove a fraction, rm, of the WT
+## from a matrix of data. Used to examine
+## the effect of having very few WT
 rm_wt <- function(x, rm = 0.9) {
     which_wt <- which(rowSums(x) == 0)
     if(length(which_wt) > 0) {
@@ -18,6 +20,12 @@ rm_wt <- function(x, rm = 0.9) {
     return(x[-rmwt, ])
 }
 
+## Add N WT to the data
+add_wt <- function(x, N = 10000) {
+    ncx <- ncol(x)
+    x <- rbind(x, matrix(0, nrow = N, ncol = ncx))
+    return(x)
+}
 
 ## 
 N <- 200
@@ -85,6 +93,14 @@ colnames(dB) <- LETTERS[1:3]
 out <- all_methods_2_trans_mat(dB)
 plot_DAG_fg(out, dB)
 
+db3 <- rm_wt(dB, 1)
+db4 <- add_wt(db3, 10 * nrow(db3))
+
+out3 <- all_methods_2_trans_mat(db3)
+out4 <- all_methods_2_trans_mat(db4)
+
+plot_DAG_fg(out3, db3)
+plot_DAG_fg(out4, db4)
 
 ## Very weird behaviour with CBN
 N <- 100
@@ -94,7 +110,7 @@ nb <- 0
 nab <- 1.6 * N + round( 10 * runif(1))
 nac <- 2.3 * N + round( 10 * runif(1))
 nabc <- N + round( 10 * runif(1))
-n00 <- 5  ## 1000 + round( 10 * runif(1))
+n00 <- 10  ## 1000 + round( 10 * runif(1))
 dB <- matrix(
     c(
         rep(c(1, 0, 0), na)
@@ -221,6 +237,7 @@ true_p1[3, 4] <- 1
 true_p1[5, 6] <- 1
 lambda_s <- 1
 lambdas <- runif(6, 1/6*lambda_s, 6*lambda_s)
+lambdas <- runif(6, 1/2*lambda_s, lambda_s)
 simGenotypes <- mccbn::sample_genotypes(20000, true_p1,
                                         sampling_param = lambda_s,
                                         lambdas = lambdas)
@@ -233,6 +250,12 @@ plot_DAG_fg(out, db2)
 db3 <- rm_wt(db2, 1)
 out3 <- all_methods_2_trans_mat(db3)
 plot_DAG_fg(out3, db3)
+
+db4 <- add_wt(db2, 100000)
+out4 <- all_methods_2_trans_mat(db4)
+plot_DAG_fg(out4, db4)
+
+
 
 ## Simulating data under posets
 true_p1 <- matrix(0, nrow = 5, ncol = 5)
