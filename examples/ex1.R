@@ -9,23 +9,7 @@ igraph_options(vertex.label.cex = 1.5)
 igraph_options(edge.label.cex = 1.5)
 
 
-## Remove a fraction, rm, of the WT
-## from a matrix of data. Used to examine
-## the effect of having very few WT
-rm_wt <- function(x, rm = 0.9) {
-    which_wt <- which(rowSums(x) == 0)
-    if(length(which_wt) > 0) {
-        rmwt <- which_wt[1:(round(rm * length(which_wt)))]
-    }
-    return(x[-rmwt, ])
-}
 
-## Add N WT to the data
-add_wt <- function(x, N = 10000) {
-    ncx <- ncol(x)
-    x <- rbind(x, matrix(0, nrow = N, ncol = ncx))
-    return(x)
-}
 
 ## 
 N <- 200
@@ -93,8 +77,8 @@ colnames(dB) <- LETTERS[1:3]
 out <- all_methods_2_trans_mat(dB)
 plot_DAG_fg(out, dB)
 
-db3 <- rm_wt(dB, 1)
-db4 <- add_wt(db3, 10 * nrow(db3))
+db3 <- remove_WT(dB, 1)
+db4 <- add_WT(db3, 10 * nrow(db3))
 
 out3 <- all_methods_2_trans_mat(db3)
 out4 <- all_methods_2_trans_mat(db4)
@@ -217,11 +201,11 @@ sampledGenotypes(db2)
 out <- all_methods_2_trans_mat(db2)
 plot_DAG_fg(out, db2)
 
-db3 <- rm_wt(db2, 1)
+db3 <- remove_WT(db2, 1)
 out3 <- all_methods_2_trans_mat(db3)
 plot_DAG_fg(out3, db3)
 
-db4 <- add_wt(db2, 100000)
+db4 <- add_WT(db2, 100000)
 out4 <- all_methods_2_trans_mat(db4)
 plot_DAG_fg(out4, db4)
 
@@ -243,7 +227,7 @@ sampledGenotypes(db2)
 out <- all_methods_2_trans_mat(db2)
 plot_DAG_fg(out, db2)
 
-db3 <- rm_wt(db2, 1  )
+db3 <- remove_WT(db2, 1  )
 out3 <- all_methods_2_trans_mat(db3)
 plot_DAG_fg(out3, db3)
 
@@ -268,17 +252,23 @@ out <- all_methods_2_trans_mat(db2)
 plot_DAG_fg(out, db2)
 
 
+## Two great examples!!
+
+## Why MHN lacks any mechanistic/causal interpretation.
 
 ## We get the negative from MHN, but transitions
 ## are screwed up
 
-## This is a case where A and B huge fitness effects
-## but further additions do not add much.
-## D depends on C.
+## This is a case where A and B each has huge fitness effects but further
+## additions do not add much.  D depends on C.
 
 ## Interesting that we get a negative coeff.
 ## for C on A and B. But mild for A or B on C.
 ## Should be the other way around.
+
+## Also: Very similar estimates of transitions, with some interesting
+## diffrences.
+
 
 N <- 1000
 na <- 4 * N
@@ -313,6 +303,13 @@ colnames(dB) <- LETTERS[1:4]
 out <- all_methods_2_trans_mat(dB)
 plot_DAG_fg(out, dB)
 
+
+
+
+
+
+## Note that highly positive D on C effect, but it is C that depends on D:
+##   very high \theta_C_D
 
 N <- 1000
 na <- 12 * N
