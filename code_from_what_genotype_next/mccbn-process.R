@@ -1,3 +1,8 @@
+## Recall that for using newer versions of MC-CBN you need libboost < 1.74:
+## https://github.com/cbg-ethz/MC-CBN/issues/5
+## I install as follows
+## sudo apt-get install libboost1.67-dev:amd64 libboost1.67-tools-dev    libboost-graph-parallel1.67-dev
+## Which removes newer versions.
 ## A minimal wrapper. No bootstrap or anything like that for now.
 library(mccbn)
 
@@ -28,3 +33,15 @@ mccbn_proc <- function(x) {
     dfr$lambda <- lambda[dfr$To]
     return(list(edges = dfr))
 }
+
+
+## ## Using the new functionality. Extremely slow.
+## ## The only non-defaults are threads (thrds)
+## ## and L.
+## posets <- mccbn::candidate_posets(db2, rep(1, nrow(db2)), 0.9)
+## poset0 <- posets[[length(posets)]]
+
+## fit <- mccbn::adaptive.simulated.annealing(poset0,
+##                                            db2, L = 100,
+##                                            max.iter.asa = 10000L,
+##                                            thrds = 8)
