@@ -61,6 +61,6 @@ This repository includes code by:
 
 # Other optional code
   - MC-CBN: https://github.com/cbg-ethz/MC-CBN
-  - For now, the default is not to use MC-CBN. If you want to use it, you'll
-  need to install the MC-CBN package. Note that you need older versions of
-  libboost: https://github.com/cbg-ethz/MC-CBN/issues/5
+      - For now, the default is not to use MC-CBN. If you want to use it, you'll
+      need to install the MC-CBN package. Note that you need older versions of
+      libboost: https://github.com/cbg-ethz/MC-CBN/issues/5
