@@ -1142,7 +1142,8 @@ plot_sampled_genots <- function(data) {
 ##   MHN: theta matrix, transition probs between genotypes,
 ##                             transition probs genots TD
 
-plot_DAG_fg <- function(x, data, orientation = "vertical",
+plot_DAG_fg <- function(x, data, orientation = "vertical", 
+                        matrix=TRUE,
                         prune_edges = TRUE) {
     plot_fg <- function(fg) {
         ## Ideas from: https://stackoverflow.com/a/48368540
@@ -1202,14 +1203,44 @@ plot_DAG_fg <- function(x, data, orientation = "vertical",
     }
     
     plot(ot_tree, layout = layout.reingold.tilford, vertex.size = 0, main = "OT")
-    plot_fg(ot_fg)
+    if (matrix){
+        ot <- as.matrix(out$OT_trans_mat)
+        plot(ot[rowSums(ot)>0, colSums(ot)>0], 
+             digits=1, xlab="", ylab="",
+             axis.col=list(side=1, las=2), axis.row = list(side=2, las=1), 
+             main="OT trans matrix", cex.axis=0.7,
+             mgp = c(2, 1, 0), key=NULL)
+    }
+    else {
+        plot_fg(ot_fg)  
+    }
+    
     par(mar=rep(3, 4))
     plot_sampled_genots(data)
     ## plot(type ="n", c(0, 0), c(0, 0), axes = FALSE)
 
     plot(cbn_tree, layout = layout.reingold.tilford, vertex.size = 0, main = "CBN")
-    plot_fg(cbn_fg)
-    plot_fg(cbn_td_fg)
+    
+    if (matrix){
+        cbn_trans_mat <- as.matrix(out$CBN_trans_mat)
+        plot(cbn_trans_mat[rowSums(cbn_trans_mat)>0,colSums(cbn_trans_mat)>0], 
+             digits=1, cex.axis=0.7,
+             main="CBN: trans matrix",
+             xlab="", ylab="",
+             axis.col=list(side=1, las=2), axis.row = list(side=2, las=1), 
+             mgp = c(2, 1, 0), key=NULL)
+        cbn_td_trans_mat <- as.matrix(out$CBN_td_trans_mat)
+        plot(cbn_td_trans_mat[rowSums(cbn_td_trans_mat)>0,colSums(cbn_td_trans_mat)>0], 
+             digits=1, cex.axis=0.7,
+             main="CBN: trans td matrix", 
+             xlab="", ylab="",
+             axis.col=list(side=1, las=2), axis.row = list(side=2, las=1), 
+             mgp = c(2, 1, 0), key=NULL)
+        }
+    else {
+        plot_fg(cbn_fg)  
+        plot_fg(cbn_td_fg)
+    }
 
     if((length(x$MCCBN_model) != 1) && !is.na(x$MCCBN_model)) {
         plot(mccbn_tree, layout = layout.reingold.tilford, vertex.size = 0, main = "MCCBN")
@@ -1226,8 +1257,24 @@ plot_DAG_fg <- function(x, data, orientation = "vertical",
          ylab = " on this (affected)",
          mgp = c(2, 1, 0))
     par(op)
-    plot_fg(mhn_fg)
-    plot_fg(mhn_td_fg)
+    if (matrix){
+        plot(mhn_tm[rowSums(mhn_tm)>0,colSums(mhn_tm)>0], 
+             digits=1, 
+             main="MHN: trans matrix",cex.axis=0.7, 
+             axis.col=list(side=1, las=2), axis.row = list(side=2, las=1), 
+             xlab="", ylab="",
+             mgp = c(2, 1, 0), key=NULL)
+        plot(mhn_td_tm[rowSums(mhn_td_tm)>0,colSums(mhn_td_tm)>0], 
+             digits=1,  cex.axis=0.7,
+             axis.col=list(side=1, las=2), axis.row = list(side=2, las=1), 
+             main="MHN: trans td matrix", 
+             xlab="", ylab="",
+             mgp = c(2, 1, 0), key=NULL)
+    }
+    else {
+        plot_fg(mhn_fg)
+        plot_fg(mhn_td_fg)
+    }
     par(op1)
 }
 
