@@ -3,6 +3,17 @@
 ## I install as follows
 ## sudo apt-get install libboost1.67-dev:amd64 libboost1.67-tools-dev    libboost-graph-parallel1.67-dev
 ## Which removes newer versions.
+
+## Upgrading. These will be removed:
+
+##   libboost-filesystem1.67-dev
+##   libboost-graph-parallel1.67-dev libboost-iostreams1.67-dev
+##   libboost-locale1.67-dev libboost-regex1.67-dev
+##   libboost-serialization1.67-dev libboost-system1.67-dev
+##   libboost-test1.67-dev libboost1.67-dev libboost1.67-tools-dev
+
+
+
 ## A minimal wrapper. No bootstrap or anything like that for now.
 library(mccbn)
 

@@ -9,6 +9,8 @@ igraph_options(vertex.label.cex = 1.5)
 igraph_options(edge.label.cex = 1.5)
 
 
+## We need to have MCCBN installed for code below
+
 ###################################
 ## Simulating data under posets
 
