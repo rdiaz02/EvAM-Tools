@@ -1,3 +1,7 @@
+## You need to do first
+## sudo apt-get install dh-autoreconf autoconf automake autotools-dev autoconf autoconf-archive
+
+
 ## Recall that for using newer versions of MC-CBN you need libboost < 1.74:
 ## https://github.com/cbg-ethz/MC-CBN/issues/5
 ## I install as follows
