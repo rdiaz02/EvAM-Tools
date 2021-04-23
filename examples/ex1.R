@@ -135,6 +135,26 @@ plot_DAG_fg(out, dB)
 
 
 
+## Very weird behaviour with CBN
+## very sensitive to the n00
+N <- 100
+na <- N + round( 10 * runif(1))
+nc <- .73 * N  + round( 10 * runif(1))
+nabc <- 1.2 * N + round( 10 * runif(1))
+n00 <- 19 ## 1.95 * N  ## 1000 + round( 10 * runif(1))
+dB <- matrix(
+    c(
+        rep(c(1, 0, 0), na) 
+      , rep(c(0, 0, 1), nc)
+      , rep(c(1, 1, 1), nabc)
+      , rep(c(0, 0, 0), n00)
+    ), ncol = 3, byrow = TRUE
+)
+colnames(dB) <- LETTERS[1:3]
+db3 <- remove_WT(dB, 1)
+db4 <- add_WT(db3, 10 * nrow(db3))
+
+
 
 
 
