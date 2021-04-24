@@ -354,6 +354,7 @@ all_methods <- function(x, nboot = 0, nboot_caprese_capri = 0,
 
 
 ## DAG of restrictions (as data frame) -> vector of accessible genotypes and graph of DAG of restrictions
+## Under an AND model, such as CBN
 ## return all the accessible genotypes
 ##     from a DAG of genes plus the DAG as igraph object
 df_2_access_genots_and_graph <- function(x) {
@@ -426,6 +427,7 @@ df_2_access_genots_and_graph <- function(x) {
 
 
 ## DAG of restrictions (as data frame) -> vector of accessible genotypes and graph of DAG of restrictions
+##  Under an OR model (not XOR, not AND), such as DBN
 ## return all the accessible genotypes
 ##     from a DAG of genes plus the DAG as igraph object
 df_2_access_genots_and_graph_OR <- function(x) {
