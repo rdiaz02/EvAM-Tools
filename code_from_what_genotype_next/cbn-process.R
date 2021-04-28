@@ -300,10 +300,13 @@ run.cbn <- function(x,
                     init.poset = "linear", ## could be OT?
                     dirname = NULL,
                     addname = NULL, 
-                    temp = 1, 
-                    steps = max(200, ncol(x)^2), ## was max(25, 
+                    temp = 1,
+                    ## as in Hosseini et al., p. i391
+                    ## but for ncol(x) <= 4 200, not 100
+                    steps = ifelse(ncol(x) <= 4, 200,
+                            ifelse(ncol(x) == 5, 1000, 10000)),
+                    ## max(200, ncol(x)^2), 
                     silent = TRUE,
-                    ##                    type.out = "adjmat",
                     eparam = 0.05, ## 0.05
                     rmfile = TRUE,
                     cores = 1,
