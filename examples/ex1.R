@@ -94,10 +94,12 @@ out3 <- all_methods_2_trans_mat(db3)
 out4 <- all_methods_2_trans_mat(db4)
 out5 <- all_methods_2_trans_mat(db5)
 
-plot_DAG_fg(out, dB)
+## CBN and OT have very similar transition matrices
+## regardless of the WT frequency
+plot_DAG_fg(out, dB, matrix=TRUE)
 plot_DAG_fg(out3, db3)
 plot_DAG_fg(out4, db4) 
-plot_DAG_fg(out4, db4)
+plot_DAG_fg(out5, db5)
 ## db4 is quite rare:
 ## it goes from 
 ## WT --> a -->b
@@ -134,7 +136,10 @@ out <- all_methods_2_trans_mat(dB)
 plot_DAG_fg(out, dB)
 
 
-
+## What level of theta_ij would be indicative of 
+## mutual exclusivity
+## This is a toy model for mutual exclusivity: 
+## we either go  with one branch or the otherversion
 N <- 100
 na <- N
 nc <- N + round( 10 * runif(1))
