@@ -89,7 +89,6 @@ library(Matrix)
 library(plot.matrix) ## for the plot of the theta matrix
 
 
-
 source("schill-trans-mat.R") ## yes, a few seconds because of the testing
 
 ## source("LOD-POM.R", echo = FALSE, max.deparse.length = 0)
@@ -99,8 +98,11 @@ source("ot-process.R", echo = FALSE, max.deparse.length = 0)
 ## source("dip-process.R", echo = FALSE, max.deparse.length = 0)  ## No longer using it
 source("cbn-process.R", echo = FALSE, max.deparse.length = 0)
 
+source("dbn-process.R", echo = FALSE, max.deparse.length = 0)
+
 if(MCCBN_INSTALLED)
     source("mccbn-process.R", echo = FALSE, max.deparse.length = 0)
+
 
 registerDoSEQ() ## for TRONCO
 
@@ -564,6 +566,7 @@ cpm_access_genots_paths_w <- function(x, string = NULL,
                          
     x <- x$edges
     tmp <- try(df_2_access_genots_and_graph(x[, c("From", "To")]))
+    
     if(inherits(tmp, "try-error")) {
         stop("how is this happening? there was edges component!")
     } else {
@@ -712,9 +715,10 @@ cpm_access_genots_paths_w_simplified <- function(x, string = NULL,
                     
                 ))
     }
-                         
+    browser()                    
     x <- x$edges
     tmp <- try(df_2_access_genots_and_graph(x[, c("From", "To")]))
+    browser()
     if(inherits(tmp, "try-error")) {
         stop("how is this happening? there was edges component!")
     } else {
@@ -1021,6 +1025,7 @@ rowScaleMatrix <- function(x) {
 ## Pass a data set as a matrix with subjects as rows and genes as columns
 
 all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE) {
+    browser()
     x <- df_2_mat_integer(x)
 
     ## cat("\n  Number of genes before limiting = ", ncol(x))
@@ -1042,6 +1047,13 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE) {
         out_schill <- do_MHN2(x, lambda = 1/nrow(x)))["elapsed"]
 
     cat("\n  time MHN = ", time_schill)
+    
+    cat("\n     Doing DBN")
+    time_dbn <- system.time(
+      out_dbn <- do_DBN(x))["elapsed"]
+    
+    cat("\n  time MHN = ", time_dbn)
+    
     cpm_out_others <- all_methods(x, cores_cbn = cores_cbn, do_MCCBN = do_MCCBN)
 
     pre_trans_mat_others <- lapply(cpm_out_others[methods], cpm_access_genots_paths_w_simplified)

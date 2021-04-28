@@ -691,6 +691,7 @@ cpm_access_genots_paths_w_simplified <- function(x, string = NULL,
                          
     x <- x$edges
     tmp <- try(df_2_access_genots_and_graph(x[, c("From", "To")]))
+    browser()
     if(inherits(tmp, "try-error")) {
         stop("how is this happening? there was edges component!")
     } else {
@@ -1739,6 +1740,7 @@ rm(Dat1)
 ## Pass a data set as a matrix with subjects as rows and genes as columns
 
 all_methods_2_trans_mat <- function(x, cores_cbn = 1) {
+    
     x <- df_2_mat_integer(x)
 
     cat("\n  Number of genes before limiting = ", ncol(x))
@@ -1761,6 +1763,7 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1) {
     pre_trans_mat_others <- lapply(cpm_out_others[methods], cpm_access_genots_paths_w_simplified)
 
     cat("\n    getting transition matrices for all non-mhn methods ")
+
     ## Unweighted
     uw <- lapply(pre_trans_mat_others, function(x) rowScaleMatrix(x$fgraph))
     ## Weighted
