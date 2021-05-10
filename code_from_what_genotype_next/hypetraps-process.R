@@ -2,15 +2,16 @@
 ## Set up: add PATH_TO_HYPERTRAPS_REPO/bin/ to your PATH
 ## Set up: operate in a conda environment: Follow installation in README.md
 
-do_HyperTraPS <- function(data){
+do_HyperTraPS <- function(data, tmp_folder="", runs=1000, bi=50000, r=100, seed=42){
   ## Create tmp folder with random nameS
   dateTime <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")
-  random_letters <- paste(c("_", LETTERS[floor(runif(4, min=1, max=26))]), sep="", collapse="")
+  random_letters <- paste(c("_", tmp_folder, "_", LETTERS[floor(runif(4, min=1, max=26))]), sep="", collapse="")
   tmp_folder <- paste(c("/tmp/", dateTime, random_letters), collapse="")
 
   dir.create(tmp_folder)
   orig_folder <- getwd()
   setwd(tmp_folder)
+  print(tmp_folder)
 
   ## Running HyperTraps
   output_name <- "data.csv"
@@ -26,34 +27,18 @@ do_HyperTraPS <- function(data){
   print("Sampling posterior")
   time_posterior <- system.time(
     # system("RUN_MCMC_SAMPLER -f transitions.txt -M second-order -N 1000 -r 20 -n zero -p 20 -k mcmc-apm -s 0.025 -b 50000 -i 100 -t 4 -q 0")
-    system("RUN_MCMC_SAMPLER -f transitions.txt -M second-order")
+    system(sprintf("RUN_MCMC_SAMPLER -f transitions.txt -M second-order -N %s -b %s -r %s -S %s", runs, bi, r, seed))
   )["elapsed"]
-  print("Elapsed time for sampling posterior ", time_posterior)
+  cat("Elapsed time for sampling posterior ", time_posterior, "\n")
 
   ### Run walkers
   print("Generating Paths")
-  system("RUN_PW -w match-data -b 50000 -R 100")
+  system(sprintf("RUN_PW -w match-data -b %s -R 100", bi))
 
+  system(sprintf("plot_mc_stats.py -b %s", bi))
   setwd(orig_folder)
   # Cleaning 
-  return(tmp_folder)
+  return(time_posterior)
 }
 
-N <- 100
-na <- N
-nc <- N + round( 10 * runif(1))
-nab <- 1.6 * N + round( 10 * runif(1))
-ncd <- 1.5 * N + round( 10 * runif(1))
-n00 <- round( 10 * runif(1))
-dB <- matrix(
-  c(
-    rep(c(1, 0, 0, 0), na) 
-    , rep(c(0, 0, 1, 0), nc)
-    , rep(c(1, 1, 0, 0), nab)
-    , rep(c(0, 0, 1, 1), ncd)        
-    , rep(c(0, 0, 0, 0), n00)
-  ), ncol = 4, byrow = TRUE
-)
-colnames(dB) <- LETTERS[1:4]
 
-do_HyperTraPS(dB)
