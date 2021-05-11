@@ -19,7 +19,7 @@ do_HyperTraPS <- function(data, tmp_folder="", runs=1000, bi=50000, r=100, seed=
   system(sprintf("conda activate %s", conda_env_name))
 
   ## Running HyperTraps
-  output_name <- "data_second_run.csv"
+  output_name <- "data.csv"
   write.csv(data, output_name)
 
   ### Transforming data
