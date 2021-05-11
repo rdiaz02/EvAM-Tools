@@ -8,7 +8,7 @@ do_HyperTraPS <- function(data, tmp_folder="", runs=1000, bi=50000, r=100, seed=
   random_letters <- paste(c("_", tmp_folder, "_", LETTERS[floor(runif(4, min=1, max=26))]), collapse="")
 
   tmp_folder_name <- paste(c(dateTime, random_letters), collapse="")
-  tmp_folder <- file.path("/tmp", conda_env_name, tmp_folder_name), collapse="")
+  tmp_folder <- file.path("/tmp", conda_env_name, tmp_folder_name)
 
   dir.create(tmp_folder, recursive=TRUE)
   orig_folder <- getwd()
@@ -16,7 +16,7 @@ do_HyperTraPS <- function(data, tmp_folder="", runs=1000, bi=50000, r=100, seed=
   print(tmp_folder)
 
   ## Activating conda env
-  system(sprintf("conda activate %s", conda_env_name))
+  # system(sprintf("conda activate %s", conda_env_name))
 
   ## Running HyperTraps
   output_name <- "data.csv"
