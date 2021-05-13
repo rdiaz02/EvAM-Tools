@@ -383,7 +383,7 @@ df_2_access_genots_and_graph <- function(x) {
     all_gty <- vector(mode = "list", length = 100) 
     i <- 1
     for(j in seq_along(node_depth)) {
-        browser()
+         
         tmp_gty_1 <- sort(setdiff(names(subcomponent(g, v = names(node_depth)[j],
                                                      mode = "in")),
                                   "Root"))
@@ -811,10 +811,10 @@ cpm_access_genots_paths_w_simplified <- function(x, string = NULL,
                     
                 ))
     }
-    browser()                    
+                         
     x <- x$edges
     tmp <- try(df_2_access_genots_and_graph(x[, c("From", "To")]))
-    browser()
+     
     if(inherits(tmp, "try-error")) {
         stop("how is this happening? there was edges component!")
     } else {
@@ -876,6 +876,7 @@ cpm_access_genots_paths_w_simplified <- function(x, string = NULL,
         }
         rownames(weights) <- weights[, "To"]
         weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
+
     } else {
         ## why would we return something? It is NA
         ## weighted_fgraph <- fgraph
@@ -1121,7 +1122,7 @@ rowScaleMatrix <- function(x) {
 ## Pass a data set as a matrix with subjects as rows and genes as columns
 
 all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE) {
-    browser()
+     
     x <- df_2_mat_integer(x)
 
     ## cat("\n  Number of genes before limiting = ", ncol(x))
@@ -1148,13 +1149,14 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE) {
     time_dbn <- system.time(
       out_dbn <- do_DBN(x))["elapsed"]
     
-    cat("\n  time MHN = ", time_dbn)
-    
+    cat("\n  time DBN = ", time_dbn)
+     
     cpm_out_others <- all_methods(x, cores_cbn = cores_cbn, do_MCCBN = do_MCCBN)
 
     pre_trans_mat_others <- lapply(cpm_out_others[methods], cpm_access_genots_paths_w_simplified)
 
     cat("\n    getting transition matrices for all non-mhn methods \n")
+
     ## ## Unweighted
     ## uw <- lapply(pre_trans_mat_others, function(x) rowScaleMatrix(x$fgraph))
     ## Weighted
@@ -1182,7 +1184,7 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE) {
         MCCBN_trans_mat <- NA
         MCCBN_td_trans_mat <- NA
     }
-
+    ## TODO: return DBN results
     return(list(
         OT_model = cpm_out_others$OT$edges,
         OT_f_graph = pre_trans_mat_others$OT$weighted_fgraph,
@@ -1205,7 +1207,11 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE) {
         MHN_exp_theta = exp(out_schill$theta),
         MHN_transitionRateMatrix = out_schill$transitionRateMatrix, 
         MHN_trans_mat = out_schill$transitionMatrixCompExp,
-        MHN_td_trans_mat = out_schill$transitionMatrixTimeDiscretized
+        MHN_td_trans_mat = out_schill$transitionMatrixTimeDiscretized,
+        DBN_model = out_dbn$edges,
+        DBN_likelihood = out_dbn$likelihood,
+        DBN_f_graph = out_dbn$weighted_fgraph,
+        DBN_trans_mat = out_dbn$trans_mat_genots
          ))
 }
 
