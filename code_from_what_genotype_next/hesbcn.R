@@ -1,6 +1,7 @@
 
 
-do_HESBCN <- function(data, n_steps=100000, tmp_folder=""){
+do_hesbcn <- function(data, n_steps=100000, tmp_folder="", seed=NULL, clean_dir=FALSE){
+    # Setting tmp folder
     dateTime <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")
     random_letters <- paste(c("_", tmp_folder, "_", LETTERS[floor(runif(4, min=1, max=26))]), collapse="")
     tmp_folder <- paste(c(dateTime, random_letters), collapse="")
@@ -12,95 +13,117 @@ do_HESBCN <- function(data, n_steps=100000, tmp_folder=""){
     setwd(tmp_folder)
 
     write.csv(data, "input.txt", row.names=FALSE, quote=FALSE)
-
-    #Launching
+ 
+    # Launching
     print("Running HESBCN")
-    time_hesbcn <- system.time(
-        system(sprintf("h-esbcn -d input.txt -o output.txt -n %1.f -s 42", n_steps), intern=FALSE))["elapsed"]
+    if (is.null(seed)){
+        command = sprintf("h-esbcn -d input.txt -o output.txt -n %1.f", n_steps)
+    } else if (is.numeric(seed) & seed > 0){
+        command = sprintf("h-esbcn -d input.txt -o output.txt -n %1.f -s %1.f", n_steps, seed)
+    }
+    system(command, ignore.stdout = TRUE)
 
     # Reading output
-    output <- cleaning_output("output.txt")
-    
+    # model_info <- cleaning_output("output.txt")
+    model_info <- import.hesbcn("output.txt")
+    # browser()
+
+    # Transforming data from model
+
+    # Housekeeping
     setwd(orig_folder)
+    if(clean_dir){
+        unlink(tmp_folder, recursive = TRUE)
+    }
+
+    # browser()
 
     return(list(
             # edges = dbn_out,
             # weighted_fgraph = weighted_fgraph,
             # trans_mat_genots = trans_mat_genots,
             # likelihood = out$score
-            time = time_hesbcn
             ))
 }
 
-cleaning_output <- function(file_name){
-    connection <- file(file_name)
-    open(connection)
-    is_graph_completed <- FALSE
-    line <- 1
-    while(length(line) > 0){
-        line <- readLines(connection, n=1)
-        print(line)
-        if (!is.null(line) & line == "best poset: "){
-            print("create Graph")
-            vector <- readLines(connection, n=1)
-            first_vector <- as.numeric(unlist(strsplit(vector, ",")[1]))
-            remaining <- readLines(connection, n=(length(first_vector) - 1))
+import.hesbcn <- function( file, genes = NULL ) {
+    ## Copied from https://github.com/BIMIB-DISCo/PMCE/blob/main/R/utils.R
 
-            poset <- c(vector, remaining)
-            poset <- sapply(poset, function(x){
-                as.numeric(unlist(strsplit(x, ",")[1]))})
-            poset <- t(poset)
+    # read results from file
+    results = read.table(file=file,header=FALSE,sep="\n",stringsAsFactors=FALSE,check.names=FALSE)
 
-            colnames(poset) <- LETTERS[1: length(first_vector)]
-            rownames(poset) <- LETTERS[1: length(first_vector)]
+    # build adjacency matrix
+    start = 2
+    end = grep("accepted",results[,1])-1
+    adjacency_matrix = NULL
+    for(entry in results[start:end,1]) {
+        adjacency_matrix = rbind(adjacency_matrix,as.numeric(strsplit(entry,split=",")[[1]]))
+    }
+    tmp_genes = LETTERS[1:nrow(adjacency_matrix)]
+    # rownames(adjacency_matrix) = paste0("Gene_",1:nrow(adjacency_matrix))
+    # colnames(adjacency_matrix) = paste0("Gene_",1:ncol(adjacency_matrix))
 
+    rownames(adjacency_matrix) = paste0(tmp_genes)
+    colnames(adjacency_matrix) = paste0(tmp_genes)
+
+    # get lambda values and parent set types
+    lambdas = results[(grep("Best Lambdas",results[,1])+1),1]
+    lambdas = strsplit(lambdas,split=" ")[[1]][1:(length(strsplit(lambdas,split=" ")[[1]])-1)]
+    lambdas = as.numeric(lambdas)
+    parent_set = strsplit(results[(grep("best theta types",results[,1])+1),1],split=",")[[1]]
+    for(i in 1:length(parent_set)) {
+        if(parent_set[i]=="-1") {
+            parent_set[i] = "Single"
         }
-    
-        if(line == FALSE & is_graph_completed == FALSE){
-            ## DO GRAPH
+        else if(parent_set[i]=="0") {
+            parent_set[i] = "AND"
         }
-
-        if(startsWith(line, "best theta types")){
-            theta_types <- readLines(connection, n=1)
-            theta_types <- as.numeric(unlist(strsplit(theta_types, ",")[1]))
+        else if(parent_set[i]=="1") {
+            parent_set[i] = "OR"
         }
-
-        if(line == "Best Lambdas:"){
-            lambdas <- readLines(connection, n=1)
-            lambdas <- as.numeric(unlist(strsplit(lambdas, " ")[1]))
-        }
-
-        if(startsWith(line, "Best epsilon")){
-            epsilon <- as.double(unlist(strsplit(line, "=")[2]))
-            ## This is the last thing we want to get
-            break
+        else if(parent_set[i]=="2") {
+            parent_set[i] = "XOR"
         }
     }
+    names(parent_set) = paste0("Gene_",1:nrow(adjacency_matrix))
 
-    close(connection)
+    # make final results and normalize lambda values
+    adjacency_matrix = cbind(rep(0,nrow(adjacency_matrix)),adjacency_matrix)
+    adjacency_matrix = rbind(rep(0,ncol(adjacency_matrix)),adjacency_matrix)
+    rownames(adjacency_matrix)[1] = "Root"
+    colnames(adjacency_matrix)[1] = "Root"
+    adjacency_matrix["Root",as.numeric(which(colSums(adjacency_matrix)==0))[-1]] = 1
+    lambdas_matrix = adjacency_matrix
+    for(i in 2:nrow(lambdas_matrix)) {
+        curr_in_lambda = lambdas[(i-1)]
+        # we assume equally distributed lambdas among components of a single formula
+        lambdas_matrix[as.numeric(which(adjacency_matrix[,i]==1)),i] = curr_in_lambda / length(which(adjacency_matrix[,i]==1))
+    }
 
-    return(list(poset = poset,
-                theta_types = theta_types,
-                lambdas = lambdas,
-                epsion = epsilon))
+    # set genes names
+    if(!is.null(genes)) {
+        rownames(adjacency_matrix) = c("Root",genes)
+        colnames(adjacency_matrix) = c("Root",genes)
+        rownames(lambdas_matrix) = c("Root",genes)
+        colnames(lambdas_matrix) = c("Root",genes)
+        names(parent_set) = genes
+    }
+
+    # adjacency_matrix_2
+    indexes_array = data.frame(which(lambdas_matrix>0, arr.ind=TRUE))
+    indexes_list = which(lambdas_matrix>0, arr.ind=TRUE)
+    lambdas = lambdas_matrix[indexes_list]
+    from = rownames(lambdas_matrix)[indexes_array$row]
+    to = colnames(lambdas_matrix)[indexes_array$col]
+    edges = paste(from, to, sep="->")
+    adjacency_matrix_2 <- data.frame(cbind(from, to, edges, lambdas))
+    colnames(adjacency_matrix_2) <- c("From", "To", "Edge", "Lambdas")
+
+    # estimated epsilon
+    epsilon = as.numeric(gsub("Best epsilon = ","",results[nrow(results),1]))
+    
+    # return results
+    hesbcn = list(adjacency_matrix=adjacency_matrix,lambdas_matrix=lambdas_matrix,parent_set=parent_set,epsilon=epsilon,hesbcn_out=adjacency_matrix_2)
+    return(hesbcn)
+
 }
-N <- 100
-na <- N
-nc <- N + round( 10 * runif(1))
-nab <- 1.6 * N + round( 10 * runif(1))
-ncd <- 1.5 * N + round( 10 * runif(1))
-n00 <- round( 10 * runif(1))
-dB <- matrix(
-  c(
-    rep(c(1, 0, 0, 0), na) 
-    , rep(c(0, 0, 1, 0), nc)
-    , rep(c(1, 1, 0, 0), nab)
-    , rep(c(0, 0, 1, 1), ncd)        
-    , rep(c(0, 0, 0, 0), n00)
-  ), ncol = 4, byrow = TRUE
-)
-
-colnames(dB) <- LETTERS[1:4]
-
-# do_HESBCN(dB)
-cleaning_output("/home/pablo/HESBCN/output3.txt")
