@@ -1,0 +1,22 @@
+## From email  20-May-2021, at 17:32:51, Pablo Herrera Nieto
+## with additions for relations
+
+From To    Edge    Lambda  Relation
+   E  A    E->A  0.2193095  OR
+   F  A    F->A  0.2193095  OR
+   C  B    C->B  0.1582985  OR
+   H  B    H->B  0.1582985  OR
+   E  C    E->C  0.1323785  OR
+   I  C    I->C  0.1323785  OR
+   A  D    A->D  0.2320390  Single
+Root  E Root->E  0.1991160  Single
+Root  F Root->F  0.8062120  Single
+Root  G Root->G  0.4305620  Single
+   F  H    F->H  0.3919575  AND
+   G  H    G->H  0.3919575  AND
+   K  I    K->I 31.4497000  Single
+   H  J    H->J  0.9656100  XOR
+   K  J    K->J  0.9656100  XOR
+   F  K    F->K  0.1886295  OR
+   G  K    G->K  0.1886295  OR
+
