@@ -63,7 +63,10 @@ cpm_out_to_oncosimul <- function(x) {
         s <- exp(x$rerun_lambda) - 1
         typeDep <- "AND"
     } else if("Relation" %in% names(x)) { ## PMCE
-        s <- exp(x$Lambda) - 1        
+        if(exists("Lambda", where = x))
+            s <- exp(x$Lambda) - 1
+        else if(exists("lambda", where = x))
+            s <- exp(x$lambda) -1
         typeDep <- x$Relation
         typeDep[typeDep == "Single"] <- "AND"
     } else if("OT_edgeWeight" %in% names(x) ) { ## OT
@@ -200,9 +203,13 @@ ex_xor <- read.table("ex_pmce_xor.txt", header = TRUE, sep = "\t")
 out_xor <- cpm2tm(ex_xor)
 
 
+## Load the stomach output
+load("stomach_pmce.RData")
 
+stomach_out <- cpm2tm(stomach_pmce)
+plot()
 
-
+stomach_out$accessible_genotypes
 
 
 
