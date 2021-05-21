@@ -49,7 +49,7 @@ date()
 
 ## Set it to TRUE if you want to load MCCBN, which requires
 ## having it installed. It then tests the MCCBN functionality too.
-MCCBN_INSTALLED <- TRUE
+MCCBN_INSTALLED <- FALSE
 
 
 ## Since we are not parallelizing here, you might want to set
@@ -381,7 +381,7 @@ df_2_access_genots_and_graph <- function(x) {
     all_gty <- vector(mode = "list", length = 100) 
     i <- 1
     for(j in seq_along(node_depth)) {
-        browser()
+
         tmp_gty_1 <- sort(setdiff(names(subcomponent(g, v = names(node_depth)[j],
                                                      mode = "in")),
                                   "Root"))
@@ -518,7 +518,7 @@ df_2_access_genots_and_graph_OR <- function(x) {
 
 ## From function of same name in ruggify-functions.R
 
-## vector of accessible genotypes -> adjacency matrix of genotypes (fitness graph)
+## list of accessible genotypes -> adjacency matrix of genotypes (fitness graph)
 ## return maximally connected fitness graph for a given set of accessible genotypes
 unrestricted_fitness_graph <- function(gacc, plot = FALSE) {
     
@@ -561,22 +561,13 @@ unrestricted_fitness_graph <- function(gacc, plot = FALSE) {
 ## https://cmdlinetips.com/2019/05/introduction-to-sparse-matrices-in-r/
 ## https://www.gormanalysis.com/blog/sparse-matrix-construction-and-use-in-r/
 
-## vector of accessible genotypes -> adjacency matrix of genotypes (fitness graph)
+## list of accessible genotypes -> adjacency matrix of genotypes (fitness graph)
 ## return maximally connected fitness graph for a given set of accessible genotypes
 unrestricted_fitness_graph_sparseM <- function(gacc, plot = FALSE) {
     gs <- unlist(lapply(gacc, function(g) paste0(g, collapse = ", ")))
     gs <- c("WT", gs)
     nmut <- c(0, vapply(gacc, length, 1))
     
-    ## adjmat <- matrix(0L, nrow = length(gs), ncol = length(gs))
-    ## rownames(adjmat) <- colnames(adjmat) <- gs
-    
-    ## ## adjmat <- Matrix(0L, nrow = length(gs), ncol = length(gs),
-    ## ##                  sparse = TRUE, dimnames = list(gs, gs))
-    ## ## This works but I don't feel comfortable
-    ## ## adjmat["WT", gs[which(nmut == 1)]] <- 1L
-    ## adjmat[i = rep(ii, length(jj)), j = jj] <- 1L
-
     jj <- match(gs[which(nmut == 1)], gs)
     ii <- rep.int(match("WT", gs), length(jj))
     adjmat <- sparseMatrix(i = ii, j = jj, x = 1L,
@@ -629,7 +620,7 @@ get_global_max <- function(ag) {
 ##    the _w: weights, so we add probs.
 ##   Modification of function of same name, without _w in
 ##   CPMs-paths-genotypes-and-comb.R
-
+##   BEWARE: this assumes a single global maximum!!!
 cpm_access_genots_paths_w <- function(x, string = NULL,
                                     names_weights_paths =
                                         c("rerun_lambda",
@@ -781,6 +772,8 @@ cpm_access_genots_paths_w <- function(x, string = NULL,
 
 ## Like the one above, but only with necessary output
 ##  for both speed and size and using sparse matrices.
+
+
 cpm_access_genots_paths_w_simplified <- function(x, string = NULL,
                                     names_weights_paths =
                                         c("rerun_lambda",
