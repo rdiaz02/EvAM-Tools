@@ -117,3 +117,16 @@ colnames(db2) <- LETTERS[1:7]
 sampledGenotypes(db2)
 out <- all_methods_2_trans_mat(db2)
 plot_DAG_fg(out, db2)
+
+## More
+true_p1 <- mccbn::random_poset(6)
+lambda_s <- 1
+lambdas <- runif(6, 1/6*lambda_s, 6*lambda_s)
+simGenotypes <- mccbn::sample_genotypes(1000, true_p1,
+                                        sampling_param = lambda_s,
+                                        lambdas = lambdas)
+db2 <- simGenotypes$obs_events
+colnames(db2) <- LETTERS[1:6]
+sampledGenotypes(db2)
+out <- all_methods_2_trans_mat(db2)
+plot_DAG_fg(out, db2)

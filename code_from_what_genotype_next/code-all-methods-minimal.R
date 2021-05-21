@@ -49,7 +49,7 @@ date()
 
 ## Set it to TRUE if you want to load MCCBN, which requires
 ## having it installed. It then tests the MCCBN functionality too.
-MCCBN_INSTALLED <- FALSE
+MCCBN_INSTALLED <- TRUE
 
 
 ## Since we are not parallelizing here, you might want to set
