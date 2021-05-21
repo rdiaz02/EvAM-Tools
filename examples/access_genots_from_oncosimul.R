@@ -76,6 +76,12 @@ cpm_out_to_oncosimul <- function(x) {
     } else {
         stop("Input not recognized")
     }
+    ## To get the colors right
+    ## Fix this in OncoSimulR
+    typeDep[typeDep == "AND"] <- "MN"
+    typeDep[typeDep == "OR"] <- "SM"
+    typeDep[typeDep == "XOR"] <- "XMPN"    
+    
     x1 <- data.frame(parent = x$From,
                      child  = x$To,
                      s = s,
@@ -173,7 +179,12 @@ ex_pmce_out1 <- read.table("ex_pmce_out1.txt", header = TRUE)
 
 outp1 <- cpm2tm(ex_pmce_out1)
 
+## plot
 
+plot(allFitnessEffects(cpm_out_to_oncosimul(ex_pmce_out1)))
+
+plot(allFitnessEffects(cpm_out_to_oncosimul(ex_pmce_out1)),
+     "igraph", layout = layout.reingold.tilford)
 
 
 
