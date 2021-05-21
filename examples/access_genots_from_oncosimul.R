@@ -142,7 +142,9 @@ cpm_to_trans_mat_oncosimul <- function(x, max_f = 3,
     tm_s[nrow(tm_s), ] <- 0
     return(list(accessible_genotypes = access_genots_fitness,
                 fitness_graph = fgraph,
-                lambdas = tm, ## for checking
+                ## For checking; these are not necessarily the original lambdas
+                ## but a the original multiplied by a factor, like changing the rate of all.
+                ## lambdas = tm, 
                 transition_matrix = tm_s
                 ))
 }
@@ -188,7 +190,14 @@ plot(allFitnessEffects(cpm_out_to_oncosimul(ex_pmce_out1)),
 
 
 
+#### Tiny OR and XOR
 
+ex_or <- read.table("ex_pmce_or.txt", header = TRUE, sep = "\t")
+out_or <- cpm2tm(ex_or)
+
+
+ex_xor <- read.table("ex_pmce_xor.txt", header = TRUE, sep = "\t")
+out_xor <- cpm2tm(ex_xor)
 
 
 

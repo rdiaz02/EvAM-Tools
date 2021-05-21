@@ -1,0 +1,11 @@
+## Modified to be tiny
+From	To	Edge	Lambda	Relation
+Root	A	Root -> A	.1	Single
+Root	B	Root -> B	.2	Single
+Root	D	Root -> D	.3	Single
+Root	E	Root -> E	.4	Single
+A	C	A -> C	.5	XOR
+B	C	B -> C	.5	XOR
+D	F	D -> F	.6	OR
+E	F	E -> F	.6	OR
+
