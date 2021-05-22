@@ -40,7 +40,14 @@ do_HyperTraPS <- function(data, tmp_folder="", runs=1000, bi=50000, r=100, seed=
   print("Generating Paths")
   system(sprintf("RUN_PW -w match-data -b %1.f -R 100", bi))
 
+  ### Plots
   system(sprintf("plot_mc_stats.py -b %1.f", bi))
+
+  ### Extract data from the model:
+  ## Posets and transitions numbers
+  ## This shoulb be easy because all this data is plotted already
+  ## So I should generate a python script that mimics the functions
+  ## that extract the data in order to save it
   setwd(orig_folder)
   # Cleaning 
   return(time_posterior)

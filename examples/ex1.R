@@ -212,5 +212,3 @@ db5 <- add_WT(db3, 5 * nrow(db3))
 
 
 
-
-

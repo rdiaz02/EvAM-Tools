@@ -1,24 +1,23 @@
 library(OncoBN)
 
 
-do_DBN <- function(data){
+do_DBN <- function(data) {
   time_dbn <- system.time(
-    out <- fitCPN(data, algorithm="DP")
-    )["elapsed"] 
+    out <- fitCPN(data, algorithm = "DP")
+    )["elapsed"]
 
   thetas <- inferTheta(data, out) 
   dbn_out <- create_data_frame_from_theta(thetas)
-  
-  weighted_fgraph <- generate_trans_matrix(dbn_out)
+  # weighted_fgraph <- generate_trans_matrix(dbn_out, "Thetas")
 
   ##TODO: include thetas for out-of-the-path mutations?
   
-  trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
+  # trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
   
   return(list(edges = dbn_out,
-              weighted_fgraph = weighted_fgraph,
+              # weighted_fgraph = weighted_fgraph,
               thetas = thetas,
-              trans_mat_genots = trans_mat_genots,
+              # trans_mat_genots = trans_mat_genots,
               likelihood = out$score,
               time = time_dbn
               ))
@@ -79,23 +78,29 @@ create_data_frame_from_theta <- function(data){
 
     }
   }
-  colnames(dbn_out) <- c("From", "To", "Edge", "Theta")
+  colnames(dbn_out) <- c("From", "To", "Edge", "Thetas")
   return(dbn_out)
 }
 
-generate_trans_matrix <- function(data){
+# generate_trans_matrix <- function(data, parameter_column_name){
 
-  tmp <- try(df_2_access_genots_and_graph_OR(data[, c("From", "To")]))
+#   tmp <- try(df_2_access_genots_and_graph_OR(data[, c("From", "To")]))
   
-  if(inherits(tmp, "try-error")) {
-    stop("how is this happening? there was edges component!")
-  } else {
-    accessible_genots <- tmp$accessible_genots
-    fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
-  }
-  weights <- unique(data[, c("To", "Theta")])
-  rownames(weights) <- weights[, "To"]
-  weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
+#   if(inherits(tmp, "try-error")) {
+#     stop("how is this happening? there was edges component!")
+#   } else {
+#     accessible_genots <- tmp$accessible_genots
+#     fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
+#   }
+  
+#   if (is.null(data[,parameter_column_name])){
+#     stop("No such column")
+#   }
+  
+#   weights <- unique(data[, c("To", parameter_column_name)])
+#   rownames(weights) <- weights[, "To"]
+#   weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
 
-  return(weighted_fgraph)
-}
+
+#   return(weighted_fgraph)
+# }

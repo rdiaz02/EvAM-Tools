@@ -97,8 +97,8 @@ source("pre-process.R", echo = FALSE, max.deparse.length = 0)
 source("ot-process.R", echo = FALSE, max.deparse.length = 0)
 ## source("dip-process.R", echo = FALSE, max.deparse.length = 0)  ## No longer using it
 source("cbn-process.R", echo = FALSE, max.deparse.length = 0)
-
 source("dbn-process.R", echo = FALSE, max.deparse.length = 0)
+source("hesbcn-process.R", echo = FALSE, max.deparse.length = 0)
 
 if(MCCBN_INSTALLED)
     source("mccbn-process.R", echo = FALSE, max.deparse.length = 0)
@@ -498,6 +498,70 @@ df_2_access_genots_and_graph_OR <- function(x) {
     all_gty <- unique(all_gty)
     ng <- unlist(lapply(all_gty, length))
     all_gty <- all_gty[order(ng)]
+    return(list(accessible_genots = all_gty,
+                graph = g))
+}
+
+df_2_access_genots_and_graph_XOR <- function(x) {
+    ##PHN
+    ## minor detail: if x is a sparse adjacency mat.
+    ##    from igraph this still works. But don't do that.
+    g <- igraph::graph_from_data_frame(x, directed = TRUE)
+    
+    ## g: an igraph object, with a "Root"
+    ## returns a list
+    # children <- sort(setdiff(V(g)$name, "Root"))
+    # node_depth <- unlist(lapply(children,
+    #                             function(node)
+    #                                 max(unlist(lapply(all_simple_paths(g,
+    #                                                                    from = "Root",
+    #                                                                    to = node),
+    #                                                   length)))
+    #                             ))
+    
+    # names(node_depth) <- children
+    # node_depth <- sort(node_depth)
+    # ## pre-allocate a list.
+    # ## FIXME: Could be smarter as a function of dim(x)?
+    # all_gty <- vector(mode = "list", length = 100) 
+    # i <- 1
+    # for(j in seq_along(node_depth)) {
+         
+    #     tmp_gty_1 <- sort(setdiff(names(subcomponent(g, v = names(node_depth)[j],
+    #                                                  mode = "in")),
+    #                               "Root"))
+    #     all_gty[[i]] <- tmp_gty_1
+        
+    #     ## only do union of those not contained in the genotype
+    #     ## to_unite <-  which(unlist(lapply(all_gty[1:(i-1)],
+    #     ##                                  function(z) length(setdiff(z, tmp_gty_1)) > 0)))
+        
+    #     if(i > 1) {
+    #         to_unite <-  which(unlist(lapply(all_gty[1:(i-1)],
+    #                                          function(z) !all(z %in% tmp_gty_1))))
+    #     } else {
+    #         to_unite <- vector(length = 0)
+    #     }
+        
+    #     if(length(to_unite)) {
+    #         ## we need unique as some sets are the same
+    #         tmp_gty_2 <- unique(lapply(all_gty[to_unite],
+    #                                    function(u) sort(union(u, tmp_gty_1))))
+    #         ## check remaining space in preallocated list.
+    #         ## expand if needed.
+    #         if(length(all_gty) < (i + 1 + length(tmp_gty_2))) {
+    #             all_gty <- c(all_gty,
+    #                          vector(mode = "list", length = max(length(all_gty),
+    #                                                             2 + length(tmp_gty_2))))
+    #         }
+    #         all_gty[(i + 1):(i + length(tmp_gty_2))] <- tmp_gty_2
+    #         i <- i + length(tmp_gty_2)
+    #     }
+    #     i <- i + 1
+    # }
+    # all_gty <- all_gty[1:(i - 1)]
+    # ng <- unlist(lapply(all_gty, length))
+    # all_gty <- all_gty[order(ng)]
     return(list(accessible_genots = all_gty,
                 graph = g))
 }
@@ -1150,11 +1214,21 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE) {
       out_dbn <- do_DBN(x))["elapsed"]
     
     cat("\n  time DBN = ", time_dbn)
+
+    cat("\n     Doing HESBCN")
+    time_hesbcn <- system.time(
+      out_hesbcn <- do_HESBCN(x))["elapsed"]
+    
+    cat("\n  time HESBCN = ", time_hesbcn)
      
     cpm_out_others <- all_methods(x, cores_cbn = cores_cbn, do_MCCBN = do_MCCBN)
+    pre_trans_mat_others <- lapply(cpm_out_others[methods],
+        cpm_access_genots_paths_w_simplified)
 
-    pre_trans_mat_others <- lapply(cpm_out_others[methods], cpm_access_genots_paths_w_simplified)
-
+    pre_trans_mat_DBN_HESBCN <- mapply(
+        cpm_access_genots_paths_w_simplified_OR, 
+        list(out_dbn, out_hesbcn),
+        c("Thetas", "Lambdas"))
     cat("\n    getting transition matrices for all non-mhn methods \n")
 
     ## ## Unweighted
@@ -1164,6 +1238,7 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE) {
     wg <- lapply(pre_trans_mat_others[c("OT", "MCCBN" , "CBN_ot")[c(TRUE, do_MCCBN, TRUE)]],
                  function(x) x$trans_mat_genots)
     ## Diagonal
+    browser()
     td <- lapply(pre_trans_mat_others[c("MCCBN", "CBN_ot")[c(do_MCCBN, TRUE)]],
                  function(x) trans_rate_to_trans_mat(x$weighted_fgraph,
                                                      method = "uniformization"))
@@ -1498,3 +1573,31 @@ if(FALSE) {
 ##                            return(all_methods_2_trans_mat(all_data[[i]]))
 ##                        }
 ##                        )
+
+
+## Sort wrapper to generate a transition matrix.
+## It first generates all accesibles genotypes given a transition matrix
+cpm_access_genots_paths_w_simplified_OR <- function(data, parameter_column_name){
+  tmp <- try(df_2_access_genots_and_graph_OR(data$edges[, c("From", "To")]))
+  
+  if(inherits(tmp, "try-error")) {
+    stop("how is this happening? there was edges component!")
+  } else {
+    accessible_genots <- tmp$accessible_genots
+    fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
+  }
+  
+  if (is.null(data$edges[,parameter_column_name])){
+    stop("No such column")
+  }
+  
+  weights <- unique(data$edges[, c("To", parameter_column_name)])
+  rownames(weights) <- weights[, "To"]
+  weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
+  trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
+
+  data$fgraph <- fgraph
+  data$weighted_fgraph <- weighted_fgraph
+  data$trans_mat_genots <- trans_mat_genots
+  return(data)
+}
