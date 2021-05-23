@@ -1,4 +1,5 @@
-## From ex1.R
+local({
+    ## From ex1.R
 ex_cbn_out1 <- structure(list(From = c("Root", "Root"),
                               To = c("A", "B"), edge = c("Root -> A", "Root -> B"),
                               init_lambda = c(88.234297, 268.921382),
@@ -259,6 +260,43 @@ expect_equal(max(cpm2tm(ex_ot_out2, max_f = 3)$accessible_genotypes),
 
 
 
+## A minimal set of tests for genots_2_fgraph_and_trans_mat
+## under general fitness landscapes
+
+x1 <- c(WT = 1, A = 2.5, B = 1.5,
+        "A, B" = 2, D = 4,
+        "A, B, C" = 3, "A, B, C, D" = 3.5)
+
+x1o <- genots_2_fgraph_and_trans_mat(x1)
+
+expect_equal(unname(x1o$transition_matrix)[1, ],
+             c(0, 1.5/(1.5 + .5 + 3), .5/(1.5 + .5 + 3), 3/(1.5 + .5 + 3), 0, 0, 0)
+)
+expect_equal(unname(x1o$transition_matrix["D", ]), rep(0, 7))
+expect_equal(unname(x1o$transition_matrix["A", ]), rep(0, 7))
+
+expect_equal(x1o$accessible_genotypes, c("A", "B", "D", "A, B", "A, B, C", "A, B, C, D"))
+
+
+x2 <- c(WT = 2, A = 2.5, B = 1.5,
+        "A, B" = 2, D = 4,
+        "A, B, C" = 3, "A, B, C, D" = 3.5)
+
+x2o <- suppressMessages(genots_2_fgraph_and_trans_mat(x2))
+
+expect_equal(unname(x2o$transition_matrix)[1, ],
+             c(0, 0.5/(0.5 + 2), 0, 2/(0.5 + 2), 0, 0, 0)
+             )
+
+expect_equal(unname(x2o$transition_matrix["D", ]), rep(0, 7))
+expect_equal(unname(x2o$transition_matrix["A", ]), rep(0, 7))
+
+expect_equal(x2o$accessible_genotypes, c("A", "D", "A, B", "A, B, C", "A, B, C, D"))
+
+
+## tripwire
+## expect_true(1 == 2)
+
 
 ## ## Running internal functions
 
@@ -277,3 +315,4 @@ expect_equal(max(cpm2tm(ex_ot_out2, max_f = 3)$accessible_genotypes),
 ## cpm2tm(ex_cbn_out2, max_f = NULL)$lambdas
 ## cpm2tm(ex_cbn_out2, 1.01, 8)$lambdas
 
+})
