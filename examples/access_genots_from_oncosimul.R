@@ -54,10 +54,10 @@ scale_fitness_2 <- function(x, max_f) {
 }
 
 
-## output from CPMs, fitness scale -> input for OncoSimulR evalAllGenotypes
-##   min_f: must pass this argument: minimum fitness
-cpm_out_to_oncosimul <- function(x) {
-    sh <- -Inf
+## output from CPMs, sh if restrictions not satisfied -> input for OncoSimulR evalAllGenotypes
+
+cpm_out_to_oncosimul <- function(x, sh = -Inf) {
+    sh <- sh
     
     if("rerun_lambda" %in% names(x)) { ## CBN
         s <- x$rerun_lambda
@@ -95,12 +95,13 @@ cpm_out_to_oncosimul <- function(x) {
 }
 
 
-## output from CPMs, min and max final fitness, max num genots -> fitness of all genotypes
+## output from CPMs, max final fitness, sh when restrictions not stasified,
+##         max num genots -> fitness of all genotypes
 ##    if max_f is NULL: no rescaling of fitness
-##       max_f and min_f should have no effect in probs transition
+##       max_f should have no effect in probs transition
 ##    max_genots: argument max of evalAllGenotypes
-cpm_to_fitness_genots <- function(x, max_f = NULL, max_genots = 2^15) {
-    x1 <- cpm_out_to_oncosimul(x)
+cpm_to_fitness_genots <- function(x, max_f = NULL, sh = -Inf, max_genots = 2^15) {
+    x1 <- cpm_out_to_oncosimul(x, sh)
     x1 <- evalAllGenotypes(fitnessEffects = allFitnessEffects(rT = x1),
                            addwt = TRUE, max = max_genots)
     if(!is.null(max_f)) {
@@ -174,20 +175,21 @@ genots_2_fgraph_and_trans_mat <- function(x) {
 
 }
 
-## output from CPMs, min and max final fitness, max num genots ->
+## output from CPMs,  max final fitness, sh if restrictions not satisfied,
+##               max num genots ->
 ##                            list(accessible genotypes ,
 ##                                 fitness graph,
 ##                                 transition matrix between genotypes)
-##    max_f and min_f should have no effect in probs transition
+##    max_f  should have no effect in probs transition
 ##    accessible_genotypes: gives the genotypes and their fitness,
 ##                          computed from the lambdas (thetas) and possibly scaled
-cpm_to_trans_mat_oncosimul <- function(x, max_f = NULL,
+cpm_to_trans_mat_oncosimul <- function(x, max_f = NULL, sh = -Inf,
                                        max_genots = 2^15) {
-    fitness_all <- cpm_to_fitness_genots(x, max_f = max_f,
+    fitness_all <- cpm_to_fitness_genots(x, max_f = max_f, sh = sh,
                                          max_genots = max_genots)
 
-    access_genots_fitness <- fitness_all$Fitness[fitness_all$Fitness > 1.0]
-    names(access_genots_fitness) <- fitness_all$Genotype[fitness_all$Fitness > 1.0]
+    access_genots_fitness <- fitness_all$Fitness[fitness_all$Fitness >= 1.0]
+    names(access_genots_fitness) <- fitness_all$Genotype[fitness_all$Fitness >= 1.0]
 
     gfo <- genots_2_fgraph_and_trans_mat(access_genots_fitness)
 
@@ -254,6 +256,15 @@ out_xor <- cpm2tm(ex_xor)
 load("stomach_pmce.RData")
 
 stomach_out <- cpm2tm(stomach_pmce)
+
+plot(allFitnessEffects(
+    cpm_out_to_oncosimul(stomach_pmce)),
+     "igraph", layout = layout.reingold.tilford)
+
+
+plot(allFitnessEffects(
+    cpm_out_to_oncosimul(stomach_pmce)))
+     
 
 
 stomach_out$accessible_genotypes
