@@ -520,6 +520,12 @@ df_2_access_genots_and_graph_OR <- function(x) {
 
 ## list of accessible genotypes -> adjacency matrix of genotypes (fitness graph)
 ## return maximally connected fitness graph for a given set of accessible genotypes
+
+## BEWARE! This is the maximally connected fitness graph. This works with
+## CPMs. But this is wrong, if, say, fitnesses are: A = 2, B = 3, AB = 2.5.
+## This will place an arrow between B and AB, but there should  be no such edge.
+## See below for how to have a general procedure
+
 unrestricted_fitness_graph <- function(gacc, plot = FALSE) {
     
     gs <- unlist(lapply(gacc, function(g) paste0(g, collapse = ", ")))
@@ -555,14 +561,35 @@ unrestricted_fitness_graph <- function(gacc, plot = FALSE) {
 
 
 
+
+## A simple, general procedure, to obtain the fitness graph is:
+##   - create matrix of all genotypes
+##   - Fill up, upper diagonal, with the fitness of destination genotype
+##   - Subtract fitness of original genotype
+##   - Set as 0 those with value <= 0.
+## We could use the list given below as starting point (to use a smaller matrix)
+## The list of accessible genotypes can also be obtained from wrap_accessibleGenotypes
+## in OncoSimulR (unexported function)
+## This function is now available as genots_2_fgraph_and_trans_mat
+
+
+
 ## Trying sparse matrices
 ## https://stackoverflow.com/questions/23107837/r-sparse-matrix-from-list-of-dimension-names
 ## https://stackoverflow.com/questions/26207850/create-sparse-matrix-from-a-data-frame
 ## https://cmdlinetips.com/2019/05/introduction-to-sparse-matrices-in-r/
 ## https://www.gormanalysis.com/blog/sparse-matrix-construction-and-use-in-r/
 
+
+## BEWARE! This is the maximally connected fitness graph. This works with
+## CPMs. But this is wrong, if, say, fitnesses are: A = 2, B = 3, AB = 2.5.
+## This will place an arrow between B and AB, but there should  be no such edge.
+## This function is now available as genots_2_fgraph_and_trans_mat
+
+
 ## list of accessible genotypes -> adjacency matrix of genotypes (fitness graph)
 ## return maximally connected fitness graph for a given set of accessible genotypes
+##   This list contains no WT (we add it)
 unrestricted_fitness_graph_sparseM <- function(gacc, plot = FALSE) {
     gs <- unlist(lapply(gacc, function(g) paste0(g, collapse = ", ")))
     gs <- c("WT", gs)
