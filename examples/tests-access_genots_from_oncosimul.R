@@ -275,7 +275,7 @@ expect_equal(unname(x1o$transition_matrix)[1, ],
 expect_equal(unname(x1o$transition_matrix["D", ]), rep(0, 7))
 expect_equal(unname(x1o$transition_matrix["A", ]), rep(0, 7))
 
-expect_equal(x1o$accessible_genotypes, c("A", "B", "D", "A, B", "A, B, C", "A, B, C, D"))
+expect_equal(names(x1o$accessible_genotypes), c("A", "B", "D", "A, B", "A, B, C", "A, B, C, D"))
 
 
 x2 <- c(WT = 2, A = 2.5, B = 1.5,
@@ -291,7 +291,7 @@ expect_equal(unname(x2o$transition_matrix)[1, ],
 expect_equal(unname(x2o$transition_matrix["D", ]), rep(0, 7))
 expect_equal(unname(x2o$transition_matrix["A", ]), rep(0, 7))
 
-expect_equal(x2o$accessible_genotypes, c("A", "D", "A, B", "A, B, C", "A, B, C, D"))
+expect_equal(names(x2o$accessible_genotypes), c("A", "D", "A, B", "A, B, C", "A, B, C, D"))
 
 
 ## tripwire

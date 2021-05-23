@@ -60,17 +60,17 @@ cpm_out_to_oncosimul <- function(x) {
     sh <- -Inf
     
     if("rerun_lambda" %in% names(x)) { ## CBN
-        s <- exp(x$rerun_lambda) - 1
+        s <- x$rerun_lambda
         typeDep <- "AND"
     } else if("Relation" %in% names(x)) { ## PMCE
         if(exists("Lambda", where = x))
-            s <- exp(x$Lambda) - 1
+            s <- x$Lambda
         else if(exists("lambda", where = x))
-            s <- exp(x$lambda) -1
+            s <- x$lambda
         typeDep <- x$Relation
         typeDep[typeDep == "Single"] <- "AND"
     } else if("OT_edgeWeight" %in% names(x) ) { ## OT
-        s <- exp(x$OT_edgeWeight) - 1                
+        s <- x$OT_edgeWeight
         typeDep <- "AND"
     } else if("whatever" %in% names(x)) { ## Something for DB
         
@@ -99,11 +99,10 @@ cpm_out_to_oncosimul <- function(x) {
 ##    if max_f is NULL: no rescaling of fitness
 ##       max_f and min_f should have no effect in probs transition
 ##    max_genots: argument max of evalAllGenotypes
-cpm_to_fitness_genots <- function(x, max_f = 3, max_genots = 2^15) {
+cpm_to_fitness_genots <- function(x, max_f = NULL, max_genots = 2^15) {
     x1 <- cpm_out_to_oncosimul(x)
     x1 <- evalAllGenotypes(fitnessEffects = allFitnessEffects(rT = x1),
                            addwt = TRUE, max = max_genots)
-    x1$Fitness[x1$Fitness > 0.0] <- log(x1$Fitness[x1$Fitness > 0.0]) + 1
     if(!is.null(max_f)) {
         if(max_f < 1) stop("max_f must be larger than min_f")
         x1$Fitness[x1$Fitness > 0.0] <-
@@ -166,10 +165,12 @@ genots_2_fgraph_and_trans_mat <- function(x) {
     tm[nrow(tm), ] <- 0
     ## This we can set
     tm[rowSums(fgraph) == 0, ] <- 0
+    accessible_genotypes <- genots_fitness[colnames(fgraph)[colSums(fgraph) >= 1]]
+
     return(list(fitness_graph = fgraph,
            transition_matrix = tm,
            fitness_differences = fdiff,
-           accessible_genotypes = colnames(fgraph)[colSums(fgraph) >= 1]))
+           accessible_genotypes = accessible_genotypes))
 
 }
 
@@ -198,7 +199,6 @@ cpm_to_trans_mat_oncosimul <- function(x, max_f = NULL,
                 transition_matrix = gfo$transition_matrix
                 ))
 }
-
 ## shorter
 cpm2tm <- cpm_to_trans_mat_oncosimul
 
@@ -254,10 +254,8 @@ out_xor <- cpm2tm(ex_xor)
 load("stomach_pmce.RData")
 
 stomach_out <- cpm2tm(stomach_pmce)
-plot()
+
 
 stomach_out$accessible_genotypes
-
-
 
 
