@@ -13,7 +13,15 @@ This repository includes code by:
 - Schill, R., Solbrig, S., Wettig, T., & Spang, R: the files under MHN,
   downloaded from https://github.com/RudiSchill/MHN
 
+# How to install?
+In order to run all CPMs you will need to clone their repositories:
 
+include github repo, and instructions to get them running
+
+* DBN: https://github.com/phillipnicol/OncoBN.
+* HyperTraps: https://github.com/sgreenbury/HyperTraPS. Follow the instruction there to install the package through conda 
+and get a working enviroment with HyperTraPS installed. Add both the bin and the src/python to your $PATH.
+* HESBCN: https://github.com/danro9685/HESBCN. For proper compilation you should modify line 23 in *Makefile* to include *LDLIBS = -lgsl -lm -lgslcblas*. You can also change compilation from gcc-5 to something a bit more up to date, like gcc-10. Finally, add this folder to your $PATH.
 
 # Directory code_from_what_genotype_next 
 
