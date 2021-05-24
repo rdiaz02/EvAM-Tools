@@ -105,7 +105,7 @@ import.hesbcn <- function( file, genes = NULL ) {
         # of a single formula
         lambdas_matrix[as.numeric(which(adjacency_matrix[, i] == 1)), i] <-
         curr_in_lambda / length(which(adjacency_matrix[, i] == 1))
-        browser()
+        # browser()
     }
 
     # set genes names

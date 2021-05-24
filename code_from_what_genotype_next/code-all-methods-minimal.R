@@ -502,7 +502,7 @@ df_2_access_genots_and_graph_OR <- function(x) {
                 graph = g))
 }
 
-df_2_access_genots_and_graph_XOR <- function(x) {
+df_2_access_genots_and_graph_XOR <- function(x ) {
     ##PHN
     ## minor detail: if x is a sparse adjacency mat.
     ##    from igraph this still works. But don't do that.
@@ -989,6 +989,33 @@ cpm_access_genots_paths_w_simplified <- function(x, string = NULL,
     ))
 }
 
+## Sort wrapper to generate a transition matrix.
+## It first generates all accesibles genotypes given a transition matrix
+cpm_access_genots_paths_w_simplified_OR <- function(data, parameter_column_name=c("Thetas")){
+  tmp <- try(df_2_access_genots_and_graph_OR(data$edges[, c("From", "To")]))
+  
+  if(inherits(tmp, "try-error")) {
+    stop("how is this happening? there was edges component!")
+  } else {
+    accessible_genots <- tmp$accessible_genots
+    fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
+  }
+  
+  if (is.null(data$edges[,parameter_column_name])){
+    stop("No such column")
+  }
+  which_col_weights <- which(colnames(data$edges) %in% parameter_column_name)
+  weights <- unique(data$edges[, c(2, which_col_weights)])
+  rownames(weights) <- weights[, "To"]
+  weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
+  trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
+
+  return(list(
+        fgraph = fgraph,
+        weighted_fgraph = weighted_fgraph,
+        trans_mat_genots = trans_mat_genots
+  ))
+}
 
 
 
@@ -1225,10 +1252,10 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE) {
     pre_trans_mat_others <- lapply(cpm_out_others[methods],
         cpm_access_genots_paths_w_simplified)
 
-    pre_trans_mat_DBN_HESBCN <- mapply(
-        cpm_access_genots_paths_w_simplified_OR, 
-        list(out_dbn, out_hesbcn),
-        c("Thetas", "Lambdas"))
+    pre_trans_mat_new_CPMS <- lapply( #For the moment just for DBN (HESBCN in the future)
+        list(DBN = out_dbn),
+        cpm_access_genots_paths_w_simplified_OR)
+
     cat("\n    getting transition matrices for all non-mhn methods \n")
 
     ## ## Unweighted
@@ -1238,7 +1265,6 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE) {
     wg <- lapply(pre_trans_mat_others[c("OT", "MCCBN" , "CBN_ot")[c(TRUE, do_MCCBN, TRUE)]],
                  function(x) x$trans_mat_genots)
     ## Diagonal
-    browser()
     td <- lapply(pre_trans_mat_others[c("MCCBN", "CBN_ot")[c(do_MCCBN, TRUE)]],
                  function(x) trans_rate_to_trans_mat(x$weighted_fgraph,
                                                      method = "uniformization"))
@@ -1285,13 +1311,10 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE) {
         MHN_td_trans_mat = out_schill$transitionMatrixTimeDiscretized,
         DBN_model = out_dbn$edges,
         DBN_likelihood = out_dbn$likelihood,
-        DBN_f_graph = out_dbn$weighted_fgraph,
-        DBN_trans_mat = out_dbn$trans_mat_genots
+        DBN_f_graph = pre_trans_mat_new_CPMS$DBN$weighted_fgraph,
+        DBN_trans_mat = pre_trans_mat_new_CPMS$DBN$trans_mat_genots
          ))
 }
-
-
-
 
 ## use plot matrix to plot the sampled genotypes
 plot_sampled_genots <- function(data) {
@@ -1573,31 +1596,3 @@ if(FALSE) {
 ##                            return(all_methods_2_trans_mat(all_data[[i]]))
 ##                        }
 ##                        )
-
-
-## Sort wrapper to generate a transition matrix.
-## It first generates all accesibles genotypes given a transition matrix
-cpm_access_genots_paths_w_simplified_OR <- function(data, parameter_column_name){
-  tmp <- try(df_2_access_genots_and_graph_OR(data$edges[, c("From", "To")]))
-  
-  if(inherits(tmp, "try-error")) {
-    stop("how is this happening? there was edges component!")
-  } else {
-    accessible_genots <- tmp$accessible_genots
-    fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
-  }
-  
-  if (is.null(data$edges[,parameter_column_name])){
-    stop("No such column")
-  }
-  
-  weights <- unique(data$edges[, c("To", parameter_column_name)])
-  rownames(weights) <- weights[, "To"]
-  weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
-  trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
-
-  data$fgraph <- fgraph
-  data$weighted_fgraph <- weighted_fgraph
-  data$trans_mat_genots <- trans_mat_genots
-  return(data)
-}
