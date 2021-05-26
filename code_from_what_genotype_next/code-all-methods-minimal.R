@@ -1272,20 +1272,21 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE) {
     pre_trans_mat_others <- lapply(cpm_out_others[methods],
         cpm_access_genots_paths_w_simplified)
 
+
     pre_trans_mat_new_CPMS <- lapply( #For the moment just for DBN (HESBCN in the future)
         list(DBN = out_dbn),
         cpm_access_genots_paths_w_simplified_OR)
+    pre_trans_mat_others["DBN"] <- list(pre_trans_mat_new_CPMS$DBN)
 
     cat("\n    getting transition matrices for all non-mhn methods \n")
 
     ## ## Unweighted
     ## uw <- lapply(pre_trans_mat_others, function(x) rowScaleMatrix(x$fgraph))
     ## Weighted
-    
-    wg <- lapply(pre_trans_mat_others[c("OT", "MCCBN" , "CBN_ot")[c(TRUE, do_MCCBN, TRUE)]],
-                 function(x) x$trans_mat_genots)
+    wg <- lapply(pre_trans_mat_others[c("OT", "MCCBN" , "CBN_ot", "DBN")[c(TRUE, do_MCCBN, TRUE, TRUE)]], 
+        function(x) x$trans_mat_genots)
     ## Diagonal
-    td <- lapply(pre_trans_mat_others[c("MCCBN", "CBN_ot")[c(do_MCCBN, TRUE)]],
+    td <- lapply(pre_trans_mat_others[c("MCCBN", "CBN_ot", "DBN")[c(do_MCCBN, TRUE, TRUE)]],
                  function(x) trans_rate_to_trans_mat(x$weighted_fgraph,
                                                      method = "uniformization"))
     ## ## Paranoid check
@@ -1305,7 +1306,7 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE) {
         MCCBN_trans_mat <- NA
         MCCBN_td_trans_mat <- NA
     }
-    ## TODO: return DBN results
+
     return(list(
         OT_model = cpm_out_others$OT$edges,
         OT_f_graph = pre_trans_mat_others$OT$weighted_fgraph,
@@ -1332,7 +1333,8 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE) {
         DBN_model = out_dbn$edges,
         DBN_likelihood = out_dbn$likelihood,
         DBN_f_graph = pre_trans_mat_new_CPMS$DBN$weighted_fgraph,
-        DBN_trans_mat = pre_trans_mat_new_CPMS$DBN$trans_mat_genots
+        DBN_trans_mat = pre_trans_mat_new_CPMS$DBN$trans_mat_genots,
+        DBN_td_trans_mat = td$DBN
          ))
 }
 
@@ -1375,8 +1377,10 @@ plot_sampled_genots <- function(data) {
 ##                             transition probs genots TD
 
 plot_DAG_fg <- function(x, data, orientation = "vertical", 
-                        matrix=TRUE,
+                        models = c("OT", "CBN", "DBN", "MCCBN", "MHN"),
+                        matrix = TRUE,
                         prune_edges = TRUE) {
+
     plot_fg <- function(fg) {
         ## Ideas from: https://stackoverflow.com/a/48368540
         lyt <- layout.reingold.tilford(fg)
@@ -1392,121 +1396,132 @@ plot_DAG_fg <- function(x, data, orientation = "vertical",
         par(opx)
     }
 
-    ot_tree <- graph_from_data_frame(x$OT_model[, c(1, 2)])
-    ot_fg <- graph_from_adjacency_matrix(x$OT_trans_mat, weighted = TRUE)
+    process_data <- function(dat, mod) {
+        dag_tree <- NULL
+        
+        dag_tree <- NULL
+        tryCatch (expr = {
+            dag_model <- get(paste(mod, "_model", sep=""), x)
+            dag_tree <- graph_from_data_frame(dag_model[, c(1, 2)])
+        }, error = function(e){})
 
-    cbn_tree <- graph_from_data_frame(x$CBN_model[, c(1, 2)])
-    cbn_fg <- graph_from_adjacency_matrix(x$CBN_trans_mat, weighted = TRUE)
-    cbn_td_fg <- graph_from_adjacency_matrix(x$CBN_td_trans_mat, weighted = TRUE)
+        dag_trans_mat <- get(paste(mod, "_trans_mat", sep=""), x)
+        fg <- graph_from_adjacency_matrix(dag_trans_mat, weighted = TRUE)
 
-    if((length(x$MCCBN_model) != 1) && !is.na(x$MCCBN_model)) {
-        mccbn_tree <- graph_from_data_frame(x$MCCBN_model[, c(1, 2)])
-        mccbn_fg <- graph_from_adjacency_matrix(x$MCCBN_trans_mat, weighted = TRUE)
-        mccbn_td_fg <- graph_from_adjacency_matrix(x$MCCBN_td_trans_mat, weighted = TRUE)
-    }
-    
-    ## mhn_mat <- graph_from_adjacency_matrix(out_schill$theta, weighted = TRUE,
-    ##                                        mode = "directed")
-
-    ## to rm edges with almost 0 weight
-    
-    mhn_tm <- as.matrix(x$MHN_trans_mat)
-    mhn_td_tm <- as.matrix(x$MHN_td_trans_mat)
-    
-    if(prune_edges) {
-        mhn_tm[mhn_tm < 0.01] <- 0
-        mhn_td_tm[mhn_td_tm < 0.01] <- 0
-    }
-    mhn_fg <- graph_from_adjacency_matrix(mhn_tm,
-                                          weighted = TRUE)
-    mhn_td_fg <- graph_from_adjacency_matrix(mhn_td_tm,
-                                             weighted = TRUE)
-    
-    if(orientation == "horizontal") {
-        if((length(x$MCCBN_model) != 1) && !is.na(x$MCCBN_model))
-            op1 <- par(mfcol = c(3, 4))
-        else
-            op1 <- par(mfcol = c(3, 3))
-    } else {
-        if((length(x$MCCBN_model) != 1) && !is.na(x$MCCBN_model))
-            op1 <- par(mfrow = c(4, 3))
-        else
-            op1 <- par(mfrow = c(3, 3))
-    }
-    
-    plot(ot_tree, layout = layout.reingold.tilford, vertex.size = 0, main = "OT")
-    if (matrix){
-        ot <- as.matrix(out$OT_trans_mat)
-        plot(ot[rowSums(ot)>0, colSums(ot)>0], 
-             digits=1, xlab="", ylab="",
-             axis.col=list(side=1, las=2), axis.row = list(side=2, las=1), 
-             main="OT trans matrix", cex.axis=0.7,
-             mgp = c(2, 1, 0), key=NULL)
-    }
-    else {
-        plot_fg(ot_fg)  
-    }
-    
-    par(mar=rep(3, 4))
-    plot_sampled_genots(data)
-    ## plot(type ="n", c(0, 0), c(0, 0), axes = FALSE)
-
-    plot(cbn_tree, layout = layout.reingold.tilford, vertex.size = 0, main = "CBN")
-    
-    if (matrix){
-        cbn_trans_mat <- as.matrix(out$CBN_trans_mat)
-        plot(cbn_trans_mat[rowSums(cbn_trans_mat)>0,colSums(cbn_trans_mat)>0], 
-             digits=1, cex.axis=0.7,
-             main="CBN: trans matrix",
-             xlab="", ylab="",
-             axis.col=list(side=1, las=2), axis.row = list(side=2, las=1), 
-             mgp = c(2, 1, 0), key=NULL)
-        cbn_td_trans_mat <- as.matrix(out$CBN_td_trans_mat)
-        plot(cbn_td_trans_mat[rowSums(cbn_td_trans_mat)>0,colSums(cbn_td_trans_mat)>0], 
-             digits=1, cex.axis=0.7,
-             main="CBN: trans td matrix", 
-             xlab="", ylab="",
-             axis.col=list(side=1, las=2), axis.row = list(side=2, las=1), 
-             mgp = c(2, 1, 0), key=NULL)
+        if(prune_edges) {
+            dag_trans_mat[dag_trans_mat < 0.01] <- 0
         }
-    else {
-        plot_fg(cbn_fg)  
-        plot_fg(cbn_td_fg)
+
+        if(matrix) {
+            dag_trans_mat <- as.matrix(dag_trans_mat)
+            dag_trans_mat <- dag_trans_mat[rowSums(dag_trans_mat) > 0, colSums(dag_trans_mat) > 0]
+        }
+
+        td_trans_mat <- NULL
+        td_fg <- NULL
+        tryCatch(expr = {
+            td_trans_mat <- get(paste(mod, "_td_trans_mat", sep=""), x)
+            td_fg <- graph_from_adjacency_matrix(td_trans_mat, weighted = TRUE)
+            if(prune_edges) {
+                td_trans_mat[td_trans_mat < 0.01] <- 0
+            }
+            if (matrix){
+                td_trans_mat <- as.matrix(td_trans_mat)
+                td_trans_mat <- td_trans_mat[rowSums(td_trans_mat)>0, colSums(td_trans_mat)>0]
+            }
+        }, error = function(e){ })
+
+        theta <- NULL
+        tryCatch(expr ={
+            theta <- get(paste(mod, "_theta", sep=""), x)
+        }, error = function(e){ })
+
+        return(list(dag_tree = dag_tree, 
+            dag_trans_mat = dag_trans_mat, 
+            fg = fg, 
+            td_trans_mat = td_trans_mat,
+            td_fg = td_fg,
+            theta = theta))
     }
 
-    if((length(x$MCCBN_model) != 1) && !is.na(x$MCCBN_model)) {
-        plot(mccbn_tree, layout = layout.reingold.tilford, vertex.size = 0, main = "MCCBN")
-        plot_fg(mccbn_fg)
-        plot_fg(mccbn_td_fg)
+    ## List of available models
+    available_models <- models[
+        sapply(models, function(mod) {
+            tryCatch(
+            expr = {
+                if(mod != "MHN"){
+                    get(paste(mod, "_model", sep = ""), x)$From
+                } else if(mod == "MHN"){
+                    get(paste(mod, "_theta", sep = ""), x)
+                }
+                return(T)
+            }, 
+            error = function(e) { 
+                return(F)
+            })
+        })
+    ]
+    print(available_models)
+    ## Shape of the plot
+    l_models <- length(available_models)
+    if(orientation == "horizontal") {
+        op1 <- par(mfcol = c(3, l_models))
+    } else {
+        op1 <- par(mfrow = c(l_models, 3))
     }
-    
-    ## I am unable to use bending edges for the theta matrix.
-    ## plot_fg(mhn_mat)
-    op <- par(mar=c(4, 4, 5, 3), las = 1)
-    plot(x$MHN_theta, cex = 1.5, digits = 2, key = NULL,
-         axis.col = list(side = 3),
-         xlab = "Effect of this (effector)",
-         ylab = " on this (affected)",
-         mgp = c(2, 1, 0))
-    par(op)
-    if (matrix){
-        plot(mhn_tm[rowSums(mhn_tm)>0,colSums(mhn_tm)>0], 
-             digits=1, 
-             main="MHN: trans matrix",cex.axis=0.7, 
-             axis.col=list(side=1, las=2), axis.row = list(side=2, las=1), 
-             xlab="", ylab="",
-             mgp = c(2, 1, 0), key=NULL)
-        plot(mhn_td_tm[rowSums(mhn_td_tm)>0,colSums(mhn_td_tm)>0], 
-             digits=1,  cex.axis=0.7,
-             axis.col=list(side=1, las=2), axis.row = list(side=2, las=1), 
-             main="MHN: trans td matrix", 
-             xlab="", ylab="",
-             mgp = c(2, 1, 0), key=NULL)
+
+    ## Plotting models
+    for(mod in available_models) {
+        ## Processing data
+        model_data2plot <- process_data(x, mod)
+
+        ## Plotting data
+        if(!is.null(model_data2plot$dag_tree)){
+            plot(model_data2plot$dag_tree, layout = layout.reingold.tilford, vertex.size = 0, main = mod)
+        }
+
+        if(!is.null(model_data2plot$theta)){
+            op <- par(mar=c(4, 4, 5, 3), las = 1)
+                plot(model_data2plot$theta, cex = 1.5, digits = 2, key = NULL,
+                    axis.col = list(side = 3),
+                    xlab = "Effect of this (effector)",
+                    ylab = " on this (affected)",
+                    mgp = c(2, 1, 0))
+                par(op)
+        }
+
+        if (matrix){
+            plot(model_data2plot$dag_trans_mat, 
+                digits=1, xlab="", ylab="",
+                axis.col=list(side=1, las=2), axis.row = list(side=2, las=1), 
+                main=paste(mod, ": trans matrix", sep = " "), cex.axis=0.7,
+                mgp = c(2, 1, 0), key=NULL)
+            
+            if (!is.null(model_data2plot$td_trans_mat)){
+                plot(model_data2plot$td_trans_mat, 
+                    digits=1, cex.axis=0.7,
+                    main=paste(mod, ": trans td matrix", sep = " "), 
+                    xlab="", ylab="",
+                    axis.col=list(side=1, las=2), axis.row = list(side=2, las=1), 
+                    mgp = c(2, 1, 0), key=NULL)
+            }
+        } else {
+            plot_fg(model_data2plot$fg)
+            if(!is.null(model_data2plot$td_fg)){
+                plot_fg(model_data2plot$td_fg)
+            }
+        }
+
+        if(mod %in% c("OT")) {
+            par(mar=rep(3, 4))
+            plot_sampled_genots(data)
+        }else if(mod %in% c("CBN", "DBN")) {
+            NULL
+        }else if(mod %in% c("MHN")) {
+            NULL
+        }
     }
-    else {
-        plot_fg(mhn_fg)
-        plot_fg(mhn_td_fg)
-    }
+
     par(op1)
 }
 
