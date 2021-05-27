@@ -1,4 +1,4 @@
-source("schill-trans-mat.R")
+source("../code_from_what_genotype_next/schill-trans-mat.R")
 
 ######################################################################
 ######################################################################
@@ -182,7 +182,7 @@ local({
 ## From Schill's ExampleApplications.R
 
 pwd <- getwd()
-setwd("./MHN")
+setwd(".,/code_from_what_genotype_next//MHN")
 source("UtilityFunctions.R")
 source("ModelConstruction.R")
 source("Likelihood.R")
