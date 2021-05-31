@@ -21,12 +21,23 @@ do_HyperTraPS <- function(data, tmp_folder="",
   print(tmp_folder)
 
   ## Activating conda env
-  use_condaenv(conda_env_name)
+  warning("You should run the script within a conda enviroment with a working installation of HyperTraPS")
+  use_condaenv(conda_env_name) ## This does not seem to work
 
   ## Running HyperTraps
+  ### Handling data 
+  if(typeof(data) == "character"){
+    tryCatch(expr={
+      data <- read.table(data, sep=",")
+    },
+    error = {
+      stop(sprintf("Could not locate the file", data))
+    })
+  }
+   
   output_name <- "data.csv"
   write.csv(data, output_name)
-
+  
   ### Transforming data
   ## TODO modify input_type
   print("Converting Data")
