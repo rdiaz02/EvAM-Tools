@@ -5,7 +5,7 @@ library(reticulate) ## To activate the conda environment
 
 do_HyperTraPS <- function(data, tmp_folder="", 
   runs=1000, bi=50000, r=100, 
-  seed=0, conda_env_name="HyperTraPS", dry_run=F){
+  seed=0, conda_env_name="HyperTraPS", plot = T, dry_run=F){
   ## Create tmp folder with random name
   if(tmp_folder == "") {
     dateTime <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")
@@ -60,19 +60,36 @@ do_HyperTraPS <- function(data, tmp_folder="",
 
   ### Plots
   system(sprintf("plot_mc_stats.py -b %1.f", bi))
-  system(sprintf("plot_hypercube_graph.py -f 'forwards_list-pord-match-data.csv' -outfile_graph 'forwards-hypercube-graph-mach-data-g0' -transition_data 'transitions.txt' -labels 'labels.csv' -label_type 'greedy_data' -labels_fontsize 4 -layout_type 'spring' -labels 'labels.csv' -aspect 0.9 -width 3.4 -out_type 'png'"))
+  system(sprintf("plot_hypercube_graph.py -f 'forwards_list-pord-match-data.csv' -outfile_graph 'forwards-hypercube-graph-mach-data-g0' -transition_data 'transitions.txt' -labels 'labels.csv' -label_type 'greedy_data' -labels_fontsize 4 -layout_type 'spring' -aspect 0.9 -width 3.4 -out_type 'png'"))
     
-  system(sprintf("plot_feature_graph.py -f 'forwards.txt' -prob_type 'joint' -layout_type 'circular' -data_type 'match-data' -width 4 -fontsize 10 -any_time 0 -node_size 100 -connection_style 'arc3,rad=-0.3' -outfile_type 'png'"))
+  system(sprintf("plot_feature_graph.py -f 'forwards.txt' -prob_type 'joint' -layout_type 'circular' -prob_type conditional -data_type 'match-data' -width 4 -fontsize 10 -any_time 0 -node_size 100 -connection_style 'arc3,rad=-0.3' -outfile_type 'png'"))
 
   system(sprintf("plot_ordering_histogram.py -f 'forwards_list-pord-zero-one.csv' -f2 'forwards_list-pord-match-data.csv' -transition_data 'transitions.txt' -labels 'labels.csv' -fontsize 6 -xevery 1 -aspect 0.9 -verbose 'no' -outfile 'forwards-ws1-ws2' -out_type 'png'"))
+  
 
+  if(plot){
+    library(imager)
+    stats_names <- unlist(strsplit(list.files(pattern = "^stats.*png"), " "))
+    files <- list(
+      stats_names[1], 
+      "forwards-hypercube-graph-mach-data-g0.png"
+      , "forwards-ws1-ws2.png")
+    for(f in files){
+      im <- load.image(f)
+      plot(im)
+    }
+  }
   ### Extract data from the model:
   ## Posets and transitions numbers
   ## This shoulb be easy because all this data is plotted already
   ## So I should generate a python script that mimics the functions
   ## that extract the data in order to save it
-  setwd(orig_folder)
+
+  ## plot_feature_graph.py includes MakeFeatureAdjacencyJoint
+  ## 
+
   # Cleaning 
+  setwd(orig_folder)
   return(time_posterior)
 }
 

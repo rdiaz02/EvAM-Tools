@@ -59,6 +59,8 @@ dB_c1 <- matrix(
     , rep(c(1, 0, 1, 1, 0), 100) #ACD
     , rep(c(1, 1, 0, 0, 1), 100) #ABE
     , rep(c(0, 0, 1, 1, 1), 100) #CDE
+    , rep(c(1, 1, 1, 0, 1), 100) #ABCE
+    , rep(c(1, 0, 1, 1, 1), 100) #ACDE
     , rep(c(1, 1, 1, 1, 0), 50) # ABCD
     , rep(c(0, 0, 0, 0, 0), 10) # WT
   ), ncol = 5, byrow = TRUE
@@ -80,9 +82,9 @@ dB_c2 <- matrix(
     , rep(c(1, 0, 1, 0), 200) #AC
     , rep(c(0, 1, 1, 0), 200) #BC
     , rep(c(1, 1, 1, 0), 100) #ABC
-    , rep(c(1, 1, 0, 1), 100) #ABD
-    , rep(c(0, 0, 1, 1), 200) #CD
-    , rep(c(1, 1, 1, 1), 50) # ABCD
+    , rep(c(1, 1, 0, 1), 200) #ABD
+    , rep(c(0, 0, 1, 1), 250) #CD
+    , rep(c(1, 1, 1, 1), 200) # ABCD
     , rep(c(0, 0, 0, 0), 10) # WT
   ), ncol = 4, byrow = TRUE
 )
@@ -90,38 +92,7 @@ colnames(dB_c2) <- LETTERS[1:4]
 
 do_HyperTraPS(dB_c2, "HP_c2", runs = 500, bi=200)
  
-##Considerer here another examples to run
 
-## ((A AND B) OR (C AND D) to reach E
-
-dB_c2 <- matrix(
-  c(
-      rep(c(1, 0, 0, 0, 0), 300) #A
-    , rep(c(0, 1, 0, 0, 0), 300) #B
-    , rep(c(0, 0, 1, 0, 0), 300) #C
-    , rep(c(0, 0, 0, 1, 0), 300) #D
-    , rep(c(1, 1, 0, 0, 0), 200) #AB
-    , rep(c(1, 0, 1, 0, 0), 200) #AC
-    , rep(c(1, 0, 0, 1, 0), 200) #AD
-    , rep(c(0, 1, 1, 0, 0), 200) #BC
-    , rep(c(0, 1, 0, 1, 0), 200) #BD
-    , rep(c(0, 0, 1, 1, 0), 200) #CD
-    , rep(c(1, 1, 1, 0, 0), 100) #ABC
-    , rep(c(1, 1, 0, 1, 0), 100) #ABD
-    , rep(c(0, 1, 1, 1, 0), 100) #BCD
-    , rep(c(1, 1, 0, 0, 1), 100) #ABE
-    , rep(c(0, 0, 1, 1, 1), 100) #CDE
-    , rep(c(1, 1, 1, 0, 1), 50)  #ABCE
-    , rep(c(1, 1, 0, 1, 1), 50) # ABDE
-    , rep(c(1, 0, 1, 1, 1), 50) # ACDE
-    , rep(c(0, 1, 1, 1, 1), 50) # BCDE
-    , rep(c(1, 1, 1, 1, 1), 50) # ABCDE
-    , rep(c(0, 0, 0, 0, 0), 10) # WT
-  ), ncol = 5, byrow = TRUE
-)
-colnames(dB_c2) <- LETTERS[1:5]
-
-do_HyperTraPS(dB_c2, "HP_c2", runs = 500, bi=200)
 
 ## WT --> A AND B --> E
 ## XOR 
@@ -160,8 +131,71 @@ dB_c4 <- matrix(
 )
 colnames(dB_c4) <- LETTERS[1:4]
 
+## WT --> (A AND B AND C) --> D
 do_HyperTraPS(dB_c4, "HP_c4", runs = 500, bi=200)
 
+dB_c5 <- matrix(
+  c(
+      rep(c(1, 0, 0, 0), 300) #A
+    , rep(c(0, 1, 0, 0), 300) #B
+    , rep(c(0, 0, 1, 0), 300) #C
+    , rep(c(1, 1, 0, 0), 200) #AB
+    , rep(c(1, 0, 1, 0), 200) #AC
+    , rep(c(0, 1, 1, 0), 200) #BC
+    , rep(c(1, 1, 1, 0), 100) #ABC
+    , rep(c(1, 1, 1, 1), 50)  #ABCD
+    , rep(c(0, 0, 0, 0), 10) # WT
+  ), ncol = 4, byrow = TRUE
+)
+colnames(dB_c5) <- LETTERS[1:4]
+
+do_HyperTraPS(dB_c5, "HP_c5", runs = 500, bi=200)
+
+## Reciprocal sign epistasis
+dB_c6 <- matrix(
+  c(
+      rep(c(1, 0, 0), 200) #A
+    , rep(c(1, 1, 0), 20) #AB
+    , rep(c(1, 1, 1), 400) #ABC
+    , rep(c(0, 0, 0), 10) # WT
+  ), ncol = 4, byrow = TRUE
+)
+colnames(dB_c6) <- LETTERS[1:3]
+do_HyperTraPS(dB_c6, "HP_c6", runs = 500, bi=200)
+
+
+##Considerer here another examples to run
+
+## ((A AND B) OR (C AND D) to reach E
+
+dB_c7 <- matrix(
+  c(
+      rep(c(1, 0, 0, 0, 0), 300) #A
+    , rep(c(0, 1, 0, 0, 0), 300) #B
+    , rep(c(0, 0, 1, 0, 0), 300) #C
+    , rep(c(0, 0, 0, 1, 0), 300) #D
+    , rep(c(1, 1, 0, 0, 0), 200) #AB
+    , rep(c(1, 0, 1, 0, 0), 200) #AC
+    , rep(c(1, 0, 0, 1, 0), 200) #AD
+    , rep(c(0, 1, 1, 0, 0), 200) #BC
+    , rep(c(0, 1, 0, 1, 0), 200) #BD
+    , rep(c(0, 0, 1, 1, 0), 200) #CD
+    , rep(c(1, 1, 1, 0, 0), 100) #ABC
+    , rep(c(1, 1, 0, 1, 0), 100) #ABD
+    , rep(c(0, 1, 1, 1, 0), 100) #BCD
+    , rep(c(1, 1, 0, 0, 1), 200) #ABE
+    , rep(c(0, 0, 1, 1, 1), 200) #CDE
+    , rep(c(1, 1, 1, 0, 1), 200)  #ABCE
+    , rep(c(1, 1, 0, 1, 1), 200) # ABDE
+    , rep(c(1, 0, 1, 1, 1), 200) # ACDE
+    , rep(c(0, 1, 1, 1, 1), 200) # BCDE
+    , rep(c(1, 1, 1, 1, 1), 200) # ABCDE
+    , rep(c(0, 0, 0, 0, 0), 10) # WT
+  ), ncol = 5, byrow = TRUE
+)
+colnames(dB_c7) <- LETTERS[1:5]
+
+do_HyperTraPS(dB_c7, "HP_c7", runs = 500, bi=200)
 ## Make a test with the real world data of the pmce paper
 
-do_HyperTraPS(dB_c3, "HP_pmce", runs = 1000, bi=500)
+do_HyperTraPS("Bladder_Urothelial_Carcinoma.csv", "HP_pmce", runs = 1000, bi=500)
