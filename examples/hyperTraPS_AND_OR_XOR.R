@@ -67,7 +67,7 @@ dB_c1 <- matrix(
 )
 colnames(dB_c1) <- LETTERS[1:5]
 
-do_HyperTraPS(dB_c1, "HP_c1", runs = 500, bi=200)
+# do_HyperTraPS(dB_c1, "HP_c1", runs = 500, bi=200)
  
 ##Considerer here another examples to run
 
@@ -90,7 +90,7 @@ dB_c2 <- matrix(
 )
 colnames(dB_c2) <- LETTERS[1:4]
 
-do_HyperTraPS(dB_c2, "HP_c2", runs = 500, bi=200)
+# do_HyperTraPS(dB_c2, "HP_c2", runs = 500, bi=200)
  
 
 
@@ -113,7 +113,7 @@ dB_c3 <- matrix(
 )
 colnames(dB_c3) <- LETTERS[1:5]
 
-do_HyperTraPS(dB_c3, "HP_c3", runs = 500, bi=200)
+# do_HyperTraPS(dB_c3, "HP_c3", runs = 500, bi=200)
 
 ## WT --> A --> B
 ## WT --> C --> D
@@ -131,8 +131,8 @@ dB_c4 <- matrix(
 )
 colnames(dB_c4) <- LETTERS[1:4]
 
+# do_HyperTraPS(dB_c4, "HP_c4", runs = 500, bi=200)
 ## WT --> (A AND B AND C) --> D
-do_HyperTraPS(dB_c4, "HP_c4", runs = 500, bi=200)
 
 dB_c5 <- matrix(
   c(
@@ -149,7 +149,7 @@ dB_c5 <- matrix(
 )
 colnames(dB_c5) <- LETTERS[1:4]
 
-do_HyperTraPS(dB_c5, "HP_c5", runs = 500, bi=200)
+# do_HyperTraPS(dB_c5, "HP_c5", runs = 500, bi=200)
 
 ## Reciprocal sign epistasis
 dB_c6 <- matrix(
@@ -158,10 +158,10 @@ dB_c6 <- matrix(
     , rep(c(1, 1, 0), 20) #AB
     , rep(c(1, 1, 1), 400) #ABC
     , rep(c(0, 0, 0), 10) # WT
-  ), ncol = 4, byrow = TRUE
+  ), ncol = 3, byrow = TRUE
 )
 colnames(dB_c6) <- LETTERS[1:3]
-do_HyperTraPS(dB_c6, "HP_c6", runs = 500, bi=200)
+# do_HyperTraPS(dB_c6, "HP_c6", runs = 500, bi=200)
 
 
 ##Considerer here another examples to run
@@ -185,7 +185,7 @@ dB_c7 <- matrix(
     , rep(c(0, 1, 1, 1, 0), 100) #BCD
     , rep(c(1, 1, 0, 0, 1), 200) #ABE
     , rep(c(0, 0, 1, 1, 1), 200) #CDE
-    , rep(c(1, 1, 1, 0, 1), 200)  #ABCE
+    , rep(c(1, 1, 1, 0, 1), 200) #ABCE
     , rep(c(1, 1, 0, 1, 1), 200) # ABDE
     , rep(c(1, 0, 1, 1, 1), 200) # ACDE
     , rep(c(0, 1, 1, 1, 1), 200) # BCDE
@@ -195,7 +195,7 @@ dB_c7 <- matrix(
 )
 colnames(dB_c7) <- LETTERS[1:5]
 
-do_HyperTraPS(dB_c7, "HP_c7", runs = 500, bi=200)
+# do_HyperTraPS(dB_c7, "HP_c7", runs = 500, bi=200)
 ## Make a test with the real world data of the pmce paper
 
-do_HyperTraPS("Bladder_Urothelial_Carcinoma.csv", "HP_pmce", runs = 1000, bi=500)
+do_HyperTraPS("Bladder_Urothelial_Carcinoma.csv", "HyperTraPS_examples/HP_pmce", runs = 1000, bi=500)

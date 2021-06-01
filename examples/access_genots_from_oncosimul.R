@@ -72,7 +72,9 @@ cpm_out_to_oncosimul <- function(x, sh = -Inf) {
     } else if("OT_edgeWeight" %in% names(x) ) { ## OT
         s <- x$OT_edgeWeight
         typeDep <- "AND"
-    } else if("whatever" %in% names(x)) { ## Something for DB
+    } else if("Thetas" %in% names(x)) { ## Something for DB
+        s <- x$Thetas
+        typeDep <- "OR"
         
     } else if("otro" %in% names(x) ) { ## MCCBN
         
