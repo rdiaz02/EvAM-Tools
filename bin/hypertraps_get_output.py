@@ -100,8 +100,6 @@ def ProccessAdjacencyMatrix(f, transition_file, prob_type="joint", end = "yes", 
     return feature_transitions
 
 def MakeGraph(df, L):
-    import pdb; pdb.set_trace()
-
     # ONLY CORRECT FOR ZERO-ONE CURRENTLY
     G = nx.DiGraph()
     nt = np.sum(df["weight"])/L
@@ -167,8 +165,7 @@ def CreateCompleteGraph(args):
 
 def main(args):
     x = ProccessAdjacencyMatrix(args.f, args.transitions, "conditional", end = args.end)
-    graph = CreateCompleteGraph(args)
-    import pdb; pdb.set_trace()
+    # graph = CreateCompleteGraph(args)
 
 if __name__ == "__main__":
     main(args)
