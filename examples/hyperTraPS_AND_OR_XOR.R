@@ -15,7 +15,7 @@ dB_AND <- matrix(
 )
 colnames(dB_AND) <- LETTERS[1:4]
 
-# do_HyperTraPS(dB_AND, "HP_AND", runs = 500, bi=200)
+do_HyperTraPS(dB_AND, "HyperTraPS_examples/HP_AND", runs = 500, bi=200, dry_run = TRUE)
 
 dB_OR <- matrix(
   c(
@@ -31,7 +31,7 @@ dB_OR <- matrix(
 )
 colnames(dB_OR) <- LETTERS[1:4]
 
-# do_HyperTraPS(dB_OR, "HP_OR", runs = 500, bi=200)
+do_HyperTraPS(dB_OR, "HyperTraPS_examples/HP_OR", runs = 500, bi=200,  dry_run = TRUE)
 
 dB_XOR <- matrix(
   c(
@@ -45,7 +45,7 @@ dB_XOR <- matrix(
 )
 colnames(dB_XOR) <- LETTERS[1:4]
 
-# do_HyperTraPS(dB_XOR, "HP_XOR", runs = 500, bi=200)
+do_HyperTraPS(dB_XOR, "HyperTraPS_examples/HP_XOR", runs = 500, bi=200, dry_run = TRUE)
 
 # A --> B ; C --> D; B XOR D for E 
 
@@ -67,11 +67,11 @@ dB_c1 <- matrix(
 )
 colnames(dB_c1) <- LETTERS[1:5]
 
-# do_HyperTraPS(dB_c1, "HP_c1", runs = 500, bi=200)
+do_HyperTraPS(dB_c1, "HyperTraPS_examples/HP_c1", runs = 500, bi=200, dry_run = TRUE)
  
 ##Considerer here another examples to run
 
-## ((A AND B) or C) to reach D
+# ((A AND B) or C) to reach D
 
 dB_c2 <- matrix(
   c(
@@ -90,7 +90,7 @@ dB_c2 <- matrix(
 )
 colnames(dB_c2) <- LETTERS[1:4]
 
-# do_HyperTraPS(dB_c2, "HP_c2", runs = 500, bi=200)
+do_HyperTraPS(dB_c2, "HyperTraPS_examples/HP_c2", runs = 500, bi=200, dry_run = TRUE)
  
 
 
@@ -113,7 +113,7 @@ dB_c3 <- matrix(
 )
 colnames(dB_c3) <- LETTERS[1:5]
 
-# do_HyperTraPS(dB_c3, "HP_c3", runs = 500, bi=200)
+do_HyperTraPS(dB_c3, "HyperTraPS_examples/HP_c3", runs = 500, bi=200, dry_run = TRUE)
 
 ## WT --> A --> B
 ## WT --> C --> D
@@ -131,7 +131,7 @@ dB_c4 <- matrix(
 )
 colnames(dB_c4) <- LETTERS[1:4]
 
-# do_HyperTraPS(dB_c4, "HP_c4", runs = 500, bi=200)
+do_HyperTraPS(dB_c4, "HyperTraPS_examples/HP_c4", runs = 500, bi=200, dry_run = TRUE)
 ## WT --> (A AND B AND C) --> D
 
 dB_c5 <- matrix(
@@ -149,7 +149,7 @@ dB_c5 <- matrix(
 )
 colnames(dB_c5) <- LETTERS[1:4]
 
-# do_HyperTraPS(dB_c5, "HP_c5", runs = 500, bi=200)
+do_HyperTraPS(dB_c5, "HyperTraPS_examples/HP_c5", runs = 500, bi=200, dry_run = TRUE)
 
 ## Reciprocal sign epistasis
 dB_c6 <- matrix(
@@ -161,7 +161,7 @@ dB_c6 <- matrix(
   ), ncol = 3, byrow = TRUE
 )
 colnames(dB_c6) <- LETTERS[1:3]
-# do_HyperTraPS(dB_c6, "HP_c6", runs = 500, bi=200)
+do_HyperTraPS(dB_c6, "HyperTraPS_examples/HP_c6", runs = 500, bi=200, dry_run = TRUE)
 
 
 ##Considerer here another examples to run
@@ -195,7 +195,7 @@ dB_c7 <- matrix(
 )
 colnames(dB_c7) <- LETTERS[1:5]
 
-# do_HyperTraPS(dB_c7, "HP_c7", runs = 500, bi=200)
+do_HyperTraPS(dB_c7, "HyperTraPS_examples/HP_c7", runs = 500, bi=200, dry_run = TRUE)
 ## Make a test with the real world data of the pmce paper
 
 do_HyperTraPS("Bladder_Urothelial_Carcinoma.csv", "HyperTraPS_examples/HP_pmce", runs = 1000, bi=500)
