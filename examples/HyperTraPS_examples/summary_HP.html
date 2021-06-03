@@ -365,14 +365,17 @@ code {
           : 'default'
     });
   </script>
-<p>En el plot de la derecha, la franja azul el walk simulator 1 (WS1): que busca ir desde 0 mutaciones a todo mutado. El naranja es el WS2, que busca solo busca dentro de los genotipos observados. PREGUNTA: Esto último es lo más útil para nuestros datos, no?</p>
+<h2 id="set-up">Set up</h2>
 <pre class="hljs"><code><div>pwd0 &lt;- getwd()
 setwd(<span class="hljs-string">"../code_from_what_genotype_next/"</span>)
 <span class="hljs-keyword">source</span>(<span class="hljs-string">"hypertraps-process.R"</span>)
 setwd(pwd0)
 rm(pwd0)
-
-dB_AND &lt;- matrix(
+</div></code></pre>
+<hr>
+<h2 id="and">AND</h2>
+<h3 id="wt-%E2%86%92-a-%E2%86%92-b-%E2%86%92-c">WT → A → B → C</h3>
+<pre class="hljs"><code><div>dB_AND &lt;- matrix(
   c(
     rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">100</span>)
     , rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">100</span>)
@@ -385,12 +388,17 @@ colnames(dB_AND) &lt;- LETTERS[<span class="hljs-number">1</span>:<span class="h
 
 do_HyperTraPS(dB_AND, <span class="hljs-string">"HP_AND"</span>, runs = <span class="hljs-number">500</span>, bi=<span class="hljs-number">200</span>)
 </div></code></pre>
-<img src="./HP_AND/stats-200.png" width=300>
-<img src="./HP_AND/forwards-feature_graph_match-data_joint_circular_graph.png" width=300>
-<img src="./HP_AND/forwards-feature_graph_match-data_joint_circular_adjacency.png" width=300>
-<img src="./HP_AND/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_AND/forwards-ws1-ws2.png" width=300>
+<img src="./HP_AND/freqs.jpg" height=300>
+<img src="./HP_AND/stats-200.png" height=300>
+<img src="./HP_AND/forwards-feature_graph_match-data_joint_circular_graph.png" height=300>
+<img src="./HP_AND/forwards-feature_graph_match-data_joint_circular_adjacency.png" height=300>
+<img src="./HP_AND/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_AND/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
+<hr>
+<h2 id="or">OR</h2>
+<h3 id="wt-%E2%86%92-a-%E2%86%92-b-%E2%86%92-d">WT → A → B → D</h3>
+<h3 id="wt-%E2%86%92-a-%E2%86%92-c-%E2%86%92-d">WT → A → C → D</h3>
 <pre class="hljs"><code><div>dB_OR &lt;- matrix(
   c(
     rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">200</span>)
@@ -407,12 +415,18 @@ colnames(dB_OR) &lt;- LETTERS[<span class="hljs-number">1</span>:<span class="hl
 
 do_HyperTraPS(dB_OR, <span class="hljs-string">"HP_OR"</span>, runs = <span class="hljs-number">500</span>, bi=<span class="hljs-number">200</span>)
 </div></code></pre>
-<img src="./HP_OR/stats-200.png" width=300>
-<img src="./HP_OR/forwards-feature_graph_match-data_joint_circular_graph.png" width=300>
-<img src="./HP_OR/forwards-feature_graph_match-data_joint_circular_adjacency.png" width=300>
-<img src="./HP_OR/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_OR/forwards-ws1-ws2.png" width=300>
+<img src="./HP_OR/freqs.jpg" height=300>
+<img src="./HP_OR/stats-200.png" height=300>
+<img src="./HP_OR/forwards-feature_graph_match-data_joint_circular_graph.png" height=300>
+<img src="./HP_OR/forwards-feature_graph_match-data_joint_circular_adjacency.png" height=300>
+<img src="./HP_OR/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_OR/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
+<hr>
+<h2 id="xor">XOR</h2>
+<h3 id="wt-%E2%86%92-a-%E2%86%92-b-%E2%86%92-d">WT → A → B → D</h3>
+<h3 id="xor">XOR</h3>
+<h3 id="wt-%E2%86%92-a-%E2%86%92-c-%E2%86%92-d">WT → A → C → D</h3>
 <pre class="hljs"><code><div>dB_XOR &lt;- matrix(
   c(
     rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">200</span>)
@@ -427,14 +441,18 @@ colnames(dB_XOR) &lt;- LETTERS[<span class="hljs-number">1</span>:<span class="h
 
 do_HyperTraPS(dB_XOR, <span class="hljs-string">"HP_XOR"</span>, runs = <span class="hljs-number">500</span>, bi=<span class="hljs-number">200</span>)
 </div></code></pre>
-<img src="./HP_XOR/stats-200.png" width=300>
-<img src="./HP_XOR/forwards-feature_graph_match-data_joint_circular_graph.png" width=300>
-<img src="./HP_XOR/forwards-feature_graph_match-data_joint_circular_adjacency.png" width=300>
-<img src="./HP_XOR/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_XOR/forwards-ws1-ws2.png" width=300>
+<img src="./HP_XOR/freqs.jpg" height=300>
+<img src="./HP_XOR/stats-200.png" height=300>
+<img src="./HP_XOR/forwards-feature_graph_match-data_joint_circular_adjacency.png" height=300>
+<img src="./HP_XOR/forwards-feature_graph_match-data_joint_circular_graph.png" height=300>
+<img src="./HP_XOR/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_XOR/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
-<pre class="hljs"><code><div><span class="hljs-comment"># A --&gt; B ; C --&gt; D; B XOR D for E </span>
-
+<hr>
+<h2 id="or-then-xor">OR then XOR</h2>
+<h3 id="a-%E2%86%92-b--c-%E2%86%92-d-b-xor-d-for-e">A → B ; C → D; B XOR D for E</h3>
+<p>Here I forgot to include some genotypes, like AC, but the algorithm is able to recover it. Hoewever, it fails also includes other genotypes that are not possible, like CE or ACE.</p>
+<pre class="hljs"><code><div>
 dB_c1 &lt;- matrix(
   c(
       rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">300</span>) <span class="hljs-comment">#A</span>
@@ -455,16 +473,18 @@ colnames(dB_c1) &lt;- LETTERS[<span class="hljs-number">1</span>:<span class="hl
 
 do_HyperTraPS(dB_c1, <span class="hljs-string">"HP_c1"</span>, runs = <span class="hljs-number">500</span>, bi=<span class="hljs-number">200</span>)
 </div></code></pre>
-<img src="./HP_c1/stats-200.png" width=300>
-<img src="./HP_c1/forwards-feature_graph_match-data_conditional_circular_graph.png" width=300>
-<img src="./HP_c1/forwards-feature_graph_match-data_conditional_circular_adjacency.png" width=300>
-<img src="./HP_c1/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_c1/forwards-ws1-ws2.png" width=300>
+<img src="./HP_c1/freqs.jpg" height=300>
+<img src="./HP_c1/stats-200.png" height=300>
+<img src="./HP_c1/forwards-feature_graph_match-data_conditional_circular_graph.png" height=300>
+<img src="./HP_c1/forwards-feature_graph_match-data_conditional_circular_adjacency.png" height=300>
+<img src="./HP_c1/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_c1/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
-<pre class="hljs"><code><div>
-<span class="hljs-comment">## ((A AND B) or C) to reach D</span>
-
-dB_c2 &lt;- matrix(
+<hr>
+<h2 id="and--or">AND + OR</h2>
+<h3 id="a-and-b-or-c-to-reach-d">((A AND B) or C) to reach D</h3>
+<p>Here it aslo recovers missing genotypes like ACD or BCD.</p>
+<pre class="hljs"><code><div>dB_c2 &lt;- matrix(
   c(
       rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">300</span>) <span class="hljs-comment">#A</span>
     , rep(c(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">300</span>) <span class="hljs-comment">#B</span>
@@ -483,17 +503,20 @@ colnames(dB_c2) &lt;- LETTERS[<span class="hljs-number">1</span>:<span class="hl
 
 do_HyperTraPS(dB_c2, <span class="hljs-string">"HP_c2"</span>, runs = <span class="hljs-number">500</span>, bi=<span class="hljs-number">200</span>)
 </div></code></pre>
-<img src="./HP_c2/stats-200.png" width=300>
-<img src="./HP_c2/forwards-feature_graph_match-data_joint_circular_graph.png" width=300>
-<img src="./HP_c2/forwards-feature_graph_match-data_joint_circular_adjacency.png" width=300>
-<img src="./HP_c2/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_c2/forwards-ws1-ws2.png" width=300>
+<img src="./HP_c2/freqs.jpg" height=300>
+<img src="./HP_c2/stats-200.png" height=300>
+<img src="./HP_c2/forwards-feature_graph_match-data_joint_circular_graph.png" height=300>
+<img src="./HP_c2/forwards-feature_graph_match-data_joint_circular_adjacency.png" height=300>
+<img src="./HP_c2/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_c2/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
-<pre class="hljs"><code><div><span class="hljs-comment">## WT --&gt; A AND B --&gt; E</span>
-<span class="hljs-comment">## XOR </span>
-<span class="hljs-comment">## WT --&gt; C AND D --&gt; E</span>
-<span class="hljs-comment">## ((A AND B) XOR (C AND D) to reach E</span>
-dB_c3 &lt;- matrix(
+<hr>
+<h2 id="separted-paths">Separted paths</h2>
+<h2 id="wt-%E2%86%92-a-and-b-%E2%86%92-e">WT → A AND B → E</h2>
+<h2 id="xor">XOR</h2>
+<h2 id="wt-%E2%86%92-c-and-d-%E2%86%92-e">WT → C AND D → E</h2>
+<h2 id="a-and-b-xor-c-and-d-to-reach-e">((A AND B) XOR (C AND D) to reach E</h2>
+<pre class="hljs"><code><div>dB_c3 &lt;- matrix(
   c(
       rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">300</span>) <span class="hljs-comment">#A</span>
     , rep(c(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">300</span>) <span class="hljs-comment">#B</span>
@@ -510,15 +533,20 @@ colnames(dB_c3) &lt;- LETTERS[<span class="hljs-number">1</span>:<span class="hl
 
 do_HyperTraPS(dB_c3, <span class="hljs-string">"HP_c3"</span>, runs = <span class="hljs-number">500</span>, bi=<span class="hljs-number">200</span>)
 </div></code></pre>
-<img src="./HP_c3/stats-200.png" width=300>
-<img src="./HP_c3/forwards-feature_graph_match-data_joint_circular_graph.png" width=300>
-<img src="./HP_c3/forwards-feature_graph_match-data_joint_circular_adjacency.png" width=300>
-<img src="./HP_c3/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_c3/forwards-ws1-ws2.png" width=300>
+<img src="./HP_c3/freqs.jpg" height=300>
+<img src="./HP_c3/stats-200.png" height=300>
+<img src="./HP_c3/forwards-feature_graph_match-data_joint_circular_graph.png" height=300>
+<img src="./HP_c3/forwards-feature_graph_match-data_joint_circular_adjacency.png" height=300>
+<img src="./HP_c3/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_c3/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
-<pre class="hljs"><code><div><span class="hljs-comment">## WT --&gt; A --&gt; B</span>
-<span class="hljs-comment">## WT --&gt; C --&gt; D</span>
-dB_c4 &lt;- matrix(
+<hr>
+<h2 id="independent-paths">Independent Paths</h2>
+<h2 id="wt-%E2%86%92-a-%E2%86%92-b">WT → A → B</h2>
+<h2 id="wt-%E2%86%92-c-%E2%86%92-d">WT → C → D</h2>
+<p>I forgot to include to include some genotypes,
+but they are marked as probably missing ones.</p>
+<pre class="hljs"><code><div>dB_c4 &lt;- matrix(
   c(
       rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">300</span>) <span class="hljs-comment">#A</span>
     , rep(c(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>), <span class="hljs-number">300</span>) <span class="hljs-comment">#C</span>
@@ -534,14 +562,17 @@ colnames(dB_c4) &lt;- LETTERS[<span class="hljs-number">1</span>:<span class="hl
 
 do_HyperTraPS(dB_c4, <span class="hljs-string">"HP_c4"</span>, runs = <span class="hljs-number">500</span>, bi=<span class="hljs-number">200</span>)
 </div></code></pre>
-<img src="./HP_c4/stats-200.png" width=300>
-<img src="./HP_c4/forwards-feature_graph_match-data_joint_circular_graph.png" width=300>
-<img src="./HP_c4/forwards-feature_graph_match-data_joint_circular_adjacency.png" width=300>
-<img src="./HP_c4/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_c4/forwards-ws1-ws2.png" width=300>
+<img src="./HP_c4/freqs.jpg" height=300>
+<img src="./HP_c4/stats-200.png" height=300>
+<img src="./HP_c4/forwards-feature_graph_match-data_joint_circular_graph.png" height=300>
+<img src="./HP_c4/forwards-feature_graph_match-data_joint_circular_adjacency.png" height=300>
+<img src="./HP_c4/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_c4/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
-<pre class="hljs"><code><div><span class="hljs-comment">## WT --&gt; (A AND B AND C) --&gt; D</span>
-
+<hr>
+<h2 id="triple-and">Triple AND</h2>
+<h2 id="wt-%E2%86%92-a-and-b-and-c-%E2%86%92-d">WT → (A AND B AND C) → D</h2>
+<pre class="hljs"><code><div>
 dB_c5 &lt;- matrix(
   c(
       rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">300</span>) <span class="hljs-comment">#A</span>
@@ -556,36 +587,61 @@ dB_c5 &lt;- matrix(
   ), ncol = <span class="hljs-number">4</span>, byrow = <span class="hljs-literal">TRUE</span>
 )
 colnames(dB_c5) &lt;- LETTERS[<span class="hljs-number">1</span>:<span class="hljs-number">4</span>]
+do_HyperTraPS(dB_c5, <span class="hljs-string">"HP_c5"</span>, runs = <span class="hljs-number">500</span>, bi=<span class="hljs-number">200</span>)
 
 </div></code></pre>
-<img src="./HP_c5/stats-200.png" width=300>
-<img src="./HP_c5/forwards-feature_graph_match-data_joint_circular_graph.png" width=300>
-<img src="./HP_c5/forwards-feature_graph_match-data_joint_circular_adjacency.png" width=300>
-<img src="./HP_c5/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_c5/forwards-ws1-ws2.png" width=300>
+<img src="./HP_c5/freqs.jpg" height=300>
+<img src="./HP_c5/stats-200.png" height=300>
+<img src="./HP_c5/forwards-feature_graph_match-data_joint_circular_graph.png" height=300>
+<img src="./HP_c5/forwards-feature_graph_match-data_joint_circular_adjacency.png" height=300>
+<img src="./HP_c5/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_c5/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
-<pre class="hljs"><code><div>do_HyperTraPS(dB_c5, <span class="hljs-string">"HP_c5"</span>, runs = <span class="hljs-number">500</span>, bi=<span class="hljs-number">200</span>)
-
+<hr>
+<h2 id="sign-epistasis">Sign epistasis</h2>
+<pre class="hljs"><code><div>
 <span class="hljs-comment">## Sign epistasis</span>
-dB_c6 &lt;- matrix(
+dB_se &lt;- matrix(
   c(
-      rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">200</span>) <span class="hljs-comment">#A</span>
-    , rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>), <span class="hljs-number">20</span>) <span class="hljs-comment">#AB</span>
-    , rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>), <span class="hljs-number">400</span>) <span class="hljs-comment">#ABC</span>
-    , rep(c(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">10</span>) <span class="hljs-comment"># WT</span>
-  ), ncol = <span class="hljs-number">3</span>, byrow = <span class="hljs-literal">TRUE</span>
+      rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>), <span class="hljs-number">50</span>) <span class="hljs-comment">#A</span>
+    , rep(c(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>), <span class="hljs-number">300</span>) <span class="hljs-comment">#B</span>
+    , rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>), <span class="hljs-number">400</span>) <span class="hljs-comment">#AB</span>
+    , rep(c(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">200</span>) <span class="hljs-comment"># WT</span>
+  ), ncol = <span class="hljs-number">2</span>, byrow = <span class="hljs-literal">TRUE</span>
 )
-colnames(dB_c6) &lt;- LETTERS[<span class="hljs-number">1</span>:<span class="hljs-number">3</span>]
-do_HyperTraPS(dB_c6, <span class="hljs-string">"HP_c6"</span>, runs = <span class="hljs-number">500</span>, bi=<span class="hljs-number">200</span>)
+colnames(dB_se) &lt;- LETTERS[<span class="hljs-number">1</span>:<span class="hljs-number">2</span>]
+do_HyperTraPS(dB_se, <span class="hljs-string">"HyperTraPS_examples/HP_se"</span>, runs = <span class="hljs-number">500</span>, bi=<span class="hljs-number">200</span>)
 </div></code></pre>
-<img src="./HP_c6/stats-200.png" width=300>
-<img src="./HP_c6/forwards-feature_graph_match-data_conditional_circular_graph.png" width=300>
-<img src="./HP_c6/forwards-feature_graph_match-data_conditional_circular_adjacency.png" width=300>
-<img src="./HP_c6/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_c6/forwards-ws1-ws2.png" width=300>
+<img src="./HP_se/freqs.jpg" height=300>
+<img src="./HP_se/stats-200.png" height=300>
+<img src="./HP_se/forwards-feature_graph_match-data_conditional_circular_graph.png" height=300>
+<img src="./HP_se/forwards-feature_graph_match-data_conditional_circular_adjacency.png" height=300>
+<img src="./HP_se/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_se/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
-<pre class="hljs"><code><div><span class="hljs-comment">## ((A AND B) OR (C AND D) to reach E</span>
-
+---
+<h2 id="reciprocal-sign-epistasis">Reciprocal Sign epistasis</h2>
+<pre class="hljs"><code><div>dB_rse &lt;- matrix(
+  c(
+      rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>), <span class="hljs-number">50</span>) <span class="hljs-comment">#A</span>
+    , rep(c(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>), <span class="hljs-number">50</span>) <span class="hljs-comment">#B</span>
+    , rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>), <span class="hljs-number">400</span>) <span class="hljs-comment">#AB</span>
+    , rep(c(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">200</span>) <span class="hljs-comment"># WT</span>
+  ), ncol = <span class="hljs-number">2</span>, byrow = <span class="hljs-literal">TRUE</span>
+)
+colnames(dB_rse) &lt;- LETTERS[<span class="hljs-number">1</span>:<span class="hljs-number">2</span>]
+do_HyperTraPS(dB_rse, <span class="hljs-string">"HyperTraPS_examples/HP_rse"</span>, runs = <span class="hljs-number">500</span>, bi=<span class="hljs-number">200</span>)
+</div></code></pre>
+<img src="./HP_rse/freqs.jpg" height=300>
+<img src="./HP_rse/stats-200.png" height=300>
+<img src="./HP_rse/forwards-feature_graph_match-data_conditional_circular_graph.png" height=300>
+<img src="./HP_rse/forwards-feature_graph_match-data_conditional_circular_adjacency.png" height=300>
+<img src="./HP_rse/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_rse/forwards-ws1-ws2.png" height=300>
+<div style="page-break-after: always;"></div>
+---
+<h2 id="a-and-b-or-c-and-d-to-reach-e">((A AND B) OR (C AND D) to reach E</h2>
+<pre class="hljs"><code><div>
 dB_c7 &lt;- matrix(
   c(
       rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">300</span>) <span class="hljs-comment">#A</span>
@@ -604,10 +660,10 @@ dB_c7 &lt;- matrix(
     , rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>), <span class="hljs-number">200</span>) <span class="hljs-comment">#ABE</span>
     , rep(c(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>), <span class="hljs-number">200</span>) <span class="hljs-comment">#CDE</span>
     , rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>), <span class="hljs-number">200</span>) <span class="hljs-comment">#ABCE</span>
-    , rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>), <span class="hljs-number">200</span>) <span class="hljs-comment"># ABDE</span>
-    , rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>), <span class="hljs-number">200</span>) <span class="hljs-comment"># ACDE</span>
-    , rep(c(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>), <span class="hljs-number">200</span>) <span class="hljs-comment"># BCDE</span>
-    , rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>), <span class="hljs-number">200</span>) <span class="hljs-comment"># ABCDE</span>
+    , rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>), <span class="hljs-number">200</span>) <span class="hljs-comment">#ABDE</span>
+    , rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>), <span class="hljs-number">200</span>) <span class="hljs-comment">#ACDE</span>
+    , rep(c(<span class="hljs-number">0</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>), <span class="hljs-number">200</span>) <span class="hljs-comment">#BCDE</span>
+    , rep(c(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>, <span class="hljs-number">1</span>), <span class="hljs-number">200</span>) <span class="hljs-comment">#ABCDE</span>
     , rep(c(<span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>, <span class="hljs-number">0</span>), <span class="hljs-number">10</span>) <span class="hljs-comment"># WT</span>
   ), ncol = <span class="hljs-number">5</span>, byrow = <span class="hljs-literal">TRUE</span>
 )
@@ -615,11 +671,12 @@ colnames(dB_c7) &lt;- LETTERS[<span class="hljs-number">1</span>:<span class="hl
 
 do_HyperTraPS(dB_c7, <span class="hljs-string">"HP_c7"</span>, runs = <span class="hljs-number">500</span>, bi=<span class="hljs-number">200</span>)
 </div></code></pre>
-<img src="./HP_c7/stats-200.png" width=300>
-<img src="./HP_c7/forwards-feature_graph_match-data_conditional_circular_graph.png" width=300>
-<img src="./HP_c7/forwards-feature_graph_match-data_conditional_circular_adjacency.png" width=300>
-<img src="./HP_c7/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_c7/forwards-ws1-ws2.png" width=300>
+<img src="./HP_c7/freqs.jpg" height=300>
+<img src="./HP_c7/stats-200.png" height=300>
+<img src="./HP_c7/forwards-feature_graph_match-data_conditional_circular_graph.png" height=300>
+<img src="./HP_c7/forwards-feature_graph_match-data_conditional_circular_adjacency.png" height=300>
+<img src="./HP_c7/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_c7/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
 <pre class="hljs"><code><div><span class="hljs-comment">## Make a test with the real world data of the pmce paper</span>
 

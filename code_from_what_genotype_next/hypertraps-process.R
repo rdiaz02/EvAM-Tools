@@ -63,14 +63,13 @@ do_HyperTraPS <- function(data, tmp_folder="",
     print("Generating Paths")
     system(sprintf("RUN_PW -w match-data -b %1.f -R 100", bi))
     system(sprintf("RUN_PW -w zero-one -b %1.f -R 100", bi))
-  }
-  setwd(tmp_folder)
+  } else { setwd(tmp_folder) }
 
   ### Plots
   system(sprintf("plot_mc_stats.py -b %1.f", bi))
   system(sprintf("custom_plot_hypercube_graph.py -f 'forwards_list-pord-match-data.csv' -outfile_graph 'forwards-hypercube-graph-mach-data-g0' -transition_data 'transitions.txt' -labels 'labels.csv' -label_type 'None' -labels_fontsize 4 -layout_type 'spring' -aspect 0.9 -width 3.4 -out_type 'png'"))
     
-  system(sprintf("plot_feature_graph.py -f 'forwards.txt' -layout_type 'circular' -prob_type 'conditional' -data_type 'match-data' -width 4 -fontsize 10 -any_time 0 -node_size 100 -connection_style 'arc3,rad=-0.3' -outfile_type 'png'"))
+  system(sprintf("plot_feature_graph.py -f 'forwards.txt' -layout_type 'circular' -prob_type 'joint' -data_type 'match-data' -width 4 -fontsize 10 -any_time 0 -node_size 100 -connection_style 'arc3,rad=-0.3' -outfile_type 'png'"))
 
   system(sprintf("plot_ordering_histogram.py -f 'forwards_list-pord-zero-one.csv' -f2 'forwards_list-pord-match-data.csv' -transition_data 'transitions.txt' -labels 'labels.csv' -fontsize 6 -xevery 1 -aspect 0.9 -verbose 'no' -outfile 'forwards-ws1-ws2' -out_type 'png'"))
   

@@ -1,13 +1,17 @@
 
-En el plot de la derecha, la franja azul el walk simulator 1 (WS1): que busca ir desde 0 mutaciones a todo mutado. El naranja es el WS2, que busca solo busca dentro de los genotipos observados. PREGUNTA: Esto último es lo más útil para nuestros datos, no? 
-
+## Set up
 ```r 
 pwd0 <- getwd()
 setwd("../code_from_what_genotype_next/")
 source("hypertraps-process.R")
 setwd(pwd0)
 rm(pwd0)
+```
+---
+## AND
+### WT &#8594; A &#8594; B &#8594; C 
 
+```r
 dB_AND <- matrix(
   c(
     rep(c(1, 0, 0, 0), 100)
@@ -21,12 +25,19 @@ colnames(dB_AND) <- LETTERS[1:4]
 
 do_HyperTraPS(dB_AND, "HP_AND", runs = 500, bi=200)
 ```
-<img src="./HP_AND/stats-200.png" width=300>
-<img src="./HP_AND/forwards-feature_graph_match-data_joint_circular_graph.png" width=300>
-<img src="./HP_AND/forwards-feature_graph_match-data_joint_circular_adjacency.png" width=300>
-<img src="./HP_AND/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_AND/forwards-ws1-ws2.png" width=300>
+
+<img src="./HP_AND/freqs.jpg" height=300>
+<img src="./HP_AND/stats-200.png" height=300>
+<img src="./HP_AND/forwards-feature_graph_match-data_joint_circular_graph.png" height=300>
+<img src="./HP_AND/forwards-feature_graph_match-data_joint_circular_adjacency.png" height=300>
+<img src="./HP_AND/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_AND/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
+
+---
+## OR
+### WT &#8594; A &#8594; B &#8594; D 
+### WT &#8594; A &#8594; C &#8594; D 
 
 ```r
 dB_OR <- matrix(
@@ -45,12 +56,19 @@ colnames(dB_OR) <- LETTERS[1:4]
 
 do_HyperTraPS(dB_OR, "HP_OR", runs = 500, bi=200)
 ```
-<img src="./HP_OR/stats-200.png" width=300>
-<img src="./HP_OR/forwards-feature_graph_match-data_joint_circular_graph.png" width=300>
-<img src="./HP_OR/forwards-feature_graph_match-data_joint_circular_adjacency.png" width=300>
-<img src="./HP_OR/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_OR/forwards-ws1-ws2.png" width=300>
+<img src="./HP_OR/freqs.jpg" height=300>
+<img src="./HP_OR/stats-200.png" height=300>
+<img src="./HP_OR/forwards-feature_graph_match-data_joint_circular_graph.png" height=300>
+<img src="./HP_OR/forwards-feature_graph_match-data_joint_circular_adjacency.png" height=300>
+<img src="./HP_OR/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_OR/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
+
+---
+## XOR
+### WT &#8594; A &#8594; B &#8594; D
+### XOR  
+### WT &#8594; A &#8594; C &#8594; D
 
 ```r
 dB_XOR <- matrix(
@@ -67,16 +85,19 @@ colnames(dB_XOR) <- LETTERS[1:4]
 
 do_HyperTraPS(dB_XOR, "HP_XOR", runs = 500, bi=200)
 ```
-<img src="./HP_XOR/stats-200.png" width=300>
-<img src="./HP_XOR/forwards-feature_graph_match-data_joint_circular_graph.png" width=300>
-<img src="./HP_XOR/forwards-feature_graph_match-data_joint_circular_adjacency.png" width=300>
-<img src="./HP_XOR/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_XOR/forwards-ws1-ws2.png" width=300>
+<img src="./HP_XOR/freqs.jpg" height=300>
+<img src="./HP_XOR/stats-200.png" height=300>
+<img src="./HP_XOR/forwards-feature_graph_match-data_joint_circular_adjacency.png" height=300>
+<img src="./HP_XOR/forwards-feature_graph_match-data_joint_circular_graph.png" height=300>
+<img src="./HP_XOR/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_XOR/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
 
+---
+## OR then XOR
+### A &#8594; B ; C &#8594; D; B XOR D for E 
 
 ```r
-# A --> B ; C --> D; B XOR D for E 
 
 dB_c1 <- matrix(
   c(
@@ -98,17 +119,19 @@ colnames(dB_c1) <- LETTERS[1:5]
 
 do_HyperTraPS(dB_c1, "HP_c1", runs = 500, bi=200)
 ```
-<img src="./HP_c1/stats-200.png" width=300>
-<img src="./HP_c1/forwards-feature_graph_match-data_conditional_circular_graph.png" width=300>
-<img src="./HP_c1/forwards-feature_graph_match-data_conditional_circular_adjacency.png" width=300>
-<img src="./HP_c1/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_c1/forwards-ws1-ws2.png" width=300>
+<img src="./HP_c1/freqs.jpg" height=300>
+<img src="./HP_c1/stats-200.png" height=300>
+<img src="./HP_c1/forwards-feature_graph_match-data_conditional_circular_graph.png" height=300>
+<img src="./HP_c1/forwards-feature_graph_match-data_conditional_circular_adjacency.png" height=300>
+<img src="./HP_c1/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_c1/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
 
+---
+## AND + OR
+### ((A AND B) or C) to reach D
+
 ```r 
-
-## ((A AND B) or C) to reach D
-
 dB_c2 <- matrix(
   c(
       rep(c(1, 0, 0, 0), 300) #A
@@ -128,18 +151,22 @@ colnames(dB_c2) <- LETTERS[1:4]
 
 do_HyperTraPS(dB_c2, "HP_c2", runs = 500, bi=200)
 ```
-<img src="./HP_c2/stats-200.png" width=300>
-<img src="./HP_c2/forwards-feature_graph_match-data_joint_circular_graph.png" width=300>
-<img src="./HP_c2/forwards-feature_graph_match-data_joint_circular_adjacency.png" width=300>
-<img src="./HP_c2/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_c2/forwards-ws1-ws2.png" width=300>
+<img src="./HP_c2/freqs.jpg" height=300>
+<img src="./HP_c2/stats-200.png" height=300>
+<img src="./HP_c2/forwards-feature_graph_match-data_joint_circular_graph.png" height=300>
+<img src="./HP_c2/forwards-feature_graph_match-data_joint_circular_adjacency.png" height=300>
+<img src="./HP_c2/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_c2/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
 
-```r 
-## WT --> A AND B --> E
+---
+## Separted paths
+## WT &#8594; A AND B &#8594; E
 ## XOR 
-## WT --> C AND D --> E
+## WT &#8594; C AND D &#8594; E
 ## ((A AND B) XOR (C AND D) to reach E
+
+```r 
 dB_c3 <- matrix(
   c(
       rep(c(1, 0, 0, 0, 0), 300) #A
@@ -157,16 +184,21 @@ colnames(dB_c3) <- LETTERS[1:5]
 
 do_HyperTraPS(dB_c3, "HP_c3", runs = 500, bi=200)
 ```
-<img src="./HP_c3/stats-200.png" width=300>
-<img src="./HP_c3/forwards-feature_graph_match-data_joint_circular_graph.png" width=300>
-<img src="./HP_c3/forwards-feature_graph_match-data_joint_circular_adjacency.png" width=300>
-<img src="./HP_c3/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_c3/forwards-ws1-ws2.png" width=300>
+<img src="./HP_c3/freqs.jpg" height=300>
+<img src="./HP_c3/stats-200.png" height=300>
+<img src="./HP_c3/forwards-feature_graph_match-data_joint_circular_graph.png" height=300>
+<img src="./HP_c3/forwards-feature_graph_match-data_joint_circular_adjacency.png" height=300>
+<img src="./HP_c3/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_c3/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
 
+---
+## Independent Paths
+## WT &#8594; A &#8594; B
+## WT &#8594; C &#8594; D
+I forgot to include to include some genotypes,
+but they are marked as probably missing ones.
 ```r 
-## WT --> A --> B
-## WT --> C --> D
 dB_c4 <- matrix(
   c(
       rep(c(1, 0, 0, 0), 300) #A
@@ -184,15 +216,19 @@ colnames(dB_c4) <- LETTERS[1:4]
 do_HyperTraPS(dB_c4, "HP_c4", runs = 500, bi=200)
 ```
 
-<img src="./HP_c4/stats-200.png" width=300>
-<img src="./HP_c4/forwards-feature_graph_match-data_joint_circular_graph.png" width=300>
-<img src="./HP_c4/forwards-feature_graph_match-data_joint_circular_adjacency.png" width=300>
-<img src="./HP_c4/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_c4/forwards-ws1-ws2.png" width=300>
+<img src="./HP_c4/freqs.jpg" height=300>
+<img src="./HP_c4/stats-200.png" height=300>
+<img src="./HP_c4/forwards-feature_graph_match-data_joint_circular_graph.png" height=300>
+<img src="./HP_c4/forwards-feature_graph_match-data_joint_circular_adjacency.png" height=300>
+<img src="./HP_c4/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_c4/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
 
+---
+## Triple AND
+## WT &#8594; (A AND B AND C) &#8594; D
+
 ```r 
-## WT --> (A AND B AND C) --> D
 
 dB_c5 <- matrix(
   c(
@@ -208,40 +244,73 @@ dB_c5 <- matrix(
   ), ncol = 4, byrow = TRUE
 )
 colnames(dB_c5) <- LETTERS[1:4]
-
-```
-<img src="./HP_c5/stats-200.png" width=300>
-<img src="./HP_c5/forwards-feature_graph_match-data_joint_circular_graph.png" width=300>
-<img src="./HP_c5/forwards-feature_graph_match-data_joint_circular_adjacency.png" width=300>
-<img src="./HP_c5/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_c5/forwards-ws1-ws2.png" width=300>
-<div style="page-break-after: always;"></div>
-
-```r 
 do_HyperTraPS(dB_c5, "HP_c5", runs = 500, bi=200)
 
-## Sign epistasis
-dB_c6 <- matrix(
-  c(
-      rep(c(1, 0, 0), 200) #A
-    , rep(c(1, 1, 0), 20) #AB
-    , rep(c(1, 1, 1), 400) #ABC
-    , rep(c(0, 0, 0), 10) # WT
-  ), ncol = 3, byrow = TRUE
-)
-colnames(dB_c6) <- LETTERS[1:3]
-do_HyperTraPS(dB_c6, "HP_c6", runs = 500, bi=200)
 ```
-
-<img src="./HP_c6/stats-200.png" width=300>
-<img src="./HP_c6/forwards-feature_graph_match-data_conditional_circular_graph.png" width=300>
-<img src="./HP_c6/forwards-feature_graph_match-data_conditional_circular_adjacency.png" width=300>
-<img src="./HP_c6/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_c6/forwards-ws1-ws2.png" width=300>
+<img src="./HP_c5/freqs.jpg" height=300>
+<img src="./HP_c5/stats-200.png" height=300>
+<img src="./HP_c5/forwards-feature_graph_match-data_joint_circular_graph.png" height=300>
+<img src="./HP_c5/forwards-feature_graph_match-data_joint_circular_adjacency.png" height=300>
+<img src="./HP_c5/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_c5/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
 
+---
+## Sign epistasis
+
 ```r 
+
+## Sign epistasis
+dB_se <- matrix(
+  c(
+      rep(c(1, 0), 50) #A
+    , rep(c(0, 1), 300) #B
+    , rep(c(1, 1), 400) #AB
+    , rep(c(0, 0), 200) # WT
+  ), ncol = 2, byrow = TRUE
+)
+colnames(dB_se) <- LETTERS[1:2]
+do_HyperTraPS(dB_se, "HyperTraPS_examples/HP_se", runs = 500, bi=200)
+```
+
+<img src="./HP_c6/freqs.jpg" height=300>
+<img src="./HP_c6/stats-200.png" height=300>
+<img src="./HP_c6/forwards-feature_graph_match-data_conditional_circular_graph.png" height=300>
+<img src="./HP_c6/forwards-feature_graph_match-data_conditional_circular_adjacency.png" height=300>
+<img src="./HP_c6/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_c6/forwards-ws1-ws2.png" height=300>
+<div style="page-break-after: always;"></div>
+---
+
+## Reciprocal Sign epistasis
+
+```r 
+
+## Sign epistasis
+dB_se <- matrix(
+  c(
+      rep(c(1, 0), 50) #A
+    , rep(c(0, 1), 300) #B
+    , rep(c(1, 1), 400) #AB
+    , rep(c(0, 0), 200) # WT
+  ), ncol = 2, byrow = TRUE
+)
+colnames(dB_se) <- LETTERS[1:2]
+do_HyperTraPS(dB_se, "HyperTraPS_examples/HP_se", runs = 500, bi=200)
+```
+
+<img src="./HP_c6/freqs.jpg" height=300>
+<img src="./HP_c6/stats-200.png" height=300>
+<img src="./HP_c6/forwards-feature_graph_match-data_conditional_circular_graph.png" height=300>
+<img src="./HP_c6/forwards-feature_graph_match-data_conditional_circular_adjacency.png" height=300>
+<img src="./HP_c6/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_c6/forwards-ws1-ws2.png" height=300>
+<div style="page-break-after: always;"></div>
+---
+
 ## ((A AND B) OR (C AND D) to reach E
+
+```r 
 
 dB_c7 <- matrix(
   c(
@@ -261,10 +330,10 @@ dB_c7 <- matrix(
     , rep(c(1, 1, 0, 0, 1), 200) #ABE
     , rep(c(0, 0, 1, 1, 1), 200) #CDE
     , rep(c(1, 1, 1, 0, 1), 200) #ABCE
-    , rep(c(1, 1, 0, 1, 1), 200) # ABDE
-    , rep(c(1, 0, 1, 1, 1), 200) # ACDE
-    , rep(c(0, 1, 1, 1, 1), 200) # BCDE
-    , rep(c(1, 1, 1, 1, 1), 200) # ABCDE
+    , rep(c(1, 1, 0, 1, 1), 200) #ABDE
+    , rep(c(1, 0, 1, 1, 1), 200) #ACDE
+    , rep(c(0, 1, 1, 1, 1), 200) #BCDE
+    , rep(c(1, 1, 1, 1, 1), 200) #ABCDE
     , rep(c(0, 0, 0, 0, 0), 10) # WT
   ), ncol = 5, byrow = TRUE
 )
@@ -273,11 +342,12 @@ colnames(dB_c7) <- LETTERS[1:5]
 do_HyperTraPS(dB_c7, "HP_c7", runs = 500, bi=200)
 ```
 
-<img src="./HP_c7/stats-200.png" width=300>
-<img src="./HP_c7/forwards-feature_graph_match-data_conditional_circular_graph.png" width=300>
-<img src="./HP_c7/forwards-feature_graph_match-data_conditional_circular_adjacency.png" width=300>
-<img src="./HP_c7/forwards-hypercube-graph-mach-data-g0.png" width=300>
-<img src="./HP_c7/forwards-ws1-ws2.png" width=300>
+<img src="./HP_c7/freqs.jpg" height=300>
+<img src="./HP_c7/stats-200.png" height=300>
+<img src="./HP_c7/forwards-feature_graph_match-data_conditional_circular_graph.png" height=300>
+<img src="./HP_c7/forwards-feature_graph_match-data_conditional_circular_adjacency.png" height=300>
+<img src="./HP_c7/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_c7/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
 
 ```r 
