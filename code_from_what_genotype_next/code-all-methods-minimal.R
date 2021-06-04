@@ -98,6 +98,7 @@ source("ot-process.R", echo = FALSE, max.deparse.length = 0)
 ## source("dip-process.R", echo = FALSE, max.deparse.length = 0)  ## No longer using it
 source("cbn-process.R", echo = FALSE, max.deparse.length = 0)
 source("dbn-process.R", echo = FALSE, max.deparse.length = 0)
+source("hypertraps-process.R", echo = FALSE, max.deparse.length = 0)
 source("hesbcn-process.R", echo = FALSE, max.deparse.length = 0)
 
 if(MCCBN_INSTALLED)
@@ -1011,7 +1012,10 @@ cpm_access_genots_paths_w_simplified <- function(x, string = NULL,
 
 ## Sort wrapper to generate a transition matrix.
 ## It first generates all accesibles genotypes given a transition matrix
-cpm_access_genots_paths_w_simplified_OR <- function(data, parameter_column_name=c("Thetas")){
+cpm_access_genots_paths_w_simplified_OR <- function(data,               
+    parameter_column_name = c("Thetas", "Probabilities")){
+
+  browser()
   tmp <- try(df_2_access_genots_and_graph_OR(data$edges[, c("From", "To")]))
   
   if(inherits(tmp, "try-error")) {
@@ -1021,10 +1025,10 @@ cpm_access_genots_paths_w_simplified_OR <- function(data, parameter_column_name=
     fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
   }
   
-  if (is.null(data$edges[,parameter_column_name])){
+  which_col_weights <- which(colnames(data$edges) %in% parameter_column_name)
+  if (is.null(data$edges[,which_col_weights])){
     stop("No such column")
   }
-  which_col_weights <- which(colnames(data$edges) %in% parameter_column_name)
   weights <- unique(data$edges[, c(2, which_col_weights)])
   rownames(weights) <- weights[, "To"]
   weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
@@ -1232,7 +1236,7 @@ rowScaleMatrix <- function(x) {
 
 ## Pass a data set as a matrix with subjects as rows and genes as columns
 
-all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE) {
+all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folder = NULL) {
      
     x <- df_2_mat_integer(x)
 
@@ -1262,31 +1266,40 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE) {
     
     cat("\n  time DBN = ", time_dbn)
 
-    cat("\n     Doing HESBCN")
-    time_hesbcn <- system.time(
-      out_hesbcn <- do_HESBCN(x))["elapsed"]
+    cat("\n     Doing HyperTraps")
+    print("By default we run it here with dry_run = TRUE.
+        HyperTraPS takes a long time and I do no want to block the script.
+    ")
+    time_HyperTraPS <- system.time(
+      out_HyperTraPS <- do_HyperTraPS(x, tmp_folder = HT_folder, dry_run = TRUE, plot = FALSE))["elapsed"]
+
+    cat("\n  time HyperTraPS = ", time_HyperTraPS)
+
+    # cat("\n     Doing HESBCN")
+    # time_hesbcn <- system.time(
+    #   out_hesbcn <- do_HESBCN(x))["elapsed"]
     
-    cat("\n  time HESBCN = ", time_hesbcn)
+    # cat("\n  time HESBCN = ", time_hesbcn)
      
     cpm_out_others <- all_methods(x, cores_cbn = cores_cbn, do_MCCBN = do_MCCBN)
     pre_trans_mat_others <- lapply(cpm_out_others[methods],
         cpm_access_genots_paths_w_simplified)
 
-
     pre_trans_mat_new_CPMS <- lapply( #For the moment just for DBN (HESBCN in the future)
-        list(DBN = out_dbn),
+        list(DBN = out_dbn, HyperTraPS = out_HyperTraPS),
         cpm_access_genots_paths_w_simplified_OR)
     pre_trans_mat_others["DBN"] <- list(pre_trans_mat_new_CPMS$DBN)
+    # pre_trans_mat_others["HyperTraPS"] <- list(pre_trans_mat_new_CPMS$HyperTraPS)
 
     cat("\n    getting transition matrices for all non-mhn methods \n")
 
     ## ## Unweighted
     ## uw <- lapply(pre_trans_mat_others, function(x) rowScaleMatrix(x$fgraph))
     ## Weighted
-    wg <- lapply(pre_trans_mat_others[c("OT", "MCCBN" , "CBN_ot", "DBN")[c(TRUE, do_MCCBN, TRUE, TRUE)]], 
+    wg <- lapply(pre_trans_mat_others[c("OT", "MCCBN" , "CBN_ot", "DBN", "HyperTraPS")[c(TRUE, do_MCCBN, TRUE, TRUE, FALSE)]], 
         function(x) x$trans_mat_genots)
     ## Diagonal
-    td <- lapply(pre_trans_mat_others[c("MCCBN", "CBN_ot", "DBN")[c(do_MCCBN, TRUE, TRUE)]],
+    td <- lapply(pre_trans_mat_others[c("MCCBN", "CBN_ot", "DBN", "HyperTraPS")[c(do_MCCBN, TRUE, TRUE, FALSE)]],
                  function(x) trans_rate_to_trans_mat(x$weighted_fgraph,
                                                      method = "uniformization"))
     ## ## Paranoid check
@@ -1334,7 +1347,11 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE) {
         DBN_likelihood = out_dbn$likelihood,
         DBN_f_graph = pre_trans_mat_new_CPMS$DBN$weighted_fgraph,
         DBN_trans_mat = pre_trans_mat_new_CPMS$DBN$trans_mat_genots,
-        DBN_td_trans_mat = td$DBN
+        DBN_td_trans_mat = td$DBN,
+        HyperTraPS_model = out_HyperTraPS$edges,
+        HyperTraPS_f_graph = pre_trans_mat_new_CPMS$HyperTraPS$weighted_fgraph,
+        HyperTraPS_trans_mat = pre_trans_mat_new_CPMS$HyperTraPS$trans_mat_genots,
+        HyperTraPS_td_trans_mat = td$HyperTraPS,
          ))
 }
 

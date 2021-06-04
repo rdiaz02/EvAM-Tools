@@ -96,7 +96,7 @@ do_HyperTraPS(dB_XOR, "HP_XOR", runs = 500, bi=200)
 ---
 ## OR then XOR
 ### A &#8594; B ; C &#8594; D; B XOR D for E 
-
+Here I forgot to include some genotypes, like AC, but the algorithm is able to recover it. Hoewever, it fails also includes other genotypes that are not possible, like CE or ACE.
 ```r
 
 dB_c1 <- matrix(
@@ -130,7 +130,7 @@ do_HyperTraPS(dB_c1, "HP_c1", runs = 500, bi=200)
 ---
 ## AND + OR
 ### ((A AND B) or C) to reach D
-
+Here it aslo recovers missing genotypes like ACD or BCD.
 ```r 
 dB_c2 <- matrix(
   c(
@@ -273,38 +273,36 @@ colnames(dB_se) <- LETTERS[1:2]
 do_HyperTraPS(dB_se, "HyperTraPS_examples/HP_se", runs = 500, bi=200)
 ```
 
-<img src="./HP_c6/freqs.jpg" height=300>
-<img src="./HP_c6/stats-200.png" height=300>
-<img src="./HP_c6/forwards-feature_graph_match-data_conditional_circular_graph.png" height=300>
-<img src="./HP_c6/forwards-feature_graph_match-data_conditional_circular_adjacency.png" height=300>
-<img src="./HP_c6/forwards-hypercube-graph-mach-data-g0.png" height=300>
-<img src="./HP_c6/forwards-ws1-ws2.png" height=300>
+<img src="./HP_se/freqs.jpg" height=300>
+<img src="./HP_se/stats-200.png" height=300>
+<img src="./HP_se/forwards-feature_graph_match-data_conditional_circular_graph.png" height=300>
+<img src="./HP_se/forwards-feature_graph_match-data_conditional_circular_adjacency.png" height=300>
+<img src="./HP_se/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_se/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
 ---
 
 ## Reciprocal Sign epistasis
 
 ```r 
-
-## Sign epistasis
-dB_se <- matrix(
+dB_rse <- matrix(
   c(
       rep(c(1, 0), 50) #A
-    , rep(c(0, 1), 300) #B
+    , rep(c(0, 1), 50) #B
     , rep(c(1, 1), 400) #AB
     , rep(c(0, 0), 200) # WT
   ), ncol = 2, byrow = TRUE
 )
-colnames(dB_se) <- LETTERS[1:2]
-do_HyperTraPS(dB_se, "HyperTraPS_examples/HP_se", runs = 500, bi=200)
+colnames(dB_rse) <- LETTERS[1:2]
+do_HyperTraPS(dB_rse, "HyperTraPS_examples/HP_rse", runs = 500, bi=200)
 ```
 
-<img src="./HP_c6/freqs.jpg" height=300>
-<img src="./HP_c6/stats-200.png" height=300>
-<img src="./HP_c6/forwards-feature_graph_match-data_conditional_circular_graph.png" height=300>
-<img src="./HP_c6/forwards-feature_graph_match-data_conditional_circular_adjacency.png" height=300>
-<img src="./HP_c6/forwards-hypercube-graph-mach-data-g0.png" height=300>
-<img src="./HP_c6/forwards-ws1-ws2.png" height=300>
+<img src="./HP_rse/freqs.jpg" height=300>
+<img src="./HP_rse/stats-200.png" height=300>
+<img src="./HP_rse/forwards-feature_graph_match-data_conditional_circular_graph.png" height=300>
+<img src="./HP_rse/forwards-feature_graph_match-data_conditional_circular_adjacency.png" height=300>
+<img src="./HP_rse/forwards-hypercube-graph-mach-data-g0.png" height=300>
+<img src="./HP_rse/forwards-ws1-ws2.png" height=300>
 <div style="page-break-after: always;"></div>
 ---
 

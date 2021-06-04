@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import argparse
 import os
+import string
 import operator as op
 from collections import OrderedDict
 np.random.seed(0)
@@ -23,6 +24,7 @@ parser.add_argument("-end", required=False, default = "no", type=str)
 parser.add_argument("-prob_type", required=False, default = "joint", type=str)
 parser.add_argument("-data_type", required=False, default = "match-data", type=str)
 parser.add_argument("-any_time", required=False, default = 0, type=int)
+parser.add_argument("-weights", required=False, default="forwards_list-pord-edge-list-long-match-data.txt", type=str)
 args = parser.parse_args()
 
 args.transitions = "forwards_list-pord-trajectory-" + args.data_type + ".txt"
@@ -99,73 +101,22 @@ def ProccessAdjacencyMatrix(f, transition_file, prob_type="joint", end = "yes", 
     np.savetxt(save, feature_transitions, delimiter=",")
     return feature_transitions
 
-def MakeGraph(df, L):
-    # ONLY CORRECT FOR ZERO-ONE CURRENTLY
-    G = nx.DiGraph()
-    nt = np.sum(df["weight"])/L
-    for i in range(len(df)):
-        G.add_edge(df.iloc[i, 0],
-                   df.iloc[i, 1],
-                   weight=float(df.iloc[i, 2]),
-                   inv_lweight=-np.log(float(df.iloc[i, 2]/nt)))
-    
-    # Calculate the probability of taking a particular edge given
-    # at a particular node
-    for node in G.nodes():
-        tweight = 0
-        for edge in G.out_edges(node):
-            tweight += G.edges[edge]["weight"]
-        for edge in G.out_edges(node):
-            G.edges[edge]["cprob"] = G.edges[edge]["weight"]/tweight
-            G.edges[edge]["inv_lcprob"] = -np.log(G.edges[edge]["weight"]/tweight)
-    return G, nt
+def GenotypeFromState(state):
+    genes = np.array(list(string.ascii_uppercase))
+    binary_state = reversed[list('{:0b}'.format(state))]
+    genotype = genes[binary_state == 1]
+    genotype = "".join(genotype) 
+    return genotype
 
-def AddNodeWeight(G, df, L):
-    for i in range(len(df)):
-        G.nodes()[df.iloc[i, 0]]["weight"] = df.iloc[i, 1]
-    return G
+def CreateTransitionMatrix(file):
+    data = pd.read_csv(file)
+    data["from"] = data["from"].apply(GenotypeFromState)
+    data["to"] = data["to"].apply(GenotypeFromState)
 
-def CheckGraph(G):
-    PROBLEM = 0
-    for node in G.nodes():
-        in_weight=0
-        out_weight=0
-        node_weight = G.nodes()[node]["weight"]
-        for edge in G.out_edges(node):
-            out_weight += G.edges()[edge]["weight"]
-        for edge in G.in_edges(node):
-            in_weight += G.edges()[edge]["weight"]
-
-        if in_weight > node_weight or out_weight > node_weight:
-            print "Node", "Node weight", "In weight", "Out weight"
-            print node, node_weight, in_weight, out_weight
-            print "NODE PROBLEM..:", node
-            PROBLEM = 1
-    if PROBLEM == 0:
-        print "All weights correct..."
-    return
-
-def CreateCompleteGraph(args):
-    'forwards_list-pord-match-data.csv'
-    datafile = args.hypergraph_transitions
-    df = pd.read_csv(datafile, index_col=None)
-    L = max(df["feature"]+1)
-    node_tag = "-edge-list-long"
-    node_tag2= "-state-list-long"
-    outfile = datafile.replace("list-pord", "list-pord" + node_tag).replace(".csv", ".txt")
-    outfile2= datafile.replace("list-pord", "list-pord" + node_tag2).replace(".csv", ".txt")
-    df = pd.read_csv(outfile,  index_col = None, sep=" ")
-    df2= pd.read_csv(outfile2, index_col = None, sep=" ")
-    import pdb; pdb.set_trace()
-
-    G, nt = MakeGraph(df=df, L=L)
-    G = AddNodeWeight(G, df=df2, L=L)
-    CheckGraph(G) 
-    return G
 
 def main(args):
-    x = ProccessAdjacencyMatrix(args.f, args.transitions, "conditional", end = args.end)
-    # graph = CreateCompleteGraph(args)
+    ProccessAdjacencyMatrix(args.f, args.transitions, "conditional", end = args.end)
+    transition_matrix = CreateTransitionMatrix(args.weight)
 
 if __name__ == "__main__":
     main(args)
