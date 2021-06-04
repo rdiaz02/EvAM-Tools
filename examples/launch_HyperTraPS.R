@@ -25,7 +25,7 @@ runs = 1000
 
 for (dataset in names(all_examples)){
   print(sprintf("HyperTraPS_examples/HP_%s", dataset))
-  tmp <- all_examples[dataset]
+  tmp_data <- all_examples[dataset]
   do_HyperTraPS(tmp_data, 
     sprintf("HyperTraPS_examples/HP_%s", dataset), 
     runs = runs, bi = bi, dry_run = FALSE, plot = FALSE )
