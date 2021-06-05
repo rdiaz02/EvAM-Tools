@@ -1,37 +1,37 @@
 
 dB_AND <- matrix(
   c(
-    rep(c(1, 0, 0, 0), 100)
-    , rep(c(1, 1, 0, 0), 100)
-    , rep(c(1, 1, 1, 0), 100)
-    , rep(c(1, 1, 1, 1), 100)
-    , rep(c(0, 0, 0, 0), 10)
+    rep(c(1, 0, 0, 0), 100) #A
+    , rep(c(1, 1, 0, 0), 100) #AB
+    , rep(c(1, 1, 1, 0), 100) #ABC
+    , rep(c(1, 1, 1, 1), 100) #ABCD
+    , rep(c(0, 0, 0, 0), 10) #WT
   ), ncol = 4, byrow = TRUE
 )
 colnames(dB_AND) <- LETTERS[1:4]
 
 dB_OR <- matrix(
   c(
-    rep(c(1, 0, 0, 0), 200)
-    , rep(c(1, 0, 1, 0), 100)
-    , rep(c(1, 1, 0, 0), 100)
-    , rep(c(1, 1, 1, 0), 50)
-    , rep(c(1, 1, 0, 1), 50)
-    , rep(c(1, 0, 1, 1), 50)
-    , rep(c(1, 1, 1, 1), 10)
-    , rep(c(0, 0, 0, 0), 10)
+    rep(c(1, 0, 0, 0), 200) #A
+    , rep(c(1, 0, 1, 0), 100) #AC
+    , rep(c(1, 1, 0, 0), 100) #AB
+    , rep(c(1, 1, 1, 0), 50) #ABC
+    , rep(c(1, 1, 0, 1), 50) #ABD
+    , rep(c(1, 0, 1, 1), 50) #ACD
+    , rep(c(1, 1, 1, 1), 10) #ABCD
+    , rep(c(0, 0, 0, 0), 10) #WT
   ), ncol = 4, byrow = TRUE
 )
 colnames(dB_OR) <- LETTERS[1:4]
 
 dB_XOR <- matrix(
   c(
-    rep(c(1, 0, 0, 0), 200)
-    , rep(c(1, 1, 0, 0), 100)
-    , rep(c(1, 0, 1, 0), 100)
-    , rep(c(1, 1, 0, 1), 50)
-    , rep(c(1, 0, 1, 1), 50)
-    , rep(c(0, 0, 0, 0), 10)
+    rep(c(1, 0, 0, 0), 200) #A
+    , rep(c(1, 1, 0, 0), 100) #AB
+    , rep(c(1, 0, 1, 0), 100) #AC
+    , rep(c(1, 1, 0, 1), 50) #ABD
+    , rep(c(1, 0, 1, 1), 50) #ACD
+    , rep(c(0, 0, 0, 0), 10) #WT
   ), ncol = 4, byrow = TRUE
 )
 colnames(dB_XOR) <- LETTERS[1:4]

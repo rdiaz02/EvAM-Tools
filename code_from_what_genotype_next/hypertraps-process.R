@@ -72,7 +72,7 @@ do_HyperTraPS <- function(data, tmp_folder = NULL,
 
   ### Plots
   system(sprintf("plot_mc_stats.py -b %1.f", bi))
-  system(sprintf("custom_plot_hypercube_graph.py -f 'forwards_list-pord-match-data.csv' -outfile_graph 'forwards-hypercube-graph-mach-data-g0' -transition_data 'transitions.txt' -labels 'labels.csv' -label_type 'None' -labels_fontsize 4 -layout_type 'spring' -aspect 0.9 -width 3.4 -out_type 'png'"))
+  system(sprintf("custom_plot_hypercube_graph.py -f 'forwards_list-pord-match-data.csv' -outfile_graph 'forwards-hypercube-graph-mach-data-g0' -transition_data 'transitions.txt' -labels 'labels.csv' -label_type 'None' -labels_fontsize 4 -aspect 0.9 -width 3.4 -out_type 'png'"))
     
   system(sprintf("plot_feature_graph.py -f 'forwards.txt' -layout_type 'circular' -prob_type %s -data_type 'match-data' -width 4 -fontsize 10 -any_time 0 -node_size 100 -connection_style 'arc3,rad=-0.3' -outfile_type 'png'", prob_type))
 
