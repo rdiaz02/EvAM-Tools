@@ -16,19 +16,23 @@ sample_freqs <- function(data, save_file = NULL){
       if(tmp_name == "") tmp_name <- "WT"
       return(tmp_name)
     }))
-  barplot(genes_freq)
+  genes_names <- names(genes_freq)
+  try(genes_names <- genes_names[-which(genes_names == "WT")])
+  ordered_names <- c("WT", genes_names[order(sapply(genes_names, nchar))])
+  ordered_genotypes <- genes_freq[ordered_names]
+  barplot(ordered_genotypes)
   dev.off()
 }
 
 bi = 20000
 runs = 1000
-
+dry_run = FALSE
 for (dataset in names(all_examples)){
   print(sprintf("HyperTraPS_examples/HP_%s", dataset))
   tmp_data <- all_examples[dataset]
   do_HyperTraPS(tmp_data, 
     sprintf("HyperTraPS_examples/HP_%s", dataset), 
-    runs = runs, bi = bi, dry_run = FALSE, plot = FALSE )
+    runs = runs, bi = bi, dry_run = dry_run, plot = FALSE )
   sample_freqs(tmp_data, 
     sprintf("HyperTraPS_examples/HP_%s/freqs.jpg", dataset))
   ## generate markdown here
