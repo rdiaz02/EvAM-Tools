@@ -116,7 +116,7 @@ def CreateTransitionMatrix(file):
 
 def main(args):
     ProccessAdjacencyMatrix(args.f, args.transitions, "conditional", end = args.end)
-    transition_matrix = CreateTransitionMatrix(args.weight)
+    transition_matrix = CreateTransitionMatrix(args.weights)
 
 if __name__ == "__main__":
     main(args)
