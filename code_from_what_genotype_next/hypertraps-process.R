@@ -1,10 +1,10 @@
 ## Set up: add PATH_TO_HYPERTRAPS_REPO/src/python to your PATH
 ## Set up: add PATH_TO_HYPERTRAPS_REPO/bin/ to your PATH
 ## Set up: operate in a conda environment: Follow installation in README.md
-library(reticulate) ## To activate the conda environment
+# library(reticulate) ## To activate the conda environment
 library(imager)
 
-do_HyperTraPS <- function(data, tmp_folder = NULL, 
+do_HyperTraPS <- function(data = NULL, tmp_folder = NULL, 
   runs=1000, bi=50000, r=100, 
   seed=0, conda_env_name="HyperTraPS", prob_type = "joint", plot = T, dry_run = F){
   
@@ -15,10 +15,10 @@ do_HyperTraPS <- function(data, tmp_folder = NULL,
       Supported types are: 1) joint and 2) conditional", prob_type))
   }
   
-  if (!dry_run) {
+  if (!dry_run & !is.null(data)) {
     ## Activating conda env
     warning("You should run the script within a conda enviroment with a working installation of HyperTraPS")
-    use_condaenv(conda_env_name) ## This does not seem to work
+    # use_condaenv(conda_env_name) ## This does not seem to work
 
     ## Running HyperTraps
     ### Handling data 
@@ -44,7 +44,7 @@ do_HyperTraPS <- function(data, tmp_folder = NULL,
     }
 
     setwd(tmp_folder)
-    print(tmp_folder)
+    print(getwd())
 
     ## Writin data to tmp folder
 

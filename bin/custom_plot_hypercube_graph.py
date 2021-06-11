@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import division
+
 import matplotlib as mpl
 import matplotlib
 from matplotlib.patches import Ellipse
@@ -15,7 +16,6 @@ import os
 import operator as op
 from collections import OrderedDict
 np.random.seed(0)
-
 parser = argparse.ArgumentParser()
 parser.add_argument("-f", required=True, default = None)
 parser.add_argument("-svg", required=False, default="no")

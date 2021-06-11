@@ -98,21 +98,31 @@ def ProccessAdjacencyMatrix(f, transition_file, prob_type="joint", end = "yes", 
         feature_transitions = [(el/np.sum(el) if np.sum(el) > 0 else el) for el in feature_transitions]
     feature_transitions = np.array(feature_transitions)
     
-    np.savetxt(save, feature_transitions, delimiter=",")
+    if save:
+        np.savetxt(save, feature_transitions, delimiter=",")
     return feature_transitions
 
 def GenotypeFromState(state):
     genes = np.array(list(string.ascii_uppercase))
-    binary_state = reversed[list('{:0b}'.format(state))]
-    genotype = genes[binary_state == 1]
-    genotype = "".join(genotype) 
-    return genotype
+    binary_state = np.array([int(i) for i in '{:0b}'.format(state)][::-1])
+    genotype = genes[np.argwhere(binary_state == 1).ravel()]
+    genotype = "".join(list(genotype)) 
+    return genotype if genotype != "" else "WT"
 
-def CreateTransitionMatrix(file):
-    data = pd.read_csv(file)
+def CreateTransitionMatrix(file, save = "genotype_transitions.csv"):
+    data = pd.read_csv(file, sep=" ")
     data["from"] = data["from"].apply(GenotypeFromState)
     data["to"] = data["to"].apply(GenotypeFromState)
+    
+    data["Joint_Probability"] = data.weight/data.weight.sum()
 
+    cumulative_from = data.groupby("from")["weight"].sum()
+    data["Contional_Probability"] = data.apply(lambda x: x["weight"]/cumulative_from[x["from"]], axis=1)
+
+    if save:
+        data.to_csv(save)
+    
+    return data
 
 def main(args):
     ProccessAdjacencyMatrix(args.f, args.transitions, "conditional", end = args.end)

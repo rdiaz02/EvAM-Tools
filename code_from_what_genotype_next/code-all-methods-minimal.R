@@ -1015,7 +1015,6 @@ cpm_access_genots_paths_w_simplified <- function(x, string = NULL,
 cpm_access_genots_paths_w_simplified_OR <- function(data,               
     parameter_column_name = c("Thetas", "Probabilities")){
 
-  browser()
   tmp <- try(df_2_access_genots_and_graph_OR(data$edges[, c("From", "To")]))
   
   if(inherits(tmp, "try-error")) {
@@ -1270,10 +1269,10 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
     print("By default we run it here with dry_run = TRUE.
         HyperTraPS takes a long time and I do no want to block the script.
     ")
-    time_HyperTraPS <- system.time(
-      out_HyperTraPS <- do_HyperTraPS(x, tmp_folder = HT_folder, dry_run = TRUE, plot = FALSE))["elapsed"]
+    # time_HyperTraPS <- system.time(
+    #   out_HyperTraPS <- do_HyperTraPS(x, tmp_folder = HT_folder, dry_run = TRUE, plot = FALSE))["elapsed"]
 
-    cat("\n  time HyperTraPS = ", time_HyperTraPS)
+    # cat("\n  time HyperTraPS = ", time_HyperTraPS)
 
     # cat("\n     Doing HESBCN")
     # time_hesbcn <- system.time(
@@ -1286,7 +1285,9 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
         cpm_access_genots_paths_w_simplified)
 
     pre_trans_mat_new_CPMS <- lapply( #For the moment just for DBN (HESBCN in the future)
-        list(DBN = out_dbn, HyperTraPS = out_HyperTraPS),
+        list(DBN = out_dbn
+        # , HyperTraPS = out_HyperTraPS
+        ),
         cpm_access_genots_paths_w_simplified_OR)
     pre_trans_mat_others["DBN"] <- list(pre_trans_mat_new_CPMS$DBN)
     # pre_trans_mat_others["HyperTraPS"] <- list(pre_trans_mat_new_CPMS$HyperTraPS)
@@ -1347,11 +1348,11 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
         DBN_likelihood = out_dbn$likelihood,
         DBN_f_graph = pre_trans_mat_new_CPMS$DBN$weighted_fgraph,
         DBN_trans_mat = pre_trans_mat_new_CPMS$DBN$trans_mat_genots,
-        DBN_td_trans_mat = td$DBN,
-        HyperTraPS_model = out_HyperTraPS$edges,
-        HyperTraPS_f_graph = pre_trans_mat_new_CPMS$HyperTraPS$weighted_fgraph,
-        HyperTraPS_trans_mat = pre_trans_mat_new_CPMS$HyperTraPS$trans_mat_genots,
-        HyperTraPS_td_trans_mat = td$HyperTraPS,
+        DBN_td_trans_mat = td$DBN
+        # HyperTraPS_model = out_HyperTraPS$edges,
+        # HyperTraPS_f_graph = pre_trans_mat_new_CPMS$HyperTraPS$weighted_fgraph,
+        # HyperTraPS_trans_mat = pre_trans_mat_new_CPMS$HyperTraPS$trans_mat_genots,
+        # HyperTraPS_td_trans_mat = td$HyperTraPS,
          ))
 }
 
@@ -1392,10 +1393,96 @@ plot_sampled_genots <- function(data) {
 ##   MCCBN: same as CBN 
 ##   MHN: theta matrix, transition probs between genotypes,
 ##                             transition probs genots TD
+cpm_layout <- function(graph){
+    # V(graph)$num_mutations <<- 
+    num_mutations <- sapply(V(graph)$name, function(x){
+        if (x == "WT") return(0)
+        else return(nchar(x))
+    })
+    V(graph)$num_mutations <- num_mutations 
+    
+    lyt <- matrix(0, ncol=2, nrow=length(V(graph)))
+    lyt[, 2] <-  max(num_mutations) - num_mutations
+
+    for (i in 0:max(num_mutations)) {
+        level_idx <- which(num_mutations == i)
+        gnt_names <- sort(V(graph)$name[level_idx], index.return = TRUE)$ix
+        spacing <- 6 / (length(level_idx) + 1)
+        level_elements <- 1:length(level_idx) * spacing
+        level_elements <- level_elements - max(level_elements)
+        correction_rate <- max(level_elements) - min(level_elements) 
+        level_elements <- level_elements + correction_rate/2
+        lyt[, 1][level_idx] <- -level_elements[gnt_names]
+    }
+    return(lyt)
+}
+
+plot_genot_fg <- function(trans_mat, data){
+    d1 <- as.data.frame(sampledGenotypes(data))
+    d1$Genotype <- str_replace_all(d1$Genotype, ", ", "")
+    d1$Abs_Freq <- d1$Freq / sum(d1$Freq)
+
+    trans_mat <- as.matrix(trans_mat)
+    rownames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
+    colnames(trans_mat) <- str_replace_all(colnames(trans_mat), ", ", "")
+
+    unique_genes_names <- sort(unique(str_split(paste(rownames(trans_mat)[-1], collapse=""), "")[[1]]))
+
+    num_genes <- length(unique_genes_names)
+    graph <- graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
+
+    lyt <- cpm_layout(graph)
+
+    observed_color <- "#ff7b00fb"
+    not_observed_color <- "#0892d0" 
+    for (gen in V(graph)$name) {
+        tryCatch({
+            V(graph)[gen]$size <- d1$Abs_Freq[which(d1$Genotype == gen)] * 150
+            V(graph)[gen]$color <- observed_color
+            V(graph)[gen]$frame.color <- observed_color
+        }, error = function(e) {
+            V(graph)[gen]$color <<- not_observed_color
+            V(graph)[gen]$size <<- 7.5
+            V(graph)[gen]$frame.color <<- not_observed_color
+        })
+    }
+    # V(graph)["WT"]$size <- 10
+    V(graph)$label.family <- "Helvetica"
+
+    opx <- par(mar = c(2, 2, 2, 5))
+    plot(graph
+        , layout = -lyt[, 2:1]
+        , vertex.label.color = "black"
+        , vertex.label.family = "Helvetica"
+        , font.best = 2
+        , vertex.frame.width = 0
+        , edge.color = rgb(0.5, 0.5, 0.5, E(graph)$weight)
+        , edge.arrow.size = 0.005
+        , edge.width = E(graph)$weight * 7
+    )
+
+    margin <- -1.15
+    lines(c(-1.2, 1.2), c(margin, margin), lwd = 2)
+    axis(1, 
+        at = seq(-1, 1, length.out = num_genes + 1), 
+        labels = 0:(num_genes), 
+        lwd = 2, 
+        pos = margin)
+    legend("topright", c("Observed", "Not-observed"), 
+        box.lwd=0, lty=c(NA,NA), lwd=c(NA,NA), pch=c(21,21),
+        col = c(observed_color, not_observed_color),
+        pt.bg = c(observed_color, not_observed_color),
+        pt.cex = c(2,2), horiz = TRUE,
+        x.intersp = c(0, 0),
+        )
+    par(opx)
+    title(xlab = "Number of features acquired")
+}
+
 
 plot_DAG_fg <- function(x, data, orientation = "vertical", 
                         models = c("OT", "CBN", "DBN", "MCCBN", "MHN"),
-                        matrix = TRUE,
+                        plot_type = "matrix",
                         prune_edges = TRUE) {
 
     plot_fg <- function(fg) {
@@ -1429,7 +1516,7 @@ plot_DAG_fg <- function(x, data, orientation = "vertical",
             dag_trans_mat[dag_trans_mat < 0.01] <- 0
         }
 
-        if(matrix) {
+        if(plot_type == "matrix") {
             dag_trans_mat <- as.matrix(dag_trans_mat)
             dag_trans_mat <- dag_trans_mat[rowSums(dag_trans_mat) > 0, colSums(dag_trans_mat) > 0]
         }
@@ -1442,7 +1529,7 @@ plot_DAG_fg <- function(x, data, orientation = "vertical",
             if(prune_edges) {
                 td_trans_mat[td_trans_mat < 0.01] <- 0
             }
-            if (matrix){
+            if (plot_type == "matrix"){
                 td_trans_mat <- as.matrix(td_trans_mat)
                 td_trans_mat <- td_trans_mat[rowSums(td_trans_mat)>0, colSums(td_trans_mat)>0]
             }
@@ -1461,6 +1548,9 @@ plot_DAG_fg <- function(x, data, orientation = "vertical",
             theta = theta))
     }
 
+    if (!(plot_type %in% c("matrix", "fg", "genotypes"))){
+        stop(sprintf("Plot type %s is not supported", plot_type))
+    }
     ## List of available models
     available_models <- models[
         sapply(models, function(mod) {
@@ -1481,7 +1571,10 @@ plot_DAG_fg <- function(x, data, orientation = "vertical",
     print(available_models)
     ## Shape of the plot
     l_models <- length(available_models)
-    if(orientation == "horizontal") {
+    if (plot_type == "genotypes"){
+        op1 <- par(mfcol = c(2, l_models))
+    }
+    else if(orientation == "horizontal") {
         op1 <- par(mfcol = c(3, l_models))
     } else {
         op1 <- par(mfrow = c(l_models, 3))
@@ -1494,7 +1587,14 @@ plot_DAG_fg <- function(x, data, orientation = "vertical",
 
         ## Plotting data
         if(!is.null(model_data2plot$dag_tree)){
-            plot(model_data2plot$dag_tree, layout = layout.reingold.tilford, vertex.size = 0, main = mod)
+            plot(model_data2plot$dag_tree
+            , layout = layout.reingold.tilford
+            , vertex.size = 30 
+            , vertex.color = "white"
+            , vertex.frame.color = "black" 
+            , vertex.label.cex = 1
+            , edge.arrow.size = 0.1
+            , main = mod)
         }
 
         if(!is.null(model_data2plot$theta)){
@@ -1507,7 +1607,7 @@ plot_DAG_fg <- function(x, data, orientation = "vertical",
                 par(op)
         }
 
-        if (matrix){
+        if (plot_type == "matrix"){
             plot(model_data2plot$dag_trans_mat, 
                 digits=1, xlab="", ylab="",
                 axis.col=list(side=1, las=2), axis.row = list(side=2, las=1), 
@@ -1522,14 +1622,16 @@ plot_DAG_fg <- function(x, data, orientation = "vertical",
                     axis.col=list(side=1, las=2), axis.row = list(side=2, las=1), 
                     mgp = c(2, 1, 0), key=NULL)
             }
-        } else {
+        } else if (plot_type == "fg") {
             plot_fg(model_data2plot$fg)
             if(!is.null(model_data2plot$td_fg)){
                 plot_fg(model_data2plot$td_fg)
             }
+        } else if (plot_type == "genotypes"){
+            plot_genot_fg(model_data2plot$dag_trans_mat, data)
         }
 
-        if(mod %in% c("OT")) {
+        if ((mod %in% c("OT")) & (plot_type != "genotypes")) {
             par(mar=rep(3, 4))
             plot_sampled_genots(data)
         }else if(mod %in% c("CBN", "DBN")) {
