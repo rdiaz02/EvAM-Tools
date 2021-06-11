@@ -1,13 +1,13 @@
 In file: transitions.txt
 Data points: 1260
 Model: second-order
-N_samples: 500
+N_samples: 1000
 Runs: 100
 Start type: zero
 Prior range: 20
 Kernel: mcmc
 Sigma: 0.025000
-Burn in: 200
+Burn in: 20000
 iid step: 100
 Seed: 0
 Threads: 3
