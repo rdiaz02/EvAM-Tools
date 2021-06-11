@@ -1402,17 +1402,18 @@ cpm_layout <- function(graph){
     V(graph)$num_mutations <- num_mutations 
     
     lyt <- matrix(0, ncol=2, nrow=length(V(graph)))
-    lyt[, 2] <-  max(num_mutations) - num_mutations
+    lyt[, 2] <-  num_mutations
 
     for (i in 0:max(num_mutations)) {
         level_idx <- which(num_mutations == i)
-        gnt_names <- sort(V(graph)$name[level_idx], index.return = TRUE)$ix
+        gnt_names <- sort(V(graph)$name[level_idx], index.return = TRUE)
         spacing <- 6 / (length(level_idx) + 1)
         level_elements <- 1:length(level_idx) * spacing
-        level_elements <- level_elements - max(level_elements)
+        level_elements <-  rev(level_elements - max(level_elements))
         correction_rate <- max(level_elements) - min(level_elements) 
         level_elements <- level_elements + correction_rate/2
-        lyt[, 1][level_idx] <- -level_elements[gnt_names]
+        lyt[, 1][level_idx[gnt_names$ix]] <- level_elements
+        # browser()
     }
     return(lyt)
 }
@@ -1451,7 +1452,7 @@ plot_genot_fg <- function(trans_mat, data){
 
     opx <- par(mar = c(2, 2, 2, 5))
     plot(graph
-        , layout = -lyt[, 2:1]
+        , layout = lyt[, 2:1]
         , vertex.label.color = "black"
         , vertex.label.family = "Helvetica"
         , font.best = 2
@@ -1572,7 +1573,8 @@ plot_DAG_fg <- function(x, data, orientation = "vertical",
     ## Shape of the plot
     l_models <- length(available_models)
     if (plot_type == "genotypes"){
-        op1 <- par(mfcol = c(2, l_models))
+        op1 <- NULL
+        nf <- layout(matrix(1:(l_models*2), nrow = 2), heights=c(1, 2), TRUE)
     }
     else if(orientation == "horizontal") {
         op1 <- par(mfcol = c(3, l_models))
@@ -1593,7 +1595,7 @@ plot_DAG_fg <- function(x, data, orientation = "vertical",
             , vertex.color = "white"
             , vertex.frame.color = "black" 
             , vertex.label.cex = 1
-            , edge.arrow.size = 0.1
+            , edge.arrow.size = 0.45
             , main = mod)
         }
 
