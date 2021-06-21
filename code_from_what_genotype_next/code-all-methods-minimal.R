@@ -1259,7 +1259,7 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
 
     cat("\n  time MHN = ", time_schill)
     
-    cat("\n     Doing DBN")
+    cat("\n     Doing DBN\n\n")
     time_dbn <- system.time(
       out_dbn <- do_DBN(x))["elapsed"]
     
@@ -1418,11 +1418,21 @@ cpm_layout <- function(graph){
     return(lyt)
 }
 
-plot_genot_fg <- function(trans_mat, data){
-    d1 <- as.data.frame(sampledGenotypes(data))
-    d1$Genotype <- str_replace_all(d1$Genotype, ", ", "")
-    d1$Abs_Freq <- d1$Freq / sum(d1$Freq)
-
+#' Plot transitions between genotypes
+#' 
+#' @param trans_mat transitions matrix to plot: can contain row counts, probabilities... 
+#' Entries will be normalized
+#' @param observations Original cross sectional data used to compute the model. DataFrame with column $Genotype and $Freqs with their frequencies. Optional.
+#' @param freqs DataFrame with column $Genotype and $Freqs with their frequencies. Optional.
+#' @examples
+#' png("fluxes.png")
+#' par(mfrow = c(1, 3))
+#' plot_genot_fg(out$MHN_trans_mat, db2, sorted_observations)
+#' title("Transition Matrix", line = -3)
+#' plot_genot_fg(edge_transitions, db2, sorted_observations)
+#' title("Fluxes", line = -3)
+#' dev.off()
+plot_genot_fg <- function(trans_mat, observations = NULL, freqs = NULL){
     trans_mat <- as.matrix(trans_mat)
     rownames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
     colnames(trans_mat) <- str_replace_all(colnames(trans_mat), ", ", "")
@@ -1432,58 +1442,84 @@ plot_genot_fg <- function(trans_mat, data){
     num_genes <- length(unique_genes_names)
     graph <- graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
 
+    if (!is.null(observations)){
+        observations <- as.data.frame(sampledGenotypes(observations))
+        observations$Abs_Freq <- observations$Freq / sum(observations$Freq)
+        observations$Genotype <- str_replace_all(observations$Genotype, ", ", "")
+    }
+
+    if (!is.null(freqs)){
+        freqs$Abs_Freq <- freqs$Freq / sum(freqs$Freq)
+        freqs$Genotype <- str_replace_all(freqs$Genotype, ", ", "")
+    }
+
     lyt <- cpm_layout(graph)
 
     observed_color <- "#ff7b00fb"
     not_observed_color <- "#0892d0" 
-    for (gen in V(graph)$name) {
-        tryCatch({
-            V(graph)[gen]$size <- d1$Abs_Freq[which(d1$Genotype == gen)] * 150
-            V(graph)[gen]$color <- observed_color
-            V(graph)[gen]$frame.color <- observed_color
-        }, error = function(e) {
-            V(graph)[gen]$color <<- not_observed_color
-            V(graph)[gen]$size <<- 7.5
-            V(graph)[gen]$frame.color <<- not_observed_color
+    colors <- sapply(V(graph)$name, 
+        function(gen){
+            if (sum(match(observations$Genotype, gen, nomatch = 0)) == 1){
+                return(observed_color)
+            } 
+            return(not_observed_color)
         })
-    }
-    # V(graph)["WT"]$size <- 10
+    V(graph)$color <- colors
+    V(graph)$frame.color <- colors
+
+    sizes <- sapply(V(graph)$name, 
+        function(gen){
+            if (sum(match(freqs$Genotype, gen, nomatch = 0)) == 1){
+                return(freqs$Abs_Freq[which(freqs$Genotype == gen)] * 150)
+            } else if ((sum(match(observations$Genotype, gen, nomatch = 0)) == 1)){
+                return(observations$Abs_Freq[which(observations$Genotype == gen)] * 150)
+            } else {
+                return(7.5)
+            }
+        })
+    V(graph)$size <- sizes
+    print(sizes)
+
     V(graph)$label.family <- "Helvetica"
 
-    opx <- par(mar = c(2, 2, 2, 5))
+    opx <- par(mar = c(1, 1, 1, 1))
+
+    w <- E(graph)$weight
     plot(graph
         , layout = lyt[, 2:1]
         , vertex.label.color = "black"
         , vertex.label.family = "Helvetica"
         , font.best = 2
         , vertex.frame.width = 0
-        , edge.color = rgb(0.5, 0.5, 0.5, E(graph)$weight)
+        , edge.color = rgb(0.5, 0.5, 0.5, E(graph)$weight/max(E(graph)$weight))
         , edge.arrow.size = 0.005
-        , edge.width = E(graph)$weight * 7
+        # , edge.width = 2
+        , edge.width = (w/max(w) * 10)
     )
 
     margin <- -1.15
     lines(c(-1.2, 1.2), c(margin, margin), lwd = 2)
-    axis(1, 
-        at = seq(-1, 1, length.out = num_genes + 1), 
-        labels = 0:(num_genes), 
-        lwd = 2, 
-        pos = margin)
-    legend("topright", c("Observed", "Not-observed"), 
-        box.lwd=0, lty=c(NA,NA), lwd=c(NA,NA), pch=c(21,21),
-        col = c(observed_color, not_observed_color),
-        pt.bg = c(observed_color, not_observed_color),
-        pt.cex = c(2,2), horiz = TRUE,
-        x.intersp = c(0, 0),
+    axis(1
+        , at = seq(-1, 1, length.out = num_genes + 1)
+        , labels = 0:(num_genes)
+        , lwd = 2
+        , pos = margin)
+    legend("bottom", c("Observed", "Not-observed") 
+        , box.lwd = 0, lty=c(NA, NA), lwd = c(NA, NA)
+        , pch = c(21, 21)
+        , col = c(observed_color, not_observed_color)
+        , pt.bg = c(observed_color, not_observed_color)
+        , pt.cex = c(2, 2), horiz = TRUE
+        , x.intersp = c(0, 0)
         )
     par(opx)
-    title(xlab = "Number of features acquired")
+    title(xlab = "Number of features acquired", line = -2)
 }
 
 
 plot_DAG_fg <- function(x, data, orientation = "vertical", 
                         models = c("OT", "CBN", "DBN", "MCCBN", "MHN"),
-                        plot_type = "matrix",
+                        plot_type = "fg",
                         prune_edges = TRUE) {
 
     plot_fg <- function(fg) {
