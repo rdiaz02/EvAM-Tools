@@ -11,12 +11,9 @@ urlcolor: blue
 # Using HyperTraPS from CPM-SSWM-Sampling repo
 ## TLDR 
 
-* **TODO**: Modify hypegraph plot to include labels of all genotypes.
 * The output gives all the accesible genotypes: so we do not need to compute them.
 * There are many parameters for running everything: the easiest is to stick to defaults and check the convergence.
 * Besides default output, I am saving the transition probabilities for jumping from one gene to another.
-* **TODO**: get the output of the last point and include it with the rest of the code in the `CPM-SSWM-Sampling` repo.
-* **TODO**: document functions.
 
 ## Example
 ```{r echo=FALSE}
