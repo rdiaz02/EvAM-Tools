@@ -1,23 +1,30 @@
 library(OncoBN)
 
-
+#' Run DBN on data
+#' 
+#' @param data data.frame with cross sectional data
+#' @return list$edges Data.frame with From, To, Edge and Theta.
+#' @return list$thetas Thetas of the best fit
+#' @return list$likelihood Float. Likelihood of the fit
 do_DBN <- function(data) {
-  time_dbn <- system.time(
-    out <- fitCPN(data, algorithm = "DP")
-    )["elapsed"]
+  invisible(capture.output(out <- fitCPN(data, algorithm = "DP")))
 
   thetas <- inferTheta(data, out) 
   dbn_out <- create_data_frame_from_theta(thetas)
 
-  return(list(edges = dbn_out,
-              thetas = thetas,
-              likelihood = out$score,
-              time = time_dbn
+  return(list(edges = dbn_out
+              , thetas = thetas
+              , likelihood = out$score
               ))
 }
 
+#' Return theta from 
+#' Modified from OncoDB package https://github.com/phillipnicol/OncoBN
+#' 
+#' @param df
+#' @param fit
+#' @return 
 inferTheta <- function(df, fit){
-  ## Modified from OncoDB package https://github.com/phillipnicol/OncoBN
   df <- cbind(df, 1)
   colnames(df)[ncol(df)] <- "WT" 
   
@@ -37,11 +44,11 @@ inferTheta <- function(df, fit){
     }
   }
 
-  out <- list()
-  out$parents <- parent_list
-  out$thetas <- theta_list
-  out$childs <- child_list
-  return(out)
+  return(list(
+    parents = parent_list
+    , thetas = theta_list
+    , childs = child_list
+  ))
 }
 
 create_data_frame_from_theta <- function(data){  

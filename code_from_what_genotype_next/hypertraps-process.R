@@ -1,13 +1,50 @@
 ## Set up: add PATH_TO_HYPERTRAPS_REPO/src/python to your PATH
 ## Set up: add PATH_TO_HYPERTRAPS_REPO/bin/ to your PATH
 ## Set up: operate in a conda environment: Follow installation in README.md
-# library(reticulate) ## To activate the conda environment
 library(imager)
 
+#' Runs HyperTraPS model
+#' This function runs command line tools to call to HyperTraps.
+#' Then processes the output
+#' 
+#' @param data Str data file to read
+#' @param data Dataframe with all the cross sectional data
+#' @param tmp_folder Str. Folder to store and read all the results 
+#' @param runs Int. Number of posterior samples
+#' @param bi Int. Burn in from MCMC sampler
+#' @param r Int. HyperTraPS trajectories per transition
+#' @param seed Int. Ramdom seed for the code to use.
+#' @param prob_type "joint" or "conditional" probaility type for transitions
+#' @param plot Boolean. Whether to run the plot command.
+#' @param show_plot Boolean. Whether to show the plots.
+#' @param dry_run Boolean. Whether to run the plot command.
+#' @return List$edges
+#' @return List$feature_transitions
+#' @example 
+#'dB_OR <- matrix(
+#'  c(
+#'     rep(c(1, 0, 0, 0), 200) #A
+#'     , rep(c(1, 0, 1, 0), 100) #AC
+#'     , rep(c(1, 1, 0, 0), 100) #AB
+#'     , rep(c(1, 1, 1, 0), 50) #ABC
+#'     , rep(c(1, 1, 0, 1), 50) #ABD
+#'     , rep(c(1, 0, 1, 1), 50) #ACD
+#'     , rep(c(1, 1, 1, 1), 10) #ABCD
+#'     , rep(c(0, 0, 0, 0), 10) #WT
+#'   ), ncol = 4, byrow = TRUE
+#' )
+#' colnames(dB_OR) <- LETTERS[1:4]
+#' 
+#' do_HyperTraPS(tmp_data, 
+#'       sprintf("./HP_%s", dataset), 
+#'       runs = runs, bi = bi, dry_run = dry_run, show_plot = FALSE )
+
 do_HyperTraPS <- function(data = NULL, tmp_folder = NULL, 
-  runs=1000, bi=50000, r=100, 
-  seed=0, conda_env_name="HyperTraPS", prob_type = "joint", plot = T, dry_run = F){
+  runs = 1000, bi = 50000, r = 100, 
+  seed = 0, prob_type = "joint", 
+  plot = TRUE, show_plot = TRUE, dry_run = FALSE){
   
+  warning("You should run the script within a conda enviroment with a working installation of HyperTraPS")
   orig_folder <- getwd()
 
   if (!(prob_type %in% c("joint", "conditional"))) {
@@ -16,9 +53,6 @@ do_HyperTraPS <- function(data = NULL, tmp_folder = NULL,
   }
   
   if (!dry_run & !is.null(data)) {
-    ## Activating conda env
-    warning("You should run the script within a conda enviroment with a working installation of HyperTraPS")
-    # use_condaenv(conda_env_name) ## This does not seem to work
 
     ## Running HyperTraps
     ### Handling data 
@@ -39,14 +73,14 @@ do_HyperTraPS <- function(data = NULL, tmp_folder = NULL,
       random_letters <- paste(c("_", 
         LETTERS[floor(runif(4, min = 1, max = 26))]), collapse = "")
       tmp_folder_name <- paste(c(dateTime, random_letters), collapse = "")
-      tmp_folder <- file.path("/tmp", conda_env_name, tmp_folder_name)
-      dir.create(tmp_folder, recursive = TRUE) 
+      tmp_folder <- file.path("/tmp", tmp_folder_name)
     }
+    dir.create(tmp_folder, recursive = TRUE) 
 
     setwd(tmp_folder)
     print(getwd())
 
-    ## Writin data to tmp folder
+    ## Writing data to tmp folder
 
     output_name <- "data.csv"
     write.csv(data, output_name)
@@ -66,22 +100,24 @@ do_HyperTraPS <- function(data = NULL, tmp_folder = NULL,
 
     ### Run walkers
     print("Generating Paths")
-    system(sprintf("RUN_PW -w match-data -b %1.f -R 100", bi))
-    system(sprintf("RUN_PW -w zero-one -b %1.f -R 100", bi))
+    system(sprintf("RUN_PW -w match-data -b %1.f", bi))
+    # system(sprintf("RUN_PW -w zero-one -b %1.f -R 100", bi))
   } else { setwd(tmp_folder) }
 
   ### Plots
-  system(sprintf("plot_mc_stats.py -b %1.f", bi))
-  system(sprintf("custom_plot_hypercube_graph.py -f 'forwards_list-pord-match-data.csv' -outfile_graph 'forwards-hypercube-graph-mach-data-g0' -transition_data 'transitions.txt' -labels 'labels.csv' -label_type 'None' -labels_fontsize 4 -aspect 0.9 -width 3.4 -out_type 'png'"))
+  if (plot){
+    system(sprintf("plot_mc_stats.py -b %1.f", bi))
+    system(sprintf("custom_plot_hypercube_graph.py -f 'forwards_list-pord-match-data.csv' -outfile_graph 'forwards-hypercube-graph-mach-data-g0' -transition_data 'transitions.txt' -labels 'labels.csv' -label_type 'None' -labels_fontsize 4 -aspect 0.9 -width 3.4 -out_type 'png'"))
+      
+    system(sprintf("plot_feature_graph.py -f 'forwards.txt' -layout_type 'circular' -prob_type %s -data_type 'match-data' -width 4 -fontsize 10 -any_time 0 -node_size 100 -connection_style 'arc3,rad=-0.3' -outfile_type 'png'", prob_type))
+
+    system(sprintf("plot_ordering_histogram.py -f 'forwards_list-pord-zero-one.csv' -f2 'forwards_list-pord-match-data.csv' -transition_data 'transitions.txt' -labels 'labels.csv' -fontsize 6 -xevery 1 -aspect 0.9 -verbose 'no' -outfile 'forwards-ws1-ws2' -out_type 'png'"))
     
-  system(sprintf("plot_feature_graph.py -f 'forwards.txt' -layout_type 'circular' -prob_type %s -data_type 'match-data' -width 4 -fontsize 10 -any_time 0 -node_size 100 -connection_style 'arc3,rad=-0.3' -outfile_type 'png'", prob_type))
+    ##Here I force to use conditional probabilities only
+    system(sprintf("hypertraps_get_output.py -f 'forwards.txt' -prob_type %s", "conditional")) 
+  }
 
-  system(sprintf("plot_ordering_histogram.py -f 'forwards_list-pord-zero-one.csv' -f2 'forwards_list-pord-match-data.csv' -transition_data 'transitions.txt' -labels 'labels.csv' -fontsize 6 -xevery 1 -aspect 0.9 -verbose 'no' -outfile 'forwards-ws1-ws2' -out_type 'png'"))
-  
-  ##Here I force to use conditional probabilities only
-  system(sprintf("hypertraps_get_output.py -f 'forwards.txt' -prob_type %s", "conditional")) 
-
-  if(plot){
+  if(show_plot){
     library(imager)
     stats_names <- unlist(strsplit(list.files(pattern = "^stats.*png"), " "))
     files <- list(
@@ -122,7 +158,6 @@ features2model <- function(data){
                       Edge = edges,
                       Probabilities = probabilities,
                       stringsAsFactors = FALSE)
-
 
   return(model)
 }
