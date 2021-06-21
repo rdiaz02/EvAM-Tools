@@ -1,6 +1,6 @@
-source("HyperTraPS_data.R")
+source("../toy_datasets.R")
 pwd0 <- getwd()
-setwd("../code_from_what_genotype_next/")
+setwd("../../code_from_what_genotype_next/")
 source("hypertraps-process.R")
 setwd(pwd0)
 rm(pwd0)
@@ -25,23 +25,35 @@ sample_freqs <- function(data, save_file = NULL){
 }
 
 bi = 20000
-runs = 1000
+runs = 2000
 dry_run = FALSE
 for (dataset in names(all_examples)){
-  print(sprintf("HyperTraPS_examples/HP_%s", dataset))
+  tmp_folder <- sprintf("./HP_%s", dataset) 
+  run = TRUE
+  if ("forwards-hypercube-graph-mach-data-g0.png" %in% list.files(tmp_folder)){
+    run = FALSE
+  }
+  print(tmp_folder)
   tryCatch({
-    tmp_data <- all_examples[dataset]
+    if (run){
+
+    tmp_data <- all_examples[[dataset]]
     do_HyperTraPS(tmp_data, 
-      sprintf("HyperTraPS_examples/HP_%s", dataset), 
-      runs = runs, bi = bi, dry_run = dry_run, plot = FALSE )
-    sample_freqs(tmp_data, 
-      sprintf("HyperTraPS_examples/HP_%s/freqs.jpg", dataset))
+      sprintf("./HP_%s", dataset), 
+      runs = runs
+      , bi = bi
+      , dry_run = dry_run
+      , plot = !(dry_run)
+      , show_plot = FALSE )
+    sample_freqs(tmp_data, tmp_folder)
+    } else { 
+      print(sprintf("Skipping %s", dataset)) 
+    }
     ## generate markdown here
   },
     error = function(e){
       print(sprintf("Failed at:\t %s", dataset))
+      print(sprintf("Error: %s", e$message))
     })
 }
-
-
 
