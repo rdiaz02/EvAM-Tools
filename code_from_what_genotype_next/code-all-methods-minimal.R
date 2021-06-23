@@ -1422,7 +1422,7 @@ cpm_layout <- function(graph){
 #' 
 #' @param trans_mat transitions matrix to plot: can contain row counts, probabilities... 
 #' Entries will be normalized
-#' @param observations Original cross sectional data used to compute the model. DataFrame with column $Genotype and $Freqs with their frequencies. Optional.
+#' @param observations Original cross sectional data used to compute the model. Optional.
 #' @param freqs DataFrame with column $Genotype and $Freqs with their frequencies. Optional.
 #' @examples
 #' png("fluxes.png")
@@ -1478,7 +1478,6 @@ plot_genot_fg <- function(trans_mat, observations = NULL, freqs = NULL){
             }
         })
     V(graph)$size <- sizes
-    print(sizes)
 
     V(graph)$label.family <- "Helvetica"
 

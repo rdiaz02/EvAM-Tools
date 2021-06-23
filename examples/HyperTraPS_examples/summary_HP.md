@@ -70,6 +70,7 @@ do_HyperTraPS(dB_OR, "HP_OR", runs = 500, bi=200)
 ### XOR  
 ### WT &#8594; A &#8594; C &#8594; D
 
+TODO: increase number of abcd
 ```r
 dB_XOR <- matrix(
   c(
@@ -97,6 +98,8 @@ do_HyperTraPS(dB_XOR, "HP_XOR", runs = 500, bi=200)
 ## OR then XOR
 ### A &#8594; B ; C &#8594; D; B XOR D for E 
 Here I forgot to include some genotypes, like AC, but the algorithm is able to recover it. Hoewever, it fails also includes other genotypes that are not possible, like CE or ACE.
+
+Check convergence plots
 ```r
 
 dB_c1 <- matrix(
@@ -258,6 +261,7 @@ do_HyperTraPS(dB_c5, "HP_c5", runs = 500, bi=200)
 ---
 ## Sign epistasis
 
+Make another without A
 ```r 
 
 ## Sign epistasis

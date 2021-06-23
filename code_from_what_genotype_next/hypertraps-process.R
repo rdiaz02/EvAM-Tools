@@ -7,6 +7,20 @@ library(imager)
 #' This function runs command line tools to call to HyperTraps.
 #' Then processes the output
 #' 
+#' HOW SIMULATIONS ARE PERFORMED ()
+#' Greenbury, Sam F. Barahona, Mauricio Johnston, Iain G. 2020
+#' Simulated Walks to Illustrate Order of Acquisition (pages e3-e4)
+#' The inference process above yields inferred posterior distributions on the hypercubic edge weightsW.
+#' We can query these posteriors in a number of ways to gain descriptive and predictive information about the mechanisms generating observed states. 
+#' First, we pro- duce a parsimonious and intuitive representation of the dynamic pathways supported by the inferred posteriors. 
+#' Here, we simulate an ensemble of random walkers generating complete trajectories on hypercubes with sets of transition probabilities sampled from the inferred posterior. 
+#' This ensemble reflects the likely dynamic pathways supported by the dynamic transition model after parameter- ization. 
+#' We simulate an ensemble of random walks in two ways:
+#'  Walk Simulation 1 (WS1), with walkers that run from f0gL to f1gL where a feature is acquired at every time step, and 
+#' Walk Simulation 2 (WS2) which only simulates trajectories corresponding to tran- sitions observed in the dataset. 
+#' In each case, we record every transition between states allowing the construction of a weighted directed graph of all states and transitions encountered. From this graph, the frequency fij with which feature i is gained at step j.
+#' Code for sampling is found in the HypeTraPS repository
+#' HyperTraPS/src/{run_pw.cpp,updater_fast.cpp}
 #' @param data Str data file to read
 #' @param data Dataframe with all the cross sectional data
 #' @param tmp_folder Str. Folder to store and read all the results 

@@ -1000,7 +1000,7 @@ if args.extra_labels_routes != None:
                                                                             transition_data=args.transition_data, L=L)
             if args.label_type == "greedy_data":
                 big_labels, label_colours = MakeGreedyLabelSet(state_labels=state_labels,
-                                                               colormap=args.colormap)
+                colormap=args.colormap)
 
             if (args.label_type == "probable_data" or args.label_type == "greedy_data" or args.label_type == "None") and args.transition_data != None:
                 G_3=nx.DiGraph()
@@ -1024,7 +1024,6 @@ if args.extra_labels_routes != None:
                     label = genes[label == 1]
                     label = "".join(label) 
                     ax.text(x, y, label)  
-                # plt.show(); import pdb;pdb.set_trace()
                 
                 
     if args.label_type != "None":
@@ -1036,7 +1035,6 @@ if args.extra_labels_routes != None:
             bbox2 = dict(facecolor='lightgrey', edgecolor='none', boxstyle='round')
             if i not in keep_els and len(keep_els)>1:
                 continue
-            import pdb;pdb.set_trace()
             for node_i, node in enumerate(el):
                 lab = el[node]
                 pos_lab = pos[node]
