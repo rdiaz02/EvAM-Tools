@@ -92,7 +92,7 @@ dB_c2_2 <- matrix(
     , rep(c(0, 0, 0, 0), 10) # WT
   ), ncol = 4, byrow = TRUE
 )
-colnames(dB_c2) <- LETTERS[1:4]
+colnames(dB_c2_2) <- LETTERS[1:4]
 
 
 ## WT --> A AND B --> E
