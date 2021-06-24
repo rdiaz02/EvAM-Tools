@@ -1,6 +1,6 @@
 pwd2 <- getwd()
-setwd("../examples/")
-source("./HyperTraPS_examples/HyperTraPS_data.R")
+setwd("../../examples/")
+source("toy_datasets.R")
 source("access_genots_from_oncosimul.R")
 setwd("../code_from_what_genotype_next/")
 source("code-all-methods-minimal.R")
@@ -20,8 +20,10 @@ compare_DBN_cpm2tm <- function(data){
     sum(round(out1 - out2, 6)) == 0
 }
 
-for (i in names(all_examples)){
-    tmp_dataset <- all_examples[[i]]
-    compare_methods <- compare_DBN_cpm2tm(tmp_dataset)
-    expect_equal(compare_methods, TRUE)
-}
+test_that("DBN gives the same results as OncoSimul", {
+   for (i in names(all_examples)){
+        tmp_dataset <- all_examples[[i]]
+        compare_methods <- compare_DBN_cpm2tm(tmp_dataset)
+        expect_equal(compare_methods, TRUE)
+    }
+})
