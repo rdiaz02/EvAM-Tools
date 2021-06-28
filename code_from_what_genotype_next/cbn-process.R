@@ -789,8 +789,117 @@ run.oncotree <- function(x, ## type.out = "adjmat",
 }
 
 
+#' Generate trajectories from simulated data
+#' 
+#' @param sim list generated with mccbn::sample_genotypes. Relevant
+#' fields are described below
+#' @param sim$T_sampling list with the time of sampling of each sample
+#' @param sim$T_events time of events for the mutations of each gene 
+#' given that all parents are satisfied
+#' @param sim$T_sum_events time of events for the mutations of each gene
+#' @param sim$n number of simulated events
+#' @param sim$obs_events data.frame with mutated before the end of the sampling time
+process_dbn_simulations <- function(sim){
+    # browser()
+    frequencies <- table(apply(sim$obs_events, 1, binary2int))
+    frequencies <- data.frame(
+        state = sapply(names(frequencies), as.integer),
+        count = as.vector(frequencies)
+    )
+    rownames(frequencies) <- NULL
 
+    #Calculate trajectories 
+    trajectories <- list()
+    for(i in 1:nrow(sim$obs_events)){
+        trajectories <- append(trajectories,
+            list(sample2trajectory(
+                sim$T_sum_events[i, ], 
+                sim$obs_events[i, ]))
+        )
+    }
 
+    #Calculate transitions & state counts
+    n_genes <- ncol(sim$obs_events)
+    n_states <- 2**n_genes
+    states <- sapply(0:(n_states - 1), int2str)
+    t <- matrix(0L, nrow = n_states, ncol = n_states)
+    rownames(t) <- states
+    colnames(t) <- states
+
+    for(traj in trajectories){
+        str_trajs <- sapply(traj, binary2str)
+        if(length(str_trajs)>1){
+            for(i in 1:(length(str_trajs) - 1)){
+                t[str_trajs[i], str_trajs[i + 1]] <-
+                    t[str_trajs[i], str_trajs[i + 1]] + 1
+            }
+        }
+    } 
+
+     #Calculate state_counts
+    state_counts <- table(apply(
+        matrix(unlist(trajectories),ncol = n_genes, byrow = TRUE)
+        , 1, binary2int))
+    state_counts <- data.frame(
+        state = sapply(names(state_counts), as.integer),
+        count = as.vector(state_counts)
+    )
+    rownames(state_counts) <- NULL
+    return(list(
+        trajectories = trajectories,
+        transitions = t,
+        state_counts = state_counts,
+        frequencies = frequencies
+    ))
+}
+
+#' Transforms a single sample of observed event 
+#' in a trajectory of genotypes
+#' 
+#' @param sum_time_event Positive vector. Times of appeareance of every mutation
+#' @param obs_event Vector of 0 and 1. Determines which mutation are present at the time of sampling. 
+#' @return List of ordered genotypes in binary format starting from the WT
+sample2trajectory <- function(sum_time_events, obs_events){
+    if(sum(which(sum_time_events <= 0) > 0)){
+        stop("Negative sampling times are not allowed")
+    }
+
+    if(!all(obs_events %in% c(0, 1))){
+        stop("Observations should be defined with 0 (not present) or 1 (present)")
+    }
+
+    if(length(sum_time_events) != length(obs_events)){
+        stop("Mismatching sizes of observations and sampling times")
+    }
+
+    gene_order <- which(obs_events == 1)[sort(sum_time_events[which(obs_events == 1)], index.return = TRUE)$ix]
+
+    by_time_gene_order <- sort(sum_time_events, index.return = TRUE)$ix[1:sum(obs_events)]
+
+    base_genotype <- rep(0, length(obs_events))
+    trajectory <- list(base_genotype)
+    if(length(gene_order) == 0) return(trajectory)
+    
+    if(any(gene_order != by_time_gene_order)){
+        warning("Observations do not respect the sampling time")
+    }
+
+    for(i in gene_order){
+        base_genotype[i] <- 1
+        trajectory <- append(trajectory, list(base_genotype))
+    }
+    
+    return(trajectory)
+}
+
+# DOCUMENT
+# simulate_dbn <- function(theta, n = 10000){
+#     #Check n, lambda_s, theta
+#     simGenotypes <- mccbn::sample_genotypes(10, theta,
+#                                         sampling_param = lambda_s,
+#                                         lambdas = lambdas)
+#     return(process_dbn_simulations((simGenotypes)))
+# }
 
 
 ## Later, we will want much more info recovered, such as the probs, etc.
