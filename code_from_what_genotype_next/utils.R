@@ -100,7 +100,7 @@ binary2str <- function(binary_state, sep = ", ", wt = "WT"){
 #' 
 #' @return vector with 0 and 1 with the binary coding
 str2binary <- function(str_state, sep =", ", wt = "WT", n = NULL){
-    if(str_state == wt) return(c(0))
+    if(str_state == wt) return(0)
     str_state <- sort(str_split(str_state, sep)[[1]])
     num_digits <- which(LETTERS == str_state[length(str_state)])
 

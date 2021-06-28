@@ -22,6 +22,7 @@ test_that("Transforming 2binary works",{
     expect_equal(int2binary(int_state1), binary_state1)
     expect_equal(int2binary(int_state2), binary_state2)
     expect_equal(int2binary(int_state3), binary_state3)
+    expect_equal(int2binary(0, n=5), c(0, 0, 0, 0, 0))
     
     expect_equal(int2binary(int_state3, n = 5), c(0, 1, 0, 0, 1))
     expect_equal(int2binary(int_state3, n = -5), binary_state3)
