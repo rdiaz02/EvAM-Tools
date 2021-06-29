@@ -1,4 +1,4 @@
-source("../toy_datasets.R")
+source("../../data/toy_datasets.R")
 pwd0 <- getwd()
 setwd("../../code_from_what_genotype_next/")
 source("hypertraps-process.R")
