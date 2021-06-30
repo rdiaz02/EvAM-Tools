@@ -1,7 +1,9 @@
 library(stringr)
 ## TODO add support for custom genes names in the str conversions
 
-#' Transform a genotype from integer nomenclature to binary coding
+#' @title Integer to binary
+#' 
+#' @description  Transform a genotype from integer nomenclature to binary coding
 #' 
 #' @param int_state Ingeter >=0
 #' @param n Integer. Number of digits to return
@@ -34,11 +36,15 @@ int2binary <- function(int_state, n = NULL){
     base_binary <- as.integer(base::intToBits(int_state))[1 : num_digits]
     remaining_digits <- n - num_digits
     if(remaining_digits < 0) remaining_digits <- 0
+    # print(n)
+    # print(num_digits)
 
-    return(c(rep(0, remaining_digits), base_binary)[1:n])
+    return(c(base_binary[1:num_digits], rep(0, remaining_digits)))
 }
 
-#' Transform a genotype from integer nomenclature to string binary coding
+#' @title Integer to string
+#' 
+#' @description Transform a genotype from integer nomenclature to string binary coding
 #' 
 #' @param int_state Ingeter >=0
 #' @param sep String. Separator between genes letters
@@ -56,7 +62,9 @@ int2str <- function(int_state, sep = ", ", wt = "WT"){
     return(binary2str(binary_state, sep = sep))
 }
 
-#' Transform a genotype from binary nomenclature to integer value
+#' @title Binary to Integer
+#' 
+#' @description  Transform a genotype from binary nomenclature to integer value
 #' 
 #' @param binary_state vector with 0 and 1
 #' 
@@ -71,7 +79,9 @@ binary2int <- function(binary_state){
     return(as.integer(binary_state %*% powers.of.two))
 }
 
-#' Transform a genotype from binary nomenclature to integer string
+#' @title Binary to string
+#' 
+#' @description  Transform a genotype from binary nomenclature to integer string
 #' 
 #' @param binary_state vector with 0 and 1
 #' @param sep String. Separator between genes letters
@@ -91,7 +101,9 @@ binary2str <- function(binary_state, sep = ", ", wt = "WT"){
         ], collapse = sep))
 }
 
-#' Transform a genotype from string nomenclature to binary coding
+#' @title String to binary
+#' 
+#' @description Transform a genotype from string nomenclature to binary coding
 #' 
 #' @param int_state Ingeter >=0
 #' @param sep String. Separator between genes letters
@@ -100,7 +112,9 @@ binary2str <- function(binary_state, sep = ", ", wt = "WT"){
 #' 
 #' @return vector with 0 and 1 with the binary coding
 str2binary <- function(str_state, sep =", ", wt = "WT", n = NULL){
-    if(str_state == wt) return(0)
+    if(str_state == wt && !(is.null(n)) && n > 0) return(rep(0, n))
+    else if (str_state == wt) return(c(0))
+    
     str_state <- sort(str_split(str_state, sep)[[1]])
     num_digits <- which(LETTERS == str_state[length(str_state)])
 
@@ -110,11 +124,13 @@ str2binary <- function(str_state, sep =", ", wt = "WT", n = NULL){
 
     remaining_digits <- n - num_digits
     if(remaining_digits < 0) remaining_digits <- 0
-    return(c(rep(0, remaining_digits)
-        , as.integer(LETTERS %in% str_state)[1:num_digits]))
+    return(c(as.integer(LETTERS %in% str_state)[1:num_digits]
+        , rep(0, remaining_digits)))
 } 
 
-#' Transform a genotype from string nomenclature to binary coding
+#' @title String to Integer
+#' 
+#' @description Transform a genotype from string nomenclature to binary coding
 #' 
 #' @param int_state Ingeter >=0
 #' @param sep String. Separator between genes letters

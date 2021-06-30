@@ -22,12 +22,12 @@ test_that("Transforming 2binary works",{
     expect_equal(int2binary(int_state1), binary_state1)
     expect_equal(int2binary(int_state2), binary_state2)
     expect_equal(int2binary(int_state3), binary_state3)
-    expect_equal(int2binary(0, n=5), c(0, 0, 0, 0, 0))
+    expect_equal(int2binary(0, n = 5), c(0, 0, 0, 0, 0))
     
-    expect_equal(int2binary(int_state3, n = 5), c(0, 1, 0, 0, 1))
+    expect_equal(int2binary(int_state3, n = 5), c(1, 0, 0, 1, 0))
     expect_equal(int2binary(int_state3, n = -5), binary_state3)
-    expect_error(int2binary(int_state4, n = -4))
-    expect_error(int2binary("abc", n = -4))
+    expect_error(int2binary(int_state4, n = -4, "Only integers >= 0 are valid"))
+    expect_error(int2binary("abc", n = -4), "Invalid input")
 
     expect_equal(str2binary(str_state1), binary_state1)
     expect_equal(str2binary(str_state2), binary_state2)
@@ -36,7 +36,7 @@ test_that("Transforming 2binary works",{
     expect_equal(str2binary("ABCD", sep = ""), binary_state2)
     expect_equal(str2binary("A-B-C-D", sep = "-"), binary_state2)
     expect_equal(str2binary("ROOT", sep = "-", wt = "ROOT"), binary_state1)
-    expect_equal(str2binary("A-B-C-D", sep = "-", n = 5), c(0, binary_state2))
+    expect_equal(str2binary("A-B-C-D", sep = "-", n = 5), c( binary_state2, 0))
     expect_error(int2binary(int_state5))
     expect_error(str2binary(str_state5))
 })
@@ -66,4 +66,24 @@ test_that("Transforming to integer works", {
     expect_error(binary2int(binary_state4))
     expect_error(binary2int(binary_state5))
     expect_error(str2int(str_state5))
+})
+
+test_that("Transforming back and forth works", {
+    expect_equal(int2str(str2int("A")), "A")
+    expect_equal(int2str(str2int("WT")), "WT")
+    expect_equal(binary2str(str2binary("A")), "A")
+    expect_equal(binary2str(str2binary("AB"
+        , n = 5, sep = ""), sep = ""), "AB")
+    expect_equal(binary2str(str2binary("WT"
+        , n = 5, sep = "")), "WT")
+
+    expect_equal(binary2int(int2binary(16)), 16)
+    expect_equal(binary2int(int2binary(0)), 0)
+    expect_equal(str2int(int2str(13), n = 12), 13)
+    expect_equal(str2int(int2str(0), n = 12), 0)
+
+    expect_equal(int2binary(binary2int(c(0,0,0)), n = 3), c(0,0,0))
+    expect_equal(int2binary(binary2int(c(0,1, 0)), n = 3), c(0,1, 0))
+    expect_equal(str2binary(binary2str(c(0,0,0)), n = 7), c(0, 0, 0, 0, 0, 0, 0))
+    expect_equal(str2binary(binary2str(c(0, 1, 0, 0)), n = 7), c(0,1, 0, 0, 0, 0, 0))
 })
