@@ -1,0 +1,28 @@
+pwd0 <- getwd()
+setwd("../code_from_what_genotype_next/")
+source("simulations.R")
+setwd(pwd0)
+rm(pwd0)
+out <- readRDS("../data/out_cpms.rds")
+
+
+Rprof("Simulations2")
+sim <- simulate_population_2(out$MHN_transitionRateMatrix, n_samples = 10000)
+Rprof(NULL)
+x <- summaryRprof("Simulations2")
+print(x$by.total)
+print(x$sampling.time)
+
+# Rprof("Simulations")
+# sim <- simulate_population(out$MHN_transitionRateMatrix, n_samples = 100000)
+# Rprof(NULL)
+# x <- summaryRprof("Simulations")
+# # print(x$by.total)
+# print(x$sampling.time)
+
+# Rprof("Process")
+# trajs <- process_simulations(sim)
+# Rprof(NULL)
+# y <- summaryRprof("Process")
+# # print(y$by.total)
+# print(y$sampling.time)
