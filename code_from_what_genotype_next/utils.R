@@ -36,8 +36,6 @@ int2binary <- function(int_state, n = NULL){
     base_binary <- as.integer(base::intToBits(int_state))[1 : num_digits]
     remaining_digits <- n - num_digits
     if(remaining_digits < 0) remaining_digits <- 0
-    # print(n)
-    # print(num_digits)
 
     return(c(base_binary[1:num_digits], rep(0, remaining_digits)))
 }
