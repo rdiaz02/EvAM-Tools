@@ -210,7 +210,7 @@ library(codetools)
 checkUsageEnv(env = .GlobalEnv)
 
 
-source(file = "tests-access_genots_from_oncosimul.R", echo = TRUE)
+# source(file = "tests-access_genots_from_oncosimul.R", echo = TRUE)
 
 ######################################################################
 ######################################################################
@@ -218,57 +218,57 @@ source(file = "tests-access_genots_from_oncosimul.R", echo = TRUE)
 #########      Examples
 
 ###### CBN
-ex_cbn_out2 <- structure(list(From = c("Root", "A", "Root", "C"),
-                              To = c("A", "B", "C", "D"),
-                              edge = c("Root -> A", "A -> B", "Root -> C", "C -> D"),
-                              init_lambda = c(0.689845, 2.734304, 0.6988, 2.463583),
-                              final_lambda = c(0.689845, 2.734304, 0.6988, 2.463583),
-                              rerun_lambda = c(0.689845, 2.734304, 0.6988, 2.463583),
-                              CBN_edgeBootFreq = c(NA, NA, NA, NA)),
-                         class = "data.frame", row.names = c("A", "B", "C", "D"))
+# ex_cbn_out2 <- structure(list(From = c("Root", "A", "Root", "C"),
+#                               To = c("A", "B", "C", "D"),
+#                               edge = c("Root -> A", "A -> B", "Root -> C", "C -> D"),
+#                               init_lambda = c(0.689845, 2.734304, 0.6988, 2.463583),
+#                               final_lambda = c(0.689845, 2.734304, 0.6988, 2.463583),
+#                               rerun_lambda = c(0.689845, 2.734304, 0.6988, 2.463583),
+#                               CBN_edgeBootFreq = c(NA, NA, NA, NA)),
+#                          class = "data.frame", row.names = c("A", "B", "C", "D"))
 
-cpm2tm(ex_cbn_out2)
+# cpm2tm(ex_cbn_out2)
 
-######    PMCE
-## From email 20-May-2021, at 17:32:51
-ex_pmce_out1 <- read.table("ex_pmce_out1.txt", header = TRUE)
+# ######    PMCE
+# ## From email 20-May-2021, at 17:32:51
+# ex_pmce_out1 <- read.table("ex_pmce_out1.txt", header = TRUE)
 
-outp1 <- cpm2tm(ex_pmce_out1)
+# outp1 <- cpm2tm(ex_pmce_out1)
 
-## plot
+# ## plot
 
-plot(allFitnessEffects(cpm_out_to_oncosimul(ex_pmce_out1)))
+# plot(allFitnessEffects(cpm_out_to_oncosimul(ex_pmce_out1)))
 
-plot(allFitnessEffects(cpm_out_to_oncosimul(ex_pmce_out1)),
-     "igraph", layout = layout.reingold.tilford)
-
-
-
-#### Tiny OR and XOR
-
-ex_or <- read.table("ex_pmce_or.txt", header = TRUE, sep = "\t")
-out_or <- cpm2tm(ex_or)
+# plot(allFitnessEffects(cpm_out_to_oncosimul(ex_pmce_out1)),
+#      "igraph", layout = layout.reingold.tilford)
 
 
-ex_xor <- read.table("ex_pmce_xor.txt", header = TRUE, sep = "\t")
-out_xor <- cpm2tm(ex_xor)
+
+# #### Tiny OR and XOR
+
+# ex_or <- read.table("ex_pmce_or.txt", header = TRUE, sep = "\t")
+# out_or <- cpm2tm(ex_or)
 
 
-## Load the stomach output
-load("stomach_pmce.RData")
-
-stomach_out <- cpm2tm(stomach_pmce)
-
-plot(allFitnessEffects(
-    cpm_out_to_oncosimul(stomach_pmce)),
-     "igraph", layout = layout.reingold.tilford)
+# ex_xor <- read.table("ex_pmce_xor.txt", header = TRUE, sep = "\t")
+# out_xor <- cpm2tm(ex_xor)
 
 
-plot(allFitnessEffects(
-    cpm_out_to_oncosimul(stomach_pmce)))
+# ## Load the stomach output
+# load("stomach_pmce.RData")
+
+# stomach_out <- cpm2tm(stomach_pmce)
+
+# plot(allFitnessEffects(
+#     cpm_out_to_oncosimul(stomach_pmce)),
+#      "igraph", layout = layout.reingold.tilford)
+
+
+# plot(allFitnessEffects(
+#     cpm_out_to_oncosimul(stomach_pmce)))
      
 
 
-stomach_out$accessible_genotypes
+# stomach_out$accessible_genotypes
 
 
