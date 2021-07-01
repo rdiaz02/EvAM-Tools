@@ -1,17 +1,22 @@
-source("../../code_from_what_genotype_next/cbn-process.R")
-source("../../code_from_what_genotype_next/utils.R")
 
-library(mccbn)
+pwd0 <- getwd()
+setwd("../../code_from_what_genotype_next/")
+# source("cbn-process.R")
+source("utils.R")
+source("simulations.R")
+setwd(pwd0)
+rm(pwd0)
+# library(mccbn)
 
-set.seed(1)
-true_p1 <- mccbn::random_poset(6)
-true_p1
-lambda_s <- 1
-lambdas <- runif(6, 1/6*lambda_s, 6*lambda_s)
-set.seed(1)
-simGenotypes <- mccbn::sample_genotypes(10, true_p1,
-                                        sampling_param = lambda_s,
-                                        lambdas = lambdas)
+# set.seed(1)
+# true_p1 <- mccbn::random_poset(6)
+# true_p1
+# lambda_s <- 1
+# lambdas <- runif(6, 1/6*lambda_s, 6*lambda_s)
+# set.seed(1)
+# simGenotypes <- mccbn::sample_genotypes(10, true_p1,
+#                                         sampling_param = lambda_s,
+#                                         lambdas = lambdas)
 
 sample1 <- c(1, 2, 3, 4, 5)
 observed_wt <- c(0, 0, 0, 0, 0)
@@ -52,8 +57,8 @@ test_that("A sample is correctly transformed to a trajectory", {
 })
     
 test_that("Bad observations or times fail", {
-    expect_warning(sample2trajectory(sample2, observed2_1), 
-        "Observations do not respect the sampling time")
+    # expect_warning(sample2trajectory(sample2, observed2_1), 
+    #     "Observations do not respect the sampling time")
     expect_error(sample2trajectory(sample3, observed2_1), "Negative sampling times are not allowed")
     expect_error(sample2trajectory(sample2, observed_error, "Observations should be defined with 0 (not present) or 1 (present)"))
     expect_error(sample2trajectory(c(1, 1), c(1, 1, 1)), "Mismatching sizes of observations and sampling times")
@@ -87,9 +92,9 @@ t["A, C", "A, C, D"] <- 1
 t["A, C, D", "A, B, C, D"] <- 1
 
 state_count <- data.frame(
-    state = sapply(c("WT", "A", "C", "A, C", 
-        "A, C, D", "A, B, C, D"), str2int),
-    count = c(5, 3, 1, 2, 1, 1)
+    Genotype = c("WT", "A", "C", "A, C", 
+        "A, C, D", "A, B, C, D"),
+    Counts = c(5, 3, 1, 2, 1, 1)
 )
 rownames(state_count) <- NULL
 
@@ -100,10 +105,12 @@ freq <- data.frame(
 rownames(freq) <- NULL
 
 test_that("Trajectories are created from simulations data", {
-    dbn_out_sim <- process_dbn_simulations(simGenotypes)
-    expect_equal(dbn_out_sim$transitions, t)
-    expect_equal(sum(sapply(dbn_out_sim$trajectories, length) - 1), sum(t))
-    expect_equal(dbn_out_sim$state_count, state_count)
-    expect_equal(dbn_out_sim$frequencies, freq)
+    out_sim <- process_simulations(simGenotypes)
+    expect_equal(out_sim$transitions, t)
+    expect_equal(sum(sapply(out_sim$trajectories, length) - 1), sum(t))
+    state_count_not_zero <- out_sim$state_count[out_sim$state_count$Counts > 0, ]
+    rownames(state_count_not_zero) <- NULL
+    expect_equal(state_count_not_zero, state_count)
+    expect_equal(out_sim$frequencies, freq)
 })
 
