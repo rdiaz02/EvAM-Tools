@@ -58,7 +58,7 @@ test_that("Output of simulations has the proper attributes", {
 
 test_that("Output is comparable to observations from MHN code", {
     #Expect similar frequencies
-    sim <- simulate_population(out$MHN_transitionRateMatrix, n_samples = 100000)
+    sim <- simulate_population(out$MHN_transitionRateMatrix, n_samples = 10000)
     expect_type(sim, "list")
     expect_named(sim, c("T_sampling", "T_sum_events", "obs_events"))
     expect_gte(min(sim$T_sum_events), 0)
@@ -75,7 +75,11 @@ test_that("Output is comparable to observations from MHN code", {
          ), "All parameters must have the same length")
     
     trajs <- process_simulations(sim)
+    expect_equal(trajs, sim$trajectory)
+    sum(as.integer(unlist(mapply(function(x, y) x != y, sim$trajectory, trajectories))))
     ## COmpare frequencies
     ## How much should I be? 
     browser()
 })
+
+## Do or adapt test to run with simulation_sample_2 and simulate_population_2

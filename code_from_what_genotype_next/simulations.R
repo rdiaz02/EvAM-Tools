@@ -25,10 +25,11 @@ process_simulations <- function(sim){
     trans_table <- as.data.frame(cbind(
         "INT" = 0:(n_states - 1)
         , "STR" = states
-        , "BIN" = sapply(int_states, function(x) I(list(int2binary(x, n = n_genes))))
+        , "BIN" = sapply(0:(n_states - 1), function(x) I(list(int2binary(x, n = n_genes))))
     ))
 
     #Calculate frequencies
+    # browser()
     frequencies <- table(sim$obs_events)
     frequencies <- data.frame(
         Genotype = sorted_genotypes,
@@ -38,25 +39,21 @@ process_simulations <- function(sim){
     frequencies[is.na(frequencies)] <- 0
 
     #Calculate trajectories 
-    trajectories <- list(rep(NA, length(sim$obs_events)))
-    for(i in 1:length(sim$obs_events)){
+    # browser()
+    trajectories <- list(rep(NA, length(sim$T_sampling)))
+    for(i in 1:length(sim$T_sampling)){
         trajectories[i] <- 
-        # append(trajectories,
             list(
                 sample2trajectory(
                     sim$T_sum_events[i, ], 
-                    unlist(trans_table$BIN[trans_table$INT == sim$obs_events[i]]
+                    unlist(trans_table$BIN[trans_table$INT == sim$obs_events[i]])
+                    # sim$obs_events[i, ]
                 )
-                # int2binary(sim$obs_events[i], n = n_genes)))
-            # )
-            )
         )
     }
-
     #Calculate transitions
 
     t <- matrix(0L, nrow = n_states, ncol = n_states)
-
     for(traj in trajectories){
         traj <- traj + 1
         # str_trajs <- sapply(traj, binary2str)
@@ -113,23 +110,22 @@ sample2trajectory <- function(sum_time_events, obs_events){
         stop("Mismatching sizes of observations and sampling times")
     }
 
-    gene_order <- which(obs_events == 1)[order(sum_time_events[which(obs_events == 1)])]
+    mutated_genes <- (1:length(obs_events))[obs_events == 1] 
+    gene_order <- mutated_genes[order(sum_time_events[mutated_genes])]
+    # by_time_gene_order <- order(sum_time_events)[1:sum(obs_events)]
 
-    by_time_gene_order <- rev(order(sum_time_events, decreasing = TRUE)[1:sum(obs_events)])
-
-    base_genotype <- rep(0, length(sum_time_events))
     trajectory <- c(0)
     if(length(gene_order) == 0) return(trajectory)
     
-    if(any(gene_order != by_time_gene_order)){
-        warning("Observations do not respect the sampling time")
-    }
+    # if(any(gene_order != by_time_gene_order)){
+    #     warning("Observations do not respect the sampling time")
+    # }
 
+    base_genotype <- rep(0, length(sum_time_events))
     for(i in gene_order){
         base_genotype[i] <- 1
         trajectory <- c(trajectory, binary2int(base_genotype))
     }
-    
     return(trajectory)
 }
 
@@ -270,39 +266,33 @@ simulate_sample_2 <- function(T_events, T_sampling
     , genotype
     , transitions
     , n_genes){
-
     tr <- transitions 
-    accessible_genotypes <- tr$TO[tr$FROM == genotype]
-    accessible_genotypes_idx <- which(tr$FROM == genotype)
     trajectory <- c(genotype)
     T_sum_events <- rep(0, n_genes)
+    accessible_genotypes <- tr$TO[tr$FROM == genotype]
     while (length(accessible_genotypes) > 0){
-        accesibles_rates <- T_events[accessible_genotypes_idx]
-        time2mutation <- min(accesibles_rates)
-        new_genotype <- accessible_genotypes[which.min(accesibles_rates)]
-        gene_mutated <- which(int2binary(new_genotype - genotype) == 1)
+        accessible_genotypes_idx <- which(tr$FROM == genotype)
+        accessible_rates <- T_events[accessible_genotypes_idx]
+        # print(accessible_rates)
+        # browser()
+        next_genotype_idx <- which.min(accessible_rates)
+        time2mutation <- accessible_rates[next_genotype_idx]
+        new_genotype <- accessible_genotypes[next_genotype_idx]
+        gene_mutated <- log2(new_genotype - genotype) + 1 ## Difference gives the int genotype of the single gene mutated
         genotype <- new_genotype
-        # print(time2mutation)
         T_sum_events[gene_mutated] <- sum(T_sum_events) + time2mutation
         trajectory <- c(trajectory, new_genotype)
         accessible_genotypes <- tr$TO[tr$FROM == genotype]
-        accessible_genotypes_idx <- which(tr$FROM == genotype)
     }
 
     obs_events <-  as.integer(T_sum_events <= T_sampling)
     trajectory <- trajectory[0:(sum(obs_events) + 1)]
-    # print(T_sum_events)
-    # print(T_events)
-    # print(T_sampling)
-    # print(as.integer(T_sum_events <= T_sampling))
-    # print(trajectory)
-    # print(":::::")
-    # browser()
+
     return(list(
         T_sampling = T_sampling, 
         T_sum_events = T_sum_events,
         trajectory = trajectory,
-        obs_events = as.integer(T_sum_events <= T_sampling))
+        obs_events = trajectory[length(trajectory)])
     )
 }
 
@@ -346,7 +336,7 @@ simulate_population_2 <- function(transition_rate_matrix
     # genotypes <- c(0, 1, 2, 15)
     # accesible_genotypes <- sapply(genotypes, function(x) as.vector(TO[x == FROM]))
     # rates_idx <- sapply(genotypes, function(x) as.vector(which(FROM == x)))
-    # browser()
+
     output <- mapply(simulate_sample_2
         , T_events = T_events_2
         , T_sampling = T_sampling
@@ -362,64 +352,11 @@ simulate_population_2 <- function(transition_rate_matrix
             T_sampling = T_sampling, 
             T_sum_events = t(sapply(output, function(x) x$T_sum_events)),
             trajectory = sapply(output, function(x) x$trajectory),
-            obs_events = sapply(output, function(x) x$obs_events),
+            obs_events = t(sapply(output, function(x) x$obs_events)),
             T_events = T_events)
         )
     
     }
-
-    # transition_rate_matrix <- as.matrix(transition_rate_matrix)
-    # rownames(transition_rate_matrix) <- as.vector(sapply(
-    #     rownames(transition_rate_matrix), function(x) str2int(x)))
-    # colnames(transition_rate_matrix) <- as.vector(sapply(
-    #     colnames(transition_rate_matrix), function(x) str2int(x)))
-
-    # n_genes <- ncol(transition_rate_matrix) ** 0.5
-    # n_states <- 2**n_genes
-
-    # states <- sapply(0:(n_states - 1), int2str)
-    # all_genotypes <- sapply(1:(n_genes**2 - 1), int2str)
-    # sorted_genotypes <- c("WT", all_genotypes[order(sapply(all_genotypes, nchar))])
-    # int_sorted_genotypes <- as.vector(sapply(sorted_genotypes, str2int))
-
-    # all_params <- list(T_sampling = T_sampling, sampled_time = sampled_time,
-    #     genotype = genotype, T_sum_events = T_sum_events)
-    
-    # is_param_null <- sapply(all_params, is.null)
-
-    # length_params <- sapply(all_params[which(is_param_null == FALSE)], length)
-    # if (length(length_params) > 0) {
-    #     if (length(unique(length_params)) != 1) stop("All parameters must have the same length")
-    #     else n_samples <- length_params[1]
-    # }
-
-    # for (param in names(all_params[which(is_param_null == TRUE)])){
-    #     if (param %in% c("T_sum_events"))
-    #         all_params[[param]] <- matrix(0, ncol = n_genes, nrow = n_samples)
-    #     else if (param == "T_sampling") 
-    #         all_params[[param]] <- rexp(n_samples, 1)
-    #     else all_params[[param]] <- rep(0, n_samples)
-    # }
-
-    # for (param in c("T_sum_events")) 
-    #     all_params[[param]] <- split(all_params[[param]], row(all_params[[param]]))
-
-    # output <- mapply(simulation_sample
-    #     , T_sampling = all_params$T_sampling
-    #     , sampled_time = all_params$sampled_time
-    #     , genotype = all_params$genotype
-    #     , T_sum_events = all_params$T_sum_events
-    #     , MoreArgs = list(transition_rate_matrix = transition_rate_matrix, checks = FALSE)
-    #     , SIMPLIFY = FALSE)
-
-    # return(
-    #     list(
-    #         T_sampling = vapply(output, function(x) x$T_sampling, numeric(1)), 
-    #         T_sum_events = t(sapply(output, function(x) x$T_sum_events)),
-    #         trajectory = sapply(output, function(x) x$trajectory),
-    #         obs_events = vapply(output, function(x) x$obs_events, numeric(1)))
-    #     )
-# sim <- sample(out$MHN_transitionRateMatrix)
 
 
 # freqs <- rep(0, binary2int(c(1,1,1,1)) + 1)

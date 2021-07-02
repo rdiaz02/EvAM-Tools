@@ -57,8 +57,6 @@ test_that("A sample is correctly transformed to a trajectory", {
 })
     
 test_that("Bad observations or times fail", {
-    # expect_warning(sample2trajectory(sample2, observed2_1), 
-    #     "Observations do not respect the sampling time")
     expect_error(sample2trajectory(sample3, observed2_1), "Negative sampling times are not allowed")
     expect_error(sample2trajectory(sample2, observed_error, "Observations should be defined with 0 (not present) or 1 (present)"))
     expect_error(sample2trajectory(c(1, 1), c(1, 1, 1)), "Mismatching sizes of observations and sampling times")

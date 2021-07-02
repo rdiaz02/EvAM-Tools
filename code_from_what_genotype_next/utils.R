@@ -28,7 +28,6 @@ int2binary <- function(int_state, n = NULL){
             num_digits <- tmp_num_digits 
         }
     }
-
     if(is.null(n) || n < 1 ){
         n <- num_digits
     }
