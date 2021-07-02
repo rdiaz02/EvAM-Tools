@@ -21,7 +21,7 @@ rm(pwd0)
 
 out <- readRDS("../data/out_cpms.rds")
 
-for (i in c("db_AND", "db_c2", "db_c4")){
+for (i in c("AND", "c2", "c4")){
     out <- all_methods_2_trans_mat(all_examples[i])
 
     ## MHN
