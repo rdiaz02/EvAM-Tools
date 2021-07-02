@@ -22,7 +22,8 @@ rm(pwd0)
 out <- readRDS("../data/out_cpms.rds")
 
 for (i in c("AND", "c2", "c4")){
-    out <- all_methods_2_trans_mat(all_examples[i])
+    out <- all_methods_2_trans_mat(all_examples[[i]])
+    # out <- out
 
     ## MHN
     p_distribution <- Generate.pTh(out$MHN_theta)
@@ -70,7 +71,7 @@ for (i in c("AND", "c2", "c4")){
         )
     rownames(all_freqs) <- sorted_observations$Genotype
 
-    png(sprintf("compare_freqs_%s.png", dataset))
+    png(sprintf("compare_freqs_%s.png", i))
     barplot(t(as.matrix(all_freqs)), 
         beside=TRUE , 
         legend.text=T,col=c("blue" , "skyblue") ,
