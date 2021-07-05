@@ -6,42 +6,53 @@ source("./utils.R")
 #' 
 #' @param sim list generated with mccbn::sample_genotypes. Relevant
 #' fields are described below
-#' @param sim$T_sampling list with the time of sampling of each sample
-#' @param sim$T_events time of events for the mutations of each gene 
-#' given that all parents are satisfied
 #' @param sim$T_sum_events time of events for the mutations of each gene
-#' @param sim$n number of simulated events
 #' @param sim$obs_events data.frame with mutated before the end of the sampling time
 process_simulations <- function(sim){
+    params <- c("T_sum_events", "obs_events")
+    for (i in c("T_sum_events", "obs_events")){
+        if (!(i %in% names(sim))) stop(sprintf("%s is missing from your simulations", i))
+    }
     #Set up
     n_genes <- ncol(sim$T_sum_events)
     n_states <- 2**n_genes
 
-    states <- sapply(0:(n_states - 1), int2str)
-    all_genotypes <- sapply(1:(n_genes**2 - 1), int2str)
-    sorted_genotypes <- c("WT", all_genotypes[order(sapply(all_genotypes, nchar))])
-    int_sorted_genotypes <- as.vector(sapply(sorted_genotypes, str2int))
+    sorted_genotypes <- generate_sorted_genotypes(n_genes, index.return = TRUE)
+    int_sorted_genotypes <- sorted_genotypes$ix
+    sorted_genotypes <- sorted_genotypes$x
 
     trans_table <- as.data.frame(cbind(
-        "INT" = 0:(n_states - 1)
-        , "STR" = states
-        , "BIN" = sapply(0:(n_states - 1), function(x) I(list(int2binary(x, n = n_genes))))
+        "INT" = int_sorted_genotypes
+        , "STR" = sorted_genotypes
+        , "BIN" = sapply(int_sorted_genotypes, function(x) I(list(int2binary(x, n = n_genes))))
     ))
 
+    if (length(sim$obs_events)/n_genes == nrow(sim$T_sum_events)) {
+        str_obs_events <- apply(sim$obs_events
+            , 1
+            , function(x) paste(x, collapse = ""))
+        str_bin_genotypes <- vapply(trans_table$BIN
+            , function(x) paste(x, collapse = "")
+            , character(1))
+        sim$obs_events <- as.vector(unlist(sapply(str_obs_events
+            , function(x) trans_table$INT[which(x == str_bin_genotypes)]
+        )))
+    }
+
     #Calculate frequencies
-    # browser()
     frequencies <- table(sim$obs_events)
     frequencies <- data.frame(
         Genotype = sorted_genotypes,
-        Counts = as.vector(sapply(int_sorted_genotypes, function(x){frequencies[as.character(x)]}))
+        Counts = as.vector(vapply(int_sorted_genotypes
+            , function(x) {frequencies[as.character(x)]}
+            , numeric(1)))
     )
     rownames(frequencies) <- NULL
     frequencies[is.na(frequencies)] <- 0
 
     #Calculate trajectories 
-    # browser()
-    trajectories <- list(rep(NA, length(sim$T_sampling)))
-    for(i in 1:length(sim$T_sampling)){
+    trajectories <- list(rep(NA, nrow(sim$T_sum_events)))
+    for(i in 1:nrow(sim$T_sum_events)){
         trajectories[i] <- 
             list(
                 sample2trajectory(
@@ -71,8 +82,6 @@ process_simulations <- function(sim){
 
     #Calculate state_counts
     
-    # state_counts <- state_count_from_trajectories(trajectories)
-    # all_trajs <- matrix(unlist(trajectories), ncol = n_genes, byrow = TRUE)
     state_counts <- table(unlist(trajectories))
     
     state_counts <- data.frame(
