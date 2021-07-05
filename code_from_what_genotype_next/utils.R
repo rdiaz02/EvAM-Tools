@@ -150,7 +150,7 @@ str2int <- function(str_state, sep =", ", wt = "WT", n = NULL){
 #' 
 #' @return Vector with the sorted genotypes
 #' @return Optionally, returns the indexes of the int states
-sorted_genotypes <- function(n_genes, sep = ", ", index.return = FALSE){
+generate_sorted_genotypes <- function(n_genes, sep = ", ", index.return = FALSE){
     if(n_genes < 0) stop("Number of genes should be >= 0")
     # browser()
     if(n_genes == 0) states <- c()
