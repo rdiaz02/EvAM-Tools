@@ -7,7 +7,7 @@ out <- readRDS("../data/out_cpms.rds")
 
 
 Rprof("Simulations2")
-sim <- simulate_population_2(out$MHN_transitionRateMatrix, n_samples = 10000)
+sim <- simulate_population(out$MHN_transitionRateMatrix, n_samples = 10000)
 Rprof(NULL)
 x1 <- summaryRprof("Simulations2")
 # print(x1$by.total)
