@@ -139,3 +139,30 @@ str2int <- function(str_state, sep =", ", wt = "WT", n = NULL){
     binary_state <- str2binary(str_state, sep = sep, wt = wt, n = n)
     return(binary2int(binary_state))
 }
+
+#' @title List of sorted genotypes
+#' 
+#' @description Returns all sorted genotypes for a given number of genes
+#' 
+#' @param n_genes Ingeter >=0
+#' @param sep String. Separator between genes letters
+#' @param index.return Boolean. Wethter to return the indexes
+#' 
+#' @return Vector with the sorted genotypes
+#' @return Optionally, returns the indexes of the int states
+sorted_genotypes <- function(n_genes, sep = ", ", index.return = FALSE){
+    if(n_genes < 0) stop("Number of genes should be >= 0")
+    # browser()
+    if(n_genes == 0) states <- c()
+    else states <- vapply(1:(2**n_genes - 1), function(x) int2str(x, sep = sep), character(1))
+
+    sorted_states <- c("WT", states[order(vapply(states, nchar, numeric(1)))])
+
+    if (index.return){
+        int_sorted_states <- as.vector(vapply(sorted_states, function(x) str2int(x, sep = sep), numeric(1)))
+        return(list(x = sorted_states
+            , ix = int_sorted_states))
+        }
+
+    return(sorted_states)
+}

@@ -87,3 +87,17 @@ test_that("Transforming back and forth works", {
     expect_equal(str2binary(binary2str(c(0,0,0)), n = 7), c(0, 0, 0, 0, 0, 0, 0))
     expect_equal(str2binary(binary2str(c(0, 1, 0, 0)), n = 7), c(0,1, 0, 0, 0, 0, 0))
 })
+
+
+test_that("Generate the sorted genoytpes correctly",{
+    expect_equal(sorted_genotypes(0), c("WT"))
+    expect_equal(sorted_genotypes(1), c("WT", "A"))
+    expect_equal(sorted_genotypes(2), c("WT", "A", "B", "A, B"))
+    expect_equal(sorted_genotypes(2, sep = ""), c("WT", "A", "B", "AB"))
+    expect_equal(sorted_genotypes(3, sep = ""), c("WT", "A", "B", "C", "AB", "AC", "BC", "ABC"))
+    expect_error(sorted_genotypes(-1, sep = ""), "Number of genes should be >= 0")
+    expect_equal(sorted_genotypes(3, sep = "", index.return = TRUE), list(x = c("WT", "A", "B", "C", "AB", "AC", "BC", "ABC")
+        , ix = c(0, 1, 2, 4, 3, 5, 6, 7))
+    )
+
+})
