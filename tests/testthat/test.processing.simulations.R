@@ -85,7 +85,7 @@ T_sum_events <- matrix(c(
     , c(1, 4, 2, 3)
     ), ncol = 4, byrow = TRUE)
 
-sorted_states <- sorted_genotypes(4)
+sorted_states <- generate_sorted_genotypes(4)
 t <- matrix(0L, nrow = 16, ncol = 16)
 rownames(t) <- sorted_states
 colnames(t) <- sorted_states
@@ -160,4 +160,26 @@ test_that("Trajectories are created from simulations data with obs_events as int
     rownames(freq_not_zero) <- NULL
     expect_equal(freq_not_zero, freq)
     expect_equal(out_sim$trajectories, trajectories)
+})
+
+test_that("Output is returned only with the requested fields", {
+    out_params <- c("frequencies", "trajectories", "state_counts", "transitions")
+
+    out_sim <- process_simulations(simGenotypes, output = out_params[1])
+    expect_equal(sort(names(out_sim)), sort(out_params[1]))
+    
+    out_sim <- process_simulations(simGenotypes, output = out_params[2:3])
+    expect_equal(sort(names(out_sim)), sort(out_params[2:3]))
+
+    out_sim <- process_simulations(simGenotypes, output = out_params)
+    expect_equal(sort(names(out_sim)), sort(out_params))
+
+    expect_error(process_simulations(simGenotypes, output = c()), "Specify valid output")
+
+    expect_error(process_simulations(simGenotypes, output = c("bad request", "bad request 2")), "Specify valid output")
+
+    expect_warning(process_simulations(simGenotypes, output = c(out_params, "bad request")), "The following parameters cannot be returned: bad request")
+
+    expect_warning(process_simulations(simGenotypes, output = c(out_params, "bad request", "bad request 2")), "The following parameters cannot be returned: bad request, bad request 2")
+
 })

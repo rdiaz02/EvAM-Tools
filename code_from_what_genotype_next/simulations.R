@@ -8,12 +8,30 @@ source("./utils.R")
 #' fields are described below
 #' @param sim$T_sum_events time of events for the mutations of each gene
 #' @param sim$obs_events data.frame with mutated before the end of the sampling time
-process_simulations <- function(sim){
+process_simulations <- function(sim, output = c("frequencies", "trajectories", "state_counts", "transitions")){
+
+    #Checking input
     params <- c("T_sum_events", "obs_events")
     for (i in params){
-        if (!(i %in% names(sim))) stop(sprintf("%s is missing from your simulations", i))
+        if (!(i %in% names(sim))) 
+            stop(sprintf("%s is missing from your simulations", i))
     }
+
+    #Checking output variables
+    valid_output <- c("frequencies", "trajectories", "state_counts", "transitions")
+    out_params <- valid_output %in% output
+    names(out_params) <- valid_output
+
+    if (sum(out_params) == 0) stop("Specify valid output")
+
+    not_valid_params <- output[which(!(output %in% valid_output))]
+    if (length(not_valid_params) > 0) 
+        warning(sprintf("The following parameters cannot be returned: %s"
+            , paste(not_valid_params, collapse = ", " )))
+    not_valid_params <- not_valid_params[not_valid_params]
+
     #Set up
+    output <- list()
     n_genes <- ncol(sim$T_sum_events)
     n_states <- 2**n_genes
 
@@ -40,60 +58,74 @@ process_simulations <- function(sim){
     }
 
     #Calculate frequencies
-    frequencies <- table(sim$obs_events)
-    frequencies <- data.frame(
-        Genotype = sorted_genotypes,
-        Counts = as.vector(vapply(int_sorted_genotypes
-            , function(x) {frequencies[as.character(x)]}
-            , numeric(1)))
-    )
-    rownames(frequencies) <- NULL
-    frequencies[is.na(frequencies)] <- 0
+    if(out_params["frequencies"]){
+        frequencies <- table(sim$obs_events)
+        frequencies <- data.frame(
+            Genotype = sorted_genotypes,
+            Counts = as.vector(vapply(int_sorted_genotypes
+                , function(x) {frequencies[as.character(x)]}
+                , numeric(1)))
+        )
+        rownames(frequencies) <- NULL
+        frequencies[is.na(frequencies)] <- 0
+
+        output$frequencies <- frequencies
+    }
 
     #Calculate trajectories 
-    trajectories <- list(rep(NA, nrow(sim$T_sum_events)))
-    for(i in 1:nrow(sim$T_sum_events)){
-        trajectories[i] <- 
-            list(
-                sample2trajectory(
-                    sim$T_sum_events[i, ], 
-                    unlist(trans_table$BIN[trans_table$INT == sim$obs_events[i]])
+    if(out_params["trajectories"] ||
+        out_params["state_counts"] ||
+        out_params["transitions"]){
+
+        trajectories <- list(rep(NA, nrow(sim$T_sum_events)))
+        for(i in 1:nrow(sim$T_sum_events)){
+            trajectories[i] <- 
+                list(
+                    sample2trajectory(
+                        sim$T_sum_events[i, ], 
+                        unlist(trans_table$BIN[trans_table$INT == sim$obs_events[i]])
+                    )
                 )
-        )
+        }
+        
+        if(out_params["trajectories"]) 
+            output$trajectories <- trajectories
     }
 
     #Calculate transitions
-    t <- matrix(0L, nrow = n_states, ncol = n_states)
-    for(traj in trajectories){
-        traj <- traj + 1
-        if(length(traj) > 1){
-            for(i in 1:(length(traj) - 1)){
-                t[traj[i], traj[i + 1]] <-
-                    t[traj[i], traj[i + 1]] + 1
+    if(out_params["transitions"]){
+        t <- matrix(0L, nrow = n_states, ncol = n_states)
+        for(traj in trajectories){
+            traj <- traj + 1
+            if(length(traj) > 1){
+                for(i in 1:(length(traj) - 1)){
+                    t[traj[i], traj[i + 1]] <-
+                        t[traj[i], traj[i + 1]] + 1
+                }
             }
-        }
-    } 
+        } 
 
-    t <- t[int_sorted_genotypes + 1, int_sorted_genotypes + 1]
-    rownames(t) <- sorted_genotypes
-    colnames(t) <- sorted_genotypes
+        t <- t[int_sorted_genotypes + 1, int_sorted_genotypes + 1]
+        rownames(t) <- sorted_genotypes
+        colnames(t) <- sorted_genotypes
+
+        output$transitions <- t
+    }
 
     #Calculate state_counts
-    
-    state_counts <- table(unlist(trajectories))
-    
-    state_counts <- data.frame(
-        Genotype = sorted_genotypes,
-        Counts = as.vector(sapply(int_sorted_genotypes, function(x){state_counts[as.character(x)]}))
-    )
-    state_counts[is.na(state_counts)] <- 0
+    if(out_params["state_counts"]){
+        state_counts <- table(unlist(trajectories))
+        
+        state_counts <- data.frame(
+            Genotype = sorted_genotypes,
+            Counts = as.vector(sapply(int_sorted_genotypes, function(x){state_counts[as.character(x)]}))
+        )
+        state_counts[is.na(state_counts)] <- 0
 
-    return(list(
-        trajectories = trajectories,
-        transitions = t,
-        state_counts = state_counts,
-        frequencies = frequencies
-    ))
+        output$state_counts <- state_counts
+    }
+
+    return(output)
 }
 
 #' @title Sample to trajectory
@@ -136,138 +168,6 @@ sample2trajectory <- function(sum_time_events, obs_events){
     return(trajectory)
 }
 
-#' @title Simulate sample
-#' 
-#' @description Create the tumor development process for a patient
-#' 
-#' @param transition_rate_matrix
-#' @param T_sampling Numeric > 0. Time at which the sampled is observed.
-#' @param sampled_time Numeric > 0. Time at which the observations start
-#' @param genotype Vector 0 and 1. Starting genotype 
-#' @param T_sum_events Vector numeric. Same length as genotype.
-#' Mutation time at which each gene has mutated. 0 if it not mutated.
-#' 
-#' @return T_sampling Vector with time of observed mutations
-# old_simulation_sample <- function(transition_rate_matrix, T_sampling = NA,
-#     sampled_time = 0, genotype = NULL, T_sum_events = NULL, checks = TRUE){
-    
-#     n_genes <- (ncol(transition_rate_matrix))**0.5
-
-#     if (checks){
-#         if(is.na(T_sampling)) T_sampling <- rexp(1, 1)
-#         else if (!(is.numeric(T_sampling))) stop("Time should be a number")
-#         else if(T_sampling <= 0) stop("Sampling time should be > 0")
-
-#         if (is.null(genotype)) genotype <- 0
-#         else if (is.vector(genotype)){
-#             if (length(genotype) != n_genes) stop("Shape Mismatch between genotype and number of genes")
-#             else if (!(all(genotype %in% c(0, 1)))) stop("Genotype should only contain 0 or 1")
-#             else genotype <- binary2int(genotype)
-#         } else if (genotype > (ncol(transition_rate_matrix) - 1)
-#             | int_genotype < 0) stop("This genotype is not supported with the current number of genes")
-
-#         if (sampled_time < 0) stop("Sampled time should be > 0") 
-
-#         if (is.null(T_sum_events)) T_sum_events <- rep(0, n_genes)
-#         else if (length(T_sum_events) != n_genes) stop("Shape mismatch between T_sum_events and number of genes")
-#         else if (any(T_sum_events < 0)) stop("All times should be positive")
-
-#         bin_genotype <- int2binary(genotype, n = n_genes)
-#         if (length(bin_genotype) != length(T_sum_events)) stop("Shape mismatch between genotype and T_sum_events")
-#         else if (any(T_sum_events[which(bin_genotype == 0)] > 0)){
-#             stop("Not-mutated genes can not have sampled time > 0")
-#         }
-#     }
-#     # browser()
-#     tmp_rates <- transition_rate_matrix[as.character(genotype), ]
-#     tmp_rates <- tmp_rates[tmp_rates > 0]
-#     trajectory <- c(0)
-#     while( sampled_time < T_sampling 
-#         & any(tmp_rates > 0) ){
-#         time_mutations <- sort.int(vapply(tmp_rates, function(x) {
-#             rexp(1, x)
-#         }, numeric(1)))[1]
-#         browser()
-
-#         # z <- sapply(tmp_rates, function(x) {
-#         #     rexp(1, x)
-#         # })
-
-#         min_time2mutation <- time_mutations[1]
-#         new_genotype <- as.integer(names(min_time2mutation)) 
-#         new_gene_mutated <- which(
-#             int2binary(new_genotype - genotype) == 1)
-#         sampled_time <- sampled_time + as.numeric(min_time2mutation)
-#         if(sampled_time <= T_sampling){
-#             T_sum_events[new_gene_mutated] <- sampled_time
-#             genotype <- new_genotype
-#             trajectory <- c(trajectory, genotype)
-#             tmp_rates <- transition_rate_matrix[as.character(genotype), ]
-#             tmp_rates <- tmp_rates[tmp_rates > 0]
-#         }
-#     }
-
-#     # browser()
-#     return(list(
-#         T_sampling = T_sampling, 
-#         T_sum_events = T_sum_events,
-#         trajectory = trajectory,
-#         obs_events = genotype))
-# }
-
-#' @title Simulates population from a transtion rate matrix
-#' 
-#' @description Create the tumor development process for a population of patients
-#' 
-#' @inheritParams simulation_sample
-# old_simulate_population <- function(transition_rate_matrix, n_samples = 10, T_sampling = NULL,
-#     sampled_time = NULL, genotype = NULL, T_sum_events = NULL){
-#     transition_rate_matrix <- as.matrix(transition_rate_matrix)
-#     rownames(transition_rate_matrix) <- as.vector(sapply(
-#         rownames(transition_rate_matrix), function(x) str2int(x)))
-#     colnames(transition_rate_matrix) <- as.vector(sapply(
-#         colnames(transition_rate_matrix), function(x) str2int(x)))
-
-#     n_genes <- ncol(transition_rate_matrix) ** 0.5
-
-#     all_params <- list(T_sampling = T_sampling, sampled_time = sampled_time,
-#         genotype = genotype, T_sum_events = T_sum_events)
-    
-#     is_param_null <- sapply(all_params, is.null)
-
-#     length_params <- sapply(all_params[which(is_param_null == FALSE)], length)
-#     if (length(length_params) > 0) {
-#         if (length(unique(length_params)) != 1) stop("All parameters must have the same length")
-#         else n_samples <- length_params[1]
-#     }
-
-#     for (param in names(all_params[which(is_param_null == TRUE)])){
-#         if (param %in% c("T_sum_events"))
-#             all_params[[param]] <- matrix(0, ncol = n_genes, nrow = n_samples)
-#         else if (param == "T_sampling") 
-#             all_params[[param]] <- rexp(n_samples, 1)
-#         else all_params[[param]] <- rep(0, n_samples)
-#     }
-
-#     for (param in c("T_sum_events")) 
-#         all_params[[param]] <- split(all_params[[param]], row(all_params[[param]]))
-
-#     output <- mapply(simulation_sample
-#         , T_sampling = all_params$T_sampling
-#         , sampled_time = all_params$sampled_time
-#         , genotype = all_params$genotype
-#         , T_sum_events = all_params$T_sum_events
-#         , MoreArgs = list(transition_rate_matrix = transition_rate_matrix, checks = FALSE)
-#         , SIMPLIFY = FALSE)
-
-#     return(
-#         list(
-#             T_sampling = vapply(output, function(x) x$T_sampling, numeric(1)), 
-#             T_sum_events = t(sapply(output, function(x) x$T_sum_events)),
-#             trajectory = sapply(output, function(x) x$trajectory),
-#             obs_events = vapply(output, function(x) x$obs_events, numeric(1)))
-#         )
-# }
 
 
 #' @title Simulate sample
@@ -307,8 +207,6 @@ simulate_sample <- function(T_events
     while (length(accessible_genotypes) > 0){
         accessible_genotypes_idx <- which(tr$FROM == genotype)
         accessible_rates <- T_events[accessible_genotypes_idx]
-        # print(accessible_rates)
-        # browser()
         next_genotype_idx <- which.min(accessible_rates)
         time2mutation <- accessible_rates[next_genotype_idx]
         new_genotype <- accessible_genotypes[next_genotype_idx]
@@ -334,12 +232,21 @@ simulate_sample <- function(T_events
 #' 
 #' @description Create the tumor development process for a population of patients
 #' 
+#' @param transition_rate_matrix n_genes**2 x n_genes**2 float matrix with rates transitions between all genotype
+#' @param n_samples Int > 0
+#' @param T_events Vector with transition times to all possible genotypes
+#' @param T_sampling Numeric > 0. Time at which the sampled is observed.
+#' 
 #' @inheritParams simulation_sample
 simulate_population <- function(transition_rate_matrix
     , n_samples = 10, T_sampling = NULL){
 
     n_genes <- ncol(transition_rate_matrix) ** 0.5
 
+    if (ncol(transition_rate_matrix) != nrow(transition_rate_matrix)) 
+        stop("Transition matrix should be squared")
+    
+    if (ncol())
     ## Build data.frame
     trans_table <- as.data.frame(which(transition_rate_matrix > 0, arr.ind = TRUE))
     colnames(trans_table) <- c("FROM", "TO")
