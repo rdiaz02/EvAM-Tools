@@ -1,22 +1,10 @@
 
 pwd0 <- getwd()
 setwd("../../code_from_what_genotype_next/")
-# source("cbn-process.R")
 source("utils.R")
 source("simulations.R")
 setwd(pwd0)
 rm(pwd0)
-# library(mccbn)
-
-# set.seed(1)
-# true_p1 <- mccbn::random_poset(6)
-# true_p1
-# lambda_s <- 1
-# lambdas <- runif(6, 1/6*lambda_s, 6*lambda_s)
-# set.seed(1)
-# simGenotypes <- mccbn::sample_genotypes(10, true_p1,
-#                                         sampling_param = lambda_s,
-#                                         lambdas = lambdas)
 
 sample1 <- c(1, 2, 3, 4, 5)
 observed_wt <- c(0, 0, 0, 0, 0)

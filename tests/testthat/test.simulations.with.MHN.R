@@ -79,6 +79,7 @@ test_that("Output of simulations has the proper attributes", {
 
 test_that("Output behaves_properly", {
     #Expect similar frequencies
+    expect_error(imulate_population(out$MHN_transitionRateMatrix[-1, ], n_samples = 100), "Transition matrix should be squared")
     sim <- simulate_population(out$MHN_transitionRateMatrix, n_samples = 100)
     expect_type(sim, "list")
     expect_named(sim, c("T_sampling"
@@ -102,10 +103,7 @@ test_that("Output behaves_properly", {
     
     trajs <- process_simulations(sim)
     expect_equal(trajs$trajectories, sim$trajectory)
-    # sum(as.integer(unlist(mapply(function(x, y) x != y, sim$trajectory, trajectories))))
-    ## COmpare frequencies
-    ## How much should I be? 
-    # browser()
+    
 })
 
 ## Do or adapt test to run with simulate_sample_2 and simulate_population_2
