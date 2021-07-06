@@ -241,12 +241,11 @@ simulate_sample <- function(T_events
 simulate_population <- function(transition_rate_matrix
     , n_samples = 10, T_sampling = NULL){
 
-    n_genes <- ncol(transition_rate_matrix) ** 0.5
 
     if (ncol(transition_rate_matrix) != nrow(transition_rate_matrix)) 
         stop("Transition matrix should be squared")
+    n_genes <- log2(ncol(transition_rate_matrix)) 
     
-    if (ncol())
     ## Build data.frame
     trans_table <- as.data.frame(which(transition_rate_matrix > 0, arr.ind = TRUE))
     colnames(trans_table) <- c("FROM", "TO")
