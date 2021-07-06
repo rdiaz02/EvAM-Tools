@@ -1,5 +1,3 @@
-library(mccbn)
-
 pwd0 <- getwd()
 setwd("../code_from_what_genotype_next")
 source("simulations.R")
