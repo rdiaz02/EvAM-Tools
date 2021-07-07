@@ -21,6 +21,9 @@
 ## Use OncoSimulR to obtain accessible genotypes and transition matrices between
 ## genotypes for CBN, OT, PMCE and DBN.
 
+## See comments and examples in ../OncoSimul-for-accessible-and-more-on-PMCE.org 
+
+
 ## Additionally, since we compute and output fitness, can be used for simulations
 ## (and shows the equivalence between lambdas and selection coefficients).
 
