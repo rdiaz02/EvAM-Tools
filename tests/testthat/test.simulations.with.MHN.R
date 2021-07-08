@@ -77,9 +77,49 @@ test_that("Output of simulations has the proper attributes", {
     expect_equal(sim$trajectory[length(sim$trajectory)], sim$obs_events)
 })
 
+test_that("Simulate sample gives the right results", {
+    FROM <- sapply(c("WT", "WT", "A", "A, C", "B", "B, E")
+        , str2int)
+    TO <- sapply(c("A", "B", "A, C", "A, C, D", "B, E", "B, E, F")
+        , str2int)
+    tt <- data.frame(FROM = FROM, TO = TO)
+
+    T_sampling <- 2
+    
+    T_events_1 <- c(0.1, 0.2, 0.1, 0.2, 0.1, 0.2)
+    sim_1 <- simulate_sample(T_events_1, tt, 6, T_sampling)
+    expect_equal(sim_1$T_sampling, T_sampling)
+    expect_equal(sim_1$T_sum_events, c(0.1, 0, 0.2, 0.4, 0, 0))
+    expect_equal(sim_1$obs_events, str2int("A, C, D"))
+    expect_equal(sim_1$trajectory, as.vector(sapply(c("WT", "A", "A, C", "A, C, D"), str2int)))
+    
+    T_events_2 <- c(0.2, 0.1, 0.1, 0.2, 0.1, 0.2)
+    sim_2 <- simulate_sample(T_events_2, tt, 6, T_sampling)
+    expect_equal(sim_2$T_sampling, T_sampling)
+    expect_equal(sim_2$T_sum_events, c(0, 0.1, 0, 0, 0.2, 0.4))
+    expect_equal(sim_2$obs_events, str2int("B, E, F"))
+    expect_equal(sim_2$trajectory, as.vector(sapply(c("WT", "B", "B, E", "B, E, F"), str2int)))
+
+    T_sampling <- 0.3
+    sim_3 <- simulate_sample(T_events_2, tt, 6, T_sampling)
+    expect_equal(sim_3$T_sampling, T_sampling)
+    expect_equal(sim_3$T_sum_events, c(0, 0.1, 0, 0, 0.2, 0.4))
+    expect_equal(sim_3$obs_events, str2int("B, E"))
+    expect_equal(sim_3$trajectory, as.vector(sapply(c("WT", "B", "B, E"), str2int)))
+
+
+    T_events_1 <- c(0.1, 0.2, 0.1, 0.2, 0.1, 0.2)
+    sim_4 <- simulate_sample(T_events_1, tt, 6, T_sampling)
+    expect_equal(sim_4$T_sampling, T_sampling)
+    expect_equal(sim_4$T_sum_events, c(0.1, 0, 0.2, 0.4, 0, 0))
+    expect_equal(sim_4$obs_events, str2int("A, C"))
+    expect_equal(sim_4$trajectory, as.vector(sapply(c("WT", "A", "A, C"), str2int)))
+
+})
+
 test_that("Output behaves_properly", {
     #Expect similar frequencies
-    expect_error(imulate_population(out$MHN_transitionRateMatrix[-1, ], n_samples = 100), "Transition matrix should be squared")
+    expect_error(simulate_population(out$MHN_transitionRateMatrix[-1, ], n_samples = 100), "Transition matrix should be squared")
     sim <- simulate_population(out$MHN_transitionRateMatrix, n_samples = 100)
     expect_type(sim, "list")
     expect_named(sim, c("T_sampling"
@@ -94,16 +134,18 @@ test_that("Output behaves_properly", {
     expect_length(sim$obs_events, 100)
     expect_length(sim$T_sum_events, 100 * 4)
 
-    for (i in 1:nrow(sim$trans_table)){
-        gen1 <- sim$trans_table$FROM[i]
-        gen2 <- sim$trans_table$TO[i]
-        rate <- sim$trans_table$RATE[i]
-        expect_equal(rate, out$MHN_transitionRateMatrix[int2str(gen1), int2str(gen2)])
+    trm <- out$MHN_transitionRateMatrix
+    tt <- simulate_population(trm, n_samples = 100)$trans_table
+    expect_equal(nrow(tt), sum(trm > 0))
+    for (i in 1:nrow(tt)){
+        gen1 <- tt$FROM[i]
+        gen2 <- tt$TO[i]
+        rate <- tt$RATE[i]
+        expect_equal(rate, trm[int2str(gen1), int2str(gen2)])
+        expect_equal(sum(int2binary(gen2 - gen1)), 1)
     }
-    
+    expect_lte(abs(1 - mean(sim$T_sampling)), 0.05)
     trajs <- process_simulations(sim)
     expect_equal(trajs$trajectories, sim$trajectory)
     
 })
-
-## Do or adapt test to run with simulate_sample_2 and simulate_population_2

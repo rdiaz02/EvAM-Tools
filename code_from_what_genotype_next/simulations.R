@@ -212,14 +212,13 @@ simulate_sample <- function(T_events
         new_genotype <- accessible_genotypes[next_genotype_idx]
         gene_mutated <- log2(new_genotype - genotype) + 1 ## Difference gives the int genotype of the single gene mutated
         genotype <- new_genotype
-        T_sum_events[gene_mutated] <- sum(T_sum_events) + time2mutation
+        T_sum_events[gene_mutated] <- max(T_sum_events) + time2mutation
         trajectory <- c(trajectory, new_genotype)
         accessible_genotypes <- tr$TO[tr$FROM == genotype]
     }
 
-    obs_events <-  as.integer(T_sum_events <= T_sampling)
+    obs_events <-  as.integer((T_sum_events <= T_sampling) & (T_sum_events > 0))
     trajectory <- trajectory[0:(sum(obs_events) + 1)]
-
     return(list(
         T_sampling = T_sampling, 
         T_sum_events = T_sum_events,
@@ -267,30 +266,24 @@ simulate_population <- function(transition_rate_matrix
     number_transitions <- length(RATES)
     T_events <- matrix(0, n_samples, number_transitions)
     for (i in 1:number_transitions){
-        T_events[ , i] <- rexp(n_samples, RATES[i])
+        T_events[ , i] <- rexp(n_samples, rate = trans_table$RATES[i])
     }
     T_events_2 <- list(rep(NA, n_samples))
     for (i in 1:n_samples){
         T_events_2[i] <- list(T_events[i, ])
     }
-    # T_events_2 <- apply(T_events, 1, function(x)x)
-    # browser()
-    T_sampling <- rexp(n_samples)
+
+    T_sampling <- rexp(n_samples, rate = 1)
 
     genotypes <- rep(0, n_samples)
-    # genotypes <- c(0, 1, 2, 15)
-    # accesible_genotypes <- sapply(genotypes, function(x) as.vector(TO[x == FROM]))
-    # rates_idx <- sapply(genotypes, function(x) as.vector(which(FROM == x)))
 
     output <- mapply(simulate_sample
         , T_events = T_events_2
         , T_sampling = T_sampling
-        # , sampled_time = all_params$sampled_time
         , genotype = genotypes
         , MoreArgs = list(transitions = trans_table, n_genes = n_genes)
         , SIMPLIFY = FALSE
         )
-    # browser()
 
     return(
         list(
@@ -301,5 +294,4 @@ simulate_population <- function(transition_rate_matrix
             obs_events = t(sapply(output, function(x) x$obs_events)),
             T_events = T_events)
         )
-    
     }
