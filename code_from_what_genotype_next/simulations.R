@@ -204,15 +204,17 @@ simulate_sample <- function(T_events
     trajectory <- c(genotype)
     T_sum_events <- rep(0, n_genes)
     accessible_genotypes <- tr$TO[tr$FROM == genotype]
+    T_cum <- 0
     while (length(accessible_genotypes) > 0){
         accessible_genotypes_idx <- which(tr$FROM == genotype)
         accessible_rates <- T_events[accessible_genotypes_idx]
         next_genotype_idx <- which.min(accessible_rates)
         time2mutation <- accessible_rates[next_genotype_idx]
+        T_cum <- T_cum + time2mutation
         new_genotype <- accessible_genotypes[next_genotype_idx]
         gene_mutated <- log2(new_genotype - genotype) + 1 ## Difference gives the int genotype of the single gene mutated
         genotype <- new_genotype
-        T_sum_events[gene_mutated] <- max(T_sum_events) + time2mutation
+        T_sum_events[gene_mutated] <- T_cum
         trajectory <- c(trajectory, new_genotype)
         accessible_genotypes <- tr$TO[tr$FROM == genotype]
     }
@@ -231,33 +233,33 @@ simulate_sample <- function(T_events
 #' 
 #' @description Create the tumor development process for a population of patients
 #' 
-#' @param transition_rate_matrix n_genes**2 x n_genes**2 float matrix with rates transitions between all genotype
+#' @param trm Transition rate matrix n_genes**2 x n_genes**2 float matrix with rates transitions between all genotype
 #' @param n_samples Int > 0
 #' @param T_events Vector with transition times to all possible genotypes
 #' @param T_sampling Numeric > 0. Time at which the sampled is observed.
 #' 
 #' @inheritParams simulation_sample
-simulate_population <- function(transition_rate_matrix
+simulate_population <- function(trm
     , n_samples = 10, T_sampling = NULL){
 
 
-    if (ncol(transition_rate_matrix) != nrow(transition_rate_matrix)) 
+    if (ncol(trm) != nrow(trm)) 
         stop("Transition matrix should be squared")
-    n_genes <- log2(ncol(transition_rate_matrix)) 
+    n_genes <- log2(ncol(trm)) 
     
     ## Build data.frame
-    trans_table <- as.data.frame(which(transition_rate_matrix > 0, arr.ind = TRUE))
+    trans_table <- as.data.frame(which(trm > 0, arr.ind = TRUE))
     colnames(trans_table) <- c("FROM", "TO")
     rownames(trans_table) <- NULL
-    RATES <- mapply(function(x, y) transition_rate_matrix[x, y]
+    RATES <- mapply(function(x, y) trm[x, y]
         , x = trans_table$FROM
         , y = trans_table$TO)
     trans_table$RATES <- RATES
     
-    FROM <- sapply(rownames(transition_rate_matrix)[trans_table$FROM]
+    FROM <- sapply(rownames(trm)[trans_table$FROM]
         , str2int)
     trans_table$FROM <- FROM
-    TO <- sapply(rownames(transition_rate_matrix)[trans_table$TO]
+    TO <- sapply(rownames(trm)[trans_table$TO]
         , str2int)
     trans_table$TO <- TO
     trans_table$NUM_GENES_MUTATED <- sapply(trans_table$FROM
