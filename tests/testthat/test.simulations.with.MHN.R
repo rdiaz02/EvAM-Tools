@@ -82,8 +82,10 @@ test_that("Simulate sample gives the right results", {
         , str2int)
     TO <- sapply(c("A", "B", "A, C", "A, C, D", "B, E", "B, E, F")
         , str2int)
-    tt <- data.frame(FROM = FROM, TO = TO)
-
+    GENE_MUTATED <- sapply(c("A", "B", "C", "D", "E", "F")
+        , function(x) log2(str2int(x)) + 1)
+    tt <- data.frame(FROM = FROM, TO = TO, GENE_MUTATED = GENE_MUTATED)
+    rownames(tt) <- NULL
     T_sampling <- 2
     
     T_events_1 <- c(0.1, 0.2, 0.1, 0.2, 0.1, 0.2)
@@ -103,7 +105,8 @@ test_that("Simulate sample gives the right results", {
     T_sampling <- 0.3
     sim_3 <- simulate_sample(T_events_2, tt, 6, T_sampling)
     expect_equal(sim_3$T_sampling, T_sampling)
-    expect_equal(sim_3$T_sum_events, c(0, 0.1, 0, 0, 0.2, 0.4))
+    expect_equal(sim_3$T_sum_events, c(0, 0.1, 0, 0, 0.2, 0))
+    # expect_equal(sim_3$T_sum_events, c(0, 0.1, 0, 0, 0.2, 0.4))
     expect_equal(sim_3$obs_events, str2int("B, E"))
     expect_equal(sim_3$trajectory, as.vector(sapply(c("WT", "B", "B, E"), str2int)))
 
@@ -111,7 +114,8 @@ test_that("Simulate sample gives the right results", {
     T_events_1 <- c(0.1, 0.2, 0.1, 0.2, 0.1, 0.2)
     sim_4 <- simulate_sample(T_events_1, tt, 6, T_sampling)
     expect_equal(sim_4$T_sampling, T_sampling)
-    expect_equal(sim_4$T_sum_events, c(0.1, 0, 0.2, 0.4, 0, 0))
+    expect_equal(sim_4$T_sum_events, c(0.1, 0, 0.2, 0, 0, 0))
+    # expect_equal(sim_4$T_sum_events, c(0.1, 0, 0.2, 0.4, 0, 0))
     expect_equal(sim_4$obs_events, str2int("A, C"))
     expect_equal(sim_4$trajectory, as.vector(sapply(c("WT", "A", "A, C"), str2int)))
 

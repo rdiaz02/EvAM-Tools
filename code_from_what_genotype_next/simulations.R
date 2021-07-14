@@ -137,7 +137,7 @@ process_simulations <- function(sim, output = c("frequencies", "trajectories", "
 #' @param obs_event Vector of 0 and 1. Determines which mutation are present at the time of sampling. 
 #' @return List of ordered genotypes in binary format starting from the WT
 sample2trajectory <- function(sum_time_events, obs_events){
-    if(sum(which(sum_time_events < 0) > 0)){
+    if(sum(which(sum_time_events < -1) > 0)){
         stop("Negative sampling times are not allowed")
     }
 
@@ -204,6 +204,7 @@ simulate_sample <- function(T_events
     trajectory <- c(genotype)
     T_sum_events <- rep(0, n_genes)
     accessible_genotypes <- tr$TO[tr$FROM == genotype]
+    accessible_gene_mutated <- tr$GENE_MUTATED[tr$FROM == genotype]
     T_cum <- 0
     while (length(accessible_genotypes) > 0){
         accessible_genotypes_idx <- which(tr$FROM == genotype)
@@ -211,12 +212,16 @@ simulate_sample <- function(T_events
         next_genotype_idx <- which.min(accessible_rates)
         time2mutation <- accessible_rates[next_genotype_idx]
         T_cum <- T_cum + time2mutation
+        if (T_cum > T_sampling) break
         new_genotype <- accessible_genotypes[next_genotype_idx]
-        gene_mutated <- log2(new_genotype - genotype) + 1 ## Difference gives the int genotype of the single gene mutated
+        gene_mutated <- accessible_gene_mutated[next_genotype_idx]
+        # gene_mutated <- log2(new_genotype - genotype) + 1 ## Difference gives the int genotype of the single gene mutated
         genotype <- new_genotype
         T_sum_events[gene_mutated] <- T_cum
         trajectory <- c(trajectory, new_genotype)
+        # browser()
         accessible_genotypes <- tr$TO[tr$FROM == genotype]
+        accessible_gene_mutated <- tr$GENE_MUTATED[tr$FROM == genotype]
     }
 
     obs_events <-  as.integer((T_sum_events <= T_sampling) & (T_sum_events > 0))
@@ -256,15 +261,23 @@ simulate_population <- function(trm
         , y = trans_table$TO)
     trans_table$RATES <- RATES
     
-    FROM <- sapply(rownames(trm)[trans_table$FROM]
-        , str2int)
+    FROM <- vapply(rownames(trm)[trans_table$FROM]
+        , str2int, numeric(1))
     trans_table$FROM <- FROM
-    TO <- sapply(rownames(trm)[trans_table$TO]
-        , str2int)
+    TO <- vapply(rownames(trm)[trans_table$TO]
+        , str2int, numeric(1))
     trans_table$TO <- TO
-    trans_table$NUM_GENES_MUTATED <- sapply(trans_table$FROM
-        , function(x) sum(int2binary(x, n = n_genes)))
+    trans_table$NUM_GENES_MUTATED <- vapply(trans_table$FROM
+        , function(x) sum(int2binary(x, n = n_genes)), numeric(1))
+    ##
+    trans_table <- trans_table[order(FROM), ]
+    trans_table$GENE_MUTATED <- mapply(
+        function(to, from) log2(to - from) + 1 ## Difference gives the int genotype of the single gene mutated
+        , trans_table$TO, trans_table$FROM)
 
+    rownames(trans_table) <- NULL
+   
+    
     number_transitions <- length(RATES)
     T_events <- matrix(0, n_samples, number_transitions)
     for (i in 1:number_transitions){
@@ -293,7 +306,7 @@ simulate_population <- function(trm
             T_sum_events = t(sapply(output, function(x) x$T_sum_events)),
             trans_table = trans_table,
             trajectory = sapply(output, function(x) x$trajectory),
-            obs_events = t(sapply(output, function(x) x$obs_events)),
+            obs_events = t(vapply(output, function(x) x$obs_events, numeric(1))),
             T_events = T_events)
         )
     }
