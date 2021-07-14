@@ -1,13 +1,13 @@
 pwd0 <- getwd()
 setwd("../code_from_what_genotype_next/")
-source("simulations_2.R")
+source("simulations.R")
 setwd(pwd0)
 rm(pwd0)
 out <- readRDS("../data/out_cpms.rds")
 
 
 Rprof("Simulations2")
-sim <- simulate_population(out$MHN_transitionRateMatrix, n_samples = 10000)
+sim <- simulate_population_2(out$MHN_transitionRateMatrix, n_samples = 10000)
 Rprof(NULL)
 x1 <- summaryRprof("Simulations2")
 print(x1$by.total)

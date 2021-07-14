@@ -3,7 +3,7 @@ setwd("../../code_from_what_genotype_next/")
 # source("code-all-methods-minimal.R")
 source("schill-trans-mat.R")
 source("simulations.R")
-source("simulations_2.R")
+# source("simulations_2.R")
 setwd(pwd0)
 rm(pwd0)
 
@@ -65,21 +65,21 @@ state_transitions <- state_transitions[ordering]
 
 test_that("Simulations properly handles parameters", {
     expect_error(
-        simulate_sample(state_transitions, transitions, T_sampling = -5)
+        simulate_sample_2(state_transitions, transitions, T_sampling = -5)
         , "Sampling time should be > 0")
-    expect_error(simulate_sample(state_transitions, transitions, T_sampling = "abc")
+    expect_error(simulate_sample_2(state_transitions, transitions, T_sampling = "abc")
         , "Time should be a number")
-    expect_error(simulate_sample(state_transitions, transitions, n_genes = 4, genotype = -1) 
+    expect_error(simulate_sample_2(state_transitions, transitions, n_genes = 4, genotype = -1) 
         , "Genotype out of bounds")
-    expect_error(simulate_sample(state_transitions, transitions, n_genes = 4, genotype = 16) 
+    expect_error(simulate_sample_2(state_transitions, transitions, n_genes = 4, genotype = 16) 
         , "Genotype out of bounds")
-    expect_error(simulate_sample(state_transitions, transitions, n_genes = -4) 
+    expect_error(simulate_sample_2(state_transitions, transitions, n_genes = -4) 
         , "n_genes should be a positive integer")
     ##expect transitions to have the right names in the columns
 })
 
 test_that("Output of simulations has the proper attributes", {
-    sim <- simulate_sample(state_transitions, transitions, 4)
+    sim <- simulate_sample_2(state_transitions, transitions, 4)
     expect_type(sim, "list")
     expect_named(sim, c("T_sampling"
         , "T_sum_events"
@@ -113,7 +113,7 @@ test_that("Simulate sample gives the right results", {
     
     T_sampling <- 0.15
     set.seed(1)
-    sim_1 <- simulate_sample(state_transitions, tt, 6, T_sampling)
+    sim_1 <- simulate_sample_2(state_transitions, tt, 6, T_sampling)
     expect_equal(sim_1$T_sampling, T_sampling)
 
     tmp_sum_events <- rep(-1, 6)
@@ -132,7 +132,7 @@ test_that("Simulate sample gives the right results", {
 
     T_sampling <- 20
     set.seed(1)
-    sim_1 <- simulate_sample(state_transitions, tt, 6, T_sampling)
+    sim_1 <- simulate_sample_2(state_transitions, tt, 6, T_sampling)
     tmp_sum_events <- rep(-1, 6)
     time_events <- c()
     set.seed(1)
@@ -149,7 +149,7 @@ test_that("Simulate sample gives the right results", {
 
     T_sampling <- 20
     set.seed(42)
-    sim_1 <- simulate_sample(state_transitions, tt, 6, T_sampling)
+    sim_1 <- simulate_sample_2(state_transitions, tt, 6, T_sampling)
 
     tmp_sum_events <- rep(-1, 6)
     time_events <- c()
@@ -167,7 +167,7 @@ test_that("Simulate sample gives the right results", {
 
     T_sampling <- 0.02
     set.seed(42)
-    sim_1 <- simulate_sample(state_transitions, tt, 6, T_sampling)
+    sim_1 <- simulate_sample_2(state_transitions, tt, 6, T_sampling)
 
     tmp_sum_events <- rep(-1, 6)
     time_events <- c()
@@ -187,8 +187,8 @@ test_that("Simulate sample gives the right results", {
 
 test_that("Output behaves_properly", {
     #Expect similar frequencies
-    expect_error(simulate_population(trm[-1, ], n_samples = 100), "Transition matrix should be squared")
-    sim <- simulate_population(trm, n_samples = 100)
+    expect_error(simulate_population_2(trm[-1, ], n_samples = 100), "Transition matrix should be squared")
+    sim <- simulate_population_2(trm, n_samples = 100)
     expect_type(sim, "list")
     expect_named(sim, c("T_sampling"
         , "T_sum_events"
