@@ -116,7 +116,7 @@ test_that("Simulate sample gives the right results", {
     sim_1 <- simulate_sample_2(state_transitions, tt, 6, T_sampling)
     expect_equal(sim_1$T_sampling, T_sampling)
 
-    tmp_sum_events <- rep(-1, 6)
+    tmp_sum_events <- rep(0, 6)
     time_events <- c()
     set.seed(1)
     for (i in 1:(length(sim_1$trajectory) - 1)){
@@ -133,7 +133,7 @@ test_that("Simulate sample gives the right results", {
     T_sampling <- 20
     set.seed(1)
     sim_1 <- simulate_sample_2(state_transitions, tt, 6, T_sampling)
-    tmp_sum_events <- rep(-1, 6)
+    tmp_sum_events <- rep(0, 6)
     time_events <- c()
     set.seed(1)
     for (i in 1:(length(sim_1$trajectory) - 1)){
@@ -151,7 +151,7 @@ test_that("Simulate sample gives the right results", {
     set.seed(42)
     sim_1 <- simulate_sample_2(state_transitions, tt, 6, T_sampling)
 
-    tmp_sum_events <- rep(-1, 6)
+    tmp_sum_events <- rep(0, 6)
     time_events <- c()
     set.seed(42)
     for (i in 1:(length(sim_1$trajectory) - 1)){
@@ -169,7 +169,7 @@ test_that("Simulate sample gives the right results", {
     set.seed(42)
     sim_1 <- simulate_sample_2(state_transitions, tt, 6, T_sampling)
 
-    tmp_sum_events <- rep(-1, 6)
+    tmp_sum_events <- rep(0, 6)
     time_events <- c()
     set.seed(42)
     for (i in 1:(length(sim_1$trajectory) - 1)){

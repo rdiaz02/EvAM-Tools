@@ -290,15 +290,16 @@ simulate_population <- function(trm
 
     T_sampling <- rexp(n_samples, rate = 1)
 
-    genotypes <- rep(0, n_samples)
-
     output <- mapply(simulate_sample
         , T_events = T_events_2
         , T_sampling = T_sampling
-        , genotype = genotypes
-        , MoreArgs = list(transitions = trans_table, n_genes = n_genes)
-        , SIMPLIFY = FALSE
+        , MoreArgs = list(
+            transitions = trans_table
+            , n_genes = n_genes
         )
+        , SIMPLIFY = FALSE
+        # 
+    )
 
     return(
         list(
@@ -346,7 +347,7 @@ simulate_sample_2 <- function(
 
     tr <- transitions 
     trajectory <- c(genotype)
-    T_sum_events <- rep(-1, n_genes)
+    T_sum_events <- rep(0, n_genes)
     accessible_genotypes <- tr$TO[tr$FROM == genotype]
     accessible_probabilities <- tr$PROBS[tr$FROM == genotype]
     accessible_gene_mutated <- tr$GENE_MUTATED[tr$FROM == genotype]
@@ -441,13 +442,13 @@ simulate_population_2 <- function(trm
 
     T_sampling <- rexp(n_samples, rate = 1)
 
-    genotypes <- rep(0, n_samples)
     output <- mapply(simulate_sample_2
         , T_sampling = T_sampling
-        , genotype = genotypes
-        , MoreArgs = list(transitions = trans_table
+        , MoreArgs = list(
+            transitions = trans_table
             , state_transitions = state_transitions
-            , n_genes = n_genes)
+            , n_genes = n_genes
+        )
         , SIMPLIFY = FALSE
         )
 
