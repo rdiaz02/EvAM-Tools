@@ -56,7 +56,7 @@ indiv_sample_from_trm <- function(trm, T_sampling, ngenots = NULL,
     t_accum <- 0
     genotype <- "WT" 
     trajectory <- "WT"
-    
+
     while(TRUE) {
         qii <- sum(trm[row, ]) ## Or qs in Gotovos et al terminology
         ## Special case of genotype that does not transition to anything
@@ -220,3 +220,54 @@ system.time(null <- population_sample_from_trm(trm10, T_sampling = rexp(10000)) 
 ## 47 secs
 system.time(null <- population_sample_from_trm(trm10, T_sampling = rexp(200000)) )
 
+
+
+## Take a sample (a vector), with genotypes as "A, B", etc
+## and return a vector of frequencies (counts) in the exact same
+## order as used by MHN
+## A simple implementation that can be slow when the sample is large
+
+## vector of genotypes, total number of genes ->
+##             counts of all genotypes in same order as used by MHN
+sample_to_pD_order0 <- function(x, ngenes) {
+    x <- gsub("WT", "", x)
+    xs <- strsplit(x, ", ")
+
+    Data <-  do.call(rbind,
+                   lapply(xs, function(z) as.integer(LETTERS[1:ngenes] %in% z)))
+
+    ## What follows is from Data.to.pD
+    ## except we do not divide
+    n <- ncol(Data)
+    N <- 2^n
+    Data <- apply(Data, 1, State.to.Int)
+    pD <- tabulate(Data, nbins = N)
+    return(pD)
+}
+
+## Take a sample (a vector), with genotypes as "A, B", etc
+## and return a vector of frequencies (counts) in the exact same
+## order as used by MHN
+## A much faster implementation
+
+## vector of genotypes, total number of genes ->
+##             counts of all genotypes in same order as used by MHN
+sample_to_pD_order <- function(x, ngenes) {
+    x <- as.data.frame(table(x), stringsAsFactors = FALSE)
+    
+    genot_int <- x[, 1]
+    genot_int <- gsub("WT", "", genot_int)
+    genot_int <- vapply(genot_int,
+                        function(z)
+                            State.to.Int(as.integer(LETTERS[1:ngenes] %in%
+                                                    strsplit(z, ", ")[[1]])),
+                        numeric(1))
+    ## all_genots <- rep(unname(genot_int), x[, 2])
+    pD <- tabulate(rep(unname(genot_int), x[, 2]),
+                   nbins = 2^ngenes)
+}
+
+
+## xa <- sample_to_pD_order(uu$obs_events, 4)
+## xb <- sample_to_pD_order0(uu$obs_events, 4)
+## xc <- sample_to_pD_order(null$obs_events, 8)
