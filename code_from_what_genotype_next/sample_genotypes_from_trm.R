@@ -1,49 +1,10 @@
 library(parallel)
 
-## First, I create a few transition rate matrices from MHN
-
-## setwd("./MHN")
-## source("UtilityFunctions.R")
-## source("ModelConstruction.R")
-## source("Likelihood.R")
-## source("RegularizedOptimization.R")
-
-## set.seed(1)
-
-## theta8 <- Random.Theta(n=8, sparsity=0.50)
-## pTh8 <- Generate.pTh(theta8)
-
-## set.seed(1)
-## theta4 <- Random.Theta(n=4, sparsity=0.50)
-## pTh4 <- Generate.pTh(theta4)
-
-## theta10 <- Random.Theta(n=10, sparsity=0.50)
-
-## save(file = "three_thetas.RData", theta8, theta4, theta10)
-
-
 source("schill-trans-mat.R")
 
-colnames(theta4) <- rownames(theta4) <- LETTERS[1:4]
-colnames(theta8) <- rownames(theta8) <- LETTERS[1:8]
-colnames(theta10) <- rownames(theta10) <- LETTERS[1:10]
-
-trm4 <- theta_to_trans_rate_3_SM(theta4)
-trm8 <- theta_to_trans_rate_3_SM(theta8)
-trm10 <- theta_to_trans_rate_3_SM(theta10)
-
-save(file = "three_trm.Data", trm4, trm8, trm10)
 
 ## indiv_sample_from_trm is equivalent to simulate_sample_2
 ## population_sample_from_trm is equivalent to simulate_population_2
-
-
-
-## Note differences with "simulate_sample_2"
-##  I do not compute diagonals unless needed
-
-##  I pass the trm directly, not objects from the trm that will use a lot of RAM
-##  and possibly CPU on creation
 
 
 ## transition rate matrix, time of sampling of a case/individual ->
@@ -194,56 +155,29 @@ population_sample_from_trm <- function(trm, n_samples = 10,
 }
 
 
+## ## Take a sample (a vector), with genotypes as "A, B", etc
+## ## and return a vector of frequencies (counts) in the exact same
+## ## order as used by MHN
+## ## A simple implementation that can be slow when the sample is large
 
-## Examples
+## ## vector of genotypes, total number of genes ->
+## ##             counts of all genotypes in same order as used by MHN
+## sample_to_pD_order0 <- function(x, ngenes) {
+##     x <- gsub("WT", "", x)
+##     xs <- strsplit(x, ", ")
 
-population_sample_from_trm(trm4, 12)
+##     Data <-  do.call(rbind,
+##                    lapply(xs, function(z) as.integer(LETTERS[1:ngenes] %in% z)))
 
-population_sample_from_trm(trm8, T_sampling = rexp(23))
+##     ## What follows is from Data.to.pD
+##     ## except we do not divide
+##     n <- ncol(Data)
+##     N <- 2^n
+##     Data <- apply(Data, 1, State.to.Int)
+##     pD <- tabulate(Data, nbins = N)
+##     return(pD)
+## }
 
-population_sample_from_trm(trm8, T_sampling = rexp(10000))
-
-uu <- population_sample_from_trm(trm10, T_sampling = rexp(10000))
-
-
-## 2.6 secs
-system.time(null <- population_sample_from_trm(trm8, T_sampling = rexp(10000)) )
-
-## 46 secs
-system.time(null <- population_sample_from_trm(trm8, T_sampling = rexp(200000)) )
-
-
-## 3.3 secs
-system.time(null <- population_sample_from_trm(trm10, T_sampling = rexp(10000)) )
-
-
-## 47 secs
-system.time(null <- population_sample_from_trm(trm10, T_sampling = rexp(200000)) )
-
-
-
-## Take a sample (a vector), with genotypes as "A, B", etc
-## and return a vector of frequencies (counts) in the exact same
-## order as used by MHN
-## A simple implementation that can be slow when the sample is large
-
-## vector of genotypes, total number of genes ->
-##             counts of all genotypes in same order as used by MHN
-sample_to_pD_order0 <- function(x, ngenes) {
-    x <- gsub("WT", "", x)
-    xs <- strsplit(x, ", ")
-
-    Data <-  do.call(rbind,
-                   lapply(xs, function(z) as.integer(LETTERS[1:ngenes] %in% z)))
-
-    ## What follows is from Data.to.pD
-    ## except we do not divide
-    n <- ncol(Data)
-    N <- 2^n
-    Data <- apply(Data, 1, State.to.Int)
-    pD <- tabulate(Data, nbins = N)
-    return(pD)
-}
 
 ## Take a sample (a vector), with genotypes as "A, B", etc
 ## and return a vector of frequencies (counts) in the exact same
@@ -263,11 +197,102 @@ sample_to_pD_order <- function(x, ngenes) {
                                                     strsplit(z, ", ")[[1]])),
                         numeric(1))
     ## all_genots <- rep(unname(genot_int), x[, 2])
-    pD <- tabulate(rep(unname(genot_int), x[, 2]),
-                   nbins = 2^ngenes)
+    return(tabulate(rep(unname(genot_int), x[, 2]),
+                   nbins = 2^ngenes))
 }
 
 
-## xa <- sample_to_pD_order(uu$obs_events, 4)
-## xb <- sample_to_pD_order0(uu$obs_events, 4)
-## xc <- sample_to_pD_order(null$obs_events, 8)
+
+pv_one_comp <- function(ngenes, n_samples) {
+    theta <- Random.Theta(n = ngenes, sparsity = runif(1, 0.2, 0.8))
+    pTh <- Generate.pTh(theta)
+
+    rownames(theta) <- colnames(theta) <- LETTERS[1:ngenes]
+    trmx <- theta_to_trans_rate_3_SM(theta)
+
+    spop <- suppressMessages(
+        population_sample_from_trm(trmx, n_samples = n_samples, cores = 1))
+    spop_o <- sample_to_pD_order(spop$obs_events, ngenes)
+    pv <- chisq.test(x = spop_o, p = pTh,
+                     simulate.p.value = TRUE, B = 5000)$p.value
+    ## this allows to catch cases with small values
+    ## if(pv < 0.01)
+    ##     browser()
+    return(pv)
+}
+
+
+library(codetools)
+checkUsageEnv(env = .GlobalEnv)
+
+
+
+## This is very slow, because what is slow is simulating the p value
+## in the chi-square test
+## system.time(
+## for(i in 1:M) {
+##     cat("\n Doing i = ", i, "\n")
+##     p_values[i] <- pv_one_comp(4, 10000)
+## }
+## )
+
+## 64 takes 150 seconds
+M <- 64
+Ngenes <- 8
+Nsampl <- 50000
+system.time(
+    p_values <- unlist(mclapply(1:M,
+                         function(x) pv_one_comp(Ngenes, Nsampl),
+                         mc.cores = detectCores()
+                         ))
+)
+
+save(file = "p_values_test.RData", p_values)
+
+
+
+
+
+################################################################
+
+###  Examples and older stuff
+
+## colnames(theta4) <- rownames(theta4) <- LETTERS[1:4]
+## colnames(theta8) <- rownames(theta8) <- LETTERS[1:8]
+## colnames(theta10) <- rownames(theta10) <- LETTERS[1:10]
+
+## trm4 <- theta_to_trans_rate_3_SM(theta4)
+## trm8 <- theta_to_trans_rate_3_SM(theta8)
+## trm10 <- theta_to_trans_rate_3_SM(theta10)
+## trm9 <- theta_to_trans_rate_3_SM(theta9)
+
+## save(file = "three_trm.Data", trm4, trm8, trm10, trm9)
+
+
+## ## Examples
+
+## population_sample_from_trm(trm4, 12)
+
+## population_sample_from_trm(trm8, T_sampling = rexp(23))
+
+## population_sample_from_trm(trm8, T_sampling = rexp(10000))
+
+## uu <- population_sample_from_trm(trm10, T_sampling = rexp(10000))
+
+
+## ## 2.6 secs
+## system.time(null <- population_sample_from_trm(trm8, T_sampling = rexp(10000)) )
+
+## ## 46 secs; 6 seconds in Draco
+## system.time(null <- population_sample_from_trm(trm8, T_sampling = rexp(200000)) )
+
+
+## ## 3.3 secs
+## system.time(null <- population_sample_from_trm(trm10, T_sampling = rexp(10000)) )
+
+
+## ## 47 secs; 9 seconds in Draco
+## system.time(null <- population_sample_from_trm(trm10, T_sampling = rexp(200000)))
+
+## ## 7 seconds in Draco
+## system.time(null <- population_sample_from_trm(trm9, T_sampling = rexp(200000)))
