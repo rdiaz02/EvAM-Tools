@@ -1331,12 +1331,11 @@ plot_sampled_genots <- function(data) {
 cpm_layout <- function(graph){
     # V(graph)$num_mutations <<- 
     num_mutations <- sapply(V(graph)$name, function(x){
-        if (x == "WT") return(0)
-        else return(nchar(x))
+        ifelse(x == "WT", 0, nchar(x))
     })
     V(graph)$num_mutations <- num_mutations 
     
-    lyt <- matrix(0, ncol=2, nrow=length(V(graph)))
+    lyt <- matrix(0, ncol = 2, nrow = length(V(graph)))
     lyt[, 2] <-  num_mutations
 
     for (i in 0:max(num_mutations)) {
@@ -1367,15 +1366,58 @@ cpm_layout <- function(graph){
 #' plot_genot_fg(edge_transitions, db2, sorted_observations)
 #' title("Fluxes", line = -3)
 #' dev.off()
-plot_genot_fg <- function(trans_mat, observations = NULL, freqs = NULL){
-    trans_mat <- as.matrix(trans_mat)
+plot_genot_fg <- function(trans_mat
+    , observations = NULL
+    , freqs = NULL
+    , simplify = TRUE
+    , top_edge_per_node = 5){
+    # trans_mat <- as.matrix(trans_mat)
     rownames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
     colnames(trans_mat) <- str_replace_all(colnames(trans_mat), ", ", "")
+
+    graph <- graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
+    print(sprintf("->Number of nodes %s Number of edges %s", length(V(graph)), length(E(graph))))
 
     unique_genes_names <- sort(unique(str_split(paste(rownames(trans_mat)[-1], collapse=""), "")[[1]]))
 
     num_genes <- length(unique_genes_names)
     graph <- graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
+    # browser()
+    ## TODO take into account that a genoytpe can be observed
+    if(simplify){
+        graph <- decompose(graph)[[1]]
+        min_values <- sort(trans_mat[trans_mat > 0], decreasing = TRUE)
+        thr <- num_genes * top_edge_per_node
+        ifelse(length(min_values > thr)
+            , min_value <- min_values[thr]
+            , min_value <- min_values[-1]
+        )
+        trans_mat[trans_mat < min_value] = 0
+
+        graph <- graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
+        
+        # browser()
+        subgraphs <- decompose(graph)
+        graph <- subgraphs[[1]]
+        for(i in subgraphs[-1]){
+            if(length(V(i)) > 5){
+                EL  = get.edgelist(graph)
+                EL1 = get.edgelist(i)
+                ELU = rbind(EL, EL1)
+                ELU = ELU[!duplicated(ELU),]
+                w <- c(get.edge.attribute(graph, "weight")
+                    , get.edge.attribute(i, "weight"))
+                graph <- graph_from_edgelist(ELU)
+                graph<- set_edge_attr(graph, "weight", value = w)
+            } 
+        }
+    } 
+        
+
+    # print(sprintf("Number of nodes %s Number of edges %s", length(V(g)), length(E(g))))
+    print(sprintf("-->Number of nodes %s Number of edges %s", length(V(graph)), length(E(graph))))
+
+    genotypes <- rownames(trans_mat)
 
     if (!is.null(observations)){
         observations <- as.data.frame(sampledGenotypes(observations))
@@ -1384,14 +1426,18 @@ plot_genot_fg <- function(trans_mat, observations = NULL, freqs = NULL){
     }
 
     if (!is.null(freqs)){
-        freqs$Abs_Freq <- freqs$Freq / sum(freqs$Freq)
+        freqs$Abs_Freq <- freqs$Counts / sum(freqs$Counts)
         freqs$Genotype <- str_replace_all(freqs$Genotype, ", ", "")
     }
 
     lyt <- cpm_layout(graph)
+    # browser()
 
-    observed_color <- "#ff7b00fb"
+    observed_color <- "#ff7b00"
     not_observed_color <- "#0892d0" 
+    if(is.null(observations)){
+        not_observed_color <- "#ff7b00"
+    } 
     colors <- sapply(V(graph)$name, 
         function(gen){
             if (sum(match(observations$Genotype, gen, nomatch = 0)) == 1){
@@ -1438,16 +1484,18 @@ plot_genot_fg <- function(trans_mat, observations = NULL, freqs = NULL){
         , labels = 0:(num_genes)
         , lwd = 2
         , pos = margin)
-    legend("bottom", c("Observed", "Not-observed") 
-        , box.lwd = 0, lty=c(NA, NA), lwd = c(NA, NA)
-        , pch = c(21, 21)
-        , col = c(observed_color, not_observed_color)
-        , pt.bg = c(observed_color, not_observed_color)
-        , pt.cex = c(2, 2), horiz = TRUE
-        , x.intersp = c(0, 0)
-        )
+    if(!(is.null(observations))){
+        legend("bottom", c("Observed", "Not observed") 
+            , box.lwd = 0, lty=c(NA, NA), lwd = c(NA, NA)
+            , pch = c(21, 21)
+            , col = c(observed_color, not_observed_color)
+            , pt.bg = c(observed_color, not_observed_color)
+            , pt.cex = c(2, 2), horiz = TRUE
+            , x.intersp = c(0, 0)
+            )
+    }
     par(opx)
-    title(xlab = "Number of features acquired", line = -2)
+    title(xlab = "Number of features acquired", line = -4)
 }
 
 
