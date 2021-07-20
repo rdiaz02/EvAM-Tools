@@ -203,7 +203,7 @@ sample_to_pD_order <- function(x, ngenes) {
 
 
 
-pv_one_comp <- function(ngenes, n_samples) {
+pv_one_comp <- function(ngenes, n_samples, B = 2000) {
     theta <- Random.Theta(n = ngenes, sparsity = runif(1, 0.2, 0.8))
     pTh <- Generate.pTh(theta)
 
@@ -214,7 +214,7 @@ pv_one_comp <- function(ngenes, n_samples) {
         population_sample_from_trm(trmx, n_samples = n_samples, cores = 1))
     spop_o <- sample_to_pD_order(spop$obs_events, ngenes)
     pv <- chisq.test(x = spop_o, p = pTh,
-                     simulate.p.value = TRUE, B = 5000)$p.value
+                     simulate.p.value = TRUE, B = B)$p.value
     ## this allows to catch cases with small values
     ## if(pv < 0.01)
     ##     browser()
@@ -236,20 +236,46 @@ checkUsageEnv(env = .GlobalEnv)
 ## }
 ## )
 
-## 64 takes 150 seconds
-M <- 64
+
+## M <- 144 ## 213 seconds; so about 52 secs per set.
+M <- 10000
 Ngenes <- 8
 Nsampl <- 50000
 system.time(
-    p_values <- unlist(mclapply(1:M,
+    p_values8 <- unlist(mclapply(1:M,
                          function(x) pv_one_comp(Ngenes, Nsampl),
                          mc.cores = detectCores()
                          ))
 )
 
-save(file = "p_values_test.RData", p_values)
+
+sum(p_values8 < 0.05)/M
+sum(p_values8 < 0.01)/M
+sum(p_values8 < 0.005)/M ## Questionable this can be estimated well with B = 2000
+
+save(file = "p_values8_test.RData", p_values8)
 
 
+M <- 10000 ## 230 seconds; so about 57 seconds per set. 
+Ngenes <- 7
+Nsampl <- 50000
+system.time(
+    p_values7 <- unlist(mclapply(1:M,
+                         function(x) pv_one_comp(Ngenes, Nsampl, B = 4000),
+                         mc.cores = detectCores()
+                         ))
+)
+
+
+sum(p_values7 < 0.05)/M
+sum(p_values7 < 0.01)/M
+sum(p_values7 < 0.005)/M
+
+save(file = "p_values7_test.RData", p_values7)
+
+
+## Can run it as
+## R --vanilla -f sample_genotypes_from_trm.R &> sample_genotypes_from_trm.Rout 
 
 
 
