@@ -277,6 +277,7 @@ save(file = "p_values7_test.RData", p_values7)
 ## Can run it as
 ## nohup R --vanilla -f sample_genotypes_from_trm.R &> sample_genotypes_from_trm.Rout & 
 ## or, with changes in systemd
+## loginctl enable-linger
 ## systemd-run --scope --user R --vanilla --slave -f sample_genotypes_from_trm.R &> sample_genotypes_from_trm.Rout &
 
 
