@@ -1,4 +1,4 @@
-
+library(parallel)
 
 ## First, I create a few transition rate matrices from MHN
 
@@ -17,16 +17,22 @@
 ## theta4 <- Random.Theta(n=4, sparsity=0.50)
 ## pTh4 <- Generate.pTh(theta4)
 
-## save(file = "two_thetas.RData", theta8, theta4)
+## theta10 <- Random.Theta(n=10, sparsity=0.50)
+
+## save(file = "three_thetas.RData", theta8, theta4, theta10)
 
 
 source("schill-trans-mat.R")
 
 colnames(theta4) <- rownames(theta4) <- LETTERS[1:4]
 colnames(theta8) <- rownames(theta8) <- LETTERS[1:8]
+colnames(theta10) <- rownames(theta10) <- LETTERS[1:10]
 
 trm4 <- theta_to_trans_rate_3_SM(theta4)
 trm8 <- theta_to_trans_rate_3_SM(theta8)
+trm10 <- theta_to_trans_rate_3_SM(theta10)
+
+save(file = "three_trm.Data", trm4, trm8, trm10)
 
 ## indiv_sample_from_trm is equivalent to simulate_sample_2
 ## population_sample_from_trm is equivalent to simulate_population_2
@@ -125,9 +131,15 @@ indiv_sample_from_trm_pre <- function(trmstd,
 
 
 ## Like indiv_sample_from_trm, but for multiple times
+
+## transition rate matrix, number of samples or times of samples,
+##  whether or not to precompute entries of the trans rate matrix (for speed)
+##  number of cores (pass 1 is you do not want to parallelize)
+
 population_sample_from_trm <- function(trm, n_samples = 10,
                                        T_sampling = NULL,
-                                       pre_compute = TRUE) {
+                                       pre_compute = TRUE,
+                                       cores = detectCores()) {
     if(is.null(T_sampling) && !is.null(n_samples)) {
         T_sampling <- rexp(n = n_samples, rate = 1)
     }
@@ -150,21 +162,23 @@ population_sample_from_trm <- function(trm, n_samples = 10,
             trm[i, ] <- trm[i, ]/sx[i]
         }
         
-        out <- lapply(T_sampling,
+        out <- mclapply(T_sampling,
                function(x)
                    indiv_sample_from_trm_pre(trmstd = trm,
                                              diag = sx,
                                              T_sampling = x,
                                              ngenots = ngenots,
-                                             genot_names = genot_names))   
+                                             genot_names = genot_names),
+               mc.cores = cores)   
         
     } else {    
-        out <- lapply(T_sampling,
+        out <- mclapply(T_sampling,
                function(x)
                    indiv_sample_from_trm(trm = trm,
                                          T_sampling = x,
                                          ngenots = ngenots,
-                                         genot_names = genot_names))
+                                         genot_names = genot_names),
+               mc.cores = cores)
     }
     ## Structure output as Pablo's  simulate_population_2
     ## Otherwise, we could just exist from the above
@@ -187,5 +201,22 @@ population_sample_from_trm(trm4, 12)
 
 population_sample_from_trm(trm8, T_sampling = rexp(23))
 
+population_sample_from_trm(trm8, T_sampling = rexp(10000))
 
+uu <- population_sample_from_trm(trm10, T_sampling = rexp(10000))
+
+
+## 2.6 secs
+system.time(null <- population_sample_from_trm(trm8, T_sampling = rexp(10000)) )
+
+## 46 secs
+system.time(null <- population_sample_from_trm(trm8, T_sampling = rexp(200000)) )
+
+
+## 3.3 secs
+system.time(null <- population_sample_from_trm(trm10, T_sampling = rexp(10000)) )
+
+
+## 47 secs
+system.time(null <- population_sample_from_trm(trm10, T_sampling = rexp(200000)) )
 
