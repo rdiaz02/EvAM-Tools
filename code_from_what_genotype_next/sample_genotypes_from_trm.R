@@ -72,8 +72,62 @@ indiv_sample_from_trm <- function(trm, T_sampling, ngenots = NULL,
 }
 
 
+
+
+
+######################################
+
+## We repeat the sums to compute the diagonal and the division
+## If we sample a large number of times, possibly worth it to
+## have those precomputed
+
+## This is what I call "transition matrix standardized":
+##    Diagonal is passed separately, entries in matrix are probabilities
+
+## This will only be used in called after standardization
+## therefore the "is.null" can be removed
+
+## transition rate matrix "standardized",
+##  diagonal of transition rate matrix, time of sampling of a case/individual ->
+##                       sampled genotype, trajectory, and accumulated time
+indiv_sample_from_trm_pre <- function(trmstd,
+                                      diag,
+                                      T_sampling,
+                                      ngenots,
+                                      genot_names) {
+    ## if(is.null(ngenots)) ngenots <- ncol(trm)
+    ## if(is.null(genot_names)) genot_names <- colnames(trm)
+    row <- 1
+    t_accum <- 0
+    genotype <- "WT" 
+    trajectory <- "WT"
+    
+    while(TRUE) {
+        ## qii <- diag[row] ## Or qs in Gotovos et al terminology
+        ## Special case of genotype that does not transition to anything
+        if(diag[row] == 0.0) break 
+        t_transition <- rexp(n = 1, rate = diag[row])
+        t_accum <- t_accum + t_transition
+        if(t_accum >= T_sampling ) break
+        ## We transition. To what genotype?
+        ## pj <- trm[row, ]
+        j <- sample(x = seq_len(ngenots), size = 1, prob = trmstd[row, ])
+        genotype <- genot_names[j]
+        trajectory <- c(trajectory, genotype)
+        ## For next iteration
+        row <- j
+    }
+    return(list(genotype = genotype,
+                trajectory = trajectory,
+                t_accum = t_accum))
+}
+
+
+
 ## Like indiv_sample_from_trm, but for multiple times
-population_sample_from_trm <- function(trm, n_samples = 10, T_sampling = NULL) {
+population_sample_from_trm <- function(trm, n_samples = 10,
+                                       T_sampling = NULL,
+                                       pre_compute = TRUE) {
     if(is.null(T_sampling) && !is.null(n_samples)) {
         T_sampling <- rexp(n = n_samples, rate = 1)
     }
@@ -87,11 +141,42 @@ population_sample_from_trm <- function(trm, n_samples = 10, T_sampling = NULL) {
     
     ngenots <- ncol(trm)
     genot_names <- colnames(trm)
-    lapply(T_sampling,
-           function(x) indiv_sample_from_trm(trm = trm,
+
+    if(pre_compute) {
+        ## Like code in trans_rate_to_trans_mat
+        sx <- rowSums(trm)
+        ii <- which(sx > 0)
+        for(i in ii) {
+            trm[i, ] <- trm[i, ]/sx[i]
+        }
+        
+        out <- lapply(T_sampling,
+               function(x)
+                   indiv_sample_from_trm_pre(trmstd = trm,
+                                             diag = sx,
                                              T_sampling = x,
                                              ngenots = ngenots,
-                                             genot_names = genot_names))
+                                             genot_names = genot_names))   
+        
+    } else {    
+        out <- lapply(T_sampling,
+               function(x)
+                   indiv_sample_from_trm(trm = trm,
+                                         T_sampling = x,
+                                         ngenots = ngenots,
+                                         genot_names = genot_names))
+    }
+    ## Structure output as Pablo's  simulate_population_2
+    ## Otherwise, we could just exist from the above
+    ## This will add time and increase RAM usage
+
+    return(list(
+        T_sampling = T_sampling
+      , T_sum_events = unlist(lapply(out, function(x) x$t_accum))
+      , trans_table = NA ## I do not know what this is for
+      , trajectory = lapply(out, function(x) x$trajectory)
+      , obs_events = unlist(lapply(out, function(x) x$genotype))
+        ))
 }
 
 
@@ -101,3 +186,6 @@ population_sample_from_trm <- function(trm, n_samples = 10, T_sampling = NULL) {
 population_sample_from_trm(trm4, 12)
 
 population_sample_from_trm(trm8, T_sampling = rexp(23))
+
+
+
