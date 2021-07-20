@@ -28,8 +28,12 @@ colnames(theta8) <- rownames(theta8) <- LETTERS[1:8]
 trm4 <- theta_to_trans_rate_3_SM(theta4)
 trm8 <- theta_to_trans_rate_3_SM(theta8)
 
+## indiv_sample_from_trm is equivalent to simulate_sample_2
+## population_sample_from_trm is equivalent to simulate_population_2
 
-## Note differences
+
+
+## Note differences with "simulate_sample_2"
 ##  I do not compute diagonals unless needed
 
 ##  I pass the trm directly, not objects from the trm that will use a lot of RAM
@@ -38,9 +42,10 @@ trm8 <- theta_to_trans_rate_3_SM(theta8)
 
 ## transition rate matrix, time of sampling of a case/individual ->
 ##                       sampled genotype, trajectory, and accumulated time
-trm_2_sample <- function(trm, T_sampling) {
-    ngenots <- ncol(trm)
-    genot_names <- colnames(trm)
+indiv_sample_from_trm <- function(trm, T_sampling, ngenots = NULL,
+                            genot_names = NULL) {
+    if(is.null(ngenots)) ngenots <- ncol(trm)
+    if(is.null(genot_names)) genot_names <- colnames(trm)
     row <- 1
     t_accum <- 0
     genotype <- "WT" 
@@ -67,3 +72,32 @@ trm_2_sample <- function(trm, T_sampling) {
 }
 
 
+## Like indiv_sample_from_trm, but for multiple times
+population_sample_from_trm <- function(trm, n_samples = 10, T_sampling = NULL) {
+    if(is.null(T_sampling) && !is.null(n_samples)) {
+        T_sampling <- rexp(n = n_samples, rate = 1)
+    }
+    if(!is.null(T_sampling) && !is.null(n_samples)) {
+        message("Ignoring n_samples as passing T_sampling")
+    }
+    if(is.null(T_sampling) && is.null(n_samples)) {
+        stop("Pass either n_samples or T_sampling vector")
+    }
+
+    
+    ngenots <- ncol(trm)
+    genot_names <- colnames(trm)
+    lapply(T_sampling,
+           function(x) indiv_sample_from_trm(trm = trm,
+                                             T_sampling = x,
+                                             ngenots = ngenots,
+                                             genot_names = genot_names))
+}
+
+
+
+## Examples
+
+population_sample_from_trm(trm4, 12)
+
+population_sample_from_trm(trm8, T_sampling = rexp(23))
