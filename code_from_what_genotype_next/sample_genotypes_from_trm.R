@@ -249,14 +249,15 @@ system.time(
 )
 
 
-sum(p_values8 < 0.05)/M
-sum(p_values8 < 0.01)/M
-sum(p_values8 < 0.005)/M ## Questionable this can be estimated well with B = 2000
+sum(p_values8 < 0.05)/M ## 0.0488
+sum(p_values8 < 0.01)/M ## 0.0108
+sum(p_values8 < 0.005)/M ## 0.0053, though questionable this can be estimated well with B = 2000
+sum(p_values7 < 0.001)/M ## 0.0012: again, expect a lot of noise here with M and B used.
 
 save(file = "p_values8_test.RData", p_values8)
 
 
-M <- 10000 ## 230 seconds; so about 57 seconds per set. 
+M <- 10000 ## 144 in 230 seconds; so about 57 seconds per set. 
 Ngenes <- 7
 Nsampl <- 50000
 system.time(
@@ -267,11 +268,62 @@ system.time(
 )
 
 
-sum(p_values7 < 0.05)/M
-sum(p_values7 < 0.01)/M
-sum(p_values7 < 0.005)/M
+sum(p_values7 < 0.05)/M ## 0.0497
+sum(p_values7 < 0.01)/M ## 0.0103
+sum(p_values7 < 0.005)/M ## 0.0054
+sum(p_values7 < 0.001)/M ## 7e-4, but this will not be well estimated?
 
 save(file = "p_values7_test.RData", p_values7)
+
+
+## both look OK
+hist(p_values8)
+hist(p_values7)
+## For ks test, recall we are using permutation test, so min p.value is not 0
+## but 1/(B + 1). Though this minor thing makes no difference
+ks.test(p_values8, "punif", 1/2001, 1) ## p-value = 0.5
+ks.test(p_values7, "punif", 1/4001, 1) ## p-value = 1
+
+## From https://stats.stackexchange.com/a/406717
+plot(ecdf(p_values8))
+curve(punif(x, 1/2001, 1), add = TRUE, col = "blue")
+
+plot(ecdf(p_values7))
+curve(punif(x, 1/4001, 1), add = TRUE, col = "blue")
+
+
+
+
+if(FALSE) {
+    ## For the hell of it, if we want, run this later
+    ## This will be very slow!!
+    M <- 30000 
+    Ngenes <- 10
+    Nsampl <- 200000
+    system.time(
+        p_values10 <- unlist(mclapply(1:M,
+                                      function(x) pv_one_comp(Ngenes, Nsampl,
+                                                              B = 10000),
+                                      mc.cores = detectCores()
+                                      ))
+    )
+
+
+    sum(p_values10 < 0.05)/M ## 
+    sum(p_values10 < 0.01)/M ## 
+    sum(p_values10 < 0.005)/M ## 
+    sum(p_values10 < 0.001)/M ## 
+
+    save(file = "p_values10_test.RData", p_values10)
+
+    hist(p_values10)
+    ks.test(p_values10, "punif", 1/10001, 1) 
+    plot(ecdf(p_values10))
+    curve(punif(x, 1/10001, 1), add = TRUE, col = "blue")
+}
+
+
+
 
 
 ## Can run it as
