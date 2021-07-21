@@ -21,6 +21,9 @@
 ## Use OncoSimulR to obtain accessible genotypes and transition matrices between
 ## genotypes for CBN, OT, PMCE and DBN.
 
+## See comments and examples in ../OncoSimul-for-accessible-and-more-on-PMCE.org 
+
+
 ## Additionally, since we compute and output fitness, can be used for simulations
 ## (and shows the equivalence between lambdas and selection coefficients).
 
@@ -241,6 +244,15 @@ checkUsageEnv(env = .GlobalEnv)
 
 # plot(allFitnessEffects(cpm_out_to_oncosimul(ex_pmce_out1)),
 #      "igraph", layout = layout.reingold.tilford)
+
+## 
+ex_pmce_email <- read.table("ex_pmce_email.txt", header = TRUE)
+
+out_em <- cpm2tm(ex_pmce_email)
+
+pdf(file = "DAG_pmce_example.pdf")
+plot(allFitnessEffects(cpm_out_to_oncosimul(ex_pmce_email)))
+dev.off()
 
 
 
