@@ -1,6 +1,7 @@
 library(parallel)
 
 source("schill-trans-mat.R")
+source("code-all-methods-minimal.R")
 
 
 ## indiv_sample_from_trm is equivalent to simulate_sample_2
@@ -204,11 +205,11 @@ sample_to_pD_order <- function(x, ngenes) {
 
 
 pv_one_comp <- function(ngenes, n_samples, B = 2000) {
+
     theta <- Random.Theta(n = ngenes, sparsity = runif(1, 0.2, 0.8))
     pTh <- Generate.pTh(theta)
 
-    rownames(theta) <- colnames(theta) <- LETTERS[1:ngenes]
-    trmx <- theta_to_trans_rate_3_SM(theta)
+    trmx <- cpm_access_genots_paths_w_simplified(theta)
 
     spop <- suppressMessages(
         population_sample_from_trm(trmx, n_samples = n_samples, cores = 1))
@@ -221,12 +222,72 @@ pv_one_comp <- function(ngenes, n_samples, B = 2000) {
     return(pv)
 }
 
+library(mccbn)
+mccbn_vs_comp <- function(ngenes, n_samples, B = 2000) {
+    true_p1 <- mccbn::random_poset(ngenes)
+    rownames(true_p1) <- colnames(true_p1) <- LETTERS[1:ncol(true_p1)]
+    lambda_s <- 1
+    lambdas <- runif(ngenes, 1/ngenes*lambda_s, ngenes*lambda_s)
+
+    simGenotypes <- mccbn::sample_genotypes(n_samples, true_p1,
+                                        sampling_param = lambda_s,
+                                        lambdas = lambdas)
+    spop_mccbn <- apply(simGenotypes$obs_events
+        , 1
+        , function(x) paste(LETTERS[1:ngenes][x == 1], collapse = ", "))
+    spop_mccbn_o <- sample_to_pD_order(spop_mccbn, ngenes)
+
+    #Build trm
+    ## Adapted from mccbn-process.R
+    df1 <- igraph::as_data_frame(graph_from_adjacency_matrix(true_p1))
+    colnames(df1) <- c("From", "To")
+    no_parent <- setdiff(colnames(true_p1), df1[, 2])
+    dfr <- rbind(
+        data.frame(From = "Root", To = no_parent,
+                   stringsAsFactors = FALSE),
+        df1)
+    dfr$edge = paste(dfr[, "From"],
+                     dfr[, "To"],
+                     sep = " -> ")
+
+    names(lambdas) <- colnames(true_p1)
+    dfr$lambda <- lambdas[dfr$To]
+
+    trm <- cpm_access_genots_paths_w_simplified(list(edges = dfr))$weighted_fgraph
+
+    spop <- suppressMessages(
+        population_sample_from_trm(trm, n_samples = n_samples, cores = 1))
+    spop_o <- sample_to_pD_order(spop$obs_events, ngenes)
+    pv <- chisq.test(x = spop_o, y = spop_mccbn_o, simulate.p.value = TRUE, B = B)$p.value
+    browser()
+    ## this allows to catch cases with small values
+    ## if(pv < 0.01)
+    ##     browser()
+    return(pv)
+}
+mccbn_vs_comp(3, 50000)
 
 library(codetools)
 checkUsageEnv(env = .GlobalEnv)
 
+M <- 10000
+Ngenes <- 5
+Nsampl <- 50000
+system.time(
+    p_values5 <- unlist(mclapply(1:M,
+                         function(x) mccbn_vs_comp(Ngenes, Nsampl),
+                         mc.cores = detectCores()
+                         ))
+)
 
 
+print(sum(p_values5 < 0.01)/M) ## 0.0108
+print(sum(p_values5 < 0.05)/M) ## 0.0488
+print(sum(p_values5 < 0.005)/M) ## 0.0053, though questionable this can be estimated well with B = 2000
+print(sum(p_values5 < 0.001)/M) ## 0.0012: again, expect a lot of noise here with M and B used.
+
+save(file = "p_values5_mccbn.RData", p_values5)
+stop()
 ## This is very slow, because what is slow is simulating the p value
 ## in the chi-square test
 ## system.time(
