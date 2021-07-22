@@ -229,6 +229,7 @@ mccbn_vs_comp <- function(ngenes, n_samples, B = 2000) {
     lambda_s <- 1
     lambdas <- runif(ngenes, 1/ngenes*lambda_s, ngenes*lambda_s)
 
+    # Simulations with MCCBN
     simGenotypes <- mccbn::sample_genotypes(n_samples, true_p1,
                                         sampling_param = lambda_s,
                                         lambdas = lambdas)
@@ -254,18 +255,17 @@ mccbn_vs_comp <- function(ngenes, n_samples, B = 2000) {
     dfr$lambda <- lambdas[dfr$To]
 
     trm <- cpm_access_genots_paths_w_simplified(list(edges = dfr))$weighted_fgraph
-
+    
+    # Simulations with our code
     spop <- suppressMessages(
         population_sample_from_trm(trm, n_samples = n_samples, cores = 1))
     spop_o <- sample_to_pD_order(spop$obs_events, ngenes)
     pv <- chisq.test(x = spop_o, y = spop_mccbn_o, simulate.p.value = TRUE, B = B)$p.value
-    browser()
     ## this allows to catch cases with small values
     ## if(pv < 0.01)
     ##     browser()
     return(pv)
 }
-mccbn_vs_comp(3, 50000)
 
 library(codetools)
 checkUsageEnv(env = .GlobalEnv)
@@ -276,7 +276,7 @@ Nsampl <- 50000
 system.time(
     p_values5 <- unlist(mclapply(1:M,
                          function(x) mccbn_vs_comp(Ngenes, Nsampl),
-                         mc.cores = detectCores()
+                         mc.cores = detectCores() - 1
                          ))
 )
 
