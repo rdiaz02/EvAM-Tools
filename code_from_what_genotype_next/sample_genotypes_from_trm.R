@@ -223,7 +223,7 @@ pv_one_comp <- function(ngenes, n_samples, B = 2000) {
 }
 
 library(mccbn)
-mccbn_vs_comp <- function(ngenes, n_samples, B = 2000) {
+mccbn_vs_comp <- function(ngenes, n_samples, B = 50000) {
     true_p1 <- mccbn::random_poset(ngenes)
     rownames(true_p1) <- colnames(true_p1) <- LETTERS[1:ncol(true_p1)]
     lambda_s <- 1
@@ -260,33 +260,45 @@ mccbn_vs_comp <- function(ngenes, n_samples, B = 2000) {
     spop <- suppressMessages(
         population_sample_from_trm(trm, n_samples = n_samples, cores = 1))
     spop_o <- sample_to_pD_order(spop$obs_events, ngenes)
-    pv <- chisq.test(x = spop_o, y = spop_mccbn_o, simulate.p.value = TRUE, B = B)$p.value
+    
+    genot_by_method <- rbind(spop_o, spop_mccbn_o)
+    which_cols_both_0 <- colSums(genot_by_method) == 0
+    genot_by_method <- genot_by_method[, !which_cols_both_0]
+
+    pv <- chisq.test(genot_by_method, simulate.p.value = TRUE, B = B)$p.value
     ## this allows to catch cases with small values
     ## if(pv < 0.01)
     ##     browser()
     return(pv)
 }
 
+mccbn_vs_comp(3, 10000)
 library(codetools)
 checkUsageEnv(env = .GlobalEnv)
 
-M <- 10000
-Ngenes <- 5
-Nsampl <- 50000
-system.time(
-    p_values5 <- unlist(mclapply(1:M,
-                         function(x) mccbn_vs_comp(Ngenes, Nsampl),
-                         mc.cores = detectCores() - 1
-                         ))
-)
+for (i in c(3, 5, 6, 7, 9)){
+    print(sprintg("GENES %s", i))
+    print(date())
+    M <- 10000
+    Ngenes <- i
+    Nsampl <- 50000
+
+    system.time(
+        p_values5 <- unlist(mclapply(1:M,
+                            function(x) mccbn_vs_comp(Ngenes, Nsampl),
+                            mc.cores = detectCores() - 1
+                            ))
+    )
+    save(file = sprintf("p_values%s_mccbn.RData", i), p_values5)
+}
 
 
-print(sum(p_values5 < 0.01)/M) ## 0.0108
-print(sum(p_values5 < 0.05)/M) ## 0.0488
-print(sum(p_values5 < 0.005)/M) ## 0.0053, though questionable this can be estimated well with B = 2000
-print(sum(p_values5 < 0.001)/M) ## 0.0012: again, expect a lot of noise here with M and B used.
+# print(sum(p_values5 < 0.01)/M) ## 0.0108
+# print(sum(p_values5 < 0.05)/M) ## 0.0488
+# print(sum(p_values5 < 0.005)/M) ## 0.0053, though questionable this can be estimated well with B = 2000
+# print(sum(p_values5 < 0.001)/M) ## 0.0012: again, expect a lot of noise here with M and B used.
 
-save(file = "p_values5_mccbn.RData", p_values5)
+# save(file = "p_values5_mccbn.RData", p_values5)
 stop()
 ## This is very slow, because what is slow is simulating the p value
 ## in the chi-square test
