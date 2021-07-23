@@ -277,7 +277,7 @@ library(codetools)
 checkUsageEnv(env = .GlobalEnv)
 
 for (i in c(3, 5, 6, 7, 9)){
-    print(sprintg("GENES %s", i))
+    print(sprintf("GENES %s", i))
     print(date())
     M <- 10000
     Ngenes <- i
