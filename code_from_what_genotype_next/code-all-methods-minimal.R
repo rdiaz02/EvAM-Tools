@@ -97,7 +97,10 @@ source("pre-process.R", echo = FALSE, max.deparse.length = 0)
 source("ot-process.R", echo = FALSE, max.deparse.length = 0)
 ## source("dip-process.R", echo = FALSE, max.deparse.length = 0)  ## No longer using it
 source("cbn-process.R", echo = FALSE, max.deparse.length = 0)
-source("dbn-process.R", echo = FALSE, max.deparse.length = 0)
+
+## do not halt if not installed. At least for now
+if(require(OncoBN))
+    source("dbn-process.R", echo = FALSE, max.deparse.length = 0)
 source("hesbcn-process.R", echo = FALSE, max.deparse.length = 0)
 
 if(MCCBN_INSTALLED)
