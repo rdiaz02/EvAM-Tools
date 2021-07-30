@@ -1,7 +1,8 @@
 local({
     ## From ex1.R
 ex_cbn_out1 <- structure(list(From = c("Root", "Root"),
-                              To = c("A", "B"), edge = c("Root -> A", "Root -> B"),
+                              To = c("A", "B"),
+                              edge = c("Root -> A", "Root -> B"),
                               init_lambda = c(88.234297, 268.921382),
                               final_lambda = c(88.234297, 268.921382),
                               rerun_lambda = c(88.234297, 268.921382),
