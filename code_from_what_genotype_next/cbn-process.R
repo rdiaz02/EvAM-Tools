@@ -76,8 +76,6 @@ library(parallel)
 library(Oncotree)
 library(igraph)
 
-source("./simulations.R")
-
 
 f_cbn <- function(x, init.poset = c("linear", "OT"), nboot = 0,
                   verbose = FALSE, parall = FALSE, cbn_proc_silent = TRUE) {
@@ -805,41 +803,41 @@ run.oncotree <- function(x, ## type.out = "adjmat",
 #' 
 #' @return List with the poset, the lambdas, the lambda_s 
 #' and the result of the simulations
-simulate_mccbn <- function(poset = NULL, n_genes = 5, lambdas = NULL, n = 10000,
-    seed = NULL, lambda_s = 1){
+# simulate_mccbn <- function(poset = NULL, n_genes = 5, lambdas = NULL, n = 10000,
+#     seed = NULL, lambda_s = 1){
     
-    if(n_genes < 2){
-        stop("Minimun number of genes supported is 2")
-    }
+#     if(n_genes < 2){
+#         stop("Minimun number of genes supported is 2")
+#     }
 
-    if(!is.null(seed)) set.seed(seed)
+#     if(!is.null(seed)) set.seed(seed)
 
-    if(is.null(poset)){
-        poset <- mccbn::random_poset(n_genes)
-    } else if(length(poset) != n_genes**2){
-        stop("Mismatch between number of genes and poset dimensions")
-    }
+#     if(is.null(poset)){
+#         poset <- mccbn::random_poset(n_genes)
+#     } else if(length(poset) != n_genes**2){
+#         stop("Mismatch between number of genes and poset dimensions")
+#     }
 
-    if(is.null(lambda_s)) lambda_s <- 1
+#     if(is.null(lambda_s)) lambda_s <- 1
 
-    if(is.null(lambdas)) { 
-        lambdas <- runif(n_genes, 1/n_genes*lambda_s, n_genes*lambda_s)
-    } else if(length(lambdas) != n_genes){
-        stop("Mismatch between number of genes and lambdas")
-    } else if(any(lambdas < 0)){
-        stop("Lambdas can only take positive values")
-    }
+#     if(is.null(lambdas)) { 
+#         lambdas <- runif(n_genes, 1/n_genes*lambda_s, n_genes*lambda_s)
+#     } else if(length(lambdas) != n_genes){
+#         stop("Mismatch between number of genes and lambdas")
+#     } else if(any(lambdas < 0)){
+#         stop("Lambdas can only take positive values")
+#     }
 
-    #Check n, lambda_s, theta
-    simGenotypes <- mccbn::sample_genotypes(n, poset,
-                                        sampling_param = lambda_s,
-                                        lambdas = lambdas)
-    return(list(
-        poset = poset,
-        lambdas = lambdas,
-        lambda_s = lambda_s,
-        results = process_simulations(simGenotypes)))
-}
+#     #Check n, lambda_s, theta
+#     simGenotypes <- mccbn::sample_genotypes(n, poset,
+#                                         sampling_param = lambda_s,
+#                                         lambdas = lambdas)
+#     return(list(
+#         poset = poset,
+#         lambdas = lambdas,
+#         lambda_s = lambda_s,
+#         results = process_simulations(simGenotypes)))
+# }
 
 
 ## Later, we will want much more info recovered, such as the probs, etc.
