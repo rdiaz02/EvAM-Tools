@@ -2,6 +2,7 @@ library(parallel)
 
 source("schill-trans-mat.R")
 source("code-all-methods-minimal.R")
+source("utils.R")
 
 
 ## indiv_sample_from_trm is equivalent to simulate_sample_2
@@ -102,17 +103,16 @@ population_sample_from_trm <- function(trm, n_samples = 10,
                                        T_sampling = NULL,
                                        pre_compute = TRUE,
                                        cores = detectCores()) {
-    if(is.null(T_sampling) && !is.null(n_samples)) {
-        T_sampling <- rexp(n = n_samples, rate = 1)
+    if(is.null(T_sampling) && is.null(n_samples)) {
+        stop("Pass either n_samples or T_sampling vector")
     }
     if(!is.null(T_sampling) && !is.null(n_samples)) {
         message("Ignoring n_samples as passing T_sampling")
     }
-    if(is.null(T_sampling) && is.null(n_samples)) {
-        stop("Pass either n_samples or T_sampling vector")
+    if(is.null(T_sampling) && !is.null(n_samples)) {
+        T_sampling <- rexp(n = n_samples, rate = 1)
     }
 
-    
     ngenots <- ncol(trm)
     genot_names <- colnames(trm)
 
@@ -149,12 +149,115 @@ population_sample_from_trm <- function(trm, n_samples = 10,
     return(list(
         T_sampling = T_sampling
       , T_sum_events = unlist(lapply(out, function(x) x$t_accum))
-      , trans_table = NA ## I do not know what this is for
+    #   , trans_table = NA ## I do not know what this is for
       , trajectory = lapply(out, function(x) x$trajectory)
       , obs_events = unlist(lapply(out, function(x) x$genotype))
         ))
 }
 
+
+#' @title Process simulations
+#' 
+#' @description Generate trajectories from simulated data
+#' 
+#' @param sim list generated with mccbn::sample_genotypes. Relevant
+#' fields are described below
+#' @param sim$T_sum_events time of events for the mutations of each gene
+#' @param sim$obs_events data.frame with mutated before the end of the sampling time
+process_simulations <- function(sim, n_genes, output = c("frequencies", "state_counts", "transitions")){
+
+    #Checking input
+    # browser()
+    params <- c("trajectory", "obs_events")
+    for (i in params){
+        if (!(i %in% names(sim))) 
+            stop(sprintf("%s is missing from your simulations", i))
+    }
+
+    #Checking output variables
+    valid_output <- c("frequencies", "state_counts", "transitions")
+    out_params <- valid_output %in% output
+    names(out_params) <- valid_output
+
+    if (sum(out_params) == 0) stop("Specify valid output")
+
+    not_valid_params <- output[which(!(output %in% valid_output))]
+    if (length(not_valid_params) > 0) 
+        warning(sprintf("The following parameters cannot be returned: %s"
+            , paste(not_valid_params, collapse = ", " )))
+
+    #Set up
+    output <- list()
+    n_states <- 2**n_genes
+    sorted_genotypes <- vapply(0:(n_states - 1), int2str, character(1))
+    trajectories <- sim$trajectory
+
+    #Calculate frequencies
+    if(out_params["frequencies"]){
+        frequencies <- sample_to_pD_order(sim$obs_events, n_genes)
+        frequencies <- data.frame(
+            Genotype = sorted_genotypes,
+            Counts = frequencies
+        )
+        rownames(frequencies) <- NULL
+
+        output$frequencies <- frequencies
+    }
+
+    #Calculate transitions
+    if(out_params["transitions"]){
+        t <- matrix(0L, nrow = n_states, ncol = n_states)
+        colnames(t) <- rownames(t) <- sorted_genotypes
+        for(traj in trajectories){
+            steps <- length(traj) - 1 
+            if(steps > 0){
+                for(i in 1:steps){
+                    t[traj[i], traj[i + 1]] <-
+                        t[traj[i], traj[i + 1]] + 1
+                }
+            }
+        } 
+
+        output$transitions <- t
+    }
+
+    #Calculate state_counts
+    if(out_params["state_counts"]){
+        state_counts <- sample_to_pD_order(unlist(sim$trajectory), n_genes)
+        state_counts <- data.frame(
+            Genotype = sorted_genotypes,
+            Counts = state_counts
+        )
+
+        output$state_counts <- state_counts
+    }
+
+    return(output)
+}
+
+
+run_all_simulations <- function(cpm_output
+    , N_samples
+    , n_genes
+    , methods = c("OT", "CBN", "MCCBN", "DBN", "MHN", "HESBCN")){
+    output <- cpm_output
+    
+
+    for(method in methods){
+        if(method == "MHN") trm <- output$MHN_transitionRateMatrix
+        else trm <- output[[sprintf("%s_f_graph", method)]]
+
+        if(any(!is.na(trm))){
+            sims <- population_sample_from_trm(trm, n_samples = N_samples)
+            output[[sprintf("%s_genotype_transitions", method)]] <- process_simulations(sims, 
+                n_genes, output = c("transitions"))$transitions
+        } 
+        else output[[sprintf("%s_genotype_transitions", method)]] <- NA
+        
+    }
+
+    return(output)
+}
 
 ## ## Take a sample (a vector), with genotypes as "A, B", etc
 ## ## and return a vector of frequencies (counts) in the exact same
@@ -272,25 +375,25 @@ mccbn_vs_comp <- function(ngenes, n_samples, B = 50000) {
     return(pv)
 }
 
-mccbn_vs_comp(3, 10000)
-library(codetools)
-checkUsageEnv(env = .GlobalEnv)
+# mccbn_vs_comp(3, 10000)
+# library(codetools)
+# checkUsageEnv(env = .GlobalEnv)
 
-for (i in c(3, 5, 6, 7, 9)){
-    print(sprintf("GENES %s", i))
-    print(date())
-    M <- 10000
-    Ngenes <- i
-    Nsampl <- 50000
+# for (i in c(3, 5, 6, 7, 9)){
+#     print(sprintf("GENES %s", i))
+#     print(date())
+#     M <- 10000
+#     Ngenes <- i
+#     Nsampl <- 50000
 
-    system.time(
-        p_values5 <- unlist(mclapply(1:M,
-                            function(x) mccbn_vs_comp(Ngenes, Nsampl),
-                            mc.cores = detectCores() - 1
-                            ))
-    )
-    save(file = sprintf("p_values%s_mccbn.RData", i), p_values5)
-}
+#     system.time(
+#         p_values5 <- unlist(mclapply(1:M,
+#                             function(x) mccbn_vs_comp(Ngenes, Nsampl),
+#                             mc.cores = detectCores() - 1
+#                             ))
+#     )
+#     save(file = sprintf("p_values%s_mccbn.RData", i), p_values5)
+# }
 
 
 # print(sum(p_values5 < 0.01)/M) ## 0.0108
@@ -299,7 +402,7 @@ for (i in c(3, 5, 6, 7, 9)){
 # print(sum(p_values5 < 0.001)/M) ## 0.0012: again, expect a lot of noise here with M and B used.
 
 # save(file = "p_values5_mccbn.RData", p_values5)
-stop()
+# stop()
 ## This is very slow, because what is slow is simulating the p value
 ## in the chi-square test
 ## system.time(
@@ -311,89 +414,89 @@ stop()
 
 
 ## M <- 144 ## 213 seconds; so about 52 secs per set.
-M <- 10000
-Ngenes <- 8
-Nsampl <- 50000
-system.time(
-    p_values8 <- unlist(mclapply(1:M,
-                         function(x) pv_one_comp(Ngenes, Nsampl),
-                         mc.cores = detectCores()
-                         ))
-)
+# M <- 10000
+# Ngenes <- 8
+# Nsampl <- 50000
+# system.time(
+#     p_values8 <- unlist(mclapply(1:M,
+#                          function(x) pv_one_comp(Ngenes, Nsampl),
+#                          mc.cores = detectCores()
+#                          ))
+# )
 
 
-sum(p_values8 < 0.05)/M ## 0.0488
-sum(p_values8 < 0.01)/M ## 0.0108
-sum(p_values8 < 0.005)/M ## 0.0053, though questionable this can be estimated well with B = 2000
-sum(p_values7 < 0.001)/M ## 0.0012: again, expect a lot of noise here with M and B used.
+# sum(p_values8 < 0.05)/M ## 0.0488
+# sum(p_values8 < 0.01)/M ## 0.0108
+# sum(p_values8 < 0.005)/M ## 0.0053, though questionable this can be estimated well with B = 2000
+# sum(p_values7 < 0.001)/M ## 0.0012: again, expect a lot of noise here with M and B used.
 
-save(file = "p_values8_test.RData", p_values8)
-
-
-M <- 10000 ## 144 in 230 seconds; so about 57 seconds per set. 
-Ngenes <- 7
-Nsampl <- 50000
-system.time(
-    p_values7 <- unlist(mclapply(1:M,
-                         function(x) pv_one_comp(Ngenes, Nsampl, B = 4000),
-                         mc.cores = detectCores()
-                         ))
-)
+# save(file = "p_values8_test.RData", p_values8)
 
 
-sum(p_values7 < 0.05)/M ## 0.0497
-sum(p_values7 < 0.01)/M ## 0.0103
-sum(p_values7 < 0.005)/M ## 0.0054
-sum(p_values7 < 0.001)/M ## 7e-4, but this will not be well estimated?
-
-save(file = "p_values7_test.RData", p_values7)
-
-
-## both look OK
-hist(p_values8)
-hist(p_values7)
-## For ks test, recall we are using permutation test, so min p.value is not 0
-## but 1/(B + 1). Though this minor thing makes no difference
-ks.test(p_values8, "punif", 1/2001, 1) ## p-value = 0.5
-ks.test(p_values7, "punif", 1/4001, 1) ## p-value = 1
-
-## From https://stats.stackexchange.com/a/406717
-plot(ecdf(p_values8))
-curve(punif(x, 1/2001, 1), add = TRUE, col = "blue")
-
-plot(ecdf(p_values7))
-curve(punif(x, 1/4001, 1), add = TRUE, col = "blue")
+# M <- 10000 ## 144 in 230 seconds; so about 57 seconds per set. 
+# Ngenes <- 7
+# Nsampl <- 50000
+# system.time(
+#     p_values7 <- unlist(mclapply(1:M,
+#                          function(x) pv_one_comp(Ngenes, Nsampl, B = 4000),
+#                          mc.cores = detectCores()
+#                          ))
+# )
 
 
+# sum(p_values7 < 0.05)/M ## 0.0497
+# sum(p_values7 < 0.01)/M ## 0.0103
+# sum(p_values7 < 0.005)/M ## 0.0054
+# sum(p_values7 < 0.001)/M ## 7e-4, but this will not be well estimated?
+
+# save(file = "p_values7_test.RData", p_values7)
 
 
-if(FALSE) {
-    ## For the hell of it, if we want, run this later
-    ## This will be very slow!!
-    M <- 30000 
-    Ngenes <- 10
-    Nsampl <- 200000
-    system.time(
-        p_values10 <- unlist(mclapply(1:M,
-                                      function(x) pv_one_comp(Ngenes, Nsampl,
-                                                              B = 10000),
-                                      mc.cores = detectCores()
-                                      ))
-    )
+# ## both look OK
+# hist(p_values8)
+# hist(p_values7)
+# ## For ks test, recall we are using permutation test, so min p.value is not 0
+# ## but 1/(B + 1). Though this minor thing makes no difference
+# ks.test(p_values8, "punif", 1/2001, 1) ## p-value = 0.5
+# ks.test(p_values7, "punif", 1/4001, 1) ## p-value = 1
+
+# ## From https://stats.stackexchange.com/a/406717
+# plot(ecdf(p_values8))
+# curve(punif(x, 1/2001, 1), add = TRUE, col = "blue")
+
+# plot(ecdf(p_values7))
+# curve(punif(x, 1/4001, 1), add = TRUE, col = "blue")
 
 
-    sum(p_values10 < 0.05)/M ## 
-    sum(p_values10 < 0.01)/M ## 
-    sum(p_values10 < 0.005)/M ## 
-    sum(p_values10 < 0.001)/M ## 
 
-    save(file = "p_values10_test.RData", p_values10)
 
-    hist(p_values10)
-    ks.test(p_values10, "punif", 1/10001, 1) 
-    plot(ecdf(p_values10))
-    curve(punif(x, 1/10001, 1), add = TRUE, col = "blue")
-}
+# if(FALSE) {
+#     ## For the hell of it, if we want, run this later
+#     ## This will be very slow!!
+#     M <- 30000 
+#     Ngenes <- 10
+#     Nsampl <- 200000
+#     system.time(
+#         p_values10 <- unlist(mclapply(1:M,
+#                                       function(x) pv_one_comp(Ngenes, Nsampl,
+#                                                               B = 10000),
+#                                       mc.cores = detectCores()
+#                                       ))
+#     )
+
+
+#     sum(p_values10 < 0.05)/M ## 
+#     sum(p_values10 < 0.01)/M ## 
+#     sum(p_values10 < 0.005)/M ## 
+#     sum(p_values10 < 0.001)/M ## 
+
+#     save(file = "p_values10_test.RData", p_values10)
+
+#     hist(p_values10)
+#     ks.test(p_values10, "punif", 1/10001, 1) 
+#     plot(ecdf(p_values10))
+#     curve(punif(x, 1/10001, 1), add = TRUE, col = "blue")
+# }
 
 
 
