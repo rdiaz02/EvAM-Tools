@@ -150,19 +150,19 @@ str2int <- function(str_state, sep =", ", wt = "WT", n = NULL){
 #' 
 #' @return Vector with the sorted genotypes
 #' @return Optionally, returns the indexes of the int states
-generate_sorted_genotypes <- function(n_genes, sep = ", ", index.return = FALSE){
-    if(n_genes < 0) stop("Number of genes should be >= 0")
-    # browser()
-    if(n_genes == 0) states <- c()
-    else states <- vapply(1:(2**n_genes - 1), function(x) int2str(x, sep = sep), character(1))
+# generate_sorted_genotypes <- function(n_genes, sep = ", ", index.return = FALSE){
+#     if(n_genes < 0) stop("Number of genes should be >= 0")
+#     # browser()
+#     if(n_genes == 0) states <- c()
+#     else states <- vapply(1:(2**n_genes - 1), function(x) int2str(x, sep = sep), character(1))
 
-    sorted_states <- c("WT", states[order(vapply(states, nchar, numeric(1)))])
+#     sorted_states <- c("WT", states[order(vapply(states, nchar, numeric(1)))])
 
-    if (index.return){
-        int_sorted_states <- as.vector(vapply(sorted_states, function(x) str2int(x, sep = sep), numeric(1)))
-        return(list(x = sorted_states
-            , ix = int_sorted_states))
-        }
+#     if (index.return){
+#         int_sorted_states <- as.vector(vapply(sorted_states, function(x) str2int(x, sep = sep), numeric(1)))
+#         return(list(x = sorted_states
+#             , ix = int_sorted_states))
+#         }
 
-    return(sorted_states)
-}
+#     return(sorted_states)
+# }
