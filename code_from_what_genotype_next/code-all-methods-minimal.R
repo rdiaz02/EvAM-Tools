@@ -1597,7 +1597,7 @@ plot_genot_fg <- function(trans_mat
 
     V(graph)$label.family <- "Helvetica"
 
-    opx <- par(mar = c(4, 4, 4, 4))
+    opx <- par(mar = c(1, 1, 1, 1))
 
     w <- E(graph)$weight
     w <- w / max(w) * 10
@@ -1749,7 +1749,8 @@ plot_DAG_fg <- function(x, data, orientation = "horizontal",
     print(available_models)
 
     ## DAG relationships colors 
-    colors_relationships <- c("black", "coral2", "cornflowerblue", "darkolivegreen3")
+    standard_relationship <- "gray73"
+    colors_relationships <- c(standard_relationship, "coral2", "cornflowerblue", "darkolivegreen3")
     names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
     
     ## Shape of the plot
@@ -1773,7 +1774,7 @@ plot_DAG_fg <- function(x, data, orientation = "horizontal",
                 for(i in names(model_data2plot$parent_set)){
                     E(model_data2plot$dag_tree)[.to(i)]$color <- colors_relationships[model_data2plot$parent_set[[i]]]
                 }
-            }
+            } else E(model_data2plot$dag_tree)$color <- standard_relationship
             plot(model_data2plot$dag_tree
                 , layout = layout.reingold.tilford
                 , vertex.size = 30 
