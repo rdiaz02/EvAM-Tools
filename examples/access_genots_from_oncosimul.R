@@ -206,6 +206,7 @@ cpm_to_trans_mat_oncosimul <- function(x, max_f = NULL, sh = -Inf,
                 transition_matrix = gfo$transition_matrix
                 ))
 }
+
 ## shorter
 cpm2tm <- cpm_to_trans_mat_oncosimul
 
