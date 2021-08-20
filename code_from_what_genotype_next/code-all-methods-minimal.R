@@ -1541,17 +1541,11 @@ plot_genot_fg <- function(trans_mat
                 w <- c(get.edge.attribute(graph, "weight")
                     , get.edge.attribute(i, "weight"))
                 graph <- graph_from_edgelist(ELU)
-                graph<- set_edge_attr(graph, "weight", value = w)
+                graph <- set_edge_attr(graph, "weight", value = w)
             } 
         }
     } 
         
-
-    # print(sprintf("Number of nodes %s Number of edges %s", length(V(g)), length(E(g))))
-    # print(sprintf("-->Number of nodes %s Number of edges %s", length(V(graph)), length(E(graph))))
-
-    # genotypes <- rownames(trans_mat)
-
     if (!is.null(observations)){
         observations <- as.data.frame(sampledGenotypes(observations))
         observations$Abs_Freq <- observations$Freq / sum(observations$Freq)
@@ -1602,14 +1596,14 @@ plot_genot_fg <- function(trans_mat
     w <- E(graph)$weight
     w <- w / max(w) * 10
     if(all(w == 10)) w <- rep(1, length(w))
-
     plot(graph
         , layout = lyt[, 2:1]
         , vertex.label.color = "black"
         , vertex.label.family = "Helvetica"
         , font.best = 2
         , vertex.frame.width = 0
-        , edge.color = rgb(0.5, 0.5, 0.5, E(graph)$weight/max(E(graph)$weight))
+        , edge.color = rgb(0.5, 0.5, 0.5, 1)
+        # , edge.color = rgb(0.5, 0.5, 0.5, E(graph)$weight/max(E(graph)$weight))
         , edge.arrow.size = 0.5
         , xlab = "Number of features acquired"
         , edge.width = w
@@ -1617,8 +1611,10 @@ plot_genot_fg <- function(trans_mat
 
     margin <- -1.15
     lines(c(-1.2, 1.2), c(margin, margin), lwd = 2)
-    max_node_depth <- max(sapply(V(graph)$name
-        , function(x) distances(graph, algorithm = "unweighted", to = x))[, "WT"])
+    node_depth <- sapply(V(graph)$name
+        , function(x) distances <- distances(graph, algorithm = "unweighted", to = x)["WT",]
+        )
+    max_node_depth <- max(node_depth[is.finite(node_depth)])
     axis(1
         , at = seq(-1, 1, length.out = max_node_depth + 1)
         , labels = 0:(max_node_depth)
@@ -1665,7 +1661,7 @@ plot_genot_fg <- function(trans_mat
 #' plot_DAG_fg(out, dB_c1, plot_type = "transitions")
 #' dev.off()
 plot_DAG_fg <- function(x, data, orientation = "horizontal", 
-                        models = c("OT", "CBN", "DBN", "MCCBN", "MHN", "HESCBN"),
+                        models = c("OT", "CBN", "DBN", "MCCBN", "MHN", "HESBCN"),
                         plot_type = "trans_mat",
                         prune_edges = TRUE) {
     
@@ -1742,10 +1738,9 @@ plot_DAG_fg <- function(x, data, orientation = "horizontal",
     available_models <- models[
         vapply(models, function(mod) {
             attr_name <- ifelse(mod == "MHN", "theta", "model")
-            return(!(is.null(x[[sprintf("%s_%s", mod, attr_name)]])))
+            return(any(!is.na(x[[sprintf("%s_%s", mod, attr_name)]])))
         }, logical(1))
     ]
-
     print(available_models)
 
     ## DAG relationships colors 

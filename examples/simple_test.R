@@ -1,6 +1,7 @@
 pwd0 <- getwd()
 setwd("../code_from_what_genotype_next/")
 source("code-all-methods-minimal.R")
+source("sample_genotypes_from_trm.R")
 setwd(pwd0)
 rm(pwd0)
 
@@ -29,3 +30,8 @@ png("graph.png", width = 1000, height = 600, units = "px")
 plot_DAG_fg(out, dB_c1, plot_type = "genotypes")
 dev.off()
 # plot_DAG_fg(out, dB_c1, plot_type = "matrix")
+
+out_with_simulations <- run_all_simulations(out, 50000, 5)
+png("transitions.png", width = 1000, height = 600, units = "px")
+plot_DAG_fg(out_with_simulations, dB_c1, plot_type = "transitions")
+dev.off()
