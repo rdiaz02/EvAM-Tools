@@ -1331,12 +1331,12 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
 
     # cat("\n  time HyperTraPS = ", time_HyperTraPS)
 
-    # cat("\n     Doing HESBCN")
-    # time_hesbcn <- system.time(
-    #   out_hesbcn <- do_HESBCN(x))["elapsed"]
-      out_hesbcn <- NULL
+    cat("\n     Doing HESBCN")
+    time_hesbcn <- system.time(
+      out_hesbcn <- do_HESBCN(x))["elapsed"]
+    #   out_hesbcn <- NULL
     
-    # cat("\n  time HESBCN = ", time_hesbcn)
+    cat("\n  time HESBCN = ", time_hesbcn)
      
     cpm_out_others <- all_methods(x, cores_cbn = cores_cbn, do_MCCBN = do_MCCBN)
     pre_trans_mat_others <- lapply(cpm_out_others[methods],
@@ -1348,14 +1348,14 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
         ),
         cpm_access_genots_paths_w_simplified_OR)
     
-    # pre_trans_mat_HESBCN <- lapply( #For the moment just for DBN (HESBCN in the future)
-    #     list(HESBCN = out_hesbcn
-    #     # , HyperTraPS = out_HyperTraPS
-    #     ),
-    #     cpm_access_genots_paths_w_simplified_relationships)
+    pre_trans_mat_HESBCN <- lapply( #For the moment just for DBN (HESBCN in the future)
+        list(HESBCN = out_hesbcn
+        # , HyperTraPS = out_HyperTraPS
+        ),
+        cpm_access_genots_paths_w_simplified_relationships)
 
     pre_trans_mat_others["DBN"] <- list(pre_trans_mat_new_CPMS$DBN)
-    # pre_trans_mat_others["HESBCN"] <- list(pre_trans_mat_HESBCN$HESBCN)
+    pre_trans_mat_others["HESBCN"] <- list(pre_trans_mat_HESBCN$HESBCN)
     # pre_trans_mat_others["HyperTraPS"] <- list(pre_trans_mat_new_CPMS$HyperTraPS)
     cat("\n    getting transition matrices for all non-mhn methods \n")
 
@@ -1413,12 +1413,12 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
         DBN_likelihood = out_dbn$likelihood,
         DBN_f_graph = pre_trans_mat_new_CPMS$DBN$weighted_fgraph,
         DBN_trans_mat = pre_trans_mat_new_CPMS$DBN$trans_mat_genots,
-        DBN_td_trans_mat = td$DBN
-        # HESBCN_model = out_hesbcn$edges,
-        # HESBCN_parent_set = out_hesbcn$parent_set,
-        # HESBCN_f_graph = pre_trans_mat_HESBCN$HESBCN$weighted_fgraph,
-        # HESBCN_trans_mat = pre_trans_mat_HESBCN$HESBCN$trans_mat_genots,
-        # HESBCN_td_trans_mat = td$HESBCN
+        DBN_td_trans_mat = td$DBN,
+        HESBCN_model = out_hesbcn$edges,
+        HESBCN_parent_set = out_hesbcn$parent_set,
+        HESBCN_f_graph = pre_trans_mat_HESBCN$HESBCN$weighted_fgraph,
+        HESBCN_trans_mat = pre_trans_mat_HESBCN$HESBCN$trans_mat_genots,
+        HESBCN_td_trans_mat = td$HESBCN
         # HyperTraPS_model = out_HyperTraPS$edges,
         # HyperTraPS_f_graph = pre_trans_mat_new_CPMS$HyperTraPS$weighted_fgraph,
         # HyperTraPS_trans_mat = pre_trans_mat_new_CPMS$HyperTraPS$trans_mat_genots,
