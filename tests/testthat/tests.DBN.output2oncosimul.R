@@ -1,6 +1,7 @@
 pwd2 <- getwd()
-setwd("../../examples/")
+setwd("../../data/")
 source("toy_datasets.R")
+setwd("../examples/")
 source("access_genots_from_oncosimul.R")
 setwd("../code_from_what_genotype_next/")
 source("code-all-methods-minimal.R")
