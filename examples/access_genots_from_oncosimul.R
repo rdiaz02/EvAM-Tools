@@ -66,10 +66,10 @@ cpm_out_to_oncosimul <- function(x, sh = -Inf) {
         s <- x$rerun_lambda
         typeDep <- "AND"
     } else if("Relation" %in% names(x)) { ## PMCE
-        if(exists("Lambda", where = x))
-            s <- x$Lambda
-        else if(exists("lambda", where = x))
-            s <- x$lambda
+        if(exists("Lambdas", where = x))
+            s <- x$Lambdas
+        # else if(exists("lambda", where = x))
+        #     s <- x$lambda
         typeDep <- x$Relation
         typeDep[typeDep == "Single"] <- "AND"
     } else if("OT_edgeWeight" %in% names(x) ) { ## OT
@@ -89,7 +89,6 @@ cpm_out_to_oncosimul <- function(x, sh = -Inf) {
     typeDep[typeDep == "AND"] <- "MN"
     typeDep[typeDep == "OR"] <- "SM"
     typeDep[typeDep == "XOR"] <- "XMPN"    
-    
     x1 <- data.frame(parent = x$From,
                      child  = x$To,
                      s = s,
