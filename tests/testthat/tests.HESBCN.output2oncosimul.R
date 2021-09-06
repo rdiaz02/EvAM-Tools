@@ -17,14 +17,16 @@ compare_HESBCN_cpm2tm <- function(data){
     order1 <- sort(rownames(out$HESBCN_trans_mat), index.return = TRUE)$ix
     order2 <- sort(rownames(out_onco$transition_matrix), index.return = TRUE)$ix
 
-    out1 <- out$HESBCN_trans_mat[order1, order1]
-    out2 <- out_onco$transition_matrix[order2, order2]
+    ordered_computed_trm <- out$HESBCN_trans_mat[order1, order1]
+    ordered_trm_onco <- out_onco$transition_matrix[order2, order2]
 
-    sum(round(out1 - out2, 6)) == 0
+    #!all(ordered_trm_onco == ordered_computed_trm) #Problem with floats
+    sum(round(ordered_computed_trm - ordered_out_onco, 6)) == 0
 }
 
 test_that("HESBCN gives the same results as OncoSimul", {
    for (i in names(all_examples)){
+        print(sprintf("Dataset %s", i))
         tmp_dataset <- all_examples[[i]]
         compare_methods <- compare_HESBCN_cpm2tm(tmp_dataset)
         expect_equal(compare_methods, TRUE)
