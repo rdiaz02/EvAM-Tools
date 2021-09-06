@@ -20,9 +20,6 @@ compare_HESBCN_cpm2tm <- function(codename){
     ordered_computed_trm <- out$HESBCN_trans_mat[order1, order1]
     ordered_trm_onco <- out_onco$transition_matrix[order2, order2]
 
-    #!all(ordered_trm_onco == ordered_computed_trm) #Problem with floats
-
-    #sum(round(ordered_computed_trm - ordered_out_onco, 6)) == 0
     expect_equal(ordered_computed_trm, ordered_trm_onco)
 }
 
