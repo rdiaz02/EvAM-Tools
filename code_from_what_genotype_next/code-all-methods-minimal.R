@@ -49,7 +49,7 @@ date()
 
 ## Set it to TRUE if you want to load MCCBN, which requires
 ## having it installed. It then tests the MCCBN functionality too.
-MCCBN_INSTALLED <- FALSE
+MCCBN_INSTALLED <- TRUE
 
 
 ## Since we are not parallelizing here, you might want to set
@@ -97,7 +97,7 @@ source("pre-process.R", echo = FALSE, max.deparse.length = 0)
 source("ot-process.R", echo = FALSE, max.deparse.length = 0)
 ## source("dip-process.R", echo = FALSE, max.deparse.length = 0)  ## No longer using it
 source("cbn-process.R", echo = FALSE, max.deparse.length = 0)
-source("dbn-process.R", echo = FALSE, max.deparse.length = 0)
+# source("dbn-process.R", echo = FALSE, max.deparse.length = 0)
 source("hypertraps-process.R", echo = FALSE, max.deparse.length = 0)
 source("hesbcn-process.R", echo = FALSE, max.deparse.length = 0)
 
@@ -1316,11 +1316,11 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
 
     cat("\n  time MHN = ", time_schill)
     
-    cat("\n     Doing DBN\n\n")
-    time_dbn <- system.time(
-      out_dbn <- do_DBN(x))["elapsed"]
+    # cat("\n     Doing DBN\n\n")
+    # time_dbn <- system.time(
+    #   out_dbn <- do_DBN(x))["elapsed"]
     
-    cat("\n  time DBN = ", time_dbn)
+    # cat("\n  time DBN = ", time_dbn)
 
     cat("\n     Doing HyperTraps")
     print("By default we run it here with dry_run = TRUE.
@@ -1342,11 +1342,11 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
     pre_trans_mat_others <- lapply(cpm_out_others[methods],
         cpm_access_genots_paths_w_simplified)
 
-    pre_trans_mat_new_CPMS <- lapply( #For the moment just for DBN (HESBCN in the future)
-        list(DBN = out_dbn
-        # , HyperTraPS = out_HyperTraPS
-        ),
-        cpm_access_genots_paths_w_simplified_OR)
+    # pre_trans_mat_new_CPMS <- lapply( #For the moment just for DBN (HESBCN in the future)
+    #     list(DBN = out_dbn
+    #     # , HyperTraPS = out_HyperTraPS
+    #     ),
+    #     cpm_access_genots_paths_w_simplified_OR)
     
     pre_trans_mat_HESBCN <- lapply( #For the moment just for DBN (HESBCN in the future)
         list(HESBCN = out_hesbcn
@@ -1354,7 +1354,7 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
         ),
         cpm_access_genots_paths_w_simplified_relationships)
 
-    pre_trans_mat_others["DBN"] <- list(pre_trans_mat_new_CPMS$DBN)
+    # pre_trans_mat_others["DBN"] <- list(pre_trans_mat_new_CPMS$DBN)
     pre_trans_mat_others["HESBCN"] <- list(pre_trans_mat_HESBCN$HESBCN)
     # pre_trans_mat_others["HyperTraPS"] <- list(pre_trans_mat_new_CPMS$HyperTraPS)
     cat("\n    getting transition matrices for all non-mhn methods \n")
@@ -1362,10 +1362,10 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
     ## ## Unweighted
     ## uw <- lapply(pre_trans_mat_others, function(x) rowScaleMatrix(x$fgraph))
     ## Weighted
-    wg <- lapply(pre_trans_mat_others[c("OT", "MCCBN" , "CBN_ot", "DBN", "HyperTraPS", "HESBCN")[c(TRUE, do_MCCBN, TRUE, TRUE, FALSE, FALSE)]], 
+    wg <- lapply(pre_trans_mat_others[c("OT", "MCCBN" , "CBN_ot", "DBN", "HyperTraPS", "HESBCN")[c(TRUE, do_MCCBN, TRUE, FALSE, FALSE, TRUE)]], 
         function(x) x$trans_mat_genots)
     ## Diagonal
-    td <- lapply(pre_trans_mat_others[c("MCCBN", "CBN_ot", "DBN", "HyperTraPS", "HESBCN")[c(do_MCCBN, TRUE, TRUE, FALSE, FALSE)]],
+    td <- lapply(pre_trans_mat_others[c("MCCBN", "CBN_ot", "DBN", "HyperTraPS", "HESBCN")[c(do_MCCBN, TRUE, FALSE, FALSE, TRUE)]],
                  function(x) trans_rate_to_trans_mat(x$weighted_fgraph,
                                                      method = "uniformization"))
     ## ## Paranoid check
@@ -1409,11 +1409,11 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
         MHN_transitionRateMatrix = out_schill$transitionRateMatrix, 
         MHN_trans_mat = out_schill$transitionMatrixCompExp,
         MHN_td_trans_mat = out_schill$transitionMatrixTimeDiscretized,
-        DBN_model = out_dbn$edges,
-        DBN_likelihood = out_dbn$likelihood,
-        DBN_f_graph = pre_trans_mat_new_CPMS$DBN$weighted_fgraph,
-        DBN_trans_mat = pre_trans_mat_new_CPMS$DBN$trans_mat_genots,
-        DBN_td_trans_mat = td$DBN,
+        # DBN_model = out_dbn$edges,
+        # DBN_likelihood = out_dbn$likelihood,
+        # DBN_f_graph = pre_trans_mat_new_CPMS$DBN$weighted_fgraph,
+        # DBN_trans_mat = pre_trans_mat_new_CPMS$DBN$trans_mat_genots,
+        # DBN_td_trans_mat = td$DBN,
         HESBCN_model = out_hesbcn$edges,
         HESBCN_parent_set = out_hesbcn$parent_set,
         HESBCN_f_graph = pre_trans_mat_HESBCN$HESBCN$weighted_fgraph,

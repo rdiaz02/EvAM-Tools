@@ -1,6 +1,6 @@
 pwd0 <- getwd()
 setwd("../code_from_what_genotype_next/")
-source("code-all-methods-minimal.R")
+source("code-all-methods-minimal.R", echo = FALSE)
 source("sample_genotypes_from_trm.R")
 setwd(pwd0)
 rm(pwd0)
