@@ -1,7 +1,7 @@
 RNGkind("L'Ecuyer-CMRG")
 
 pwd0 <- getwd()
-setwd("../code_from_what_genotype_next")
+setwd("../R")
 source("simulations.R")
 # source("simulations_2.R")
 source("code-all-methods-minimal.R")

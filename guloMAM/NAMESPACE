@@ -1,0 +1,4 @@
+importFrom("grDevices", "rgb")
+importFrom("graphics", "axis", "legend", "lines", "par")
+importFrom("stats", "aggregate", "chisq.test", "decompose", "na.omit", "rexp", "runif")
+importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert", "write.csv")
