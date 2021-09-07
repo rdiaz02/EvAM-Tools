@@ -64,7 +64,7 @@ create_data_frame_from_theta <- function(data){
     child <- data$childs[[i]]
     theta <- data$thetas[[i]]
 
-    if (length(parent) == 1){
+    if (length(parent) == 1){ ## May cause problems 
       edge <- paste(parent, child, sep="->")
       new_row <- list(parent, child, edge, theta)
       rbind(dbn_out,new_row) -> dbn_out

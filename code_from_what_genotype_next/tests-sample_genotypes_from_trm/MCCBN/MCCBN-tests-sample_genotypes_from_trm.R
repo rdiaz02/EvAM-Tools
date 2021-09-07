@@ -19,7 +19,7 @@ my_chi_unif <- function(pv) {
 
     tt_all <- rep(0, length(seqp))
     names(tt_all) <- seqp
-    tt_all[names(tt)] <- tt
+    
 
     chisq.test(tt_all,
                p = rep(1, length(seqp))/length(seqp),
@@ -35,6 +35,7 @@ check_dist <- function(pv) {
     cat("prop. < 0.005: ", sum(pv < 0.005)/length(pv), "\n")
     cat("prop. < 0.001: ", sum(pv < 0.001)/length(pv), "\n")
     cat("\n")
+    browser()
     print(ks.test(pv, "punif", minp, 1))
     cat("\n")
     print(my_chi_unif(pv))
