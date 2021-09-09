@@ -140,8 +140,6 @@ NA, NA, NA), OT_edgeWeight = c(0.838483399072279, 0.317539113591577,
 cpm2tm(ex_ot_out2, max_f = NULL)$transition_matrix
 cpm_access_genots_paths_w_simplified(list(edges = ex_ot_out2))$trans_mat_genots
 
-
-
 ## Same transitions, different fitness
 cpm2tm(ex_cbn_out2, max_f = NULL)$transition_matrix
 cpm2tm(ex_cbn_out2, 8)$transition_matrix
@@ -149,8 +147,6 @@ cpm2tm(ex_cbn_out2, 8)$transition_matrix
 ## Original code
 cpm_access_genots_paths_w_simplified(list(edges = ex_cbn_out2))$trans_mat_genots
 
-
-library(testthat)
 
 ## For testing
 reorder_trans_mat <- function(x) {

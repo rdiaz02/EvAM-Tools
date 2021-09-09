@@ -1,6 +1,5 @@
 compare_DBN_cpm2tm <- function(codename){
     out <- readRDS(sprintf("../../data/toy_datasets_cpms/%s.rds", codename))
-    browser()
     out_onco <- cpm2tm(out$DBN_model)
 
     order1 <- sort(rownames(out$DBN_trans_mat), index.return = TRUE)$ix
@@ -14,7 +13,6 @@ compare_DBN_cpm2tm <- function(codename){
 
 test_that("DBN gives the same results as OncoSimul", {
    for (i in names(all_examples)){
-        print(sprintf("Dataset %s", i))
         compare_methods <- compare_DBN_cpm2tm(i)
     }
 })
