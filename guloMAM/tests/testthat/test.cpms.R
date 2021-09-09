@@ -731,17 +731,17 @@ NA, NA, NA), OT_edgeWeight = c(0.525915054637741, 0.101508072999909,
   ## Additional testing
   
   
-  Dat1 <- readRDS(file="../../R/MHN/data/BreastCancer.rds") [1:50, 1:4]
+  Dat1 <- readRDS(file="../../insts/miscell/MHN/data/BreastCancer.rds") [1:50, 1:4]
   test_others(Dat1)
   
   
-  Dat1 <- readRDS(file="../../R/MHN/data/ColorectalCancer.rds")[1:40, 1:6]
+  Dat1 <- readRDS(file="../../insts/miscell/MHN/data/ColorectalCancer.rds")[1:40, 1:6]
   test_others(Dat1)
   
-  Dat1 <- readRDS(file="../../R/MHN/data/RenalCellCarcinoma.rds")[1:30,2:6]
+  Dat1 <- readRDS(file="../../insts/miscell/MHN/data/RenalCellCarcinoma.rds")[1:30,2:6]
   test_others(Dat1)
   
-  Dat1 <- readRDS(file="../../R/MHN/data/Glioblastoma.rds")[1:20, 1:5]
+  Dat1 <- readRDS(file="../../insts/miscell/MHN/data/Glioblastoma.rds")[1:20, 1:5]
   test_others(Dat1)
   
   rm(Dat1)
