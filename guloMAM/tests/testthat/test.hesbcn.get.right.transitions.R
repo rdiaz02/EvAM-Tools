@@ -169,14 +169,14 @@ trm4["A, B, C, D", "A, B, C, D, E"] <- 5
 
 
 compare_hesbcn_trms <- function(computed_trm, manual_trm){
-    computed_trm <- computed_trm[Matrix::rowSums(computed_trm) > 0, ]
+    computed_trm <- computed_trm[rowSums(computed_trm) > 0, ]
     ## Same genotypes
     computed_genotypes <- rownames(computed_trm)
     expect_equal(length(setdiff(rownames(computed_trm), rownames(manual_trm))), 0)
 
     
     ## By element comparison
-    filled_elements <- Matrix::summary(computed_trm)[, c("i", "j")]
+    filled_elements <- summary(computed_trm)[, c("i", "j")]
 
     for (i in (1:length(nrow(filled_elements)))){
         from_genotype <- computed_genotypes[filled_elements[i, 1]]

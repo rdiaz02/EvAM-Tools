@@ -1,7 +1,7 @@
 library(mccbn)
-setwd("../../")
-source("sample_genotypes_from_trm.R")
-setwd("tests-sample_genotypes_from_trm/MCCBN")
+# setwd("../../")
+# source("sample_genotypes_from_trm.R")
+# setwd("tests-sample_genotypes_from_trm/MCCBN")
 mccbn_vs_comp <- function(ngenes, n_samples, B = 10000) {
     true_p1 <- mccbn::random_poset(ngenes)
     rownames(true_p1) <- colnames(true_p1) <- LETTERS[1:ncol(true_p1)]
@@ -51,7 +51,7 @@ mccbn_vs_comp <- function(ngenes, n_samples, B = 10000) {
     return(pv)
 }
 
-for (i in c(3, 5, 6, 7, 8, 9, 10)){
+for (i in c(5, 6, 7, 8, 9, 10)){
     print(sprintf("GENES %s", i))
     print(date())
     M <- 10000

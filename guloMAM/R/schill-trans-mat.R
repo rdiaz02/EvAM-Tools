@@ -362,7 +362,6 @@ transitionRate <- function(x, y, Theta) {
             if(length(ret) > 1) {
                 cat("\n here")
                 stop()
-                browser()
             }
             else (return(ret))
             ## if(length(posx) == 0) return(Theta[posy, posy])

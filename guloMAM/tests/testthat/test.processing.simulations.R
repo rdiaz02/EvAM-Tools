@@ -1,11 +1,4 @@
 
-# pwd0 <- getwd()
-# setwd("../../R/")
-# source("utils.R")
-# source("sample_genotypes_from_trm.R")
-# setwd(pwd0)
-# rm(pwd0)
-
 
 simGenotypes <- readRDS("../../data/simulation_output.rds")
 
