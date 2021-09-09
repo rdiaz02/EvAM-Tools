@@ -166,3 +166,10 @@ str2int <- function(str_state, sep =", ", wt = "WT", n = NULL){
 
 #     return(sorted_states)
 # }
+
+#From schill
+#Convert a state from a bit-vector to a natural number.
+State.to.Int <- function(x){
+  x <- as.logical(rev(x))
+  packBits(rev(c(rep(FALSE, 32 - length(x)%%32), x)), type="integer") + 1
+}
