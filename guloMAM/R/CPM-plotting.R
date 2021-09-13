@@ -36,11 +36,54 @@ plot_sampled_genots <- function(data) {
 ##   MCCBN: same as CBN 
 ##   MHN: theta matrix, transition probs between genotypes,
 ##                             transition probs genots TD
+
+#' Computes the relevance of the paths starting on WT based on edge weigth
+#' 
+#' @param graph igraph object with genotype transition
+#' @param top_paths Int > 0. Default NULL. Number of path to compute. 
+#' By default all paths are considered
+rank_paths <- function(graph, top_paths = NULL){
+    g <- graph
+    all_paths <- list()
+    ## Starting from WT --> get the most likely children
+    ## recusively until reaching a leaf
+    path <- list()
+    
+
+    ## Clean up: if leaf --> remove leaf vertex, if 
+    last_node <- path[length(path)]
+    remove_leafs <- TRUE
+    while(remove_leafs){
+        ## Set previous weigth to zero / remove edge
+        ## Number of parents of leaf
+        number_of_parents <- NULL
+        vertex_removed <- 0
+        if(number_of_parents == 0){
+            ## Remove vertex
+            vertex_removed <- vertex_removed + 1
+            last_node <- path[length(path) - vertex_removed]
+        } else remove_leafs <- FALSE
+    }
+    return(all_paths)
+}
+
+#' Return the labels of most relevant paths starting from WT 
+#' 
+#' @param graph igraph object with genotype transitions
+#' @param paths_from_graph List of path from WT to ending genotype
+#' @param top_paths Int > 0. Include labels from vertex present in n top_paths
+#' @param type String. Default genotype. Valid options are "genotypes" or "acquisition"
+#' "genotype" option returns the genotype of the vertex.
+#' "acquisition" option returns the genotype acquire along the path.
+compute_vertex_labels <- function(graph, paths_from_graph, top_paths = 5, type = "genotype"){
+    NULL
+}
+
+## Document
 cpm_layout <- function(graph){
-    # V(graph)$num_mutations <<- 
-    num_mutations <- sapply(V(graph)$name, function(x){
-        ifelse(x == "WT", 0, nchar(x))
-    })
+    num_mutations <- vapply(V(graph)$name, function(x){
+        ifelse(x == "WT", 0, str_count(x, ",") + 1)
+    }, numeric(1))
     V(graph)$num_mutations <- num_mutations 
     
     lyt <- matrix(0, ncol = 2, nrow = length(V(graph)))
@@ -55,20 +98,37 @@ cpm_layout <- function(graph){
         correction_rate <- max(level_elements) - min(level_elements) 
         level_elements <- level_elements + correction_rate/2
         lyt[, 1][level_idx[gnt_names$ix]] <- level_elements
-        # browser()
     }
     return(lyt)
 }
 
-#' Plot transitions between genotypes
+#' Plot hypercubic genotype transitions
 #' 
 #' @param trans_mat transitions matrix to plot: can contain row counts, probabilities... 
 #' Entries will be normalized
 #' @param observations Original cross sectional data used to compute the model. Optional.
 #' @param freqs DataFrame with column $Genotype and $Freqs with their frequencies. Optional.
 #' @examples
+#' dB_c2 <- matrix(
+#' c(
+#'      rep(c(1, 0, 0, 0, 0), 300) #A
+#'    , rep(c(0, 0, 1, 0, 0), 300) #C
+#'    , rep(c(1, 1, 0, 0, 0), 200) #AB
+#'    , rep(c(0, 0, 1, 1, 0), 200) #CD
+#'    , rep(c(1, 1, 1, 0, 0), 100) #ABC
+#'    , rep(c(1, 0, 1, 1, 0), 100) #ACD
+#'    , rep(c(1, 1, 0, 0, 1), 100) #ABE
+#'    , rep(c(0, 0, 1, 1, 1), 100) #CDE
+#'    , rep(c(1, 1, 1, 0, 1), 100) #ABCE
+#'    , rep(c(1, 0, 1, 1, 1), 100) #ACDE
+#'    , rep(c(1, 1, 1, 1, 0), 50) # ABCD
+#'    , rep(c(0, 0, 0, 0, 0), 10) # WT
+#'  ), ncol = 5, byrow = TRUE
+#' )
+#' colnames(dB_c2) <- LETTERS[1:5]
+#' out <- all_methods_2_trans_mat(dB_c1)
 #' png("fluxes.png")
-#' par(mfrow = c(1, 3))
+#' par(mfrow = c(1, 2))
 #' plot_genot_fg(out$MHN_trans_mat, db2, sorted_observations)
 #' title("Transition Matrix", line = -3)
 #' plot_genot_fg(edge_transitions, db2, sorted_observations)
@@ -77,48 +137,17 @@ cpm_layout <- function(graph){
 plot_genot_fg <- function(trans_mat
     , observations = NULL
     , freqs = NULL
-    , simplify = TRUE
-    , top_edge_per_node = 5){
-    # trans_mat <- as.matrix(trans_mat)
+    ){
     rownames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
     colnames(trans_mat) <- str_replace_all(colnames(trans_mat), ", ", "")
 
     graph <- graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
-    # print(sprintf("->Number of nodes %s Number of edges %s", length(V(graph)), length(E(graph))))
 
     unique_genes_names <- sort(unique(str_split(paste(rownames(trans_mat)[-1], collapse=""), "")[[1]]))
 
     num_genes <- length(unique_genes_names)
     graph <- graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
-    # browser()
-    ## TODO take into account that a genoytpe can be observed
-    if(simplify){
-        graph <- decompose(graph)[[1]]
-        min_values <- sort(trans_mat[trans_mat > 0], decreasing = TRUE)
-        thr <- num_genes * top_edge_per_node
-        ifelse(length(min_values > thr)
-            , min_value <- min_values[thr]
-            , min_value <- min_values[-1]
-        )
-        trans_mat[trans_mat < min_value] = 0
-
-        graph <- graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
-        
-        subgraphs <- decompose(graph)
-        graph <- subgraphs[[1]]
-        for(i in subgraphs[-1]){
-            if(length(V(i)) > 5){
-                EL  = get.edgelist(graph)
-                EL1 = get.edgelist(i)
-                ELU = rbind(EL, EL1)
-                ELU = ELU[!duplicated(ELU),]
-                w <- c(get.edge.attribute(graph, "weight")
-                    , get.edge.attribute(i, "weight"))
-                graph <- graph_from_edgelist(ELU)
-                graph <- set_edge_attr(graph, "weight", value = w)
-            } 
-        }
-    } 
+    graph <- igraph::decompose(graph)[[1]] ## We do not want disconnected nodes
         
     if (!is.null(observations)){
         observations <- as.data.frame(sampledGenotypes(observations))
@@ -131,9 +160,13 @@ plot_genot_fg <- function(trans_mat
         freqs$Genotype <- str_replace_all(freqs$Genotype, ", ", "")
     }
 
+    ## Layout
     lyt <- cpm_layout(graph)
-    # browser()
 
+    ## Labels
+    labels <- compute_vertex_labels(sorted_paths, type)
+
+    ## Vertex colors based on the presence/absence in the original data
     observed_color <- "#ff7b00"
     not_observed_color <- "#0892d0" 
     if(is.null(observations)){
@@ -149,27 +182,31 @@ plot_genot_fg <- function(trans_mat
     V(graph)$color <- colors
     V(graph)$frame.color <- colors
 
+    ## Sizes based of frequency
+    min_size <- 5.5
     sizes <- vapply(V(graph)$name, 
         function(gen){
-            if (sum(match(freqs$Genotype, gen, nomatch = 0)) == 1){
+            if (sum(match(freqs$Genotype, gen, nomatch = 0)) == 1)
                 return(freqs$Abs_Freq[which(freqs$Genotype == gen)] * 150)
-            } else if ((sum(match(observations$Genotype, gen, nomatch = 0)) == 1)){
+            else if ((sum(match(observations$Genotype, gen, nomatch = 0)) == 1))
                 return(observations$Abs_Freq[which(observations$Genotype == gen)] * 150)
-            } else {
-                return(7.5)
-            }
+            else 
+                return(min_size)
         }, numeric(1.0))
 
-    if(all(sizes == 7.5)) sizes <- rep(15, length(sizes))
+    if(all(sizes == min_size)) sizes <- rep(15, length(sizes))
     V(graph)$size <- sizes
 
     V(graph)$label.family <- "Helvetica"
 
     opx <- par(mar = c(1, 1, 1, 1))
-
+    
+    ## Weights proportional to the time they are transited
     w <- E(graph)$weight
     w <- w / max(w) * 10
     if(all(w == 10)) w <- rep(1, length(w))
+
+    ## Actual plotting
     plot(graph
         , layout = lyt[, 2:1]
         , vertex.label.color = "black"
@@ -212,9 +249,9 @@ plot_genot_fg <- function(trans_mat
 
 #' Plot results from CPMs
 #' 
-#' By default it create a top row with the DAG of the CPM 
+#' By default it creates a top row with the DAG of the CPM 
 #' or de transtionRateMatrix for MHN
-#' The bottom row has a custom plot for transition between genotypes
+#' The bottom row has a custom plot for genotype transition
 
 #' @param x output from the cpm
 #' @param data Original cross sectional data used to compute the model. Optional.
@@ -393,11 +430,11 @@ plot_DAG_fg <- function(x, data, orientation = "horizontal",
                     mgp = c(2, 1, 0), key = NULL)
             }
         } else if (plot_type == "genotypes") {
-            plot_genot_fg(as_adjacency_matrix(model_data2plot$fg), simplify = FALSE)
+            plot_genot_fg(as_adjacency_matrix(model_data2plot$fg))
         } else if (plot_type == "transitions") {
             plot_genot_fg(model_data2plot$transitions, data)
         }else if (plot_type == "trans_mat"){
-            plot_genot_fg(model_data2plot$dag_trans_mat, data, simplify = FALSE)
+            plot_genot_fg(model_data2plot$dag_trans_mat, data)
         }
 
         if ((mod %in% c("OT")) & (plot_type == "matrix")) {
