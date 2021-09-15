@@ -1,17 +1,12 @@
+## Created from bits of code take from HyperTraps functions
+## to compute the transition probability matrix
+
 #!/usr/bin/env python
 from __future__ import division
-import pdb
-import matplotlib as mpl
-import matplotlib
-from matplotlib.patches import Ellipse
-from matplotlib.backends.backend_pdf import PdfPages
-import matplotlib.pyplot as plt
-import seaborn as sns
 import networkx as nx
 import numpy as np
 import pandas as pd
 import argparse
-import os
 import string
 import operator as op
 from collections import OrderedDict
@@ -106,7 +101,7 @@ def GenotypeFromState(state):
     genes = np.array(list(string.ascii_uppercase))
     binary_state = np.array([int(i) for i in '{:0b}'.format(state)][::-1])
     genotype = genes[np.argwhere(binary_state == 1).ravel()]
-    genotype = "".join(list(genotype)) 
+    genotype = ", ".join(list(genotype)) 
     return genotype if genotype != "" else "WT"
 
 def CreateTransitionMatrix(file, save = "genotype_transitions.csv"):
@@ -117,7 +112,7 @@ def CreateTransitionMatrix(file, save = "genotype_transitions.csv"):
     data["Joint_Probability"] = data.weight/data.weight.sum()
 
     cumulative_from = data.groupby("from")["weight"].sum()
-    data["Contional_Probability"] = data.apply(lambda x: x["weight"]/cumulative_from[x["from"]], axis=1)
+    data["Conditional_Probability"] = data.apply(lambda x: x["weight"]/cumulative_from[x["from"]], axis=1)
 
     if save:
         data.to_csv(save)

@@ -29,7 +29,6 @@ library(imager)
 #' @param r Int. HyperTraPS trajectories per transition
 #' @param seed Int. Ramdom seed for the code to use.
 #' @param prob_type "joint" or "conditional" probaility type for transitions
-#' @param plot Boolean. Whether to run the plot command.
 #' @param show_plot Boolean. Whether to show the plots.
 #' @param dry_run Boolean. Whether to run the plot command.
 #' @return List$edges
@@ -116,33 +115,34 @@ do_HyperTraPS <- function(data = NULL, tmp_folder = NULL,
     print("Generating Paths")
     system(sprintf("RUN_PW -w match-data -b %1.f", bi))
     # system(sprintf("RUN_PW -w zero-one -b %1.f -R 100", bi))
+
+    ##Here I force to use conditional probabilities only
+    system(sprintf("hypertraps_get_output.py -f 'forwards.txt' -prob_type %s", "conditional")) 
   } else { setwd(tmp_folder) }
 
   ### Plots
-  if (plot){
-    system(sprintf("plot_mc_stats.py -b %1.f", bi))
-    system(sprintf("custom_plot_hypercube_graph.py -f 'forwards_list-pord-match-data.csv' -outfile_graph 'forwards-hypercube-graph-mach-data-g0' -transition_data 'transitions.txt' -labels 'labels.csv' -label_type 'None' -labels_fontsize 4 -aspect 0.9 -width 3.4 -out_type 'png'"))
+  # if (plot){
+  #   system(sprintf("plot_mc_stats.py -b %1.f", bi))
+  #   system(sprintf("custom_plot_hypercube_graph.py -f 'forwards_list-pord-match-data.csv' -outfile_graph 'forwards-hypercube-graph-mach-data-g0' -transition_data 'transitions.txt' -labels 'labels.csv' -label_type 'None' -labels_fontsize 4 -aspect 0.9 -width 3.4 -out_type 'png'"))
       
-    system(sprintf("plot_feature_graph.py -f 'forwards.txt' -layout_type 'circular' -prob_type %s -data_type 'match-data' -width 4 -fontsize 10 -any_time 0 -node_size 100 -connection_style 'arc3,rad=-0.3' -outfile_type 'png'", prob_type))
+  #   system(sprintf("plot_feature_graph.py -f 'forwards.txt' -layout_type 'circular' -prob_type %s -data_type 'match-data' -width 4 -fontsize 10 -any_time 0 -node_size 100 -connection_style 'arc3,rad=-0.3' -outfile_type 'png'", prob_type))
 
-    system(sprintf("plot_ordering_histogram.py -f 'forwards_list-pord-zero-one.csv' -f2 'forwards_list-pord-match-data.csv' -transition_data 'transitions.txt' -labels 'labels.csv' -fontsize 6 -xevery 1 -aspect 0.9 -verbose 'no' -outfile 'forwards-ws1-ws2' -out_type 'png'"))
+  #   system(sprintf("plot_ordering_histogram.py -f 'forwards_list-pord-zero-one.csv' -f2 'forwards_list-pord-match-data.csv' -transition_data 'transitions.txt' -labels 'labels.csv' -fontsize 6 -xevery 1 -aspect 0.9 -verbose 'no' -outfile 'forwards-ws1-ws2' -out_type 'png'"))
     
-    ##Here I force to use conditional probabilities only
-    system(sprintf("hypertraps_get_output.py -f 'forwards.txt' -prob_type %s", "conditional")) 
-  }
+  # }
 
-  if(show_plot){
-    library(imager)
-    stats_names <- unlist(strsplit(list.files(pattern = "^stats.*png"), " "))
-    files <- list(
-      stats_names[1], 
-      "forwards-hypercube-graph-mach-data-g0.png"
-      , "forwards-ws1-ws2.png")
-    for(f in files){
-      im <- load.image(f)
-      plot(im)
-    }
-  }
+  # if(show_plot){
+  #   library(imager)
+  #   stats_names <- unlist(strsplit(list.files(pattern = "^stats.*png"), " "))
+  #   files <- list(
+  #     stats_names[1], 
+  #     "forwards-hypercube-graph-mach-data-g0.png"
+  #     , "forwards-ws1-ws2.png")
+  #   for(f in files){
+  #     im <- load.image(f)
+  #     plot(im)
+  #   }
+  # }
 
   ## Reading features 
   features <- read.csv("feature_transitions.csv", header = FALSE)
@@ -151,10 +151,28 @@ do_HyperTraPS <- function(data = NULL, tmp_folder = NULL,
   rownames(features) <- genes
   model <- features2model(features)
 
+  ## Compute Transition Rate Matrix
+
+  ## Compute Transition Count Matrix
+  genotypes_transition_counts <- read.table("forwards_list-pord-edge-list-long-match-data.txt", header = TRUE)
+
+  genotypes_transition_counts$from <- vapply(genotypes_transition_counts$from, int2str, character(1))
+  genotypes_transition_counts$to <- vapply(genotypes_transition_counts$to, int2str, character(1))
+  g <- graph_from_data_frame(genotypes_transition_counts)
+  transition_count_matrix <- as_adjacency_matrix(g, attr="weight")
+  states <- setdiff(colnames(transition_count_matrix), "WT")
+  sorted_states <- c("WT", states[order(vapply(states, nchar, numeric(1)))])
+  transition_count_matrix <- transition_count_matrix[sorted_states, sorted_states]
+
+  ## Compute Transition Probability Matrix
+  transition_probability_matrix <- transition_count_matrix / rowSums(transition_count_matrix)
+
   # Cleaning 
   setwd(orig_folder)
   return(list(
     feature_transitions = features,
+    transition_count_matrix = transition_count_matrix,
+    transition_probability_matrix = transition_probability_matrix,
     edges = model))
 }
 
@@ -175,3 +193,6 @@ features2model <- function(data){
 
   return(model)
 }
+
+
+create_transition_probabi <- function() {}
