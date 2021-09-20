@@ -1,8 +1,12 @@
 library(mccbn)
+library(parallel)
+library(devtools)
+load_all()
+
 # setwd("../../")
 # source("sample_genotypes_from_trm.R")
 # setwd("tests-sample_genotypes_from_trm/MCCBN")
-mccbn_vs_comp <- function(ngenes, n_samples, B = 10000) {
+mccbn_vs_comp <- function(ngenes, n_samples, B = 2000) {
     true_p1 <- mccbn::random_poset(ngenes)
     rownames(true_p1) <- colnames(true_p1) <- LETTERS[1:ncol(true_p1)]
     lambda_s <- 1
@@ -56,7 +60,7 @@ for (i in c(5, 6, 7, 8, 9, 10)){
     print(date())
     M <- 10000
     Ngenes <- i
-    Nsampl <- 50000
+    Nsampl <- 100000
 
     system.time(
         p_values <- unlist(mclapply(1:M,
