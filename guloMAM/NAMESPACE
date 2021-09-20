@@ -11,3 +11,4 @@ importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert", 
 importFrom("Matrix", "diag", "rowSums", "colSums", "summary")
 importFrom("OncoSimulR", "sampledGenotypes")
 importFrom("stringr", "str_count")
+importFrom("parallel", "detectCores", "mclapply")
