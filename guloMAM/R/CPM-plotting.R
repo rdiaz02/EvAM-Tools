@@ -158,7 +158,7 @@ plot_genot_fg <- function(trans_mat
     rownames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
     colnames(trans_mat) <- str_replace_all(colnames(trans_mat), ", ", "")
 
-    graph <- graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
+    graph <- graph_from_adjacency_matrix(trans_mat, weighted = TRUE, mode = "directed")
 
     unique_genes_names <- sort(unique(str_split(paste(rownames(trans_mat)[-1], collapse=""), "")[[1]]))
 
@@ -217,11 +217,13 @@ plot_genot_fg <- function(trans_mat
 
     V(graph)$label.family <- "Helvetica"
 
-    opx <- par(mar = c(1, 1, 1, 1))
+    opx <- par(mar = c(3, 0, 3, 0))
     
     ## Weights proportional to the time they are transited
     w <- E(graph)$weight
-    w <- w / max(w) * 10
+    w <- w / max(w) 
+    w[w <= 0.1] <- 0.1
+    w <- w * 10
     if(all(w == 10)) w <- rep(1, length(w))
 
     ## Actual plotting
@@ -229,12 +231,13 @@ plot_genot_fg <- function(trans_mat
         , layout = lyt[, 2:1]
         , vertex.label.color = "black"
         , vertex.label.family = "Helvetica"
+        , vertex.label.font = 2
         , vertex.label = labels$vertex_labels
         , font.best = 2
         , vertex.label.cex = 1
         , vertex.frame.width = 0
-        # , edge.color = rgb(0.5, 0.5, 0.5, 1)
-        , edge.color = rgb(0.5, 0.5, 0.5, E(graph)$weight/max(E(graph)$weight))
+        , edge.color = rgb(0.5, 0.5, 0.5, 1)
+        # , edge.color = rgb(0.5, 0.5, 0.5, E(graph)$weight/max(E(graph)$weight))
         , edge.arrow.size = 0.5
         , xlab = "Number of features acquired"
         , edge.width = w
