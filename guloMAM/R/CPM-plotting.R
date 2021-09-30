@@ -1,7 +1,7 @@
 
 #' Use plot matrix to plot the sampled genotypes
 #' 
-#' @param data: data.frame object with cross sectional datas
+#' @param data data.frame object with cross sectional datas
 plot_sampled_genots <- function(data) {
     d1 <- as.data.frame(sampledGenotypes(data))
 
@@ -56,7 +56,9 @@ rank_paths <- function(graph){
 #' @param type String. Default genotype. Valid options are "genotypes" or "acquisition"
 #' "genotype" option returns the genotype of the vertex.
 #' "acquisition" option returns the genotype acquire along the path.
-compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL, type = "genotype", vertex_labels =  TRUE, edge_labels = TRUE){
+compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL, type = "genotype"
+# , vertex_labels =  TRUE
+){
     if(is.null(top_paths)) top_paths <- length(paths_from_graph)
     else if(is.numeric(top_paths)){
         if(top_paths > length(paths_from_graph)) top_paths <- length(paths_from_graph)
@@ -66,20 +68,20 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL, typ
     paths_from_graph <- paths_from_graph[1:top_paths]
     edge_labels <- NULL
     
-    if(vertex_labels){
-        nodes_in_top_paths <- unique(c(sapply(paths_from_graph,
-            function(x) x$name
-        )))
-        vertex_labels <- vapply(V(graph)$name,
-            function(x){
-                if (x %in% nodes_in_top_paths) return(x)
-                else return("")
-            },
-            character(1))
-    } else vertex_labels <- NULL
+    # if(vertex_labels){
+    nodes_in_top_paths <- unique(c(sapply(paths_from_graph,
+        function(x) x$name
+    )))
+    vertex_labels <- vapply(V(graph)$name,
+        function(x){
+            if (x %in% nodes_in_top_paths) return(x)
+            else return("")
+        },
+        character(1))
+    # } else vertex_labels <- NULL
 
     # if(edge_labels){
-
+        ## TODO in each vertex say +NEW_GENE
     # }
 
 
@@ -95,7 +97,9 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL, typ
 #' of mutated genes they have
 #' Distribution in the Y axis in done alphabetically.
 #' 
-#' #' @param graph igraph object with genotype transitions
+#' @param graph igraph object with genotype transitions
+#' 
+#' @return dataframe the x and y position for each vertex in graph
 cpm_layout <- function(graph){
     num_mutations <- vapply(V(graph)$name, function(x){
         ifelse(x == "WT", 0, nchar(x)) ## Revise
@@ -144,11 +148,8 @@ cpm_layout <- function(graph){
 #' colnames(dB_c2) <- LETTERS[1:5]
 #' out <- all_methods_2_trans_mat(dB_c1)
 #' png("fluxes.png")
-#' par(mfrow = c(1, 2))
-#' plot_genot_fg(out$MHN_trans_mat, db2, sorted_observations)
-#' title("Transition Matrix", line = -3)
-#' plot_genot_fg(edge_transitions, db2, sorted_observations)
-#' title("Fluxes", line = -3)
+#' par(mfrow = c(1, 1))
+#' plot_genot_fg(out$MHN_trans_mat, dB_c2)
 #' dev.off()
 plot_genot_fg <- function(trans_mat
     , observations = NULL
@@ -182,7 +183,9 @@ plot_genot_fg <- function(trans_mat
 
     ## Labels
     sorted_paths <- rank_paths(graph)
-    labels <- compute_vertex_labels(graph, sorted_paths, top_paths = top_paths, edge_labels = FALSE)
+    labels <- compute_vertex_labels(graph, sorted_paths, top_paths = top_paths
+    # , edge_labels = FALSE
+    )
 
     ## Vertex colors based on the presence/absence in the original data
     observed_color <- "#ff7b00"
@@ -246,8 +249,7 @@ plot_genot_fg <- function(trans_mat
     margin <- -1.15
     lines(c(-1.2, 1.2), c(margin, margin), lwd = 2)
     node_depth <- sapply(V(graph)$name
-        , function(x) distances <- distances(graph, algorithm = "unweighted", to = x)["WT",]
-        )
+        , function(x) distances <- distances(graph, algorithm = "unweighted", to = x)["WT",])
     max_node_depth <- max(node_depth[is.finite(node_depth)])
     axis(1
         , at = seq(-1, 1, length.out = max_node_depth + 1)
@@ -285,15 +287,36 @@ plot_genot_fg <- function(trans_mat
 #' transitions: shows the hypercubic genotype transitions 
 #'              running simulations is needed before this
 #' trans_mat: HyperTraps-like representation of the transition matrix
+#' @param prune_edges Threshold. Values below this number will be set to zero
+#' in the trm
+#' @param top_paths Number of most relevant paths to plot. Default NULL 
+#' will plot all paths
 #' 
 #' @examples
-#' out <- all_methods_2_trans_mat(dB_c1, do_MCCBN = TRUE)
+#' dB_c1 <- matrix(
+#'  c(
+#'      rep(c(1, 0, 0, 0, 0), 300) #A
+#'    , rep(c(0, 0, 1, 0, 0), 300) #C
+#'    , rep(c(1, 1, 0, 0, 0), 200) #AB
+#'    , rep(c(0, 0, 1, 1, 0), 200) #CD
+#'    , rep(c(1, 1, 1, 0, 0), 100) #ABC
+#'    , rep(c(1, 0, 1, 1, 0), 100) #ACD
+#'    , rep(c(1, 1, 0, 0, 1), 100) #ABE
+#'    , rep(c(0, 0, 1, 1, 1), 100) #CDE
+#'    , rep(c(1, 1, 1, 0, 1), 100) #ABCE
+#'    , rep(c(1, 0, 1, 1, 1), 100) #ACDE
+#'    , rep(c(1, 1, 1, 1, 0), 50) # ABCD
+#'    , rep(c(0, 0, 0, 0, 0), 10) # WT
+#'  ), ncol = 5, byrow = TRUE
+#' )
+#' colnames(dB_c1) <- LETTERS[1:5]
+#' out <- all_methods_2_trans_mat(dB_c1, do_MCCBN = FALSE)
 #' png("trans_at.png", width = 1000, height = 600, units = "px")
 #' plot_DAG_fg(out, dB_c1, plot_type = "trans_mat")
 #' dev.off()
-#' out2 <- run_all_simulations(out, 100, n_genes = 5)
+#' out2 <- sample_all_CPMS(out, 100, n_genes = 5)
 #' png("graph.png", width = 1000, height = 600, units = "px")
-#' plot_DAG_fg(out, dB_c1, plot_type = "transitions")
+#' plot_DAG_fg(out2, dB_c1, plot_type = "transitions")
 #' dev.off()
 plot_DAG_fg <- function(x, data, orientation = "horizontal", 
                         models = c("OT", "CBN", "DBN", "MCCBN", "MHN", "HESBCN"),
@@ -453,7 +476,7 @@ plot_DAG_fg <- function(x, data, orientation = "horizontal",
                     mgp = c(2, 1, 0), key = NULL)
             }
         } else if (plot_type == "genotypes") {
-            plot_genot_fg(as_adjacency_matrix(model_data2plot$fg, top_paths = top_paths))
+            plot_genot_fg(model_data2plot$fg, top_paths = top_paths)
         } else if (plot_type == "transitions") {
             plot_genot_fg(model_data2plot$transitions, data, top_paths = top_paths)
         }else if (plot_type == "trans_mat"){

@@ -95,6 +95,8 @@ indiv_sample_from_trm_pre <- function(trmstd,
 #' 
 #' @param trm transition rate matrix, number of samples or times of samples,
 #' @param n_samples Int with the number of samples to be computed
+#' @param T_sampling Time at wich each individual in sample. By default they 
+#' are randomly generated
 #' @param pre_compute whether or not to precompute entries of the trans rate matrix (for speed)
 #' @param cores number of cores (pass 1 is you do not want to parallelize)
 #' 
@@ -158,26 +160,27 @@ population_sample_from_trm <- function(trm, n_samples = 10,
         ))
 }
 
-#' @title Process simulations
+#' @title Process samples
 #' 
 #' @description Generate trajectories from simulated data
 #' 
 #' @param sim list generated with mccbn::sample_genotypes. Relevant
 #' fields are described below
-#' @param sim$T_sum_events time of events for the mutations of each gene
-#' @param sim$obs_events data.frame with mutated before the end of the sampling time
-#'
+#' $T_sum_events time of events for the mutations of each gene
+#' $obs_events data.frame with mutated before the end of the sampling time
+#' @param n_genes number of genes observed
+#' @param output type of output that we want
+#' 
 #' @return List with a list of trajectories (the order in which gene mutations
 #' are acquired), genotype frequencies and genotypes transition matrix (with
 #' counts of how many transitions between each genotype have been observed) 
-process_simulations <- function(sim, n_genes, output = c("frequencies", "state_counts", "transitions")){
+process_samples <- function(sim, n_genes, output = c("frequencies", "state_counts", "transitions")){
 
     #Checking input
-    # browser()
     params <- c("trajectory", "obs_events")
     for (i in params){
         if (!(i %in% names(sim))) 
-            stop(sprintf("%s is missing from your simulations", i))
+            stop(sprintf("%s is missing from your samples", i))
     }
 
     #Checking output variables
@@ -265,7 +268,7 @@ sample_all_CPMS <- function(cpm_output
 
         if(any(!is.na(trm))){
             sims <- population_sample_from_trm(trm, n_samples = N_samples)
-            output[[sprintf("%s_genotype_transitions", method)]] <- process_simulations(sims, 
+            output[[sprintf("%s_genotype_transitions", method)]] <- process_samples(sims, 
                 n_genes, output = c("transitions"))$transitions
         } 
         else output[[sprintf("%s_genotype_transitions", method)]] <- NA

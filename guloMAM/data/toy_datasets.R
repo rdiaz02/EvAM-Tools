@@ -250,7 +250,7 @@ colnames(dB_cv3) <- LETTERS[1:4]
 # do_HyperTraPS("Bladder_Urothelial_Carcinoma.csv", "HyperTraPS_examples/HP_pmce", runs = 1000, bi=500)
 # sample_freqs(dB_OR, "HyperTraPS_examples/HP_OR/freqs.jpg")
 
-all_examples <- list(
+all_examples_csd <- list(
     AND = dB_AND 
   , OR = dB_OR 
   , XOR = dB_XOR 
@@ -268,3 +268,8 @@ all_examples <- list(
   , cv2 = dB_cv2
   , cv3 = dB_cv3
 )
+
+# for (i in names(all_examples_csd)){
+#   tmp <- all_examples_csd[i]
+#   save(tmp, file = sprintf("./toy_datasets_cpms/%s.RData", i))
+# }

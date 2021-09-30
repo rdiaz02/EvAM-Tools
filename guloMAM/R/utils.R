@@ -102,7 +102,7 @@ binary2str <- function(binary_state, sep = ", ", wt = "WT"){
 #' 
 #' @description Transform a genotype from string nomenclature to binary coding
 #' 
-#' @param int_state Ingeter >=0
+#' @param str_state String
 #' @param sep String. Separator between genes letters
 #' @param wt String. How to define the wild type
 #' @param n Integer. Number of digits to return
@@ -129,7 +129,7 @@ str2binary <- function(str_state, sep =", ", wt = "WT", n = NULL){
 #' 
 #' @description Transform a genotype from string nomenclature to binary coding
 #' 
-#' @param int_state Ingeter >=0
+#' @param str_state String
 #' @param sep String. Separator between genes letters
 #' @param wt String. How to define the wild type
 #' @param n Integer. Number of digits to return
