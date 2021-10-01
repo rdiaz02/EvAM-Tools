@@ -91,6 +91,8 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL, typ
     ))
 }
 
+
+
 #' Computes the best layout for a genotype transtion matrix 
 #' 
 #' Genotypes are distributed in the x axis according the number 
@@ -128,7 +130,8 @@ cpm_layout <- function(graph){
 #' @param observations Original cross sectional data used to compute the model. Optional.
 #' @param freqs DataFrame with column $Genotype and $Freqs with their frequencies. Optional.
 #' @param top_paths Int>0. Default NULL. Most transited paths to label
-#' @examples
+#' @examples 
+#' \dontrun{
 #' dB_c2 <- matrix(
 #' c(
 #'      rep(c(1, 0, 0, 0, 0), 300) #A
@@ -146,11 +149,13 @@ cpm_layout <- function(graph){
 #'  ), ncol = 5, byrow = TRUE
 #' )
 #' colnames(dB_c2) <- LETTERS[1:5]
-#' out <- all_methods_2_trans_mat(dB_c1)
+#' out <- all_methods_2_trans_mat(dB_c2)
 #' png("fluxes.png")
 #' par(mfrow = c(1, 1))
 #' plot_genot_fg(out$MHN_trans_mat, dB_c2)
 #' dev.off()
+#' }
+
 plot_genot_fg <- function(trans_mat
     , observations = NULL
     , freqs = NULL
@@ -271,6 +276,8 @@ plot_genot_fg <- function(trans_mat
     # title(xlab = "Number of features acquired", line = -3)
 }
 
+
+
 #' Plot results from CPMs
 #' 
 #' By default it creates a top row with the DAG of the CPM 
@@ -291,8 +298,8 @@ plot_genot_fg <- function(trans_mat
 #' in the trm
 #' @param top_paths Number of most relevant paths to plot. Default NULL 
 #' will plot all paths
-#' 
 #' @examples
+#'\dontrun{
 #' dB_c1 <- matrix(
 #'  c(
 #'      rep(c(1, 0, 0, 0, 0), 300) #A
@@ -318,6 +325,9 @@ plot_genot_fg <- function(trans_mat
 #' png("graph.png", width = 1000, height = 600, units = "px")
 #' plot_DAG_fg(out2, dB_c1, plot_type = "transitions")
 #' dev.off()
+#' }
+#' 
+
 plot_DAG_fg <- function(x, data, orientation = "horizontal", 
                         models = c("OT", "CBN", "DBN", "MCCBN", "MHN", "HESBCN"),
                         plot_type = "trans_mat",

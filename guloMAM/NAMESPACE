@@ -1,12 +1,12 @@
 
 export("indiv_sample_from_trm_pre", "population_sample_from_trm",
-    "process_simulations", "do_DBN", "do_HESBCN", "import.hesbcn",
+    "process_samples", "do_DBN", "do_HESBCN", "import.hesbcn",
     "cpm2tm", "all_methods_2_trans_mat", "plot_sampled_genots",
     "plot_genot_fg", "plot_DAG_fg", "do_MHN2")
 
 importFrom("grDevices", "rgb")
 importFrom("graphics", "axis", "legend", "lines", "par")
-importFrom("stats", "aggregate", "chisq.test", "decompose", "na.omit", "rexp", "runif")
+importFrom("stats", "aggregate", "chisq.test", "decompose", "na.omit", "rexp", "runif", "rnorm", "optim")
 importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert", "write.csv")
 importFrom("Matrix", "diag", "rowSums", "colSums", "summary")
 importFrom("OncoSimulR", "sampledGenotypes")
