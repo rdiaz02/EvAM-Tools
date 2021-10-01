@@ -21,9 +21,9 @@ do_DBN <- function(data) {
 #' Return theta from 
 #' Modified from OncoDB package https://github.com/phillipnicol/OncoBN
 #' 
-#' @param df
-#' @param fit
-#' @return 
+#' @param df output from DBN
+#' @param fit output from DBN
+#' @return List with parent, children and thetas
 inferTheta <- function(df, fit){
   df <- cbind(df, 1)
   colnames(df)[ncol(df)] <- "WT" 

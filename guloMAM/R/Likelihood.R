@@ -6,6 +6,12 @@ Q.vec <- function(Theta, x, diag=F, transp=F){
   y <- rep(0, 2^n)
   
   for(i in 1:n){ #Should be parallelized with MPI
+    # print("From Q.vec")
+    # print(Theta)
+    # print(i)
+    # print(x)
+    # print(diag)
+    # print(transp)
     y <- y + kronvec(exp(Theta[i,]), i, x, diag, transp)
   }    
   

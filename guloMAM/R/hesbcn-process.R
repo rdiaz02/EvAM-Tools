@@ -1,5 +1,16 @@
 
-
+#' @title Run HESBCN
+#' 
+#' @param data Cross secitonal data. Matrix of genes (columns)
+#' and individuals (rows)
+#' @param n_steps Number of steps to run. Default: 100000
+#' @param tmp_folder Folder name where the oput is located. 
+#' It will be place under /tmp/HESBCN/tmp_folder
+#' @param seed Seed to run the experiment
+#' @param clean_dir Whether to delete the folder upon completion
+#' 
+#' @return A list with the adjacency matrix, the lambdas, the parent set
+#' and a data.frame with From-To edges and associated lambdas.
 do_HESBCN <- function(data, n_steps=100000, 
     tmp_folder="", seed=NULL, clean_dir=FALSE){
     # Setting tmp folder
@@ -48,8 +59,17 @@ do_HESBCN <- function(data, n_steps=100000,
     return(model_info)
 }
 
+#' @title Read output of HESBCN
+#'  
+#' Copied from https://github.com/BIMIB-DISCo/PMCE/blob/main/R/utils.R
+#' and extended to match the output with that of others CPMs
+#'
+#' @param file Filename with the output
+#' @param genes Custon genes names
+#' 
+#' @return A list with the adjacency matrix, the lambdas, the parent set
+#' and a data.frame with From-To edges and associated lambdas.
 import.hesbcn <- function( file, genes = NULL ) {
-    ## Copied from https://github.com/BIMIB-DISCo/PMCE/blob/main/R/utils.R
 
     # read results from file
     results <- read.table(file = file,

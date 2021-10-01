@@ -1,16 +1,12 @@
-library(parallel)
 
-# source("schill-trans-mat.R")
-# source("code-all-methods-minimal.R")
-# source("utils.R")
-
-
-## indiv_sample_from_trm is equivalent to simulate_sample_2
-## population_sample_from_trm is equivalent to simulate_population_2
-
-
-## transition rate matrix, time of sampling of a case/individual ->
-##                       sampled genotype, trajectory, and accumulated time
+#' @title Sample an indivial based on a transition rate matrix
+#' 
+#' @param trm transition rate matrix
+#' @param T_sampling Time to compute 
+#' @param ngenots Number of genotypes
+#' @param genot_names String array with genotype names
+#' 
+#' @return sampled genotype, trajectory, and accumulated time
 indiv_sample_from_trm <- function(trm, T_sampling, ngenots = NULL,
                             genot_names = NULL) {
     if(is.null(ngenots)) ngenots <- ncol(trm)
@@ -41,24 +37,25 @@ indiv_sample_from_trm <- function(trm, T_sampling, ngenots = NULL,
 }
 
 
+#' @title Sample an indivial based on a transition rate matrix
+#' 
+#' We repeat the sums to compute the diagonal and the division
+#' If we sample a large number of times, possibly worth it to
+#' have those precomputed
 
+#' This is what I call "transition matrix standardized":
+#'    Diagonal is passed separately, entries in matrix are probabilities
 
+#' This will only be used in called after standardization
+#' therefore the "is.null" can be removed
 
-######################################
-
-## We repeat the sums to compute the diagonal and the division
-## If we sample a large number of times, possibly worth it to
-## have those precomputed
-
-## This is what I call "transition matrix standardized":
-##    Diagonal is passed separately, entries in matrix are probabilities
-
-## This will only be used in called after standardization
-## therefore the "is.null" can be removed
-
-## transition rate matrix "standardized",
-##  diagonal of transition rate matrix, time of sampling of a case/individual ->
-##                       sampled genotype, trajectory, and accumulated time
+#' @param trmstd transition rate matrix "standardized",
+#' @param diag diagonal of transition rate matrix, time of sampling of a case/individual
+#' @param T_sampling Time to compute 
+#' @param ngenots Number of genotypes
+#' @param genot_names String array with genotype names
+#' 
+#' @return sampled genotype, trajectory, and accumulated time
 indiv_sample_from_trm_pre <- function(trmstd,
                                       diag,
                                       T_sampling,
@@ -92,12 +89,20 @@ indiv_sample_from_trm_pre <- function(trmstd,
 }
 
 
-
-## Like indiv_sample_from_trm, but for multiple times
-
-## transition rate matrix, number of samples or times of samples,
-##  whether or not to precompute entries of the trans rate matrix (for speed)
-##  number of cores (pass 1 is you do not want to parallelize)
+#' @title Sample a population
+#' 
+#' @description Like indiv_sample_from_trm, but for multiple times
+#' 
+#' @param trm transition rate matrix, number of samples or times of samples,
+#' @param n_samples Int with the number of samples to be computed
+#' @param T_sampling Time at wich each individual in sample. By default they 
+#' are randomly generated
+#' @param pre_compute whether or not to precompute entries of the trans rate matrix (for speed)
+#' @param cores number of cores (pass 1 is you do not want to parallelize)
+#' 
+#' @return List with precompunted sampling time of sampling, the actual time sampled
+#' observed for each sample (s), the complete trajectory of acquired mutations
+#' and the observed genotype
 
 population_sample_from_trm <- function(trm, n_samples = 10,
                                        T_sampling = NULL,
@@ -155,23 +160,27 @@ population_sample_from_trm <- function(trm, n_samples = 10,
         ))
 }
 
-
-#' @title Process simulations
+#' @title Process samples
 #' 
 #' @description Generate trajectories from simulated data
 #' 
 #' @param sim list generated with mccbn::sample_genotypes. Relevant
 #' fields are described below
-#' @param sim$T_sum_events time of events for the mutations of each gene
-#' @param sim$obs_events data.frame with mutated before the end of the sampling time
-process_simulations <- function(sim, n_genes, output = c("frequencies", "state_counts", "transitions")){
+#' $T_sum_events time of events for the mutations of each gene
+#' $obs_events data.frame with mutated before the end of the sampling time
+#' @param n_genes number of genes observed
+#' @param output type of output that we want
+#' 
+#' @return List with a list of trajectories (the order in which gene mutations
+#' are acquired), genotype frequencies and genotypes transition matrix (with
+#' counts of how many transitions between each genotype have been observed) 
+process_samples <- function(sim, n_genes, output = c("frequencies", "state_counts", "transitions")){
 
     #Checking input
-    # browser()
     params <- c("trajectory", "obs_events")
     for (i in params){
         if (!(i %in% names(sim))) 
-            stop(sprintf("%s is missing from your simulations", i))
+            stop(sprintf("%s is missing from your samples", i))
     }
 
     #Checking output variables
@@ -235,8 +244,18 @@ process_simulations <- function(sim, n_genes, output = c("frequencies", "state_c
     return(output)
 }
 
-
-run_all_simulations <- function(cpm_output
+#' @title Run samples for all outputs of CPMs
+#' 
+#' TODO some methods do not make sense to be here, like OT
+#' that do not raise a transition rate matrix
+#' 
+#' @param cpm_output Output from calling all_methods2trans_mat
+#' @param N_samples Number of samples to generate
+#' @param n_genes Number of samples that are in the sample
+#' @param methods List of methods that we want to sample
+#' 
+#' @return modified cpm_outputd including a matrix with genotype transitions
+sample_all_CPMS <- function(cpm_output
     , N_samples
     , n_genes
     , methods = c("OT", "CBN", "MCCBN", "DBN", "MHN", "HESBCN")){
@@ -249,7 +268,7 @@ run_all_simulations <- function(cpm_output
 
         if(any(!is.na(trm))){
             sims <- population_sample_from_trm(trm, n_samples = N_samples)
-            output[[sprintf("%s_genotype_transitions", method)]] <- process_simulations(sims, 
+            output[[sprintf("%s_genotype_transitions", method)]] <- process_samples(sims, 
                 n_genes, output = c("transitions"))$transitions
         } 
         else output[[sprintf("%s_genotype_transitions", method)]] <- NA
@@ -283,13 +302,17 @@ run_all_simulations <- function(cpm_output
 ## }
 
 
-## Take a sample (a vector), with genotypes as "A, B", etc
-## and return a vector of frequencies (counts) in the exact same
-## order as used by MHN
-## A much faster implementation
+#' @title Count genotypes 
+#' 
+#' Take a sample (a vector), with genotypes as "A, B", etc
+#' and return a vector of frequencies (counts) in the exact same
+#' order as used by MHN
+#' A much faster implementation
 
-## vector of genotypes, total number of genes ->
-##             counts of all genotypes in same order as used by MHN
+#' @param x vector of genotypes
+#' @param ngenes total number of genes
+#' 
+#' @return counts of all genotypes in same order as used by MHN
 sample_to_pD_order <- function(x, ngenes) {
     x <- as.data.frame(table(x), stringsAsFactors = FALSE)
     
@@ -305,8 +328,22 @@ sample_to_pD_order <- function(x, ngenes) {
                    nbins = 2^ngenes))
 }
 
-
-
+#' @title Compute p-values for MHN sample vs our sampling
+#' 
+#' For testing purposes 
+#' 
+#' Generates a random transitions rate matrix
+#' and run samples using the MHN engine and ours
+#' Returns the p-value of a chis-sq test to compare if
+#' both genotype distribution come from the same initial
+#' distribution
+#' 
+#' @param ngenes Number of genes to sample
+#' @param n_samples How many random samples do we want
+#' @param B an integer specifying the number of replicates used in the
+#'          Monte Carlo test.
+#' 
+#' @return list of p-values (one for each sample)
 pv_one_comp <- function(ngenes, n_samples, B = 2000) {
 
     theta <- Random.Theta(n = ngenes, sparsity = runif(1, 0.2, 0.8))
@@ -324,8 +361,6 @@ pv_one_comp <- function(ngenes, n_samples, B = 2000) {
     ##     browser()
     return(pv)
 }
-
-
 
 # print(sum(p_values5 < 0.01)/M) ## 0.0108
 # print(sum(p_values5 < 0.05)/M) ## 0.0488
@@ -399,8 +434,6 @@ pv_one_comp <- function(ngenes, n_samples, B = 2000) {
 # curve(punif(x, 1/4001, 1), add = TRUE, col = "blue")
 
 
-
-
 # if(FALSE) {
 #     ## For the hell of it, if we want, run this later
 #     ## This will be very slow!!
@@ -438,8 +471,6 @@ pv_one_comp <- function(ngenes, n_samples, B = 2000) {
 ## or, with changes in systemd
 ## loginctl enable-linger
 ## systemd-run --scope --user R --vanilla --slave -f sample_genotypes_from_trm.R &> sample_genotypes_from_trm.Rout &
-
-
 
 ################################################################
 

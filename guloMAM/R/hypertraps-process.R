@@ -29,11 +29,11 @@ library(imager)
 #' @param r Int. HyperTraPS trajectories per transition
 #' @param seed Int. Ramdom seed for the code to use.
 #' @param prob_type "joint" or "conditional" probaility type for transitions
-#' @param show_plot Boolean. Whether to show the plots.
 #' @param dry_run Boolean. Whether to run the plot command.
 #' @return List$edges
 #' @return List$feature_transitions
-#' @example 
+#' @examples 
+#'\dontrun{
 #'dB_OR <- matrix(
 #'  c(
 #'     rep(c(1, 0, 0, 0), 200) #A
@@ -51,18 +51,20 @@ library(imager)
 #' do_HyperTraPS(tmp_data, 
 #'       sprintf("./HP_%s", dataset), 
 #'       runs = runs, bi = bi, dry_run = dry_run, show_plot = FALSE )
+#' }
 
 do_HyperTraPS <- function(data = NULL, tmp_folder = NULL, 
   runs = 1000, bi = 50000, r = 100, 
   seed = 0, prob_type = "joint", 
-  plot = TRUE, show_plot = TRUE, dry_run = FALSE){
+  # plot = TRUE, show_plot = TRUE, 
+  dry_run = FALSE){
   
   warning("You should run the script within a conda enviroment with a working installation of HyperTraPS")
   orig_folder <- getwd()
 
   if (!(prob_type %in% c("joint", "conditional"))) {
     stop(sprintf("Invalid probability type %s.
-      Supported types are: 1) joint and 2) conditional", prob_type))
+      Supported types are: 1.- joint and 2.- conditional", prob_type))
   }
   
   if (!dry_run & !is.null(data)) {

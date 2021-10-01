@@ -43,6 +43,7 @@ do_MHN <- function(x,  lambda = 1/nrow(x)) {
     ## See Suppl Mat.
     mhnd <- Data.to.pD(x)
     cat("\n      MHN: done Data.to.pD ", date(), "\n")
+    browser()
     theta <- Learn.MHN(mhnd, lambda = lambda)
     cat("\n      MHN: done Learn.MHN ", date(), "\n")
     colnames(theta) <- rownames(theta) <- colnames(x)
