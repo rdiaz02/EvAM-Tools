@@ -1,0 +1,99 @@
+### 3 genes
+[1] COMPUTED B 50000 (50000 original)
+prop. < 0.05 :  0.0513 
+prop. < 0.01 :  0.012 
+prop. < 0.005:  0.006 
+prop. < 0.001:  9e-04 
+
+
+	One-sample Kolmogorov-Smirnov test
+
+data:  pv
+D = 0.00942, p-value = 0.3374
+alternative hypothesis: two-sided
+
+
+
+	Chi-squared test for given probabilities with simulated p-value (based
+	on 2000 replicates)
+
+data:  tt_all
+X-squared = 50011, df = NA, p-value = 0.4848
+
+### 5 genes
+[1] COMPUTED B 50000 (50000 original)
+prop. < 0.05 :  0.0484 
+prop. < 0.01 :  0.0114 
+prop. < 0.005:  0.0073 
+prop. < 0.001:  0.0014 
+
+
+	One-sample Kolmogorov-Smirnov test
+
+data:  pv
+D = 0.00662, p-value = 0.7732
+alternative hypothesis: two-sided
+
+
+
+	Chi-squared test for given probabilities with simulated p-value (based
+	on 2000 replicates)
+
+data:  tt_all
+X-squared = 50011, df = NA, p-value = 0.5007
+
+### 6 genes
+[1] COMPUTED B 12499 (50000 original)
+prop. < 0.05 :  0.0503 
+prop. < 0.01 :  0.0118 
+prop. < 0.005:  0.0058 
+prop. < 0.001:  0.001 
+
+
+	One-sample Kolmogorov-Smirnov test
+
+data:  pv
+D = 0.0085546, p-value = 0.4571
+alternative hypothesis: two-sided
+
+
+
+	Chi-squared test for given probabilities with simulated p-value (based
+	on 2000 replicates)
+
+data:  tt_all
+X-squared = 50451, df = NA, p-value = 0.07996
+
+### 7 genes
+[1] COMPUTED B 24999 (50000 original)
+prop. < 0.05 :  0.048 
+prop. < 0.01 :  0.0099 
+prop. < 0.005:  0.0056 
+prop. < 0.001:  0.0011 
+
+
+	One-sample Kolmogorov-Smirnov test
+
+data:  pv
+D = 0.010248, p-value = 0.2443
+alternative hypothesis: two-sided
+
+### 9 genes
+[1] COMPUTED B 16666 (50000 original)
+prop. < 0.05 :  0.0514 
+prop. < 0.01 :  0.0108 
+prop. < 0.005:  0.0064 
+prop. < 0.001:  0.0021 
+
+
+	One-sample Kolmogorov-Smirnov test
+
+data:  pv
+D = 0.0053491, p-value = 0.9372
+alternative hypothesis: two-sided
+
+	Chi-squared test for given probabilities with simulated p-value (based
+	on 2000 replicates)
+
+data:  tt_all
+X-squared = 49461, df = NA, p-value = 0.967
