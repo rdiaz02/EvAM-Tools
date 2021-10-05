@@ -6,3 +6,5 @@ rm -r guloMAM.Rcheck
 R_ENVIRON_USER=~/.Renviron.bioc R CMD build guloMAM
 
 R_ENVIRON_USER=~/.Renviron.bioc R CMD check guloMAM_0.0.0.9015.tar.gz
+
+R_ENVIRON_USER=~/.Renviron.bioc R CMD INSTALL guloMAM_0.0.0.9015.tar.gz
