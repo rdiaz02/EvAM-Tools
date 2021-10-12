@@ -1,8 +1,8 @@
 
 export("indiv_sample_from_trm_pre", "population_sample_from_trm",
-    "process_samples", "do_DBN", "do_HESBCN", "import.hesbcn",
+    "process_samples", "sample_all_CPMs", "do_DBN", "do_HESBCN", "import.hesbcn",
     "cpm2tm", "all_methods_2_trans_mat", "plot_sampled_genots",
-    "plot_genot_fg", "plot_DAG_fg", "do_MHN2")
+    "plot_genot_fg", "plot_DAG_fg", "do_MHN2", "runExample")
 
 importFrom("grDevices", "rgb")
 importFrom("graphics", "axis", "legend", "lines", "par")

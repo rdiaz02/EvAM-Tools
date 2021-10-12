@@ -255,7 +255,7 @@ process_samples <- function(sim, n_genes, output = c("frequencies", "state_count
 #' @param methods List of methods that we want to sample
 #' 
 #' @return modified cpm_outputd including a matrix with genotype transitions
-sample_all_CPMS <- function(cpm_output
+sample_all_CPMs <- function(cpm_output
     , N_samples
     , n_genes
     , methods = c("OT", "CBN", "MCCBN", "DBN", "MHN", "HESBCN")){

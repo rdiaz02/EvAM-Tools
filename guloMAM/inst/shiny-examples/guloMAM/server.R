@@ -13,7 +13,7 @@ plot_genotypes_freqs <- function(data){
 }
 
 server <- function(input, output, session) {
-    dB_c1 <- matrix(
+    complete_csd <- matrix(
         c(
             rep(c(1, 0, 0, 0, 0), 300) #A
             , rep(c(0, 0, 1, 0, 0), 300) #C
@@ -29,23 +29,53 @@ server <- function(input, output, session) {
             , rep(c(0, 0, 0, 0, 0), 10) # WT
         ), ncol = 5, byrow = TRUE
         )
-        colnames(dB_c1) <- LETTERS[1:5]
+        colnames(complete_csd) <- LETTERS[1:5]
 
-    csd_freqs <- data.frame(sampledGenotypes(dB_c1))
+    n_genes <- ncol(complete_csd)
+    display_csd <- complete_csd[, 1:n_genes]
+    # n_genes <- reactiveVal(n_genes)
+    min_genes <- 2
+    max_genes <- 10
+
+    csd_freqs <- data.frame(sampledGenotypes(display_csd))
+    # display_csd <- reactiveVal(display_csd)
     rownames(csd_freqs) <- csd_freqs$Genotype
-    n_genes <- ncol(dB_c1)
     gene_names <- LETTERS[1: n_genes]
 
     ## Define number of genes
     output$gene_number <- renderUI({
-             numericInput("gene_number", "Number of genes", n_genes, min = 2, width = 100)
+             numericInput("gene_number", "Number of genes", n_genes, 
+                max = max_genes , min = min_genes, width = 100)
     })
 
     observeEvent(input$gene_number, {
         ## Change number of genes to show
-        ## Change plot
+        old_gene_number <- n_genes
+        if (input$gene_number >= 2) n_genes <<- input$gene_number
+            # updateNumericInput(session, "gene_number", value = input$gene_number)
+        print(sprintf("old gene number %s new gene number %s", old_gene_number, input$gene_number))
         ## Filter csd
+        if(n_genes > ncol(complete_csd)){
+            gene_names <<- LETTERS[1: n_genes]
+            complete_csd[gene_names[n_genes]] <<- 0 # we only add one at a time
+        }
+        display_csd <<- complete_csd[, 1:n_genes]
+
+        ## Update Labels 
+        output$define_genotype <- renderUI({
+            checkboxGroupInput(inputId = "genotype", label = "Mutations", choices =  lapply(1:n_genes, function(i)gene_names[i]))
+        })
+
         ## Recalculate freqs
+        csd_freqs <<- data.frame(sampledGenotypes(display_csd))
+        
+        ##Update table 
+        replaceData(proxy_csd, csd_freqs, resetPaging = FALSE, rownames = FALSE)
+        
+        ## Change plot 
+        output$plot <- renderPlot({
+            plot_genotypes_freqs(csd_freqs)
+        })
     })
 
     ## Define new genotype
@@ -72,7 +102,7 @@ server <- function(input, output, session) {
         }
     })
     ## Genotypes table
-    output$csd_freqs <-  DT::renderDT(csd_freqs, selection =    'none', server = TRUE, editable = list(target = "column", disable = list(columns = c(0)))
+    output$csd_freqs <-  DT::renderDT(csd_freqs, selection = 'none', server = TRUE, editable = list(target = "column", disable = list(columns = c(0)))
         , rownames = FALSE,
         options = list(
             columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE),
