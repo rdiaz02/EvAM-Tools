@@ -15,7 +15,6 @@ user_input <- function(){
           actionButton("add_genotype", "Add")
         ),
         DTOutput("csd_freqs"),
-       
         ),
       column(width = 6,
         plotOutput("plot")
