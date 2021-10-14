@@ -69,7 +69,7 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL, typ
     edge_labels <- NULL
     
     # if(vertex_labels){
-    nodes_in_top_paths <- unique(c(sapply(paths_from_graph,
+    nodes_in_top_paths <- unique(unlist(sapply(paths_from_graph,
         function(x) x$name
     )))
     vertex_labels <- vapply(V(graph)$name,
@@ -209,18 +209,21 @@ plot_genot_fg <- function(trans_mat
     V(graph)$frame.color <- colors
 
     ## Sizes based of frequency
-    min_size <- 5.5
+    min_size <- 2
+    max_size <- 40
     sizes <- vapply(V(graph)$name, 
         function(gen){
             if (sum(match(freqs$Genotype, gen, nomatch = 0)) == 1)
-                return(freqs$Abs_Freq[which(freqs$Genotype == gen)] * 150)
-            else if ((sum(match(observations$Genotype, gen, nomatch = 0)) == 1))
-                return(observations$Abs_Freq[which(observations$Genotype == gen)] * 150)
+                return(freqs$Abs_Freq[which(freqs$Genotype == gen)])
+            # else if ((sum(match(observations$Genotype, gen, nomatch = 0)) == 1))
+            #     return(observations$Abs_Freq[which(observations$Genotype == gen)] * max_size_factor)
             else 
                 return(min_size)
         }, numeric(1.0))
-
+    sizes[sizes <= 0.01] <- 0.01
+    sizes <- (sizes - min(sizes))/(max(sizes) - min(sizes)) * (max_size - min_size) + min_size
     if(all(sizes == min_size)) sizes <- rep(15, length(sizes))
+    # sizes[sizes < 10] <- 10
     V(graph)$size <- sizes
 
     V(graph)$label.family <- "Helvetica"
@@ -230,9 +233,12 @@ plot_genot_fg <- function(trans_mat
     ## Weights proportional to the time they are transited
     w <- E(graph)$weight
     w <- w / max(w) 
-    w[w <= 0.1] <- 0.1
-    w <- w * 10
-    if(all(w == 10)) w <- rep(1, length(w))
+    w[w <= 0.05] <- 0.05
+
+    min_width <- 2
+    max_width <- 15
+    w2 <- (w - min(w))/(max(w) - min(w)) * (max_width - min_width) + min_width
+    if(all(w2 == 20)) w2 <- rep(1, length(w))
 
     ## Actual plotting
     plot(graph
@@ -244,11 +250,11 @@ plot_genot_fg <- function(trans_mat
         , font.best = 2
         , vertex.label.cex = 1
         , vertex.frame.width = 0
+        # , edge.color = rgb(0.5, 0.5, 0.5, 1)
         , edge.color = rgb(0.5, 0.5, 0.5, 1)
-        # , edge.color = rgb(0.5, 0.5, 0.5, E(graph)$weight/max(E(graph)$weight))
-        , edge.arrow.size = 0.5
+        , edge.arrow.size = 0
         , xlab = "Number of features acquired"
-        , edge.width = w
+        , edge.width = w2
     )
 
     margin <- -1.15
@@ -263,17 +269,17 @@ plot_genot_fg <- function(trans_mat
         , cex = 2
         , pos = margin)
     if(!(is.null(observations))){
-        legend("bottom", c("Observed", "Not observed") 
+        legend(-1, 1.6, c("Observed", "Not observed") 
             , box.lwd = 0, lty=c(NA, NA), lwd = c(NA, NA)
-            , pch = c(21, 21)
+            , pch = c(21, 21), bty = "n"
             , col = c(observed_color, not_observed_color)
             , pt.bg = c(observed_color, not_observed_color)
             , pt.cex = c(2, 2), horiz = TRUE
             , x.intersp = c(0, 0)
             )
     }
-    par(opx)
-    # title(xlab = "Number of features acquired", line = -3)
+    # par(opx)
+    title(xlab = "Number of features acquired", line = 2)
 }
 
 
@@ -391,7 +397,6 @@ plot_DAG_fg <- function(x, data, orientation = "horizontal",
         tryCatch(expr ={
             theta <- get(paste(mod, "_theta", sep=""), x)
         }, error = function(e) { })
-
         return(list(dag_tree = dag_tree
             , dag_trans_mat = dag_trans_mat
             , fg = fg
@@ -400,6 +405,7 @@ plot_DAG_fg <- function(x, data, orientation = "horizontal",
             , theta = theta
             , parent_set = x[[sprintf("%s_parent_set", mod)]]
             , transitions = x[[sprintf("%s_genotype_transitions", mod)]]
+            , freqs = x[[sprintf("%s_genotype_freqs", mod)]]
             ))
     }
 
@@ -441,7 +447,7 @@ plot_DAG_fg <- function(x, data, orientation = "horizontal",
             } else E(model_data2plot$dag_tree)$color <- standard_relationship
             plot(model_data2plot$dag_tree
                 , layout = layout.reingold.tilford
-                , vertex.size = 30 
+                , vertex.size = 50 
                 , vertex.label.color = "black"
                 , vertex.label.family = "Helvetica"
                 , font.best = 2
@@ -449,12 +455,12 @@ plot_DAG_fg <- function(x, data, orientation = "horizontal",
                 , vertex.color = "white"
                 , vertex.frame.color = "black" 
                 , vertex.label.cex = 1
-                , edge.arrow.size = 0.45
+                , edge.arrow.size = 0
                 , edge.width = 5
                 , main = mod)
             if(!is.null(model_data2plot$parent_set)){
                 legend("topleft", legend = names(colors_relationships),
-                    col = colors_relationships, lty = 1, lwd = 2)
+                    col = colors_relationships, lty = 1, lwd = 5, bty = "n")
             }
         }else if(!is.null(model_data2plot$theta)) {
             op <- par(mar=c(3, 3, 5, 3), las = 1)
@@ -488,7 +494,7 @@ plot_DAG_fg <- function(x, data, orientation = "horizontal",
         } else if (plot_type == "genotypes") {
             plot_genot_fg(model_data2plot$fg, top_paths = top_paths)
         } else if (plot_type == "transitions") {
-            plot_genot_fg(model_data2plot$transitions, data, top_paths = top_paths)
+            plot_genot_fg(model_data2plot$transitions, data, model_data2plot$freqs, top_paths = top_paths)
         }else if (plot_type == "trans_mat"){
             plot_genot_fg(model_data2plot$dag_trans_mat, data, top_paths = top_paths)
         }

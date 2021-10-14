@@ -270,6 +270,8 @@ sample_all_CPMs <- function(cpm_output
             sims <- population_sample_from_trm(trm, n_samples = N_samples)
             output[[sprintf("%s_genotype_transitions", method)]] <- process_samples(sims, 
                 n_genes, output = c("transitions"))$transitions
+            output[[sprintf("%s_genotype_freqs", method)]] <- process_samples(sims, 
+                n_genes, output = c("frequencies"))$frequencies
         } 
         else output[[sprintf("%s_genotype_transitions", method)]] <- NA
         
