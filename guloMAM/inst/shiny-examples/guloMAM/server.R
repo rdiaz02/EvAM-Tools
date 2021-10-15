@@ -71,13 +71,20 @@ server <- function(input, output, session) {
     rownames(csd_freqs) <- csd_freqs$Genotype
     gene_names <- LETTERS[1: n_genes]
     display_freqs <- get_display_freqs(csd_freqs, n_genes, gene_names)
+    input$display_freqs <- display_freqs
     # complete_csd <- freqs2csd(csd_freqs, gene_names)
 
     ## Define number of genes
-    output$gene_number <- renderUI({
+    output$genes_number <- renderUI({
+        input_text <- lapply(1:length(gene_names), function(i){
+            textInput(sprintf("gene-%s", i), NULL, width=50, value = gene_names[[i]])
+        })
+        fluidPage(
              numericInput("gene_number", "Number of genes",
-                n_genes, max = max_genes, min = min_genes, 
-                width = 100)
+                n_genes, max = max_genes, min = min_genes),
+            "Genes names",
+            input_text
+    )
     })
 
     observeEvent(input$gene_number, {
@@ -88,7 +95,11 @@ server <- function(input, output, session) {
         ## Update Labels 
         gene_names <<- LETTERS[1:n_genes]
         output$define_genotype <- renderUI({
-            checkboxGroupInput(inputId = "genotype", label = "Mutations", choices =  lapply(1:n_genes, function(i)gene_names[i]))
+            fluidPage(
+                checkboxGroupInput(inputId = "genotype", label = "Mutations", choices =  lapply(1:n_genes, function(i)gene_names[i])),
+                numericInput(label="Frequency", value = NA, min = 0, inputId = "genotype_freq",width = NA),
+                actionButton("add_genotype", "Add")
+            )
         })
 
         ## Recalculate freqs
@@ -105,7 +116,11 @@ server <- function(input, output, session) {
 
     ## Define new genotype
     output$define_genotype <- renderUI({
-         checkboxGroupInput(inputId = "genotype", inline = TRUE, label = "Mutations", choices =  lapply(1:n_genes, function(i)gene_names[i]))
+        fluidPage(
+            checkboxGroupInput(inputId = "genotype", label = "Mutations", choices =  lapply(1:n_genes, function(i)gene_names[i])),
+            numericInput(label="Frequency", value = NA, min = 0, inputId = "genotype_freq",width = NA),
+            actionButton("add_genotype", "Add")
+        )
     })
 
     observeEvent(input$genotype, {
@@ -117,7 +132,7 @@ server <- function(input, output, session) {
     observeEvent(input$add_genotype, {
         genotype <- paste(input$genotype, collapse = ", ")
         genot_freq <- input$genot_freq
-        if(!is.na(genot_freq)){
+        if(length(genot_freq) > 0){
             csd_freqs[genotype, ] <<- c(genotype, genot_freq)
             csd_freqs[, 2] <<- as.numeric(csd_freqs[, 2])
             rownames(csd_freqs) <- csd_freqs$Genotype
@@ -162,6 +177,11 @@ server <- function(input, output, session) {
     output$plot <- renderPlot({
         # Add a little noise to the cars data
         plot_genotypes_freqs(display_freqs)
+    })
+
+    output$plot2 <- renderPlot({
+        # Add a little noise to the cars data
+        plot_genotypes_freqs(input$display_freqs)
     })
 
     ## Run CPMS
