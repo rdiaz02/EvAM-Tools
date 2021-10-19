@@ -60,35 +60,19 @@ user_input <- function(){
         "shift + enter to save changes when editing column",
         column(width = 12,
           uiOutput("genes_number"),
-          uiOutput("define_genotype")
-        ),
-        DTOutput("csd_freqs"),
+          uiOutput("define_genotype"),
+        ), DTOutput("csd_freqs")
         ),
       column(width = 6,
-        plotOutput("plot"),
-        plotOutput("plot2")
+        plotOutput("plot")
       ),
-    ),
-    actionButton("run_cpms", "Run analysis!")
+    )
   )
 
-}
-
-define_CPM_usage <- function(){
-  "Define CPM usage"
-}
-
-display_output <- function(){
-  fluidPage(
-    textOutput("out_cpms")
-  )
 }
 
 ui <- fluidPage(
   tabsetPanel(id = "inTabSet",
-    tabPanel("Input", fluid = TRUE, user_input()),
-    tabPanel("Run CPMs", fluid = TRUE, define_CPM_usage()),
-    tabPanel("Loading", fluid = TRUE, "Loading"),
-    tabPanel("Output", fluid = TRUE, display_output())
+    tabPanel("Input", fluid = TRUE, user_input())
   )
 )

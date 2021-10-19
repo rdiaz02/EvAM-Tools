@@ -63,138 +63,80 @@ server <- function(input, output, session) {
         colnames(complete_csd) <- LETTERS[1:5]
 
     n_genes <- ncol(complete_csd)
-    display_csd <- complete_csd
     min_genes <- 2
     max_genes <- 10
 
-    csd_freqs <- data.frame(sampledGenotypes(display_csd))
-    rownames(csd_freqs) <- csd_freqs$Genotype
-    gene_names <- LETTERS[1: n_genes]
-    display_freqs <- get_display_freqs(csd_freqs, n_genes, gene_names)
-    input$display_freqs <- display_freqs
-    # complete_csd <- freqs2csd(csd_freqs, gene_names)
+    csd <- data.frame(sampledGenotypes(complete_csd))
+    rownames(csd) <- csd$Genotype
+    data <- reactiveValues(csd_freqs = csd)
+    gene_names <- reactive({LETTERS[1: input$gene_number]})
+    display_freqs <- reactive({get_display_freqs(data$csd_freqs, input$gene_number, gene_names())})
+    
 
     ## Define number of genes
     output$genes_number <- renderUI({
-        input_text <- lapply(1:length(gene_names), function(i){
-            textInput(sprintf("gene-%s", i), NULL, width=50, value = gene_names[[i]])
-        })
-        fluidPage(
              numericInput("gene_number", "Number of genes",
-                n_genes, max = max_genes, min = min_genes),
-            "Genes names",
-            input_text
-    )
-    })
-
-    observeEvent(input$gene_number, {
-        ## Change number of genes to show
-        old_gene_number <- n_genes
-        if (input$gene_number >= 2) n_genes <<- input$gene_number
-
-        ## Update Labels 
-        gene_names <<- LETTERS[1:n_genes]
-        output$define_genotype <- renderUI({
-            fluidPage(
-                checkboxGroupInput(inputId = "genotype", label = "Mutations", choices =  lapply(1:n_genes, function(i)gene_names[i])),
-                numericInput(label="Frequency", value = NA, min = 0, inputId = "genotype_freq",width = NA),
-                actionButton("add_genotype", "Add")
-            )
-        })
-
-        ## Recalculate freqs
-        display_freqs <<- get_display_freqs(csd_freqs, n_genes, gene_names)
-        # rownames(csd_freqs) <<- csd_freqs$Genotype
-        ##Update table 
-        replaceData(proxy_csd, display_freqs, resetPaging = FALSE, rownames = FALSE)
-        
-        ## Change plot 
-        output$plot <- renderPlot({
-            plot_genotypes_freqs(display_freqs)
-        })
+                value = ncol(complete_csd), max = max_genes, min = min_genes)
     })
 
     ## Define new genotype
     output$define_genotype <- renderUI({
         fluidPage(
-            checkboxGroupInput(inputId = "genotype", label = "Mutations", choices =  lapply(1:n_genes, function(i)gene_names[i])),
+            checkboxGroupInput(inputId = "genotype", label = "Mutations", choices =  lapply(1:input$gene_number, function(i) gene_names()[i])),
             numericInput(label="Frequency", value = NA, min = 0, inputId = "genotype_freq",width = NA),
             actionButton("add_genotype", "Add")
         )
     })
 
-    observeEvent(input$genotype, {
-        genotype <- paste(input$genotype, collapse = ", ")
-        genot_freq <- csd_freqs[, 2][csd_freqs[, 1] == genotype]
-        updateNumericInput(session, "genot_freq", value = genot_freq)
-    })
-
     observeEvent(input$add_genotype, {
         genotype <- paste(input$genotype, collapse = ", ")
-        genot_freq <- input$genot_freq
+        genot_freq <- input$genotype_freq
         if(length(genot_freq) > 0){
-            csd_freqs[genotype, ] <<- c(genotype, genot_freq)
-            csd_freqs[, 2] <<- as.numeric(csd_freqs[, 2])
-            rownames(csd_freqs) <- csd_freqs$Genotype
-            replaceData(proxy_csd, csd_freqs, resetPaging = FALSE, rownames = FALSE)
-            display_freqs <- get_display_freqs(csd_freqs, n_genes, gene_names)
-            output$plot <- renderPlot({
-                plot_genotypes_freqs(display_freqs)
-            })
+            data$csd_freqs[genotype, ] <- c(genotype, genot_freq)
+            data$csd_freqs[, 2] <- as.numeric(data$csd_freqs[, 2])
+            rownames(data$csd_freqs) <- data$csd_freqs$Genotype
         }
-         updateNumericInput(session, "genot_freq", value = NA)
-         updateCheckboxGroupInput(session, "genotype",label = "Mutations", choices =  lapply(1:n_genes, function(i)gene_names[i]), selected = NULL)
-        #  complete_csd <<- freqs2csd(csd_freqs, gene_names)
+        updateNumericInput(session, "genotype_freq", value = NA)
+        updateCheckboxGroupInput(session, "genotype", label = "Mutations", 
+            choices =  lapply(1:input$gene_number, function(i)gene_names()[i]), selected = NULL)
     })
+    
     ## Genotypes table
-    output$csd_freqs <-  DT::renderDT(display_freqs, selection = 'none', server = TRUE, editable = list(target = "column", disable = list(columns = c(0)))
+    output$csd_freqs <-  DT::renderDT(display_freqs(), selection = 'none', server = TRUE, editable = list(target = "column", disable = list(columns = c(0)))
         , rownames = FALSE,
         options = list(
             columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE),
     )
-    output_cpms <- reactiveValues(data = NULL)
+    # output_cpms <- reactiveValues(data = NULL)
 
-    proxy_csd <- dataTableProxy("csd_freqs")
+    # proxy_csd <- dataTableProxy("csd_freqs")
 
     observeEvent(input$csd_freqs_cell_edit, {
         info = input$csd_freqs_cell_edit
-        # str(info)
         info[ , "col"] <- 2
-        csd_freqs <<- editData(csd_freqs, info, "csd_freqs") 
+        data$csd_freqs <- editData(data$csd_freqs, info, "csd_freqs") 
         ## Filtering out non-positive counts
-        csd_freqs <<- csd_freqs[csd_freqs[,2] > 0,]
-        # complete_csd <<- freqs2csd(csd_freqs, gene_names)
-        # display_csd <<- get_display_csd(complete_csd, n_genes)
-        # info$value <- as.numeric(info$value)
-        replaceData(proxy_csd, csd_freqs, resetPaging = FALSE, rownames = FALSE)
-        display_freqs <- get_display_freqs(csd_freqs, n_genes, gene_names)
-        output$plot <- renderPlot({
-            plot_genotypes_freqs(display_freqs)
-        })
+        data$csd_freqs <- data$csd_freqs[data$csd_freqs[,2] > 0,]
+
     })
 
     ## Plot histogram of genotypes
     output$plot <- renderPlot({
-        # Add a little noise to the cars data
-        plot_genotypes_freqs(display_freqs)
+        plot_genotypes_freqs(display_freqs())
     })
 
-    output$plot2 <- renderPlot({
-        # Add a little noise to the cars data
-        plot_genotypes_freqs(input$display_freqs)
-    })
 
     ## Run CPMS
-    observeEvent(input$run_cpms, {
-        updateTabsetPanel(session, "inTabSet",selected = "Loading")
-    })
+    # observeEvent(input$run_cpms, {
+    #     updateTabsetPanel(session, "inTabSet",selected = "Loading")
+    # })
 
-    observeEvent(input$run_cpms, {
-        output_cpms$data <- all_methods_2_trans_mat(dB_c1)
-        output$out_cpms <- renderText({paste(output_cpms$data)})
-        updateTabsetPanel(session, "inTabSet",selected = "Output")
-    })
+    # observeEvent(input$run_cpms, {
+    #     output_cpms$data <- all_methods_2_trans_mat(dB_c1)
+    #     output$out_cpms <- renderText({paste(output_cpms$data)})
+    #     updateTabsetPanel(session, "inTabSet",selected = "Output")
+    # })
 
-    # output_cpms2 <- readRDS("/home/pablo/CPM-SSWM-Sampling/guloMAM/inst/shiny-examples/cpm_out_with_simulations.rds")
-    output$out_cpms <- renderText({paste(list("a" = "no hay nada"))})
+    # # output_cpms2 <- readRDS("/home/pablo/CPM-SSWM-Sampling/guloMAM/inst/shiny-examples/cpm_out_with_simulations.rds")
+    # output$out_cpms <- renderText({paste(list("a" = "no hay nada"))})
 }
