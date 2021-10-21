@@ -43,6 +43,12 @@ get_display_freqs <- function(freqs, n_genes, gene_names){
     return(freqs[selected_rows, ])
 }
 
+get_csd <- function(complete_csd){
+    csd <- data.frame(sampledGenotypes(complete_csd))
+    rownames(csd) <- csd$Genotype
+    return(csd)
+}
+
 server <- function(input, output, session) {
     complete_csd <- matrix(
         c(
@@ -62,16 +68,24 @@ server <- function(input, output, session) {
         )
         colnames(complete_csd) <- LETTERS[1:5]
 
-    n_genes <- ncol(complete_csd)
     min_genes <- 2
     max_genes <- 10
 
-    csd <- data.frame(sampledGenotypes(complete_csd))
-    rownames(csd) <- csd$Genotype
-    data <- reactiveValues(csd_freqs = csd)
+    data <- reactiveValues(csd_freqs =  get_csd(complete_csd), complete_csd =  complete_csd)
+    # data$csd_freqs <- get_csd(data$complete_csd)
+
+    n_genes <- reactive({ncol(data$complete_csd)})
+    # n_genes <- 5
+    
     gene_names <- reactive({LETTERS[1: input$gene_number]})
     display_freqs <- reactive({get_display_freqs(data$csd_freqs, input$gene_number, gene_names())})
     
+    ## Upload csv
+    observeEvent(input$csd, {
+        print("Uploading")
+        data$complete_csd <- read.csv(input$csd$datapath)
+        data$csd_freqs <- sampledGenotypes(data$complete_csd)
+    })
 
     ## Define number of genes
     output$genes_number <- renderUI({
@@ -125,6 +139,17 @@ server <- function(input, output, session) {
         plot_genotypes_freqs(display_freqs())
     })
 
+    ## Download button
+    observeEvent(input$download, {
+    })
+    output$download <- downloadHandler(
+        filename = "cross_section_data.csv",
+        content = function(file) {
+            print(file)
+            data2download <- freqs2csd(display_freqs(), gene_names())
+            write.csv(data2download, file, row.names = FALSE)
+        }
+    )
 
     ## Run CPMS
     # observeEvent(input$run_cpms, {

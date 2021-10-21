@@ -54,7 +54,11 @@ user_input <- function(){
     ),
     column(width=12,
       column(width = 6
-        ,fileInput("csd", "Load a CSV"),
+        ,fileInput("csd", "Load a CSV",
+          multiple = FALSE,
+          accept = c("text/csv",
+                      "text/comma-separated-values,text/plain",
+                      ".csv")),
         "Double click in a cell to edit",
         "Set genotype to zero to remove it",
         "shift + enter to save changes when editing column",
@@ -66,7 +70,8 @@ user_input <- function(){
       column(width = 6,
         plotOutput("plot")
       ),
-    )
+    ),
+    downloadButton("download", "Download CSV")
   )
 
 }
