@@ -1,79 +1,211 @@
 library(DT)
+library(shinydashboard)
 
 user_input <- function(){
   fluidPage(
     tags$head(
       tags$style(HTML("
-       #define_genotype {
-          border: 3px solid red;
-          border-radius: 3px;
-          padding: 5px 15px;
-          width: auto;
+      body{
+        font-size: 20px;
       }
-      #define_genotype>*{
-        padding:0;
-      }
-      #define_genotype>*>*{
-        width: auto;
-        display: inline-flex;
-        margin-right: 15px;
-        margin-bottom: 0;
-      }
-
       #define_genotype>*>*>label{
         margin-right: 10px;
         text-align: right;
         margin-bottom: 0;
       }
+      input[type='checkbox']{
+        zoom: 1.5;
+        margin-right: 4px;
+      }
+
+      .checkbox{
+        vertical-align: middle;
+        margin-top: 10px !important; 
+      }
 
       #genotype>.shiny-options-group>*{
-        display: inline-block;
         margin-right: 15px;
       }
-      #genotype_freq{padding:0}
 
-      #genes_number{
-        border: 3px solid red;
-        border-radius: 3px;
-        padding: 5px 15px;
-        width: auto;
+      #genotype>.shiny-options-group{
+        display: flex;
+        margin-right: 15px;
       }
-      #genes_number>div{
-        display: inline-flex;
-        padding:0;
+
+      label{
+        margin-right: 10px;
       }
-      #genes_number>div>*{
+      # #genotype{
+      #   display: flex;
+      # }
+      .frame .form-group{
+        display: flex;
+      }
+
+      .form-control{
+        height: 42px !important;
+      }
+
+      .form-group{
+        display: flex;
+        margin-bottom: 0;
+      }
+      .upload_file .form-group{
+        width: 500px !important; 
+      }
+      input.formc-control{
+        height: 40px !important;
+      }
+
+      #genotype>label{
         margin-right: 20px;
-        display: inline-flex;
       }
-      #gene_number-label{
+      #add_genotype{
+        width: 35%;
+        height: 40px;
+      }
+      #fr{
+        display: flex;
+        justify-content: space-between;
+      }
+
+      #genotype_freq-label{
+        margin-right: 20px;
+      }
+
+      div#inlin label { 
+        width: 15%; 
+      }
+      
+      #inlin label{ 
+        display: table-cell; 
+        text-align: left; 
+        vertical-align: middle; 
+      }
+
+      #inlin>.form-group>.irs--shiny.irs-with-grid{
+        margin-left: 10%;
+        width: 75%;
+      }
+
+      .btn, input.form-control{
+        font-size: 20px;
+      }
+      #inlin .form-group { 
+        display: table-row;
+        font-size: 20px;
+      }
+
+      .irs > span{
+        font-size: 20px;
+      }
+
+      span [class*='irs'] { 
+        font-size: 20px !important; 
+      }
+
+      .irs-single, .irs-min, .irs-max{
+        visibility: hidden !important;
+      }
+
+      .download_button{
+        heigth: auto;
+        display: block;
+        display:flex;
+        # height: 80px;
+        margin-top: 15px;
+        justify-content: center;
+      }
+
+      .submit_button>button{
+        font-size: 30px !important;
+        padding: 15px 30px;
+        background: #FAA0A0;
+      }
+
+      .shiny-download-link{
+        margin: auto;
+        # font-size: 18px;
+      }
+      .not_show{
+        color: rgba(0,0,0,0);
+      }
+
+      .frame{
+        margin-bottom:15px;
+        padding: 20px;
+        border: 5px solid rgba(100, 100, 100, 0.5);
+        border-radius: 5px;
+      }
+      .upload_file{
         width: 100%;
+        display: table-cell;
+        # justify_content: center
+      }
+      h3{
+        margin-top:0;
+      }
+
+      #csd_table{
+        max-height: 40vh;
       }
         ") # end HTML
       ) # end tags$style
     ),
     column(width=12,
-      column(width = 6
-        ,fileInput("csd", "Load a CSV",
-          multiple = FALSE,
-          accept = c("text/csv",
-                      "text/comma-separated-values,text/plain",
-                      ".csv")),
-        "Double click in a cell to edit",
-        "Set genotype to zero to remove it",
-        "shift + enter to save changes when editing column",
-        column(width = 12,
-          uiOutput("genes_number"),
-          uiOutput("define_genotype"),
-        ), DTOutput("csd_freqs")
+      
+      sidebarLayout(
+        column(width = 2,
+          menuItem("Main Dashboard", tabName = 'dashboard', 
+            icon = icon('dashboard'), 
+            badgeLabel = 100, 
+            badgeColor = "green")
         ),
-      column(width = 6,
-        plotOutput("plot")
-      ),
-    ),
-    downloadButton("download", "Download CSV")
-  )
 
+        column(width = 10,
+          titlePanel("Cross sectional data input"),
+          column(width = 6,
+            # tags$div(class="",
+
+              column(width = 12,
+            tags$div(class = "frame",
+                tags$h3("1. Set the number of genes"),
+                uiOutput("genes_number")),
+            tags$div(class = "frame",
+              tags$h3("2. Add new genotypes"),
+              uiOutput("define_genotype"),
+            ),
+              tags$h3("3. Change frequencies"),
+              actionButton("display_help", "Help"),
+              tags$div(id = "csd_table",
+                DTOutput("csd_freqs")
+              )
+            )
+          ),
+          column(width = 6,
+          tags$div(class = "frame",
+              tags$h3("... or load your own data"),
+              tags$div(class="upload_file",
+                  fileInput("csd", "Load a CSV",
+                    multiple = FALSE,
+                    accept = c("text/csv",
+                                ".csv")) 
+            )),
+            plotOutput("plot"),
+            tags$div(
+              tags$label(class="not_show", "Download your data"), 
+              tags$div(class = "download_button submit_button",
+                actionButton("analysis", "Run guloMAM!")
+              ),
+              tags$div(class = "download_button",
+                downloadButton("download", "Download your data")
+              )
+            )
+          )
+        )
+      )
+      )
+  )
 }
 
 ui <- fluidPage(

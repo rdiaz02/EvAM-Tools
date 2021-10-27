@@ -3,10 +3,10 @@ library(guloMAM)
 library(OncoSimulR)
 
 plot_genotypes_freqs <- function(data){
-    par(las = 2)
+    par(las = 2, cex.main=1.6, cex.lab=1.5, cex.axis=1.2)
     barplot(data[, 2]
         , names = data$Genotype
-        , ylab="Counts", xlab="Genotype"
+        , ylab="Counts", main="Genotype Frequencies"
         , horiz = FALSE
         , panel.first=grid())
     grid(nx = NA, ny = NULL, col='gray', lwd = 2)
@@ -71,41 +71,68 @@ server <- function(input, output, session) {
     min_genes <- 2
     max_genes <- 10
 
-    data <- reactiveValues(csd_freqs =  get_csd(complete_csd), complete_csd =  complete_csd)
-    # data$csd_freqs <- get_csd(data$complete_csd)
-
-    n_genes <- reactive({ncol(data$complete_csd)})
-    # n_genes <- 5
+    data <- reactiveValues(csd_freqs =  get_csd(complete_csd)
+        , complete_csd =  complete_csd
+        , n_genes = ncol(complete_csd))
     
     gene_names <- reactive({LETTERS[1: input$gene_number]})
     display_freqs <- reactive({get_display_freqs(data$csd_freqs, input$gene_number, gene_names())})
-    
+
     ## Upload csv
     observeEvent(input$csd, {
-        print("Uploading")
+        # TODO hanlde corrupt files
         data$complete_csd <- read.csv(input$csd$datapath)
         data$csd_freqs <- sampledGenotypes(data$complete_csd)
+        data$n_genes <- ncol(data$complete_csd)
     })
 
     ## Define number of genes
     output$genes_number <- renderUI({
-             numericInput("gene_number", "Number of genes",
-                value = ncol(complete_csd), max = max_genes, min = min_genes)
-    })
-
-    ## Define new genotype
-    output$define_genotype <- renderUI({
-        fluidPage(
-            checkboxGroupInput(inputId = "genotype", label = "Mutations", choices =  lapply(1:input$gene_number, function(i) gene_names()[i])),
-            numericInput(label="Frequency", value = NA, min = 0, inputId = "genotype_freq",width = NA),
-            actionButton("add_genotype", "Add")
+        tags$div(id="inlin",
+            sliderInput("gene_number", "Number of genes",
+                value = data$n_genes, max = max_genes, min = min_genes, step = 1)
         )
     })
 
+    
+    observeEvent(input$display_help, {
+      showModal(modalDialog(
+        title = tags$h3("How does it work?",
+         tags$div(
+                tags$p("1. Double click in a Frequency cell to edit it"),
+                tags$p("2. Press Tab to move to the next row"),
+                tags$p("3. Use Shift + Enter to save changes"),
+                tags$p("4. Set a frequency to 0 to remove a genotype"),
+                tags$p("5. Type in the Search bar to filter genotypes")
+                )
+              )
+      ))
+    })
+    ## Define new genotype
+    output$define_genotype <- renderUI({
+        tags$div(
+            tags$div(class = "inline",
+                checkboxGroupInput(inputId = "genotype", 
+                    label = "Mutations", 
+                    choices =  lapply(1:input$gene_number, function(i) gene_names()[i]))
+            ),
+            tags$div(id="fr",
+                numericInput(label="Frequency", value = NA, min = 0, inputId = "genotype_freq",width = NA),
+                actionButton("add_genotype", "Add Genotype")
+                )
+        )
+    })
+
+    observeEvent(input$genotype, {
+        genotype <- paste(input$genotype, collapse = ", ")
+        genot_freq <- data$csd_freqs[, 2][data$csd_freqs[, 1] == genotype]
+        updateNumericInput(session, "genotype_freq", value = genot_freq)
+    })
+    
     observeEvent(input$add_genotype, {
         genotype <- paste(input$genotype, collapse = ", ")
         genot_freq <- input$genotype_freq
-        if(length(genot_freq) > 0){
+        if(!is.na(genot_freq)){
             data$csd_freqs[genotype, ] <- c(genotype, genot_freq)
             data$csd_freqs[, 2] <- as.numeric(data$csd_freqs[, 2])
             rownames(data$csd_freqs) <- data$csd_freqs$Genotype
