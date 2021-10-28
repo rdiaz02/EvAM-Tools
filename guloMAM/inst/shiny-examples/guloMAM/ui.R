@@ -1,5 +1,6 @@
 library(DT)
 library(shinydashboard)
+library(markdown)
 
 user_input <- function(){
   fluidPage(
@@ -136,6 +137,8 @@ user_input <- function(){
         padding: 20px;
         border: 5px solid rgba(100, 100, 100, 0.5);
         border-radius: 5px;
+        # max-height: 40vh;
+        # overflow: auto;
       }
       .upload_file{
         width: 100%;
@@ -147,7 +150,11 @@ user_input <- function(){
       }
 
       #csd_table{
-        max-height: 40vh;
+        height: 40vh;
+        overflow: auto;
+      }
+      .row{
+        padding-top: 20px;
       }
         ") # end HTML
       ) # end tags$style
@@ -155,18 +162,14 @@ user_input <- function(){
     column(width=12,
       
       sidebarLayout(
-        column(width = 2,
-          menuItem("Main Dashboard", tabName = 'dashboard', 
-            icon = icon('dashboard'), 
-            badgeLabel = 100, 
-            badgeColor = "green")
+        column(width = 1,
+          "load datasets"
+          ## do it with a render UI
         ),
 
-        column(width = 10,
+        column(width = 11,
           titlePanel("Cross sectional data input"),
           column(width = 6,
-            # tags$div(class="",
-
               column(width = 12,
             tags$div(class = "frame",
                 tags$h3("1. Set the number of genes"),
@@ -175,10 +178,12 @@ user_input <- function(){
               tags$h3("2. Add new genotypes"),
               uiOutput("define_genotype"),
             ),
+            tags$div(class = "frame",
               tags$h3("3. Change frequencies"),
               actionButton("display_help", "Help"),
-              tags$div(id = "csd_table",
+              tags$div(id = "csd_table", 
                 DTOutput("csd_freqs")
+                )
               )
             )
           ),
@@ -208,8 +213,90 @@ user_input <- function(){
   )
 }
 
-ui <- fluidPage(
-  tabsetPanel(id = "inTabSet",
-    tabPanel("Input", fluid = TRUE, user_input())
+cpm_info <- function(){
+  tags$div(id = "background",
+    tags$head(
+      tags$style(HTML("
+        html, body{
+          margin: 0;
+        }
+        #background{
+          background-color: #f1f5f8;
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          height: 100vh;
+          top: 0;
+          left: 0;
+          position: absolute;
+        }
+
+        #cpm_info{
+          background: white;
+          padding: 10px 50px;
+          width: 75%;
+          # height: 100vh;
+          margin: auto;
+          margin-top: 100px;
+          border: 5px solid white;
+          border-radius: 5px;
+          box-shadow: 0 0 10px 5px rgba(160,160,160, 0.5);
+        }
+
+        .container-fluid{
+          padding:0;
+        }
+        "
+    ))),
+    tags$div(id = "cpm_info",
+      includeMarkdown("test.md")
+    )
   )
+}
+
+ui <- 
+  navbarPage(
+    tags$h2("GuloMan!"),
+    tags$head(
+      tags$style(HTML("
+        h2{
+          margin: 0;
+          padding: 0;
+        }
+        .navbar{
+          padding-left: 20px;
+          margin-bottom: 0px;
+        }
+        .dropdown-menu > li > a{
+          font-size: 20px;
+          padding: 10px 10px;
+        }
+        "
+    ))),
+    navbarMenu("User Input",
+      tabPanel("Cross sectional Data Builder",
+        user_input()
+      ),
+      tabPanel("DAG Builder (CBN)",
+      ),
+      tabPanel("Matrix Builder (MHN)",
+      )
+    ),
+    tabPanel("Results",
+    ),
+    tabPanel("About CPMS",
+      cpm_info()
+    ),
+    
+    # navbarMenu("About CPMs",
+    #   tabPanel("Table",
+    #     "Table"
+    #   ),
+    #   tabPanel("About",
+    #     "About"
+    #   )
+    # )
 )
+  # tabsetPanel(id = "inTabSet",
+  #   tabPanel("Input", fluid = TRUE, user_input())
+  # )

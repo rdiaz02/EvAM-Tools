@@ -94,10 +94,9 @@ server <- function(input, output, session) {
         )
     })
 
-    
     observeEvent(input$display_help, {
       showModal(modalDialog(
-        title = tags$h3("How does it work?",
+        title = tags$h3("How does it work?"),
          tags$div(
                 tags$p("1. Double click in a Frequency cell to edit it"),
                 tags$p("2. Press Tab to move to the next row"),
@@ -106,7 +105,7 @@ server <- function(input, output, session) {
                 tags$p("5. Type in the Search bar to filter genotypes")
                 )
               )
-      ))
+      )
     })
     ## Define new genotype
     output$define_genotype <- renderUI({
