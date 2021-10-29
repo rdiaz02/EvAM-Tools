@@ -49,7 +49,14 @@ get_csd <- function(complete_csd){
     return(csd)
 }
 
+
+available_cpms <- function(data){
+    data$csd_data <- NULL
+    cpm_names <- unique(sapply(names(data), function(x) str_split(x, "_")[[1]][[1]]))
+    return(cpm_names)
+}
 server <- function(input, output, session) {
+    ## CSD input
     complete_csd <- matrix(
         c(
             rep(c(1, 0, 0, 0, 0), 300) #A
@@ -63,7 +70,7 @@ server <- function(input, output, session) {
             , rep(c(1, 1, 1, 0, 1), 100) #ABCE
             , rep(c(1, 0, 1, 1, 1), 100) #ACDE
             , rep(c(1, 1, 1, 1, 0), 50) # ABCD
-            , rep(c(0, 0, 0, 0, 0), 10) # WT
+            , rep(c(0, 0, 0, 0, 0), 100) # WT
         ), ncol = 5, byrow = TRUE
         )
         colnames(complete_csd) <- LETTERS[1:5]
@@ -188,6 +195,48 @@ server <- function(input, output, session) {
     #     updateTabsetPanel(session, "inTabSet",selected = "Output")
     # })
 
-    # # output_cpms2 <- readRDS("/home/pablo/CPM-SSWM-Sampling/guloMAM/inst/shiny-examples/cpm_out_with_simulations.rds")
-    # output$out_cpms <- renderText({paste(list("a" = "no hay nada"))})
+    cpm_out <- readRDS("/home/pablo/CPM-SSWM-Sampling/guloMAM/inst/shiny-examples/sims.RDS")
+
+
+    cpm_names <- available_cpms(cpm_out)
+
+    output$cpm_names <- renderText({
+        cpm_names
+    })
+
+    plot_options <- c("Genotypes", "Transitions") 
+    output$cpm_names <- renderUI({
+        tags$div(
+            tags$div(class = "inline",
+                checkboxGroupInput(inputId = "cpm2show", 
+                    label = "CPMs to show", 
+                    choices =  cpm_names),
+            tags$div(class = "inline",
+                checkboxGroupInput(inputId = "data2plo", 
+                    label = "CPMs to show", 
+                    choices =  plot_options
+                    )
+                )
+            )
+        )
+    })
+
+    output$sims <- renderPlot({
+        plot_DAG_fg(cpm_out, cpm_out$csd_data, 
+            models = c("CBN"),
+            plot_type = "genotypes", top_paths = 4)
+    })
+
+    output$csd <- renderPlot({
+        plot_genotypes_freqs(get_csd(cpm_out$csd_data))
+    })
+
+    observeEvent(input$modify_data, {
+        data$csd_freqs <- sampledGenotypes(cpm_out$csd_data)
+        data$n_genes <- ncol(cpm_out$csd_data)
+        updateTabsetPanel(session, "navbar",
+            selected = "csd_builder"
+        )
+    })
+
 }
