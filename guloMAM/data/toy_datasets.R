@@ -269,6 +269,26 @@ all_examples_csd <- list(
   , cv3 = dB_cv3
 )
 
+
+all_examples_csd_2 <- list(
+    AND = list(id = 1, data = dB_AND, name = "AND", dag = NULL), 
+    OR = list(id = 2, data = dB_OR, name = "OR", dag = NULL), 
+    XOR = list(id = 3, data = dB_XOR, name = "XOR", dag = NULL), 
+    se = list(id = 4, data = dB_se, name = "Sign epistasis", dag = NULL), 
+    rse = list(id = 5, data = dB_rse, name = "Reciprocal sign epistasis", dag = NULL), 
+    c1 = list(id = 6, data = dB_c1, name = "A --> B ; C --> D; B XOR D for E", dag = NULL), 
+    c2 = list(id = 7, data = dB_c2, name = "Missing: ((A AND B) or C) to reach D", dag = NULL), 
+    c2_2c2 = list(id = 8, data = dB_c2_2, name = "All: ((A AND B) or C) to reach D", dag = NULL), 
+    c4c2 = list(id = 9, data = dB_c4, name = "Parallel", dag = NULL), 
+    c3c2 = list(id = 10, data = dB_c3, name = "Parallel XOR", dag = NULL), 
+    c5c2 = list(id = 11, data = dB_c5, name = "WT --> (A AND B AND C) --> D", dag = NULL), 
+    c7c2 = list(id = 12, data = dB_c7, name = "((A AND B) OR (C AND D) to reach E", dag = NULL), 
+    cv1c2 = list(id = 13, data = dB_cv1, name = "CV#1 Representative", dag = NULL), 
+    cv2c2 = list(id = 14, data = dB_cv2, name = "CV#2 Local Maxima", dag = NULL), 
+    cv3c2 = list(id = 15, data = dB_cv3, name = "CV#3 RMF", dag = NULL) 
+)
+
+
 # for (i in names(all_examples_csd)){
 #   tmp <- all_examples_csd[i]
 #   save(tmp, file = sprintf("./toy_datasets_cpms/%s.RData", i))

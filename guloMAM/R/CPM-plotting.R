@@ -185,7 +185,6 @@ plot_genot_fg <- function(trans_mat
 
     ## Layout
     lyt <- cpm_layout(graph)
-
     ## Labels
     sorted_paths <- rank_paths(graph)
     labels <- compute_vertex_labels(graph, sorted_paths, top_paths = top_paths
@@ -211,7 +210,7 @@ plot_genot_fg <- function(trans_mat
     ## Sizes based of frequency
     min_size <- 2
     max_size <- 40
-    sizes <- vapply(V(graph)$name, 
+    node_sizes <- vapply(V(graph)$name, 
         function(gen){
             if (sum(match(freqs$Genotype, gen, nomatch = 0)) == 1)
                 return(freqs$Abs_Freq[which(freqs$Genotype == gen)])
@@ -220,11 +219,11 @@ plot_genot_fg <- function(trans_mat
             else 
                 return(min_size)
         }, numeric(1.0))
-    sizes[sizes <= 0.01] <- 0.01
-    sizes <- (sizes - min(sizes))/(max(sizes) - min(sizes)) * (max_size - min_size) + min_size
-    if(all(sizes == min_size)) sizes <- rep(15, length(sizes))
+    node_sizes[node_sizes <= 0.01] <- 0.01
+    node_sizes <- (node_sizes - min(node_sizes))/(max(node_sizes) - min(node_sizes)) * (max_size - min_size) + min_size
+    if(all(node_sizes == min_size)) node_sizes <- rep(15, length(node_sizes))
     # sizes[sizes < 10] <- 10
-    V(graph)$size <- sizes
+    V(graph)$size <- node_sizes
 
     V(graph)$label.family <- "Helvetica"
 
@@ -246,9 +245,10 @@ plot_genot_fg <- function(trans_mat
         , vertex.label.color = "black"
         , vertex.label.family = "Helvetica"
         , vertex.label.font = 2
+        , vertex.label.cex = 1.2
         , vertex.label = labels$vertex_labels
         , font.best = 2
-        , vertex.label.cex = 1
+        # , vertex.label.cex = 1
         , vertex.frame.width = 0
         # , edge.color = rgb(0.5, 0.5, 0.5, 1)
         , edge.color = rgb(0.5, 0.5, 0.5, 1)
@@ -283,6 +283,63 @@ plot_genot_fg <- function(trans_mat
 }
 
 
+
+
+
+process_data <- function(data, mod, prune_edges = TRUE, plot_type = "transitions") {
+
+
+    dag_tree <- NULL
+    
+    dag_tree <- NULL
+    tryCatch (expr = {
+        dag_model <- get(paste(mod, "_model", sep = ""), data)
+        dag_tree <- graph_from_data_frame(dag_model[, c(1, 2)])
+    }, error = function(e){})
+
+    dag_trans_mat <- get(paste(mod, "_trans_mat", sep = ""), data)
+    fg <- graph_from_adjacency_matrix(dag_trans_mat, weighted = TRUE)
+
+    if(prune_edges) {
+        dag_trans_mat[dag_trans_mat < 0.01] <- 0
+    }
+
+    if(plot_type == "matrix") {
+        dag_trans_mat <- as.matrix(dag_trans_mat)
+        dag_trans_mat <- dag_trans_mat[rowSums(dag_trans_mat) > 0, colSums(dag_trans_mat) > 0]
+    }
+
+    td_trans_mat <- NULL
+    td_fg <- NULL
+    tryCatch(expr = {
+        td_trans_mat <- get(paste(mod, "_td_trans_mat", sep = ""), data)
+        td_fg <- graph_from_adjacency_matrix(td_trans_mat, weighted = TRUE)
+        if(prune_edges) {
+            td_trans_mat[td_trans_mat < 0.01] <- 0
+        }
+        if (plot_type == "matrix"){
+            td_trans_mat <- as.matrix(td_trans_mat)
+            td_trans_mat <- td_trans_mat[rowSums(td_trans_mat) > 0, colSums(td_trans_mat) > 0]
+        }
+    }, error = function(e){ })
+
+    theta <- NULL
+    tryCatch(expr ={
+        theta <- get(paste(mod, "_theta", sep=""), data)
+    }, error = function(e) { })
+    # browser()
+    return(list(dag_tree = dag_tree
+        , dag_trans_mat = dag_trans_mat
+        , fg = fg
+        , trans_mat = data[[sprintf("%s_trans_mat", mod)]]
+        , td_trans_mat = td_trans_mat
+        , td_fg = td_fg
+        , theta = theta
+        , parent_set = data[[sprintf("%s_parent_set", mod)]]
+        , transitions = data[[sprintf("%s_genotype_transitions", mod)]]
+        , freqs = data[[sprintf("%s_genotype_freqs", mod)]]
+        ))
+}
 
 #' Plot results from CPMs
 #' 
@@ -333,11 +390,9 @@ plot_genot_fg <- function(trans_mat
 #' dev.off()
 #' }
 #' 
-
-plot_DAG_fg <- function(x, data, orientation = "horizontal", 
+plot_DAG_fg <- function(cpm_output, data, orientation = "horizontal", 
                         models = c("OT", "CBN", "DBN", "MCCBN", "MHN", "HESBCN"),
                         plot_type = "trans_mat",
-                        prune_edges = TRUE,
                         top_paths = NULL) {
     
     if (!(plot_type %in% c("matrix", "transitions", "trans_mat", "genotypes"))){
@@ -358,62 +413,12 @@ plot_DAG_fg <- function(x, data, orientation = "horizontal",
     #     par(opx)
     # }
 
-    process_data <- function(mod) {
-        dag_tree <- NULL
-        
-        dag_tree <- NULL
-        tryCatch (expr = {
-            dag_model <- get(paste(mod, "_model", sep = ""), x)
-            dag_tree <- graph_from_data_frame(dag_model[, c(1, 2)])
-        }, error = function(e){})
-
-        dag_trans_mat <- get(paste(mod, "_trans_mat", sep = ""), x)
-        fg <- graph_from_adjacency_matrix(dag_trans_mat, weighted = TRUE)
-
-        if(prune_edges) {
-            dag_trans_mat[dag_trans_mat < 0.01] <- 0
-        }
-
-        if(plot_type == "matrix") {
-            dag_trans_mat <- as.matrix(dag_trans_mat)
-            dag_trans_mat <- dag_trans_mat[rowSums(dag_trans_mat) > 0, colSums(dag_trans_mat) > 0]
-        }
-
-        td_trans_mat <- NULL
-        td_fg <- NULL
-        tryCatch(expr = {
-            td_trans_mat <- get(paste(mod, "_td_trans_mat", sep = ""), x)
-            td_fg <- graph_from_adjacency_matrix(td_trans_mat, weighted = TRUE)
-            if(prune_edges) {
-                td_trans_mat[td_trans_mat < 0.01] <- 0
-            }
-            if (plot_type == "matrix"){
-                td_trans_mat <- as.matrix(td_trans_mat)
-                td_trans_mat <- td_trans_mat[rowSums(td_trans_mat) > 0, colSums(td_trans_mat) > 0]
-            }
-        }, error = function(e){ })
-
-        theta <- NULL
-        tryCatch(expr ={
-            theta <- get(paste(mod, "_theta", sep=""), x)
-        }, error = function(e) { })
-        return(list(dag_tree = dag_tree
-            , dag_trans_mat = dag_trans_mat
-            , fg = fg
-            , td_trans_mat = td_trans_mat
-            , td_fg = td_fg
-            , theta = theta
-            , parent_set = x[[sprintf("%s_parent_set", mod)]]
-            , transitions = x[[sprintf("%s_genotype_transitions", mod)]]
-            , freqs = x[[sprintf("%s_genotype_freqs", mod)]]
-            ))
-    }
 
     ## List of available models
     available_models <- models[
         vapply(models, function(mod) {
             attr_name <- ifelse(mod == "MHN", "theta", "model")
-            return(any(!is.na(x[[sprintf("%s_%s", mod, attr_name)]])))
+            return(any(!is.na(cpm_output[[sprintf("%s_%s", mod, attr_name)]])))
         }, logical(1))
     ]
     print(available_models)
@@ -437,7 +442,7 @@ plot_DAG_fg <- function(x, data, orientation = "horizontal",
     ## Plotting models
     for(mod in available_models) {
         ## Processing data
-        model_data2plot <- process_data(mod)
+        model_data2plot <- process_data(cpm_output, mod, plot_type)
         ## Plotting data
         if(!is.null(model_data2plot$dag_tree)) {
             if(!is.null(model_data2plot$parent_set)){
@@ -473,6 +478,7 @@ plot_DAG_fg <- function(x, data, orientation = "horizontal",
             par(op)
         }
 
+        browser()
         if (plot_type == "matrix"){
             plot(model_data2plot$dag_trans_mat
                 , digits = 1, xlab = "", ylab = ""
@@ -491,12 +497,13 @@ plot_DAG_fg <- function(x, data, orientation = "horizontal",
                     axis.col = list(side = 1, las = 2), axis.row = list(side = 2, las = 1), 
                     mgp = c(2, 1, 0), key = NULL)
             }
-        } else if (plot_type == "genotypes") {
-            plot_genot_fg(model_data2plot$fg, top_paths = top_paths)
+        } else if (plot_type == "probabilities") {
+            plot_genot_fg(model_data2plot$trans_mat, top_paths = top_paths)
         } else if (plot_type == "transitions") {
             plot_genot_fg(model_data2plot$transitions, data, model_data2plot$freqs, top_paths = top_paths)
         }else if (plot_type == "trans_mat"){
-            plot_genot_fg(model_data2plot$dag_trans_mat, data, top_paths = top_paths)
+            browser()
+            plot_genot_fg(model_data2plot$trans_mat, data, top_paths = top_paths)
         }
 
         if ((mod %in% c("OT")) & (plot_type == "matrix")) {

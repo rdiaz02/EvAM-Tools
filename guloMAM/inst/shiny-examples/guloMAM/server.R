@@ -2,6 +2,8 @@ library(DT)
 library(guloMAM)
 library(OncoSimulR)
 
+source("../../../data/toy_datasets.R")
+
 plot_genotypes_freqs <- function(data){
     par(las = 2, cex.main=1.6, cex.lab=1.5, cex.axis=1.2)
     barplot(data[, 2]
@@ -55,8 +57,73 @@ available_cpms <- function(data){
     cpm_names <- unique(sapply(names(data), function(x) str_split(x, "_")[[1]][[1]]))
     return(cpm_names)
 }
+
+
+plot_model <- function(cpm_output, mod){
+    ## DAG relationships colors 
+    standard_relationship <- "gray73"
+    colors_relationships <- c(standard_relationship, "coral2", "cornflowerblue", "darkolivegreen3")
+    names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
+    
+    
+    model_data2plot <- process_data(cpm_output, mod)
+    ## Plotting data
+    if(!is.null(model_data2plot$dag_tree)) {
+        if(!is.null(model_data2plot$parent_set)){
+            for(i in names(model_data2plot$parent_set)){
+                E(model_data2plot$dag_tree)[.to(i)]$color <- colors_relationships[model_data2plot$parent_set[[i]]]
+            }
+        } else E(model_data2plot$dag_tree)$color <- standard_relationship
+        plot(model_data2plot$dag_tree
+            , layout = layout.reingold.tilford
+            , vertex.size = 55 
+            , vertex.label.color = "black"
+            , vertex.label.family = "Helvetica"
+            , vertex.label.cex = 1.5
+            , font.best = 2
+            , vertex.frame.width = 0.5
+            , vertex.color = "white"
+            , vertex.frame.color = "black" 
+            , vertex.label.cex = 1
+            , edge.arrow.size = 0
+            , edge.width = 5
+            )
+        # par(mar=c(0, 0, 0, 0))
+        if(!is.null(model_data2plot$parent_set)){
+            legend("topleft", legend = names(colors_relationships),
+                col = colors_relationships, lty = 1, lwd = 5, bty = "n")
+        }
+    }else if(!is.null(model_data2plot$theta)) {
+        op <- par(mar=c(3, 3, 5, 3), las = 1)
+        plot(model_data2plot$theta, cex = 1.4, digits = 2, key = NULL
+            , axis.col = list(side = 3)
+            , xlab = "Effect of this (effector)"
+            , ylab = " on this (affected)"
+            , main = ""
+            , mgp = c(2, 1, 0))
+        par(op)
+    }
+    title(mod, cex.main = 1.8)
+}
+
+compare_cpm_freqs <- function(data){
+    all_counts <- data.frame(Genotype = data[["MHN_genotype_freqs"]]$Genotype)
+    for(name in names(data)){
+        if(grepl("_genotype_freqs", name)){
+            method_name <- strsplit(name, "_")[[1]][[1]]
+            all_counts[[method_name]] <- data[[name]]$Counts
+        }
+    }
+
+    order_by_counts <- sort(rowSums(all_counts[-1]), 
+        decreasing = TRUE, index.return = TRUE)$ix
+    return(all_counts[order_by_counts, ])
+}
+
 server <- function(input, output, session) {
     ## CSD input
+    ## Load many examples
+
     complete_csd <- matrix(
         c(
             rep(c(1, 0, 0, 0, 0), 300) #A
@@ -74,6 +141,10 @@ server <- function(input, output, session) {
         ), ncol = 5, byrow = TRUE
         )
         colnames(complete_csd) <- LETTERS[1:5]
+    
+    all_csd <- c(
+        list(user = list(data = complete_csd, name = "User Data"))
+        , all_examples_csd_2)
 
     min_genes <- 2
     max_genes <- 10
@@ -85,12 +156,38 @@ server <- function(input, output, session) {
     gene_names <- reactive({LETTERS[1: input$gene_number]})
     display_freqs <- reactive({get_display_freqs(data$csd_freqs, input$gene_number, gene_names())})
 
+    ## Display List of availabe CSD 
+
+    output$csd_list <- renderUI({
+        all_names <- unname(sapply(all_csd, function(dataset) dataset$name))
+        
+        tagList(
+            radioButtons(
+                inputId = "select_csd",
+                label = "",
+                selected = "se",
+                choiceNames = all_names,
+                choiceValues = names(all_csd)
+            )
+      )
+    })
+
+    observeEvent(input$select_csd, {
+        # browser()
+        print(input$select_csd)
+        data$complete_csd <- all_csd[[input$select_csd]]$data
+        data$csd_freqs <- sampledGenotypes(data$complete_csd)
+        data$n_genes <- ncol(data$complete_csd)
+    })
+
+
     ## Upload csv
     observeEvent(input$csd, {
         # TODO hanlde corrupt files
         data$complete_csd <- read.csv(input$csd$datapath)
         data$csd_freqs <- sampledGenotypes(data$complete_csd)
         data$n_genes <- ncol(data$complete_csd)
+        updateRadioButtons(session, "select_csd", selected = "user")
     })
 
     ## Define number of genes
@@ -116,18 +213,27 @@ server <- function(input, output, session) {
     })
     ## Define new genotype
     output$define_genotype <- renderUI({
-        tags$div(
-            tags$div(class = "inline",
-                checkboxGroupInput(inputId = "genotype", 
-                    label = "Mutations", 
-                    choices =  lapply(1:input$gene_number, function(i) gene_names()[i]))
-            ),
-            tags$div(id="fr",
-                numericInput(label="Frequency", value = NA, min = 0, inputId = "genotype_freq",width = NA),
-                actionButton("add_genotype", "Add Genotype")
-                )
-        )
+        if(input$input2build == "CSD"){
+            tags$div(
+                tags$h3("2. Add new genotypes"),
+                tags$div(class = "inline",
+                    checkboxGroupInput(inputId = "genotype", 
+                        label = "Mutations", 
+                        choices =  lapply(1:input$gene_number, function(i) gene_names()[i]))
+                ),
+                tags$div(id="fr",
+                    numericInput(label="Frequency", value = NA, min = 0, inputId = "genotype_freq",width = NA),
+                    actionButton("add_genotype", "Add Genotype")
+                    )
+            )
+        } else if (input$input2build == "DAG"){
+            tags$div(
+                tags$h3("2. Define edges"),
+                tags$h3("WIP")
+            )
+        }
     })
+
 
     observeEvent(input$genotype, {
         genotype <- paste(input$genotype, collapse = ", ")
@@ -149,14 +255,11 @@ server <- function(input, output, session) {
     })
     
     ## Genotypes table
-    output$csd_freqs <-  DT::renderDT(display_freqs(), selection = 'none', server = TRUE, editable = list(target = "column", disable = list(columns = c(0)))
+    output$csd_freqs <- DT::renderDT(display_freqs(), selection = 'none', server = TRUE, editable = list(target = "column", disable = list(columns = c(0)))
         , rownames = FALSE,
         options = list(
             columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE),
     )
-    # output_cpms <- reactiveValues(data = NULL)
-
-    # proxy_csd <- dataTableProxy("csd_freqs")
 
     observeEvent(input$csd_freqs_cell_edit, {
         info = input$csd_freqs_cell_edit
@@ -172,10 +275,8 @@ server <- function(input, output, session) {
         plot_genotypes_freqs(display_freqs())
     })
 
-    ## Download button
-    observeEvent(input$download, {
-    })
-    output$download <- downloadHandler(
+    ## Download csd button
+    output$download_csd <- downloadHandler(
         filename = "cross_section_data.csv",
         content = function(file) {
             print(file)
@@ -196,35 +297,61 @@ server <- function(input, output, session) {
     # })
 
     cpm_out <- readRDS("/home/pablo/CPM-SSWM-Sampling/guloMAM/inst/shiny-examples/sims.RDS")
+    cpm_out$MHN_f_graph <- cpm_out$MHN_transitionRateMatrix
+    
+    genotype_freq_df <- compare_cpm_freqs(cpm_out)
 
+    output$cpm_freqs <-  DT::renderDT(genotype_freq_df,  
+        selection = 'none', server = TRUE
+        # , editable = list(target = "column", disable = list(columns = c(0)))
+        , rownames = FALSE
+        , options = list(
+            columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE)
+    )
 
-    cpm_names <- available_cpms(cpm_out)
+    output$sims <- renderUI({
+        column_models2show <- floor(12 / length(input$cpm2show)) 
 
-    output$cpm_names <- renderText({
-        cpm_names
-    })
-
-    plot_options <- c("Genotypes", "Transitions") 
-    output$cpm_names <- renderUI({
-        tags$div(
-            tags$div(class = "inline",
-                checkboxGroupInput(inputId = "cpm2show", 
-                    label = "CPMs to show", 
-                    choices =  cpm_names),
-            tags$div(class = "inline",
-                checkboxGroupInput(inputId = "data2plo", 
-                    label = "CPMs to show", 
-                    choices =  plot_options
-                    )
-                )
+        lapply(input$cpm2show, function(mod){
+            output[[sprintf("plot_sims_%s", mod)]] <- renderPlot({
+                pl <- plot_model(cpm_out, mod)
+            })
+            return(
+                column(3,
+                    plotOutput(sprintf("plot_sims_%s", mod)))
             )
+        }
         )
     })
 
-    output$sims <- renderPlot({
-        plot_DAG_fg(cpm_out, cpm_out$csd_data, 
-            models = c("CBN"),
-            plot_type = "genotypes", top_paths = 4)
+    output$sims2 <- renderUI({
+        column_models2show <- floor(12 / length(input$cpm2show)) 
+
+        attribute_name <- c("f_graph", "genotype_transitions", "trans_mat")
+
+        names(attribute_name) <- c("Probabilities", "Transitions", "Transition Matrix")
+
+        selected_plot_type <- attribute_name [input$data2plot]
+
+        top_paths <- input$top_paths
+        if(top_paths == 0) top_paths <- NULL
+        
+        lapply(input$cpm2show, function(mod){
+            data2plot <- cpm_out[[sprintf("%s_%s", mod, 
+                # "trans_mat"
+                selected_plot_type
+                )]]
+            output[[sprintf("plot_sims2_%s", mod)]] <- renderPlot({
+                pl <- plot_genot_fg(data2plot, 
+                    cpm_out$csd_data, 
+                    cpm_out[[sprintf("%s_genotype_%s", mod, "freqs")]], 
+                    top_paths = top_paths)
+            })
+            return(
+                column(3,
+                    plotOutput(sprintf("plot_sims2_%s", mod)))
+            )
+        })
     })
 
     output$csd <- renderPlot({
@@ -237,6 +364,15 @@ server <- function(input, output, session) {
         updateTabsetPanel(session, "navbar",
             selected = "csd_builder"
         )
+        updateRadioButtons(session, "select_csd", selected = "user")
     })
+
+        ## Download button
+    output$download_cpm <- downloadHandler(
+        filename = "cpm.RDS",
+        content = function(file) {
+            saveRDS(cpm_out, file)
+        }
+    )
 
 }

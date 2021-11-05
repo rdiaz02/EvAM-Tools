@@ -180,7 +180,7 @@ user_input <- function(){
                 tags$h3("1. Set the number of genes"),
                 uiOutput("genes_number")),
             tags$div(class = "frame",
-              tags$h3("2. Add new genotypes"),
+              tags$h3("3. Add new genotypes"),
               uiOutput("define_genotype"),
             ),
             tags$div(class = "frame",
@@ -210,7 +210,7 @@ user_input <- function(){
                 actionButton("analysis", "Run guloMAM!")
               ),
               tags$div(class = "download_button",
-                downloadButton("download", "Download your data")
+                downloadButton("download_csd", "Download your data")
               )
             )
           )

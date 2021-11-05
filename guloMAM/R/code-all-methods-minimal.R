@@ -1418,7 +1418,8 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
         HESBCN_parent_set = out_hesbcn$parent_set,
         HESBCN_f_graph = pre_trans_mat_HESBCN$HESBCN$weighted_fgraph,
         HESBCN_trans_mat = pre_trans_mat_HESBCN$HESBCN$trans_mat_genots,
-        HESBCN_td_trans_mat = td$HESBCN
+        HESBCN_td_trans_mat = td$HESBCN,
+        csd_data = x
         # HyperTraPS_model = out_HyperTraPS$edges,
         # HyperTraPS_f_graph = pre_trans_mat_new_CPMS$HyperTraPS$weighted_fgraph,
         # HyperTraPS_trans_mat = pre_trans_mat_new_CPMS$HyperTraPS$trans_mat_genots,
