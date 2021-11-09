@@ -1,6 +1,7 @@
 library(DT)
 library(shinydashboard)
 library(markdown)
+library(shinyjs)
 
 source("ui/user_input_csd.R")
 source("ui/see_results_simple.R")
@@ -137,6 +138,7 @@ results_simple <- function(){
 
 user_input <- function(){
   fluidPage(
+    useShinyjs(),
     tags$head(
       tags$style(HTML("
       body{
@@ -169,9 +171,6 @@ user_input <- function(){
       label{
         margin-right: 10px;
       }
-      # #genotype{
-      #   display: flex;
-      # }
       .frame .form-group{
         display: flex;
       }
@@ -255,6 +254,12 @@ user_input <- function(){
         font-size: 30px !important;
         padding: 15px 30px;
         background: #FAA0A0;
+      }
+
+      .submit_button>button:hover{
+        font-size: 30px !important;
+        padding: 15px 30px;
+        background: #F20D0D;
       }
 
       .shiny-download-link{
@@ -427,16 +432,11 @@ ui <-
   navbarPage( id = "navbar",
     title = "guloMAM",
     tabPanel("User input", 
-      # value = "csd_builder",
+      value = "csd_builder",
       user_input()
     ),
-    # navbarMenu("User Input",
-    #   tabPanel("DAG Builder (CBN)",
-    #   ),
-    #   tabPanel("Matrix Builder (MHN)",
-    #   )
-    # ),
     tabPanel("Results",
+      value = "result_viewer",
       results_simple()
     ),
     tabPanel("About CPMS",

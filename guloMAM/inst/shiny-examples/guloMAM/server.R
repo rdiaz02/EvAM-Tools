@@ -1,6 +1,7 @@
 library(DT)
 library(guloMAM)
 library(OncoSimulR)
+library(shinyjs)
 
 source("../../../data/toy_datasets.R")
 
@@ -142,6 +143,8 @@ server <- function(input, output, session) {
         )
         colnames(complete_csd) <- LETTERS[1:5]
     
+    are_CPM_running <- FALSE
+
     all_csd <- c(
         list(user = list(data = complete_csd, name = "User Data"))
         , all_examples_csd_2)
@@ -279,7 +282,6 @@ server <- function(input, output, session) {
     output$download_csd <- downloadHandler(
         filename = "cross_section_data.csv",
         content = function(file) {
-            print(file)
             data2download <- freqs2csd(display_freqs(), gene_names())
             write.csv(data2download, file, row.names = FALSE)
         }
@@ -290,20 +292,43 @@ server <- function(input, output, session) {
     #     updateTabsetPanel(session, "inTabSet",selected = "Loading")
     # })
 
-    # observeEvent(input$run_cpms, {
-    #     output_cpms$data <- all_methods_2_trans_mat(dB_c1)
-    #     output$out_cpms <- renderText({paste(output_cpms$data)})
-    #     updateTabsetPanel(session, "inTabSet",selected = "Output")
-    # })
 
     cpm_out <- readRDS("/home/pablo/CPM-SSWM-Sampling/guloMAM/inst/shiny-examples/sims.RDS")
     cpm_out$MHN_f_graph <- cpm_out$MHN_transitionRateMatrix
     
-    genotype_freq_df <- compare_cpm_freqs(cpm_out)
+    all_cpm_out <- reactiveValues(output = list(default = cpm_out))
 
-    output$cpm_freqs <-  DT::renderDT(genotype_freq_df,  
+    observeEvent(input$analysis, {
+        shinyjs::disable("analysis")
+        # Create a Progress object
+        progress <- shiny::Progress$new()
+        # Make sure it closes when we exit this reactive, even if there's an error
+        on.exit(progress$close())
+
+        progress$set(message = "Running GuloMAM", value = 0)
+
+        data2run <- freqs2csd(display_freqs(), gene_names())
+        progress$inc(1/4, detail = "Setting up data")
+        Sys.sleep(0.5)
+        progress$inc(2/4, detail = "Running CPMs")
+        cpm_output <- all_methods_2_trans_mat(data2run)
+        n_samples <- 10000 
+        progress$inc(3/4, detail = paste("Running ", n_samples, " samples"))
+        new_data <- sample_all_CPMs(cpm_output, n_samples, input$gene_number)
+        progress$inc(4/4, detail = "Post processing data")
+        Sys.sleep(0.5)
+        new_data$MHN_f_graph <- new_data$MHN_transitionRateMatrix
+        all_cpm_out$output[["user_input"]] <- new_data
+        updateTabsetPanel(session, "navbar", selected = "result_viewer")
+        shinyjs::enable("analysis")
+    })
+    
+    genotype_freq_df <- reactive(compare_cpm_freqs(all_cpm_out$output[[
+        length(all_cpm_out$output)
+        ]]))
+
+    output$cpm_freqs <-  DT::renderDT(genotype_freq_df(),  
         selection = 'none', server = TRUE
-        # , editable = list(target = "column", disable = list(columns = c(0)))
         , rownames = FALSE
         , options = list(
             columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE)
@@ -314,7 +339,7 @@ server <- function(input, output, session) {
 
         lapply(input$cpm2show, function(mod){
             output[[sprintf("plot_sims_%s", mod)]] <- renderPlot({
-                pl <- plot_model(cpm_out, mod)
+                pl <- plot_model(all_cpm_out$output[["user_input"]], mod)
             })
             return(
                 column(3,
@@ -331,20 +356,20 @@ server <- function(input, output, session) {
 
         names(attribute_name) <- c("Probabilities", "Transitions", "Transition Matrix")
 
-        selected_plot_type <- attribute_name [input$data2plot]
+        selected_plot_type <- attribute_name[input$data2plot]
 
         top_paths <- input$top_paths
         if(top_paths == 0) top_paths <- NULL
         
         lapply(input$cpm2show, function(mod){
-            data2plot <- cpm_out[[sprintf("%s_%s", mod, 
+            data2plot <- all_cpm_out$output[["user_input"]][[sprintf("%s_%s", mod, 
                 # "trans_mat"
                 selected_plot_type
                 )]]
             output[[sprintf("plot_sims2_%s", mod)]] <- renderPlot({
                 pl <- plot_genot_fg(data2plot, 
-                    cpm_out$csd_data, 
-                    cpm_out[[sprintf("%s_genotype_%s", mod, "freqs")]], 
+                    all_cpm_out$output[["user_input"]]$csd_data, 
+                    all_cpm_out$output[["user_input"]][[sprintf("%s_genotype_%s", mod, "freqs")]], 
                     top_paths = top_paths)
             })
             return(
@@ -355,24 +380,23 @@ server <- function(input, output, session) {
     })
 
     output$csd <- renderPlot({
-        plot_genotypes_freqs(get_csd(cpm_out$csd_data))
+        plot_genotypes_freqs(get_csd(all_cpm_out$output[["user_input"]]$csd_data))
     })
 
     observeEvent(input$modify_data, {
-        data$csd_freqs <- sampledGenotypes(cpm_out$csd_data)
-        data$n_genes <- ncol(cpm_out$csd_data)
+        data$csd_freqs <- sampledGenotypes(all_cpm_out$output[["user_input"]]$csd_data)
+        data$n_genes <- ncol(all_cpm_out$output[["user_input"]]$csd_data)
         updateTabsetPanel(session, "navbar",
             selected = "csd_builder"
         )
         updateRadioButtons(session, "select_csd", selected = "user")
     })
 
-        ## Download button
+    ## Download button
     output$download_cpm <- downloadHandler(
         filename = "cpm.RDS",
         content = function(file) {
-            saveRDS(cpm_out, file)
+            saveRDS(all_cpm_out$output[["user_input"]], file)
         }
     )
-
 }

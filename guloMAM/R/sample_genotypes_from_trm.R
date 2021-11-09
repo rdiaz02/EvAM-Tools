@@ -267,6 +267,7 @@ sample_all_CPMs <- function(cpm_output
         else trm <- output[[sprintf("%s_f_graph", method)]]
 
         if(any(!is.na(trm))){
+            print(sprintf("Running %s", method))
             sims <- population_sample_from_trm(trm, n_samples = N_samples)
             output[[sprintf("%s_genotype_transitions", method)]] <- process_samples(sims, 
                 n_genes, output = c("transitions"))$transitions
@@ -280,6 +281,12 @@ sample_all_CPMs <- function(cpm_output
     return(output)
 }
 
+guloMAM_pipeline <- function(data){
+    n_genes <- ncol(data)
+    cpm_output <- all_methods_2_trans_mat(data) 
+    output <- sample_all_CPMs(cpm_output, 10000, n_genes)
+    return(output)
+}
 ## ## Take a sample (a vector), with genotypes as "A, B", etc
 ## ## and return a vector of frequencies (counts) in the exact same
 ## ## order as used by MHN
