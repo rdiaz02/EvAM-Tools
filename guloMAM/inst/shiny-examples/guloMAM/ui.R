@@ -67,20 +67,27 @@ results_simple <- function(){
                     #sims > .col-sm-3{
                       padding: 0;
                     }
+
+                    #noprogress input.form-control{
+                      visibility: hidden;
+                    }
                     "
                 )
             )
         ),
         tags$div(class = "row",
           column(1,
-            "list here all CPM outputs"),
+            tags$h3("Outputs"),
+            uiOutput("cpm_list")),
           column(11,
             column(2,
               tags$div(class = "frame",
                 tags$h3("1. Load  & download"),
+                tags$div(id = "noprogress",
                 fileInput("output_cpms", "Load your results"
                   , multiple = FALSE,
-                  accept = c(".Rdata", ".rds", ".RDS")),
+                  accept = c(".Rdata", ".rds", ".RDS"))
+                ),
                 tags$div(class = "download_button",
                   downloadButton("download_cpm", "Download!")
                 )
@@ -410,12 +417,12 @@ user_input <- function(){
                     accept = c("text/csv",
                                 ".csv")) 
             )),
+            tags$div(class = "download_button submit_button",
+              actionButton("analysis", "Run guloMAM!")
+            ),
             plotOutput("plot"),
             tags$div(
-              tags$label(class="not_show", "Download your data"), 
-              tags$div(class = "download_button submit_button",
-                actionButton("analysis", "Run guloMAM!")
-              ),
+              # tags$label(class="not_show", "Download your data"), 
               tags$div(class = "download_button",
                 downloadButton("download_csd", "Download your data")
               )
