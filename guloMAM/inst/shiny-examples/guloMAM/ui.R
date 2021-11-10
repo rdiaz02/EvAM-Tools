@@ -316,30 +316,29 @@ user_input <- function(){
         border-radius: 3px;
         margin-top: 5px;
         margin-left: -20px;
-        max-width: 150px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
       }
 
       @media only screen and (min-width: 1400px) {
+        #input2build div.radio{
+          max-width: 150px;
+        }
         #select_csd div.radio{
           max-width: 150px;
         }
 
-        #input2build div.radio{
-          max-width: 150px;
-        }
       }
 
       @media only screen and (min-width: 1900px) {
+        #input2build div.radio{
+          max-width: 200px;
+        }
         #select_csd div.radio{
           max-width: 200px;
         }
 
-        #input2build div.radio{
-          max-width: 200px;
-        }
       }
 
       #input2build div.radio:hover {
@@ -355,7 +354,6 @@ user_input <- function(){
         border-radius: 3px;
         margin-top: 5px;
         margin-left: -20px;
-        max-width: 150px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;

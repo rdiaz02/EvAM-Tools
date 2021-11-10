@@ -47,6 +47,7 @@ get_display_freqs <- function(freqs, n_genes, gene_names){
 }
 
 get_csd <- function(complete_csd){
+    # browser()
     csd <- data.frame(sampledGenotypes(complete_csd))
     rownames(csd) <- csd$Genotype
     return(csd)
@@ -143,18 +144,21 @@ server <- function(input, output, session) {
         )
         colnames(complete_csd) <- LETTERS[1:5]
     
-    are_CPM_running <- FALSE
-
-    all_csd <- c(
+    all_csd_data <- c(
         list(user = list(data = complete_csd, name = "User Data"))
         , all_examples_csd_2)
+
+    
 
     min_genes <- 2
     max_genes <- 10
 
-    data <- reactiveValues(csd_freqs =  get_csd(complete_csd)
-        , complete_csd =  complete_csd
-        , n_genes = ncol(complete_csd))
+    data <- reactiveValues(
+        csd_freqs =  get_csd(complete_csd)
+        , all_csd = all_csd_data
+        , complete_csd = complete_csd
+        , n_genes = complete_csd
+        )
     
     gene_names <- reactive({LETTERS[1: input$gene_number]})
     display_freqs <- reactive({get_display_freqs(data$csd_freqs, input$gene_number, gene_names())})
@@ -162,7 +166,7 @@ server <- function(input, output, session) {
     ## Display List of availabe CSD 
 
     output$csd_list <- renderUI({
-        all_names <- unname(sapply(all_csd, function(dataset) dataset$name))
+        all_names <- unname(sapply(data$all_csd, function(dataset) dataset$name))
         
         tagList(
             radioButtons(
@@ -170,15 +174,13 @@ server <- function(input, output, session) {
                 label = "",
                 selected = "se",
                 choiceNames = all_names,
-                choiceValues = names(all_csd)
+                choiceValues = names(data$all_csd)
             )
       )
     })
 
     observeEvent(input$select_csd, {
-        # browser()
-        print(input$select_csd)
-        data$complete_csd <- all_csd[[input$select_csd]]$data
+        data$complete_csd <- data$all_csd[[input$select_csd]]$data
         data$csd_freqs <- sampledGenotypes(data$complete_csd)
         data$n_genes <- ncol(data$complete_csd)
     })
@@ -248,9 +250,12 @@ server <- function(input, output, session) {
         genotype <- paste(input$genotype, collapse = ", ")
         genot_freq <- input$genotype_freq
         if(!is.na(genot_freq)){
+            rownames(data$csd_freqs) <- data$csd_freqs$Genotype
             data$csd_freqs[genotype, ] <- c(genotype, genot_freq)
             data$csd_freqs[, 2] <- as.numeric(data$csd_freqs[, 2])
-            rownames(data$csd_freqs) <- data$csd_freqs$Genotype
+            ## Filtering out non-positive counts
+            data$csd_freqs <- data$csd_freqs[data$csd_freqs[,2] > 0,]
+            data$all_csd[[input$select_csd]]$data <- freqs2csd(data$csd_freqs, gene_names())
         }
         updateNumericInput(session, "genotype_freq", value = NA)
         updateCheckboxGroupInput(session, "genotype", label = "Mutations", 
@@ -270,7 +275,8 @@ server <- function(input, output, session) {
         data$csd_freqs <- editData(data$csd_freqs, info, "csd_freqs") 
         ## Filtering out non-positive counts
         data$csd_freqs <- data$csd_freqs[data$csd_freqs[,2] > 0,]
-
+        # browser()
+        data$all_csd[[input$select_csd]]$data <- freqs2csd(data$csd_freqs, gene_names())
     })
 
     ## Plot histogram of genotypes
@@ -291,7 +297,6 @@ server <- function(input, output, session) {
     # observeEvent(input$run_cpms, {
     #     updateTabsetPanel(session, "inTabSet",selected = "Loading")
     # })
-
 
     cpm_out <- readRDS("/home/pablo/CPM-SSWM-Sampling/guloMAM/inst/shiny-examples/sims.RDS")
     cpm_out$MHN_f_graph <- cpm_out$MHN_transitionRateMatrix
@@ -327,7 +332,7 @@ server <- function(input, output, session) {
         length(all_cpm_out$output)
         ]]))
 
-    output$cpm_freqs <-  DT::renderDT(genotype_freq_df(),  
+    output$cpm_freqs <- DT::renderDT(genotype_freq_df(),  
         selection = 'none', server = TRUE
         , rownames = FALSE
         , options = list(
@@ -385,6 +390,7 @@ server <- function(input, output, session) {
 
     observeEvent(input$modify_data, {
         data$csd_freqs <- sampledGenotypes(all_cpm_out$output[["user_input"]]$csd_data)
+        rownames(data$csd_freqs) <- data$csd_freqs$Genotype
         data$n_genes <- ncol(all_cpm_out$output[["user_input"]]$csd_data)
         updateTabsetPanel(session, "navbar",
             selected = "csd_builder"
