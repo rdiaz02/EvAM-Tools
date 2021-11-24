@@ -102,7 +102,7 @@ results_simple <- function(){
                 tags$div(class = "inline",
                   radioButtons(inputId = "data2plot", 
                       label = "CPMs to show", 
-                      choices =  c("Probabilities", "Transitions", "Transition Matrix"),
+                      choices =  c("Transition Rate matrix", "Transitions", "Transition Probability Matrix"),
                       selected =  "Transitions"
                       )
                     )
@@ -151,6 +151,11 @@ user_input <- function(){
       body{
         font-size: 20px;
       }
+      
+      .irs-grid-pol.small{
+        height: 0px !important; 
+      }
+
       #define_genotype>*>*>label{
         margin-right: 10px;
         text-align: right;
@@ -213,17 +218,24 @@ user_input <- function(){
         margin-right: 20px;
       }
 
-      div#inlin label { 
+      div.inlin label { 
         width: 15%; 
       }
-      
-      #inlin label{ 
+
+      div.inlin2 label { 
+        width: 100%; 
+      }
+      .inlin2>div{ 
+        width: 100% !important; 
+      }
+
+      .inlin label{ 
         display: table-cell; 
         text-align: left; 
         vertical-align: middle; 
       }
 
-      #inlin>.form-group>.irs--shiny.irs-with-grid{
+      .inlin>.form-group>.irs--shiny.irs-with-grid{
         margin-left: 10%;
         width: 75%;
       }
@@ -231,7 +243,7 @@ user_input <- function(){
       .btn, input.form-control{
         font-size: 20px;
       }
-      #inlin .form-group { 
+      .inlin .form-group { 
         display: table-row;
         font-size: 20px;
       }
@@ -376,9 +388,9 @@ user_input <- function(){
             tags$h3("Input to build"),
             tagList(
               radioButtons(inputId = "input2build", label = "", 
-              choiceNames = c("Cross sectional data", "DAG builder"),
-              choiceValues = c("CSD", "DAG"),
-              selected = "CSD"
+              choiceNames = c("Cross sectional data", "DAG builder", "Matrix Builder"),
+              choiceValues = c("csd", "dag", "matrix"),
+              selected = "dag"
               )
             ),
             tags$h3("Some examples"),
@@ -392,41 +404,51 @@ user_input <- function(){
           column(width = 6,
               column(width = 12,
             tags$div(class = "frame",
-                tags$h3("1. Set the number of genes"),
+                tags$div(class = "flex",
+                    tags$h3("1. Set the number of genes"),
+                    actionButton("change_gene_names", "Change gene names")
+                  ),
                 uiOutput("genes_number")),
             tags$div(class = "frame",
               uiOutput("define_genotype"),
             ),
+            uiOutput("change_freqs"),
+
             tags$div(class = "frame",
-              tags$div(class = "flex",
-                tags$h3("3. Change frequencies"),
-                actionButton("display_help", "Help"),
-              ),
-              tags$div(id = "csd_table", 
-                DTOutput("csd_freqs")
+              tags$h3("Save & Download data"),
+              uiOutput("dataset_name"),
+              tags$div(
+                tags$div(class = "download_button",
+                  actionButton("save_csd_data", "Save Data"),
+                ),
+                tags$div(class = "download_button",
+                  downloadButton("download_csd", "Download your data")
                 )
               )
+            )
             )
           ),
           column(width = 6,
           tags$div(class = "frame",
               tags$h3("... or load your own data"),
               tags$div(class = "upload_file",
-                  fileInput("csd", "Load a CSV",
+                  fileInput("csd", "Load Data",
                     multiple = FALSE,
-                    accept = c("text/csv",
-                                ".csv")) 
+                    accept = c(
+                      ".rds", ".RDS",
+                      "text/csv",
+                      ".csv")) 
             )),
             tags$div(class = "download_button submit_button",
               actionButton("analysis", "Run guloMAM!")
             ),
-            plotOutput("plot"),
-            tags$div(
-              # tags$label(class="not_show", "Download your data"), 
-              tags$div(class = "download_button",
-                downloadButton("download_csd", "Download your data")
-              )
-            )
+            tags$div(class = "download_button",
+              actionButton("advanced_options", "Advanced Options")
+            ),
+            plotOutput("plot")
+            ,
+            plotOutput("dag_plot")
+
           )
         )
       )
@@ -443,6 +465,9 @@ ui <-
     tabPanel("Results",
       value = "result_viewer",
       results_simple()
+    ),
+    tabPanel("Example Library",
+      "WIP"
     ),
     tabPanel("About CPMS",
       cpm_info()

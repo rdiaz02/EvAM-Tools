@@ -1,10 +1,22 @@
 
-dB_AND <- matrix(
+dB_linear <- matrix(
   c(
     rep(c(1, 0, 0, 0), 100) #A
     , rep(c(1, 1, 0, 0), 100) #AB
     , rep(c(1, 1, 1, 0), 100) #ABC
     , rep(c(1, 1, 1, 1), 100) #ABCD
+    , rep(c(0, 0, 0, 0), 10) #WT
+  ), ncol = 4, byrow = TRUE
+)
+colnames(dB_linear) <- LETTERS[1:4]
+
+dB_AND <- matrix(
+  c(
+    rep(c(1, 0, 0, 0), 200) #A
+    , rep(c(1, 0, 1, 0), 100) #AC
+    , rep(c(1, 1, 0, 0), 100) #AB
+    , rep(c(1, 1, 1, 0), 50) #ABC
+    , rep(c(1, 1, 1, 1), 10) #ABCD
     , rep(c(0, 0, 0, 0), 10) #WT
   ), ncol = 4, byrow = TRUE
 )
@@ -270,22 +282,111 @@ all_examples_csd <- list(
 )
 
 
+dag_linear <- matrix(0, ncol=5, nrow=5)
+rownames(dag_linear) <- colnames(dag_linear) <- c("WT", "A", "B", "C", "D")
+dag_linear["WT", "A"] <- 1
+dag_linear["A" , "B"] <- 1
+dag_linear["B", "C"] <- 1
+dag_linear["C", "D"] <- 1
+
+dag_or <- matrix(0, ncol=5, nrow=5)
+rownames(dag_or) <- colnames(dag_or) <- c("WT", "A", "B", "C", "D")
+dag_or["WT", "A"] <- 1
+dag_or["A" , "B"] <- 1
+dag_or["A", "C"] <- 1
+dag_or["C", "D"] <- 1
+dag_or["B", "D"] <- 1
+
+and_parent_set <- c("Single", "Single", "Single", "AND")
+names(and_parent_set) <- c("A", "B", "C", "D")
+and_lambdas <- c(1,2,3,4)
+names(and_lambdas) <- c("A", "B", "C", "D")
+
+or_parent_set <- c("Single", "Single", "Single", "OR")
+names(or_parent_set) <- c("A", "B", "C", "D")
+
+xor_parent_set <- c("Single", "Single", "Single", "XOR")
+names(xor_parent_set) <- c("A", "B", "C", "D")
+
+dag_c1 <- matrix(0, ncol=6, nrow=6)
+rownames(dag_c1) <- colnames(dag_c1) <- c("WT", "A", "B", "C", "D", "E")
+dag_c1["WT", "A"] <- 1
+dag_c1["A" , "B"] <- 1
+dag_c1["WT", "C"] <- 1
+dag_c1["C", "D"] <- 1
+dag_c1["B", "E"] <- 1
+dag_c1["D", "E"] <- 1
+
+c1_parent_set <- c("Single", "Single", "Single", "Sinlge", "XOR")
+names(c1_parent_set) <- c("A", "B", "C", "D", "E")
+
+dag_c2 <- matrix(0, ncol=5, nrow=5)
+rownames(dag_c2) <- colnames(dag_c2) <- c("WT", "A", "B", "C", "D")
+dag_c2["WT", "A"] <- 1
+dag_c2["WT" , "B"] <- 1
+dag_c2["WT", "C"] <- 1
+dag_c2["A", "D"] <- 1
+dag_c2["B", "D"] <- 1
+dag_c2["C", "D"] <- 1
+
+dag_c3 <- matrix(0, ncol=6, nrow=6)
+rownames(dag_c3) <- colnames(dag_c3) <- c("WT", "A", "B", "C", "D", "E")
+dag_c3["WT", "A"] <- 1
+dag_c3["WT" , "B"] <- 1
+dag_c3["WT", "C"] <- 1
+dag_c3["WT", "D"] <- 1
+dag_c3["A", "E"] <- 1
+dag_c3["B", "E"] <- 1
+dag_c3["C", "E"] <- 1
+dag_c3["D", "E"] <- 1
+
+dag_c4 <- matrix(0, ncol=5, nrow=5)
+rownames(dag_c4) <- colnames(dag_c4) <- c("WT", "A", "B", "C", "D")
+dag_c4["WT", "A"] <- 1
+dag_c4["WT", "C"] <- 1
+dag_c4["A", "B"] <- 1
+dag_c4["C", "D"] <- 1
+
+dag_se <- matrix(0, ncol=3, nrow=3)
+rownames(dag_se) <- colnames(dag_se) <- c("WT", "A", "B")
+dag_se["WT", "A"] <- 1
+dag_se["WT", "B"] <- 1
+
+dag_cv <- matrix(0, ncol=5, nrow=5)
+rownames(dag_cv) <- colnames(dag_cv) <- c("WT", "A", "B", "C", "D")
+dag_cv["WT", "A"] <- 1
+dag_cv["WT", "B"] <- 1
+dag_cv["WT", "C"] <- 1
+dag_cv["B", "D"] <- 1
+dag_cv["C", "D"] <- 1
+
 all_examples_csd_2 <- list(
-    AND = list(id = 1, data = dB_AND, name = "AND", dag = NULL), 
-    OR = list(id = 2, data = dB_OR, name = "OR", dag = NULL), 
-    XOR = list(id = 3, data = dB_XOR, name = "XOR", dag = NULL), 
-    se = list(id = 4, data = dB_se, name = "Sign epistasis", dag = NULL), 
-    rse = list(id = 5, data = dB_rse, name = "Reciprocal sign epistasis", dag = NULL), 
-    c1 = list(id = 6, data = dB_c1, name = "A --> B ; C --> D; B XOR D for E", dag = NULL), 
-    c2 = list(id = 7, data = dB_c2, name = "Missing: ((A AND B) or C) to reach D", dag = NULL), 
-    c2_2c2 = list(id = 8, data = dB_c2_2, name = "All: ((A AND B) or C) to reach D", dag = NULL), 
-    c4c2 = list(id = 9, data = dB_c4, name = "Parallel", dag = NULL), 
-    c3c2 = list(id = 10, data = dB_c3, name = "Parallel XOR", dag = NULL), 
-    c5c2 = list(id = 11, data = dB_c5, name = "WT --> (A AND B AND C) --> D", dag = NULL), 
-    c7c2 = list(id = 12, data = dB_c7, name = "((A AND B) OR (C AND D) to reach E", dag = NULL), 
-    cv1c2 = list(id = 13, data = dB_cv1, name = "CV#1 Representative", dag = NULL), 
-    cv2c2 = list(id = 14, data = dB_cv2, name = "CV#2 Local Maxima", dag = NULL), 
-    cv3c2 = list(id = 15, data = dB_cv3, name = "CV#3 RMF", dag = NULL) 
+  "csd" = list(
+    user = list(data = NULL, name = "User Data"),
+    Linear = list(id = 0, data = dB_linear,  name = "Linear", dag = dag_linear), 
+    AND = list(id = 1, data = dB_AND,  name = "AND", dag = dag_or, dag_parent_set = and_parent_set), 
+    OR = list(id = 2, data = dB_OR,  name = "OR", dag = dag_or, dag_parent_set = or_parent_set), 
+    XOR = list(id = 3, data = dB_XOR, name = "XOR", dag = dag_or, dag_parent_set = xor_parent_set), 
+    se = list(id = 4, data = dB_se,  name = "Sign epistasis", dag = dag_se), 
+    rse = list(id = 5, data = dB_rse,  name = "Reciprocal sign epistasis", dag = dag_se), 
+    c1 = list(id = 6, data = dB_c1, name = "A --> B ; C --> D; B XOR D for E", dag = dag_c1, dag_parent_set = c1_parent_set), 
+    c2 = list(id = 7, data = dB_c2,  name = "Missing: ((A AND B) or C) to reach D", dag = dag_c2), 
+    c2_2c2 = list(id = 8, data = dB_c2_2,  name = "All: ((A AND B) or C) to reach D", dag = dag_c2), 
+    c4c2 = list(id = 9, data = dB_c4,  name = "Parallel", dag = dag_c4), 
+    c3c2 = list(id = 10, data = dB_c3,  name = "Parallel XOR", dag = dag_c3), 
+    c5c2 = list(id = 11, data = dB_c5,  name = "WT --> (A AND B AND C) --> D", dag = dag_c2), 
+    c7c2 = list(id = 12, data = dB_c7,  name = "((A AND B) OR (C AND D) to reach E", dag = dag_c3), 
+    cv1c2 = list(id = 13, data = dB_cv1,  name = "CV#1 Representative", dag = dag_cv), 
+    cv2c2 = list(id = 14, data = dB_cv2,  name = "CV#2 Local Maxima", dag = dag_cv), 
+    cv3c2 = list(id = 15, data = dB_cv3,  name = "CV#3 RMF", dag = dag_cv)
+  ),
+  "dag" = list(
+    user = list(data = NULL, name = "User Data"),
+    AND = list(id = 1, data = NULL,  name = "AND", dag = dag_or, dag_parent_set = and_parent_set, lambdas = and_lambdas) 
+  ),
+  "matrix" = list(
+    user = list(data = NULL, name = "User Data")
+  )
 )
 
 
