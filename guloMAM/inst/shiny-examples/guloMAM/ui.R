@@ -390,7 +390,7 @@ user_input <- function(){
               radioButtons(inputId = "input2build", label = "", 
               choiceNames = c("Cross sectional data", "DAG builder", "Matrix Builder"),
               choiceValues = c("csd", "dag", "matrix"),
-              selected = "dag"
+              selected = "csd"
               )
             ),
             tags$h3("Some examples"),
@@ -419,17 +419,14 @@ user_input <- function(){
               uiOutput("dataset_name"),
               tags$div(
                 tags$div(class = "download_button",
-                  actionButton("save_csd_data", "Save Data"),
+                  disabled(actionButton("save_csd_data", "Save Data")),
                 ),
                 tags$div(class = "download_button",
                   downloadButton("download_csd", "Download your data")
                 )
               )
-            )
-            )
-          ),
-          column(width = 6,
-          tags$div(class = "frame",
+            ),
+            tags$div(class = "frame",
               tags$h3("... or load your own data"),
               tags$div(class = "upload_file",
                   fileInput("csd", "Load Data",
@@ -438,7 +435,11 @@ user_input <- function(){
                       ".rds", ".RDS",
                       "text/csv",
                       ".csv")) 
-            )),
+            ))
+            )
+          ),
+          column(width = 6,
+          
             tags$div(class = "download_button submit_button",
               actionButton("analysis", "Run guloMAM!")
             ),
