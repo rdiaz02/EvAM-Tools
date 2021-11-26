@@ -6,6 +6,20 @@ library(igraph)
 
 source("../../../data/toy_datasets.R")
 
+default_genes <- 3
+max_genes <- 10
+all_gene_names <- LETTERS[1: max_genes]
+template_dag <- matrix(0, ncol= max_genes + 1, nrow = max_genes + 1)
+rownames(template_dag) <- colnames(template_dag) <- c("WT", all_gene_names)
+template_parent_set <- rep("Single", max_genes)
+names(template_parent_set) <- all_gene_names
+template_lambdas <- rep(1, max_genes)
+names(template_lambdas) <- all_gene_names
+template_thetas <- matrix(0, ncol = 3, nrow = 3)
+rownames(template_thetas) <- colnames(template_thetas) <- all_gene_names[1:3]
+template_csd_freqs <- data.frame(Genotype = character(), Freq = integer())
+template_csd_data <- matrix(0, ncol=3, nrow=0)
+
 check_if_csd <- function(data){
     tmp_names <- c("data", "dag", "dag_parent_set", "name", "type", "trm", "thetas")
     types <- c("csd", "dag", "matrix")
@@ -22,7 +36,7 @@ check_if_csd <- function(data){
 }
 
 plot_genotypes_freqs <- function(data){
-    if(is.null(data)) return()
+    if(nrow(data) == 0) return()
     par(las = 2, cex.main=1.6, cex.lab=1.5, cex.axis=1.2)
     barplot(data[, 2]
         , names = data$Genotype
@@ -38,7 +52,6 @@ plot_dag <- function(dag, parent_set){
     standard_relationship <- "gray73"
     colors_relationships <- c(standard_relationship, "coral2", "cornflowerblue", "darkolivegreen3")
     names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
-
     dag <- graph_from_adjacency_matrix(dag, mode = "directed")
     dag <- igraph::decompose(dag)[[1]]
     ## Plotting data
@@ -70,30 +83,34 @@ plot_dag <- function(dag, parent_set){
 }
 
 freqs2csd <- function(freqs, gene_names){
-    csd <- apply(
+    csd2 <- apply(
         freqs, 1
         , function(x){
-            print(x)
             mut <- x[[1]]
             freq <- as.numeric(x[[2]])
             genot <- rep(0, length(gene_names))
             if(mut != "WT"){
                 mut <-  strsplit(mut, ", ")[[1]]
-                genot[which( gene_names %in% mut)] <- 1
+                genot[which(gene_names %in% mut)] <- 1
             }
             csd <- matrix(rep(genot, freq), ncol= length(gene_names), byrow = TRUE)
-            return(csd)
+            return(list(csd))
         })
-    if(nrow(freqs)==1){ 
-        csd <- matrix(csd, ncol= length(gene_names), byrow = TRUE)
-    } else csd <- do.call(rbind, csd)
-
+    
+    csd <- csd2[[1]][[1]]
+    if(nrow(freqs) > 1){ 
+        for (i in 2:nrow(freqs)){
+            csd <- rbind(csd, csd2[[i]][[1]])
+        }
+    } 
+    
     colnames(csd) <- gene_names
+
     return(csd)
 }
 
 get_display_freqs <- function(freqs, n_genes, gene_names){
-    if(is.null(freqs)) return(NULL)
+    if(nrow(freqs) == 0) return(template_csd_freqs)
     valid_gene_names <- c("WT", gene_names[1:n_genes])
 
     selected_rows <- sapply(freqs$Genotype, function(x){
@@ -206,26 +223,80 @@ dataModal <- function(error_message) {
       )
     }
 
+standarize_dataset<-function(data){
+    new_data <- list()
+
+    new_data$gene_names <- all_gene_names
+
+    new_data$name <- data$name  
+
+    if(is.null(data$lambdas)) new_data$lambdas <- template_lambdas
+    else{
+        new_lambdas <- template_lambdas
+        new_lambdas[1:length(data$lambdas)] <- data$lambdas
+        names(new_lambdas) <- new_data$gene_names
+        new_data$lambdas <- new_lambdas
+    }
+
+    if(is.null(data$dag_parent_set)) new_data$dag_parent_set <- template_parent_set
+    else{
+        new_parent_set <- template_parent_set
+        new_parent_set[1:length(data$dag_parent_set)] <- data$dag_parent_set
+        names(new_parent_set) <- new_data$gene_names
+        new_data$dag_parent_set <- new_parent_set
+    }
+
+    if(is.null(data$dag)) new_data$dag <- template_dag
+    else{
+        to_keep <- which(colSums(data$dag)>0 | rowSums(data$dag)>0)
+        tmp_dag <- data$dag[to_keep, to_keep]
+        n_genes <- ncol(data$dag)
+        new_dag <- template_dag 
+        new_dag[1:n_genes, 1:n_genes] <- tmp_dag
+        new_data$dag <- new_dag
+    }
+
+    if(is.null(data$thetas)) new_data$thetas <- template_thetas
+    else{
+        new_data$thetas <- data$thetas
+        rownames(new_data$thetas) <- colnames(new_data$thetas) <-
+            new_data$gene_names[1:ncol(new_data$thetas)]
+    }
+
+    if(is.null(data$data)) new_data$data <- template_csd_data
+    else{
+        new_data$data <- data$data
+        colnames(new_data$data) <- new_data$gene_names[1:ncol(new_data$data)]
+    }
+    return(new_data)
+}
+
+standarize_all_datasets <- function(datasets){
+    all_new_data <- list()
+    for(i in c("csd", "dag", "matrix")){
+        tmp_data <- datasets[[i]] 
+        for(j in names(tmp_data)) all_new_data[[i]][[j]] <-     
+            standarize_dataset(tmp_data[[j]])
+    }
+    return(all_new_data)
+}
+
 server <- function(input, output, session) {
-    all_csd_data <- all_examples_csd_2
+    all_csd_data <- standarize_all_datasets(all_examples_csd_2)
     min_genes <- 2
     max_genes <- 10
     default_mhn_samples <- 5000
     keep_dataset_name <- FALSE
-    all_gene_names <- LETTERS[1: max_genes]
+
     error_message <- NULL
-    template_dag <- matrix(0, ncol= max_genes + 1, nrow = max_genes + 1)
-    rownames(template_dag) <- colnames(template_dag) <- c("WT", all_gene_names)
-    template_parent_set <- rep("Single", max_genes)
-    names(template_parent_set) <- all_gene_names
-    template_lambdas <- rep(1, max_genes)
-    names(template_lambdas) <- all_gene_names
-    template_thetas <- matrix(0, ncol = 3, nrow = 3)
-    rownames(template_thetas) <- colnames(template_thetas) <- all_gene_names[1:3]
-    template_csd_freqs <- data.frame(Genotype = character(), Freq = integer())
+    last_visited_pages <- list(csd = "User", dag = "User", matrix = "User")
+
+    datasets <- reactiveValues(
+        all_csd = all_csd_data
+    )
     data <- reactiveValues(
         csd_freqs =  template_csd_freqs
-        , all_csd = all_csd_data
+        # , all_csd = all_csd_data
         , complete_csd = NULL
         , dag = template_dag
         , dag_parent_set = template_parent_set
@@ -236,11 +307,12 @@ server <- function(input, output, session) {
         , gene_names = LETTERS[1: max_genes]
     )
 
-    last_visited_pages <- list(csd = "user", dag = "user", matrix = "user")
     
     display_freqs <- reactive({
         get_display_freqs(data$csd_freqs, input$gene_number, data$gene_names
     )})
+
+    ## TODO display dag
 
     ## Upload data
     observeEvent(input$csd, {
@@ -249,9 +321,8 @@ server <- function(input, output, session) {
             dataset_name <- strsplit(strsplit(input$csd$name, ".csv")[[1]], "_")[[1]][[1]]
             tmp_data <- read.csv(input$csd$datapath)
             if(check_if_csd(tmp_data)){
-                data$all_csd[[dataset_name]]$data <- tmp_data
-                data$all_csd[[dataset_name]]$name <- dataset_name
-                data$all_csd[[dataset_name]]$type <- "csd"
+                datasets$all_csd[[dataset_name]]$data <- tmp_data
+                datasets$all_csd[[dataset_name]]$name <- dataset_name
                 # data$complete_csd <- tmp_data
                 # data$csd_freqs <- sampledGenotypes(data$complete_csd)
                 # data$gene_names <- colnames(data$complete_csd)
@@ -266,7 +337,7 @@ server <- function(input, output, session) {
         }else if(grepl(".rds", input$csd$datapath, ignore.case = TRUE)){
             tmp_data <- readRDS(input$csd$datapath)
             if(check_if_csd(tmp_data)){
-                data$all_csd[[tmp_data$name]] <- tmp_data
+                datasets$all_csd[[tmp_data$name]] <- tmp_data
                 updateRadioButtons(session, "input2build", selected = tmp_data$type)
                 updateRadioButtons(session, "select_csd", selected = tmp_data$name)
             } else {
@@ -277,7 +348,7 @@ server <- function(input, output, session) {
     })
 
     observeEvent(input$input2build, {
-        if(keep_dataset_name %in% names(data$all_csd)){
+        if(keep_dataset_name %in% names(datasets$all_csd)){
             updateRadioButtons(session, "select_csd", selected = keep_dataset_name)
             keep_dataset_name <- FALSE
         }else{
@@ -294,9 +365,9 @@ server <- function(input, output, session) {
 
     observeEvent(input$dataset_name, {
         if(input$dataset_name != "" &
-            !(input$dataset_name %in% names(data$all_csd[[input$input2build]]))) {
+            !(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))) {
             shinyjs::enable("save_csd_data")
-        }else if(input$dataset_name %in% names(data$all_csd[[input$input2build]])){
+        }else if(input$dataset_name %in% names(datasets$all_csd[[input$input2build]])){
             shinyjs::disable("save_csd_data")
         }
     })
@@ -305,7 +376,7 @@ server <- function(input, output, session) {
     output$download_csd <- downloadHandler(
         filename = function() sprintf("%s_csd.RDS", input$select_csd),
         content = function(file) {
-            saveRDS(data$all_csd[[input$select_csd]], file)
+            saveRDS(datasets$all_csd[[input$select_csd]], file)
         }
     )
 
@@ -313,12 +384,13 @@ server <- function(input, output, session) {
     output$csd_list <- renderUI({
         all_names <- c()
         all_choice_names <- c()
-        for (i in names(data$all_csd[[input$input2build]])){
-            tmp_data <- data$all_csd[[input$input2build]][[i]]
+        for (i in names(datasets$all_csd[[input$input2build]])){
+            tmp_data <- datasets$all_csd[[input$input2build]][[i]]
             all_names <- c(all_names, i)
             all_choice_names <- c(all_choice_names, tmp_data$name)
-            # }
         }
+
+        browser()
         tagList(
             radioButtons(
                 inputId = "select_csd",
@@ -332,7 +404,6 @@ server <- function(input, output, session) {
 
     observeEvent(input$select_csd, {
         last_visited_pages[[input$input2build]] <<- input$select_csd
-        print(last_visited_pages)
     })
     
     toListen <- reactive({
@@ -341,60 +412,34 @@ server <- function(input, output, session) {
 
     observeEvent(toListen(), {
         ## Cleaning stuf
-        data$csd_freqs <-  NULL
-        data$complete_csd <- NULL
-        data$dag <- template_dag
-        data$dag_parent_set <- template_parent_set
-        data$lambdas <- template_lambdas
-        data$thetas <- NULL
-        data$trm <- NULL
-        data$gene_names <- LETTERS[1: max_genes]
-
         selected <- last_visited_pages[[input$input2build]]
+        tmp_data <- datasets$all_csd[[input$input2build]][[selected]]
+        data$gene_names <- tmp_data$gene_names
+        data$complete_csd <- tmp_data$data
 
-        tmp_complete_csd <- data$all_csd[[input$input2build]][[selected]]$data
-        tmp_thetas <- data$all_csd[[input$input2build]][[selected]]$thetas
-        tmp_dag <- data$all_csd[[input$input2build]][[selected]]$dag
-        tmp_parent_set <- data$all_csd[[input$input2build]][[selected]]$dag_parent_set
-        shinyjs::disable("analysis")
-        shinyjs::disable("save_csd_data")
-        if(!is.null(tmp_complete_csd)){
-            data$complete_csd <- tmp_complete_csd
-            data$csd_freqs <- sampledGenotypes(tmp_complete_csd) 
-            n_genes <- sum(colSums(data$complete_csd)>0)
-            tmp_gene_names <- colnames(data$complete_csd)
-            shinyjs::enable("analysis")   
-        } 
-        # else{
-        #     data$csd_freqs <- template_csd_freqs 
-        # }
-
-        if(input$input2build == "dag" & !is.null(tmp_dag)){
-            ## Filtering
-            to_keep <- which(colSums(tmp_dag)>0 | rowSums(tmp_dag)>0)
-            tmp_dag <- tmp_dag[to_keep, to_keep]
-            n_genes <- ncol(tmp_dag)
-            new_dag <- template_dag 
-            new_dag[1:n_genes, 1:n_genes] <- tmp_dag
-            rownames(new_dag) <- colnames(new_dag) <- c("WT", data$gene_names)
-            data$dag <- new_dag
-            data$dag_parent_set[names(tmp_parent_set)] <- tmp_parent_set
-            data$lambdas[names(tmp_parent_set)] <- data$all_csd[[input$input2build]][[selected]]$lambdas
-            n_genes <- n_genes - 1
-            tmp_gene_names <- colnames(new_dag)[-1]
-        }else if(input$input2build == "matrix" & !is.null(tmp_thetas) ){
-            data$thetas <- tmp_thetas 
-            data$trm <- data$all_csd[[input$input2build]][[selected]]$trm
-            n_genes <- ncol(tmp_thetas)
-            tmp_gene_names <- colnames(tmp_thetas)
-        }else { 
-            n_genes <- 3 
-            tmp_gene_names <- data$gene_names 
+        if(nrow(data$complete_csd) > 0){
+            data$csd_freqs <- sampledGenotypes(data$complete_csd) 
+            rownames(data$csd_freqs) <- data$csd_freqs$Genotype
+        } else{
+            data$csd_freqs <- template_csd_freqs
         }
 
-        # data$gene_names <- c(tmp_gene_names, 
-                                # LETTERS[(length(tmp_gene_names) + 1): max_genes])
-        data$gene_names <- tmp_gene_names 
+        data$dag <- tmp_data$dag
+        data$dag_parent_set <- tmp_data$dag_parent_set
+        data$lambdas <- tmp_data$lambdas
+        data$thetas <- tmp_data$thetas
+        data$trm <- tmp_data$trm
+
+        if(input$input2build == "dag"){
+            to_keep <- which(colSums(data$dag)>0 | rowSums(data$dag)>0)
+            tmp_dag <- data$dag[to_keep, to_keep]
+            n_genes <- ifelse(ncol(tmp_dag) == 0, default_genes, ncol(tmp_dag))
+        } else if(input$input2build == "matrix"){
+            n_genes <- ncol(data$thetas)
+        } else if (input$input2build == "csd"){
+            n_genes <- ncol(data$complete_csd)
+        }
+
         updateNumericInput(session, "gene_number", value = n_genes)
         updateNumericInput(session, "genotype_freq", value = NA)
         updateCheckboxGroupInput(session, "genotype", label = "Mutations", 
@@ -434,17 +479,17 @@ server <- function(input, output, session) {
         new_gene_names <- unique(strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]])
         all_gene_names <- data$gene_names
         all_gene_names[1:length(new_gene_names)] <- new_gene_names
-        
         data$gene_names <- all_gene_names
-        if(!is.null(data$complete_csd)){
-            colnames(data$complete_csd) <- data$gene_names[1:ncol(data$complete_csd)]
-            data$csd_freqs <- sampledGenotypes(data$complete_csd)
-        }
-        if(!is.null(data$dag)){
-            names(data$dag_parent_set) <- all_gene_names
-            rownames(data$dag) <- colnames(data$dag) <- c("WT", all_gene_names)
-        } else if (!is.null(data$thetas)){
-            rownames(data$thetas) <- colnames(data$thetas) <- data$gene_names[1:input$gene_number]
+
+        ## Rename stuff
+        # browser()
+        colnames(data$complete_csd) <- data$gene_names[1:ncol(data$complete_csd)]
+        if(nrow(data$complete_csd)>0) data$csd_freqs <- sampledGenotypes(data$complete_csd)
+        names(data$lambdas) <- names(data$dag_parent_set) <- all_gene_names
+        rownames(data$dag) <- colnames(data$dag) <- c("WT", all_gene_names)
+        rownames(data$thetas) <- colnames(data$thetas) <- data$gene_names[1:input$gene_number]
+
+        if(!is.null(data$trm)){
             state_names <- vapply(1:(ncol(data$trm)), function(x){
                 x <- x - 1
                 if(x == 0) state_name <- "WT"
@@ -455,47 +500,41 @@ server <- function(input, output, session) {
         }
 
         tmp_data <- list(data = data$complete_csd, dag = data$dag
-            , name = input$select_csd
+            , name = data$name
             , dag_parent_set = data$dag_parent_set, lambdas = data$lambdas
             , thetas = data$thetas, trm = data$trm) 
 
-        data$all_csd[[input$input2build]][[input$select_csd]] <- tmp_data
+        datasets$all_csd[[input$input2build]][[input$select_csd]] <- tmp_data
     })
 
     ## Saving dataset
     observeEvent(input$save_csd_data,{
         ## 1 save dataset to list after user data
-        if(!(input$dataset_name %in% names(data$all_csd))){
-            data$all_csd[[input$input2build]][[input$dataset_name]]$name <- input$dataset_name
+        if(!(input$dataset_name %in% names(datasets$all_csd))){
+            datasets$all_csd[[input$input2build]][[input$dataset_name]]$name <- input$dataset_name
 
             if(!is.null(data$csd_freqs)){
-                data$all_csd[[input$input2build]][[input$dataset_name]]$data <- freqs2csd(data$csd_freqs, data$gene_names)
+                datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <- freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
             }
 
             tmp_data <- list(data = data$complete_csd, data = data$dag
             , dag_parent_set = data$dag_parent_set, lambdas = data$lambdas
             , thetas = data$thetas, trm = data$trm, name = input$select_csd) 
 
-            data$all_csd[[input$input2build]][[input$select_csd]] <- tmp_data
+            datasets$all_csd[[input$input2build]][[input$select_csd]] <- tmp_data
 
-            # data$all_csd[[input$input2build]][[input$dataset_name]]$dag <- data$dag
-            # data$all_csd[[input$input2build]][[input$dataset_name]]$dag_parent_set <- data$dag_parent_set
-            # data$all_csd[[input$input2build]][[input$dataset_name]]$lambdas <- data$lambdas
-            # data$all_csd[[input$input2build]][[input$dataset_name]]$thetas <- data$thetas
-            # data$all_csd[[input$input2build]][[input$dataset_name]]$trm <- data$trm
-
-            data$all_csd[[input$input2build]] <- 
-                c(data$all_csd[[input$input2build]]["user"],
-                data$all_csd[[input$input2build]][input$dataset_name],
-                data$all_csd[[input$input2build]][which(!(names(data$all_csd[[input$input2build]]) %in% c("user", input$dataset_name, names(all_examples_csd_2))))],
-                data$all_csd[[input$input2build]][which(names(data$all_csd[[input$input2build]]) %in% names(all_examples_csd_2))]
+            tmp_data_2 <- datasets$all_csd[[input$input2build]]
+            datasets$all_csd[[input$input2build]] <- 
+                c(tmp_data_2["User"],
+                tmp_data_2[input$dataset_name],
+                tmp_data_2[which(!(names(tmp_data_2) %in% c("User", input$dataset_name, names(all_examples_csd_2))))],
+                tmp_data_2[which(names(datasets$all_csd[[input$input2build]]) %in% names(all_examples_csd_2))]
             )
 
             ## 2 restore default values
             try({
-                data$all_csd[[input$input2build]][[input$select_csd]] <- all_examples_csd_2[[input$input2build]][[input$select_csd]]
+                datasets$all_csd[[input$input2build]][[input$select_csd]] <- all_examples_csd_2[[input$input2build]][[input$select_csd]]
             })
-
             ## 3 update selected entry
             updateRadioButtons(session, "select_csd", selected = input$dataset_name)
         }
@@ -697,7 +736,6 @@ server <- function(input, output, session) {
                 data$dag[from2remove, to2remove] <- 0
             }
         }
-        
 
     })
     listen2dag_change <- reactive({
@@ -741,8 +779,10 @@ server <- function(input, output, session) {
         }
         data$dag_parent_set <- tmp_parent_set
 
-        # data$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$dag
-        # Resampling
+        # datasets$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$dag
+    })
+
+    observeEvent(input$dag_table_cell_edit, {
         shinyjs::click("resample_dag")
     })
 
@@ -764,15 +804,15 @@ server <- function(input, output, session) {
         tmp_csd <- tmp_csd[tmp_csd$Counts > 0, ]
         rownames(tmp_csd) <- tmp_csd$Genotype
         data$csd_freqs <- tmp_csd
-        data$complete_csd <- freqs2csd(tmp_csd, data$gene_names)
+        data$complete_csd <- freqs2csd(tmp_csd,data$gene_names[1:input$gene_number])
         shinyjs::enable("resample_dag")
         progress$inc(1/2, detail = "Sampling Finished")
 
-        data$all_csd[[input$input2build]][[input$select_csd]]$data <- data$complete_csd
-        data$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$dag
-        data$all_csd[[input$input2build]][[input$select_csd]]$trm <- trm
-        data$all_csd[[input$input2build]][[input$select_csd]]$lambdas <- data$lambdas
-        data$all_csd[[input$input2build]][[input$select_csd]]$dag_parent_set <- data$dag_parent_set
+        datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- data$complete_csd
+        datasets$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$dag
+        datasets$all_csd[[input$input2build]][[input$select_csd]]$trm <- trm
+        datasets$all_csd[[input$input2build]][[input$select_csd]]$lambdas <- data$lambdas
+        datasets$all_csd[[input$input2build]][[input$select_csd]]$dag_parent_set <- data$dag_parent_set
     
         shinyjs::enable("analysis")
     })
@@ -820,13 +860,13 @@ server <- function(input, output, session) {
         mhn_data <-get_mhn_data(input$gene_number, input$mhn_samples, 
             data$gene_names[1:input$gene_number], thetas = data$thetas)
         data$csd_freqs <- mhn_data$samples
-        data$complete_csd <- freqs2csd(data$csd_freqs, data$gene_names)
+        data$complete_csd <- freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
         data$thetas <- mhn_data$thetas
         data$trm <- mhn_data$trm
 
-        data$all_csd[[input$input2build]][[input$select_csd]]$data <- data$complete_csd
-        data$all_csd[[input$input2build]][[input$select_csd]]$thetas <- data$thetas
-        data$all_csd[[input$input2build]][[input$select_csd]]$trm <- data$trm
+        datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- data$complete_csd
+        datasets$all_csd[[input$input2build]][[input$select_csd]]$thetas <- data$thetas
+        datasets$all_csd[[input$input2build]][[input$select_csd]]$trm <- data$trm
         shinyjs::enable("analysis")
     })
 
@@ -859,15 +899,16 @@ server <- function(input, output, session) {
 
     observeEvent(input$add_genotype, {
         genotype <- paste(input$genotype, collapse = ", ")
+        genotype <- ifelse(genotype == "", "WT", genotype)
         genot_freq <- input$genotype_freq
-        if(is.null(data$csd_freqs)) data$csd_freqs <- template_csd_freqs
+        # if(is.null(data$csd_freqs)) data$csd_freqs <- template_csd_freqs
         if(!is.na(genot_freq)){
             data$csd_freqs[genotype, ] <- c(genotype, genot_freq)
             rownames(data$csd_freqs) <- data$csd_freqs$Genotype
             data$csd_freqs[, 2] <- as.numeric(data$csd_freqs[, 2])
             ## Filtering out non-positive counts
             data$csd_freqs <- data$csd_freqs[data$csd_freqs[,2] > 0,]
-            data$all_csd[[input$input2build]][[input$select_csd]]$data <- freqs2csd(data$csd_freqs, data$gene_names)
+            data$complete_csd <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
         }
         updateNumericInput(session, "genotype_freq", value = NA)
         updateCheckboxGroupInput(session, "genotype", label = "Mutations", 
@@ -887,7 +928,7 @@ server <- function(input, output, session) {
         data$csd_freqs <- editData(data$csd_freqs, info, "csd_freqs") 
         ## Filtering out non-positive counts
         data$csd_freqs <- data$csd_freqs[data$csd_freqs[,2] > 0,]
-        data$all_csd[[input$select_csd]]$data <- freqs2csd(data$csd_freqs, data$gene_names)
+        datasets$all_csd[[input$select_csd]]$data <- freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
     })
 
     ## Plot histogram of genotypes
@@ -937,7 +978,7 @@ server <- function(input, output, session) {
 
         progress$set(message = "Running GuloMAM", value = 0)
 
-        data2run <- freqs2csd(display_freqs(), data$gene_names)
+        data2run <- freqs2csd(display_freqs(), data$gene_names[1:input$gene_number])
         progress$inc(1/4, detail = "Setting up data")
         Sys.sleep(0.5)
         progress$inc(2/4, detail = "Running CPMs")
@@ -1023,7 +1064,7 @@ server <- function(input, output, session) {
         updateTabsetPanel(session, "navbar",
             selected = "csd_builder"
         )
-        selected <- ifelse(input$select_cpm %in% names(data$all_csd), input$select_cpm, "user")
+        selected <- ifelse(input$select_cpm %in% names(datasets$all_csd), input$select_cpm, "user")
         updateRadioButtons(session, "select_csd", selected = selected)
     })
 
