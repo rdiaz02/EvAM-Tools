@@ -319,7 +319,7 @@ server <- function(input, output, session) {
         # TODO hanlde corrupt files
         if(grepl(".csv", input$csd$datapath)){
             dataset_name <- strsplit(strsplit(input$csd$name, ".csv")[[1]], "_")[[1]][[1]]
-            tmp_data <- read.csv(input$csd$datapath)
+            tfmp_data <- read.csv(input$csd$datapath)
             if(check_if_csd(tmp_data)){
                 datasets$all_csd[[dataset_name]]$data <- tmp_data
                 datasets$all_csd[[dataset_name]]$name <- dataset_name
