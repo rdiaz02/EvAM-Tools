@@ -360,9 +360,24 @@ dag_cv["WT", "C"] <- 1
 dag_cv["B", "D"] <- 1
 dag_cv["C", "D"] <- 1
 
+template_dag <- matrix(0, ncol = 2, nrow = 2)
+rownames(template_dag) <- colnames(template_dag) <- c("WT", "A")
+template_dag["WT", "A"] <- 1
+
+template_thetas <- matrix(0, ncol = 3, nrow = 3)
+    rownames(template_thetas) <- colnames(template_thetas) <- LETTERS[1:3]
+
+mhn_example_lambdas <- matrix(c(
+  c(-0.4, -1.04, -2.53),
+  c(0.18, -0.92, -0.76),
+  c(-1.05, -0.53, 0.23)
+), ncol = 3, nrow = 3)
+rownames(mhn_example_lambdas) <- colnames(mhn_example_lambdas) <- c("A1", "B2", "C3")
+
+
 all_examples_csd_2 <- list(
   "csd" = list(
-    user = list(data = NULL, name = "User Data"),
+    User = list(data = NULL, name = "User Data"),
     Linear = list(id = 0, data = dB_linear,  name = "Linear", dag = dag_linear), 
     AND = list(id = 1, data = dB_AND,  name = "AND", dag = dag_or, dag_parent_set = and_parent_set), 
     OR = list(id = 2, data = dB_OR,  name = "OR", dag = dag_or, dag_parent_set = or_parent_set), 
@@ -381,11 +396,12 @@ all_examples_csd_2 <- list(
     cv3c2 = list(id = 15, data = dB_cv3,  name = "CV#3 RMF", dag = dag_cv)
   ),
   "dag" = list(
-    user = list(data = NULL, name = "User Data"),
+    User = list(dag = template_dag, name = "User Data"),
     AND = list(id = 1, data = NULL,  name = "AND", dag = dag_or, dag_parent_set = and_parent_set, lambdas = and_lambdas) 
   ),
   "matrix" = list(
-    user = list(data = NULL, name = "User Data")
+    User = list(thetas = template_thetas, name = "User Data"),
+    test1 = list(thetas = mhn_example_lambdas, name = "Example 1")
   )
 )
 
