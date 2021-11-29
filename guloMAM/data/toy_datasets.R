@@ -364,15 +364,19 @@ template_dag <- matrix(0, ncol = 2, nrow = 2)
 rownames(template_dag) <- colnames(template_dag) <- c("WT", "A")
 template_dag["WT", "A"] <- 1
 
-template_thetas <- matrix(0, ncol = 3, nrow = 3)
-    rownames(template_thetas) <- colnames(template_thetas) <- LETTERS[1:3]
+template_thetas <- matrix(0, ncol = 10, nrow = 10)
+    rownames(template_thetas) <- colnames(template_thetas) <- LETTERS[1:10]
 
 mhn_example_lambdas <- matrix(c(
   c(-0.4, -1.04, -2.53),
   c(0.18, -0.92, -0.76),
   c(-1.05, -0.53, 0.23)
 ), ncol = 3, nrow = 3)
-rownames(mhn_example_lambdas) <- colnames(mhn_example_lambdas) <- c("A1", "B2", "C3")
+
+mhn_example_lambdas2 <- template_thetas
+mhn_example_lambdas2[1:ncol(mhn_example_lambdas)
+  , 1:ncol(mhn_example_lambdas)] <- mhn_example_lambdas
+rownames(mhn_example_lambdas2) <- colnames(mhn_example_lambdas2) <- c("A1", "B2", "C3", LETTERS[4:10])
 
 
 all_examples_csd_2 <- list(
@@ -401,7 +405,7 @@ all_examples_csd_2 <- list(
   ),
   "matrix" = list(
     User = list(thetas = template_thetas, name = "User Data"),
-    test1 = list(thetas = mhn_example_lambdas, name = "Example 1")
+    test1 = list(thetas = mhn_example_lambdas2, name = "Example 1")
   )
 )
 

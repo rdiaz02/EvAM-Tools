@@ -15,8 +15,8 @@ template_parent_set <- rep("Single", max_genes)
 names(template_parent_set) <- all_gene_names
 template_lambdas <- rep(1, max_genes)
 names(template_lambdas) <- all_gene_names
-template_thetas <- matrix(0, ncol = 3, nrow = 3)
-rownames(template_thetas) <- colnames(template_thetas) <- all_gene_names[1:3]
+template_thetas <- matrix(0, ncol = max_genes, nrow = max_genes)
+rownames(template_thetas) <- colnames(template_thetas) <- all_gene_names
 template_csd_freqs <- data.frame(Genotype = character(), Freq = integer())
 template_csd_data <- matrix(0, ncol=3, nrow=0)
 
@@ -296,7 +296,6 @@ server <- function(input, output, session) {
     )
     data <- reactiveValues(
         csd_freqs =  template_csd_freqs
-        # , all_csd = all_csd_data
         , complete_csd = NULL
         , dag = template_dag
         , dag_parent_set = template_parent_set
@@ -380,6 +379,10 @@ server <- function(input, output, session) {
         }
     )
 
+    observeEvent(input$select_csd, {
+        last_visited_pages[[input$input2build]] <<- input$select_csd
+    })
+
     ## Display List of availabe CSD 
     output$csd_list <- renderUI({
         all_names <- c()
@@ -390,7 +393,6 @@ server <- function(input, output, session) {
             all_choice_names <- c(all_choice_names, tmp_data$name)
         }
 
-        browser()
         tagList(
             radioButtons(
                 inputId = "select_csd",
@@ -402,10 +404,6 @@ server <- function(input, output, session) {
         )
     })
 
-    observeEvent(input$select_csd, {
-        last_visited_pages[[input$input2build]] <<- input$select_csd
-    })
-    
     toListen <- reactive({
         list(input$select_csd, input$input2build)
     })
@@ -417,9 +415,12 @@ server <- function(input, output, session) {
         data$gene_names <- tmp_data$gene_names
         data$complete_csd <- tmp_data$data
 
+        shinyjs::disable("analysis")
+
         if(nrow(data$complete_csd) > 0){
             data$csd_freqs <- sampledGenotypes(data$complete_csd) 
             rownames(data$csd_freqs) <- data$csd_freqs$Genotype
+            shinyjs::enable("analysis")
         } else{
             data$csd_freqs <- template_csd_freqs
         }
@@ -429,13 +430,15 @@ server <- function(input, output, session) {
         data$lambdas <- tmp_data$lambdas
         data$thetas <- tmp_data$thetas
         data$trm <- tmp_data$trm
+        data$name <- tmp_data$name
 
         if(input$input2build == "dag"){
-            to_keep <- which(colSums(data$dag)>0 | rowSums(data$dag)>0)
-            tmp_dag <- data$dag[to_keep, to_keep]
-            n_genes <- ifelse(ncol(tmp_dag) == 0, default_genes, ncol(tmp_dag))
+            to_keep <- length(which(colSums(data$dag)>0 | rowSums(data$dag)>0)) - 1
+            n_genes <- ifelse(to_keep < 1 , default_genes, to_keep)
         } else if(input$input2build == "matrix"){
-            n_genes <- ncol(data$thetas)
+            n_genes <- length(which(colSums(abs(data$thetas))>0 
+                | rowSums(abs(data$thetas))>0))
+            n_genes <- ifelse(n_genes <= 0, 3, n_genes)
         } else if (input$input2build == "csd"){
             n_genes <- ncol(data$complete_csd)
         }
@@ -443,7 +446,7 @@ server <- function(input, output, session) {
         updateNumericInput(session, "gene_number", value = n_genes)
         updateNumericInput(session, "genotype_freq", value = NA)
         updateCheckboxGroupInput(session, "genotype", label = "Mutations", 
-            choices =  lapply(1:n_genes, function(i)data$gene_names[i]), selected = NULL)
+            choices = lapply(1:n_genes, function(i)data$gene_names[i]), selected = NULL)
     })
 
     ## Define number of genes
@@ -482,12 +485,14 @@ server <- function(input, output, session) {
         data$gene_names <- all_gene_names
 
         ## Rename stuff
-        # browser()
         colnames(data$complete_csd) <- data$gene_names[1:ncol(data$complete_csd)]
-        if(nrow(data$complete_csd)>0) data$csd_freqs <- sampledGenotypes(data$complete_csd)
+        if(nrow(data$complete_csd)>0) {
+            data$csd_freqs <- sampledGenotypes(data$complete_csd)
+            rownames(data$csd_freqs) <- data$csd_freqs$Genotype    
+        }
         names(data$lambdas) <- names(data$dag_parent_set) <- all_gene_names
         rownames(data$dag) <- colnames(data$dag) <- c("WT", all_gene_names)
-        rownames(data$thetas) <- colnames(data$thetas) <- data$gene_names[1:input$gene_number]
+        rownames(data$thetas) <- colnames(data$thetas) <- data$gene_names[1:ncol(data$thetas)]
 
         if(!is.null(data$trm)){
             state_names <- vapply(1:(ncol(data$trm)), function(x){
@@ -502,7 +507,7 @@ server <- function(input, output, session) {
         tmp_data <- list(data = data$complete_csd, dag = data$dag
             , name = data$name
             , dag_parent_set = data$dag_parent_set, lambdas = data$lambdas
-            , thetas = data$thetas, trm = data$trm) 
+            , thetas = data$thetas, trm = data$trm)
 
         datasets$all_csd[[input$input2build]][[input$select_csd]] <- tmp_data
     })
@@ -517,25 +522,33 @@ server <- function(input, output, session) {
                 datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <- freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
             }
 
-            tmp_data <- list(data = data$complete_csd, data = data$dag
-            , dag_parent_set = data$dag_parent_set, lambdas = data$lambdas
-            , thetas = data$thetas, trm = data$trm, name = input$select_csd) 
-
-            datasets$all_csd[[input$input2build]][[input$select_csd]] <- tmp_data
+            tmp_data <- list(
+                data = data$complete_csd
+                , dag = data$dag
+                , gene_names = data$gene_names
+                , dag_parent_set = data$dag_parent_set
+                , lambdas = data$lambdas
+                , thetas = data$thetas
+                , trm = data$trm
+                , name = input$dataset_name) 
+            datasets$all_csd[[input$input2build]][[input$dataset_name]] <- tmp_data
 
             tmp_data_2 <- datasets$all_csd[[input$input2build]]
             datasets$all_csd[[input$input2build]] <- 
-                c(tmp_data_2["User"],
-                tmp_data_2[input$dataset_name],
-                tmp_data_2[which(!(names(tmp_data_2) %in% c("User", input$dataset_name, names(all_examples_csd_2))))],
-                tmp_data_2[which(names(datasets$all_csd[[input$input2build]]) %in% names(all_examples_csd_2))]
+                c(tmp_data_2["User"]
+                , tmp_data_2[input$dataset_name]
+                , tmp_data_2[which(!(names(tmp_data_2) %in% c("User",           
+                    input$dataset_name, names(all_csd_data))))]
+                , tmp_data_2[which(names(datasets$all_csd[[input$input2build]]) %in% names(all_csd_data))]
             )
 
             ## 2 restore default values
             try({
-                datasets$all_csd[[input$input2build]][[input$select_csd]] <- all_examples_csd_2[[input$input2build]][[input$select_csd]]
+                datasets$all_csd[[input$input2build]][[input$select_csd]] <- all_csd_data[[input$input2build]][[input$select_csd]]
             })
+
             ## 3 update selected entry
+            # last_visited_pages[[input$input2build]] <<- input$dataset_name
             updateRadioButtons(session, "select_csd", selected = input$dataset_name)
         }
     })
@@ -562,7 +575,8 @@ server <- function(input, output, session) {
             easyClose = TRUE,
             title = tags$h3("Advanced options?"),
             tags$div(
-                numericInput("num_steps", "Sampling steps", 10000, min=0, max=1000000,step=1000, width="100%"),
+                numericInput("num_steps", "Sampling steps", 10000
+                    , min = 0, max = 1000000, step = 1000, width="100%"),
                 checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("HyperTRAPS", "MCCBN"), choiceValues = c("hypertraps", "mccbn")),
                 tags$h4("DISCLAIMER: Both HyperTraps and MCCBN may take hours to run")
             )
@@ -633,6 +647,7 @@ server <- function(input, output, session) {
             )
         }
     })
+
     output$change_freqs <- renderUI({
         if(input$input2build == "csd"){
             tags$div(class = "frame",
@@ -646,6 +661,8 @@ server <- function(input, output, session) {
             )
         }
     })
+
+    ##CSD controller
 
     ## ÐAG builder
     ## Controling dag builder
@@ -738,6 +755,7 @@ server <- function(input, output, session) {
         }
 
     })
+
     listen2dag_change <- reactive({
         list(input$dag_table_cell_edit, input$add_edge)
     })
@@ -782,10 +800,6 @@ server <- function(input, output, session) {
         # datasets$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$dag
     })
 
-    observeEvent(input$dag_table_cell_edit, {
-        shinyjs::click("resample_dag")
-    })
-
     ## Building trm from dag
     observeEvent(input$resample_dag, {
         progress <- shiny::Progress$new()
@@ -799,7 +813,7 @@ server <- function(input, output, session) {
         tmp_data <- list(edges = dag_data(), parent_set = data$dag_parent_set)
         trm <- cpm_access_genots_paths_w_simplified_relationships(tmp_data)$weighted_fgraph
         samples <- population_sample_from_trm(trm, input$dag_samples)
-        process_data <- process_samples(samples, input$gene_number)
+        process_data <- process_samples(samples, input$gene_number, data$gene_names[1:input$gene_number])
         tmp_csd <- process_data$frequencies
         tmp_csd <- tmp_csd[tmp_csd$Counts > 0, ]
         rownames(tmp_csd) <- tmp_csd$Genotype
@@ -821,18 +835,17 @@ server <- function(input, output, session) {
     observeEvent(input$how2build_dag, {
       showModal(modalDialog(
         easyClose = TRUE,
-        title = tags$h3("How to build a matrix"),
+        title = tags$h3("How to build a DAG"),
         tags$div(
-            tags$p("A positive theta indicates that the presence of one the row gene makes column gene more likely. A negative means the opposite."),
-            tags$p("Diagonal thetas indicates how likely is that event to be the first one (positive values likely, negative unlikely."),
-            tags$p("Once the thetas are defined hit the 'Sample from MHN' to generate a sample."),
-            tags$p("To make a sample we take into account multiplicative effects of all thetas"),
-            tags$h3("How to modify the table"),
-            tags$p("1. Double click in a Frequency cell to edit it"),
-            tags$p("2. Press Tab to move to the next row"),
-            tags$p("3. Use Shift + Enter to save changes"),
-            tags$p("4. Set a frequency to 0 to remove a genotype"),
-            tags$p("5. Type in the Search bar to filter genotypes")
+            tags$p("Select a parent node and child node and hit 'Add edge'."),
+            tags$p("But, TAKE CARE"),
+            tags$p("Some edge wont be allowed if: "),
+            tags$li("That edge is already present"),
+            tags$li("It introduces cycles"),
+            tags$p("TO REMOVE EDGES: set a lambda of the relationship to 0"),
+            tags$p("But, TAKE CARE"),
+            tags$p("Breaking edges might reestructure the DAG:"),
+            tags$li("If a node has no parent, it will be assigned as descendent of WT")
             )
         )
       )
@@ -840,7 +853,8 @@ server <- function(input, output, session) {
 
     ## MHN
     ## Controling thetas
-    output$thetas_table <- DT::renderDT(data$thetas, selection = 'none', server = TRUE
+    output$thetas_table <- DT::renderDT(data$thetas[1:input$gene_number, 1:input$gene_number]
+        , selection = 'none', server = TRUE
         , editable = list(target = "all", disable = list(columns = c(0)))
         , rownames = TRUE,
         options = list(
@@ -850,22 +864,25 @@ server <- function(input, output, session) {
 
     observeEvent(input$thetas_table_cell_edit, {
         info <-input$thetas_table_cell_edit
-        data$thetas <- editData(data$thetas, info, "thetas") 
+        browser()
+        data$thetas[1:input$gene_number, 1:input$gene_number] <- 
+            editData(data$thetas[1:input$gene_number, 1:input$gene_number], info, "thetas") 
         
+        datasets$all_csd[[input$input2build]][[input$select_csd]]$thetas <- data$thetas
         ## Resample based on changes
         shinyjs::click("resample_mhn")
     })
 
     observeEvent(input$resample_mhn, {
         mhn_data <-get_mhn_data(input$gene_number, input$mhn_samples, 
-            data$gene_names[1:input$gene_number], thetas = data$thetas)
+            data$gene_names[1:input$gene_number], thetas = data$thetas[1:input$gene_number, 1:input$gene_number])
         data$csd_freqs <- mhn_data$samples
         data$complete_csd <- freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
-        data$thetas <- mhn_data$thetas
-        data$trm <- mhn_data$trm
+        # data$thetas <- mhn_data$thetas
+        # data$trm <- mhn_data$trm
 
         datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- data$complete_csd
-        datasets$all_csd[[input$input2build]][[input$select_csd]]$thetas <- data$thetas
+        # datasets$all_csd[[input$input2build]][[input$select_csd]]$thetas <- data$thetas
         datasets$all_csd[[input$input2build]][[input$select_csd]]$trm <- data$trm
         shinyjs::enable("analysis")
     })
@@ -875,8 +892,8 @@ server <- function(input, output, session) {
         easyClose = TRUE,
         title = tags$h3("How to build a matrix"),
         tags$div(
-            tags$p("A positive theta indicates that the presence of one the row gene makes column gene more likely. A negative means the opposite."),
-            tags$p("Diagonal thetas indicates how likely is that event to be the first one (positive values likely, negative unlikely."),
+            tags$p("Positive theta: gene i in row makes gene j in column more likely. A negative means the opposite."),
+            tags$p("Diagonal theta: likelihood of that event i to be the first one (positive values likely, negative unlikely."),
             tags$p("Once the thetas are defined hit the 'Sample from MHN' to generate a sample."),
             tags$p("To make a sample we take into account multiplicative effects of all thetas"),
             tags$h3("How to modify the table"),
@@ -913,6 +930,7 @@ server <- function(input, output, session) {
         updateNumericInput(session, "genotype_freq", value = NA)
         updateCheckboxGroupInput(session, "genotype", label = "Mutations", 
             choices =  lapply(1:input$gene_number, function(i)data$gene_names[i]), selected = NULL)
+        shinyjs::enable("analysis")
     })
     
     ## Genotypes table
@@ -923,12 +941,13 @@ server <- function(input, output, session) {
     )
 
     observeEvent(input$csd_freqs_cell_edit, {
-        info = input$csd_freqs_cell_edit
+        info <- input$csd_freqs_cell_edit
         info[ , "col"] <- 2
         data$csd_freqs <- editData(data$csd_freqs, info, "csd_freqs") 
+        print(data$csd_freqs)
         ## Filtering out non-positive counts
         data$csd_freqs <- data$csd_freqs[data$csd_freqs[,2] > 0,]
-        datasets$all_csd[[input$select_csd]]$data <- freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
+        data$complete_csd <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
     })
 
     ## Plot histogram of genotypes
@@ -940,7 +959,7 @@ server <- function(input, output, session) {
     output$dag_plot <- renderPlot({
         if(input$input2build %in% c("csd", "dag")){
             tmp_dag <- NULL
-            if(!is.null(data$dag) & !is.null(input$gene_number)) {
+            if(sum(data$dag)>0 & !is.null(input$gene_number)) {
                 num_genes <- ncol(data$dag) - 1
                 if(num_genes >= input$gene_number){
                     genes2show <- input$gene_number
