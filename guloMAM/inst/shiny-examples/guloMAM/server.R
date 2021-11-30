@@ -864,7 +864,6 @@ server <- function(input, output, session) {
 
     observeEvent(input$thetas_table_cell_edit, {
         info <-input$thetas_table_cell_edit
-        browser()
         data$thetas[1:input$gene_number, 1:input$gene_number] <- 
             editData(data$thetas[1:input$gene_number, 1:input$gene_number], info, "thetas") 
         
@@ -988,6 +987,18 @@ server <- function(input, output, session) {
 
     ## Run CPMS
     observeEvent(input$analysis, {
+        ## Calculate TRM for DAG and for matrices
+        
+        source_trm <- NULL
+        
+        if(input$input2build == "dag"){
+            tmp_data <- list(edges = dag_data(), parent_set = data$dag_parent_set)
+            source_trm <- cpm_access_genots_paths_w_simplified_relationships(tmp_data)$weighted_fgraph
+        }else if(input$input2build == "matrix"){
+            source_trm <- theta_to_trans_rate_3_SM(data$thetas,
+                                    inner_transition = inner_transitionRate_3_1)
+        }
+
         ## TODO: Put everything with a try and display a modal if I have an error
         shinyjs::disable("analysis")
         # Create a Progress object
@@ -998,21 +1009,37 @@ server <- function(input, output, session) {
         progress$set(message = "Running GuloMAM", value = 0)
 
         data2run <- freqs2csd(display_freqs(), data$gene_names[1:input$gene_number])
-        progress$inc(1/4, detail = "Setting up data")
+        progress$inc(1/5, detail = "Setting up data")
         Sys.sleep(0.5)
-        progress$inc(2/4, detail = "Running CPMs")
+        progress$inc(2/5, detail = "Running CPMs")
         cpm_output <- all_methods_2_trans_mat(data2run)
+        cpm_output$Source_f_graph <- source_trm
         n_samples <- 100
-        progress$inc(3/4, detail = paste("Running ", n_samples, " samples"))
-        new_data <- sample_all_CPMs(cpm_output, n_samples, input$gene_number)
-        progress$inc(4/4, detail = "Post processing data")
+        progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
+        # browser()
+        new_data <- sample_all_CPMs(cpm_output, n_samples, input$gene_number, data$gene_names[1:input$gene_number])
+        progress$inc(4/5, detail = "Post processing data")
         Sys.sleep(0.5)
         new_data$MHN_f_graph <- new_data$MHN_transitionRateMatrix
+        orig_data <- list(complete_csd = data2run, name = data$name
+            , type = input$input2build, gene_names = data$gene_names
+            , thetas = data$thetas, lambdas = data$lambdas
+            , dag = data$dag, dag_parent_set = data$dag_parent_set)
+        browser()
         new_data$name <- input$select_csd
+        new_data$source_data <- orig_data
         all_cpm_out$output[[input$select_csd]] <- new_data
+        progress$inc(5/5, detail = "You can see your result by going to the Results tab")
         shinyjs::enable("analysis")
-        updateTabsetPanel(session, "navbar", selected = "result_viewer")
-        updateRadioButtons(session, "select_cpm", selected = input$select_csd)
+        Sys.sleep(3)
+
+        ## To see if I disable original data
+        if(input$input2build != "csd"){
+            shinyjs::enable(selector = "#cpm2show input[value='Source data']")
+        } 
+        ## Maybe I do no want this
+        # updateTabsetPanel(session, "navbar", selected = "result_viewer")
+        # updateRadioButtons(session, "select_cpm", selected = input$select_csd)
     })
     
     output$cpm_freqs <- DT::renderDT(genotype_freq_df(),  
@@ -1026,7 +1053,6 @@ server <- function(input, output, session) {
     cpm_out$MHN_f_graph <- cpm_out$MHN_transitionRateMatrix
     
     all_cpm_out <- reactiveValues(output = list(user = cpm_out))
-
     output$sims <- renderUI({
         column_models2show <- floor(12 / length(input$cpm2show)) 
 
@@ -1048,8 +1074,34 @@ server <- function(input, output, session) {
         attribute_name <- c("f_graph", "genotype_transitions", "trans_mat")
 
         names(attribute_name) <- c("Transition Rate matrix", "Transitions", "Transition Probability Matrix")
-
         selected_plot_type <- attribute_name[input$data2plot]
+
+        ## To makeall plots of the same type comparable
+        max_edge <- 0
+        min_edge <- 0
+        if(selected_plot_type== "trans_mat"){
+            min_edge <- 0
+            max_edge <- 1
+        } else if (selected_plot_type== "genotype_transitions") {
+            for(i in input$cpm2show){
+                if (i != "OT"){
+                    tmp_data <- all_cpm_out$output[[input$select_cpm]][[sprintf("%s_%s", i, selected_plot_type)]]
+                    
+                    tmp_max_edge <- max(tmp_data)
+                    max_edge <- ifelse(tmp_max_edge > max_edge
+                        , tmp_max_edge
+                        , max_edge)
+                    
+                    tmp_min_edge <- min(tmp_data)
+                    mom_edge <- ifelse(tmp_min_edge > min_edge
+                        , tmp_min_edge
+                        , min_edge)
+                }
+            }
+        } else if (selected_plot_type== "f_graph") {
+            max_edge <- min_edge <- NULL
+        }
+        # browser()
 
         top_paths <- input$top_paths
         if(top_paths == 0) top_paths <- NULL
@@ -1059,12 +1111,18 @@ server <- function(input, output, session) {
                 # "trans_mat"
                 selected_plot_type
                 )]]
-            output[[sprintf("plot_sims2_%s", mod)]] <- renderPlot({
-                pl <- plot_genot_fg(data2plot, 
-                    all_cpm_out$output[[input$select_cpm]]$csd_data, 
-                    all_cpm_out$output[[input$select_cpm]][[sprintf("%s_genotype_%s", mod, "freqs")]], 
-                    top_paths = top_paths)
-            })
+            if(is.null(data2plot)){
+                output[[sprintf("plot_sims2_%s", mod)]] <- renderPlot({})
+            } else{
+                output[[sprintf("plot_sims2_%s", mod)]] <- renderPlot({
+                    pl <- plot_genot_fg(data2plot 
+                        , all_cpm_out$output[[input$select_cpm]]$csd_data 
+                        , all_cpm_out$output[[input$select_cpm]][[sprintf("%s_genotype_%s", mod, "freqs")]] 
+                        , top_paths = top_paths
+                        , max_edge = max_edge
+                        , min_edge = min_edge)
+                })
+            }
             return(
                 column(3,
                     plotOutput(sprintf("plot_sims2_%s", mod)))
@@ -1122,5 +1180,7 @@ server <- function(input, output, session) {
         if(is.null(cpm_out$name)) cpm_out$name <- "User Data"
         all_cpm_out$output[[cpm_out$name]] <- cpm_out
         updateRadioButtons(session, "select_cpm", selected = cpm_out$name)
+        ## To see if I disable original data
+        shinyjs::disable(selector = "#variable input[value='cyl']")
     })
 }

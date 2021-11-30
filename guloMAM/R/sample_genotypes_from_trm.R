@@ -174,7 +174,10 @@ population_sample_from_trm <- function(trm, n_samples = 10,
 #' @return List with a list of trajectories (the order in which gene mutations
 #' are acquired), genotype frequencies and genotypes transition matrix (with
 #' counts of how many transitions between each genotype have been observed) 
-process_samples <- function(sim, n_genes, output = c("frequencies", "state_counts", "transitions")){
+process_samples <- function(sim, n_genes, gene_names = NULL, output = c("frequencies", "state_counts", "transitions")){
+    genes_names <- ifelse(is.null(gene_names)
+        , LETTERS[1:n_genes]
+        , gene_names)
 
     #Checking input
     params <- c("trajectory", "obs_events")
@@ -198,7 +201,12 @@ process_samples <- function(sim, n_genes, output = c("frequencies", "state_count
     #Set up
     output <- list()
     n_states <- 2**n_genes
-    sorted_genotypes <- vapply(0:(n_states - 1), int2str, character(1))
+    sorted_genotypes <- vapply(0:(n_states - 1), function(x){
+        tmp_genotype <- paste(gene_names[int2binary(x, n_genes) == 1]
+            , collapse = ", ")
+        tmp_genotype <- ifelse(tmp_genotype == "", "WT", tmp_genotype)
+        return(tmp_genotype)
+    }, character(1))
     trajectories <- sim$trajectory
 
     #Calculate frequencies
@@ -258,9 +266,14 @@ process_samples <- function(sim, n_genes, output = c("frequencies", "state_count
 sample_all_CPMs <- function(cpm_output
     , N_samples
     , n_genes
-    , methods = c("OT", "CBN", "MCCBN", "DBN", "MHN", "HESBCN")){
+    , gene_names = NULL
+    , methods = c("Source", "CBN", "MCCBN", "DBN", "MHN", "HESBCN")){
     output <- cpm_output
-    
+    ## I have removed OT from the list of CPM to sample
+    ## And I haved "Source" for a source data type for the web server
+    genes_names <- ifelse(is.null(gene_names)
+        , LETTERS[1:n_genes]
+        , gene_names)
 
     for(method in methods){
         if(method == "MHN") trm <- output$MHN_transitionRateMatrix
@@ -269,10 +282,10 @@ sample_all_CPMs <- function(cpm_output
         if(any(!is.na(trm))){
             print(sprintf("Running %s", method))
             sims <- population_sample_from_trm(trm, n_samples = N_samples)
-            output[[sprintf("%s_genotype_transitions", method)]] <- process_samples(sims, 
-                n_genes, output = c("transitions"))$transitions
-            output[[sprintf("%s_genotype_freqs", method)]] <- process_samples(sims, 
-                n_genes, output = c("frequencies"))$frequencies
+            psamples <- process_samples(sims, 
+                n_genes, gene_names, output = c("transitions", "frequencies"))
+            output[[sprintf("%s_genotype_transitions", method)]] <- psamples$transitions
+            output[[sprintf("%s_genotype_freqs", method)]] <- psamples$frequencies
         } 
         else output[[sprintf("%s_genotype_transitions", method)]] <- NA
         

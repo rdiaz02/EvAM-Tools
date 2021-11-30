@@ -160,6 +160,8 @@ plot_genot_fg <- function(trans_mat
     , observations = NULL
     , freqs = NULL
     , top_paths = NULL
+    , max_edge = NULL
+    , min_edge = NULL
     ){
     rownames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
     colnames(trans_mat) <- str_replace_all(colnames(trans_mat), ", ", "")
@@ -231,14 +233,19 @@ plot_genot_fg <- function(trans_mat
     
     ## Weights proportional to the time they are transited
     w <- E(graph)$weight
-    w <- w / max(w) 
-    w[w <= 0.05] <- 0.05
+    max_edge <- ifelse(is.null(max_edge), max(w), max_edge)
+    min_edge <- ifelse(is.null(min_edge), min(w), min_edge)
+    # tmp_w <- w / max_edge 
+    # w[tmp_w <= 0.05] <- 0.05
 
-    min_width <- 2
-    max_width <- 15
-    w2 <- (w - min(w))/(max(w) - min(w)) * (max_width - min_width) + min_width
+    min_width <- 0
+    max_width <- 13
+
+    w2 <- (w - min_edge)/(max_edge - min_edge) * (max_width - min_width) + min_width
+    # browser()
     if(all(w2 == 20)) w2 <- rep(1, length(w))
 
+    transparent_w2 <-  w2/max(w2) * 0.95 + 0.05
     ## Actual plotting
     plot(graph
         , layout = lyt[, 2:1]
@@ -250,8 +257,8 @@ plot_genot_fg <- function(trans_mat
         , font.best = 2
         # , vertex.label.cex = 1
         , vertex.frame.width = 0
+        , edge.color = rgb(0.5, 0.5, 0.5, transparent_w2)
         # , edge.color = rgb(0.5, 0.5, 0.5, 1)
-        , edge.color = rgb(0.5, 0.5, 0.5, 1)
         , edge.arrow.size = 0
         , xlab = "Number of features acquired"
         , edge.width = w2
