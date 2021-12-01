@@ -163,12 +163,12 @@ plot_genot_fg <- function(trans_mat
     , max_edge = NULL
     , min_edge = NULL
     ){
-    rownames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
-    colnames(trans_mat) <- str_replace_all(colnames(trans_mat), ", ", "")
+    unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
 
-    graph <- graph_from_adjacency_matrix(trans_mat, weighted = TRUE, mode = "directed")
+    rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
 
-    unique_genes_names <- sort(unique(str_split(paste(rownames(trans_mat)[-1], collapse=""), "")[[1]]))
+    # graph <- graph_from_adjacency_matrix(trans_mat, weighted = TRUE, mode = "directed")
+
 
     num_genes <- length(unique_genes_names)
     graph <- graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
@@ -184,6 +184,9 @@ plot_genot_fg <- function(trans_mat
         freqs$Abs_Freq <- freqs$Counts / sum(freqs$Counts)
         freqs$Genotype <- str_replace_all(freqs$Genotype, ", ", "")
     }
+    # else {
+
+    # }
 
     ## Layout
     lyt <- cpm_layout(graph)
@@ -212,15 +215,28 @@ plot_genot_fg <- function(trans_mat
     ## Sizes based of frequency
     min_size <- 2
     max_size <- 40
-    node_sizes <- vapply(V(graph)$name, 
-        function(gen){
-            if (sum(match(freqs$Genotype, gen, nomatch = 0)) == 1)
-                return(freqs$Abs_Freq[which(freqs$Genotype == gen)])
-            # else if ((sum(match(observations$Genotype, gen, nomatch = 0)) == 1))
-            #     return(observations$Abs_Freq[which(observations$Genotype == gen)] * max_size_factor)
-            else 
-                return(min_size)
-        }, numeric(1.0))
+
+    if(!is.null(freqs)){
+        node_sizes <- vapply(V(graph)$name, 
+            function(gen){
+                if (sum(match(freqs$Genotype, gen, nomatch = 0)) == 1)
+                    return(freqs$Abs_Freq[which(freqs$Genotype == gen)])
+                else 
+                    return(min_size)
+            }, numeric(1.0))
+    } else if(!is.null(observations)){
+        node_sizes <- vapply(V(graph)$name, 
+            function(gen){
+                if (sum(match(observations$Genotype, gen, nomatch = 0)) == 1)
+                    return(observations$Abs_Freq[which(observations$Genotype == gen)])
+                else 
+                    return(min_size)
+            }, numeric(1.0))
+    } else {
+        node_sizes <- vapply(V(graph)$name, 
+        function(gen) min_size, numeric(1.0))
+    }
+
     node_sizes[node_sizes <= 0.01] <- 0.01
     node_sizes <- (node_sizes - min(node_sizes))/(max(node_sizes) - min(node_sizes)) * (max_size - min_size) + min_size
     if(all(node_sizes == min_size)) node_sizes <- rep(15, length(node_sizes))
@@ -238,14 +254,14 @@ plot_genot_fg <- function(trans_mat
     # tmp_w <- w / max_edge 
     # w[tmp_w <= 0.05] <- 0.05
 
-    min_width <- 0
+    min_width <- 3
     max_width <- 13
 
     w2 <- (w - min_edge)/(max_edge - min_edge) * (max_width - min_width) + min_width
     # browser()
     if(all(w2 == 20)) w2 <- rep(1, length(w))
 
-    transparent_w2 <-  w2/max(w2) * 0.95 + 0.05
+    transparent_w2 <-  w2/max(w2) * 0.9 + 0.1
     ## Actual plotting
     plot(graph
         , layout = lyt[, 2:1]

@@ -121,7 +121,7 @@ results_simple <- function(){
             )
             ,
             # column(2),
-            column(5,
+            column(4,
               tags$div(class="frame max_height",
                 tags$h3("3. The original data"),
                 plotOutput("csd"),
@@ -130,9 +130,16 @@ results_simple <- function(){
                 )
               )
             ),
-            column(7,
+            column(6,
               tags$div(class="frame max_height",
                 tags$h3("4. Compare genotypes for each simulations"),
+                radioButtons(inputId = "data2plot", 
+                      label = "CPMs to show", 
+                      inline = TRUE,
+                      choiceNames =  c("Transition Rates", "Genotype Transitions Counts", "Genotype frequencies", "Conditional Transition Probabilities", "Lambdas"),
+                      choiceValues =  c("f_graph", "transitions", "freqs", "trans_mat", "lambdas"),
+                      selected =  "transitions"
+                      ),
                 tags$div( 
                   DTOutput("cpm_freqs")
                 )

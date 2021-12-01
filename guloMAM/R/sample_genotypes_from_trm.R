@@ -258,13 +258,13 @@ process_samples <- function(sim, n_genes, gene_names = NULL, output = c("frequen
 #' that do not raise a transition rate matrix
 #' 
 #' @param cpm_output Output from calling all_methods2trans_mat
-#' @param N_samples Number of samples to generate
+#' @param n_samples Number of samples to generate
 #' @param n_genes Number of samples that are in the sample
 #' @param methods List of methods that we want to sample
 #' 
 #' @return modified cpm_outputd including a matrix with genotype transitions
 sample_all_CPMs <- function(cpm_output
-    , N_samples
+    , n_samples
     , n_genes
     , gene_names = NULL
     , methods = c("Source", "CBN", "MCCBN", "DBN", "MHN", "HESBCN")){
@@ -281,7 +281,7 @@ sample_all_CPMs <- function(cpm_output
 
         if(any(!is.na(trm))){
             print(sprintf("Running %s", method))
-            sims <- population_sample_from_trm(trm, n_samples = N_samples)
+            sims <- population_sample_from_trm(trm, n_samples = n_samples)
             psamples <- process_samples(sims, 
                 n_genes, gene_names, output = c("transitions", "frequencies"))
             output[[sprintf("%s_genotype_transitions", method)]] <- psamples$transitions
