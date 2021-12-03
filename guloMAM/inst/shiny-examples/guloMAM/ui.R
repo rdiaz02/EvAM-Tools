@@ -71,6 +71,77 @@ results_simple <- function(){
                     #noprogress input.form-control{
                       visibility: hidden;
                     }
+
+                    .form-control{
+        height: 42px !important;
+      }
+
+      #freq2label-label{
+        width: 0%;
+      }
+      #freq2label-wrap .form-group{
+        display: block !important;
+        margin-bottom: 0;
+      }
+
+       #freq2label-wrap .irs-single, .irs-min, .irs-max{
+        visibility: visible !important;
+      }
+
+       #freq2label-wrap .irs-grid-text{
+        visibility: hidden !important;
+      }
+
+                   
+                #select_cpm div.radio{
+                  background-color: rgba(200,200,200, 0.5);
+                  text-align: center;
+                  border: 2px solid gray;
+                  border-radius: 3px;
+                  margin-top: 5px;
+                  # margin-left: -20px;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+                }
+
+                @media only screen and (min-width: 1400px) {
+                  #select_cpm div.radio{
+                    max-width: 150px;
+                  }
+                  #select_cpm div.radio{
+                    max-width: 150px;
+                  }
+                }
+
+                @media only screen and (min-width: 1900px) {
+                  #select_cpm div.radio{
+                    max-width: 200px;
+                  }
+                  #select_cpm div.radio{
+                    max-width: 200px;
+                  }
+
+                }
+
+                #select_cpm div.radio:hover {
+                  background-color: rgba(160,160,160, 0.5);
+                  box-shadow: 0 0 2px 2px rgba(160,160,160, 0.5);
+                  cursor: pointer;
+                }
+
+                #select_cpm div.radio{
+                  background-color: rgba(200,200,200, 0.5);
+                  text-align: center;
+                  border: 2px solid gray;
+                  border-radius: 3px;
+                  margin-top: 5px;
+                  margin-left: -20px;
+                  white-space: nowrap;
+                  overflow: hidden;
+                  text-overflow: ellipsis;
+
+                    }
                     "
                 )
             )
@@ -80,8 +151,6 @@ results_simple <- function(){
             tags$h3("Outputs"),
             uiOutput("cpm_list")),
           column(11,
-            tags$div("things to do 1 i have to add some stuff to oring data to make plot_model and process_data work 2 I have to make the modify button work 3 load download data 4 tabular data: different types, genotypes, trm, lambdas, matrix...
-            5 make mccbn work"),
             column(2,
               tags$div(class = "frame",
                 tags$h3("1. Load  & download"),
@@ -99,19 +168,25 @@ results_simple <- function(){
                 tags$div(class = "inline",
                   checkboxGroupInput(inputId = "cpm2show", 
                       label = "Data to show", 
-                      choices = c("Source data", "OT", "CBN", "MHN", "HESBCN"),
+                      choices = c("Source", "OT", "CBN", "MHN", "HESBCN"),
                       selected = c("CBN", "MHN", "HESBCN")),
                       
                 tags$div(class = "inline",
                   radioButtons(inputId = "data2plot", 
                       label = "CPMs to show", 
-                      choices =  c("Transition Rate matrix", "Transitions", "Transition Probability Matrix"),
-                      selected =  "Transitions"
+                      choiceNames =  c("Transition Rate matrix", "Transitions", "Transition Probability Matrix", "Time Discretized transition matrix"),
+                      choiceValues = c("f_graph", "genotype_transitions", "trans_mat", "td_trans_mat"),
+                      selected = "genotype_transitions"
                       )
                     ),
                 ),
-              numericInput("top_paths", "Paths to show",
-                min = 0, step = 1, value = 4)
+              tags$p("Label genotypes with frequency bigger than:"),
+              tags$div(id="freq2label-wrap",
+                sliderInput("freq2label", "", width = "500px",
+                  value = 0.05, max = 1, min = 0, step = 0.05)
+              )
+              # numericInput("top_paths", "Paths to show",
+              #   min = 0, step = 1, value = 4)
             )
               
             ),
@@ -137,8 +212,8 @@ results_simple <- function(){
                 radioButtons(inputId = "data2table", 
                       label = "", 
                       inline = TRUE,
-                      choiceNames =  c("Transition Rates", "Genotype Transitions Counts", "Genotype frequencies", "Conditional Transition Probabilities", "Lambdas"),
-                      choiceValues =  c("f_graph", "transitions", "freqs", "trans_mat", "lambdas"),
+                      choiceNames =  c("Transition Rates", "Genotype Transitions Counts", "Genotype frequencies", "Conditional Transition Probabilities", "Lambdas/probabilities", "Time discreticed transition matrix"),
+                      choiceValues =  c("f_graph", "genotype_transitions", "freqs", "trans_mat", "lambdas", "td_trans_mat"),
                       selected =  "freqs"
                       ),
                 tags$div( 
@@ -304,8 +379,6 @@ user_input <- function(){
         padding: 20px;
         border: 5px solid rgba(100, 100, 100, 0.5);
         border-radius: 5px;
-        # max-height: 40vh;
-        # overflow: auto;
       }
       .upload_file{
         width: 100%;
@@ -357,17 +430,15 @@ user_input <- function(){
         #select_csd div.radio{
           max-width: 150px;
         }
-
       }
 
       @media only screen and (min-width: 1900px) {
         #input2build div.radio{
-          max-width: 200px;
+          max-width: 180px;
         }
         #select_csd div.radio{
-          max-width: 200px;
+          max-width: 180px;
         }
-
       }
 
       #input2build div.radio:hover {

@@ -160,6 +160,7 @@ plot_genot_fg <- function(trans_mat
     , observations = NULL
     , freqs = NULL
     , top_paths = NULL
+    , freq2label = NULL
     , max_edge = NULL
     , min_edge = NULL
     ){
@@ -168,7 +169,6 @@ plot_genot_fg <- function(trans_mat
     rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
 
     # graph <- graph_from_adjacency_matrix(trans_mat, weighted = TRUE, mode = "directed")
-
 
     num_genes <- length(unique_genes_names)
     graph <- graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
@@ -183,18 +183,24 @@ plot_genot_fg <- function(trans_mat
     if (!is.null(freqs)){
         freqs$Abs_Freq <- freqs$Counts / sum(freqs$Counts)
         freqs$Genotype <- str_replace_all(freqs$Genotype, ", ", "")
+        rownames(freqs) <- freqs$Genotype
     }
-    # else {
-
-    # }
 
     ## Layout
     lyt <- cpm_layout(graph)
     ## Labels
     sorted_paths <- rank_paths(graph)
-    labels <- compute_vertex_labels(graph, sorted_paths, top_paths = top_paths
-    # , edge_labels = FALSE
-    )
+    if(is.null(freq2label)){
+        labels <- compute_vertex_labels(graph, sorted_paths, top_paths = top_paths)
+    } else {
+        labels <- vapply(V(graph)$name,
+            function(x){
+                if (freqs[x, ]$Abs_Freq >= freq2label) return(x)
+                else return("")
+            },
+            character(1))
+        labels <- list(vertex_labels = labels)
+    }
 
     ## Vertex colors based on the presence/absence in the original data
     observed_color <- "#ff7b00"
@@ -448,7 +454,7 @@ plot_DAG_fg <- function(cpm_output, data, orientation = "horizontal",
 
     ## DAG relationships colors 
     standard_relationship <- "gray73"
-    colors_relationships <- c(standard_relationship, "coral2", "cornflowerblue", "darkolivegreen3")
+    colors_relationships <- c(standard_relationship, standard_relationship, "cornflowerblue", "coral2")
     names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
     
     ## Shape of the plot
@@ -501,7 +507,6 @@ plot_DAG_fg <- function(cpm_output, data, orientation = "horizontal",
             par(op)
         }
 
-        browser()
         if (plot_type == "matrix"){
             plot(model_data2plot$dag_trans_mat
                 , digits = 1, xlab = "", ylab = ""
@@ -525,7 +530,6 @@ plot_DAG_fg <- function(cpm_output, data, orientation = "horizontal",
         } else if (plot_type == "transitions") {
             plot_genot_fg(model_data2plot$transitions, data, model_data2plot$freqs, top_paths = top_paths)
         }else if (plot_type == "trans_mat"){
-            browser()
             plot_genot_fg(model_data2plot$trans_mat, data, top_paths = top_paths)
         }
 

@@ -50,7 +50,7 @@ plot_genotypes_freqs <- function(data){
 plot_dag <- function(dag, parent_set){
     if (is.null(dag)) return()
     standard_relationship <- "gray73"
-    colors_relationships <- c(standard_relationship, "coral2", "cornflowerblue", "darkolivegreen3")
+    colors_relationships <- c(standard_relationship, standard_relationship, "cornflowerblue", "coral2")
     names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
     dag <- graph_from_adjacency_matrix(dag, mode = "directed")
     dag <- igraph::decompose(dag)[[1]]
@@ -155,13 +155,14 @@ get_mhn_data <- function(n_genes, n_samples, gene_names, thetas = NULL){
 plot_model <- function(cpm_output, mod){
     ## DAG relationships colors 
     standard_relationship <- "gray73"
-    colors_relationships <- c(standard_relationship, "coral2", "cornflowerblue", "darkolivegreen3")
+    colors_relationships <- c(standard_relationship, standard_relationship, "cornflowerblue", "coral2")
     names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
     
     print(mod)
     model_data2plot <- process_data(cpm_output, mod)
     ## Plotting data
     if(!is.null(model_data2plot$dag_tree)) {
+
         if(!is.null(model_data2plot$parent_set)){
             for(i in names(model_data2plot$parent_set)){
                 E(model_data2plot$dag_tree)[.to(i)]$color <- colors_relationships[model_data2plot$parent_set[[i]]]
@@ -216,9 +217,9 @@ compare_cpm_freqs <- function(data, type){
         all_counts[order_by_counts, ]
         return(all_counts[order_by_counts, ])
 
-    } else if(type %in% c("f_graph", "transitions", "trans_mat")){
-        var2var <- c("f_graph", "transitions", "trans_mat")
-        names(var2var) <- c("f_graph", "genotype_transitions", "trans_mat")
+    } else if(type %in% c("f_graph", "genotype_transitions", "trans_mat", "td_trans_mat")){
+        var2var <- c("f_graph", "genotype_transitions", "trans_mat", "td_trans_mat")
+        names(var2var) <- c("f_graph", "genotype_transitions", "trans_mat", "td_trans_mat")
         
         var2use <- var2var[type]
         ## 1 Methods to compute
@@ -230,23 +231,21 @@ compare_cpm_freqs <- function(data, type){
         }, logical(1))
 
         methods2compute <- names(methods2compute)[methods2compute]
-        if(type == "genotypes_transitions"){
+        if(type == "genotype_transitions"){
             methods2compute <- setdiff(methods2compute, "OT")
         }
             
         ## 2 Fill the data frame
-
         all_genotypes <- matrix(0, nrow = 0, ncol = 2)
         all_methods <- matrix(0, nrow = 0, ncol = length(methods2compute))
         n_methods2compute <- length(methods2compute)
         base_vector <- rep(0, n_methods2compute)
         names(base_vector) <- methods2compute
-        ## I use MHN because it has all the 
+        ## I use MHN because it has all the genotypes
         for(i in rownames(data[[sprintf("MHN_%s", var2use)]])){
             for(j in rownames(data[[sprintf("MHN_%s", var2use)]])){
                 row_data <- sapply(methods2compute, function(x){
                     tryCatch({
-                        # browser()
                         return(data[[sprintf("%s_%s", x, var2use)]][i, j])
                     }, error = function(e){
                         return(0)
@@ -296,7 +295,6 @@ compare_cpm_freqs <- function(data, type){
         return(all_counts)
     }
 
-    ##TODO tomorrow
     order_by_counts <- sort(rowSums(all_counts[-1]), 
         decreasing = TRUE, index.return = TRUE)$ix
     
@@ -413,9 +411,6 @@ server <- function(input, output, session) {
             if(check_if_csd(tmp_data)){
                 datasets$all_csd[[dataset_name]]$data <- tmp_data
                 datasets$all_csd[[dataset_name]]$name <- dataset_name
-                # data$complete_csd <- tmp_data
-                # data$csd_freqs <- sampledGenotypes(data$complete_csd)
-                # data$gene_names <- colnames(data$complete_csd)
                 keep_dataset_name <<- dataset_name 
                 updateRadioButtons(session, "input2build", selected = "csd")
                 updateRadioButtons(session, "select_csd", selected = dataset_name)
@@ -493,7 +488,6 @@ server <- function(input, output, session) {
             })
 
             ## 3 update selected entry
-            # last_visited_pages[[input$input2build]] <<- input$dataset_name
             updateRadioButtons(session, "select_csd", selected = input$dataset_name)
 
             shinyjs::disable("save_csd_data")
@@ -550,7 +544,6 @@ server <- function(input, output, session) {
 
     observeEvent(toListen(), {
         ## Cleaning stuf
-        print("HERE")
         selected <- last_visited_pages[[input$input2build]]
         tmp_data <- datasets$all_csd[[input$input2build]][[selected]]
         data$gene_names <- tmp_data$gene_names
@@ -560,7 +553,6 @@ server <- function(input, output, session) {
 
         if(nrow(data$complete_csd) > 0){
             data$csd_freqs <- get_csd(data$complete_csd) 
-            # rownames(data$csd_freqs) <- data$csd_freqs$Genotype
             shinyjs::enable("analysis")
         } else{
             data$csd_freqs <- template_csd_freqs
@@ -727,7 +719,7 @@ server <- function(input, output, session) {
                         actionButton("add_edge", "Add edge"),
                         tags$h3("DAG table"),
                         DTOutput("dag_table"),
-                        numericInput("dag_samples", "Total genotypes to sample", value = default_mhn_samples, min= 100, max= 100000, width = "50%"),
+                        numericInput("dag_samples", "Total genotypes to sample", value = default_mhn_samples, min= 100, max = 10000, step = 100, width = "50%"),
                         actionButton("resample_dag", "Sample from DAG")
                     )
                 }
@@ -742,7 +734,7 @@ server <- function(input, output, session) {
                     tags$div(
                         tags$h3("Thetas table"),
                         DTOutput("thetas_table"),
-                        numericInput("mhn_samples", "Total genotypes to sample", value = default_mhn_samples, min= 100, max= 100000, width = "50%"),
+                        numericInput("mhn_samples", "Total genotypes to sample", value = default_mhn_samples, min= 100, max= 10000, step = 100, width = "50%"),
                         actionButton("resample_mhn", "Sample from MHN")
                     )
                 }
@@ -1138,6 +1130,7 @@ server <- function(input, output, session) {
         progress$inc(4/5, detail = "Post processing data")
         Sys.sleep(0.5)
         new_data$MHN_f_graph <- new_data$MHN_transitionRateMatrix
+        new_data$OT_f_graph <- NULL
         orig_data <- list(complete_csd = data2run, name = data$name
             , type = input$input2build, gene_names = data$gene_names
             , thetas = data$thetas, lambdas = data$lambdas
@@ -1198,18 +1191,19 @@ server <- function(input, output, session) {
     output$sims2 <- renderUI({
         column_models2show <- floor(12 / length(input$cpm2show)) 
 
-        attribute_name <- c("f_graph", "genotype_transitions", "trans_mat")
+        # attribute_name <- c("f_graph", "genotype_transitions", "trans_mat", "td_trans_mat")
 
-        names(attribute_name) <- c("Transition Rate matrix", "Transitions", "Transition Probability Matrix")
-        selected_plot_type <- attribute_name[input$data2plot]
+        # names(attribute_name) <- c("Transition Rate matrix", "Transitions", "Transition Probability Matrix")
+        # selected_plot_type <- attribute_name[input$data2plot]
+        selected_plot_type <- input$data2plot
 
         ## To makeall plots of the same type comparable
         max_edge <- 0
         min_edge <- 0
-        if(selected_plot_type== "trans_mat"){
+        if(selected_plot_type %in% c("trans_mat", "td_trans_mat")){
             min_edge <- 0
             max_edge <- 1
-        } else if (selected_plot_type== "genotype_transitions") {
+        } else if (selected_plot_type == "genotype_transitions") {
             for(i in input$cpm2show){
                 if (i != "OT"){
                     tmp_data <- all_cpm_out$output[[input$select_cpm]][[sprintf("%s_%s", i, selected_plot_type)]]
@@ -1229,15 +1223,19 @@ server <- function(input, output, session) {
             max_edge <- min_edge <- NULL
         }
 
-        top_paths <- input$top_paths
-        if(top_paths == 0) top_paths <- NULL
+        # top_paths <- input$top_paths
+        # if(top_paths == 0) top_paths <- NULL
         
         lapply(input$cpm2show, function(mod){
 
-            data2plot <- all_cpm_out$output[[input$select_cpm]][[sprintf("%s_%s", mod, 
-                # "trans_mat"
-                selected_plot_type
-                )]]
+            data2plot <- all_cpm_out$output[[input$select_cpm]][[
+                sprintf("%s_%s", mod, selected_plot_type)]]
+            
+            if(selected_plot_type == "td_trans_mat"){
+                diag(data2plot) <- 0
+                data2plot <- drop0(data2plot, 0)
+            }
+
             if(is.null(data2plot)){
                 output[[sprintf("plot_sims2_%s", mod)]] <- renderPlot({})
             } else{
@@ -1245,7 +1243,8 @@ server <- function(input, output, session) {
                     pl <- plot_genot_fg(data2plot 
                         , all_cpm_out$output[[input$select_cpm]]$csd_data 
                         , all_cpm_out$output[[input$select_cpm]][[sprintf("%s_genotype_%s", mod, "freqs")]] 
-                        , top_paths = top_paths
+                        , freq2label = input$freq2label
+                        , top_paths = 5
                         , max_edge = max_edge
                         , min_edge = min_edge)
                 })
@@ -1299,7 +1298,6 @@ server <- function(input, output, session) {
 
     ## Tabular data
     genotype_freq_df <- reactive({
-        shinyjs::disable(selector = "#cpm2show input[value='Source']")
         compare_cpm_freqs(all_cpm_out$output[[
             input$select_cpm]]
             ,  input$data2table )
