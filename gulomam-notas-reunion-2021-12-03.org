@@ -1,0 +1,88 @@
+#+TITLE: Presentacion Pablo Gulo MAM, [2021-12-03 Fri]
+
+* Cambiar título
+
+* Ponerse con el docker
+
+* Meter MCCBN
+
+* Añadir pestaña de lo que va todo:
+** Rellenar la info en "About CPMS"
+** Se hace al final, final
+
+* Fonts muy grandes?
+
+* DAG builder usar AND por defecto
+
+
+* Matrix builder : llamarle MHN builder
+
+* Colores en CBN/HESCBCN plots:
+- Rojo: para XOR
+- Verde para Single
+- Gris: para AND
+- Azul: para OR
+
+* OT: output tipo HyperTraPS
+- Pensarlo:
+  - solo las transition prob matrix
+  - no la transition rate
+
+* Nobmres de los "CPMs to show"
+
+* Paths to show:
+- cambiar el nombre
+- usar algoritmo en funcion de la frecuencia del genotipo
+
+* Figura de arriba:
+- rotular los edges
+
+* Tabla resultados:
+- Lambda -> Lambda/p
+- Transition rates:
+  - quitar a OT:
+    - verificar de dónde sale en el código
+    - all_methods_2_trans_mat:
+      - OT_f_graph: esto es lo que se pone en transition rate matrix.
+        - Cambiar el nombre a eso? Por qué se da ese output en OT
+        - Cmabiar el nombre a OT_f_graph a otra cosa?
+      - OT_trans_mat
+  - quitar source del output
+  - 
+
+* a veces output da un breve mensaje de error
+
+* Conditional probs:
+- acalarar en OT en la ayuda
+- OT: no está aún porque tengo que pasar el código
+  
+
+* Notas sobre el codigo
+- MHN: se crea el MHN_f_graph desde MHN_transitionRateMatrix por la
+  inconsistencia con los nombres
+- quizás solo tocar lo menos posible, para quitar a OT de donde haya que quitarlo
+  - renombrar lo que se llama f_graph
+  - o
+  - poner excepciones con OT
+
+* Se puede hacer un pull request cunando una branch no existe?
+- Idea es meter la branch shiny_dev directamente.
+
+* Mas tarde:
+** Check cuánto tarde en generar genotipos
+** gradiente de colores en MHN
+** ??? si solo tienen AND usar algoritmo de generacion de genotipos de MCCBN
+** queremos mostrar la transition rate matrix? 
+** poner pesos en los edges de arriba
+** transponer la matriz de output de MHN (??)
+** para local maxima? es el output _td_trans_mat:
+- en la segunda fila de figuras
+- en la tabla de output
+** sacar frecuencias de genes? tiene sentido? creo que sí, pero lo pienso
+
+* Tests
+
+* Ponerlo en Draco
+- Semana del 12: hablar con Javier Merino para acceso a la aplicación
+- Docker y puertos
+- Docker y seguridad?
