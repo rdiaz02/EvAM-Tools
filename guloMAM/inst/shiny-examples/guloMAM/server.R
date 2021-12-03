@@ -200,20 +200,108 @@ plot_model <- function(cpm_output, mod){
 }
 
 compare_cpm_freqs <- function(data, type){
-    if(type %in% c("transitions")){
+    available_methods <- c("Source", "OT", "CBN", "MHN", "HESBCN", "MCCBN")
+    if(type %in% c("freqs")){
         all_counts <- data.frame(Genotype = data[["MHN_genotype_freqs"]]$Genotype)
         for(name in names(data)){
-            if(grepl("_genotype_freqs", name)){
+            if(grepl("_genotype_freqs", name) & !grepl("^OT", name)){
                 method_name <- strsplit(name, "_")[[1]][[1]]
                 all_counts[[method_name]] <- data[[name]]$Counts
             }
         }
+        
+        order_by_counts <- sort(rowSums(all_counts[-1]), 
+        decreasing = TRUE, index.return = TRUE)$ix
+    
+        all_counts[order_by_counts, ]
+        return(all_counts[order_by_counts, ])
+
+    } else if(type %in% c("f_graph", "transitions", "trans_mat")){
+        var2var <- c("f_graph", "transitions", "trans_mat")
+        names(var2var) <- c("f_graph", "genotype_transitions", "trans_mat")
+        
+        var2use <- var2var[type]
+        ## 1 Methods to compute
+        methods2compute <- vapply(available_methods, function(x){
+            if(!is.null(data[[sprintf("%s_%s", x, var2use)]])){
+                return(!any(is.na(data[[sprintf("%s_%s", x, var2use)]])))
+            }
+            return(FALSE)
+        }, logical(1))
+
+        methods2compute <- names(methods2compute)[methods2compute]
+        if(type == "genotypes_transitions"){
+            methods2compute <- setdiff(methods2compute, "OT")
+        }
+            
+        ## 2 Fill the data frame
+
+        all_genotypes <- matrix(0, nrow = 0, ncol = 2)
+        all_methods <- matrix(0, nrow = 0, ncol = length(methods2compute))
+        n_methods2compute <- length(methods2compute)
+        base_vector <- rep(0, n_methods2compute)
+        names(base_vector) <- methods2compute
+        ## I use MHN because it has all the 
+        for(i in rownames(data[[sprintf("MHN_%s", var2use)]])){
+            for(j in rownames(data[[sprintf("MHN_%s", var2use)]])){
+                row_data <- sapply(methods2compute, function(x){
+                    tryCatch({
+                        # browser()
+                        return(data[[sprintf("%s_%s", x, var2use)]][i, j])
+                    }, error = function(e){
+                        return(0)
+                    })
+                })
+
+                all_genotypes <- rbind(all_genotypes, c(i, j))
+                all_methods <- rbind(all_methods, unname(row_data))
+            }
+        }
+        
+        selected_rows <- rowSums(abs(all_methods))>0
+        all_methods <- round(all_methods[selected_rows, ], 2)
+        all_genotypes <- all_genotypes[selected_rows, ]
+
+        all_fucking_data <- data.frame(From = all_genotypes[, 1]
+            , To = all_genotypes[, 2])
+        for(i in 1:n_methods2compute){
+            all_fucking_data[[methods2compute[i]]] <- all_methods[, i]
+        }
+
+        colnames(all_fucking_data) <- c("From", "To", methods2compute)
+
+        order_by_counts <- sort(rowSums(all_methods), 
+        decreasing = TRUE, index.return = TRUE)$ix
+    
+        return(all_fucking_data[order_by_counts, ])
+
+    } else if(type %in% c("lambdas")){
+
+        lambda_field <- c("Lambdas", "OT_edgeWeight", "rerun_lambda", "Lambdas", "Lambdas")
+        names(lambda_field) <- c("Source", "OT", "CBN", "HESBCN", "MCCBN")
+
+        gene_names <- sort(unique(data$OT_model$To))
+        all_counts <- data.frame(Gene = gene_names)
+        for(name in names(data)){
+            if(grepl("_model", name)){
+                method_name <- strsplit(name, "_")[[1]][[1]]
+                if(!is.null(data[[name]]) & !is.na(data[[name]])){
+                    tmp_data <- data[[name]][[lambda_field[method_name]]]
+                    names(tmp_data) <- data[[name]]$To
+                    all_counts[[method_name]] <- round(tmp_data[all_counts$Gene], 2)
+                }
+            }
+        }
+
+        return(all_counts)
     }
+
     ##TODO tomorrow
     order_by_counts <- sort(rowSums(all_counts[-1]), 
         decreasing = TRUE, index.return = TRUE)$ix
     
-    return(all_counts[order_by_counts, ])
+    all_counts[order_by_counts, ]
+    return(to_return)
 }
 
 dataModal <- function(error_message) {
@@ -1173,6 +1261,7 @@ server <- function(input, output, session) {
         plot_genotypes_freqs(get_csd(all_cpm_out$output[[input$select_cpm]]$csd_data))
     })
 
+    ## Go back to input to work again with the input
     observeEvent(input$modify_data, {
         tmp_data <- all_cpm_out$output[[input$select_cpm]]$source
         data$complete_csd <- tmp_data$complete_csd
@@ -1196,6 +1285,7 @@ server <- function(input, output, session) {
         all_names <- unname(sapply(all_cpm_out$output, function(dataset) dataset$name))
         selected <- ifelse(is.null(input$select_csd), "user", input$select_csd)
         selected <- ifelse(input$select_csd %in% names(all_cpm_out$output),input$select_csd, "user")
+        
         tagList(
             radioButtons(
                 inputId = "select_cpm",
@@ -1207,10 +1297,14 @@ server <- function(input, output, session) {
       )
     })
 
+    ## Tabular data
     genotype_freq_df <- reactive({
+        shinyjs::disable(selector = "#cpm2show input[value='Source']")
         compare_cpm_freqs(all_cpm_out$output[[
-        input$select_cpm, input$data2plot
-        ]])})
+            input$select_cpm]]
+            ,  input$data2table )
+        }
+    )
 
     ## Download button
     output$download_cpm <- downloadHandler(
@@ -1226,8 +1320,6 @@ server <- function(input, output, session) {
         if(is.null(all_cpm_out$output[[selected]]$Source_genotype_transitions)){
             updateCheckboxGroupInput(session, "cpm2show", 
                 selected = setdiff(c(input$cpm2show), "Source"))
-            # label = "Mutations", 
-            # choices = lapply(1:n_genes, function(i)data$gene_names[i]), selected = NULL)
             shinyjs::disable(selector = "#cpm2show input[value='Source']")
         }else{
             shinyjs::enable(selector = "#cpm2show input[value='Source']")

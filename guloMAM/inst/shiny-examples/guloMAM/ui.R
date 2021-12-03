@@ -101,13 +101,14 @@ results_simple <- function(){
                       label = "Data to show", 
                       choices = c("Source data", "OT", "CBN", "MHN", "HESBCN"),
                       selected = c("CBN", "MHN", "HESBCN")),
+                      
                 tags$div(class = "inline",
                   radioButtons(inputId = "data2plot", 
                       label = "CPMs to show", 
                       choices =  c("Transition Rate matrix", "Transitions", "Transition Probability Matrix"),
                       selected =  "Transitions"
                       )
-                    )
+                    ),
                 ),
               numericInput("top_paths", "Paths to show",
                 min = 0, step = 1, value = 4)
@@ -132,13 +133,13 @@ results_simple <- function(){
             ),
             column(6,
               tags$div(class="frame max_height",
-                tags$h3("4. Compare genotypes for each simulations"),
-                radioButtons(inputId = "data2plot", 
-                      label = "CPMs to show", 
+                tags$h3("4. Tabular data"),
+                radioButtons(inputId = "data2table", 
+                      label = "", 
                       inline = TRUE,
                       choiceNames =  c("Transition Rates", "Genotype Transitions Counts", "Genotype frequencies", "Conditional Transition Probabilities", "Lambdas"),
                       choiceValues =  c("f_graph", "transitions", "freqs", "trans_mat", "lambdas"),
-                      selected =  "transitions"
+                      selected =  "freqs"
                       ),
                 tags$div( 
                   DTOutput("cpm_freqs")
