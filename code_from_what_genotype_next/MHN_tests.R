@@ -181,6 +181,9 @@ local({
 ######################################################################
 ## From Schill's ExampleApplications.R
 
+## RDU: FIXME aren't the above functions and code already sourced above?
+##      FIXME: clean this up. We need the data (do we?) but probably the code
+##             already available
 pwd <- getwd()
 setwd("./MHN")
 source("UtilityFunctions.R")
