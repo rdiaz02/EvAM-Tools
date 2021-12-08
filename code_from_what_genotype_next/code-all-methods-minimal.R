@@ -963,7 +963,6 @@ cpm_access_genots_paths_w_simplified <- function(x, string = NULL,
         }
         rownames(weights) <- weights[, "To"]
         weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
-
     } else {
         ## why would we return something? It is NA
         ## weighted_fgraph <- fgraph
