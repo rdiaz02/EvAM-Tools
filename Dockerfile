@@ -44,7 +44,7 @@ COPY . /app/
 RUN mkdir -p /app/Sources/
 
 #Install cbn
-RUN cd /app/guloMAM/R/ && \  
+RUN cd /app/evamtools/R/ && \  
     cp ct-cbn-0.1.04b-with-rdu-bug-fix-write-lambda-likelihood.tar.gz /app/Sources && \
     cd /app/Sources && \
     tar -xvzf ct-cbn-0.1.04b-with-rdu-bug-fix-write-lambda-likelihood.tar.gz && \
@@ -67,10 +67,8 @@ RUN cd /app/Sources && \
 #Create folder to share with the outside
 RUN mkdir /app/outside
 
-WORKDIR /app/guloMAM
+WORKDIR /app/evamtools
 
-# CMD ["Rscript", "insts/miscell/examples/simple_test.R"]
-# CMD ["Rscript", "docker/runFromImage.R"]
 ENTRYPOINT  ["../docker/runFromImage.R", "-f"]
 CMD ["NULL"]
 
