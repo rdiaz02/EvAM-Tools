@@ -263,7 +263,8 @@ colnames(dB_cv3) <- LETTERS[1:4]
 # sample_freqs(dB_OR, "HyperTraPS_examples/HP_OR/freqs.jpg")
 
 all_examples_csd <- list(
-    AND = dB_AND 
+  linear = dB_linear
+  , AND = dB_AND 
   , OR = dB_OR 
   , XOR = dB_XOR 
   , rse = dB_rse 
@@ -280,7 +281,6 @@ all_examples_csd <- list(
   , cv2 = dB_cv2
   , cv3 = dB_cv3
 )
-
 
 dag_linear <- matrix(0, ncol=5, nrow=5)
 rownames(dag_linear) <- colnames(dag_linear) <- c("WT", "A", "B", "C", "D")
@@ -411,6 +411,7 @@ all_examples_csd_2 <- list(
 
 
 # for (i in names(all_examples_csd)){
-#   tmp <- all_examples_csd[i]
-#   saveRDS(tmp, file = sprintf("./toy_datasets_cpms/%s.rds", i))
+#   tmp <- all_examples_csd[[i]]
+#   tmp <- all_methods_2_trans_mat(tmp, do_MCCBN = TRUE)
+#   saveRDS(tmp, file = sprintf("./toy_outputs_cpms/%s.rds", i))
 # }

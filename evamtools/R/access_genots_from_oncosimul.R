@@ -50,6 +50,8 @@
 # rm(pwd0)
 
 
+## TODO lots of things could be removed from this file
+
 ## fitness, target max fitness. WT fitness always 1.
 scale_fitness_2 <- function(x, max_f) {
     max_x <- max(x)
@@ -255,13 +257,13 @@ cpm2tm <- cpm_to_trans_mat_oncosimul
 # dev.off()
 
 ## 
-ex_pmce_email <- read.table("ex_pmce_email.txt", header = TRUE)
+# ex_pmce_email <- read.table("ex_pmce_email.txt", header = TRUE)
 
-out_em <- cpm2tm(ex_pmce_email)
+# out_em <- cpm2tm(ex_pmce_email)
 
-pdf(file = "DAG_pmce_example.pdf")
-plot(allFitnessEffects(cpm_out_to_oncosimul(ex_pmce_email)))
-dev.off()
+# pdf(file = "DAG_pmce_example.pdf")
+# plot(allFitnessEffects(cpm_out_to_oncosimul(ex_pmce_email)))
+# dev.off()
 
 
 

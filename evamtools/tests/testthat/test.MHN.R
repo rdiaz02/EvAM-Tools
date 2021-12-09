@@ -172,7 +172,7 @@ local({
 ## additional tests and example calls
 local({
   
-  setwd("../../insts/miscell/MHN/data/")
+  setwd("../../inst/miscell/MHN/data/")
   
   ## Example of calls from original Schill code
   ##Cancer Progression Data----------------
