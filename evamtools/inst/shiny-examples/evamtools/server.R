@@ -1,5 +1,5 @@
 library(DT)
-library(guloMAM)
+# library(guloMAM)
 library(OncoSimulR)
 library(shinyjs)
 library(igraph)
@@ -662,7 +662,7 @@ server <- function(input, output, session) {
       )
     })
 
-    ## Advanced option for running GuloMAM
+    ## Advanced option for running evamtools
     observeEvent(input$advanced_options, {
         showModal(modalDialog(
             size = "l",
@@ -900,7 +900,7 @@ server <- function(input, output, session) {
         # Make sure it closes when we exit this reactive, even if there's an error
         on.exit(progress$close())
 
-        progress$set(message = "Running GuloMAM", value = 0)
+        progress$set(message = "Running evamtools", value = 0)
 
         progress$inc(1/2, detail = "Doing sampling")
         shinyjs::disable("resample_dag")
@@ -1100,7 +1100,7 @@ server <- function(input, output, session) {
         # Make sure it closes when we exit this reactive, even if there's an error
         on.exit(progress$close())
 
-        progress$set(message = "Running GuloMAM", value = 0)
+        progress$set(message = "Running evamtools", value = 0)
 
         data2run <- freqs2csd(display_freqs(), data$gene_names[1:input$gene_number])
         progress$inc(1/5, detail = "Setting up data")
@@ -1168,7 +1168,7 @@ server <- function(input, output, session) {
             columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE)
     )
 
-    cpm_out <- readRDS("/home/pablo/CPM-SSWM-Sampling/guloMAM/inst/shiny-examples/sims.RDS")
+    cpm_out <- readRDS("../../../evamtools/inst/shiny-examples/sims.RDS")
     cpm_out$MHN_f_graph <- cpm_out$MHN_transitionRateMatrix
     
     all_cpm_out <- reactiveValues(output = list(user = cpm_out))

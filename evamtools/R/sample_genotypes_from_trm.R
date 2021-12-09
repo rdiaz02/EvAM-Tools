@@ -175,9 +175,7 @@ population_sample_from_trm <- function(trm, n_samples = 10,
 #' are acquired), genotype frequencies and genotypes transition matrix (with
 #' counts of how many transitions between each genotype have been observed) 
 process_samples <- function(sim, n_genes, gene_names = NULL, output = c("frequencies", "state_counts", "transitions")){
-    genes_names <- ifelse(is.null(gene_names)
-        , LETTERS[1:n_genes]
-        , gene_names)
+    gene_names <- if(is.null(gene_names) gene_names <- LETTERS[1:n_genes]
 
     #Checking input
     params <- c("trajectory", "obs_events")
@@ -271,9 +269,7 @@ sample_all_CPMs <- function(cpm_output
     output <- cpm_output
     ## I have removed OT from the list of CPM to sample
     ## And I haved "Source" for a source data type for the web server
-    genes_names <- ifelse(is.null(gene_names)
-        , LETTERS[1:n_genes]
-        , gene_names)
+    gene_names <- if(is.null(gene_names) gene_names <- LETTERS[1:n_genes] 
 
     for(method in methods){
         if(method == "MHN") trm <- output$MHN_transitionRateMatrix
