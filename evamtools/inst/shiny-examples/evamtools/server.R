@@ -1168,7 +1168,7 @@ server <- function(input, output, session) {
             columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE)
     )
 
-    cpm_out <- readRDS("../../../evamtools/inst/shiny-examples/sims.RDS")
+    cpm_out <- readRDS("../sims.RDS")
     cpm_out$MHN_f_graph <- cpm_out$MHN_transitionRateMatrix
     
     all_cpm_out <- reactiveValues(output = list(user = cpm_out))
