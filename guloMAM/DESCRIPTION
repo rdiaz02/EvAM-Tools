@@ -1,0 +1,23 @@
+Package: guloMAM
+Type: Package
+Title: Implimentation of CPM and related tools to test their performance
+Version: 0.0.0.9015
+Date: 2021-06-24 15:15:45
+Authors@R: c(person("Herrera-Nieto", "Pablo", email = "pablo.h.nieto@gmail.com", role = "aut"), 
+            person("Ramón", "Díaz Uriarte", email = "r.diaz@uam.es", role = c("cre", "aut")))
+Author: Ramon Diaz-Uriarte [aut, cre]
+        Pablo Herrera-Nieto [ctb]
+Maintainer: Ramón Díaz Uriarte <r.diaz@uam.es>
+Description: Wrapper to run cancer progression models (CPMs) on
+    cross-sectinal data, to make finite sample using transition rate matrices,
+    and to compare the results of the different methods.
+URL: https://github.com/rdiaz02/CPM-SSWM-Sampling
+BugReports: https://github.com/rdiaz02/CPM-SSWM-Sampling/issues
+Depends: R (>= 4.0.0)
+License: GPL-3 + file LICENSE
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.1
+Imports: TRONCO, dplyr, igraph, OncoSimulR, mccbn, stringr, Matrix
+Suggests: 
+    testthat (>= 3.0.0)
