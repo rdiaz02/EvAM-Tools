@@ -6,7 +6,7 @@ runShiny <- function() {
   }
 
   options(shiny.autoreload = TRUE, browser = "/usr/bin/google-chrome")
-  shiny::runApp(appDir, display.mode = "normal")
+  shiny::runApp(appDir, port = 3000, host = "0.0.0.0", display.mode = "normal")
 }
 
 # enableBookmarking = "url"
