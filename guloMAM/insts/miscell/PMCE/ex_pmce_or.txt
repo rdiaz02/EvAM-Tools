@@ -1,7 +1,0 @@
-## Modified to be tiny
-From	To	Edge	Lambda	Relation
-Root	D	Root -> D	.3	Single
-Root	E	Root -> E	.4	Single
-D	F	D -> F	.6	OR
-E	F	E -> F	.6	OR
-
