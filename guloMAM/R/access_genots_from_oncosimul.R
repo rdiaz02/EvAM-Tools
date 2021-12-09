@@ -254,6 +254,15 @@ cpm2tm <- cpm_to_trans_mat_oncosimul
 # plot(allFitnessEffects(cpm_out_to_oncosimul(ex_pmce_email)))
 # dev.off()
 
+## 
+ex_pmce_email <- read.table("ex_pmce_email.txt", header = TRUE)
+
+out_em <- cpm2tm(ex_pmce_email)
+
+pdf(file = "DAG_pmce_example.pdf")
+plot(allFitnessEffects(cpm_out_to_oncosimul(ex_pmce_email)))
+dev.off()
+
 
 
 # #### Tiny OR and XOR
