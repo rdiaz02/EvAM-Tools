@@ -17,8 +17,8 @@ how2run <- function(opt){
     if(opt$file == "NULL"){ 
         runShiny()
         print("I will run Shiny")
-    } else { ## Running online mode
-        print("Running in online mode")
+    } else { ## Running command mode
+        print("Running in command mode")
         tryCatch({
             csd <- read.csv(paste("/app/outside/", opt$file, sep = ""))
         }, error = function(e){
