@@ -412,5 +412,5 @@ all_examples_csd_2 <- list(
 
 # for (i in names(all_examples_csd)){
 #   tmp <- all_examples_csd[i]
-#   save(tmp, file = sprintf("./toy_datasets_cpms/%s.RData", i))
+#   saveRDS(tmp, file = sprintf("./toy_datasets_cpms/%s.rds", i))
 # }
