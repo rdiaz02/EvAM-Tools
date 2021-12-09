@@ -1,8 +1,8 @@
 #' @export
 runShiny <- function() {
-  appDir <- system.file("shiny-examples", "guloMAM", package = "guloMAM")
+  appDir <- system.file("shiny-examples", "evamtools", package = "evamtools")
   if (appDir == "") {
-    stop("Could not find example directory. Try re-installing `guloMAM`.", call. = FALSE)
+    stop("Could not find example directory. Try re-installing `evamtools`.", call. = FALSE)
   }
 
   options(shiny.autoreload = TRUE, browser = "/usr/bin/google-chrome")

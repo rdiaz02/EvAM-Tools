@@ -522,7 +522,7 @@ user_input <- function(){
           column(width = 6,
           
             tags$div(class = "download_button submit_button",
-              actionButton("analysis", "Run guloMAM!")
+              actionButton("analysis", "Run evamtools!")
             ),
             tags$div(class = "download_button",
               actionButton("advanced_options", "Advanced Options")
@@ -539,7 +539,7 @@ user_input <- function(){
 }
 ui <- 
   navbarPage( id = "navbar",
-    title = "guloMAM",
+    title = "evamtools",
     tabPanel("User input", 
       value = "csd_builder",
       user_input()

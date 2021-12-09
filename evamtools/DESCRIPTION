@@ -1,4 +1,4 @@
-Package: guloMAM
+Package: evamtools
 Type: Package
 Title: Implimentation of CPM and related tools to test their performance
 Version: 0.0.0.9015
