@@ -2,7 +2,9 @@
 
 # FIXME: need to update this file
 
-- Add a file of copyrights, for all that we have not authored, that lists
+- Add a file of copyrights (e.g., like in
+  https://cran.r-project.org/web/packages/RcppEigen/COPYRIGHTS), for all that we
+  have not authored, that lists
     - original location of the file, date we copied it, committ (if it exists),
       authors, copyright and license, and location in our repo
 	  
@@ -12,6 +14,19 @@
   whatever) is compatible with our GPL v3 license.
 
     
+## FIXME : changes in other files
+- In files we include from other authors, if it is not already there, add a
+  header in the file itself that lists: original location of the file, date we
+  copied it, committ (if it exists), authors, copyright and original license.
+    - This would apply to files from MHN, for example, if we include them.
+	
+- DESCRIPTION of R package
+    - remember to update author list if needed
+	- remember to add COPYRIGHTS file, if needed (see above) or symlink it.Yes,
+      it is the same file, but we want to make sure that if only the R package
+      subdirectory is grabbed, that file is present.
+
+
 
 
 All original code here is released under the GPL v3 license.
