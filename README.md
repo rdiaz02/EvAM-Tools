@@ -1,7 +1,18 @@
 # License and copyright
 
+# FIXME: need to update this file
 
-FIXME: need to update this file
+- Add a file of copyrights, for all that we have not authored, that lists
+    - original location of the file, date we copied it, committ (if it exists),
+      authors, copyright and license, and location in our repo
+	  
+- Add that information here too, at the bottom	
+
+- In text above, wherever it is needed, clarify that original license (e.g., Apache 2, or
+  whatever) is compatible with our GPL v3 license.
+
+    
+
 
 All original code here is released under the GPL v3 license.
 
