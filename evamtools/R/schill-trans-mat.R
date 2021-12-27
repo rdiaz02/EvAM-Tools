@@ -19,10 +19,12 @@
 ## matrices. In general, the best option is to use do_MHN2 for moderate to
 ## large numbers of features.
 
-
 library(gtools)
-
-
+source("../External-code/MHN/InlineFunctions.R")
+source("../External-code/MHN/ModelConstruction.R")
+source("../External-code/MHN/Likelihood.R")
+source("../External-code/MHN/RegularizedOptimization.R")
+source("../External-code/MHN/UtilityFunctions.R")
 
 ## Use these wrappers
 ## observations (rows as patients, columns genes) -> transition matrix genotypes
