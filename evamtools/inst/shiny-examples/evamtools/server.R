@@ -21,9 +21,9 @@ template_csd_freqs <- data.frame(Genotype = character(), Freq = integer())
 template_csd_data <- matrix(0, ncol=3, nrow=0)
 
 check_if_csd <- function(data){
-    tmp_names <- c("data", "dag", "dag_parent_set", "name", "type", "trm", "thetas")
+    tmp_names <- c("data", "dag", "dag_parent_set", "gene_names", "name", "type", "thetas")
     types <- c("csd", "dag", "matrix")
-    if(all(names(data) %in% tmp_names)){
+    if(all(tmp_names %in% names(data))){
         if((data$type %in% types 
         & all(unique(c(data$data)) %in% c(0, 1)))){
             return(TRUE)
@@ -315,7 +315,12 @@ dataModal <- function(error_message) {
 standarize_dataset<-function(data){
     new_data <- list()
 
-    new_data$gene_names <- all_gene_names
+    if(!is.null(colnames(data$data))){
+        new_data$gene_names <- c(colnames(data$data)
+            , LETTERS[ncol(data) + 1 : max_genes ])
+    } else {
+        new_data$gene_names <- all_gene_names
+    }
 
     new_data$name <- data$name  
 
@@ -397,32 +402,35 @@ server <- function(input, output, session) {
     )
     
     display_freqs <- reactive({
-        get_display_freqs(data$csd_freqs, input$gene_number, data$gene_names
-    )})
+        get_display_freqs(data$csd_freqs, input$gene_number, data$gene_names)
+    })
 
     ## TODO display dag
 
     ## Upload data
     observeEvent(input$csd, {
-        # TODO hanlde corrupt files
         if(grepl(".csv", input$csd$datapath)){
             dataset_name <- strsplit(strsplit(input$csd$name, ".csv")[[1]], "_")[[1]][[1]]
-            tfmp_data <- read.csv(input$csd$datapath)
-            if(check_if_csd(tmp_data)){
-                datasets$all_csd[[dataset_name]]$data <- tmp_data
-                datasets$all_csd[[dataset_name]]$name <- dataset_name
-                keep_dataset_name <<- dataset_name 
+            tmp_data <- list()
+            tmp_data$data <- read.csv(input$csd$datapath)
+            if(check_if_csd(tmp_data$data)){
+                datasets$all_csd[["csd"]][[dataset_name]] <- standarize_dataset(tmp_data)
+                datasets$all_csd[["csd"]][[dataset_name]]$name <- dataset_name
+                datasets$all_csd[["csd"]][[dataset_name]]$gene_names <- c(colnames(tmp_data$data)
+                , LETTERS[(ncol(tmp_data$data) + 1): max_genes])
+                # keep_dataset_name <<- dataset_name 
+                last_visited_pages["csd"] <<- dataset_name
                 updateRadioButtons(session, "input2build", selected = "csd")
                 updateRadioButtons(session, "select_csd", selected = dataset_name)
-                error_message <<- "Your csv data can not be loaded. Make sure it only contains 0 and 1."
-                
             } else {
+                error_message <<- "Your csv data can not be loaded. Make sure it only contains 0 and 1."
                 showModal(dataModal(error_message))
             }
         } else if(grepl(".rds", input$csd$datapath, ignore.case = TRUE)){
             tmp_data <- readRDS(input$csd$datapath)
-            if(check_if_csd(tmp_data)){
-                datasets$all_csd[[tmp_data$name]] <- tmp_data
+            if(check_if_csd(tmp_data$data)){
+                last_visited_pages[tmp_data$type] <<- tmp_data$name
+                datasets$all_csd[[tmp_data$type]][[tmp_data$name]] <- tmp_data
                 updateRadioButtons(session, "input2build", selected = tmp_data$type)
                 updateRadioButtons(session, "select_csd", selected = tmp_data$name)
             } else {
@@ -509,7 +517,9 @@ server <- function(input, output, session) {
     output$download_csd <- downloadHandler(
         filename = function() sprintf("%s_csd.RDS", input$select_csd),
         content = function(file) {
-            saveRDS(datasets$all_csd[[input$select_csd]], file)
+            tmp_data <- datasets$all_csd[[input$input2build]][[input$select_csd]] 
+            tmp_data$type <- input$input2build
+            saveRDS(tmp_data, file)
         }
     )
 
@@ -645,8 +655,6 @@ server <- function(input, output, session) {
         datasets$all_csd[[input$input2build]][[input$select_csd]] <- tmp_data
     })
 
-   
-
     observeEvent(input$display_help, {
       showModal(modalDialog(
         easyClose = TRUE,
@@ -681,7 +689,10 @@ server <- function(input, output, session) {
 
     ## Define new genotype
     output$define_genotype <- renderUI({
+        print(data$gene_names)
+        print(input$gene_number)
         options <- data$gene_names[1:input$gene_number]
+        print(options)
         if(input$input2build == "csd"){
             tags$div(
                 tags$h3("2. Add new genotypes"),

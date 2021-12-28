@@ -3,8 +3,8 @@ library(DT)
 library(markdown)
 library(shinyjs)
 
-source("ui/user_input_csd.R")
-source("ui/see_results_simple.R")
+# source("ui/user_input_csd.R")
+# source("ui/see_results_simple.R")
 
 cpm_info <- function(){
   tags$div(id = "background",
@@ -79,6 +79,7 @@ results_simple <- function(){
       #freq2label-label{
         width: 0%;
       }
+
       #freq2label-wrap .form-group{
         display: block !important;
         margin-bottom: 0;
@@ -423,21 +424,21 @@ user_input <- function(){
         text-overflow: ellipsis;
       }
 
-      @media only screen and (min-width: 1400px) {
+      @media only screen and (min-width: 1200px) {
         #input2build div.radio{
-          max-width: 150px;
+          max-width: 140px;
         }
         #select_csd div.radio{
-          max-width: 150px;
+          max-width: 140px;
         }
       }
 
       @media only screen and (min-width: 1900px) {
         #input2build div.radio{
-          max-width: 180px;
+          max-width: 150px;
         }
         #select_csd div.radio{
-          max-width: 180px;
+          max-width: 150px;
         }
       }
 
