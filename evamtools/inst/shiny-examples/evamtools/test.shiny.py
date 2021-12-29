@@ -1,6 +1,8 @@
 import pdb
 import unittest
 from selenium import webdriver
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
 from time import sleep
 
 class evamtools(unittest.TestCase):
@@ -36,9 +38,59 @@ class evamtools(unittest.TestCase):
     
     def _get_error_message(self):
         return self.driver.find_element_by_css_selector("#shiny-modal .modal-body div")
+    
+    def _get_table_info(self):
+        row_table = self.driver.find_elements_by_css_selector("#csd_freqs tbody>tr")
+        row_text = [i.text for i in row_table]
+        return row_text
+
+    def _modify_genotype(self, genotype = None, freq = None):
+        if genotype:
+            for gene in genotype.split(", "):
+                input_gene = self.driver.find_element_by_css_selector(
+                    f"#genotype input[value={gene}]")
+                input_gene.find_element_by_xpath('..').click()
         
+        if freq != None:
+            genotype_freq = self.driver.find_element_by_css_selector("#genotype_freq")
+            genotype_freq.clear()
+            genotype_freq.send_keys(freq)
+
+        self.driver.find_element_by_css_selector("#add_genotype").click()
+        sleep(1)
+
+    def _select_tab(self, input_type, name_dataset):
+        csd_tab = self.driver.find_element_by_css_selector(f"#input2build .radio input[value={input_type}]")
+        csd_tab.click()
+        dataset_tab = self.driver.find_element_by_css_selector(f"#select_csd .radio input[value={name_dataset}]")
+        dataset_tab.click()
+        sleep(1)
+
+    def _process_genotype_table(self, data):
+        genotypes = {}
+
+        # pdb.set_trace()
+        for i in data:
+            key, val = i.replace(", ", "").split(" ")
+            genotypes[key] = int(val)
+        
+        return genotypes
+
+
     ## TESTING BASIC FUNCIONALITY
     # def test_switch_tab(self):
+        ## Go to CSD-LINEAR
+
+        ## Go to DAG-AND
+
+        ## Go to MATRIX-EXAMPLE
+
+        ## Go back to CSD & check we are in LINEAR
+
+        ## Go back to DAG & check we are in AND
+
+        ## Go back to MATRIX & check we are in EXAMPLE
+
     #     csd_tab = self.driver.find_element_by_css_selector("#input2build .radio input[value=csd]")
     #     csd_tab.click()
     #     dag_tab = self.driver.find_element_by_css_selector("#input2build .radio input[value=dag]")
@@ -95,20 +147,193 @@ class evamtools(unittest.TestCase):
         assert(status["gene_names"] == ["A", "B", "C"])
     
     # ## TESTING CSD 
-    # def test_add_genotype(self):
-    #     pass
-    
-    # def test_remove_genotype(self):
-    #     pass
+    def test_modiying_genotype_with_buttons(self):
+        ## Initial status
+        status = self._get_status()
+        assert(status["number_of_genes"] == 3)
+        assert(status["selected_dataset"] == "User")
+        assert(status["selected_input2build"] == "csd")
+        assert(status["gene_names"] == ["A", "B", "C"])
 
-    # def test_modify_table(self):
-    #     pass
+        table_info = self._get_table_info()
+        assert(table_info[0] == "No data available in table")
+
+        analysis_button = self.driver.find_element_by_css_selector("#analysis")
+
+        ## Cannot add string frequencies
+        self._modify_genotype("A", "asdf")
+        sleep(0.5)
+        table_info = self._get_table_info()
+        assert(table_info[0] == "No data available in table")
+        assert(analysis_button.is_enabled() == False)
+
+        ## Cannot add empty frequencies
+        self._modify_genotype("A")
+        sleep(0.5)
+        table_info = self._get_table_info()
+        assert(table_info[0] == "No data available in table")
+        assert(analysis_button.is_enabled() == False)
+
+        ## Cannot add negative frequencies
+        self._modify_genotype("A", -100)
+        sleep(0.5)
+        table_info = self._get_table_info()
+        assert(table_info[0] == "No data available in table")
+        assert(analysis_button.is_enabled() == False)
+
+        ## Can add positive freq
+        self._modify_genotype("A", 100)
+        sleep(1)
+        table_info = self._get_table_info()
+        assert(table_info[0] == "A 100")
+        assert(analysis_button.is_enabled())
+
+        ## Freq changes based on available data 
+        input_gene = self.driver.find_element_by_css_selector(
+                    "#genotype input[value=A]")
+        input_gene.find_element_by_xpath('..').click()
+        current_freq = self.driver.find_element_by_css_selector("#genotype_freq").get_attribute("value")
+        print(current_freq)
+        assert(int(current_freq) == 100)
+
+        ## Freq changes based on available data 
+        input_gene = self.driver.find_element_by_css_selector(
+                    "#genotype input[value=A]")
+        input_gene.find_element_by_xpath('..').click()
+        sleep(1)
+        current_freq = self.driver.find_element_by_css_selector("#genotype_freq").get_attribute("value")
+        print(current_freq)
+        assert(current_freq == '')
+
+        ## Remove genotype when adding a 0 freq
+        sleep(0.5)
+        self._modify_genotype(genotype = "A", freq = 0)
+        sleep(1)
+        table_info = self._get_table_info()
+        assert(table_info[0] == "No data available in table")
+
+        ## Not specifying genes add WT freq
+        self._modify_genotype(freq = 100)
+        sleep(1)
+        table_info = self._get_table_info()
+        assert(table_info[0] == "WT 100")
+        assert(analysis_button.is_enabled())
+
+    def test_modify_table(self):
+        ## Select AND dataset
+        self._select_tab("csd", "AND")
+
+        ## Check Status
+        status = self._get_status()
+        assert(status["number_of_genes"] == 4)
+        assert(status["selected_dataset"] == "AND")
+        assert(status["selected_input2build"] == "csd")
+        assert(status["gene_names"] == ["A", "B", "C", "D"])
+
+        ## Table before modification
+        prev_table_info = self._get_table_info()
+        prev_genotypes = self._process_genotype_table(prev_table_info)
+
+        ## Double click on first freq
+        first_freq = self.driver.find_elements_by_css_selector("#csd_freqs tbody>tr>td")[1]
+        actions = ActionChains(self.driver)
+        actions.double_click(first_freq).perform()
+        # pdb.set_trace()
+        actions.key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(Keys.RIGHT).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
+
+        ## Set freqs (remove some genotypes)
+        actions.key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(Keys.LEFT).key_up(Keys.CONTROL).key_up(Keys.SHIFT).send_keys(200).perform()
+        actions.send_keys(Keys.TAB).perform()
+        for i in [50, 150, 0]:
+            actions.send_keys(i)
+            actions.send_keys(Keys.TAB).perform()
+
+        ## Save changes
+        actions.key_down(Keys.CONTROL).send_keys(Keys.ENTER).key_up(Keys.CONTROL).perform()
+
+        ## Check Status
+        sleep(1)
+        out_table_info = self._get_table_info()
+        out_genotypes = self._process_genotype_table(out_table_info)
+
+        assert(out_genotypes["WT"] == 200)
+        assert(out_genotypes["A"] == 50)
+        assert(out_genotypes["AB"] == 150)
+        assert(("ABC" in out_genotypes.keys()) == False)
+        assert(out_genotypes["AC"] == prev_genotypes["AC"])
+        assert(out_genotypes["ABCD"] == prev_genotypes["ABCD"])
 
     # def test_change_gene_number_CSD(self):
-    #     pass
+        ## Select Linear & save data
+
+        ## Change to 5 genes
+
+        ## Add new genotype & save data
+
+        ## Set to 4 genes & check we lose some data
+        
+        ## Set to 5 genes & check we recover some data
+
+    # def test_change_gene_names_CSD(self):
+        ## Select Linear & save data
+
+        ## Change gene names
+
+        ## Get gene names
+
+        ## Get genotypes freqs
 
     # def test_save_data_set_CSD(self):
-    #     pass
+    #     ## Selecting LINEAR
+    #     self._select_tab("csd", "Linear")
+    #     initial_genotypes = self._get_table_info()
+    #     initial_genotypes_dict = self._process_genotype_table(initial_genotypes)
+
+    #     ## Introducing modifications
+    #     changes = {"A, B": 1000, "A": 500}
+
+    #     for (genotype, freq) in changes.items():
+    #         self._modify_genotype(genotype, freq)
+    #         sleep(1.5)
+
+    #     ## Saving with new name
+    #     new_dataset_name = "SELENIUM_ft"
+
+    #     save_button = self.driver.find_element_by_id("save_csd_data")
+    #     assert(save_button.is_enabled() == False)
+    #     dataset_name = self.driver.find_element_by_css_selector("input#dataset_name")
+    #     dataset_name.clear()
+    #     dataset_name.send_keys(new_dataset_name)
+    #     sleep(0.5)
+    #     assert(save_button.is_enabled() == True)
+    #     save_button.click()
+
+    #     sleep(0.5)
+    #     ## Check status
+    #     status = self._get_status()
+    #     assert(status["selected_dataset"] == new_dataset_name)
+    #     assert(status["selected_input2build"] == "csd")
+
+    #     new_genotypes = self._get_table_info()
+    #     new_genotypes_dict = self._process_genotype_table(new_genotypes)
+
+    #     for genotype in new_genotypes_dict.keys():
+    #         changed_genotypes = {}
+             
+    #         for k, v in changes.items():
+    #             changed_genotypes[k.replace(", ", "")] = v
+
+    #         if (genotype in changed_genotypes.keys()):
+    #             assert(new_genotypes_dict[genotype] != initial_genotypes_dict[genotype])
+    #             assert(new_genotypes_dict[genotype] == changed_genotypes[genotype])
+    #         else:
+    #             assert(new_genotypes_dict[genotype] == initial_genotypes_dict[genotype])
+
+    #     ## Check dataset restoration
+    #     self._select_tab("csd", "Linear")
+    #     final_genotypes = self._get_table_info()
+
+    #     assert(final_genotypes == initial_genotypes)
 
     # def test_dag_pipeline(self):
     #     # 1 loading data
