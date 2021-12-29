@@ -83,28 +83,30 @@ plot_dag <- function(dag, parent_set){
 }
 
 freqs2csd <- function(freqs, gene_names){
-    csd2 <- apply(
-        freqs, 1
-        , function(x){
-            mut <- x[[1]]
-            freq <- as.numeric(x[[2]])
-            genot <- rep(0, length(gene_names))
-            if(mut != "WT"){
-                mut <-  strsplit(mut, ", ")[[1]]
-                genot[which(gene_names %in% mut)] <- 1
+    csd <- NULL
+    if(nrow(freqs) > 0){
+        csd2 <- apply(
+            freqs, 1
+            , function(x){
+                mut <- x[[1]]
+                freq <- as.numeric(x[[2]])
+                genot <- rep(0, length(gene_names))
+                if(mut != "WT"){
+                    mut <-  strsplit(mut, ", ")[[1]]
+                    genot[which(gene_names %in% mut)] <- 1
+                }
+                csd <- matrix(rep(genot, freq), ncol= length(gene_names), byrow = TRUE)
+                return(list(csd))
+            })
+        
+        csd <- csd2[[1]][[1]]
+        if(nrow(freqs) > 1){ 
+            for (i in 2:nrow(freqs)){
+                csd <- rbind(csd, csd2[[i]][[1]])
             }
-            csd <- matrix(rep(genot, freq), ncol= length(gene_names), byrow = TRUE)
-            return(list(csd))
-        })
-    
-    csd <- csd2[[1]][[1]]
-    if(nrow(freqs) > 1){ 
-        for (i in 2:nrow(freqs)){
-            csd <- rbind(csd, csd2[[i]][[1]])
-        }
-    } 
-    
-    colnames(csd) <- gene_names
+        } 
+        colnames(csd) <- gene_names
+    }
 
     return(csd)
 }
@@ -1015,26 +1017,29 @@ server <- function(input, output, session) {
     observeEvent(input$genotype, {
         genotype <- paste(input$genotype, collapse = ", ")
         genot_freq <- data$csd_freqs[, 2][data$csd_freqs[, 1] == genotype]
+        print("genot_freq")
+        print(genotype)
+        print(genot_freq)
         updateNumericInput(session, "genotype_freq", value = genot_freq)
-    })
+    }, ignoreNULL = FALSE)
 
     observeEvent(input$add_genotype, {
         genotype <- paste(input$genotype, collapse = ", ")
         genotype <- ifelse(genotype == "", "WT", genotype)
-        genot_freq <- input$genotype_freq
-        # if(is.null(data$csd_freqs)) data$csd_freqs <- template_csd_freqs
-        if(!is.na(genot_freq)){
+        genot_freq <- ifelse(is.na(input$genotype_freq), -1, input$genotype_freq)
+
+        if(genot_freq >= 0){
             data$csd_freqs[genotype, ] <- c(genotype, genot_freq)
             rownames(data$csd_freqs) <- data$csd_freqs$Genotype
             data$csd_freqs[, 2] <- as.numeric(data$csd_freqs[, 2])
             ## Filtering out non-positive counts
             data$csd_freqs <- data$csd_freqs[data$csd_freqs[,2] > 0,]
             data$complete_csd <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
+            shinyjs::enable("analysis")
         }
         updateNumericInput(session, "genotype_freq", value = NA)
         updateCheckboxGroupInput(session, "genotype", label = "Mutations", 
-            choices =  lapply(1:input$gene_number, function(i)data$gene_names[i]), selected = NULL)
-        shinyjs::enable("analysis")
+            choices = lapply(1:input$gene_number, function(i)data$gene_names[i]), selected = NULL)
     })
     
     ## Genotypes table
