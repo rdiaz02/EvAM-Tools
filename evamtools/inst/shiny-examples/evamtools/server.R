@@ -606,7 +606,6 @@ server <- function(input, output, session) {
     observeEvent(input$change_gene_names, {
         showModal(modalDialog(
             easyClose = TRUE,
-
             title = tags$h3("Modify gene names"),
             tags$div(class = "inlin2",
                 textInput(inputId = "new_gene_names", "Genes names", 
@@ -625,9 +624,10 @@ server <- function(input, output, session) {
     ## Updating gene names
     observeEvent(input$action_gene_names,{
         new_gene_names <- unique(strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]])
-        all_gene_names <- data$gene_names
-        all_gene_names[1:length(new_gene_names)] <- new_gene_names
-        data$gene_names <- all_gene_names
+        data$gene_names <- c(
+            new_gene_names
+            , LETTERS[(length(new_gene_names) + 1):max_genes]
+        )
 
         ## Rename stuff
         colnames(data$complete_csd) <- data$gene_names[1:ncol(data$complete_csd)]
@@ -635,19 +635,18 @@ server <- function(input, output, session) {
             data$csd_freqs <- get_csd(data$complete_csd)
             # rownames(data$csd_freqs) <- data$csd_freqs$Genotype    
         }
-        names(data$lambdas) <- names(data$dag_parent_set) <- all_gene_names
-        rownames(data$dag) <- colnames(data$dag) <- c("WT", all_gene_names)
+        names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
+        rownames(data$dag) <- colnames(data$dag) <- c("WT", data$gene_names)
         rownames(data$thetas) <- colnames(data$thetas) <- data$gene_names[1:ncol(data$thetas)]
-
-        if(!is.null(data$trm)){
-            state_names <- vapply(1:(ncol(data$trm)), function(x){
-                x <- x - 1
-                if(x == 0) state_name <- "WT"
-                else state_name <- paste(data$gene_names[which(int2binary(x, input$gene_number) == 1)], collapse = ", ")
-                return(state_name)
-            }, character(1))
-            rownames(data$trm) <- colnames(data$trm) <- state_names
-        }
+        # if(!is.null(data$trm)){
+        #     state_names <- vapply(1:(ncol(data$trm)), function(x){
+        #         x <- x - 1
+        #         if(x == 0) state_name <- "WT"
+        #         else state_name <- paste(data$gene_names[which(int2binary(x, input$gene_number) == 1)], collapse = ", ")
+        #         return(state_name)
+        #     }, character(1))
+        #     rownames(data$trm) <- colnames(data$trm) <- state_names
+        # }
 
         tmp_data <- list(data = data$complete_csd, dag = data$dag
             , name = data$name
@@ -655,6 +654,7 @@ server <- function(input, output, session) {
             , thetas = data$thetas, trm = data$trm)
 
         datasets$all_csd[[input$input2build]][[input$select_csd]] <- tmp_data
+        
     })
 
     observeEvent(input$display_help, {
