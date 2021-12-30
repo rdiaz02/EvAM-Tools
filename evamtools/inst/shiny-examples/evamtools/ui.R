@@ -235,7 +235,7 @@ user_input <- function(){
     tags$head(
       tags$style(HTML("
       body{
-        font-size: 20px;
+        font-size: 15px;
       }
       
       .irs-grid-pol.small{
@@ -258,7 +258,11 @@ user_input <- function(){
       }
 
       #genotype>.shiny-options-group>*{
-        margin-right: 15px;
+        margin-right: 10px;
+      }
+
+      #genotype>label>span{
+        margin-right: 10px;
       }
 
       #genotype>.shiny-options-group{
@@ -327,19 +331,19 @@ user_input <- function(){
       }
 
       .btn, input.form-control{
-        font-size: 20px;
+        font-size: 15px;
       }
       .inlin .form-group { 
         display: table-row;
-        font-size: 20px;
+        font-size: 15px;
       }
 
       .irs > span{
-        font-size: 20px;
+        font-size: 15px;
       }
 
       span [class*='irs'] { 
-        font-size: 20px !important; 
+        font-size: 15px !important; 
       }
 
       .irs-single, .irs-min, .irs-max{
@@ -377,8 +381,8 @@ user_input <- function(){
 
       .frame{
         margin-bottom:15px;
-        padding: 20px;
-        border: 5px solid rgba(100, 100, 100, 0.5);
+        padding: 15px;
+        border: 3px solid rgba(100, 100, 100, 0.5);
         border-radius: 5px;
       }
       .upload_file{
@@ -568,7 +572,7 @@ ui <-
           margin-bottom: 0px;
         }
         .dropdown-menu > li > a{
-          font-size: 20px;
+          font-size: 15px;
           padding: 10px 10px;
         }
         "
