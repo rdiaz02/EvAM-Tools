@@ -319,11 +319,10 @@ standarize_dataset<-function(data){
 
     if(!is.null(colnames(data$data))){
         new_data$gene_names <- c(colnames(data$data)
-            , LETTERS[ncol(data) + 1 : max_genes ])
+            , LETTERS[(ncol(data$data) + 1) : max_genes ])
     } else {
         new_data$gene_names <- all_gene_names
     }
-
     new_data$name <- data$name  
 
     if(is.null(data$lambdas)) new_data$lambdas <- template_lambdas
@@ -691,10 +690,7 @@ server <- function(input, output, session) {
 
     ## Define new genotype
     output$define_genotype <- renderUI({
-        print(data$gene_names)
-        print(input$gene_number)
         options <- data$gene_names[1:input$gene_number]
-        print(options)
         if(input$input2build == "csd"){
             tags$div(
                 tags$h3("2. Add new genotypes"),
@@ -1017,9 +1013,6 @@ server <- function(input, output, session) {
     observeEvent(input$genotype, {
         genotype <- paste(input$genotype, collapse = ", ")
         genot_freq <- data$csd_freqs[, 2][data$csd_freqs[, 1] == genotype]
-        print("genot_freq")
-        print(genotype)
-        print(genot_freq)
         updateNumericInput(session, "genotype_freq", value = genot_freq)
     }, ignoreNULL = FALSE)
 
@@ -1053,7 +1046,6 @@ server <- function(input, output, session) {
         info <- input$csd_freqs_cell_edit
         info[ , "col"] <- 2
         data$csd_freqs <- editData(data$csd_freqs, info, "csd_freqs") 
-        print(data$csd_freqs)
         ## Filtering out non-positive counts
         data$csd_freqs <- data$csd_freqs[data$csd_freqs[,2] > 0,]
         data$complete_csd <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
