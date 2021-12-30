@@ -257,12 +257,8 @@ user_input <- function(){
         margin-top: 10px !important; 
       }
 
-      #genotype>.shiny-options-group>*{
-        margin-right: 10px;
-      }
-
-      #genotype>label>span{
-        margin-right: 10px;
+      #genotype  input[type=checkbox] {
+        zoom: 0;
       }
 
       #genotype>.shiny-options-group{
