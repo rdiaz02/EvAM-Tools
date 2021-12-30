@@ -76,6 +76,9 @@ class evamtools(unittest.TestCase):
         
         return genotypes
 
+    def _get_genotypes_dict(self):
+        return self._process_genotype_table(self._get_table_info())
+
 
     ## TESTING BASIC FUNCIONALITY
     # def test_switch_tab(self):
@@ -263,77 +266,129 @@ class evamtools(unittest.TestCase):
         assert(out_genotypes["AC"] == prev_genotypes["AC"])
         assert(out_genotypes["ABCD"] == prev_genotypes["ABCD"])
 
-    # def test_change_gene_number_CSD(self):
+    def test_change_gene_number_CSD(self):
         ## Select Linear & save data
+        self._select_tab("csd", "Linear")
+        initial_genotypes = self._get_table_info()
+        initial_genotypes_dict = self._process_genotype_table(initial_genotypes)
 
         ## Change to 5 genes
+        slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
+        move = ActionChains(self.driver)
+        move.click_and_hold(slider_input).move_by_offset(100, 0).release().perform()
+
+        sleep(1)
 
         ## Add new genotype & save data
+        status = self._get_status()
+        assert(status["gene_names"] == ["A", "B", "C", "D", "E", "F", "G"])
+        self._modify_genotype("A, B, C, D, E", 100)
+        new_genotypes_dict = self._get_genotypes_dict()
+        assert(new_genotypes_dict["ABCDE"] == 100)
 
         ## Set to 4 genes & check we lose some data
-        
-        ## Set to 5 genes & check we recover some data
+        move.click_and_hold(slider_input).move_by_offset(-200, 0).release().perform()
+        sleep(1)
+        status = self._get_status()
+        assert(status["gene_names"] == ["A", "B", "C", "D"])
+        new_genotypes_dict = self._get_genotypes_dict()
+        assert("ABCDE" not in new_genotypes_dict.keys())        
 
-    # def test_change_gene_names_CSD(self):
+        ## Set to 5 genes & check we recover some data
+        move.click_and_hold(slider_input).move_by_offset(100, 0).release().perform()
+        sleep(1)
+        new_genotypes_dict = self._get_genotypes_dict()
+        assert(new_genotypes_dict["ABCDE"]== 100)
+
+    def test_change_gene_names_CSD(self):
         ## Select Linear & save data
+        self._select_tab("csd", "Linear")
+        initial_genotypes = self._get_table_info()
+        initial_genotypes_dict = self._process_genotype_table(initial_genotypes)
+
+        base_names = ["A", "B", "C", "D"]
+        new_names = ["A1", "B2", "C3", "D4"]
+
+        expected_genotypes_dict = {}
+        for k, v in initial_genotypes_dict.items():
+            for (base_gene_name, new_gene_name) in zip(base_names, new_names):
+                k = k.replace(base_gene_name, new_gene_name)
+            expected_genotypes_dict[k] = v
 
         ## Change gene names
+        self.driver.find_element_by_css_selector("#change_gene_names").click()
+        input_new_gene_names = self.driver.find_element_by_css_selector("#new_gene_names")
+        input_new_gene_names.clear()
+        input_new_gene_names.send_keys("A1, B2, C3, D4")
+        self.driver.find_element_by_css_selector("#action_gene_names").click()
+
+        actions = ActionChains(self.driver)
+        actions.move_to_element_with_offset(input_new_gene_names, -500, 500)
+        actions.click()
+        actions.perform()
+        sleep(1)
 
         ## Get gene names
+        status = self._get_status()
+        assert(status["gene_names"], new_names)
 
         ## Get genotypes freqs
+        genotype_info = self._get_table_info()
+        genotype_info_dict = self._process_genotype_table(genotype_info)
 
-    # def test_save_data_set_CSD(self):
-    #     ## Selecting LINEAR
-    #     self._select_tab("csd", "Linear")
-    #     initial_genotypes = self._get_table_info()
-    #     initial_genotypes_dict = self._process_genotype_table(initial_genotypes)
+        assert(genotype_info_dict == expected_genotypes_dict)
 
-    #     ## Introducing modifications
-    #     changes = {"A, B": 1000, "A": 500}
+    def test_save_data_set_CSD(self):
+        ## Selecting LINEAR
+        self._select_tab("csd", "Linear")
+        initial_genotypes = self._get_table_info()
+        initial_genotypes_dict = self._process_genotype_table(initial_genotypes)
 
-    #     for (genotype, freq) in changes.items():
-    #         self._modify_genotype(genotype, freq)
-    #         sleep(1.5)
+        ## Introducing modifications
+        changes = {"A, B": 1000, "A": 500}
 
-    #     ## Saving with new name
-    #     new_dataset_name = "SELENIUM_ft"
+        for (genotype, freq) in changes.items():
+            self._modify_genotype(genotype, freq)
+            sleep(1.5)
 
-    #     save_button = self.driver.find_element_by_id("save_csd_data")
-    #     assert(save_button.is_enabled() == False)
-    #     dataset_name = self.driver.find_element_by_css_selector("input#dataset_name")
-    #     dataset_name.clear()
-    #     dataset_name.send_keys(new_dataset_name)
-    #     sleep(0.5)
-    #     assert(save_button.is_enabled() == True)
-    #     save_button.click()
+        ## Saving with new name
+        new_dataset_name = "SELENIUM_ft"
 
-    #     sleep(0.5)
-    #     ## Check status
-    #     status = self._get_status()
-    #     assert(status["selected_dataset"] == new_dataset_name)
-    #     assert(status["selected_input2build"] == "csd")
+        save_button = self.driver.find_element_by_id("save_csd_data")
+        assert(save_button.is_enabled() == False)
+        dataset_name = self.driver.find_element_by_css_selector("input#dataset_name")
+        dataset_name.clear()
+        dataset_name.send_keys(new_dataset_name)
+        sleep(0.5)
+        assert(save_button.is_enabled() == True)
+        save_button.click()
 
-    #     new_genotypes = self._get_table_info()
-    #     new_genotypes_dict = self._process_genotype_table(new_genotypes)
+        sleep(0.5)
+        ## Check status
+        status = self._get_status()
+        assert(status["selected_dataset"] == new_dataset_name)
+        assert(status["selected_input2build"] == "csd")
 
-    #     for genotype in new_genotypes_dict.keys():
-    #         changed_genotypes = {}
+        new_genotypes = self._get_table_info()
+        new_genotypes_dict = self._process_genotype_table(new_genotypes)
+
+        for genotype in new_genotypes_dict.keys():
+            changed_genotypes = {}
              
-    #         for k, v in changes.items():
-    #             changed_genotypes[k.replace(", ", "")] = v
+            for k, v in changes.items():
+                changed_genotypes[k.replace(", ", "")] = v
 
-    #         if (genotype in changed_genotypes.keys()):
-    #             assert(new_genotypes_dict[genotype] != initial_genotypes_dict[genotype])
-    #             assert(new_genotypes_dict[genotype] == changed_genotypes[genotype])
-    #         else:
-    #             assert(new_genotypes_dict[genotype] == initial_genotypes_dict[genotype])
+            if (genotype in changed_genotypes.keys()):
+                assert(new_genotypes_dict[genotype] != initial_genotypes_dict[genotype])
+                assert(new_genotypes_dict[genotype] == changed_genotypes[genotype])
+            else:
+                assert(new_genotypes_dict[genotype] == initial_genotypes_dict[genotype])
 
-    #     ## Check dataset restoration
-    #     self._select_tab("csd", "Linear")
-    #     final_genotypes = self._get_table_info()
+        ## Check dataset restoration
+        self._select_tab("csd", "Linear")
+        final_genotypes = self._get_table_info()
 
-    #     assert(final_genotypes == initial_genotypes)
+        assert(final_genotypes == initial_genotypes)
 
     # def test_dag_pipeline(self):
     #     # 1 loading data
