@@ -406,8 +406,6 @@ server <- function(input, output, session) {
         get_display_freqs(data$csd_freqs, input$gene_number, data$gene_names)
     })
 
-    ## TODO display dag
-
     ## Upload data
     observeEvent(input$csd, {
         if(grepl(".csv", input$csd$datapath)){
@@ -593,14 +591,7 @@ server <- function(input, output, session) {
             choices = lapply(1:n_genes, function(i)data$gene_names[i]), selected = NULL)
     })
 
-    ## Define number of genes
-    output$genes_number <- renderUI({
-        val <- ifelse(is.null(data$n_genes), 3, data$n_genes)
-        tags$div(class="inlin",
-            sliderInput("gene_number", "Number of genes",
-                value = val, max = max_genes, min = min_genes, step = 1)
-        )
-    })
+
     
     observeEvent(input$change_gene_names, {
         showModal(modalDialog(
@@ -687,23 +678,33 @@ server <- function(input, output, session) {
         )
     ## TODO this has no effect so far 
     })
+    
+    ## Define number of genes
+    output$genes_number <- renderUI({
+        val <- ifelse(is.null(data$n_genes), 3, data$n_genes)
+        tags$div(class="inlin",
+            sliderInput("gene_number", "Number of genes",
+                value = val, max = max_genes, min = min_genes, step = 1)
+        )
+    })
 
     ## Define new genotype
     output$define_genotype <- renderUI({
-        options <- data$gene_names[1:input$gene_number]
+        n_genes <- ifelse(is.null(input$gene_number), 3, input$gene_number)
+        options <- data$gene_names[1:n_genes]
         if(input$input2build == "csd"){
             tags$div(
                 tags$h3("2. Add new genotypes"),
-                tags$div(class = "inline",
-                    checkboxGroupInput(inputId = "genotype", 
-                        label = "Mutations", 
-                        choices = options)
-                ),
-                tags$div(id="fr",
-                    numericInput(label="Frequency", value = NA, min = 0, inputId = "genotype_freq",width = NA),
-                    actionButton("add_genotype", "Add Genotype")
+                    tags$div(class = "inline",
+                        checkboxGroupInput(inputId = "genotype", 
+                            label = "Mutations", 
+                            choices = options)
+                    ),
+                    tags$div(id="fr",
+                        numericInput(label="Frequency", value = NA, min = 0, inputId = "genotype_freq",width = NA),
+                        actionButton("add_genotype", "Add Genotype")
+                    )
                 )
-            )
         } else if (input$input2build == "dag"){
             tags$div(
                 tags$div(class = "flex",
