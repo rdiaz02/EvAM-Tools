@@ -812,7 +812,7 @@ server <- function(input, output, session) {
                 error_message <<- "That edge is already present"
                 showModal(dataModal(error_message))
             } else if(data$dag[input$dag_to, from_node] == 1){
-                error_message <<- "Relathionships cannot be bidirectional"
+                error_message <<- "Relationships cannot be bidirectional"
                 showModal(dataModal(error_message))
             } else{
                 tmp_dag <- data$dag
@@ -821,7 +821,7 @@ server <- function(input, output, session) {
                 if(is_dag(g)){
                     data$dag <- tmp_dag
                 } else {
-                    error_message <<- "This relathionship breaks the DAG. Revise it."
+                    error_message <<- "This relationship breaks the DAG. Revise it."
                 showModal(dataModal(error_message))
                 }
             }
@@ -865,43 +865,41 @@ server <- function(input, output, session) {
     })
 
     observeEvent(listen2dag_change(), {
+        # browser()
         info <- input$dag_table_cell_edit
         orig_data <- dag_data()
         all_genes <- dag_data()$To
 
         ## Restructure the DAG
-        number_of_parents2 <- colSums(data$dag)
-        number_of_children2 <- rowSums(data$dag)
+        number_of_parents <- colSums(data$dag)
+        number_of_children <- rowSums(data$dag)
         for(i in colnames(data$dag)[-1]){
-            if(number_of_children2[i] > 0 & number_of_parents2[i] == 0){
+            if(number_of_children[i] > 0 & number_of_parents[i] == 0){
                 ## We add link to WT
                 data$dag["WT", i] <- 1
             }
         }
 
         ## Different relationships
-        new_relationships <- info[info["col"] == 2,"value"]
-        old_relationships <- orig_data$Relationship
-        changed_genes <- all_genes[new_relationships != old_relationships]
-        changed_relationships <- new_relationships[new_relationships != old_relationships]
-
-        tmp_parent_set <- data$dag_parent_set
-        tmp_parent_set[changed_genes] <- toupper(changed_relationships)
-        ## Replace relationships that are not AND, OR, XOR
-        ## Genes with only one parent with single relationship
+        ## Genes with only one parent: "Single" relationship
         ## Default relationship for several parents is OR
-
-        number_of_parents <- colSums(data$dag)
-        for(i in unique(all_genes)){
-            if(number_of_parents[[i]] <= 1){
-                tmp_parent_set[[i]] <- "Single"
-            } else if (!(tmp_parent_set[i] %in% c("AND", "OR", "XOR"))){
-                tmp_parent_set[i] <- "OR"
-            }
+        number_of_parents <- colSums(data$dag)[-1]
+        tmp_parent_set <- number_of_parents
+        new_relationships <- info[info["col"] == 2,"value"]
+        names(new_relationships) <- info[info["col"] == 1,"value"]
+        for(idx in c(1:length(new_relationships))){
+            tmp_parent_set[names(new_relationships[idx])] <- new_relationships[idx]
         }
-        data$dag_parent_set <- tmp_parent_set
+        print(number_of_parents)
+        print(new_relationships)
+        print("parent set")
+        print(tmp_parent_set)
+        tmp_parent_set[!(tmp_parent_set %in% c("Single", "AND", "OR", "XOR"))] <- "OR"
+        print(tmp_parent_set)
+        tmp_parent_set[number_of_parents <= 1] <- "Single"
+        print(tmp_parent_set)
 
-        # datasets$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$dag
+        data$dag_parent_set <- tmp_parent_set
     })
 
     ## Building trm from dag
