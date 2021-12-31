@@ -417,7 +417,6 @@ user_input <- function(){
         text-align: center;
         border: 2px solid gray;
         border-radius: 3px;
-        margin-top: 5px;
         margin-left: -20px;
         white-space: nowrap;
         overflow: hidden;
@@ -426,19 +425,19 @@ user_input <- function(){
 
       @media only screen and (min-width: 1200px) {
         #input2build div.radio{
-          max-width: 140px;
+          width: 140px;
         }
         #select_csd div.radio{
-          max-width: 140px;
+          width: 140px;
         }
       }
 
       @media only screen and (min-width: 1900px) {
         #input2build div.radio{
-          max-width: 150px;
+          width: 150px;
         }
         #select_csd div.radio{
-          max-width: 150px;
+          width: 150px;
         }
       }
 
@@ -453,11 +452,14 @@ user_input <- function(){
         text-align: center;
         border: 2px solid gray;
         border-radius: 3px;
-        margin-top: 5px;
         margin-left: -20px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+      }
+
+      #input2build div label{
+        padding-left: 20px;
       }
         ") # end HTML
       ) # end tags$style
@@ -470,9 +472,9 @@ user_input <- function(){
             tags$h3("Input to build"),
             tagList(
               radioButtons(inputId = "input2build", label = "", 
-              choiceNames = c("Cross sectional data", "DAG builder", "Matrix Builder"),
-              choiceValues = c("csd", "dag", "matrix"),
-              selected = "csd"
+                choiceNames = c("Cross sectional data", "DAG builder", "Matrix Builder"),
+                choiceValues = c("csd", "dag", "matrix"),
+                selected = "csd"
               )
             ),
             tags$h3("Some examples"),
