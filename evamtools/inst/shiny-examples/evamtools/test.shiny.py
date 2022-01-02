@@ -5,7 +5,7 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 from time import sleep
 
-class evamtools(unittest.TestCase):
+class evamtools_basics(unittest.TestCase):
     def setUp(self):
         self.driver = webdriver.Chrome('chromedriver')
         self.driver.implicitly_wait(1)
@@ -107,6 +107,12 @@ class evamtools(unittest.TestCase):
         row_text = [i.text.split(" ") for i in row_table]
         return row_text
 
+    def _get_theta_table(self):
+        row_table = self.driver.find_elements_by_css_selector("#thetas_table tr")
+        row_text = [i.text.split(" ") for i in row_table]
+        return row_text
+
+class evamtools_basic_functionality(evamtools_basics):
     # Testing basic input navigation
     def test_switch_tab(self):
         ## Go to CSD-LINEAR
@@ -180,6 +186,7 @@ class evamtools(unittest.TestCase):
         assert(status["selected_input2build"] == "matrix")
         assert(status["gene_names"] == ["A", "B", "C"])
     
+class test_csd_input(evamtools_basics):
     ## TESTING CSD 
     def test_modiying_genotype_with_buttons(self):
         ## Initial status
@@ -225,8 +232,9 @@ class evamtools(unittest.TestCase):
 
         ## Freq changes based on available data 
         input_gene = self.driver.find_element_by_css_selector(
-                    "#genotype input[value=A]")
-        input_gene.find_element_by_xpath('..').click()
+                    "#genotype input[value=A]").click()
+        # input_gene.find_element_by_xpath('..')
+        sleep(1)
         current_freq = self.driver.find_element_by_css_selector("#genotype_freq").get_attribute("value")
         print(current_freq)
         sleep(1)
@@ -435,6 +443,7 @@ class evamtools(unittest.TestCase):
         pass
 
     # TESTING DAG
+class test_dag_input(evamtools_basics):
     def test_modifying_dag(self):
         ## Increasing number of genes
         sleep(0.2)
@@ -513,7 +522,7 @@ class evamtools(unittest.TestCase):
         sleep(3)
         assert(analysis_button.is_enabled())
 
-    def test_change_names_DAG(self):
+    def test_change_gene_names_DAG(self):
         ## Increasing number of genes
         sleep(0.2)
         self._select_tab("dag")
@@ -587,8 +596,6 @@ class evamtools(unittest.TestCase):
             ["B", "D", "OR", "1"],
             ["C", "D", "OR", "1"],
         ]
-        # if(dag_info != expected_dag_info):
-            # pdb.set_trace()
         assert(dag_info == expected_dag_info)
 
     def test_remove_node(self):
@@ -681,6 +688,7 @@ class evamtools(unittest.TestCase):
         slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
         move = ActionChains(self.driver)
         move.click_and_hold(slider_input).move_by_offset(100, 0).release().perform()
+        sleep(0.5)
 
         # Adding edges & checking changes
         self._add_edge("Root", "B")
@@ -736,22 +744,171 @@ class evamtools(unittest.TestCase):
     #     pass
 
     # ## TESTING MATRIX
-    # def test_change_theta(self):
-    #     pass
+class test_matrix_input(evamtools_basics):
+    def test_change_theta(self):
+        ## Selecting dag AND dataset
+        sleep(1)
+        self._select_tab("matrix", "test1")
+        sleep(1)
+
+        analysis_button = self.driver.find_element_by_css_selector("#analysis")
+        assert(analysis_button.is_enabled() == False)
+        ## Modify dataset
+        actions = ActionChains(self.driver)
+        first_cell = self.driver.find_elements_by_css_selector("#thetas_table tbody td")[2]
+
+
+        actions.double_click(first_cell).perform()
+        actions.key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(Keys.LEFT).key_up(Keys.CONTROL).key_up(Keys.SHIFT).send_keys("2").perform()
+        actions.send_keys(Keys.TAB).perform()
+        actions.send_keys(4).perform()
+
+        for _ in range(0,3):
+            actions.send_keys(Keys.TAB).perform()
+        actions.send_keys("0").perform()
+        actions.send_keys(Keys.TAB).perform()
+        actions.send_keys(-7).perform()
+
+        actions.key_down(Keys.CONTROL).send_keys(Keys.ENTER).key_up(Keys.CONTROL).perform()
+        sleep(1)
+
+        expected_theta_table = [
+            ["A", "B", "C"],
+            ["A", "-0.4", "2", "4"],
+            ["B", "-1.04", "0", "-7"],
+            ["C", "-2.53", "-0.76", "0.23"],
+        ]
+
+        theta_table = self._get_theta_table()
+        assert(theta_table == expected_theta_table)
+
+        assert(analysis_button.is_enabled())
+
     
-    # def test_repeated_relathionship(self):
-    #     pass
+    def test_change_names_MATRIX(self):
+        self._select_tab("matrix")
+        slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
+        move = ActionChains(self.driver)
+        move.click_and_hold(slider_input).move_by_offset(50, 0).release().perform()
+        sleep(0.5)
 
-    # def test_repeated_relathionship(self):
-    #     pass
+        new_gene_names = ["A1", "B", "C3"]
+        self._change_gene_names(new_gene_names)
+        theta_table = self._get_theta_table()
 
-    # def test_change_names_MATRIX(self):
-    #     pass
+        expected_theta_table = [
+            ["A1", "B", "C3", "D"],
+            ["A1", "0", "0", "0", "0"],
+            ["B", "0", "0", "0", "0"],
+            ["C3", "0", "0", "0", "0"],
+            ["D", "0", "0", "0", "0"],
+        ]
 
-    # def test_change_gene_number_MATRIX(self):
-    #     pass
+        assert(theta_table == expected_theta_table)
 
-    # def test_save_data_set_MATRIX(self):
+    def test_change_gene_number_MATRIX(self):
+        self._select_tab("matrix")
+        slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
+        move = ActionChains(self.driver)
+        move.click_and_hold(slider_input).move_by_offset(100, 0).release().perform()
+        sleep(0.5)
+
+        status = self._get_status("matrix")
+
+        assert(status["gene_names"] == ["A", "B", "C", "D", "E", "F"])
+
+    def test_save_data_set_MATRIX(self):
+        ## Increasing number of genes
+        self._select_tab("matrix", "test1")
+        old_thetas = self._get_theta_table()
+
+        # Changing gene number
+        slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
+        move = ActionChains(self.driver)
+        move.click_and_hold(slider_input).move_by_offset(60, 0).release().perform()
+        sleep(0.5)
+  
+        ## Modify dataset
+        actions = ActionChains(self.driver)
+        first_cell = self.driver.find_elements_by_css_selector("#thetas_table tbody td")[2]
+
+        actions.double_click(first_cell).perform()
+        sleep(0.4)
+        actions.key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(Keys.LEFT).key_up(Keys.CONTROL).key_up(Keys.SHIFT).send_keys(2).perform()
+        actions.send_keys(Keys.TAB).perform()
+        actions.send_keys(4).perform()
+
+        actions.send_keys(Keys.TAB).perform()
+        actions.send_keys(3).perform()
+
+        actions.send_keys(Keys.TAB).perform()
+        actions.send_keys(2).perform()
+
+        for _ in range(0,3):
+            actions.send_keys(Keys.TAB).perform()
+        actions.send_keys("0").perform()
+        actions.send_keys(Keys.TAB).perform()
+        actions.send_keys(-7).perform()
+
+        actions.send_keys(Keys.TAB).perform()
+        actions.send_keys(1).perform()
+
+        actions.send_keys(Keys.TAB).perform()
+        actions.send_keys(-1).perform()
+
+        actions.key_down(Keys.CONTROL).send_keys(Keys.ENTER).key_up(Keys.CONTROL).perform()
+        sleep(1)
+
+        # Changing genes names
+        new_gene_names = ["A1", "B", "C3", "D", "E5"]
+        self._change_gene_names(new_gene_names)
+
+        expected_theta_table = [
+            ["A1", "B", "C3", "D", "E5"],
+            ["A1", "-0.4", "2", "4", "3", "2"],
+            ["B", "-1.04", "0", "-7", "1", "-1"],
+            ["C3", "-2.53", "-0.76", "0.23", "0", "0"],
+            ["D", "0", "0", "0", "0", "0"],
+            ["E5", "0", "0", "0", "0", "0"],
+        ]
+
+        theta_table = self._get_theta_table()
+        assert(theta_table == expected_theta_table)
+
+        ## Saving with new name
+        new_dataset_name = "SELENIUM_ft"
+
+        save_button = self.driver.find_element_by_id("save_csd_data")
+        assert(save_button.is_enabled() == False)
+        dataset_name = self.driver.find_element_by_css_selector("input#dataset_name")
+        dataset_name.clear()
+        dataset_name.send_keys(new_dataset_name)
+        sleep(0.5)
+        assert(save_button.is_enabled() == True)
+        save_button.click()
+        sleep(0.5)
+
+        ## Check status
+        status = self._get_status("matrix")
+        assert(status["selected_dataset"] == new_dataset_name)
+        assert(status["selected_input2build"] == "matrix")
+
+        theta_table = self._get_theta_table()
+        assert(theta_table == expected_theta_table)
+
+        ## Check dataset restoration
+        self._select_tab("matrix", "test1")
+        sleep(1)
+        theta_table = self._get_theta_table()
+
+        assert(theta_table == old_thetas)
+
+        self._select_tab("dag")
+        sleep(1)
+        self._select_tab("matrix", new_dataset_name)
+        sleep(1)
+        theta_table = self._get_theta_table()
+        assert(theta_table == expected_theta_table)
     #     pass
 
     # def test_MATRIX_pipeline(self):
