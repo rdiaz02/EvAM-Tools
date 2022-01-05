@@ -186,8 +186,11 @@ class evamtools_basic_functionality(evamtools_basics):
         assert(status["selected_input2build"] == "matrix")
         assert(status["gene_names"] == ["A", "B", "C"])
     
+    def test_load_csd_from_examples_tab(self):
+        pass
+    
+## TESTING CSD 
 class test_csd_input(evamtools_basics):
-    ## TESTING CSD 
     def test_modiying_genotype_with_buttons(self):
         ## Initial status
         sleep(0.2)
@@ -233,13 +236,11 @@ class test_csd_input(evamtools_basics):
         ## Freq changes based on available data 
         input_gene = self.driver.find_element_by_css_selector(
                     "#genotype input[value=A]").click()
-        # input_gene.find_element_by_xpath('..')
-        sleep(1)
+        sleep(1.5)
         current_freq = self.driver.find_element_by_css_selector("#genotype_freq").get_attribute("value")
-        print(current_freq)
         sleep(1)
-        if(current_freq != "100"):
-            pdb.set_trace()
+        # if(current_freq != "100"):
+        #     pdb.set_trace()
         assert(int(current_freq) == 100) ## This sometimes fails with invalid literal for int() with base 10: ''
 
         ## Freq changes based on available data 
@@ -286,7 +287,6 @@ class test_csd_input(evamtools_basics):
         first_freq = self.driver.find_elements_by_css_selector("#csd_freqs tbody>tr>td")[1]
         actions = ActionChains(self.driver)
         actions.double_click(first_freq).perform()
-        #actions.key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(Keys.RIGHT).key_up(Keys.CONTROL).key_up(Keys.SHIFT).perform()
 
         ## Set freqs (remove some genotypes)
         actions.key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(Keys.LEFT).key_up(Keys.CONTROL).key_up(Keys.SHIFT).send_keys(200).perform()
@@ -428,21 +428,7 @@ class test_csd_input(evamtools_basics):
 
         assert(final_genotypes == initial_genotypes)
 
-    def test_dag_pipeline(self):
-        # 1 loading data
-        # 2 modify dag
-        # 3 modify lambda
-        # 4 modify relathionship
-        # 5 change gene names
-        # 5.1 sample
-        # 6 switch tabs
-        # 7 go back
-        # 8 save
-        # 9 download
-        # 10 run
-        pass
-
-    # TESTING DAG
+# TESTING DAG
 class test_dag_input(evamtools_basics):
     def test_modifying_dag(self):
         ## Increasing number of genes
@@ -729,21 +715,7 @@ class test_dag_input(evamtools_basics):
 
         assert(old_dag == user_dag)
 
-    # def test_dag_pipeline(self):
-    #     # 1 loading data
-    #     # 2 modify dag
-    #     # 3 modify lambda
-    #     # 4 modify relathionship
-    #     # 5 change gene names
-    #     # 5.1 sample
-    #     # 6 switch tabs
-    #     # 7 go back
-    #     # 8 save
-    #     # 9 download
-    #     # 10 run
-    #     pass
-
-    # ## TESTING MATRIX
+## TESTING MATRIX
 class test_matrix_input(evamtools_basics):
     def test_change_theta(self):
         ## Selecting dag AND dataset
@@ -909,23 +881,47 @@ class test_matrix_input(evamtools_basics):
         sleep(1)
         theta_table = self._get_theta_table()
         assert(theta_table == expected_theta_table)
-    #     pass
 
-    # def test_MATRIX_pipeline(self):
-    #     # 1 loading data
-    #     # 2 modify dag
-    #     # 3 modify lambda
-    #     # 4 modify relathionship
-    #     # 5 change gene names
-    #     # 5.1 sample
-    #     # 6 switch tabs
-    #     # 7 go back
-    #     # 8 save
-    #     # 9 download
-    #     # 10 run
-    #     pass
+## TESTING RESULTS
+class evamtools_test_results(evamtools_basics):
+    def _basic_results_test(self, data):
+        ## Download/upload results
+        # Visualization: count number of plots
+        # Tabular data
+        # Hit the "modify data" button 
+        pass
 
-    ## TESTING RESULTS
+    def test_results_on_load():
+        ## Placeholder text to ask for runngin something
+        pass
+
+    def test_results_on_CSD(self):
+        ## Load data
+        ## Modify data
+        ## Save data 
+        ## Run analysis
+
+        ## Test
+        # Source display should not be available     
+        pass
+
+    def test_results_on_DAG(self):
+        ## Load data
+        ## Modify data
+        ## Save data 
+        ## Run analysis
+
+        # Source display should be available
+        pass
+
+    def test_results_on_Matrix(self):
+        ## Load data
+        ## Modify data
+        ## Save data 
+        ## Run analysis
+
+        # Source display should be available
+        pass
 
 if __name__ == "__main__":
     unittest.main()
