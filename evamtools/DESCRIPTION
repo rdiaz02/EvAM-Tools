@@ -6,7 +6,7 @@ Date: 2021-06-24 15:15:45
 Authors@R: c(person("Herrera-Nieto", "Pablo", email = "pablo.h.nieto@gmail.com", role = "aut"), 
             person("Ramón", "Díaz Uriarte", email = "r.diaz@uam.es", role = c("cre", "aut")))
 Author: Ramon Diaz-Uriarte [aut, cre]
-        Pablo Herrera-Nieto [ctb]
+        Pablo Herrera-Nieto [aut]
 Maintainer: Ramón Díaz Uriarte <r.diaz@uam.es>
 Description: Wrapper to run cancer progression models (CPMs) on
     cross-sectinal data, to make finite sample using transition rate matrices,
