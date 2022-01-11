@@ -160,7 +160,6 @@ plot_model <- function(cpm_output, mod){
     colors_relationships <- c(standard_relationship, standard_relationship, "cornflowerblue", "coral2")
     names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
     
-    print(mod)
     model_data2plot <- process_data(cpm_output, mod)
     ## Plotting data
     if(!is.null(model_data2plot$dag_tree)) {
@@ -890,14 +889,9 @@ server <- function(input, output, session) {
         for(idx in c(1:length(new_relationships))){
             tmp_parent_set[names(new_relationships[idx])] <- new_relationships[idx]
         }
-        print(number_of_parents)
-        print(new_relationships)
-        print("parent set")
-        print(tmp_parent_set)
+
         tmp_parent_set[!(tmp_parent_set %in% c("Single", "AND", "OR", "XOR"))] <- "OR"
-        print(tmp_parent_set)
         tmp_parent_set[number_of_parents <= 1] <- "Single"
-        print(tmp_parent_set)
 
         data$dag_parent_set <- tmp_parent_set
     })
@@ -1086,7 +1080,7 @@ server <- function(input, output, session) {
         }
     })
 
-    ## Run CPMS
+    ## Run CPMs
     observeEvent(input$analysis, {
         ## Calculate TRM for DAG and for matrices
         
@@ -1175,116 +1169,126 @@ server <- function(input, output, session) {
             columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE)
     )
 
-    cpm_out <- readRDS("../sims.RDS")
-    cpm_out$MHN_f_graph <- cpm_out$MHN_transitionRateMatrix
+    # cpm_out <- readRDS("../sims.RDS")
+    # cpm_out$MHN_f_graph <- cpm_out$MHN_transitionRateMatrix
     
-    all_cpm_out <- reactiveValues(output = list(user = cpm_out))
+    # all_cpm_out <- reactiveValues(output = list(user = cpm_out))
+    all_cpm_out <- reactiveValues(output = list())
 
     output$sims <- renderUI({
-        column_models2show <- floor(12 / length(input$cpm2show)) 
+        if(length(all_cpm_out$output > 0)){
+            column_models2show <- floor(12 / length(input$cpm2show)) 
 
-        lapply(input$cpm2show, function(mod){
-            output[[sprintf("plot_sims_%s", mod)]] <- renderPlot({
-                pl <- plot_model(all_cpm_out$output[[input$select_cpm]], mod)
-            })
-            return(
-                column(3,
-                    plotOutput(sprintf("plot_sims_%s", mod)))
+            lapply(input$cpm2show, function(mod){
+                output[[sprintf("plot_sims_%s", mod)]] <- renderPlot({
+                    pl <- plot_model(all_cpm_out$output[[input$select_cpm]], mod)
+                })
+                return(
+                    column(3,
+                        plotOutput(sprintf("plot_sims_%s", mod)))
+                )
+            }
             )
         }
-        )
     })
 
     output$sims2 <- renderUI({
-        column_models2show <- floor(12 / length(input$cpm2show)) 
 
-        # attribute_name <- c("f_graph", "genotype_transitions", "trans_mat", "td_trans_mat")
+        if(length(all_cpm_out$output > 0)){
+            column_models2show <- floor(12 / length(input$cpm2show)) 
 
-        # names(attribute_name) <- c("Transition Rate matrix", "Transitions", "Transition Probability Matrix")
-        # selected_plot_type <- attribute_name[input$data2plot]
-        selected_plot_type <- input$data2plot
+            # attribute_name <- c("f_graph", "genotype_transitions", "trans_mat", "td_trans_mat")
 
-        ## To makeall plots of the same type comparable
-        max_edge <- 0
-        min_edge <- 0
-        if(selected_plot_type %in% c("trans_mat", "td_trans_mat")){
+            # names(attribute_name) <- c("Transition Rate matrix", "Transitions", "Transition Probability Matrix")
+            # selected_plot_type <- attribute_name[input$data2plot]
+            selected_plot_type <- input$data2plot
+
+            ## To makeall plots of the same type comparable
+            max_edge <- 0
             min_edge <- 0
-            max_edge <- 1
-        } else if (selected_plot_type == "genotype_transitions") {
-            for(i in input$cpm2show){
-                if (i != "OT"){
-                    tmp_data <- all_cpm_out$output[[input$select_cpm]][[sprintf("%s_%s", i, selected_plot_type)]]
-                    
-                    tmp_max_edge <- max(tmp_data)
-                    max_edge <- ifelse(tmp_max_edge > max_edge
-                        , tmp_max_edge
-                        , max_edge)
-                    
-                    tmp_min_edge <- min(tmp_data)
-                    mom_edge <- ifelse(tmp_min_edge > min_edge
-                        , tmp_min_edge
-                        , min_edge)
+            if(selected_plot_type %in% c("trans_mat", "td_trans_mat")){
+                min_edge <- 0
+                max_edge <- 1
+            } else if (selected_plot_type == "genotype_transitions") {
+                for(i in input$cpm2show){
+                    if (i != "OT"){
+                        tmp_data <- all_cpm_out$output[[input$select_cpm]][[sprintf("%s_%s", i, selected_plot_type)]]
+                        
+                        tmp_max_edge <- max(tmp_data)
+                        max_edge <- ifelse(tmp_max_edge > max_edge
+                            , tmp_max_edge
+                            , max_edge)
+                        
+                        tmp_min_edge <- min(tmp_data)
+                        mom_edge <- ifelse(tmp_min_edge > min_edge
+                            , tmp_min_edge
+                            , min_edge)
+                    }
                 }
+            } else if (selected_plot_type== "f_graph") {
+                max_edge <- min_edge <- NULL
             }
-        } else if (selected_plot_type== "f_graph") {
-            max_edge <- min_edge <- NULL
-        }
 
-        # top_paths <- input$top_paths
-        # if(top_paths == 0) top_paths <- NULL
-        
-        lapply(input$cpm2show, function(mod){
-
-            data2plot <- all_cpm_out$output[[input$select_cpm]][[
-                sprintf("%s_%s", mod, selected_plot_type)]]
+            # top_paths <- input$top_paths
+            # if(top_paths == 0) top_paths <- NULL
             
-            if(selected_plot_type == "td_trans_mat"){
-                diag(data2plot) <- 0
-                data2plot <- drop0(data2plot, 0)
-            }
+            lapply(input$cpm2show, function(mod){
 
-            if(is.null(data2plot)){
-                output[[sprintf("plot_sims2_%s", mod)]] <- renderPlot({})
-            } else{
-                output[[sprintf("plot_sims2_%s", mod)]] <- renderPlot({
-                    pl <- plot_genot_fg(data2plot 
-                        , all_cpm_out$output[[input$select_cpm]]$csd_data 
-                        , all_cpm_out$output[[input$select_cpm]][[sprintf("%s_genotype_%s", mod, "freqs")]] 
-                        , freq2label = input$freq2label
-                        , top_paths = 5
-                        , max_edge = max_edge
-                        , min_edge = min_edge)
-                })
-            }
-            return(
-                column(3,
-                    plotOutput(sprintf("plot_sims2_%s", mod)))
-            )
-        })
+                data2plot <- all_cpm_out$output[[input$select_cpm]][[
+                    sprintf("%s_%s", mod, selected_plot_type)]]
+                
+                if(selected_plot_type == "td_trans_mat"){
+                    diag(data2plot) <- 0
+                    data2plot <- drop0(data2plot, 0)
+                }
+
+                if(is.null(data2plot)){
+                    output[[sprintf("plot_sims2_%s", mod)]] <- renderPlot({})
+                } else{
+                    output[[sprintf("plot_sims2_%s", mod)]] <- renderPlot({
+                        pl <- plot_genot_fg(data2plot 
+                            , all_cpm_out$output[[input$select_cpm]]$csd_data 
+                            , all_cpm_out$output[[input$select_cpm]][[sprintf("%s_genotype_%s", mod, "freqs")]] 
+                            , freq2label = input$freq2label
+                            , top_paths = 5
+                            , max_edge = max_edge
+                            , min_edge = min_edge)
+                    })
+                }
+                return(
+                    column(3,
+                        plotOutput(sprintf("plot_sims2_%s", mod)))
+                )
+            })
+        } else {
+            return("Run the analysis")
+        }
     })
 
-    output$csd <- renderPlot({
-        plot_genotypes_freqs(get_csd(all_cpm_out$output[[input$select_cpm]]$csd_data))
-    })
+    # output$csd <- renderPlot({
+    #     plot_genotypes_freqs(get_csd(all_cpm_out$output[[input$select_cpm]]$csd_data))
+    # })
 
     ## Go back to input to work again with the input
     observeEvent(input$modify_data, {
-        tmp_data <- all_cpm_out$output[[input$select_cpm]]$source
-        data$complete_csd <- tmp_data$complete_csd
-        data$csd_freqs <- get_csd(tmp_data$complete_csd)
-        data$thetas <- tmp_data$thetas
-        data$dag <- tmp_data$dag
-        data$dag_parent_set <- tmp_data$dag_parent_set
-        data$gene_names <- tmp_data$gene_names
+        if(length(all_cpm_out$output) > 0){
+            tmp_data <- all_cpm_out$output[[input$select_cpm]]$source
+            data$complete_csd <- tmp_data$complete_csd
+            data$csd_freqs <- get_csd(tmp_data$complete_csd)
+            data$thetas <- tmp_data$thetas
+            data$dag <- tmp_data$dag
+            data$dag_parent_set <- tmp_data$dag_parent_set
+            data$gene_names <- tmp_data$gene_names
 
-        updateTabsetPanel(session, "navbar",
-            selected = "csd_builder")
-        
-        gene_number <- length(unique(unlist(str_split(rownames(data$csd_freqs)[-1], ", "))))
+            updateTabsetPanel(session, "navbar",
+                selected = "csd_builder")
+            
+            gene_number <- length(unique(unlist(str_split(rownames(data$csd_freqs)[-1], ", "))))
 
-        updateRadioButtons(session, "input2build", selected = tmp_data$type)
-        updateRadioButtons(session, "select_csd", selected = tmp_data$name)
-        updateNumericInput(session, "gene_number", value = gene_number)
+            updateRadioButtons(session, "input2build", selected = tmp_data$type)
+            updateRadioButtons(session, "select_csd", selected = tmp_data$name)
+            updateNumericInput(session, "gene_number", value = gene_number)
+        }
     })
 
     output$cpm_list <- renderUI({
@@ -1303,6 +1307,18 @@ server <- function(input, output, session) {
       )
     })
 
+    output$original_data <- renderUI({
+        if(length(all_cpm_out$output) > 0){
+            tags$div(class="frame max_height",
+                tags$h3("3. The original data"),
+                plot_genotypes_freqs(get_csd(all_cpm_out$output[[input$select_cpm]]$csd_data)),
+                # plotOutput("csd"),
+                tags$div(class = "download_button",
+                    actionButton("modify_data", "Modify data")
+                )
+              )
+        }
+    })
     ## Tabular data
     genotype_freq_df <- reactive({
         compare_cpm_freqs(all_cpm_out$output[[
@@ -1310,6 +1326,10 @@ server <- function(input, output, session) {
             ,  input$data2table )
         }
     )
+
+    # output$tabular_data <- renderUI({
+
+    # })
 
     ## Download button
     output$download_cpm <- downloadHandler(

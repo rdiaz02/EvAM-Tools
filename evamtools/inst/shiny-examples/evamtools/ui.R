@@ -199,13 +199,8 @@ results_simple <- function(){
             ,
             # column(2),
             column(4,
-              tags$div(class="frame max_height",
-                tags$h3("3. The original data"),
-                plotOutput("csd"),
-                tags$div(class = "download_button",
-                    actionButton("modify_data", "Modify data")
-                )
-              )
+              uiOutput("original_data")
+              
             ),
             column(6,
               tags$div(class="frame max_height",
@@ -554,7 +549,7 @@ ui <-
     tabPanel("Example Library",
       "WIP"
     ),
-    tabPanel("About CPMS",
+    tabPanel("About CPMs",
       cpm_info()
     ),
     tags$head(
