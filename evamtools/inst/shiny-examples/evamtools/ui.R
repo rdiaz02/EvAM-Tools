@@ -164,58 +164,21 @@ results_simple <- function(){
                   downloadButton("download_cpm", "Download!")
                 )
               ),
-              tags$div(class = "frame",
-                tags$h3("2. Customize the visualization"),
-                tags$div(class = "inline",
-                  checkboxGroupInput(inputId = "cpm2show", 
-                      label = "Data to show", 
-                      choices = c("Source", "OT", "CBN", "MHN", "HESBCN"),
-                      selected = c("CBN", "MHN", "HESBCN")),
-                      
-                tags$div(class = "inline",
-                  radioButtons(inputId = "data2plot", 
-                      label = "CPMs to show", 
-                      choiceNames =  c("Transition Rate matrix", "Transitions", "Transition Probability Matrix", "Time Discretized transition matrix"),
-                      choiceValues = c("f_graph", "genotype_transitions", "trans_mat", "td_trans_mat"),
-                      selected = "genotype_transitions"
-                      )
-                    ),
-                ),
-              tags$p("Label genotypes with frequency bigger than:"),
-              tags$div(id="freq2label-wrap",
-                sliderInput("freq2label", "", width = "500px",
-                  value = 0.05, max = 1, min = 0, step = 0.05)
-              )
-              # numericInput("top_paths", "Paths to show",
-              #   min = 0, step = 1, value = 4)
-            )
+              uiOutput("customize")
+              
               
             ),
             column(10,
               column(12, uiOutput("sims")),
               column(12, uiOutput("sims2"))
-                # plotOutput("sims")
             )
             ,
-            # column(2),
             column(4,
               uiOutput("original_data")
               
             ),
             column(6,
-              tags$div(class="frame max_height",
-                tags$h3("4. Tabular data"),
-                radioButtons(inputId = "data2table", 
-                      label = "", 
-                      inline = TRUE,
-                      choiceNames =  c("Transition Rates", "Genotype Transitions Counts", "Genotype frequencies", "Conditional Transition Probabilities", "Lambdas/probabilities", "Time discreticed transition matrix"),
-                      choiceValues =  c("f_graph", "genotype_transitions", "freqs", "trans_mat", "lambdas", "td_trans_mat"),
-                      selected =  "freqs"
-                      ),
-                tags$div( 
-                  DTOutput("cpm_freqs")
-                )
-              )
+              uiOutput("tabular_data")
             )
 
           )

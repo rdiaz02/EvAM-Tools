@@ -1196,14 +1196,9 @@ server <- function(input, output, session) {
 
         if(length(all_cpm_out$output > 0)){
             column_models2show <- floor(12 / length(input$cpm2show)) 
-
-            # attribute_name <- c("f_graph", "genotype_transitions", "trans_mat", "td_trans_mat")
-
-            # names(attribute_name) <- c("Transition Rate matrix", "Transitions", "Transition Probability Matrix")
-            # selected_plot_type <- attribute_name[input$data2plot]
             selected_plot_type <- input$data2plot
 
-            ## To makeall plots of the same type comparable
+            ## To make all plots of the same type comparable
             max_edge <- 0
             min_edge <- 0
             if(selected_plot_type %in% c("trans_mat", "td_trans_mat")){
@@ -1229,9 +1224,6 @@ server <- function(input, output, session) {
                 max_edge <- min_edge <- NULL
             }
 
-            # top_paths <- input$top_paths
-            # if(top_paths == 0) top_paths <- NULL
-            
             lapply(input$cpm2show, function(mod){
 
                 data2plot <- all_cpm_out$output[[input$select_cpm]][[
@@ -1261,7 +1253,7 @@ server <- function(input, output, session) {
                 )
             })
         } else {
-            return("Run the analysis")
+            return(tags$h3("There are not results to show yet. Go to the input tab, select a dataset and hit the 'Run evamtools!' button"))
         }
     })
 
@@ -1291,20 +1283,50 @@ server <- function(input, output, session) {
         }
     })
 
+    output$customize <- renderUI({
+        if(length(all_cpm_out$output) > 0){
+            tags$div(class = "frame",
+                tags$h3("2. Customize the visualization"),
+                tags$div(class = "inline",
+                  checkboxGroupInput(inputId = "cpm2show", 
+                      label = "Data to show", 
+                      choices = c("Source", "OT", "CBN", "MHN", "HESBCN"),
+                      selected = c("CBN", "MHN", "HESBCN")),
+                      
+                tags$div(class = "inline",
+                  radioButtons(inputId = "data2plot", 
+                      label = "CPMs to show", 
+                      choiceNames =  c("Transition Rate matrix", "Transitions", "Transition Probability Matrix", "Time Discretized transition matrix"),
+                      choiceValues = c("f_graph", "genotype_transitions", "trans_mat", "td_trans_mat"),
+                      selected = "genotype_transitions"
+                      )
+                    ),
+                ),
+              tags$p("Label genotypes with frequency bigger than:"),
+              tags$div(id="freq2label-wrap",
+                sliderInput("freq2label", "", width = "500px",
+                  value = 0.05, max = 1, min = 0, step = 0.05)
+              )
+            )
+        }
+    })
     output$cpm_list <- renderUI({
         all_names <- unname(sapply(all_cpm_out$output, function(dataset) dataset$name))
-        selected <- ifelse(is.null(input$select_csd), "user", input$select_csd)
-        selected <- ifelse(input$select_csd %in% names(all_cpm_out$output),input$select_csd, "user")
+
+        if(length(all_names) > 0){
+            selected <- ifelse(is.null(input$select_csd), "user", input$select_csd)
+            selected <- ifelse(input$select_csd %in% names(all_cpm_out$output),input$select_csd, "user")
         
-        tagList(
-            radioButtons(
-                inputId = "select_cpm",
-                label = "",
-                selected = last_visited_cpm,
-                choiceNames = names(all_cpm_out$output),
-                choiceValues = names(all_cpm_out$output)
+            tagList(
+                radioButtons(
+                    inputId = "select_cpm",
+                    label = "",
+                    selected = last_visited_cpm,
+                    choiceNames = names(all_cpm_out$output),
+                    choiceValues = names(all_cpm_out$output)
+                )
             )
-      )
+        }
     })
 
     output$original_data <- renderUI({
@@ -1316,9 +1338,10 @@ server <- function(input, output, session) {
                 tags$div(class = "download_button",
                     actionButton("modify_data", "Modify data")
                 )
-              )
+            )
         }
     })
+
     ## Tabular data
     genotype_freq_df <- reactive({
         compare_cpm_freqs(all_cpm_out$output[[
@@ -1327,9 +1350,23 @@ server <- function(input, output, session) {
         }
     )
 
-    # output$tabular_data <- renderUI({
-
-    # })
+    output$tabular_data <- renderUI({
+        if(length(all_cpm_out$output) > 0){
+            tags$div(class="frame max_height",
+                tags$h3("4. Tabular data"),
+                radioButtons(inputId = "data2table", 
+                        label = "", 
+                        inline = TRUE,
+                        choiceNames =  c("Transition Rates", "Genotype Transitions Counts", "Genotype frequencies", "Conditional Transition Probabilities", "Lambdas/probabilities", "Time discreticed transition matrix"),
+                        choiceValues =  c("f_graph", "genotype_transitions", "freqs", "trans_mat", "lambdas", "td_trans_mat"),
+                        selected =  "freqs"
+                        ),
+                tags$div( 
+                    DTOutput("cpm_freqs")
+                )
+            )
+        }
+    })
 
     ## Download button
     output$download_cpm <- downloadHandler(
