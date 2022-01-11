@@ -1,0 +1,280 @@
+#+OPTIONS: ^:nil
+#+AUTHOR: Ramon Diaz-Uriarte
+#+TITLE: Using OncoSimulR to get accessible genotypes and transition matrices
+
+* Note:
+  - Most of this implemented in access_genots_from_oncosimul.R. 
+  
+* Using OncoSimulR to get accessible genotypes and transition matrices
+
+ OncoSimulR has had, for a long time, the AND, XOR, OR operations (see the help of "allFitnessEffects", under "typeDep"), if a gene depends on other genes with the same relationship for all parents. Since we can obtain the fitness of genotypes, obtaining accessible genotypes is simple:
+
+ 
+ - Use an appropriate setting for the "s"
+ - Use $-\infty$ for sh (so if restrictions are not satisfied, a genotype has
+    fitness 0).
+ - Evaluate the fitness of genotypes.
+ - Call function "genots_2_fgraph_and_trans_mat".
+   - This is a general function.
+   - In particular, it does not assume that mutations that do not kill a
+     genotype always increase fitness or at least do not decrease it.
+   - This function returns accessible genotypes, fitness graph, and transition matrices directly from the fitness of the genotypes.
+      
+** Computing fitness of genotypes: for CBN and OT
+- OncoSimulR, when using DAGs, uses a model of fitness (birth rate), for a  genotype with restrictions satisfied as $\Pi (1 + s_i)$. 
+  - Again, to emphasize the above: $s_i$, when using OncoSimulR with a DAG, is  the selection coefficient from gene $i$ *with its restrictions satisfied.*
+- Recall that the transition probabilities can be computed from competing   exponentials. For example, suppose from genotype A we can go to enotypes AB and AC. The probability of going to AB should be $\lambda_B/(\lambda_B +  \lambda_C)$.
+- As explained in Hosseini et al., 2019 (Hosseini, S., Diaz-Uriarte, Ramon, Markowetz, F., & Beerenwinkel, N. (2019). Estimating the predictability of cancer evolution. Bioinformatics,   35(14), 389–397. https://dx.doi.org/10.1093/bioinformatics/btz332), p. i392, let us define the selective  coefficient of a mutation $i$ as the fitness difference that it causes along the mutational pathway.
+     
+  - Using our previous example, that would be $Pr(A \rightarrow AB) = \frac{W_{AB}- W_{A}}{(W_{AB} - W_A) + (W_{AC} - W_A)}$, where $W_x$ is fitness of  genotype $x$.
+       
+  - If we write, as is common, $W_{AB} = W_A \  (1 + s_B)$, we get from the above $Pr(A \rightarrow AB) = \frac{s_B}{s_B + s_C}$.
+       
+  - (So, actually, the $s_i$ are the relative differences, not just
+    differences, in fitness: $s_B = \frac{W_{AB} - W_A}{W_A}$.)
+       
+  - (We wrote $W_{AB} = W_A \ (1 + s_B)$. This we can do as we explained what the meaning of the $s_i$ are: selection coefficient from gene $i$ with its restrictions satisfied. See below: [[*Transition probabilities using an epistatic specification][Transition probabilities using an epistatic specification]].)
+   
+- Note that this is the same procedure as in Weinreich et al., 2006, (Weinreich, D. M., Delaney, N. F., DePristo, M. A., & Hartl, D. L. (2006). Darwinian Evolution Can Follow Only Very Few Mutational Paths to Fitter Proteins. Science, 312(5770), 111–114.https://dx.doi.org/10.1126/science.1123539) supplementary material, p. 4): $s_{i \rightarrow j}$ "the selection coefficient for the mutation that carries allele i to allele j" (where selection coefficient has the usual definition, e.g., Gillespie, 2004 (Population genetics: a concise guide, 2nd. Baltimore, Md: The Johns Hopkins University Press.), p. 63 ---but we write $W_{AB} = W_A \ (1 + s_B)$, and thus if $s_B > 0$ AB is fitter than A).
+   
+- Note: In Gerstung et al., 2011 (Gerstung, M., Eriksson, N., Lin, J., Vogelstein, B., & Beerenwinkel, N. (2011). The Temporal Order of Genetic and Pathway Alterations in Tumorigenesis. PLoS ONE, 6(11), 27136. https://dx.doi.org/10.1371/journal.pone.0027136), PLoS ONE (p.8) the relationship between $\lambda_i$ and $s_i$ is also discussed.
+     
+- And why the fitness difference with respect to the ancestor and not just a  ratio of fitnesses? Suppose $W_{AC} < W_A < W_{AB}$. The procedure above  correctly would say that we always transition from A to AB.
+            
+- So we do as follows:
+  - Set $s_i = \lambda_i$ (for OT, we use edgeWeight instead of \lambda).
+  - Obtain the fitness of all genotypes from OncoSimulR.
+  - If so desired (e.g., to ensure the maximum fitness is a specific number),  multiply all fitness values by the appropriate scaling factor.
+
+** Crucial assumption above
+- We compute fitness above assuming that only one of two things can happen: a mutation provides a fitness benefit or it leads to death. When the requirements are satisfied, a mutation conveys a fitness increase ($\lambda_i$); otherwise, the cell with the mutation has fitness 0.
+         
+- Strictly, mutations without dependencies satisfied might not be lethal, but they should not confer any fitness advantage, so that we will never observe them (Gerstung et al., 2009, p. 2810, say "(...) mutations that need to be present before mutation i can fixate." and Gerstung and Beerenwinkel, 2010, , p. 126, "with steps including both mutation and clonal expansion occurring at effective rates k j").
+ 
+- In OncoSimulR, in addition to the $s_i$, it is possible to set =sh = 0=, meaning there is no penalty for not respecting the restrictions. When =sh = 0= there is also no fitness gain, either, so fitness for those genotypes ends up being the fitness of the immediate parent (there is no contribution from the gen without restrictions satisfied to the fitness of the parent genotype). Regardless, when =sh = 0=, the transition matrix does not change compared to the transition matrix we obtain if we assume that mutations to genotypes with non-satisfied dependencies lead to a fitness of 0. 
+
+   
+- To elaborate on this point: The output from the code, with =sh = 0=, will result in more genotypes being shown as accessible. It is arguable, though, that those genotypes are not really accessible, since their fitness is never larger than the fitness of their ancestor. So the probability of transitioning to them will be 0 under the expressions above when in SSWM. This is something we might want to correct in the code: making sure something is only shown as accessible if its fitness is strictly larger than the fitness of its ancestor. **FIXME** 
+     
+- (Actually, in OncoSimulR, the $s_h$ can vary by gene, so we could have different $s_{hi}$, but this does not affect these arguments).
+
+   
+** A detail about the fitness specification with OncoSimulR's DAGs and epistatic fitness specifications
+
+- We said above: "Again, to emphasize the above: $s_i$, when using OncoSimulR with a DAG, is the selection coefficient from gene $i$ *with its restrictions satisfied.*"
+
+- This also means, when using DAGs in OncoSimulR, that terms such as $s_{ij}$ are not used in that specification: they are not needed as the DAG models do not include epistasis beyond that given by the DAG, and all these epistatic interactions we capture with the DAG and the $s_i$ and $s_h$, which denote the fitness effects when restrictions are satisfied and not satisfied, respectively.
+   
+- But with OncoSimulR you can also specify fitness with the usual multiplicative expression where you specify explicitly the contribution of genes and gene interactions (e.g., $s_{ij}$ for the effect of the interaction between genes $i$ and $j$, so that fitness of the genotype with both $i$ and $j$ mutated would be $(1 + s_i)\ (1 + s_j)\ (1 + s_{ij})$). 
+     
+- In other words, suppose $j$ depends on $i$. The usual epistatic interaction fitness specification would write: $W_{ij} = (1 + s_i)\ (1 + s_j)\ (1 + s_{ij})$ and $W_j = (1 + s_j)$. 
+     
+- Using the DAG, if the restriction is not satisfied, i.e., for genotype with only $j$: $W_j = (1 + s_h)$. If the restriction is satisfied, $W_{ij} = (1 + s_i) (1 + s_j)$. So the meaning of the $s$ is different.
+   
+- To fully elaborate here, and give a more complex example, suppose C depends on both A and B, according to the DAG. 
+     
+  - When using the DAG, then, these are
+    the expressions for some genotypes:
+    - $W_{ABC} = (1 + s_A) (1 + s_B) (1 + s_C)$
+    - $W_{AC}  = (1 + s_A) (1 + s_h)$
+    - (If we had gene-specific $s_h$, such as $s_{hC}$, that does not
+      change anything fundamental, just adds a subscript)
+  - If we were to use an epistatic specification:
+    - $W_{ABC} = (1 + s_A) (1 + s_B) (1 + s_C) (1 + s_{AB}) (1 + s_{AC}) (1 + s_{BC}) (1 + s_{ABC})$
+    - $W_{AC}  = (1 + s_A) (1 + s_C) (1 + s_{AC})$
+
+- Therefore, the meaning of the $s_i$ is not the same under both specifications. That is why we said "$s_i$, when using OncoSimulR with a DAG, is the selection coefficient from gene $i$ *with its restrictions satisfied.*" and "terms such as $s_{ij}$ are not used in that specification: they are not needed as the DAG models do not include epistasis beyond that given by the DAG, and all these epistatic interactions we capture (...)". 
+ 
+- Yes, sure, we could always re-write the $s_{i}$ and $s_{hi}$ in the DAG specification as a function of the $s_i, s_{ij}, s_{ijk}$ in the epistatic specification. (See section [[*Transition probabilities using an epistatic specification][Transition probabilities using an epistatic specification]]).
+
+- This was just for the sake of completeness. The use of $s_h$ and the epistatic fitness specification is fully explained in the documentation of OncoSimulR and its vignette, and is not in the scope of this document.      
+
+   
+** Transition probabilities using an epistatic specification
+- Suppose B and C both depend on A. If we were to use an specification with epistasis, instead of how we have used and interpreted the $s_i$ using the DAGs, then we would have to write $W_{AB} = W_A \ (1 + s_B^*) \ (1 + s_{AB}^*)$, where now I am using $s*$ to make the sets of $s$ clearly distinct. We can express the $s_B$ as a function of $s_B^*$ and $s_{AB}^*$. If we set $s_B^* = 0$ (similar to setting =sh = 0=) then $s_B = s_{AB}^*$. Otherwise, the expression will be $s_B = ((1 + s_B^*)\ (1 + s_{AB}^*)) - 1$; and, to respect the restrictions, it must be the case that $s_B^* < 0$. 
+
+- The expressions for probabilities of transition become messier, but you end up with a ratio of \\
+   \[ \frac{increase\_in\_fitness\_from\_acquiring\_B}{increase\_in\_fitness\_from\_acquiring\_B + increase\_in\_fitness\_from\_acquiring\_C} \]
+
+    where $increase\_in\_fitness\_from\_acquiring\_B$ would include the effect of B, $s_B^*$, and the epistatic interaction, $s_{AB}^*$. 
+
+- $s_B$ is still the relative fitness difference $\frac{W_{AB} - W_A}{W_A}$. Which is the same as saying that $((1 + s_B^*)\ (1 + s_{AB}^*)) - 1 = \frac{W_{AB} - W_A}{W_A}$ is the relative fitness difference. 
+
+- This shows we can directly use the DAG fitness specification where we take the $s_i$ as the selection coefficient from gene $i$ with its restrictions satisfied. 
+
+- And why do we do what we do with CBN? Because it simplifies everything and fitness can be written as $\prod (1 + s_i)$ for any genotype with its restrictions satisfied. 
+     
+     If neither A nor B depend on anything, then the expression for fitness is $(1 + s_A)\ (1 + s_B)$ because, under CBN, there is no epistasis here so $s_{AB} = 0$ (look, for example, at the transition rate matrix in Montazeri et al., 2016, Figure 1, for the transition from genotype 1 to genotype 1,2 or from genotype 2 to genotype 1,2). 
+     
+     If B depends on A, when we consider the transition from A to B, we can use a single term, $(1 + s_X)$ to multiply $(1 + s_A)$, and that $s_X = \lambda_B$. That $\lambda_B$ is the (relative) increase in fitness due to B, when B's restrictions are satisfied (for example, in Example 1 in Montazeri et al., 2016 (Large-scale inference of conjunctive Bayesian networks. Bioinformatics, 32(17), 727–735. https://dx.doi.org/10.1093/bioinformatics/btw459), see the transition rate matrix from genotype 2 to genotype 2,4 ---notice that Figure 1 is correct, but the matrix in Example 1 has a typo, and is missing the entry for $\lambda_4$; or look at the transition from 1,2 to 1,2,3 and 1,2,4). You can think of this $s_X$ as the joint combination of the effect of B on its own and the epistasis of A and B; but thinking of B on its own is a moot point, since B on its own (i.e., without A, without its restrictions satisfied) is not a genotype that can be observed. 
+     
+    Thus, for any genotype, do $\prod (1 + s_i)$, where $s_i = \lambda_i$ when the restrictions are satisfied. 
+     
+** Even more details about CBN, $s$, $\lambda$
+- Remember that having $\lambda_i < 0$ makes no sense.
+     
+- Suppose a model where A and B depend on no one, D depends on A and C depends on both A and B. 
+     
+- Simple case:
+  - $W_{AD} = (1 + \lambda_A) (1 + s_D) (1 + s_{AD})$
+  - $W_{AD} = (1 + \lambda_A) (1 + \lambda_D)$
+  - So: $1 + s_{AD} = \frac{1 + \lambda_D}{1 + s_D}$
+  - If $s_D = 0$ we get the $s_{AD} = \lambda_D$ or "the epistatic term is     equal to the lambda".
+  - If $s_D < 0$ then the epistatic term, $s_{AD} > \lambda_D$: it has to be large enough to compensate for the decrease in fitness from the single $D$.
+  - This can matter if we try to generate $s_{xy\ldots}$ from some
+    distribution and match them to the $\lambda$. 
+
+- Beware, though, of a simple interpretation of the $s_D$ as $s_h$,
+     specially when there are more genes. An example:
+     
+  - $W_{ADC} = (1 + \lambda_A) (1 + s_D) (1 + s_{AD}) (1 +
+    s_C) (1 + s_{DC}) (1 + s_{AC}) (1 + s_{ACD})$
+  - But we can replace the second and third terms:
+    - $W_{ADC} = (1 + \lambda_A) (1 + \lambda_D) (1 + s_C) (1 + s_{DC}) (1 + s_{AC}) (1 + s_{ACD})$
+  - OncoSimulR is NOT replacing all the extra terms by $s_h$.
+    - If it did you would get:
+      - $W_{ADC} = (1 + \lambda_A) (1 + \lambda_D) (1 + s_h)^4$
+    - But what OncoSimul actually gives you is:
+      - $W_{ADC} = (1 + \lambda_A) (1 + \lambda_D) (1 + s_h)$
+    - Why? Because only one gene, C, has not got its restrictions satisfied.
+    - In other words, the number of $(1 + s_h)$ is equal to the number of genes (not genes and gene combinations) with their restrictions not satisfied. 
+           
+  - In particular, note that this is not correct:
+    - $W_{ADC} = (1 + \lambda_A) (1 + s_h) (1 + s_{AD}) (1 + s_h) (1 + s_h) (1 + s_h) (1 + s_h)$
+    - Where the first $s_h$ would correspond to $s_D$ and the rest to C,  AC, DC, ACD.
+    - And thus, it is not correct to write:  $1 + s_{AD} = \frac{1 + \lambda_D}{1 + s_h}$
+          
+  - Of course, if $s_h < 0$ then $W_{ADC} < W_{AD}$.
+       
+- And with this same DAG, we can write either:
+  - $W_{ABC} = (1 + \lambda_A) (1 + \lambda_B) (1 + \lambda_C)$
+  - $W_{ABC} = (1 + \lambda_A) (1 + \lambda_B) (1 + s_C) (1 + s_{AC}) (1 + s_{BC}) (1 + s_{ABC})$
+  - As before we could do: $(1 + s_{ABC}) = \frac{1 + \lambda_C}{(1 + s_C) (1 + s_{AC}) (1 +  s_{BC})}$
+       
+  - And this shows again that the epistatic term for ABC (i.e., when restrictions are satisfied) might have to be very large to compensate for large negative fitness effects of mutations without restrictions satisfied (e.g., $s_C$).        
+
+
+   
+
+
+* What about PMCE?
+
+   Whether or not what we do makes sense depends on what PMCE really does. 
+
+[[./PMCE_1.png]]
+
+Suppose the above DAG. The left is the simplest representation, but if we look at the plots from PMCE the right one is much more similar to the one in their paper: there is a node that is not really any of the genes, and from there you get the dependent gene. 
+
+ 
+
+[[./PMCE_2.png]]
+
+With the above DAG, the set of accessible genotypes and the fitness graph is the one given above. 
+
+** Fitness relationships between genotypes
+   I think this is a set of fitness relationships between genotypes that must  hold, regardless of the interpretation of some specific terms:
+   - $W_{WT} < W_A < W_{AC}$
+   - $W_{WT} < W_B < W_{BC}$
+   - $W_{WT} < W_{AB} < W_{ABC}$
+   - $W_C = 0$ (relationship not satisfied).
+
+
+   Here, we are avoiding interpreting the OR. We are simply reasoning under a
+   model of accumulating independent mutations with their restrictions
+   satisfied. Now the tricky parts.
+     
+
+   
+
+** Is $W_{AC} = W_{BC}$?
+   Right now, it is not. We compute each fitness as the product of the respective
+   terms: $(1 + \lambda_A) \ (1 + \lambda_C)$ and $(1 + \lambda_B) \ (1 +
+   \lambda_C)$. They would be the same only iff $\lambda_A = \lambda_B$.
+
+   But the author's intention might be to actually assume the two are identical
+   if "A and B are *fitness equivalent*". (This idea is much more prevalent in
+   previous papers of this authors, and in the preprint ---not the final--
+   version of the paper Ramazzotti, D. et al., 2018, "Modeling Cumulative
+   Biological Phenomena with Suppes-Bayes Causal Networks" which is cited as an
+   apparently key reference for this one).
+
+*** Modules for fitness equivalence
+   If fitness equivalent is required, in OncoSimulR genes A and B should be
+   modeled as two genes of the same module (see section 3.5 of the vignette).
+
+   There are two problems, though, with using modules: first, this forces the
+   fitness effects of all genes to be the same. Second, modules cannot share
+   genes. 
+
+   When thinking about $\lambda$ I do not know what to make of this. It is
+   possible in OncoSimulR, however, to be fitness equivalent but to have
+   different mutation rates. (This is a flexibility that OncoSimulR provides
+   because it uses and explicit evolutionary model, and not the confusing
+   generative model of PMCE). But the no-sharing of genes between modules
+   precludes modeling many examples from PMCE.
+
+*** Epistasis for specifying fitness equivalence
+   A convoluted alternative when using OncoSimulR is to force those relationships
+   to the desired values using epistatic terms. This is of course completely
+   flexible. It has advantages and disadvantages:
+   - It shows explicitly what (mess of a) model PMCE implies.
+   - It is almost the same as specifying fitness of each genotype passing the
+     matrix of genotypes and fitness.
+
+** Is $W_{AB} = W_A = W_B$?
+
+   If A and B are fitness equivalent, I think $\lambda_A = \lambda_B$, and having
+   both mutations together should confer no fitness advantage. That is NOT what
+   is being done now. I think that only makes sense if we specify identical
+   lambdas for both.
+
+   Again, if $W_A \ne W_B$ we can still try to model some kind of fitness
+   equivalence using epistatic terms. But then, which of these is the right
+   option (assume $W_A > W_B$, or $\lambda_A > \lambda_B$):
+
+   - $W_{AB} = min(W_A, W_B)$
+   - $W_{AB} = max(W_A, W_B)$
+   - $W_{AB} = mean(W_A, W_B)$
+   - Something else :-)
+
+** Is $W_{ABC} = W_{AC}$ or $W_{ABC} = W_{BC}$ or both?
+   Again, that depends on what is the fitness contribution of the not needed
+   mutation in the OR.
+
+   Thinking in terms of their Suppes' causation, it would seem $W_{ABC} = W_{AC}
+   = W_{BC}$.
+
+** What if we tried to remain agnostic about fitness, and only thought about transitions?
+   One problem is, then, that this model is not identified in an evolutionary
+   sense. It would be impossible to simulate data under evolutionary scenarios
+   and say which ones fit or do not fit the model.
+
+   But even if we tried that, the following questions are not clear:
+
+   - What is $Pr(A \rightarrow AB)$? Is it 0 or something else? What else?
+
+* And DBN (Nicol et al. "Oncogenetic Network Estimation with Disjunctive Bayesian Networks")?
+
+  Many questions will be similar. I haven't looked at it in any detail but we  should make sure that we know how to set fitness to all of the relationships  given above (i.e., we have definite answers about them). If not, we should ask the authors.
+
+  In other words, there is nothing specific about OncoSimulR here: it is a matter  of how the OR relationships, the disjunctive relationships, in their paper are  interpreted.
+
+* HyperTraPS?
+
+  I think that none of this applies to HyperTraPS: their paper, as far as I can tell, says nothing about possible evolutionary interpretations in terms of selection, etc. This is purely a phenomenological model.
+
+  Thus, I do not see how we would try to map their model to explicit evolutionary models. (This does not mean their model cannot be assessed using evolutionary simulations, though).
+
+  
+ We need to think this, in case I am missing something. We also need to see if some interpretations are available in some of the other HyperTraPS-related papers: 
+
+  - Johnston, I. G., lR\oyrvik, Ellen C. (2020). Data-Driven Inference Reveals   Distinct and Conserved Dynamic Pathways of Tool Use Emergence across Animal  Taxa. iScience, 23(6), 101245. http://dx.doi.org/10.1016/j.isci.2020.101245
+
+  
+  
+   
+* Advantages of doing this with OncoSimulR
+  - We make the fitness model explicit
+  - We can double check the code for getting fitness graphs and transition
+    probabilities as some critical computations are being done with very
+    different code.
