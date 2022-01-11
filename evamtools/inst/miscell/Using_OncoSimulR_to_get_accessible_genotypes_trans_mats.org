@@ -23,7 +23,7 @@
 ** Computing fitness of genotypes: for CBN and OT
 - OncoSimulR, when using DAGs, uses a model of fitness (birth rate), for a  genotype with restrictions satisfied as $\Pi (1 + s_i)$. 
   - Again, to emphasize the above: $s_i$, when using OncoSimulR with a DAG, is  the selection coefficient from gene $i$ *with its restrictions satisfied.*
-- Recall that the transition probabilities can be computed from competing   exponentials. For example, suppose from genotype A we can go to genotypes AB and AC. The probability of going to AB should be $\lambda_B/(\lambda_B +  \lambda_C)$.
+- Recall that the transition probabilities can be computed from competing   exponentials. For example, suppose from genotype A we can go to enotypes AB and AC. The probability of going to AB should be $\lambda_B/(\lambda_B +  \lambda_C)$.
 - As explained in Hosseini et al., 2019 (Hosseini, S., Diaz-Uriarte, Ramon, Markowetz, F., & Beerenwinkel, N. (2019). Estimating the predictability of cancer evolution. Bioinformatics,   35(14), 389–397. https://dx.doi.org/10.1093/bioinformatics/btz332), p. i392, let us define the selective  coefficient of a mutation $i$ as the fitness difference that it causes along the mutational pathway.
      
   - Using our previous example, that would be $Pr(A \rightarrow AB) = \frac{W_{AB}- W_{A}}{(W_{AB} - W_A) + (W_{AC} - W_A)}$, where $W_x$ is fitness of  genotype $x$.
@@ -115,14 +115,14 @@
      
 - Suppose a model where A and B depend on no one, D depends on A and C depends on both A and B. 
      
-  - Simple case:
-    - $W_{AD} = (1 + \lambda_A) (1 + s_D) (1 + s_{AD})$
-    - $W_{AD} = (1 + \lambda_A) (1 + \lambda_D)$
-    - So: $1 + s_{AD} = \frac{1 + \lambda_D}{1 + s_D}$
-    - If $s_D = 0$ we get the $s_{AD} = \lambda_D$ or "the epistatic term is     equal to the lambda".
-    - If $s_D < 0$ then the epistatic term, $s_{AD} > \lambda_D$: it has to be large enough to compensate for the decrease in fitness from the single $D$.
-    - This can matter if we try to generate $s_{xy\ldots}$ from some
-      distribution and match them to the $\lambda$. 
+- Simple case:
+  - $W_{AD} = (1 + \lambda_A) (1 + s_D) (1 + s_{AD})$
+  - $W_{AD} = (1 + \lambda_A) (1 + \lambda_D)$
+  - So: $1 + s_{AD} = \frac{1 + \lambda_D}{1 + s_D}$
+  - If $s_D = 0$ we get the $s_{AD} = \lambda_D$ or "the epistatic term is     equal to the lambda".
+  - If $s_D < 0$ then the epistatic term, $s_{AD} > \lambda_D$: it has to be large enough to compensate for the decrease in fitness from the single $D$.
+  - This can matter if we try to generate $s_{xy\ldots}$ from some
+    distribution and match them to the $\lambda$. 
 
 - Beware, though, of a simple interpretation of the $s_D$ as $s_h$,
      specially when there are more genes. An example:
@@ -254,33 +254,21 @@ With the above DAG, the set of accessible genotypes and the fitness graph is the
    - What is $Pr(A \rightarrow AB)$? Is it 0 or something else? What else?
 
 * And DBN (Nicol et al. "Oncogenetic Network Estimation with Disjunctive Bayesian Networks")?
-  Many questions will be similar. I haven't looked at it in any detail but we
-  should make sure that we know how to set fitness to all of the relationships
-  given above (i.e., we have definite answers about them). If not, we should ask
-  the authors.
 
-  In other words, there is nothing specific about OncoSimulR here: it is a matter
-  of how the OR relationships, the disjunctive relationships, in their paper are
-  interpreted.
+  Many questions will be similar. I haven't looked at it in any detail but we  should make sure that we know how to set fitness to all of the relationships  given above (i.e., we have definite answers about them). If not, we should ask the authors.
+
+  In other words, there is nothing specific about OncoSimulR here: it is a matter  of how the OR relationships, the disjunctive relationships, in their paper are  interpreted.
 
 * HyperTraPS?
 
-  I think that none of this applies to HyperTraPS: their paper, as far as I can
-  tell, says nothing about possible evolutionary interpretations in terms of
-  selection, etc. This is purely a phenomenological model.
+  I think that none of this applies to HyperTraPS: their paper, as far as I can tell, says nothing about possible evolutionary interpretations in terms of selection, etc. This is purely a phenomenological model.
 
-  Thus, I do not see how we would try to map their model to explicit evolutionary
-  models. (This does not mean their model cannot be assessed using evolutionary
-  simulations, though).
+  Thus, I do not see how we would try to map their model to explicit evolutionary models. (This does not mean their model cannot be assessed using evolutionary simulations, though).
 
-  We need to think this, in case I am missing something. We also need to see if
-  some interpretations are available in some of the other HyperTraPS-related
-  papers:
+  
+ We need to think this, in case I am missing something. We also need to see if some interpretations are available in some of the other HyperTraPS-related papers: 
 
-
-  - Johnston, I. G., & R\oyrvik, Ellen C. (2020). Data-Driven Inference Reveals
-  Distinct and Conserved Dynamic Pathways of Tool Use Emergence across Animal
-  Taxa. iScience, 23(6), 101245. http://dx.doi.org/10.1016/j.isci.2020.101245
+  - Johnston, I. G., lR\oyrvik, Ellen C. (2020). Data-Driven Inference Reveals   Distinct and Conserved Dynamic Pathways of Tool Use Emergence across Animal  Taxa. iScience, 23(6), 101245. http://dx.doi.org/10.1016/j.isci.2020.101245
 
   
   
