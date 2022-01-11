@@ -10,17 +10,11 @@
 #' @return list$likelihood Float. Likelihood of the fit
 do_DBN <- function(data) {
   invisible(capture.output(out <- fitCPN(data, algorithm = "DP")))
-
-  thetas <- OncoBN:::inferTheta(data, out) 
-
-  # browser()
+  thetas <- OncoBN:::inferTheta(data, out)
   dbn_out <- create_data_frame_from_theta(thetas, colnames(data))
-
-
   return(list(
     edges = dbn_out
-              , 
-              thetas = thetas
+              , thetas = thetas
               , likelihood = out$score
               ))
 }
@@ -33,52 +27,53 @@ create_data_frame_from_theta <- function(thetas, gene_names) {
                         Edge = character(),
                         Theta = numeric(),
                         stringsAsFactors = FALSE)
-  thetas$parents <- lapply(thetas$parents, function(i) str_replace(i, "WT", "Root"))
+    thetas$parents <- lapply(thetas$parents,
+                             function(i) str_replace(i, "WT", "Root"))
 
-  for(i in c(1:(length(gene_names)))) {
+  for (i in c(1:(length(gene_names)))) {
     parent <- thetas$parents[[i]]
     gene <- gene_names[[i]]
     theta <- thetas$thetas[[i]]
 
-    if (length(parent) == 1) { ## May cause problems 
+    if (length(parent) == 1) { ## May cause problems
       edge <- paste(parent, gene, sep = "->")
       new_row <- list(parent, gene, edge, theta)
-      dbn_out <- rbind(dbn_out, new_row)  
+      dbn_out <- rbind(dbn_out, new_row)
     } else {
-      for (i in 1:length(parent)) {
+      for (i in seq_len(parent)) {
         edge <- paste(parent[i], gene, sep = "->")
         new_row <- list(parent[i], gene, edge, theta)
-        dbn_out <- rbind(dbn_out, new_row)  
+        dbn_out <- rbind(dbn_out, new_row)
       }
-
     }
   }
   colnames(dbn_out) <- c("From", "To", "Edge", "Thetas")
   return(dbn_out)
 }
 
-old_create_data_frame_from_theta <- function(data){  
+old_create_data_frame_from_theta <- function(data) {
   ## Ugly patch to get a clean data.frame from the output of inferTheta
   dbn_out <- data.frame(From = character(),
                         To = character(),
                         Edge = character(),
                         Theta = numeric(),
                         stringsAsFactors = FALSE)
-  data$parents <- lapply(data$parents, function(i) str_replace(i, "WT", "Root"))
-  for(i in c(1:(length(data$parents)))){
-    parent<- data$parents[[i]]
+    data$parents <- lapply(data$parents,
+                           function(i) str_replace(i, "WT", "Root"))
+  for (i in c(1:(length(data$parents)))) {
+    parent <- data$parents[[i]]
     child <- data$childs[[i]]
     theta <- data$thetas[[i]]
 
-    if (length(parent) == 1){ ## May cause problems 
-      edge <- paste(parent, child, sep="->")
+    if (length(parent) == 1) { ## May cause problems
+      edge <- paste(parent, child, sep = "->")
       new_row <- list(parent, child, edge, theta)
-      rbind(dbn_out,new_row) -> dbn_out
+      rbind(dbn_out, new_row) -> dbn_out
     } else {
-      for(i in 1:length(parent)){
-        edge <- paste(parent[i], child[i], sep="->")
+      for (i in seq_len(parent)) {
+        edge <- paste(parent[i], child[i], sep = "->")
         new_row <- list(parent[i], child[i], edge, theta)
-        rbind(dbn_out,new_row) -> dbn_out
+        rbind(dbn_out, new_row) -> dbn_out
       }
 
     }
