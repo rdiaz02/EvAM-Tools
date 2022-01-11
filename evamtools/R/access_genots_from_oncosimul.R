@@ -30,7 +30,9 @@
 ## Code for CBN and OT tested. For DBN not tested (nor fully implemented). For
 ## PMCE not tested.
 
-## For CBN, MCCBN, should allow to use time discretization. Not done yet. FIXME?
+## FIXME:
+## For CBN, MCCBN, should allow to use time discretization.
+##   But this requires proper definition of this process.
 
 
 ## Run as cpm2tm(cpm_output)
@@ -41,21 +43,13 @@
 ######################################################################
 
 
-## Required deps
-## Yes, slow. Will need to separate testing.
-# pwd0 <- getwd()
-# setwd("../R/")
-# source("code-all-methods-minimal.R")
-# setwd(pwd0)
-# rm(pwd0)
-
 
 ## TODO lots of things could be removed from this file
 
 ## fitness, target max fitness. WT fitness always 1.
 scale_fitness_2 <- function(x, max_f) {
     max_x <- max(x)
-    return(1.0 +  (x - 1) * ( (max_f - 1)/(max_x - 1) ))
+    return(1.0 +  (x - 1) * ((max_f - 1) / (max_x - 1)))
 }
 
 
