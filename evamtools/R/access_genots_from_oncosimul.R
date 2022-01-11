@@ -124,7 +124,7 @@ genots_2_fgraph_and_trans_mat <- function(x) {
     ##    genotypes with one extra mutation.
     ##  - Construct matrix of fitness differences between ancestor and immediate
     ##    descendants. Likely slow if many genotypes.
-    ##  - Set to non accessible if fitness difference < 0
+    ##  - Set to non accessible if fitness difference <= 0
 
     ##  Could be done faster, by not creating the unrestricted fitness graph
     ##  and instead maybe using OncoSimulR's wrap_accessibleGenotypes
@@ -157,8 +157,8 @@ genots_2_fgraph_and_trans_mat <- function(x) {
 
     fdiff <- mf - genots_fitness
     fdiff <- fgraph * fdiff
-
-    fgraph[fdiff < 0] <- 0
+    browser()
+    fgraph[fdiff <= 0] <- 0
     tm <- fdiff
     tm[tm < 0] <- 0
     tm <- tm / ifelse(rowSums(tm) != 0, rowSums(tm), 1)
