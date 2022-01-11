@@ -1,4 +1,5 @@
 import pdb
+import os
 import unittest
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
@@ -891,9 +892,67 @@ class evamtools_test_results(evamtools_basics):
         # Hit the "modify data" button 
         pass
 
-    def test_results_on_load():
-        ## Placeholder text to ask for runngin something
-        pass
+    def _get_cpm_table(self):
+        row_table = self.driver.find_elements_by_css_selector("#cpm_freqs tr")
+        row_text = [i.text.replace(", ", ",").split(" ") for i in row_table]
+        return row_text
+
+    def test_results_on_load(self):
+        ## Switch to results tab
+        self.driver.find_element_by_css_selector(".nav a[data-value=result_viewer]").click()
+        sleep(0.5)
+
+        ## Placeholder text to ask for running something
+        placeholder_text = self.driver.find_element_by_css_selector("#sims2 h3").text
+        assert(placeholder_text == "There are not results to show yet. Go to the input tab, select a dataset and hit the 'Run evamtools!' button")
+
+        download_button = self.driver.find_elements_by_css_selector("#download_cpm[disabled=disabled]")
+        assert(len(download_button) == 1)
+        assert(download_button[0].text == 'Download!')
+
+        ## Uploading data
+        upload = self.driver.find_element_by_css_selector("input#output_cpms[type=file]")
+        upload.send_keys(os.path.join(os.getcwd(), "test_data", "AND_test_cpm.RDS")) 
+        sleep(1)
+
+        ## Status changes after uploading some data
+
+        download_button = self.driver.find_elements_by_css_selector("#download_cpm")
+        assert(len(download_button) == 1)
+        assert(download_button[0].text == 'Download!')
+        download_button = self.driver.find_elements_by_css_selector("#download_cpm[disabled=disabled]")
+        assert(len(download_button) == 0)
+
+        ## Check status
+        active_cpms = self.driver.find_elements_by_css_selector("#cpm2show .checkbox input[checked=checked]")
+        active_cpms = [i.get_attribute("value") for i in active_cpms]
+        for i in active_cpms:
+            plot_sims_1 = self.driver.find_elements_by_css_selector(f"#plot_sims_{i}")
+            assert(len(plot_sims_1) == 1)
+            plot_sims_2 = self.driver.find_elements_by_css_selector(f"#plot_sims_{i}")
+            assert(len(plot_sims_2) == 1)
+        
+        ## Check table
+        table_info = self._get_cpm_table()
+        assert(table_info[0][1:] == active_cpms)
+
+        ## Check name of downloaded file
+        download_button = self.driver.find_element_by_css_selector("#download_cpm").click()
+        sleep(1)
+        os.chdir(os.path.join(os.path.expanduser("~"), "Downloads"))
+        last_created_file = sorted(filter(os.path.isfile, os.listdir('.')), key=os.path.getmtime)[-1]
+        assert(last_created_file[-4:] == ".RDS")
+        os.remove(last_created_file)
+
+        ## Check functionality of 'Modify data' button
+        self.driver.find_element_by_css_selector("#modify_data").click()
+        sleep(1)
+
+        status = self._get_status()
+        assert(status["number_of_genes"] == 4)
+        assert(status["selected_dataset"] == "AND_test")
+        assert(status["selected_input2build"] == "csd")
+        assert(status["gene_names"] == ["A", "B", "C", "D"])
 
     def test_results_on_CSD(self):
         ## Load data
