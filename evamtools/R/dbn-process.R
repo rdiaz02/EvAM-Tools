@@ -1,5 +1,5 @@
-library(OncoBN)
-source("../External-code/DBN/dbn-external.R")
+## library(OncoBN)
+## source("../External-code/DBN/dbn-external.R")
 
 
 #' Run DBN on data
