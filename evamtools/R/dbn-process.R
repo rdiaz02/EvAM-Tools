@@ -11,7 +11,7 @@ source("../External-code/DBN/dbn-external.R")
 do_DBN <- function(data) {
   invisible(capture.output(out <- fitCPN(data, algorithm = "DP")))
 
-  thetas <- inferTheta(data, out) 
+  thetas <- OncoBN:::inferTheta(data, out) 
 
   # browser()
   dbn_out <- create_data_frame_from_theta(thetas, colnames(data))
