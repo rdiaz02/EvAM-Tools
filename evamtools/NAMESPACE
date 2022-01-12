@@ -1,17 +1,22 @@
-
-export("indiv_sample_from_trm_pre", "population_sample_from_trm"
-    , "all_methods_2_trans_mat"
-    , "do_DBN", "do_HESBCN", "do_MHN2"
-    , "process_samples", "sample_all_CPMs"
-    , "cpm2tm"
-    , "plot_sampled_genots", "inner_transitionRate_3_1", "theta_to_trans_rate_3_SM", 
-    "plot_genot_fg", "plot_DAG_fg", "runShiny", "process_data", "evamtools_pipeline")
+export("indiv_sample_from_trm_pre"
+     , "population_sample_from_trm"
+     , "all_methods_2_trans_mat"
+     , "do_DBN", "do_HESBCN", "do_MHN2"
+     , "process_samples", "sample_all_CPMs"
+     , "cpm2tm"
+     , "plot_sampled_genots", "inner_transitionRate_3_1"
+     , "theta_to_trans_rate_3_SM"
+     , "plot_genot_fg", "plot_DAG_fg", "runShiny"
+     , "process_data", "evamtools_pipeline")
 
 importFrom("grDevices", "rgb")
 importFrom("graphics", "axis", "legend", "lines", "par")
-importFrom("stats", "aggregate", "chisq.test", "decompose", "na.omit", "rexp", "runif", "rnorm", "optim")
-importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert", "write.csv")
+importFrom("stats", "aggregate", "chisq.test", "decompose", "na.omit", "rexp",
+           "runif", "rnorm", "optim")
+importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert",
+           "write.csv")
 importFrom("Matrix", "diag", "rowSums", "colSums", "summary")
 importFrom("OncoSimulR", "sampledGenotypes")
 importFrom("stringr", "str_count")
 importFrom("parallel", "detectCores", "mclapply")
+importFrom("OncoBN", "fitCPN")

@@ -1,3 +1,16 @@
+## Code from https://github.com/BIMIB-DISCo/PMCE/blob/main/Utilities/R/utils.R
+## Commit 5578c79 from 2021-09-29
+
+## License: Apache License 2.0, which is compatible with the GPL 3 used by
+## the rest of this project.
+
+## Author of code: from commit history, most likely D. Ramazotti (danro9685)
+
+## Authors of project: F. Angaroni, K. Chen, C. Damiani, G. Caravagna,
+## A. Graudenzi, D. Ramazotti
+
+
+
 "import.hesbcn" <- function( file, genes = NULL ) {
 
     # read results from file
