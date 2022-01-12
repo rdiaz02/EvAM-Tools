@@ -396,7 +396,7 @@ server <- function(input, output, session) {
     )
     data <- reactiveValues(
         csd_freqs =  template_csd_freqs
-        , complete_csd = NULL
+        , data = NULL
         , dag = template_dag
         , dag_parent_set = template_parent_set
         , lambdas = template_lambdas
@@ -552,7 +552,7 @@ server <- function(input, output, session) {
     })
 
     toListen <- reactive({
-        list(input$select_csd, input$input2build, input$modify_data)
+        list(input$select_csd, input$input2build)
     })
 
     observeEvent(toListen(), {
@@ -1111,7 +1111,6 @@ server <- function(input, output, session) {
             cpm_output$Source_theta <- data$thetas[1:input$gene_number
                 , 1:input$gene_number]
         }
-
         # n_samples <- 100 ## To be replaced by input$something
         n_samples <- 100 
         progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
@@ -1121,7 +1120,7 @@ server <- function(input, output, session) {
         Sys.sleep(0.5)
         new_data$MHN_f_graph <- new_data$MHN_transitionRateMatrix
         new_data$OT_f_graph <- NULL
-        orig_data <- list(complete_csd = data2run, name = data$name
+        orig_data <- list(data = data2run, name = data$name
             , type = input$input2build, gene_names = data$gene_names
             , thetas = data$thetas, lambdas = data$lambdas
             , dag = data$dag, dag_parent_set = data$dag_parent_set)
@@ -1138,17 +1137,21 @@ server <- function(input, output, session) {
         last_visited_cpm <<- result_name
         updateRadioButtons(session, "select_cpm", selected = result_name)
         progress$inc(5/5, detail = "You can see your result by going to the Results tab")
+        Sys.sleep(1)
         shinyjs::enable("analysis")
-        Sys.sleep(3)
-        ## To see if I disable original data
-        if(input$input2build != "csd"){
-            updateCheckboxGroupInput(session, "cpm2show", 
-                selected = setdiff(c(input$cpm2show), "Source"))
-            shinyjs::enable(selector = "#cpm2show input[value='Source']")
-        } 
+        
         ## Maybe I do no want this
-        # updateTabsetPanel(session, "navbar", selected = "result_viewer")
-        # updateRadioButtons(session, "select_cpm", selected = input$select_csd)
+        updateTabsetPanel(session, "navbar", selected = "result_viewer")
+        updateRadioButtons(session, "select_cpm", selected = result_name)
+
+        # selected <- ifelse(is.null(input$select_cpm), last_visited_cpm, input$select_cpm)
+        # if(is.null(all_cpm_out$output[[selected]]$Source_genotype_transitions)){
+        #     updateCheckboxGroupInput(session, "cpm2show", 
+        #         selected = setdiff(c(input$cpm2show), "Source"))
+        #     shinyjs::disable(selector = "#cpm2show input[value='Source']")
+        # }else{
+        #     shinyjs::enable(selector = "#cpm2show input[value='Source']")
+        # }
     })
     
     output$cpm_freqs <- DT::renderDT(genotype_freq_df(),  
@@ -1158,7 +1161,12 @@ server <- function(input, output, session) {
             columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE)
     )
 
-    all_cpm_out <- reactiveValues(output = list())
+    cpm_out <- readRDS("./test_data/AND_test_cpm.RDS")
+    cpm_out$MHN_f_graph <- cpm_out$MHN_transitionRateMatrix
+    
+    all_cpm_out <- reactiveValues(output = list(user = cpm_out))
+
+    # all_cpm_out <- reactiveValues(output = list())
 
     output$sims <- renderUI({
         if(length(all_cpm_out$output) > 0){
@@ -1248,24 +1256,26 @@ server <- function(input, output, session) {
         }
     })
 
-    ## Go back to input to work again with the input
+    ## Go back to input to work again with the data
     observeEvent(input$modify_data, {
         if(length(all_cpm_out$output) > 0){
             tmp_data <- all_cpm_out$output[[input$select_cpm]]$source_data
-            datasets$all_csd[[tmp_data$type]][[input$select_cpm]] <- standarize_dataset(tmp_data)
             last_visited_pages[[tmp_data$type]] <<- input$select_cpm
+            tmp_data <- datasets$all_csd[[tmp_data$type]][[input$select_cpm]] <- standarize_dataset(tmp_data)
+            
+            data <- tmp_data 
+            data$csd_freqs <- get_csd(tmp_data$data)
+            data$n_genes <- ncol(data$data)
+            
+            updateNumericInput(session, "gene_number", value = data$n_genes)
             updateTabsetPanel(session, "navbar",
                 selected = "csd_builder")
             updateRadioButtons(session, "input2build", selected = tmp_data$type)
+            updateRadioButtons(session, "select_csd", selected = input$select_cpm)
         }
     })
 
-    observeEvent(input$modify_data, {
-        tmp_data <- all_cpm_out$output[[input$select_cpm]]$source_data
-    })
-
     output$customize <- renderUI({
-        if(length(all_cpm_out$output) > 0){
             tags$div(class = "frame",
                 tags$h3("2. Customize the visualization"),
                 tags$div(class = "inline",
@@ -1289,7 +1299,7 @@ server <- function(input, output, session) {
                   value = 0.05, max = 1, min = 0, step = 0.05)
               )
             )
-        }
+        # }
     })
 
     output$cpm_list <- renderUI({
@@ -1316,6 +1326,7 @@ server <- function(input, output, session) {
     })
 
     output$original_data <- renderUI({
+        ## To see if I disable original data
         if(length(all_cpm_out$output) > 0){
             tags$div(class="frame max_height",
                 tags$h3("3. The original data"),

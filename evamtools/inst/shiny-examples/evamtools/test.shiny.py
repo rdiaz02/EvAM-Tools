@@ -1,6 +1,7 @@
 import pdb
 import os
 import unittest
+from unittest.case import expectedFailure
 from selenium import webdriver
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
@@ -45,18 +46,23 @@ class evamtools_basics(unittest.TestCase):
         row_text = [i.text for i in row_table]
         return row_text
 
+    def _go_to(self, where):
+        self.driver.find_element_by_css_selector(f".nav a[data-value={where}]").click()
+        sleep(0.5)
+
     def _modify_genotype(self, genotype = None, freq = None):
         if genotype:
             for gene in genotype.split(", "):
                 input_gene = self.driver.find_element_by_css_selector(
                     f"#genotype input[value={gene}]")
                 input_gene.find_element_by_xpath('..').click()
-        
+        sleep(0.5)
         if freq != None:
             genotype_freq = self.driver.find_element_by_css_selector("#genotype_freq")
             genotype_freq.clear()
             genotype_freq.send_keys(freq)
 
+        sleep(0.5)
         self.driver.find_element_by_css_selector("#add_genotype").click()
         sleep(1)
 
@@ -67,6 +73,11 @@ class evamtools_basics(unittest.TestCase):
         if(name_dataset):
             dataset_tab = self.driver.find_element_by_css_selector(f"#select_csd .radio input[value={name_dataset}]")
             dataset_tab.click()
+        sleep(0.5)
+    
+    def _select_result(self, cpm_name):
+        dataset_tab = self.driver.find_element_by_css_selector(f"#cpm_list .radio input[value={cpm_name}]")
+        dataset_tab.click()
         sleep(0.5)
 
     def _process_genotype_table(self, data):
@@ -142,7 +153,7 @@ class evamtools_basic_functionality(evamtools_basics):
 
     def test_load_csv_dataset(self):
         upload = self.driver.find_element_by_css_selector(".upload_file input[type=file]")
-        upload.send_keys("/home/pablo/Downloads/sample_csd/good_csd.csv")
+        upload.send_keys(os.path.join(os.getcwd(), "test_data", "good_csd.csv"))
         sleep(2)
         status = self._get_status()
         assert(status["number_of_genes"] == 4)
@@ -152,13 +163,13 @@ class evamtools_basic_functionality(evamtools_basics):
 
     def test_load_corrupt_csv_dataset(self):
         upload = self.driver.find_element_by_css_selector(".upload_file input[type=file]")
-        upload.send_keys("/home/pablo/Downloads/sample_csd/bad_csd.csv")
+        upload.send_keys(os.path.join(os.getcwd(), "test_data", "bad_csd.csv"))
         error_message = self._get_error_message()
         assert(error_message, "Your csv data can not be loaded. Make sure it only contains 0 and 1.")
     
     def test_load_CSD_dataset(self):
         upload = self.driver.find_element_by_css_selector(".upload_file input[type=file]")
-        upload.send_keys("/home/pablo/Downloads/sample_csd/FREQ_csd.RDS")
+        upload.send_keys(os.path.join(os.getcwd(), "test_data", "FREQ_csd.RDS"))
         sleep(2)
         status = self._get_status()
         assert(status["number_of_genes"] == 4)
@@ -168,7 +179,7 @@ class evamtools_basic_functionality(evamtools_basics):
 
     def test_load_DAG_dataset(self):
         upload = self.driver.find_element_by_css_selector(".upload_file input[type=file]")
-        upload.send_keys("/home/pablo/Downloads/sample_csd/DAG_csd.RDS")
+        upload.send_keys(os.path.join(os.getcwd(), "test_data", "DAG_csd.RDS"))
         sleep(2)
         status = self._get_status("dag")
         assert(status["number_of_genes"] == 4)
@@ -178,7 +189,7 @@ class evamtools_basic_functionality(evamtools_basics):
 
     def test_load_MATRIX_dataset(self):
         upload = self.driver.find_element_by_css_selector(".upload_file input[type=file]")
-        upload.send_keys("/home/pablo/Downloads/sample_csd/MHN_csd.RDS")
+        upload.send_keys(os.path.join(os.getcwd(), "test_data", "MHN_csd.RDS"))
         sleep(2)
         status = self._get_status("matrix")
         print(status)
@@ -885,12 +896,61 @@ class test_matrix_input(evamtools_basics):
 
 ## TESTING RESULTS
 class evamtools_test_results(evamtools_basics):
+    def _compare_table(self, input2build):
+        available_cpms = active_cpms = self.driver.find_elements_by_css_selector("#cpm2show .checkbox input")
+        available_cpms = [i.get_attribute("value") for i in active_cpms]
+
+        keep_source = input2build != "csd"
+
+        tabular_types = {
+            "f_graph": [],
+            "genotype_transitions": [],
+            "freqs": [],
+            "trans_mat": [],
+            "lambdas": [],
+            "td_trans_mat": [],
+        }
+
+        table_info = self._get_cpm_table()
+
+
     def _basic_results_test(self, data):
-        ## Download/upload results
-        # Visualization: count number of plots
-        # Tabular data
-        # Hit the "modify data" button 
-        pass
+        ## Check status
+        pdb.set_trace()
+        active_cpms = self.driver.find_elements_by_css_selector("#cpm2show .checkbox input[checked=checked]")
+        active_cpms = [i.get_attribute("value") for i in active_cpms]
+        for i in active_cpms:
+            plot_sims_1 = self.driver.find_elements_by_css_selector(f"#plot_sims_{i}")
+            assert(len(plot_sims_1) == 1)
+            plot_sims_2 = self.driver.find_elements_by_css_selector(f"#plot_sims_{i}")
+            assert(len(plot_sims_2) == 1)
+        
+        ## Check table
+        sleep(1)
+        table_info = self._get_cpm_table()
+        assert(table_info[0][1:] == active_cpms)
+
+        ## Check name of downloaded file
+        download_button = self.driver.find_element_by_css_selector("#download_cpm").click()
+        sleep(1)
+        os.chdir(os.path.join(os.path.expanduser("~"), "Downloads"))
+        last_created_file = sorted(filter(os.path.isfile, os.listdir('.')), key=os.path.getmtime)[-1]
+        assert(last_created_file[-4:] == ".RDS")
+        os.remove(last_created_file)
+        
+        ## Check wether "source" should be dissabled
+        source_option = self.driver.find_element_by_css_selector("#cpm2show input[value=Source]")
+        assert(source_option.is_enabled() == (data["tab"] != "csd" ))
+
+        ## Check functionality of 'Modify data' button
+        self.driver.find_element_by_css_selector("#modify_data").click()
+        sleep(1)
+
+        status = self._get_status()
+        assert(status["number_of_genes"] == data["number_of_genes"])
+        assert(status["selected_dataset"] == data["name"])
+        assert(status["selected_input2build"] == data["tab"])
+        assert(status["gene_names"] == data["gene_names"])
 
     def _get_cpm_table(self):
         row_table = self.driver.find_elements_by_css_selector("#cpm_freqs tr")
@@ -899,16 +959,17 @@ class evamtools_test_results(evamtools_basics):
 
     def test_results_on_load(self):
         ## Switch to results tab
-        self.driver.find_element_by_css_selector(".nav a[data-value=result_viewer]").click()
-        sleep(0.5)
+        self._go_to("result_viewer")
+        
 
         ## Placeholder text to ask for running something
-        placeholder_text = self.driver.find_element_by_css_selector("#sims2 h3").text
-        assert(placeholder_text == "There are not results to show yet. Go to the input tab, select a dataset and hit the 'Run evamtools!' button")
+        # sleep(1)
+        # placeholder_text = self.driver.find_element_by_css_selector("#sims2 h3").text
+        # assert(placeholder_text == "There are not results to show yet. Go to the input tab, select a dataset and hit the 'Run evamtools!' button")
 
-        download_button = self.driver.find_elements_by_css_selector("#download_cpm[disabled=disabled]")
-        assert(len(download_button) == 1)
-        assert(download_button[0].text == 'Download!')
+        # download_button = self.driver.find_elements_by_css_selector("#download_cpm[disabled=disabled]")
+        # assert(len(download_button) == 1)
+        # assert(download_button[0].text == 'Download!')
 
         ## Uploading data
         upload = self.driver.find_element_by_css_selector("input#output_cpms[type=file]")
@@ -923,57 +984,99 @@ class evamtools_test_results(evamtools_basics):
         download_button = self.driver.find_elements_by_css_selector("#download_cpm[disabled=disabled]")
         assert(len(download_button) == 0)
 
-        ## Check status
-        active_cpms = self.driver.find_elements_by_css_selector("#cpm2show .checkbox input[checked=checked]")
-        active_cpms = [i.get_attribute("value") for i in active_cpms]
-        for i in active_cpms:
-            plot_sims_1 = self.driver.find_elements_by_css_selector(f"#plot_sims_{i}")
-            assert(len(plot_sims_1) == 1)
-            plot_sims_2 = self.driver.find_elements_by_css_selector(f"#plot_sims_{i}")
-            assert(len(plot_sims_2) == 1)
-        
-        ## Check table
-        table_info = self._get_cpm_table()
-        assert(table_info[0][1:] == active_cpms)
-
-        ## Check name of downloaded file
-        download_button = self.driver.find_element_by_css_selector("#download_cpm").click()
-        sleep(1)
-        os.chdir(os.path.join(os.path.expanduser("~"), "Downloads"))
-        last_created_file = sorted(filter(os.path.isfile, os.listdir('.')), key=os.path.getmtime)[-1]
-        assert(last_created_file[-4:] == ".RDS")
-        os.remove(last_created_file)
-
-        ## Check functionality of 'Modify data' button
-        self.driver.find_element_by_css_selector("#modify_data").click()
-        sleep(1)
-
-        status = self._get_status()
-        assert(status["number_of_genes"] == 4)
-        assert(status["selected_dataset"] == "AND_test")
-        assert(status["selected_input2build"] == "csd")
-        assert(status["gene_names"] == ["A", "B", "C", "D"])
+        expected_data = {"tab": "csd", "gene_names": ["A", "B", "C", "D"],
+            "name": "AND_test", "number_of_genes": 4}
+        self._basic_results_test(expected_data)     
 
     def test_results_on_CSD(self):
         ## Load data
+        self._select_tab("csd", "AND")
+        sleep(0.5)
+
         ## Modify data
+        self._modify_genotype("A", 500)
+        self._modify_genotype("A, B", 50)
+
         ## Save data 
+        new_dataset_name = "AND_new"
+        dataset_name = self.driver.find_element_by_css_selector("input#dataset_name")
+        dataset_name.clear()
+        dataset_name.send_keys(new_dataset_name)
+        sleep(0.5)
+        save_button = self.driver.find_element_by_id("save_csd_data")
+        save_button.click()
+        sleep(1)
+
         ## Run analysis
+        self.driver.find_element_by_css_selector("#analysis").click()
+        sleep(1)
+        self._select_tab("csd", "User")
+        sleep(10)
 
-        ## Test
-        # Source display should not be available     
-        pass
+        ## Check new status
+        self._go_to("result_viewer")
+        self._select_result(new_dataset_name)
+        
+        expected_data = {"tab": "csd", "gene_names": ["A", "B", "C", "D"],
+            "name": new_dataset_name, "number_of_genes": 4}
+        self._basic_results_test(expected_data) 
 
-    def test_results_on_DAG(self):
+    # def test_results_on_DAG(self):
+    #     ## Load data
+    #     self._select_tab("dag")
+    #     sleep(0.5)
+
+    #     ## Modify data
+    #     slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
+    #     move = ActionChains(self.driver)
+    #     move.click_and_hold(slider_input).move_by_offset(100, 0).release().perform()
+    #     sleep(0.5)
+
+    #     self._add_edge("Root", "B")
+    #     self._add_edge("B", "C")
+    #     self._add_edge("C", "D")
+    #     new_gene_names = ["A", "B1", "C", "D3"]
+    #     self._change_gene_names(new_gene_names)
+
+
+    #     self.driver.find_element_by_css_selector("#resample_dag").click()
+    #     sleep(5)
+
+    #     ## Save data 
+    #     new_dataset_name = "DAG_new"
+    #     dataset_name = self.driver.find_element_by_css_selector("input#dataset_name")
+    #     dataset_name.clear()
+    #     dataset_name.send_keys(new_dataset_name)
+    #     sleep(0.5)
+    #     save_button = self.driver.find_element_by_id("save_csd_data")
+    #     save_button.click()
+    #     sleep(1)
+        
+    #     ## Run analysis
+    #     self.driver.find_element_by_css_selector("#analysis").click()
+    #     sleep(1)
+    #     self._select_tab("csd", "User")
+    #     sleep(10)
+
+    #     ## Check new status
+    #     self._go_to("result_viewer")
+    #     self._select_result(new_dataset_name)
+        
+    #     expected_data = {"tab": "dag", "gene_names": ["A", "B1", "C", "D3"],
+    #         "name": new_dataset_name, "number_of_genes": 4}
+    #     self._basic_results_test(expected_data) 
+
+    def test_results_on_Matrix(self):
         ## Load data
         ## Modify data
+
         ## Save data 
         ## Run analysis
 
         # Source display should be available
         pass
-
-    def test_results_on_Matrix(self):
+    
+    def test_running_MCCBN(self):
         ## Load data
         ## Modify data
         ## Save data 
