@@ -32,6 +32,9 @@ do_HESBCN <- function(data, n_steps=100000,
 
     setwd(tmp_folder)
 
+    orig_gene_names <- colnames(data)
+    colnames(data) <- LETTERS[1:ncol(data)]
+
     write.csv(data, "input.txt", row.names = FALSE, quote = FALSE)
  
     # Launching
@@ -46,15 +49,15 @@ do_HESBCN <- function(data, n_steps=100000,
     system(command, ignore.stdout = TRUE)
 
     # Reading output
-    model_info <- import.hesbcn("output.txt")
+    model_info <- import.hesbcn("output.txt", genes = orig_gene_names)
 
     # Updating gene names
-    gene_names <- colnames(data)
-    names(model_info$parent_set) <- gene_names
-    rownames(model_info$lambdas_matrix) <-
-    colnames(model_info$lambdas_matrix) <-
-    rownames(model_info$adjacency_matrix) <-
-    colnames(model_info$adjacency_matrix) <- c("Root", gene_names)
+    # gene_names <- orig_gene_names
+    # names(model_info$parent_set) <- gene_names
+    # rownames(model_info$lambdas_matrix) <-
+    # colnames(model_info$lambdas_matrix) <-
+    # rownames(model_info$adjacency_matrix) <-
+    # colnames(model_info$adjacency_matrix) <- c("Root", gene_names)
 
     indexes_array <- data.frame(which(model_info$lambdas_matrix > 0, arr.ind = TRUE))
     indexes_list <- which(model_info$lambdas_matrix > 0, arr.ind = TRUE)
