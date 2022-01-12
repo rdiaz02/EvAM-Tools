@@ -209,7 +209,7 @@ process_samples <- function(sim, n_genes, gene_names = NULL, output = c("frequen
 
     #Calculate frequencies
     if(out_params["frequencies"]){
-        frequencies <- sample_to_pD_order(sim$obs_events, n_genes)
+        frequencies <- sample_to_pD_order(sim$obs_events, n_genes, gene_names)
         frequencies <- data.frame(
             Genotype = sorted_genotypes,
             Counts = frequencies
@@ -238,7 +238,7 @@ process_samples <- function(sim, n_genes, gene_names = NULL, output = c("frequen
 
     #Calculate state_counts
     if(out_params["state_counts"]){
-        state_counts <- sample_to_pD_order(unlist(sim$trajectory), n_genes)
+        state_counts <- sample_to_pD_order(unlist(sim$trajectory), n_genes, gene_names)
         state_counts <- data.frame(
             Genotype = sorted_genotypes,
             Counts = state_counts
@@ -283,7 +283,7 @@ sample_all_CPMs <- function(cpm_output
             output[[sprintf("%s_genotype_transitions", method)]] <- psamples$transitions
             output[[sprintf("%s_genotype_freqs", method)]] <- psamples$frequencies
         } 
-        else output[[sprintf("%s_genotype_transitions", method)]] <- NA
+        else output[[sprintf("%s_genotype_transitions", method)]] <- NULL
         
     }
 
@@ -331,14 +331,15 @@ evamtools_pipeline <- function(data){
 #' @param ngenes total number of genes
 #' 
 #' @return counts of all genotypes in same order as used by MHN
-sample_to_pD_order <- function(x, ngenes) {
+sample_to_pD_order <- function(x, ngenes, gene_names = NULL) {
+    if(is.null(gene_names)) gene_names <- LETTERS[1:ngenes]
     x <- as.data.frame(table(x), stringsAsFactors = FALSE)
     
     genot_int <- x[, 1]
     genot_int <- gsub("WT", "", genot_int)
     genot_int <- vapply(genot_int,
                         function(z)
-                            State.to.Int(as.integer(LETTERS[1:ngenes] %in%
+                            State.to.Int(as.integer(gene_names %in%
                                                     strsplit(z, ", ")[[1]])),
                         numeric(1))
     ## all_genots <- rep(unname(genot_int), x[, 2])
