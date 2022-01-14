@@ -130,6 +130,13 @@ genots_2_fgraph_and_trans_mat <- function(x) {
     ##  and instead maybe using OncoSimulR's wrap_accessibleGenotypes
     ##  But would need to check that works with partial lists of genotypes
     ##  and use allGenotypes_to_matrix.
+
+    ## FIXME: use igraph's function to all genots as destinations?
+    ## NOPE! use wrap_accessibleGenotypes for accessible
+    ##      what for fitness graph?
+    ##      and this code for transition
+    ##      And then, check for consistency.
+
     
     which_wt <- which(names(x) == "WT")
     if(length(which_wt) == 1) {
@@ -157,7 +164,6 @@ genots_2_fgraph_and_trans_mat <- function(x) {
 
     fdiff <- mf - genots_fitness
     fdiff <- fgraph * fdiff
-    browser()
     fgraph[fdiff <= 0] <- 0
     tm <- fdiff
     tm[tm < 0] <- 0

@@ -4,6 +4,20 @@
 # setwd(pwd2)
 # rm(pwd2)
 
+## FIXME: do this properly: no local, use testthat
+
+test_that("Genotype not accessible if no increase in fitness wrt to ancestor", {
+    x1 <- c("WT" = 1, "A" = 2, "B" = 1, "A, B" = 2.5)
+    ox1 <- genots_2_fgraph_and_trans_mat(x1)
+    expect_equal(ox1$accessible_genotypes, c("A" = 2.0, "A, B" = 2.5))
+
+    ## FIXME: this shows current code is wrong!
+    x2 <- c("WT" = 1, "A" = 2, "B" = 1, "A, B" = 2)
+    ox2 <- genots_2_fgraph_and_trans_mat(x2)
+    expect_equal(ox2$accessible_genotypes, c("A" = 2.0))
+})
+
+
 local({
     ## From ex1.R
 ex_cbn_out1 <- structure(list(From = c("Root", "Root"),
