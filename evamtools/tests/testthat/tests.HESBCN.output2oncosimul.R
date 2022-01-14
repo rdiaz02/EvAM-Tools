@@ -14,6 +14,7 @@ compare_HESBCN_cpm2tm <- function(codename){
 }
 
 test_that("HESBCN gives the same results as OncoSimul", {
+    source("../../data/toy_datasets.R")
     for (i in names(all_examples_csd)){
             compare_methods <- compare_HESBCN_cpm2tm(i)
         }
