@@ -113,8 +113,87 @@ cpm_to_fitness_genots <- function(x, max_f = NULL, sh = -Inf, max_genots = 2^15)
 }
 
 
+## ## named vector of genotype fitness -> fitness graph and transition matrix and
+## ##                                     accessible genotypes
+## ##   We assume WT is 1 if not given explicitly
+## ##   An approach, not finished, using OncoSimulR's wrap_accessibleGenotypes
+## genots_2_fgraph_and_trans_mat_wrap_accessible_genotypes <- function(x) {
+##     ## Logic:
+##     ##  - Construct a fully connected fitness graph
+##     ##    between the given genotypes. So any genotype connected to
+##     ##    genotypes with one extra mutation.
+##     ##  - Construct matrix of fitness differences between ancestor and immediate
+##     ##    descendants. Likely slow if many genotypes.
+##     ##  - Set to non accessible if fitness difference <= 0
+
+##     ## FIXME
+##     ##  can I just call wrap_accessibleGenotypes on partial lists of genotypes?
+##     ## Not verified
+    
+##     if(!is.data.frame(x)) {
+##         df1 <- data.frame(Genotype = names(x),
+##                           Fitness = x)
+##         x <- df1
+##     }
+##     fitness_mat <- OncoSimulR:::allGenotypes_to_matrix(x)
+
+##     ## FIXME now, on fitness_mat, use wrap_accessibleGenotypes
+##     ## BUT!!! the th is such that it is accessible if difference >= th
+##     ## so we would need, to make inaccessible if diff = 0, use a kludge
+##     ## setting th to minimal double. Or else change OncoSimulR.
+
+##     ## Do the next with the data frame
+##     which_wt <- which(names(x) == "WT")
+##     if(length(which_wt) == 1) {
+##         fit_wt <- x["WT"]
+##         if(fit_wt != 1.0) message("Your WT has fitness different from 1.",
+##                                   " Using WT with the fitness you provided.")
+##         x <- x[-which_wt]
+##     } else {
+##         fit_wt <- c("WT" = 1.0)
+##     }
+
+
+    
+##     ## Silly? Inside the next, we now put them together. FIXME?
+##     access_genots_as_list <- lapply(names(x),
+##                                     function(v) strsplit(v, ", ")[[1]])
+##     ## For ordered output
+##     no <-  order(unlist(lapply(access_genots_as_list, length)), names(x))
+##     access_genots_as_list <- access_genots_as_list[no]
+    
+##     fgraph <- unrestricted_fitness_graph_sparseM(access_genots_as_list)
+    
+##     genots_fitness <- c(fit_wt, x)[colnames(fgraph)]
+##     mf <- matrix(rep(genots_fitness, nrow(fgraph)),
+##                  nrow = nrow(fgraph), byrow = TRUE)
+##     stopifnot(identical(dim(mf), dim(fgraph)))
+
+##     fdiff <- mf - genots_fitness
+##     fdiff <- fgraph * fdiff
+##     fgraph[fdiff <= 0] <- 0
+##     tm <- fdiff
+##     tm[tm < 0] <- 0
+##     tm <- tm / ifelse(rowSums(tm) != 0, rowSums(tm), 1)
+##     ## This we know is always 0
+##     tm[nrow(tm), ] <- 0
+##     ## This we can set
+##     tm[rowSums(fgraph) == 0, ] <- 0
+##     accessible_genotypes <- genots_fitness[colnames(fgraph)[colSums(fgraph) >= 1]]
+
+##     return(list(fitness_graph = fgraph,
+##            transition_matrix = tm,
+##            fitness_differences = fdiff,
+##            accessible_genotypes = accessible_genotypes))
+
+## }
+
+
+
+
 ## named vector of genotype fitness -> fitness graph and transition matrix and
 ##                                     accessible genotypes
+##                                   Only accessible genotypes shown in output.
 ##   We assume WT is 1 if not given explicitly
 ##   BEWARE: only tested with one minimal test, and by comparing against CBN and OT!! 
 genots_2_fgraph_and_trans_mat <- function(x) {
@@ -129,24 +208,19 @@ genots_2_fgraph_and_trans_mat <- function(x) {
     ##  Could be done faster, by not creating the unrestricted fitness graph
     ##  and instead maybe using OncoSimulR's wrap_accessibleGenotypes
     ##  But would need to check that works with partial lists of genotypes
-    ##  and use allGenotypes_to_matrix.
+    ##  and use allGenotypes_to_matrix. And would need to change
+    ##  OncoSimulR's wrap_accessibleGenotype and how it uses the th.
 
-    ## FIXME: use igraph's function to all genots as destinations?
-    ## NOPE! use wrap_accessibleGenotypes for accessible
-    ##      what for fitness graph?
-    ##      and this code for transition
-    ##      And then, check for consistency.
-
-    
     which_wt <- which(names(x) == "WT")
-    if(length(which_wt) == 1) {
+    if (length(which_wt) == 1) {
         fit_wt <- x["WT"]
-        if(fit_wt != 1.0) message("Your WT has fitness different from 1.",
+        if (fit_wt != 1.0) message("Your WT has fitness different from 1.",
                                   " Using WT with the fitness you provided.")
         x <- x[-which_wt]
     } else {
         fit_wt <- c("WT" = 1.0)
     }
+
     
     ## Silly? Inside the next, we now put them together. FIXME?
     access_genots_as_list <- lapply(names(x),
@@ -154,9 +228,9 @@ genots_2_fgraph_and_trans_mat <- function(x) {
     ## For ordered output
     no <-  order(unlist(lapply(access_genots_as_list, length)), names(x))
     access_genots_as_list <- access_genots_as_list[no]
-    
+
     fgraph <- unrestricted_fitness_graph_sparseM(access_genots_as_list)
-    
+
     genots_fitness <- c(fit_wt, x)[colnames(fgraph)]
     mf <- matrix(rep(genots_fitness, nrow(fgraph)),
                  nrow = nrow(fgraph), byrow = TRUE)
@@ -172,14 +246,38 @@ genots_2_fgraph_and_trans_mat <- function(x) {
     tm[nrow(tm), ] <- 0
     ## This we can set
     tm[rowSums(fgraph) == 0, ] <- 0
-    accessible_genotypes <- genots_fitness[colnames(fgraph)[colSums(fgraph) >= 1]]
 
-    return(list(fitness_graph = fgraph,
-           transition_matrix = tm,
-           fitness_differences = fdiff,
-           accessible_genotypes = accessible_genotypes))
+    ## First simple filtering for potentially expensive call to igraph
+    accessible_genotypes_candidates <-
+        genots_fitness[colnames(fgraph)[colSums(fgraph) >= 1]]
+
+    ig_fgraph <- igraph::graph_from_adjacency_matrix(fgraph)
+
+    num_paths_from_WT <-
+        vapply(names(accessible_genotypes_candidates),
+               function(x)
+                   length(igraph::all_simple_paths(ig_fgraph,
+                                                   from = "WT",
+                                                   to = x, mode = "out")),
+               FUN.VALUE = 0)
+
+    accessible_genotypes <-
+        accessible_genotypes_candidates[num_paths_from_WT > 0]
+
+    ## Remove unaccessibe genotypes from matrices before returning
+    name_ret <- c("WT", names(accessible_genotypes))
+
+    return(
+        list(fitness_graph = fgraph[name_ret, name_ret],
+             transition_matrix = tm[name_ret, name_ret],
+             fitness_differences = fdiff[name_ret, name_ret],
+             accessible_genotypes = accessible_genotypes))
 
 }
+
+
+
+
 
 ## output from CPMs,  max final fitness, sh if restrictions not satisfied,
 ##               max num genots ->
@@ -189,13 +287,22 @@ genots_2_fgraph_and_trans_mat <- function(x) {
 ##    max_f  should have no effect in probs transition
 ##    accessible_genotypes: gives the genotypes and their fitness,
 ##                          computed from the lambdas (thetas) and possibly scaled
+##   By default, WT has fitness 1.
 cpm_to_trans_mat_oncosimul <- function(x, max_f = NULL, sh = -Inf,
-                                       max_genots = 2^15) {
+                                       max_genots = 2^15,
+                                       WT_fitness = 1.0) {
     fitness_all <- cpm_to_fitness_genots(x, max_f = max_f, sh = sh,
                                          max_genots = max_genots)
 
-    access_genots_fitness <- fitness_all$Fitness[fitness_all$Fitness >= 1.0]
-    names(access_genots_fitness) <- fitness_all$Genotype[fitness_all$Fitness >= 1.0]
+    ## If we were to use wrap_accessibleGenotypes we would not
+    ## do this filtering, so that we get all the genotypes.
+    ## O.w. we can filter because from OncoSimulR, WT always has
+    ## fitness 1. WT_fitness = 1.
+
+    access_genots_fitness <-
+        fitness_all$Fitness[fitness_all$Fitness > WT_fitness]
+    names(access_genots_fitness) <-
+        fitness_all$Genotype[fitness_all$Fitness > WT_fitness]
 
     gfo <- genots_2_fgraph_and_trans_mat(access_genots_fitness)
 
