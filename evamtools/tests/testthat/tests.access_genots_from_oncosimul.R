@@ -15,6 +15,13 @@ test_that("Genotype not accessible if no increase in fitness wrt to ancestor", {
     x2 <- c("WT" = 1, "A" = 2, "B" = 1, "A, B" = 2)
     ox2 <- genots_2_fgraph_and_trans_mat(x2)
     expect_equal(ox2$accessible_genotypes, c("A" = 2.0))
+    
+    ## FIXME: this shows current code is wrong for other reasons
+    ## anything that can be reached from something else is shown
+    ## as accessible.
+    x3 <- c("WT" = 1, "A" = 2, "B" = 0.1, "A, B" = 0.2)
+    ox3 <- genots_2_fgraph_and_trans_mat(x3)
+    expect_equal(ox3$accessible_genotypes, c("A" = 2.0))
 })
 
 
