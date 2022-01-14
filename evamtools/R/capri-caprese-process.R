@@ -14,73 +14,11 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-## rm(list = ls())
-library(TRONCO)
-library(help = TRONCO)
-library(parallel)
+## library(TRONCO)
+## library(help = TRONCO)
+## library(parallel)
 
 ## Recall caprese and capri crash if only one column of data.
-
-## f_caprese <- function(x, cores.ratio = 1, silent = FALSE,
-##                       nboot = 100) {
-##     ## Like above, but says what file it is processing and is verbose
-##     if(!silent)
-##         cat("\n .... Starting with data ", x$name, "\n")
-##     datax <- x$out$popSample
-##     datax <- pre_process(datax, remove.constant = TRUE)
-##     if(ncol(datax) < 2) {
-##         return(list(name = x$name, params = x$params,
-##                     nocols = TRUE,
-##                     time = NA,
-##                     res = NA))
-##     } else {
-##         datax <- tronco_common(datax)
-##         time <- system.time({
-##             otout <- try(caprese_proc(genotData = datax, nboot = nboot,
-##                                       silent = silent,
-##                                       cores.ratio = cores.ratio))
-##         })
-##         return(list(name = x$name, params = x$params,
-##                     nocols = FALSE,
-##                     time = time,
-##                     res = otout))
-##     }
-## }
-
-## f_capri <- function(x, silent = FALSE, nboot = 100,
-##                     nbootWilcox = 100,
-##                     regularization = "bic",
-##                     cores.ratio = 1) {
-##     ## nboot is for the bootstrap per se
-##     ## nbootWilcox is the "nboot" argument in tronco.capri.
-##     if(!silent)
-##         cat("\n .... Starting with data ", x$name, "\n")
-##     datax <- x$out$popSample
-##     datax <- pre_process(datax, remove.constant = TRUE)
-##     if(ncol(datax) < 2) {
-##         return(list(name = x$name, params = x$params,
-##                     nocols = TRUE,
-##                     time = NA,
-##                     res = NA))
-##     } else {
-##         datax <- tronco_common(datax)
-##         time <- system.time({
-##             otout <- try(capri_proc(genotData = datax, nboot = nboot,
-##                                     nbootWilcox = nbootWilcox,
-##                                     regularization = regularization,
-##                                     command = "hc", pvalue = 0.05,
-##                                     cores.ratio = cores.ratio))
-##         })
-##         return(list(name = x$name, params = x$params,
-##                     nocols = FALSE,
-##                     time = time,
-##                     res = otout))
-##     }
-## }
-
-
-
-
 
 
 tronco_common <- function(x) {
@@ -609,8 +547,66 @@ capri_proc <- function(genotData = NULL, nboot = 100,
 }
 
 
-library(codetools)
-checkUsageEnv(env = .GlobalEnv)
+## library(codetools)
+## checkUsageEnv(env = .GlobalEnv)
 
 
 
+
+
+## f_caprese <- function(x, cores.ratio = 1, silent = FALSE,
+##                       nboot = 100) {
+##     ## Like above, but says what file it is processing and is verbose
+##     if(!silent)
+##         cat("\n .... Starting with data ", x$name, "\n")
+##     datax <- x$out$popSample
+##     datax <- pre_process(datax, remove.constant = TRUE)
+##     if(ncol(datax) < 2) {
+##         return(list(name = x$name, params = x$params,
+##                     nocols = TRUE,
+##                     time = NA,
+##                     res = NA))
+##     } else {
+##         datax <- tronco_common(datax)
+##         time <- system.time({
+##             otout <- try(caprese_proc(genotData = datax, nboot = nboot,
+##                                       silent = silent,
+##                                       cores.ratio = cores.ratio))
+##         })
+##         return(list(name = x$name, params = x$params,
+##                     nocols = FALSE,
+##                     time = time,
+##                     res = otout))
+##     }
+## }
+
+## f_capri <- function(x, silent = FALSE, nboot = 100,
+##                     nbootWilcox = 100,
+##                     regularization = "bic",
+##                     cores.ratio = 1) {
+##     ## nboot is for the bootstrap per se
+##     ## nbootWilcox is the "nboot" argument in tronco.capri.
+##     if(!silent)
+##         cat("\n .... Starting with data ", x$name, "\n")
+##     datax <- x$out$popSample
+##     datax <- pre_process(datax, remove.constant = TRUE)
+##     if(ncol(datax) < 2) {
+##         return(list(name = x$name, params = x$params,
+##                     nocols = TRUE,
+##                     time = NA,
+##                     res = NA))
+##     } else {
+##         datax <- tronco_common(datax)
+##         time <- system.time({
+##             otout <- try(capri_proc(genotData = datax, nboot = nboot,
+##                                     nbootWilcox = nbootWilcox,
+##                                     regularization = regularization,
+##                                     command = "hc", pvalue = 0.05,
+##                                     cores.ratio = cores.ratio))
+##         })
+##         return(list(name = x$name, params = x$params,
+##                     nocols = FALSE,
+##                     time = time,
+##                     res = otout))
+##     }
+## }
