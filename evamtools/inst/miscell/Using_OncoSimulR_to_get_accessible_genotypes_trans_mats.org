@@ -268,7 +268,7 @@ With the above DAG, the set of accessible genotypes and the fitness graph is the
   
  We need to think this, in case I am missing something. We also need to see if some interpretations are available in some of the other HyperTraPS-related papers: 
 
-  - Johnston, I. G., lR\oyrvik, Ellen C. (2020). Data-Driven Inference Reveals   Distinct and Conserved Dynamic Pathways of Tool Use Emergence across Animal  Taxa. iScience, 23(6), 101245. http://dx.doi.org/10.1016/j.isci.2020.101245
+  - Johnston, I. G., Røyrvik, Ellen C. (2020). Data-Driven Inference Reveals   Distinct and Conserved Dynamic Pathways of Tool Use Emergence across Animal  Taxa. iScience, 23(6), 101245. http://dx.doi.org/10.1016/j.isci.2020.101245
 
   
   
