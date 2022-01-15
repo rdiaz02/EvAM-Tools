@@ -5,6 +5,12 @@
 ## Permutation tests sometimes with B=2000 or B=4000. Not very relevant, but the
 ## minimum values were observed in the data.
 
+## The permutation tests used code in
+## sample_genotypes_from_trm.R
+## The commented out code shows, for example, how the p_values8 file
+## was generated.
+
+
 ## Using the KS test is not 100% OK, since we have
 ## permutation tests, and thus p-values are discrete
 

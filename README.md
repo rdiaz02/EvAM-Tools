@@ -104,3 +104,12 @@ and get a working enviroment with HyperTraPS installed. Add both the `bin` and t
       - For now, the default is not to use MC-CBN. If you want to use it, you'll
       need to install the MC-CBN package. Note that you need older versions of
       libboost: https://github.com/cbg-ethz/MC-CBN/issues/5
+
+# Tests
+FIXME write this better
+
+We use testthat to test our R code. Those tests will run automatically with the usual procedures from testthat or while doing `R CMD check`.
+
+In addition, under evamtools/inst/miscell/tests-sample_genotypes_from_trm we have the output of tests that were run to verify the code for sampling genotypes from the transition rate matrices. We compared the output of our code with that from the code of the original authors (MHN, MCCBN) for a large set of cases; 
+
+
