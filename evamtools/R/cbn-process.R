@@ -1,4 +1,4 @@
-## Copyright 2016, 2017, 2018 Ramon Diaz-Uriarte
+## Copyright 2016, 2017, 2018, 2022 Ramon Diaz-Uriarte
 
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -12,13 +12,6 @@
 
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
-## Beware I am only using 10 bootstrap iterations as this is unbearably
-## slow. As well, I decrease maximum number of nodes to 10, not 12. This
-## is from 144 steps to 100. Let's see if this way this thing can finish
-## in a reasonable time.
-
 
 
 ## Be VERY careful with what is done when frequencies are 0.  CBN will
@@ -40,8 +33,8 @@
 ## But then, in a sense it is being smart to place nodes with zero, or
 ## close to zero, freq. at the bottom of graph.
 
-## We limit columns/genes to 10. 12 was what Farahani and Lagergren did in
-## theri comparison with H-CBN, and as Gerstung et al do. But going from
+## Some functions limit columns/genes to 10. 12 was what Farahani and Lagergren
+## did in theri comparison with H-CBN, and as Gerstung et al do. But going from
 ## 10 to 12 is painfully slow.
 
 ## Testing CBN programs available
@@ -70,11 +63,11 @@ rm(.._OncoSimul_test.ctcbn)
 rm(.._OncoSimul_test.hcbn)
 ## Done with the testing
 
-## library(data.table)
-library(parallel)
-## library(graph)
-library(Oncotree)
-library(igraph)
+## ## library(data.table)
+## library(parallel)
+## ## library(graph)
+## library(Oncotree)
+## library(igraph)
 
 
 f_cbn <- function(x, init.poset = c("linear", "OT"), nboot = 0,
@@ -117,54 +110,6 @@ f_cbn <- function(x, init.poset = c("linear", "OT"), nboot = 0,
     }
 }
 
-
-## f_cbn <- function(x, init.poset = c("linear", "OT"), nboot = 100, verbose = FALSE) {
-##     init.poset <- match.arg(init.poset)
-##     ## Be verbose since this is soooo slooooow to know where we are
-##     if(verbose)
-##         cat("\n     doing data ", x$name, "\n")
-##     datax <- x$out$popSample
-##     datax <- pre_process(datax, remove.constant = FALSE, max.cols = 10) ## 12 and beyond it gets
-##     ## painfully slow Using up to 12 actually benefits CBN in these
-##     ## scenarios since there are no patterns
-##     if(ncol(datax) < 2) {
-##         return(list(
-##             scenario = x$scenario,
-##             name = x$name, params = x$params,
-##             nocols = TRUE,
-##             time = NA,
-##             res = NA))
-##     } else {
-##         addnn <- paste0(x$scenario, "_", x$name)
-##         for(i in c("|", ".", "=", ",")) addnn <- gsub(i, "", addnn, fixed = TRUE)
-##         time <- system.time({ 
-##             otout <- try(cbn_proc(datax, addname = addnn,
-##                                   init.poset = init.poset,
-##                                   nboot = nboot))
-##         })
-##         return(list(
-##             scenario = x$scenario,
-##             name = x$name, params = x$params,
-##             nocols = FALSE,
-##             time = time,
-##             res = otout))
-##     }
-## }
-
-
-## This function is now defined in run-all-methods.R as it is common to several
-
-## boot_data_index <- function(x, boot) {
-##     ## boot is an integer. 0 means no boot
-##     ## that is because I reuse boot for two purposes
-##     boot <- as.logical(boot)
-##     if(boot) {
-##         ind <- sample(nrow(x), nrow(x), replace = TRUE)
-##         return(x[ind, , drop = FALSE])
-##     } else {
-##         return(x)
-##     }
-## }
 
 ## be very careful using cores > 1. I think OMP can actually
 ## slow things down.
@@ -267,34 +212,6 @@ cbn_proc <- function(x, addname, init.poset = "linear", nboot = 0,
                 nboot = nboot,
                 init.poset = init.poset))
 }
-
-
-## cbn_proc <- function(x, addname, init.poset = "linear", nboot = 100,
-##                      verbose = FALSE, cores = 1, silent = TRUE) {
-##     ## Returns CBN and bootstrap freqs of edges
-##     edges <- run.cbn(x, addname = addname, init.poset = init.poset,
-##                      cores = cores, silent = silent)
-##     CBN_edgeBootFreq <- rep(0, nrow(edges))
-##     names(CBN_edgeBootFreq) <- edges[, "edge"]
-##     nn <- names(CBN_edgeBootFreq)
-##     for(i in seq.int(nboot)) {
-##         if(verbose)
-##             cat("\n  .... doing bootstrap ", i, "\n")
-##         ind <- sample(nrow(x), nrow(x), replace = TRUE)
-##         bx <- x[ind, , drop = FALSE]
-##         addnameb <- paste0(addname, "b", i, paste(sample(letters, 3), collapse=""))
-##         bootedges <- run.cbn(bx, addname = addnameb, init.poset = init.poset,
-##                              cores = cores, silent = silent)$edge
-##         posadd <- na.omit(match(bootedges, nn))
-##         if(length(posadd))
-##             CBN_edgeBootFreq[posadd] <- CBN_edgeBootFreq[posadd] + 1
-##     }
-##     edges <- cbind(edges, CBN_edgeBootFreq = CBN_edgeBootFreq/nboot,
-##                    stringsAsFactors = FALSE)
-##     return(list(edges = edges,
-##                 nboot = nboot,
-##                 init.poset = init.poset))
-## }
 
 run.cbn <- function(x,
                     init.poset = "linear", ## could be OT?
@@ -419,7 +336,6 @@ run.cbn <- function(x,
 
 ## a brutish thing would be to accumulate the character vector and then do
 ## a table and subset.
-
 
 
 
@@ -629,47 +545,6 @@ read.poset <- function(dirname, maxn, verbose = FALSE) {
 }
 
 
-## read.poset2 <- function(dirname, maxn, genenames, verbose = FALSE) {
-##     stopifnot(length(genenames) == maxn)
-##     dirname <- paste(dirname, "/00000.poset", sep = "")
-##     tmp <- scan(dirname,
-##                 quiet = !verbose,
-##                 what = integer())
-##     tmp0 <- scan(dirname,
-##                  quiet = !verbose)
-##     stopifnot(isTRUE(all.equal(tmp, tmp0)))
-##     tmp <- tmp[-(length(tmp))]
-##     nn <- tmp[1]
-##     tmp <- tmp[-1]
-
-##     allnodes <- seq.int(maxn)
-##     missing.nodes <- setdiff(allnodes, unique(as.vector(tmp)))
-##     missing.nodes.n <- genenames[missing.nodes]
-##     tmp <- matrix(tmp, ncol = 2, byrow = TRUE)
-##     fromRoot <- genenames[setdiff(tmp[, 1], tmp[, 2])]
-    
-##     tmpn <- cbind(genenames[tmp[, 1]],
-##                   genenames[tmp[, 2]])
-##     tmpn <- rbind(tmpn,
-##                   cbind(rep("Root", length(fromRoot)),
-##                         fromRoot))
-    
-##     if(length(missing.nodes.n)) {
-##         mnm <- cbind(rep("Root", length(missing.nodes.n)),
-##                      missing.nodes.n)
-##         tmpn <- rbind(tmpn, mnm)
-##     }
-##     return(data.frame(From = tmpn[, 1],
-##                       To =   tmpn[, 2],
-##                       edge = paste(tmpn[, 1],
-##                                    tmpn[, 2],
-##                                    sep = " -> ")
-##                       ))
-## }
-
-
-
-
 linear.poset <- function(x) {
   ## a direct translation of linear_poset and write_poset
   ## in cbn.py by
@@ -703,15 +578,6 @@ linear.poset <- function(x) {
   posetw <- posetw[order(posetw[, 1]), ]  ## place drop = FALSE?
   return(posetw)
 }
-
-## write.linear.poset <- function(x, filename) {
-##   poset <- linear.poset(x)
-##   fn <- paste(filename, ".poset", sep = "")
-##   write(ncol(x), file = fn)
-##   write(t(poset), file = fn, append = TRUE,
-##         sep = " ", ncolumns = 2)
-##   write(0, file = fn, append = TRUE)
-## }
 
 
 write.linear.poset <- function(x, dirname) {
@@ -788,21 +654,21 @@ run.oncotree <- function(x, ## type.out = "adjmat",
     ##     return(as(sam1, "graphNEL"))
 }
 
-#' @title Simulate MCCBN sample
-#' 
-#' @description Generate a simulation with user parameters or with random ones
-#' 
-#' @TODO test
-#' 
-#' @param poset Matrix of n_genes x n_genes. Fill with 
-#' 0 and 1
-#' @param n_genes Int >= 2. Number of genes to simulates
-#' @param lambdas Vector with the rate for each gene.
-#' @param lambda_s Int. Sampling parameter. Default 1.
-#' @param seed Int
-#' 
-#' @return List with the poset, the lambdas, the lambda_s 
-#' and the result of the simulations
+## #' @title Simulate MCCBN sample
+## #' 
+## #' @description Generate a simulation with user parameters or with random ones
+## #' 
+## #' @TODO test
+## #' 
+## #' @param poset Matrix of n_genes x n_genes. Fill with 
+## #' 0 and 1
+## #' @param n_genes Int >= 2. Number of genes to simulates
+## #' @param lambdas Vector with the rate for each gene.
+## #' @param lambda_s Int. Sampling parameter. Default 1.
+## #' @param seed Int
+## #' 
+## #' @return List with the poset, the lambdas, the lambda_s 
+## #' and the result of the simulations
 # simulate_mccbn <- function(poset = NULL, n_genes = 5, lambdas = NULL, n = 10000,
 #     seed = NULL, lambda_s = 1){
     
@@ -950,3 +816,76 @@ run.oncotree <- function(x, ## type.out = "adjmat",
 ## not done here, as we use a function defined in run-all-methods.R
 ## library(codetools)
 ## checkUsageEnv(env = .GlobalEnv)
+
+
+
+
+
+
+
+
+## read.poset2 <- function(dirname, maxn, genenames, verbose = FALSE) {
+##     stopifnot(length(genenames) == maxn)
+##     dirname <- paste(dirname, "/00000.poset", sep = "")
+##     tmp <- scan(dirname,
+##                 quiet = !verbose,
+##                 what = integer())
+##     tmp0 <- scan(dirname,
+##                  quiet = !verbose)
+##     stopifnot(isTRUE(all.equal(tmp, tmp0)))
+##     tmp <- tmp[-(length(tmp))]
+##     nn <- tmp[1]
+##     tmp <- tmp[-1]
+
+##     allnodes <- seq.int(maxn)
+##     missing.nodes <- setdiff(allnodes, unique(as.vector(tmp)))
+##     missing.nodes.n <- genenames[missing.nodes]
+##     tmp <- matrix(tmp, ncol = 2, byrow = TRUE)
+##     fromRoot <- genenames[setdiff(tmp[, 1], tmp[, 2])]
+    
+##     tmpn <- cbind(genenames[tmp[, 1]],
+##                   genenames[tmp[, 2]])
+##     tmpn <- rbind(tmpn,
+##                   cbind(rep("Root", length(fromRoot)),
+##                         fromRoot))
+    
+##     if(length(missing.nodes.n)) {
+##         mnm <- cbind(rep("Root", length(missing.nodes.n)),
+##                      missing.nodes.n)
+##         tmpn <- rbind(tmpn, mnm)
+##     }
+##     return(data.frame(From = tmpn[, 1],
+##                       To =   tmpn[, 2],
+##                       edge = paste(tmpn[, 1],
+##                                    tmpn[, 2],
+##                                    sep = " -> ")
+##                       ))
+## }
+
+
+## cbn_proc <- function(x, addname, init.poset = "linear", nboot = 100,
+##                      verbose = FALSE, cores = 1, silent = TRUE) {
+##     ## Returns CBN and bootstrap freqs of edges
+##     edges <- run.cbn(x, addname = addname, init.poset = init.poset,
+##                      cores = cores, silent = silent)
+##     CBN_edgeBootFreq <- rep(0, nrow(edges))
+##     names(CBN_edgeBootFreq) <- edges[, "edge"]
+##     nn <- names(CBN_edgeBootFreq)
+##     for(i in seq.int(nboot)) {
+##         if(verbose)
+##             cat("\n  .... doing bootstrap ", i, "\n")
+##         ind <- sample(nrow(x), nrow(x), replace = TRUE)
+##         bx <- x[ind, , drop = FALSE]
+##         addnameb <- paste0(addname, "b", i, paste(sample(letters, 3), collapse=""))
+##         bootedges <- run.cbn(bx, addname = addnameb, init.poset = init.poset,
+##                              cores = cores, silent = silent)$edge
+##         posadd <- na.omit(match(bootedges, nn))
+##         if(length(posadd))
+##             CBN_edgeBootFreq[posadd] <- CBN_edgeBootFreq[posadd] + 1
+##     }
+##     edges <- cbind(edges, CBN_edgeBootFreq = CBN_edgeBootFreq/nboot,
+##                    stringsAsFactors = FALSE)
+##     return(list(edges = edges,
+##                 nboot = nboot,
+##                 init.poset = init.poset))
+## }

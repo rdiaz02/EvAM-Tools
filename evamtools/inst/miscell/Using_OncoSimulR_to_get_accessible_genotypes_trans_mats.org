@@ -54,7 +54,7 @@
 - In OncoSimulR, in addition to the $s_i$, it is possible to set =sh = 0=, meaning there is no penalty for not respecting the restrictions. When =sh = 0= there is also no fitness gain, either, so fitness for those genotypes ends up being the fitness of the immediate parent (there is no contribution from the gen without restrictions satisfied to the fitness of the parent genotype). Regardless, when =sh = 0=, the transition matrix does not change compared to the transition matrix we obtain if we assume that mutations to genotypes with non-satisfied dependencies lead to a fitness of 0. 
 
    
-- To elaborate on this point: The output from the code, with =sh = 0=, will result in more genotypes being shown as accessible. It is arguable, though, that those genotypes are not really accessible, since their fitness is never larger than the fitness of their ancestor. So the probability of transitioning to them will be 0 under the expressions above when in SSWM. This is something we might want to correct in the code: making sure something is only shown as accessible if its fitness is strictly larger than the fitness of its ancestor. **FIXME** 
+- To elaborate on this point: The output from the code, with =sh = 0=, will result in more genotypes being shown as accessible. It is arguable, though, that those genotypes are not really accessible, since their fitness is never larger than the fitness of their ancestor. So the probability of transitioning to them will be 0 under the expressions above when in SSWM. We have changed the code so that now something is only shown as accessible if its fitness is strictly larger than the fitness of its ancestor. 
      
 - (Actually, in OncoSimulR, the $s_h$ can vary by gene, so we could have different $s_{hi}$, but this does not affect these arguments).
 
@@ -268,7 +268,7 @@ With the above DAG, the set of accessible genotypes and the fitness graph is the
   
  We need to think this, in case I am missing something. We also need to see if some interpretations are available in some of the other HyperTraPS-related papers: 
 
-  - Johnston, I. G., lR\oyrvik, Ellen C. (2020). Data-Driven Inference Reveals   Distinct and Conserved Dynamic Pathways of Tool Use Emergence across Animal  Taxa. iScience, 23(6), 101245. http://dx.doi.org/10.1016/j.isci.2020.101245
+  - Johnston, I. G., Røyrvik, Ellen C. (2020). Data-Driven Inference Reveals   Distinct and Conserved Dynamic Pathways of Tool Use Emergence across Animal  Taxa. iScience, 23(6), 101245. http://dx.doi.org/10.1016/j.isci.2020.101245
 
   
   
