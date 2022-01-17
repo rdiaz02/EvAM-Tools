@@ -10,7 +10,7 @@
 #' @return list$likelihood Float. Likelihood of the fit
 do_DBN <- function(data) {
   invisible(capture.output(out <- fitCPN(data, algorithm = "DP")))
-  thetas <- OncoBN:::inferTheta(data, out)
+  thetas <- inferTheta(data, out)
   dbn_out <- create_data_frame_from_theta(thetas, colnames(data))
   return(list(
     edges = dbn_out
