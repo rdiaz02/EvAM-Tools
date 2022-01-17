@@ -896,27 +896,50 @@ class test_matrix_input(evamtools_basics):
 
 ## TESTING RESULTS
 class evamtools_test_results(evamtools_basics):
-    def _compare_table(self, input2build):
-        available_cpms = active_cpms = self.driver.find_elements_by_css_selector("#cpm2show .checkbox input")
-        available_cpms = [i.get_attribute("value") for i in active_cpms]
+    def _check_tabular_data(self, input2build):
+        available_cpms = self.driver.find_elements_by_css_selector("#cpm2show .checkbox input")
+        available_cpms = [i.get_attribute("value") for i in available_cpms]
+        available_cpms.remove("Source")
 
-        keep_source = input2build != "csd"
+        not_ot = available_cpms.copy()
+        not_ot.remove("OT")
+
+        expected_tabular = not_ot.copy()
+
+        if input2build != "csd":
+            expected_tabular.append("Source")
+        expected_tabular_from_sims = ["From", "To", *expected_tabular]
+
+        expected_lambdas = available_cpms.copy()
+        if input2build == "dag":
+            expected_lambdas.append("Source")
+        expected_lambdas.remove("MHN")
+        expected_lambdas = ["Gene", *expected_lambdas]
+
+        expected_td_trans_mat = expected_tabular_from_sims.copy()
+        expected_td_trans_mat.remove("Source")
 
         tabular_types = {
-            "f_graph": [],
-            "genotype_transitions": [],
-            "freqs": [],
-            "trans_mat": [],
-            "lambdas": [],
-            "td_trans_mat": [],
+            "f_graph": expected_tabular_from_sims,
+            "genotype_transitions": expected_tabular_from_sims,
+            "freqs": ["Genotype", *expected_tabular],
+            "trans_mat": ["From", "To", "OT", *expected_tabular],
+            "lambdas": expected_lambdas,
+            "td_trans_mat": expected_td_trans_mat,
         }
 
-        table_info = self._get_cpm_table()
-
+        for k in tabular_types.keys():
+            self.driver.find_element_by_css_selector(f"#data2table input[value='{k}']").click()
+            sleep(0.4)
+            table_info = self._get_cpm_table()
+            # print(k)
+            # print(tabular_types[k])
+            # print(table_info[0])
+            assert(set(table_info[0]) == set(tabular_types[k]))
 
     def _basic_results_test(self, data):
         ## Check status
-        pdb.set_trace()
+        # pdb.set_trace()
         active_cpms = self.driver.find_elements_by_css_selector("#cpm2show .checkbox input[checked=checked]")
         active_cpms = [i.get_attribute("value") for i in active_cpms]
         for i in active_cpms:
@@ -925,11 +948,6 @@ class evamtools_test_results(evamtools_basics):
             plot_sims_2 = self.driver.find_elements_by_css_selector(f"#plot_sims_{i}")
             assert(len(plot_sims_2) == 1)
         
-        ## Check table
-        sleep(1)
-        table_info = self._get_cpm_table()
-        assert(table_info[0][1:] == active_cpms)
-
         ## Check name of downloaded file
         download_button = self.driver.find_element_by_css_selector("#download_cpm").click()
         sleep(1)
@@ -946,7 +964,7 @@ class evamtools_test_results(evamtools_basics):
         self.driver.find_element_by_css_selector("#modify_data").click()
         sleep(1)
 
-        status = self._get_status()
+        status = self._get_status(data["tab"])
         assert(status["number_of_genes"] == data["number_of_genes"])
         assert(status["selected_dataset"] == data["name"])
         assert(status["selected_input2build"] == data["tab"])
@@ -961,7 +979,6 @@ class evamtools_test_results(evamtools_basics):
         ## Switch to results tab
         self._go_to("result_viewer")
         
-
         ## Placeholder text to ask for running something
         # sleep(1)
         # placeholder_text = self.driver.find_element_by_css_selector("#sims2 h3").text
@@ -1019,62 +1036,93 @@ class evamtools_test_results(evamtools_basics):
         
         expected_data = {"tab": "csd", "gene_names": ["A", "B", "C", "D"],
             "name": new_dataset_name, "number_of_genes": 4}
+
         self._basic_results_test(expected_data) 
+        self._go_to("result_viewer")
+        self._check_tabular_data(expected_data["tab"])
 
-    # def test_results_on_DAG(self):
-    #     ## Load data
-    #     self._select_tab("dag")
-    #     sleep(0.5)
-
-    #     ## Modify data
-    #     slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
-    #     move = ActionChains(self.driver)
-    #     move.click_and_hold(slider_input).move_by_offset(100, 0).release().perform()
-    #     sleep(0.5)
-
-    #     self._add_edge("Root", "B")
-    #     self._add_edge("B", "C")
-    #     self._add_edge("C", "D")
-    #     new_gene_names = ["A", "B1", "C", "D3"]
-    #     self._change_gene_names(new_gene_names)
-
-
-    #     self.driver.find_element_by_css_selector("#resample_dag").click()
-    #     sleep(5)
-
-    #     ## Save data 
-    #     new_dataset_name = "DAG_new"
-    #     dataset_name = self.driver.find_element_by_css_selector("input#dataset_name")
-    #     dataset_name.clear()
-    #     dataset_name.send_keys(new_dataset_name)
-    #     sleep(0.5)
-    #     save_button = self.driver.find_element_by_id("save_csd_data")
-    #     save_button.click()
-    #     sleep(1)
-        
-    #     ## Run analysis
-    #     self.driver.find_element_by_css_selector("#analysis").click()
-    #     sleep(1)
-    #     self._select_tab("csd", "User")
-    #     sleep(10)
-
-    #     ## Check new status
-    #     self._go_to("result_viewer")
-    #     self._select_result(new_dataset_name)
-        
-    #     expected_data = {"tab": "dag", "gene_names": ["A", "B1", "C", "D3"],
-    #         "name": new_dataset_name, "number_of_genes": 4}
-    #     self._basic_results_test(expected_data) 
-
-    def test_results_on_Matrix(self):
+    def test_results_on_DAG(self):
         ## Load data
+        self._select_tab("dag")
+        sleep(0.5)
+
         ## Modify data
+        slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
+        move = ActionChains(self.driver)
+        move.click_and_hold(slider_input).move_by_offset(100, 0).release().perform()
+        sleep(0.5)
+
+        self._add_edge("Root", "B")
+        self._add_edge("B", "C")
+        self._add_edge("C", "D")
+        new_gene_names = ["A", "B1", "C", "D3"]
+        self._change_gene_names(new_gene_names)
+
+
+        self.driver.find_element_by_css_selector("#resample_dag").click()
+        sleep(5)
 
         ## Save data 
+        new_dataset_name = "DAG_new"
+        dataset_name = self.driver.find_element_by_css_selector("input#dataset_name")
+        dataset_name.clear()
+        dataset_name.send_keys(new_dataset_name)
+        sleep(0.5)
+        save_button = self.driver.find_element_by_id("save_csd_data")
+        save_button.click()
+        sleep(1)
+        
         ## Run analysis
+        self.driver.find_element_by_css_selector("#analysis").click()
+        sleep(1)
+        self._select_tab("csd", "User")
+        sleep(10)
 
-        # Source display should be available
-        pass
+        ## Check new status
+        self._go_to("result_viewer")
+        self._select_result(new_dataset_name)
+        
+        expected_data = {"tab": "dag", "gene_names": ["A", "B1", "C", "D3"],
+            "name": new_dataset_name, "number_of_genes": 4}
+        self._basic_results_test(expected_data) 
+        self._go_to("result_viewer")
+        self._check_tabular_data(expected_data["tab"])
+
+    def test_results_on_matrix(self):
+        ## Load data
+        self._select_tab("matrix", "test1")
+        sleep(0.5)
+
+        ## Sampling
+        self.driver.find_element_by_css_selector("#resample_mhn").click()
+        sleep(1)
+
+        ## Save data 
+        new_dataset_name = "MHN_new"
+        dataset_name = self.driver.find_element_by_css_selector("input#dataset_name")
+        dataset_name.clear()
+        dataset_name.send_keys(new_dataset_name)
+        sleep(0.5)
+        save_button = self.driver.find_element_by_id("save_csd_data")
+        save_button.click()
+        sleep(1)
+
+        ## Run analysis
+        self.driver.find_element_by_css_selector("#analysis").click()
+        sleep(1)
+        self._select_tab("csd", "User")
+        sleep(10)
+
+        ## Check new status
+        self._go_to("result_viewer")
+        self._select_result(new_dataset_name)
+        
+        expected_data = {"tab": "matrix", "gene_names": ["A", "B", "C"],
+            "name": new_dataset_name, "number_of_genes": 3}
+
+        self._basic_results_test(expected_data) 
+        self._go_to("result_viewer")
+        self._check_tabular_data(expected_data["tab"])
     
     def test_running_MCCBN(self):
         ## Load data

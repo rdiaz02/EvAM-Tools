@@ -1131,7 +1131,7 @@ server <- function(input, output, session) {
         result_index <- length(grep(sprintf("^%s", input$select_csd), names(all_cpm_out$output)))
         result_name <- ifelse(result_index == 0
             , input$select_csd
-            , sprintf("%s_%s", input$select_csd, result_index))
+            , sprintf("%s__%s", input$select_csd, result_index))
 
         all_cpm_out$output[[result_name]] <- new_data
         last_visited_cpm <<- result_name
@@ -1260,8 +1260,10 @@ server <- function(input, output, session) {
     observeEvent(input$modify_data, {
         if(length(all_cpm_out$output) > 0){
             tmp_data <- all_cpm_out$output[[input$select_cpm]]$source_data
-            last_visited_pages[[tmp_data$type]] <<- input$select_cpm
-            tmp_data <- datasets$all_csd[[tmp_data$type]][[input$select_cpm]] <- standarize_dataset(tmp_data)
+            dataset_name <- strsplit(input$select_cpm, "__")[[1]][[1]]
+            dataset_type <- tmp_data$type
+            last_visited_pages[[tmp_data$type]] <<- dataset_name
+            tmp_data <- datasets$all_csd[[tmp_data$type]][[dataset_name]] <- standarize_dataset(tmp_data)
             
             data <- tmp_data 
             data$csd_freqs <- get_csd(tmp_data$data)
@@ -1270,8 +1272,8 @@ server <- function(input, output, session) {
             updateNumericInput(session, "gene_number", value = data$n_genes)
             updateTabsetPanel(session, "navbar",
                 selected = "csd_builder")
-            updateRadioButtons(session, "input2build", selected = tmp_data$type)
-            updateRadioButtons(session, "select_csd", selected = input$select_cpm)
+            updateRadioButtons(session, "input2build", selected = dataset_type)
+            updateRadioButtons(session, "select_csd", selected = dataset_name)
         }
     })
 
