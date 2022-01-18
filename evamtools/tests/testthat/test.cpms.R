@@ -673,7 +673,7 @@ NA, NA, NA), OT_edgeWeight = c(0.525915054637741, 0.101508072999909,
   test_others <- function(data) {
     data <- as.matrix(data)
     data <- df_2_mat_integer(data)
-    cpm_out_others2 <- all_methods(data, do_MCCBN = MCCBN_INSTALLED)
+    cpm_out_others2 <- ot_cbn_methods(data, do_MCCBN = MCCBN_INSTALLED)
     
     mm <- c("OT",
             "CAPRESE", "CAPRI_BIC", "CAPRI_AIC",

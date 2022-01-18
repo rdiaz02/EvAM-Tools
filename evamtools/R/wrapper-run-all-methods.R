@@ -108,8 +108,9 @@ add_pseudosamples <- function(x, n00 = "auto3") {
                  ))
 }
 
+## given the samples by genes matrix, run OT, CBN, and maybe MCCBN
 ## NOTE: MCCBN allowed to run with arbitrary number of columns
-all_methods <- function(x, nboot = 0, 
+ot_cbn_methods <- function(x, nboot = 0, 
                         nboot_cbn = 0, 
                         n00 = "auto3", 
                         distribution_oncotree = TRUE,
@@ -943,7 +944,7 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
     
     cat("\n  time HESBCN = ", time_hesbcn)
      
-    cpm_out_others <- all_methods(x, cores_cbn = cores_cbn, do_MCCBN = do_MCCBN)
+    cpm_out_others <- ot_cbn_methods(x, cores_cbn = cores_cbn, do_MCCBN = do_MCCBN)
     pre_trans_mat_others <- lapply(cpm_out_others[methods],
         cpm_access_genots_paths_w_simplified)
 
