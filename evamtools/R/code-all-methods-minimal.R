@@ -75,10 +75,10 @@ thiscores <- 1
 # library(readr)
 # library(data.table)
 # library(igraph)
-## library(TRONCO)
+# # library(TRONCO)
 # library(parallel)
 # library(foreach)
-## library(doParallel)
+# # library(doParallel)
 # library(Rgraphviz)
 # library(stringr)
 # library(pryr)
@@ -101,7 +101,7 @@ thiscores <- 1
 # source("hypertraps-process.R", echo = FALSE, max.deparse.length = 0)
 # source("hesbcn-process.R", echo = FALSE, max.deparse.length = 0)
 
-if(MCCBN_INSTALLED)
+# if(MCCBN_INSTALLED)
     # source("mccbn-process.R", echo = FALSE, max.deparse.length = 0)
 
 

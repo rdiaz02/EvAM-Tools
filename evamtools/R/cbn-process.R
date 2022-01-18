@@ -63,11 +63,11 @@ rm(.._OncoSimul_test.ctcbn)
 rm(.._OncoSimul_test.hcbn)
 ## Done with the testing
 
-## ## library(data.table)
-## library(parallel)
-## ## library(graph)
-## library(Oncotree)
-## library(igraph)
+# ## library(data.table)
+# library(parallel)
+# ## library(graph)
+# library(Oncotree)
+# library(igraph)
 
 
 f_cbn <- function(x, init.poset = c("linear", "OT"), nboot = 0,
