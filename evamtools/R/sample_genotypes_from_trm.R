@@ -252,8 +252,8 @@ process_samples <- function(sim, n_genes, gene_names = NULL, output = c("frequen
 
 #' @title Run samples for all outputs of CPMs
 #' 
-#' TODO some methods do not make sense to be here, like OT
-#' that do not raise a transition rate matrix
+#' OT already provides the predicted genotypes
+#' though not from a transition rate matrix
 #' 
 #' @param cpm_output Output from calling all_methods2trans_mat
 #' @param n_samples Number of samples to generate
@@ -265,28 +265,41 @@ sample_all_CPMs <- function(cpm_output
     , n_samples
     , n_genes
     , gene_names = NULL
-    , methods = c("Source", "CBN", "MCCBN", "DBN", "MHN", "HESBCN")){
+    , methods = c("Source", "CBN", "MCCBN", "DBN", "MHN", "HESBCN", "OT")) {
     output <- cpm_output
     ## I have removed OT from the list of CPM to sample
     ## And I haved "Source" for a source data type for the web server
-    if(is.null(gene_names)) gene_names <- LETTERS[1:n_genes] 
+    if (is.null(gene_names)) gene_names <- LETTERS[1:n_genes]
 
-    for(method in methods){
-        if(method == "MHN") trm <- output$MHN_transitionRateMatrix
-        else trm <- output[[sprintf("%s_f_graph", method)]]
-
-        if(any(!is.na(trm))){
-            print(sprintf("Running %s", method))
-            sims <- population_sample_from_trm(trm, n_samples = n_samples)
-            psamples <- process_samples(sims, 
-                n_genes, gene_names, output = c("transitions", "frequencies"))
-            output[[sprintf("%s_genotype_transitions", method)]] <- psamples$transitions
-            output[[sprintf("%s_genotype_freqs", method)]] <- psamples$frequencies
-        } 
-        else output[[sprintf("%s_genotype_transitions", method)]] <- NULL
-        
-    }
-
+    for (method in methods) {
+        if (method == "OT") {
+            output[[sprintf("%s_genotype_freqs", method)]] <-
+                output$OT_genots_predicted
+            ## FIXME: is the next implicitly available?
+            output[[sprintf("%s_genotype_transitions", method)]] <- NULL
+        } else {
+            if (method == "MHN") {
+                trm <- output$MHN_transitionRateMatrix
+            } else {
+                trm <- output[[sprintf("%s_f_graph", method)]]
+            }
+            if (any(!is.na(trm))) {
+                print(sprintf("Running %s", method))
+                sims <- population_sample_from_trm(trm, n_samples = n_samples)
+                psamples <- process_samples(sims,
+                                            n_genes, gene_names,
+                                            output = c("transitions",
+                                                       "frequencies")
+                                            )
+                output[[sprintf("%s_genotype_transitions", method)]] <-
+                    psamples$transitions
+                output[[sprintf("%s_genotype_freqs", method)]] <-
+                    psamples$frequencies
+            } else {
+                output[[sprintf("%s_genotype_transitions", method)]] <- NULL
+            }
+        }
+        }
     return(output)
 }
 
