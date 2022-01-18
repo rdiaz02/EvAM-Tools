@@ -64,50 +64,6 @@ thiscores <- 1
 ## RhpcBLASctl::omp_set_num_threads(thiscores)
 
 
-
-boot_data_index <- function(x, boot) {
-    ## Used by CBN and DiP
-    ## boot is an integer. 0 means no boot
-    ## that is because I reuse boot for two purposes
-    boot <- as.logical(boot)
-    if (boot) {
-        ind <- sample(nrow(x), nrow(x), replace = TRUE)
-        return(x[ind, , drop = FALSE])
-    } else {
-        return(x)
-    }
-}
-
-add_pseudosamples <- function(x, n00 = "auto3") {
-    if (n00 == "auto") {
-        if(nrow(x) <= 500) {
-            n00 <- round(nrow(x) * 0.10)
-        } else {
-            n00 <- round(nrow(x) * 0.05)
-        }
-    } else if(n00 == "auto2") {
-        ## add only if max. freq. of any gene is > 95%
-        fmax <- max(colSums(x)) / nrow(x)
-        if(fmax > 0.95)
-            n00 <- round(nrow(x) * 0.05)
-        else
-            n00 <- 0
-    } else if(n00 == "auto3") {
-        ## add only if any gene is 100%
-        ## add just 1
-        fmax <- max(colSums(x))/nrow(x)
-        if(fmax == 1) {
-            cat("\n  Added one pseudosample \n ")
-            n00 <- 1
-        } else { 
-            n00 <- 0
-        }
-    }
-    return(rbind(x,
-                 matrix(0L, nrow = n00, ncol = ncol(x))
-                 ))
-}
-
 ## given the samples by genes matrix, run OT, CBN, and maybe MCCBN
 ## NOTE: MCCBN allowed to run with arbitrary number of columns
 ot_cbn_methods <- function(x, nboot = 0, 
@@ -773,41 +729,11 @@ transition_fg_sparseM <- function(x, weights) {
 
 
 
-## a simple check
-any_constant_col <- function(x) {
-    nr <- nrow(x)
-    mcs <- max(colSums(x))
-    any(mcs == nr)
-}
-
-## convert data frame to a matrix with 0L and 1L
-df_2_mat_integer <- function(x) {
-    x1 <- as.matrix(x)
-    if(max(abs(x - x1)) != 0) stop("failed conversion to matrix")
-    x2 <- x1
-    storage.mode(x2) <- "integer"
-    if(max(abs(x2 - x1)) != 0) stop("Not in 0L, 1L")
-    if(max(abs(x - x2)) != 0) stop("df not in 0L, 1L") ## paranoia
-    return(x2)
-}
-
-## To make it explicit
-## but do not set the last row to NaNs or similar.
-## Following same logic as in trans_rate_to_trans_mat (in MHN dir)
-rowScaleMatrix <- function(x) {
-    tm <- x
-    sx <- rowSums(x)
-    ii <- which(sx > 0)
-    for(i in ii) {
-        tm[i, ] <- tm[i, ]/sx[i]
-    }
-    tm
-}
-
 
 ## Pass a data set as a matrix with subjects as rows and genes as columns
 
-all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folder = NULL) {
+all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
+                                    HT_folder = NULL) {
      
     x <- df_2_mat_integer(x)
 
@@ -942,24 +868,6 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
 }
 
 
-
-## Remove a fraction, frac, of the WT
-## from a matrix of data. Used to examine
-## the effect of having very few WT
-remove_WT <- function(x, frac = 0.9) {
-    which_wt <- which(rowSums(x) == 0)
-    if(length(which_wt) > 0) {
-        rmwt <- which_wt[1:(round(frac * length(which_wt)))]
-    }
-    return(x[-rmwt, ])
-}
-
-## Add N WT to the data. Used to examine the effect of having many WT.
-add_WT <- function(x, N = 10000) {
-    ncx <- ncol(x)
-    x <- rbind(x, matrix(0, nrow = N, ncol = ncx))
-    return(x)
-}
 
 
 ## The code that follows is tested, and is the basis of much simplified
