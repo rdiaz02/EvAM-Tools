@@ -262,18 +262,18 @@ compare_cpm_freqs <- function(data, type){
         all_methods <- round(all_methods[selected_rows, ], 2)
         all_genotypes <- all_genotypes[selected_rows, ]
 
-        all_fucking_data <- data.frame(From = all_genotypes[, 1]
+        all_the_data <- data.frame(From = all_genotypes[, 1]
             , To = all_genotypes[, 2])
         for(i in 1:n_methods2compute){
-            all_fucking_data[[methods2compute[i]]] <- all_methods[, i]
+            all_the_data[[methods2compute[i]]] <- all_methods[, i]
         }
 
-        colnames(all_fucking_data) <- c("From", "To", methods2compute)
+        colnames(all_the_data) <- c("From", "To", methods2compute)
 
         order_by_counts <- sort(rowSums(all_methods), 
         decreasing = TRUE, index.return = TRUE)$ix
     
-        return(all_fucking_data[order_by_counts, ])
+        return(all_the_data[order_by_counts, ])
 
     } else if(type %in% c("lambdas")){
 
