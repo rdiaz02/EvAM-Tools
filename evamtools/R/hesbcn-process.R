@@ -2,6 +2,30 @@ source("../External-code/HESBCN/hesbcn-external.R")
 ## TODO
 # Create something similar to cbn-process for checking if the package is installed
 
+## Testing HESBCN programs available
+.._EvamTools_test.hesbcn <- Sys.which("h-esbcn") == ""
+if(.._EvamTools_test.hesbcn) {
+    warning(paste(
+        "\n\n",
+        "\n******************************************************",
+        "\n******************************************************\n",
+        ## "          OncoSimulT installation warning:\n",
+        "\n  WARNING \n",
+        "The external program h-esbcn was not found.",
+        "You will not be able to use HESBCN.",
+        "You can download them from https://github.com/danro9685/HESBCN",
+        "For proper compilation you should modify", 
+        "line 23 in *Makefile* to include *LDLIBS = -lgsl -lm -lgslcblas*.", 
+        "You can also change compilation from gcc-5 to something a bit more up to date, like gcc-10.", 
+        "Finally, add this folder to your $PATH.",
+        "\n******************************************************",
+        "\n******************************************************",
+        "\n\n"
+        )
+            )
+}
+rm(.._EvamTools_test.hesbcn)
+
 
 #' @title Run HESBCN
 #' 
