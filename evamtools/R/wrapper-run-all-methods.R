@@ -292,8 +292,7 @@ df_2_access_genots_and_graph_OR <- function(x) {
 ## DAG of restrictions (as data frame), options info about gene_relations
 ##            -> vector of accessible genotypes and graph of DAG of restrictions
 ##  Under OR, AND, XOR models, as specified by gene_relations
-# return all the accessible genotypes
-##     from a DAG of genes plus the DAG as igraph object
+
 df_2_access_genots_and_graph_relationships <- function(x,
                                                        gene_relations = NULL) {
 
@@ -458,20 +457,19 @@ unrestricted_fitness_graph_sparseM <- function(gacc) {
 
 
 
-## output of CPM analysis, string ->
+## output of CPM analysis ->
 ##             fitness graph (fgraph): just the adj. matrix
 ##             weighted fitness graph (weighted_fgraph)
 ##             transition matrix (trans_mat_genots)
-
 ##  Assumes an AND relationship
 
-##    string: to identify errors
+## To be used with output from CBN, MCCBN, OT
 
 ## Based on cpm_access_genots_paths_w  but only with necessary output
 ##  for both speed and size and using sparse matrices.
 ##  No paths are computed, so multiple global max is a moot point
 
-cpm_access_genots_paths_w_simplified <- function(x, string = NULL,
+cpm_access_genots_paths_w_simplified <- function(x, 
                                                  names_weights_paths =
                                                      c("rerun_lambda",
                                                        "lambda",
@@ -540,9 +538,17 @@ cpm_access_genots_paths_w_simplified <- function(x, string = NULL,
     ))
 }
 
+
+## output of CPM analysis ->
+##             fitness graph (fgraph): just the adj. matrix
+##             weighted fitness graph (weighted_fgraph)
+##             transition matrix (trans_mat_genots)
 ## Like cpm_access_genots_paths_w_simplified but for OR relationships
+
+## To be used with output from DBN
 cpm_access_genots_paths_w_simplified_OR <-
-    function(data, parameter_column_name = c("Thetas", "Probabilities")) {
+    function(data,
+             parameter_column_name = c("Thetas", "Probabilities")) {
 
         tmp <-
             try(df_2_access_genots_and_graph_OR(data$edges[, c("From", "To")]))
@@ -574,9 +580,12 @@ cpm_access_genots_paths_w_simplified_OR <-
     }
 
 
-## FIXME: this comment is either wrong or incomplete.
-## Sort wrapper to generate a transition matrix.
-## It first generates all accesibles genotypes given a transition matrix
+## output of CPM analysis ->
+##             fitness graph (fgraph): just the adj. matrix
+##             weighted fitness graph (weighted_fgraph)
+##             transition matrix (trans_mat_genots)
+## To be used with output from HESBCN
+
 cpm_access_genots_paths_w_simplified_relationships <-
     function(data,
              parameter_column_name = c("Thetas", "Probabilities", "Lambdas")) {
@@ -610,7 +619,7 @@ cpm_access_genots_paths_w_simplified_relationships <-
             weighted_fgraph = weighted_fgraph,
             trans_mat_genots = trans_mat_genots
         ))
-    }
+}
 
 
 ## adjacency matrix genotypes, row, column of that matrix,
@@ -646,12 +655,6 @@ transition_fg_sparseM <- function(x, weights) {
              get_single_lambda(x, r, c, weights),
             pos_do[, 1], pos_do[, 2]))
     wfg[pos_do] <- tmp
-    ## ## Could use Map but let's use a loop instead
-    ## for(p in 1:nrow(pos_do)) {
-    ##     wfg[pos_do[p, ] ] <-  get_single_lambda(x,
-    ##                                             pos_do[p, 1], pos_do[p, 2],
-    ##                                             weights)
-    ## }
     return(wfg)
 }
 
