@@ -72,20 +72,16 @@ ot_cbn_methods <- function(x, nboot = 0,
                         distribution_oncotree = TRUE,
                         min.freq = 0,
                         cores_cbn = 1,
-                        do_MCCBN = FALSE) { ## I think we want to keep min.freq to 0?
+                        do_MCCBN = FALSE) { 
     
-    x000 <- x
-    x <- add_pseudosamples(x, n00 = n00)
-    ## remove.constant makes no difference IFF we add pseudosamples, as
-    ## there can be no constant column when we add pseudosamples
-    x_tmp <- pre_process(x, remove.constant = FALSE, min.freq = min.freq)
+    
 
     cat("\n     Doing OT")
-    if(ncol(x_tmp) >= 2) {
+    if(ncol(x) >= 2) {
         time_ot <- system.time(
             OT <- try(
                 suppressMessages(
-                    ot_proc(x_tmp,
+                    ot_proc(x,
                             nboot = nboot,
                             distribution.oncotree = distribution_oncotree))))["elapsed"]
     } else {
@@ -93,13 +89,11 @@ ot_cbn_methods <- function(x, nboot = 0,
         time_ot <- NA
     }
 
-    ## So despite the message, we can do up to 25?
-    x_tmp <- pre_process(x, remove.constant = FALSE, min.freq = min.freq,
-                         max.cols = 25)
-    if(ncol(x_tmp) >= 2) {
+   
+    if(ncol(x) >= 2) {
         cat("\n     Doing CBN")
         time_cbn_ot <- system.time(
-            CBN_ot <- try(cbn_proc(x_tmp,
+            CBN_ot <- try(cbn_proc(x,
                                    addname = "tmpo",
                                    init.poset = "OT",
                                    nboot = nboot_cbn, parall = TRUE,
@@ -109,13 +103,10 @@ ot_cbn_methods <- function(x, nboot = 0,
         CBN_ot <- NA
     }
     if (do_MCCBN) {
-        x_tmp <- pre_process(x, remove.constant = FALSE, min.freq = min.freq,
-                             max.cols = NULL)
         cat("\n     Doing MCCBN")
-        if(ncol(x_tmp) >= 2) {
-            ## MCCBN should be able to run with many columns. 
+        if(ncol(x) >= 2) {
             time_mccbn <-
-                system.time(MCCBN <- try(mccbn_proc(x_tmp)))["elapsed"]
+                system.time(MCCBN <- try(mccbn_proc(x)))["elapsed"]
         } else {
             time_mccbn <- NA
             MCCBN <- NA
@@ -135,9 +126,7 @@ ot_cbn_methods <- function(x, nboot = 0,
         MCCBN = MCCBN,
         time_ot = time_ot,
         time_cbn_ot = time_cbn_ot,
-        time_mccbn = time_mccbn,
-        input_data = x000, ## definitely return this!!!
-        input_data_pseudosamples = x
+        time_mccbn = time_mccbn
     )
     return(out)
 }
@@ -672,13 +661,17 @@ transition_fg_sparseM <- function(x, weights) {
 ## Pass a data set as a matrix with subjects as rows and genes as columns
 
 all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
-                                    HT_folder = NULL) {
+                                    HT_folder = NULL,
+                                    max.cols = 15) {
      
     x <- df_2_mat_integer(x)
-
-    ## Always limit to 15
+    xoriginal <- x
+    
+    x <- add_pseudosamples(x, n00 = "auto3")
+    ## remove.constant makes no difference IFF we add pseudosamples, as
+    ## there can be no constant column when we add pseudosamples
     x <- pre_process(x, remove.constant = FALSE,
-                     min.freq = 0, max.cols = 15)
+                     min.freq = 0, max.cols = max.cols)
 
     if(do_MCCBN)
         methods <- c("OT",
@@ -798,7 +791,7 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
         HESBCN_f_graph = pre_trans_mat_HESBCN$HESBCN$weighted_fgraph,
         HESBCN_trans_mat = pre_trans_mat_HESBCN$HESBCN$trans_mat_genots,
         HESBCN_td_trans_mat = td$HESBCN,
-        csd_data = x
+        csd_data = xoriginal
         # HyperTraPS_model = out_HyperTraPS$edges,
         # HyperTraPS_f_graph = pre_trans_mat_new_CPMS$HyperTraPS$weighted_fgraph,
         # HyperTraPS_trans_mat = pre_trans_mat_new_CPMS$HyperTraPS$trans_mat_genots,
