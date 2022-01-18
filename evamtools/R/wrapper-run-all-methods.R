@@ -44,7 +44,7 @@
 ##        Probably you need to have autoconf-archive installed.
 ## - OT, and CAPRIand CAPRESE (the corresponding packages Oncotree and TRONCO)
 
-date()
+
 
 ## Set it to TRUE if you want to load MCCBN, which requires
 ## having it installed. It then tests the MCCBN functionality too.
@@ -64,54 +64,13 @@ thiscores <- 1
 ## RhpcBLASctl::omp_set_num_threads(thiscores)
 
 
-## library(compiler)
-## enableJIT(3)
-## setCompilerOptions(optimize = 3)
-## ## ## library(parallel)
-
-# library(dplyr)
-# library(Oncotree)
-# library(readr)
-# library(data.table)
-# library(igraph)
-# # library(TRONCO)
-# library(parallel)
-# library(foreach)
-# # library(doParallel)
-# library(Rgraphviz)
-# library(stringr)
-# library(pryr)
-# library(OncoSimulR)
-# library(testthat)
-# library(Matrix)
-
-# library(plot.matrix) ## for the plot of the theta matrix
-
-
-# source("schill-trans-mat.R") ## yes, a few seconds because of the testing
-
-# ## source("LOD-POM.R", echo = FALSE, max.deparse.length = 0)
-# source("pre-process.R", echo = FALSE, max.deparse.length = 0)
-# ## source("capri-caprese-process.R", echo = FALSE, max.deparse.length = 0)
-# source("ot-process.R", echo = FALSE, max.deparse.length = 0)
-# ## source("dip-process.R", echo = FALSE, max.deparse.length = 0)  ## No longer using it
-# source("cbn-process.R", echo = FALSE, max.deparse.length = 0)
-# # source("dbn-process.R", echo = FALSE, max.deparse.length = 0)
-# source("hypertraps-process.R", echo = FALSE, max.deparse.length = 0)
-# source("hesbcn-process.R", echo = FALSE, max.deparse.length = 0)
-
-# if(MCCBN_INSTALLED)
-    # source("mccbn-process.R", echo = FALSE, max.deparse.length = 0)
-
-
-registerDoSEQ() ## for TRONCO
 
 boot_data_index <- function(x, boot) {
     ## Used by CBN and DiP
     ## boot is an integer. 0 means no boot
     ## that is because I reuse boot for two purposes
     boot <- as.logical(boot)
-    if(boot) {
+    if (boot) {
         ind <- sample(nrow(x), nrow(x), replace = TRUE)
         return(x[ind, , drop = FALSE])
     } else {
@@ -120,7 +79,7 @@ boot_data_index <- function(x, boot) {
 }
 
 add_pseudosamples <- function(x, n00 = "auto3") {
-    if(n00 == "auto") {
+    if (n00 == "auto") {
         if(nrow(x) <= 500) {
             n00 <- round(nrow(x) * 0.10)
         } else {
@@ -128,7 +87,7 @@ add_pseudosamples <- function(x, n00 = "auto3") {
         }
     } else if(n00 == "auto2") {
         ## add only if max. freq. of any gene is > 95%
-        fmax <- max(colSums(x))/nrow(x)
+        fmax <- max(colSums(x)) / nrow(x)
         if(fmax > 0.95)
             n00 <- round(nrow(x) * 0.05)
         else
@@ -147,35 +106,17 @@ add_pseudosamples <- function(x, n00 = "auto3") {
     return(rbind(x,
                  matrix(0L, nrow = n00, ncol = ncol(x))
                  ))
-    ## cn <- colnames(x)
-    
-    ## tmp <- rbind(x,
-    ##              matrix(0L, nrow = n00, ncol = ncol(x))
-    ##              )
-    ## colnames(tmp) <- cn
-    ## return(tmp)
 }
 
 ## NOTE: MCCBN allowed to run with arbitrary number of columns
-all_methods <- function(x, nboot = 0, nboot_caprese_capri = 0,
-                        nboot_cbn = 0, nboot_dip = 0,
-                        n00 = "auto3", caprese_capri_minimal = TRUE,
-                        caprese_capri_cores.ratio = 0,
+all_methods <- function(x, nboot = 0, 
+                        nboot_cbn = 0, 
+                        n00 = "auto3", 
                         distribution_oncotree = TRUE,
                         min.freq = 0,
                         cores_cbn = 1,
                         do_MCCBN = FALSE) { ## I think we want to keep min.freq to 0?
     
-    # if(caprese_capri_minimal) {
-    #     ## Most of the time we only want the graphs, that's it
-    #     evaleloss <- FALSE
-    #     evalprederr <- FALSE
-    #     evalposterr <- FALSE
-    # } else {
-    #     evaleloss <- TRUE
-    #     evalprederr <- TRUE
-    #     evalposterr <- TRUE
-    # }
     x000 <- x
     x <- add_pseudosamples(x, n00 = n00)
     ## remove.constant makes no difference IFF we add pseudosamples, as
@@ -184,163 +125,61 @@ all_methods <- function(x, nboot = 0, nboot_caprese_capri = 0,
 
     cat("\n     Doing OT")
     if(ncol(x_tmp) >= 2) {
-        time_ot <- system.time(OT <- try(
-                                   suppressMessages(
-                                       ot_proc(x_tmp,
-                                               nboot = nboot,
-                                               distribution.oncotree = distribution_oncotree))))["elapsed"]
+        time_ot <- system.time(
+            OT <- try(
+                suppressMessages(
+                    ot_proc(x_tmp,
+                            nboot = nboot,
+                            distribution.oncotree = distribution_oncotree))))["elapsed"]
     } else {
         OT <- NA
         time_ot <- NA
     }
 
-    ## ## remove.constant I think is here because if we do not add
-    ## ## pseudosamples, caprese and capri will fail (fail, not just give a
-    ## ## tree with a silly edge) if we pass n00 = 0 to add
-    ## ## pseudosamples. And in some cases we have run this without adding
-    ## ## pseudosamples. Not with the simulations, though.
-    ## x_tmp <- pre_process(x, remove.constant = TRUE, min.freq = min.freq)
-    ## if(ncol(x_tmp) >= 2) {
-    ##     x_tmp <- tronco_common(x_tmp)
-    ##     cat("\n     Doing CAPRESE")
-    ##     time_caprese <- system.time(CAPRESE <- try(suppressMessages(
-    ##                                     caprese_proc(genotData = x_tmp,
-    ##                                 nboot = nboot_caprese_capri,
-    ##                                 silent = TRUE,
-    ##                                 cores.ratio = caprese_capri_cores.ratio,
-    ##                                 evaleloss = evaleloss,
-    ##                                 evalprederr = evalprederr,
-    ##                                 evalposterr = evalposterr))))["elapsed"]
-    ##     cat("\n     Doing CAPRI_BIC")
-    ##     time_capri_bic <- system.time(CAPRI_BIC <- try(suppressMessages(
-    ##                                   capri_proc(genotData = x_tmp,
-    ##                                 nboot = nboot_caprese_capri,
-    ##                                 nbootWilcox = 100,
-    ##                                 regularization = "bic",
-    ##                                 command = "hc",
-    ##                                 pvalue = 0.05,
-    ##                                 cores.ratio = caprese_capri_cores.ratio,
-    ##                                 evaleloss = evaleloss,
-    ##                                 evalprederr = evalprederr,
-    ##                                 evalposterr = evalposterr))))["elapsed"]
-    ##     cat("\n     Doing CAPRI_AIC")
-    ##     time_capri_aic <- system.time(CAPRI_AIC <- try(suppressMessages(
-    ##                                   capri_proc(genotData = x_tmp,
-    ##                                 nboot = nboot_caprese_capri,
-    ##                                 nbootWilcox = 100,
-    ##                                 regularization = "aic",
-    ##                                 command = "hc",
-    ##                                 pvalue = 0.05,
-    ##                                 cores.ratio = caprese_capri_cores.ratio,
-    ##                                 evaleloss = evaleloss,
-    ##                                 evalprederr = evalprederr,
-    ##                                 evalposterr = evalposterr))))["elapsed"]
-    ## } else {
-    ##     CAPRESE <- CAPRI_AIC <- CAPRI_BIC <- NA
-    ##     time_caprese <- time_capri_aic <- time_capri_bic <- NA
-    ## }
-
-    ## The code (ct-cbn.h) has
-    ## 	if ((n < 1) || (n > 25))
-    ## {
-    ## 	fprintf(stderr, "Error:  Number of events is %d.  Supported range is {1, ..., 14}.\n", n);
-    ## 	exit(1);
-    ## }
     ## So despite the message, we can do up to 25?
     x_tmp <- pre_process(x, remove.constant = FALSE, min.freq = min.freq,
                          max.cols = 25)
     if(ncol(x_tmp) >= 2) {
-        ## CBN_linear <- try(cbn_proc(x_tmp, addname = "tmpl",
-        ##                            init.poset = "linear",
-        ##                            nboot = nboot_cbn, parall = TRUE))
-        ## CBN_linear <- NA ## disabled
-        ## And note the parall argument has no effect as I am not using mclapply
-        ## This was changed in cbn-process.R on commit b9027d5, on 2016-09-26.
-        ## Yes, ugly!
-        
         cat("\n     Doing CBN")
-        time_cbn_ot <- system.time(CBN_ot <- try(cbn_proc(x_tmp, addname = "tmpo",
+        time_cbn_ot <- system.time(
+            CBN_ot <- try(cbn_proc(x_tmp,
+                                   addname = "tmpo",
                                    init.poset = "OT",
                                    nboot = nboot_cbn, parall = TRUE,
                                    cores = cores_cbn)))["elapsed"]
     } else {
-       time_cbn_ot <- NA
-       CBN_ot <- NA 
+        time_cbn_ot <- NA
+        CBN_ot <- NA
     }
-    if(do_MCCBN) {
+    if (do_MCCBN) {
         x_tmp <- pre_process(x, remove.constant = FALSE, min.freq = min.freq,
                              max.cols = NULL)
         cat("\n     Doing MCCBN")
         if(ncol(x_tmp) >= 2) {
-            ## MCCBN should be able to run with many more columns. See max.cols above
-            time_mccbn <- system.time(MCCBN <- try(mccbn_proc(x_tmp)))["elapsed"]
+            ## MCCBN should be able to run with many columns. 
+            time_mccbn <-
+                system.time(MCCBN <- try(mccbn_proc(x_tmp)))["elapsed"]
         } else {
-            ## MCCBN <- CBN_linear <- CBN_ot <- NA
             time_mccbn <- NA
             MCCBN <- NA
         }
     } else {
         time_mccbn <- NA
-        MCCBN <- NA  
+        MCCBN <- NA
     }
-    ## x_tmp <- pre_process(x, remove.constant = FALSE, min.freq = min.freq,
-    ##                      max.cols = 20)
-    ## if(ncol(x_tmp) >= 2) {
-    ##     ## if we are really going to use boottstrap,
-    ##     ## it is more reasonable to parallelize over boot
-    ##     ## than over p-range
-    ##     if(nboot_dip == 0) {
-    ##         ## When many runs from shell, we do not want any parall
-    ##         ## cpr <- detectCores()
-    ##         cpr <- 1
-    ##         cpb <- 1
-    ##         pb <- FALSE
-    ##     } else {
-    ##         cpr <- 1
-    ##         cpb <- detectCores()
-    ##         pb <- TRUE
-    ##     }
-    ##     time_dip_mpn <- system.time(DIP_MPN <- try(dip_proc(x_tmp, method = "MPN",
-    ##                             addname = "dm",
-    ##                             nboot = nboot_dip,
-    ##                             cores_for_p_range = cpr,
-    ##                             cores_for_boot = cpb,
-    ##                             parall_boot = pb)))["elapsed"]
-    ##     time_dip_smpn <- system.time(DIP_SMPN <- try(dip_proc(x_tmp, method = "SMPN", addname = "ds",
-    ##                              nboot = nboot_dip,
-    ##                              cores_for_p_range = cpr,
-    ##                              cores_for_boot = cpb,
-    ##                              parall_boot = pb)))["elapsed"]
-    ## } else {
-    ##     DIP_MPN <- DIP_SMPN <- NA
-    ##     time_dip_mpn <- time_dip_smpn <- NA
-    ## }
 
     cat("\n                  _times_cpm: ot", time_ot,
         " cbn ", time_cbn_ot,
         " mccbn ", time_mccbn,
-        ## " caprese ", time_caprese,
-        ## " capri_aic ", time_capri_aic,
-        ## " capri_bic ", time_capri_bic,
         "\n")
     out <- list(
         OT = OT,
-        ## CAPRESE = CAPRESE,
-        ## CAPRI_BIC = CAPRI_BIC,
-        ## CAPRI_AIC = CAPRI_AIC,        
-        ## DIP_MPN = DIP_MPN,
-        ## DIP_SMPN = DIP_SMPN,
         CBN_ot = CBN_ot,
         MCCBN = MCCBN,
         time_ot = time_ot,
-        ## time_caprese = time_caprese,
-        ## time_capri_bic = time_capri_bic,
-        ## time_capri_aic = time_capri_aic,        
-        ## time_dip_mpn = time_dip_mpn,
-        ## time_dip_smpn = time_dip_smpn,
         time_cbn_ot = time_cbn_ot,
         time_mccbn = time_mccbn,
-        input_data = x000, ## yes, return this!!!
+        input_data = x000, ## definitely return this!!!
         input_data_pseudosamples = x
     )
     return(out)
@@ -355,7 +194,8 @@ all_methods <- function(x, nboot = 0, nboot_caprese_capri = 0,
 ## We leave in there things we don't really need. Simpler.
 
 
-## DAG of restrictions (as data frame) -> vector of accessible genotypes and graph of DAG of restrictions
+## DAG of restrictions (as data frame) ->
+##              vector of accessible genotypes and graph of DAG of restrictions
 ## Under an AND model, such as CBN
 ## return all the accessible genotypes
 ##     from a DAG of genes plus the DAG as igraph object
@@ -388,14 +228,11 @@ df_2_access_genots_and_graph <- function(x) {
                                                      mode = "in")),
                                   "Root"))
         all_gty[[i]] <- tmp_gty_1
-        
-        ## only do union of those not contained in the genotype
-        ## to_unite <-  which(unlist(lapply(all_gty[1:(i-1)],
-        ##                                  function(z) length(setdiff(z, tmp_gty_1)) > 0)))
-        
-        if(i > 1) {
-            to_unite <-  which(unlist(lapply(all_gty[1:(i-1)],
-                                             function(z) !all(z %in% tmp_gty_1))))
+
+        if (i > 1) {
+            to_unite <-  which(
+                unlist(lapply(all_gty[1:(i-1)],
+                              function(z) !all(z %in% tmp_gty_1))))
         } else {
             to_unite <- vector(length = 0)
         }
@@ -408,8 +245,9 @@ df_2_access_genots_and_graph <- function(x) {
             ## expand if needed.
             if(length(all_gty) < (i + 1 + length(tmp_gty_2))) {
                 all_gty <- c(all_gty,
-                             vector(mode = "list", length = max(length(all_gty),
-                                                                2 + length(tmp_gty_2))))
+                             vector(mode = "list",
+                                    length = max(length(all_gty),
+                                                 2 + length(tmp_gty_2))))
             }
             all_gty[(i + 1):(i + length(tmp_gty_2))] <- tmp_gty_2
             i <- i + length(tmp_gty_2)
@@ -422,9 +260,6 @@ df_2_access_genots_and_graph <- function(x) {
     return(list(accessible_genots = all_gty,
                 graph = g))
 }
-
-
-
 
 
 
@@ -441,13 +276,14 @@ df_2_access_genots_and_graph_OR <- function(x) {
     ## g: an igraph object, with a "Root"
     ## returns a list
     children <- sort(setdiff(V(g)$name, "Root"))
-    node_depth <- unlist(lapply(children,
-                                function(node)
-                                    max(unlist(lapply(all_simple_paths(g,
-                                                                       from = "Root",
-                                                                       to = node),
-                                                      length)))
-                                ))
+    node_depth <-
+        unlist(lapply(children,
+                      function(node)
+                          max(unlist(lapply(all_simple_paths(g,
+                                                             from = "Root",
+                                                             to = node),
+                                            length)))
+                      ))
     
     names(node_depth) <- children
     node_depth <- sort(node_depth)
@@ -465,26 +301,28 @@ df_2_access_genots_and_graph_OR <- function(x) {
                                 function(u) sort(setdiff(u, "Root")))
         for(k in seq_along(all_tmp_gty_1)) {
             tmp_gty_1 <- all_tmp_gty_1[[k]]
-            all_gty[[i]] <- tmp_gty_1 
-            
+            all_gty[[i]] <- tmp_gty_1
             
             if(i > 1) {
-                to_unite <-  which(unlist(lapply(all_gty[1:(i-1)],
-                                                 function(z) !all(z %in% tmp_gty_1))))
+                to_unite <-
+                    which(unlist(lapply(all_gty[1:(i-1)],
+                                        function(z) !all(z %in% tmp_gty_1))))
             } else {
                 to_unite <- vector(length = 0)
             }
-            
+
             if(length(to_unite)) {
                 ## we need unique as some sets are the same
-                tmp_gty_2 <- unique(lapply(all_gty[to_unite],
-                                           function(u) sort(union(u, tmp_gty_1))))
+                tmp_gty_2 <-
+                    unique(lapply(all_gty[to_unite],
+                                  function(u) sort(union(u, tmp_gty_1))))
                 ## check remaining space in preallocated list.
                 ## expand if needed.
                 if(length(all_gty) < (i + 1 + length(tmp_gty_2))) {
                     all_gty <- c(all_gty,
-                                 vector(mode = "list", length = max(length(all_gty),
-                                                                    2 + length(tmp_gty_2))))
+                                 vector(mode = "list",
+                                        length = max(length(all_gty),
+                                                     2 + length(tmp_gty_2))))
                 }
                 all_gty[(i + 1):(i + length(tmp_gty_2))] <- tmp_gty_2
                 i <- i + length(tmp_gty_2)
@@ -502,47 +340,54 @@ df_2_access_genots_and_graph_OR <- function(x) {
                 graph = g))
 }
 
-## DAG of restrictions (as data frame) -> vector of accessible genotypes and graph of DAG of restrictions
-##  Under an OR model (not XOR, not AND), such as DBN
-## return all the accessible genotypes
+## DAG of restrictions (as data frame), options info about gene_relations
+##            -> vector of accessible genotypes and graph of DAG of restrictions
+##  Under OR, AND, XOR models, as specified by gene_relations
+# return all the accessible genotypes
 ##     from a DAG of genes plus the DAG as igraph object
-df_2_access_genots_and_graph_relationships <- function(x, gene_relations = NULL) {
-    ## minor detail: if x is a sparse adjacency mat.
-    ##    from igraph this still works. But don't do that.
+df_2_access_genots_and_graph_relationships <- function(x,
+                                                       gene_relations = NULL) {
 
-    genotype_follows_relationship <- function(genotype){
+    ## check if genotype follows the XOR/AND relationship.
+    genotype_follows_relationship <- function(genotype) {
         tmp_gene_relations <- gene_relations[genotype]
-        
-        for(relationship in c("XOR", "AND")){
-            rel_genes <- names(which(tmp_gene_relations == relationship) == TRUE)
-            for ( rel_idx in rel_genes){
-                parents_of_rel <- adjacent_vertices(g, rel_idx, mode=c("in"))[[rel_idx]]$name
-                if(relationship == "XOR" && all(parents_of_rel %in% genotype)) return(FALSE) ## XOR relationship not futfilled
-                if(relationship == "AND" && !all(parents_of_rel %in% genotype)) return(FALSE) ## AND relationship not futfilled
+        for (relationship in c("XOR", "AND")) {
+            rel_genes <-
+                names(which(tmp_gene_relations == relationship) == TRUE)
+            for (rel_idx in rel_genes) {
+                parents_of_rel <-
+                    adjacent_vertices(g, rel_idx, mode = c("in"))[[rel_idx]]$name
+                ## XOR relationship not futfilled
+                if (relationship == "XOR" &&
+                    all(parents_of_rel %in% genotype)) return(FALSE)
+                ## AND relationship not futfilled
+                if (relationship == "AND" &&
+                    !all(parents_of_rel %in% genotype)) return(FALSE)
             }
         }
         return(TRUE)
     }
 
-    g <- igraph::graph_from_data_frame(x, directed = TRUE)
-    
     ## g: an igraph object, with a "Root"
     ## returns a list
+    g <- igraph::graph_from_data_frame(x, directed = TRUE)
+
     children <- sort(setdiff(V(g)$name, "Root"))
-    node_depth <- unlist(lapply(children,
-                                function(node)
-                                    max(unlist(lapply(all_simple_paths(g,
-                                                                       from = "Root",
-                                                                       to = node),
-                                                      length)))
-                                ))
-    
+    node_depth <-
+        unlist(lapply(children,
+                      function(node)
+                          max(unlist(lapply(all_simple_paths(g,
+                                                             from = "Root",
+                                                             to = node),
+                                            length)))
+                      ))
+
     names(node_depth) <- children
     node_depth <- sort(node_depth)
     ## pre-allocate a list.
-    all_gty <- vector(mode = "list", length = 100) 
+    all_gty <- vector(mode = "list", length = 100)
     i <- 1
-    for(j in seq_along(node_depth)) {
+    for (j in seq_along(node_depth)) {
         ## FIXME: we did this traversing above. Reuse that
         all_tmp_gty_1 <- lapply(
             all_simple_paths(g, from = "Root", to = names(node_depth)[j],
@@ -551,41 +396,47 @@ df_2_access_genots_and_graph_relationships <- function(x, gene_relations = NULL)
 
         all_tmp_gty_1 <- lapply(all_tmp_gty_1,
                                 function(u) sort(setdiff(u, "Root")))
-        for(k in seq_along(all_tmp_gty_1)) {
+        for (k in seq_along(all_tmp_gty_1)) {
             tmp_gty_1 <- all_tmp_gty_1[[k]]
 
             ## Evaluate relationships
-            if(genotype_follows_relationship(tmp_gty_1)){
-                all_gty[[i]] <- tmp_gty_1 
+            if (genotype_follows_relationship(tmp_gty_1)) {
+                all_gty[[i]] <- tmp_gty_1
                 i <- i + 1
-            } 
+            }
 
-            if(i > 1) {
-                to_unite <-  which(unlist(lapply(all_gty[1:(i-1)],
-                                                 function(z) !all(z %in% tmp_gty_1))))
+            if (i > 1) {
+                to_unite <-
+                    which(unlist(lapply(all_gty[1:(i - 1)],
+                                        function(z) !all(z %in% tmp_gty_1))))
             } else {
                 to_unite <- vector(length = 0)
             }
-            
-            if(length(to_unite)) {
+
+            if (length(to_unite)) {
                 ## we need unique as some sets are the same
-                tmp_gty_2 <- unique(lapply(all_gty[to_unite],
-                                           function(u) sort(union(u, tmp_gty_1))))
+                tmp_gty_2 <-
+                    unique(lapply(all_gty[to_unite],
+                                  function(u) sort(union(u, tmp_gty_1))))
                 ## check remaining space in preallocated list.
                 ## expand if needed.
-                tmp_gty_2 <- tmp_gty_2[unlist(lapply(tmp_gty_2, genotype_follows_relationship))]
-                if(length(all_gty) < (i + length(tmp_gty_2))) {
+                tmp_gty_2 <-
+                    tmp_gty_2[unlist(lapply(tmp_gty_2,
+                                            genotype_follows_relationship))]
+                if (length(all_gty) < (i + length(tmp_gty_2))) {
                     all_gty <- c(all_gty,
-                                 vector(mode = "list", length = max(length(all_gty),
-                                                                    2 + length(tmp_gty_2))))
+                                 vector(mode = "list",
+                                        length = max(length(all_gty),
+                                                     2 + length(tmp_gty_2))))
                 }
-                if(length(tmp_gty_2)){
+                if (length(tmp_gty_2)){
                     all_gty[(i):(i + length(tmp_gty_2) - 1)] <- tmp_gty_2
                     i <- i + length(tmp_gty_2)
                 }
             }
         }
     }
+
     all_gty <- all_gty[1:(i - 1)]
     ## FIXME: We got duplicates above. Easy to rm here, but better if we did not
     ## get them to begin with
@@ -637,9 +488,10 @@ unrestricted_fitness_graph <- function(gacc, plot = FALSE) {
         for (gn in g) {
             parents <- gacc[which(nmut == m-1)-1]
             gns <- unlist(strsplit(gn, ", "))
-            parents <- parents[which(unlist(lapply(parents,
-                                                   function(p)
-                                                       length(setdiff(gns, p)))) == 1)]
+            parents <-
+                parents[which(unlist(lapply(parents,
+                                            function(p)
+                                                length(setdiff(gns, p)))) == 1)]
             for (p in parents){
                 adjmat[paste0(p, collapse = ", "), gn] <- 1L
             }
@@ -656,36 +508,16 @@ unrestricted_fitness_graph <- function(gacc, plot = FALSE) {
 
 
 
-
-## A simple, general procedure, to obtain the fitness graph is:
-##   - create matrix of all genotypes
-##   - Fill up, upper diagonal, with the fitness of destination genotype
-##   - Subtract fitness of original genotype
-##   - Set as 0 those with value <= 0.
-## We could use the list given below as starting point (to use a smaller matrix)
-## The list of accessible genotypes can also be obtained from wrap_accessibleGenotypes
-## in OncoSimulR (unexported function)
-## This function is now available as genots_2_fgraph_and_trans_mat
-
-
-
-## Trying sparse matrices
-## https://stackoverflow.com/questions/23107837/r-sparse-matrix-from-list-of-dimension-names
-## https://stackoverflow.com/questions/26207850/create-sparse-matrix-from-a-data-frame
-## https://cmdlinetips.com/2019/05/introduction-to-sparse-matrices-in-r/
-## https://www.gormanalysis.com/blog/sparse-matrix-construction-and-use-in-r/
-
-
+## list of accessible genotypes -> adjacency matrix of genotypes (fitness graph)
+## return maximally connected fitness graph for a given set of accessible
+## genotypes.   This list contains no WT (we add it)
 ## BEWARE! This is the maximally connected fitness graph. This works with
 ## CPMs. But this is wrong, if, say, fitnesses are: A = 2, B = 3, AB = 2.5.
 ## This will place an arrow between B and AB, but there should  be no such edge.
-## This function is now available as genots_2_fgraph_and_trans_mat
+## function genots_2_fgraph_and_trans_mat
+## only returns the truly accessible
 
-
-## list of accessible genotypes -> adjacency matrix of genotypes (fitness graph)
-## return maximally connected fitness graph for a given set of accessible genotypes
-##   This list contains no WT (we add it)
-unrestricted_fitness_graph_sparseM <- function(gacc, plot = FALSE) {
+unrestricted_fitness_graph_sparseM <- function(gacc) {
     gs <- unlist(lapply(gacc, function(g) paste0(g, collapse = ", ")))
     gs <- c("WT", gs)
     nmut <- c(0, vapply(gacc, length, 1))
@@ -701,9 +533,10 @@ unrestricted_fitness_graph_sparseM <- function(gacc, plot = FALSE) {
         for (gn in g) {
             parents <- gacc[which(nmut == m-1)-1]
             gns <- unlist(strsplit(gn, ", "))
-            parents <- parents[which(unlist(lapply(parents,
-                                                   function(p)
-                                                       length(setdiff(gns, p)))) == 1)]
+            parents <-
+                parents[which(unlist(lapply(parents,
+                                            function(p)
+                                                length(setdiff(gns, p)))) == 1)]
             for (p in parents){
                 ## Works but better via indices, I think
                 ## adjmat[paste0(p, collapse = ", "), gn] <- 1L
@@ -714,253 +547,48 @@ unrestricted_fitness_graph_sparseM <- function(gacc, plot = FALSE) {
             }
         }
     }
-    ## Probably will not work
-    if (plot)
-        mccbn::plot_poset(adjmat) ## , title = "G0 (unrestricted)")
-    ## stopifnot(all(adjmat %in% c(0L, 1L) ))
-    ## storage.mode(adjmat) <- "integer"
     return(adjmat)
 }
 
 
 
-## list of accessible genotypes -> global maximum
-##    Beware: just a single maximum
-get_global_max <- function(ag) {
-    muts <- unlist(lapply(ag, length))
-    max_muts <- max(muts)
-    ind_max_muts <- which(muts == max_muts)
-    if(length(ind_max_muts) != 1) stop("eh??!! ind_max_muts")
-    return(paste0(ag[[ind_max_muts]], collapse = ", "))
-}
 
+## output of CPM analysis, string ->
+##             fitness graph (fgraph): just the adj. matrix
+##             weighted fitness graph (weighted_fgraph)
+##             transition matrix (trans_mat_genots)
 
-## < /from CPMs-paths-genotypes-and-comb.R >
+##  Assumes an AND relationship
 
-## output of CPM analysis, string -> accessible genotypes and paths
-##                  string: just to identify errors
-##    the _w: weights, so we add probs.
-##   Modification of function of same name, without _w in
-##   CPMs-paths-genotypes-and-comb.R
-##   BEWARE: this assumes a single global maximum!!!
-cpm_access_genots_paths_w <- function(x, string = NULL,
-                                    names_weights_paths =
-                                        c("rerun_lambda",
-                                          "lambda",
-                                          "OT_edgeWeight")) {
-    if(inherits(x, "try-error") || is.na(x) || is.null(x)) {
-        ## The CPM analysis produced no edges component, so
-        ## nothing can be done
-        if(inherits(x, "try-error")) likely_error <- "Error_in_run"
-        if(is.na(x)) likely_error <- "ncol_x"
-        if(is.null(x)) likely_error <- "other_error"
-        return(list(accessible_genots = "ERROR_CPM_ANALYSIS",
-                    num_accessible_genots = "ERROR_CPM_ANALYSIS",
-                    CPM_DAG_as_igraph = "ERROR_CPM_ANALYSIS",
-                    fgraph = "ERROR_CPM_ANALYSIS",
-                    num_paths_to_max = "ERROR_CPM_ANALYSIS",
-                    paths_error = "ERROR_CPM_ANALYSIS",
-                    paths_to_max = "ERROR_CPM_ANALYSIS",
-                    weighted_fgraph = "ERROR_CPM_ANALYSIS",
-                    trans_mat_genots = "ERROR_CPM_ANALYSIS",
-                    unweighted_paths_to_max = "ERROR_CPM_ANALYSIS",
-                    weighted_paths_to_max = "ERROR_CPM_ANALYSIS",
-                    diversity_weighted_paths_to_max = "ERROR_CPM_ANALYSIS",
-                    likely_error = likely_error
-                    
-                ))
-    }
-                         
-    x <- x$edges
-    tmp <- try(df_2_access_genots_and_graph(x[, c("From", "To")]))
-    
-    if(inherits(tmp, "try-error")) {
-        stop("how is this happening? there was edges component!")
-    } else {
-        accessible_genots <- tmp$accessible_genots
-        fgraph <- unrestricted_fitness_graph(accessible_genots)
-        fgraphi <- igraph::graph_from_adjacency_matrix(fgraph)
-        gmax <- get_global_max(accessible_genots)
-    }
+##    string: to identify errors
 
-    ## based on n_pahts_single_max in compute-numpaths-clonal-int-stats.R
-    ## I still need this to get the paths from the CPM
-    lpaths <- NA
-    paths_to_max <- NA
-    paths_error <- FALSE
-    paths <- try(igraph::all_simple_paths(fgraphi,
-                                          from = "WT",
-                                          to = gmax,
-                                          mode = "out"))
-    if(inherits(paths, "try-error")) {
-        cat("\n     ERROR_in_paths_in_calling_string = ", string, "\n")
-        lpaths <- -99
-        paths_error <- TRUE
-        paths_to_max <- "PATHS_ERROR" ## this will never appear anywhere FIXME
-        ## will have to look for the paths_error variable
-    } else {
-        lpaths <- length(paths)
-        paths_to_max <-  unlist(lapply(paths,
-                                       function(x) paste(igraph::as_ids(x),
-                                                         collapse = " -> ")))
-    }
-
-    
-    ## Logic of obtaining weighted fitness graph
-    
-    ##  - obtain all accessible genotypes and fitness graph (unrestricted
-    ##      fitness graph) from CPM
-
-    ##  - from the lambdas/probs. of genes given genes obtain
-    ##       probabilities/lambdas of genotypes given genotypes. The call
-    ##       to "transition_fg" (where weights is the conditional
-    ##       prob./lambda) of descendant gene given parent gene
-
-    ##  - when using CBN, might not be probabilities. Make sure they are
-    ##    transition probabilities between genotypes: sweep
-
-    ##  - find the probability of each path: call to
-    ##    do_weighted_paths_to_max, that uses the list of all paths_to_max. 
-
-    
-    which_col_weights <- which(colnames(x) %in% names_weights_paths)
-    if(length(which_col_weights) > 1) {
-        stop("more than one column with weights")
-    } else if (length(which_col_weights) == 1) {
-        stopifnot(colnames(x)[2] == "To")
-        weights <- unique(x[, c(2, which_col_weights)])
-        if(any(duplicated(weights[, "To"]))) {
-            stop("Different lambda/weight for same destination gene.",
-                 " This is not allowed with conjunctive DAGs")
-        }
-        rownames(weights) <- weights[, "To"]
-        weighted_fgraph <- transition_fg(fgraph, weights)
-    } else {
-        ## why would we return something? It is NA
-        ## weighted_fgraph <- fgraph
-        weighted_fgraph <- NA
-    }
-
-    if (length(which_col_weights) == 1) {
-        ## weighted_fgraph need not have each row sum to 1, if they are lambdas
-        ## from CBN for instance. So make sure they are transition matrices
-        ## between genotypes.
-        trans_mat_genots <- sweep(weighted_fgraph, 1,
-                                  rowSums(weighted_fgraph), FUN = "/")
-        trans_mat_genots[is.nan(trans_mat_genots)] <- 0
-    } else {
-        trans_mat_genots <- NA
-    }
-
-
-    if(length(which_col_weights) == 1) {
-        weighted_paths_to_max <- do_weighted_paths_to_max(paths_to_max,
-                                                          trans_mat_genots)
-        diversity_weighted_paths_to_max <-
-            OncoSimulR:::shannonI(weighted_paths_to_max[, "probability"])
-
-    } else {
-        weighted_paths_to_max <- NA
-        diversity_weighted_paths_to_max <- NA
-    }
-    
-    return(list(accessible_genots = accessible_genots,
-                num_accessible_genots = length(accessible_genots),
-                CPM_DAG_as_igraph = tmp$graph,
-                ## fgraph_AM = fgraph,
-                fgraph = fgraph,
-                num_paths_to_max = lpaths,
-                paths_error = paths_error,
-                weighted_fgraph = weighted_fgraph,
-                trans_mat_genots = trans_mat_genots,
-                unweighted_paths_to_max = paths_to_max,
-                weighted_paths_to_max = weighted_paths_to_max,
-                diversity_weighted_paths_to_max =
-                    diversity_weighted_paths_to_max,
-                likely_error = "No_error"
-                ))
-}
-
-
-
-
-
-## < /from CPMs-paths-genotypes-and-comb.R >
-
-## output of CPM analysis, string -> accessible genotypes and paths
-##                  string: just to identify errors
-##    the _w: weights, so we add probs.
-##   Modification of function of same name, without _w in
-##   CPMs-paths-genotypes-and-comb.R
-
-## Like the one above, but only with necessary output
+## Based on cpm_access_genots_paths_w  but only with necessary output
 ##  for both speed and size and using sparse matrices.
-
+##  No paths are computed, so multiple global max is a moot point
 
 cpm_access_genots_paths_w_simplified <- function(x, string = NULL,
-                                    names_weights_paths =
-                                        c("rerun_lambda",
-                                          "lambda",
-                                          "OT_edgeWeight")) {
+                                                 names_weights_paths =
+                                                     c("rerun_lambda",
+                                                       "lambda",
+                                                       "OT_edgeWeight")) {
     if(inherits(x, "try-error") || is.na(x) || is.null(x)) {
-        ## The CPM analysis produced no edges component, so
-        ## nothing can be done
-        ## if(inherits(x, "try-error")) likely_error <- "Error_in_run"
-        ## if(is.na(x)) likely_error <- "ncol_x"
-        ## if(is.null(x)) likely_error <- "other_error"
-        return(list(## accessible_genots = "ERROR_CPM_ANALYSIS",
-                    ## num_accessible_genots = "ERROR_CPM_ANALYSIS",
-                    ## CPM_DAG_as_igraph = "ERROR_CPM_ANALYSIS",
-                    fgraph = "ERROR_CPM_ANALYSIS",
-                    ## num_paths_to_max = "ERROR_CPM_ANALYSIS",
-                    ## paths_error = "ERROR_CPM_ANALYSIS",
-                    ## paths_to_max = "ERROR_CPM_ANALYSIS",
-                    weighted_fgraph = "ERROR_CPM_ANALYSIS",
-                    trans_mat_genots = "ERROR_CPM_ANALYSIS"
-                    ## unweighted_paths_to_max = "ERROR_CPM_ANALYSIS",
-                    ## weighted_paths_to_max = "ERROR_CPM_ANALYSIS",
-                    ## diversity_weighted_paths_to_max = "ERROR_CPM_ANALYSIS",
-                    ## likely_error = likely_error
-                    
-                ))
+        return(list(
+            fgraph = "ERROR_CPM_ANALYSIS",
+            weighted_fgraph = "ERROR_CPM_ANALYSIS",
+            trans_mat_genots = "ERROR_CPM_ANALYSIS"
+        ))
     }
-                         
+    
     x <- x$edges
     tmp <- try(df_2_access_genots_and_graph(x[, c("From", "To")]))
-     
+    
     if(inherits(tmp, "try-error")) {
-        stop("how is this happening? there was edges component!")
+        stop("Some error here")
     } else {
         accessible_genots <- tmp$accessible_genots
         fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
-        ## fgraphi <- igraph::graph_from_adjacency_matrix(fgraph)
-        ## gmax <- get_global_max(accessible_genots)
     }
 
-    
-    ## ## based on n_pahts_single_max in compute-numpaths-clonal-int-stats.R
-    ## ## I still need this to get the paths from the CPM
-    ## lpaths <- NA
-    ## paths_to_max <- NA
-    ## paths_error <- FALSE
-    ## paths <- try(igraph::all_simple_paths(fgraphi,
-    ##                                       from = "WT",
-    ##                                       to = gmax,
-    ##                                       mode = "out"))
-    ## ## if(inherits(paths, "try-error")) {
-    ## ##     cat("\n     ERROR_in_paths_in_calling_string = ", string, "\n")
-    ## ##     lpaths <- -99
-    ## ##     paths_error <- TRUE
-    ## ##     paths_to_max <- "PATHS_ERROR" ## this will never appear anywhere FIXME
-    ## ##     ## will have to look for the paths_error variable
-    ## ## } else {
-    ## ##     lpaths <- length(paths)
-    ## ##     paths_to_max <-  unlist(lapply(paths,
-    ## ##                                    function(x) paste(igraph::as_ids(x),
-    ## ##                                                      collapse = " -> ")))
-    ## ## }
-
-    
     ## Logic of obtaining weighted fitness graph
     
     ##  - obtain all accessible genotypes and fitness graph (unrestricted
@@ -974,9 +602,7 @@ cpm_access_genots_paths_w_simplified <- function(x, string = NULL,
     ##  - when using CBN, might not be probabilities. Make sure they are
     ##    transition probabilities between genotypes: sweep
 
-    ##  - find the probability of each path: call to
-    ##    do_weighted_paths_to_max, that uses the list of all paths_to_max. 
-
+    
     which_col_weights <- which(colnames(x) %in% names_weights_paths)
     if(length(which_col_weights) > 1) {
         stop("more than one column with weights")
@@ -990,8 +616,6 @@ cpm_access_genots_paths_w_simplified <- function(x, string = NULL,
         rownames(weights) <- weights[, "To"]
         weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
     } else {
-        ## why would we return something? It is NA
-        ## weighted_fgraph <- fgraph
         weighted_fgraph <- NA
     }
 
@@ -999,105 +623,88 @@ cpm_access_genots_paths_w_simplified <- function(x, string = NULL,
         ## weighted_fgraph need not have each row sum to 1, if they are lambdas
         ## from CBN for instance. So make sure they are transition matrices
         ## between genotypes.
-        
-        ## trans_mat_genots <- sweep(weighted_fgraph, 1,
-        ##                           rowSums(weighted_fgraph), FUN = "/")
-
         trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
     } else {
         trans_mat_genots <- NA
     }
-
-
-    ## if(length(which_col_weights) == 1) {
-    ##     weighted_paths_to_max <- do_weighted_paths_to_max(paths_to_max,
-    ##                                                       trans_mat_genots)
-    ##     diversity_weighted_paths_to_max <-
-    ##         OncoSimulR:::shannonI(weighted_paths_to_max[, "probability"])
-
-    ## } else {
-    ##     weighted_paths_to_max <- NA
-    ##     diversity_weighted_paths_to_max <- NA
-    ## }
     
     return(list(
-        ## accessible_genots = accessible_genots,
-        ## num_accessible_genots = length(accessible_genots),
-        ## CPM_DAG_as_igraph = tmp$graph,
-        ## fgraph_AM = fgraph,
         fgraph = fgraph,
-        ## num_paths_to_max = lpaths,
-        ## paths_error = paths_error,
         weighted_fgraph = weighted_fgraph,
         trans_mat_genots = trans_mat_genots
-        ## unweighted_paths_to_max = paths_to_max,
-        ## weighted_paths_to_max = weighted_paths_to_max,
-        ## diversity_weighted_paths_to_max =  diversity_weighted_paths_to_max,
-        ## likely_error = "No_error"
     ))
 }
 
+## Like cpm_access_genots_paths_w_simplified but for OR relationships
+cpm_access_genots_paths_w_simplified_OR <-
+    function(data, parameter_column_name = c("Thetas", "Probabilities")) {
+
+        tmp <-
+            try(df_2_access_genots_and_graph_OR(data$edges[, c("From", "To")]))
+
+        if (inherits(tmp, "try-error")) {
+            stop("Some error here")
+        } else {
+            accessible_genots <- tmp$accessible_genots
+            fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
+        }
+
+        which_col_weights <-
+            which(colnames(data$edges) %in% parameter_column_name)
+        
+        if (is.null(data$edges[,which_col_weights])){
+            stop("No such column")
+        }
+
+        weights <- unique(data$edges[, c(2, which_col_weights)])
+        rownames(weights) <- weights[, "To"]
+        weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
+        trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
+
+        return(list(
+            fgraph = fgraph,
+            weighted_fgraph = weighted_fgraph,
+            trans_mat_genots = trans_mat_genots
+        ))
+    }
+
+
+## FIXME: this comment is either wrong or incomplete.
 ## Sort wrapper to generate a transition matrix.
 ## It first generates all accesibles genotypes given a transition matrix
-cpm_access_genots_paths_w_simplified_OR <- function(data,               
-    parameter_column_name = c("Thetas", "Probabilities")){
+cpm_access_genots_paths_w_simplified_relationships <-
+    function(data,
+             parameter_column_name = c("Thetas", "Probabilities", "Lambdas")) {
+        tmp <-
+            try(df_2_access_genots_and_graph_relationships(
+                data$edges[, c("From", "To")],
+                data$parent_set
+            ))
 
-  tmp <- try(df_2_access_genots_and_graph_OR(data$edges[, c("From", "To")]))
-  
-  if(inherits(tmp, "try-error")) {
-    stop("how is this happening? there was edges component!")
-  } else {
-    accessible_genots <- tmp$accessible_genots
-    fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
-  }
-  
-  which_col_weights <- which(colnames(data$edges) %in% parameter_column_name)
-  if (is.null(data$edges[,which_col_weights])){
-    stop("No such column")
-  }
-  weights <- unique(data$edges[, c(2, which_col_weights)])
-  rownames(weights) <- weights[, "To"]
-  weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
-  trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
+        if (inherits(tmp, "try-error")) {
+            stop("Some error here")
+        } else {
+            accessible_genots <- tmp$accessible_genots
+            fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
+        }
 
-  return(list(
-        fgraph = fgraph,
-        weighted_fgraph = weighted_fgraph,
-        trans_mat_genots = trans_mat_genots
-  ))
-}
+        which_col_weights <-
+            which(colnames(data$edges) %in% parameter_column_name)
+        if (is.null(data$edges[, which_col_weights])) {
+            stop("No such column")
+        }
 
-## Sort wrapper to generate a transition matrix.
-## It first generates all accesibles genotypes given a transition matrix
-cpm_access_genots_paths_w_simplified_relationships <- function(data,               
-    parameter_column_name = c("Thetas", "Probabilities", "Lambdas")){
+        weights <- unique(data$edges[, c(2, which_col_weights)])
+        rownames(weights) <- weights[, "To"]
+        weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
+        trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
 
-  tmp <- try(df_2_access_genots_and_graph_relationships(data$edges[, c("From", "To")]
-                                                        , data$parent_set))
-  
-  if(inherits(tmp, "try-error")) {
-    stop("how is this happening? there was edges component!")
-  } else {
-    accessible_genots <- tmp$accessible_genots
-    fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
-  }
-  
-  which_col_weights <- which(colnames(data$edges) %in% parameter_column_name)
-  if (is.null(data$edges[,which_col_weights])){
-    stop("No such column")
-  }
-  weights <- unique(data$edges[, c(2, which_col_weights)])
-  rownames(weights) <- weights[, "To"]
-  weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
-  trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
-
-  return(list(
-        fgraph = fgraph,
-        weighted_fgraph = weighted_fgraph,
-        trans_mat_genots = trans_mat_genots
-  ))
-}
-
+        return(list(
+            fgraph = fgraph,
+            weighted_fgraph = weighted_fgraph,
+            trans_mat_genots = trans_mat_genots
+        ))
+    }
 
 
 ## adjacency matrix genotypes, row, column of that matrix,
@@ -1446,8 +1053,175 @@ add_WT <- function(x, N = 10000) {
     return(x)
 }
 
+
+
+
+
+## The code that follows is tested, and is the basis of much simplified
+## code above, but this code itself is not actually used here.
+## This was used in Diaz-Uriarte and Vasallo, 2019
+## This was used to obtain paths to the global maximum from the CPMs
+## all of which assumed a single global maximum.
+
+## list of accessible genotypes -> global maximum
+##    Beware: just a single maximum
+get_global_max <- function(ag) {
+    muts <- unlist(lapply(ag, length))
+    max_muts <- max(muts)
+    ind_max_muts <- which(muts == max_muts)
+    if(length(ind_max_muts) != 1) stop("eh??!! ind_max_muts")
+    return(paste0(ag[[ind_max_muts]], collapse = ", "))
+}
+
+
+## < /from CPMs-paths-genotypes-and-comb.R >
+
+## output of CPM analysis, string -> accessible genotypes and paths
+##                  string: just to identify errors
+##    the _w: weights, so we add probs.
+##   Modification of function of same name, without _w in
+##   CPMs-paths-genotypes-and-comb.R
+##   BEWARE: this assumes a single global maximum!!!
+cpm_access_genots_paths_w <- function(x, string = NULL,
+                                      names_weights_paths =
+                                          c("rerun_lambda",
+                                            "lambda",
+                                            "OT_edgeWeight")) {
+    if(inherits(x, "try-error") || is.na(x) || is.null(x)) {
+        ## The CPM analysis produced no edges component, so
+        ## nothing can be done
+        if(inherits(x, "try-error")) likely_error <- "Error_in_run"
+        if(is.na(x)) likely_error <- "ncol_x"
+        if(is.null(x)) likely_error <- "other_error"
+        return(list(accessible_genots = "ERROR_CPM_ANALYSIS",
+                    num_accessible_genots = "ERROR_CPM_ANALYSIS",
+                    CPM_DAG_as_igraph = "ERROR_CPM_ANALYSIS",
+                    fgraph = "ERROR_CPM_ANALYSIS",
+                    num_paths_to_max = "ERROR_CPM_ANALYSIS",
+                    paths_error = "ERROR_CPM_ANALYSIS",
+                    paths_to_max = "ERROR_CPM_ANALYSIS",
+                    weighted_fgraph = "ERROR_CPM_ANALYSIS",
+                    trans_mat_genots = "ERROR_CPM_ANALYSIS",
+                    unweighted_paths_to_max = "ERROR_CPM_ANALYSIS",
+                    weighted_paths_to_max = "ERROR_CPM_ANALYSIS",
+                    diversity_weighted_paths_to_max = "ERROR_CPM_ANALYSIS",
+                    likely_error = likely_error
+                    
+                    ))
+    }
+    
+    x <- x$edges
+    tmp <- try(df_2_access_genots_and_graph(x[, c("From", "To")]))
+    
+    if(inherits(tmp, "try-error")) {
+        stop("how is this happening? there was edges component!")
+    } else {
+        accessible_genots <- tmp$accessible_genots
+        fgraph <- unrestricted_fitness_graph(accessible_genots)
+        fgraphi <- igraph::graph_from_adjacency_matrix(fgraph)
+        gmax <- get_global_max(accessible_genots)
+    }
+
+    ## based on n_pahts_single_max in compute-numpaths-clonal-int-stats.R
+    ## I still need this to get the paths from the CPM
+    lpaths <- NA
+    paths_to_max <- NA
+    paths_error <- FALSE
+    paths <- try(igraph::all_simple_paths(fgraphi,
+                                          from = "WT",
+                                          to = gmax,
+                                          mode = "out"))
+    if(inherits(paths, "try-error")) {
+        cat("\n     ERROR_in_paths_in_calling_string = ", string, "\n")
+        lpaths <- -99
+        paths_error <- TRUE
+        paths_to_max <- "PATHS_ERROR" ## this will never appear anywhere FIXME
+        ## will have to look for the paths_error variable
+    } else {
+        lpaths <- length(paths)
+        paths_to_max <-  unlist(lapply(paths,
+                                       function(x) paste(igraph::as_ids(x),
+                                                         collapse = " -> ")))
+    }
+
+    
+    ## Logic of obtaining weighted fitness graph
+    
+    ##  - obtain all accessible genotypes and fitness graph (unrestricted
+    ##      fitness graph) from CPM
+
+    ##  - from the lambdas/probs. of genes given genes obtain
+    ##       probabilities/lambdas of genotypes given genotypes. The call
+    ##       to "transition_fg" (where weights is the conditional
+    ##       prob./lambda) of descendant gene given parent gene
+
+    ##  - when using CBN, might not be probabilities. Make sure they are
+    ##    transition probabilities between genotypes: sweep
+
+    ##  - find the probability of each path: call to
+    ##    do_weighted_paths_to_max, that uses the list of all paths_to_max. 
+
+    
+    which_col_weights <- which(colnames(x) %in% names_weights_paths)
+    if(length(which_col_weights) > 1) {
+        stop("more than one column with weights")
+    } else if (length(which_col_weights) == 1) {
+        stopifnot(colnames(x)[2] == "To")
+        weights <- unique(x[, c(2, which_col_weights)])
+        if(any(duplicated(weights[, "To"]))) {
+            stop("Different lambda/weight for same destination gene.",
+                 " This is not allowed with conjunctive DAGs")
+        }
+        rownames(weights) <- weights[, "To"]
+        weighted_fgraph <- transition_fg(fgraph, weights)
+    } else {
+        ## why would we return something? It is NA
+        ## weighted_fgraph <- fgraph
+        weighted_fgraph <- NA
+    }
+
+    if (length(which_col_weights) == 1) {
+        ## weighted_fgraph need not have each row sum to 1, if they are lambdas
+        ## from CBN for instance. So make sure they are transition matrices
+        ## between genotypes.
+        trans_mat_genots <- sweep(weighted_fgraph, 1,
+                                  rowSums(weighted_fgraph), FUN = "/")
+        trans_mat_genots[is.nan(trans_mat_genots)] <- 0
+    } else {
+        trans_mat_genots <- NA
+    }
+
+
+    if(length(which_col_weights) == 1) {
+        weighted_paths_to_max <- do_weighted_paths_to_max(paths_to_max,
+                                                          trans_mat_genots)
+        diversity_weighted_paths_to_max <-
+            OncoSimulR:::shannonI(weighted_paths_to_max[, "probability"])
+
+    } else {
+        weighted_paths_to_max <- NA
+        diversity_weighted_paths_to_max <- NA
+    }
+    
+    return(list(accessible_genots = accessible_genots,
+                num_accessible_genots = length(accessible_genots),
+                CPM_DAG_as_igraph = tmp$graph,
+                ## fgraph_AM = fgraph,
+                fgraph = fgraph,
+                num_paths_to_max = lpaths,
+                paths_error = paths_error,
+                weighted_fgraph = weighted_fgraph,
+                trans_mat_genots = trans_mat_genots,
+                unweighted_paths_to_max = paths_to_max,
+                weighted_paths_to_max = weighted_paths_to_max,
+                diversity_weighted_paths_to_max =
+                    diversity_weighted_paths_to_max,
+                likely_error = "No_error"
+                ))
+}
+
 # library(codetools)
-checkUsageEnv(env = .GlobalEnv)
+## checkUsageEnv(env = .GlobalEnv)
 
 
 
