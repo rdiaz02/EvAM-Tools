@@ -20,11 +20,11 @@
 ## large numbers of features.
 
 ## Load the original code by Schill et al.
-source("../External-code/MHN/InlineFunctions.R")
-source("../External-code/MHN/ModelConstruction.R")
-source("../External-code/MHN/Likelihood.R")
-source("../External-code/MHN/RegularizedOptimization.R")
-source("../External-code/MHN/UtilityFunctions.R")
+source("../../External-code/MHN/InlineFunctions.R")
+source("../../External-code/MHN/ModelConstruction.R")
+source("../../External-code/MHN/Likelihood.R")
+source("../../External-code/MHN/RegularizedOptimization.R")
+source("../../External-code/MHN/UtilityFunctions.R")
 
 
 ## observations (rows as patients, columns genes) -> transition matrix genotypes
@@ -130,6 +130,7 @@ trans_rate_to_trans_mat <- function(x,
 allGenotypes_3 <- function(k) {
     ## From OncoSimulR
     f1 <- function(n) {
+        ## combinations: from gtools
         lapply(seq.int(n), function(x) combinations(n = n, r = x))}
 
     list.of.vectors <- function(y) {
@@ -540,37 +541,6 @@ allGenotypes_2 <- function(k) {
 
 
 
-
-
-## ## integer (number of genes) -> all genotypes as 0,1 vectors
-## allGenotypes_1 <- function(k) {
-##     ## From OncoSimulR
-##     f1 <- function(n) {
-##         lapply(seq.int(n), function(x) combinations(n = n, r = x))}
-
-##     list.of.vectors <- function(y) {
-##         ## there's got to be a simpler way
-##         lapply(unlist(lapply(y, function(x) {apply(x, 1, list)}),
-##                       recursive = FALSE),
-##                function(m) m[[1]])
-##     }
-   
-##     mutated <- list.of.vectors(f1(k))
-##     num_mutated <- lapply(mutated, length)
-    
-##     ## number of genes, mutated positions -> binary genotype as vector of
-##     ## 0, 1
-##     binary_genotype <- function(x, k) {
-##         y <- rep(0L, k)
-##         y[x] <- 1L
-##         return(y)
-##     }
-##     bin_genot <- lapply(mutated, function(x) binary_genotype(x, k = k))
-##     Map(function(nm, m) list(num_mutated = nm, genot = m), num_mutated, bin_genot)
-##     ## FIXME: add WT
-## }
-
-
 ## integer (number of genes) -> all genotypes as 0,1 vectors
 allGenotypes_former <- function(k) {
     ## From OncoSimulR
@@ -597,44 +567,6 @@ allGenotypes_former <- function(k) {
     lapply(mutated, function(x) binary_genotype(x, k = k))
 }
 
-
-## ## two genotypes as vector of 0,1 : can we transition from x -> y?
-## ## only if exactly a difference of 1
-## canTransition <- function(x, y) {
-##     sum(y - x) == 1
-## }
-
-
-
-
-
-
-## ## Not used anywhere anymore
-## ## genotype, genotype, Theta (as exp(theta)) -> transition rate x -> y
-## transitionRate <- function(x, y, Theta) {
-##     if(sum(y) != (sum(x) + 1) ) {
-##         return(0)
-##     } else {
-##         posy <- which(y != x)
-##         if(length(posy) != 1) {
-##             return(0)
-##         } else {
-##             posx <- which(x == 1L)
-##             if(length(posx) == 0) {
-##                 ret <- return(Theta[posy, posy])
-##             } else {
-##                 ret <- (Theta[posy, posy] * prod(Theta[posy, posx]))
-##             }
-##             if(length(ret) > 1) {
-##                 cat("\n here")
-##                 stop()
-##             }
-##             else (return(ret))
-##             ## if(length(posx) == 0) return(Theta[posy, posy])
-##             ## else return(Theta[posy, posy] * cumprod(Theta[posy, posx]))
-##         }
-##     }
-## }
 
 ## this is faster
 ## genotype, genotype, Theta (as exp(theta)) -> transition rate x -> y
@@ -804,3 +736,69 @@ inner_transitionRate_2 <- function(i, j, genotypes, Theta) {
 
 
 
+
+
+
+
+## ## integer (number of genes) -> all genotypes as 0,1 vectors
+## allGenotypes_1 <- function(k) {
+##     ## From OncoSimulR
+##     f1 <- function(n) {
+##         lapply(seq.int(n), function(x) combinations(n = n, r = x))}
+
+##     list.of.vectors <- function(y) {
+##         ## there's got to be a simpler way
+##         lapply(unlist(lapply(y, function(x) {apply(x, 1, list)}),
+##                       recursive = FALSE),
+##                function(m) m[[1]])
+##     }
+   
+##     mutated <- list.of.vectors(f1(k))
+##     num_mutated <- lapply(mutated, length)
+    
+##     ## number of genes, mutated positions -> binary genotype as vector of
+##     ## 0, 1
+##     binary_genotype <- function(x, k) {
+##         y <- rep(0L, k)
+##         y[x] <- 1L
+##         return(y)
+##     }
+##     bin_genot <- lapply(mutated, function(x) binary_genotype(x, k = k))
+##     Map(function(nm, m) list(num_mutated = nm, genot = m), num_mutated, bin_genot)
+##     ## FIXME: add WT
+## }
+
+
+## ## two genotypes as vector of 0,1 : can we transition from x -> y?
+## ## only if exactly a difference of 1
+## canTransition <- function(x, y) {
+##     sum(y - x) == 1
+## }
+
+
+## ## Not used anywhere anymore
+## ## genotype, genotype, Theta (as exp(theta)) -> transition rate x -> y
+## transitionRate <- function(x, y, Theta) {
+##     if(sum(y) != (sum(x) + 1) ) {
+##         return(0)
+##     } else {
+##         posy <- which(y != x)
+##         if(length(posy) != 1) {
+##             return(0)
+##         } else {
+##             posx <- which(x == 1L)
+##             if(length(posx) == 0) {
+##                 ret <- return(Theta[posy, posy])
+##             } else {
+##                 ret <- (Theta[posy, posy] * prod(Theta[posy, posx]))
+##             }
+##             if(length(ret) > 1) {
+##                 cat("\n here")
+##                 stop()
+##             }
+##             else (return(ret))
+##             ## if(length(posx) == 0) return(Theta[posy, posy])
+##             ## else return(Theta[posy, posy] * cumprod(Theta[posy, posx]))
+##         }
+##     }
+## }
