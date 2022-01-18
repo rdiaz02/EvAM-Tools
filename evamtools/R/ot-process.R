@@ -19,8 +19,8 @@ options(boot.parallel = "no")
 options(boot.ncpus = 1L)
 
 ## rm(list = ls())
-library(Oncotree)
-library(help = Oncotree)
+# library(Oncotree)
+# library(help = Oncotree)
 
 
 ## Also return the frequency of the original tree
@@ -317,5 +317,5 @@ ot_proc <- function(datax, nboot = 1000, distribution.oncotree = TRUE) {
 ## discrepancy consensus and original
 
 
-library(codetools)
-checkUsageEnv(env = .GlobalEnv)
+# library(codetools)
+# checkUsageEnv(env = .GlobalEnv)

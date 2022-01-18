@@ -93,8 +93,8 @@ pre_process <- function(x, remove.constant, min.freq = 0.05,
 
 
 
-library(codetools)
-checkUsageEnv(env = .GlobalEnv)
+# library(codetools)
+# checkUsageEnv(env = .GlobalEnv)
 
 
 

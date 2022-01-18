@@ -1,4 +1,3 @@
-library(stringr)
 ## TODO add support for custom genes names in the str conversions
 
 #' @title Integer to binary

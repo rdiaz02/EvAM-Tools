@@ -33,7 +33,7 @@
 
 
 ## A minimal wrapper. No bootstrap or anything like that for now.
-library(mccbn)
+# library(mccbn)
 
 mccbn_proc <- function(x) {
     stopifnot(!is.null(colnames(x)))

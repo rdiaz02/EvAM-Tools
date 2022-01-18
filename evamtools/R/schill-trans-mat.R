@@ -19,7 +19,7 @@
 ## matrices. In general, the best option is to use do_MHN2 for moderate to
 ## large numbers of features.
 
-library(gtools)
+# library(gtools)
 source("../External-code/MHN/InlineFunctions.R")
 source("../External-code/MHN/ModelConstruction.R")
 source("../External-code/MHN/Likelihood.R")
@@ -792,8 +792,8 @@ theta_to_trans_rate_3_SM <- function(theta,
 ## ## callSummary(pd32)
 
 
-library(codetools)
-checkUsageEnv(env = .GlobalEnv)
+# library(codetools)
+# checkUsageEnv(env = .GlobalEnv)
 
 
 

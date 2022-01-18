@@ -1,7 +1,7 @@
 ## Set up: add PATH_TO_HYPERTRAPS_REPO/src/python to your PATH
 ## Set up: add PATH_TO_HYPERTRAPS_REPO/bin/ to your PATH
 ## Set up: operate in a conda environment: Follow installation in README.md
-library(imager)
+#library(imager)
 
 #' Runs HyperTraPS model
 #' This function runs command line tools to call to HyperTraps.
