@@ -275,7 +275,9 @@ sample_all_CPMs <- function(cpm_output
         if (method == "OT") {
             output[[sprintf("%s_genotype_freqs", method)]] <-
                 output$OT_genots_predicted
-            ## FIXME: is the next implicitly available?
+            ## The next one is NOT implicitly available.
+            ##   see OT_transition_matrices.org
+            
             output[[sprintf("%s_genotype_transitions", method)]] <- NULL
         } else {
             if (method == "MHN") {
