@@ -1,0 +1,181 @@
+#+OPTIONS: ^:nil
+#+AUTHOR: Ramon Diaz-Uriarte
+#+TITLE: OT: transition matrices
+#+LATEX_HEADER: \usepackage[margin=1.7cm]{geometry}
+#+LATEX_HEADER: \usepackage{isodate}
+#+OPTIONS: toc:nil
+
+* Introduction: what this is about
+  Here I show why computing transition matrices is not well defined with OT
+  (Oncogenetic trees, as implemente for example in package "Oncotree", and
+  described by Desper et al., 1999 and Szabo and Boucher).
+
+
+* The example
+
+ - Suppose that, given some data, we obtain a very simple tree, where both A and B depend directly on root.
+
+   
+ - Suppose the estimated edge for A, which I'll call $p_a$ is $p_a = 0.3$. And the edge for B is $p_b = 0.6$. 
+    
+ - We can compute the genotype frequencies expected under the OT model as follows (see the paper by Szabo and Boucher):
+   
+    | Genotype | Expression            | Value |
+    |----------+-----------------------+-------|
+    | WT       | $(1 - p_a) (1 - p_b)$ |  0.28 |
+    | A        | $p_a \ (1 - p_b)$     |  0.12 |
+    | B        | $p_b \ (1 - p_a)$     |  0.42 |
+    | AB       | $p_a \ p_b$           |  0.18 |
+
+    
+ - (You can check this numbers with code like the one given at the end of this file also included as file "ot-simple.R" under the examples directory.)
+    
+ - For simplicity (to remove the "0.") I'll assume we are dealing with 100 individuals in what follows.
+   
+\clearpage
+
+* One set of transitions: S1
+
+ - This is a plausible evolutionary scenario that fits the above data (the frequencies of genotypes) 
+
+ - 
+ #+DOWNLOADED: screenshot @ 2021-09-06 15:51:22
+ [[./OT_trm1.png]]
+
+- Note that B is a local maximum
+    
+
+\clearpage
+* Another set of transitions: S2
+
+- This is also compatible with the  frequencies of genotypes.
+
+-
+#+DOWNLOADED: screenshot @ 2021-09-06 15:53:10
+[[./OT_trm2.png]]
+
+- In red I have shown a few problematic things: simply trying to multiply will not give the correct numbers. 
+
+- Where are 48 and 24, for the first split, coming from? From the logic for the transition rates that was used in Diaz-Uriarte and Vasallo, 2019:
+  - $p_b = 2\ p_a$
+        
+  - Since 72 (100 - 28) transition away from WT, $2/3$ go down the B path and $1/3$ down the A path.
+      
+  - $48 = 72 \ 2/3$: the B path
+  - $24 = 72 \ 1/3$: the A path
+          
+- But things break later:
+  - The 6 that transition from B to AB need to be obtained by subtraction
+  - The 12 that transition from A to AB need to be obtained by subtraction
+  - Etc.
+        
+- Why? Because, as Desper et al., and Szabo and Boucher mention, these are *untimed* oncogenetic trees. 
+      
+* OT cannot tell S1 apart from S2.
+
+** And OT seems compatible with local maxima if we want to.
+
+   For instance, with this:
+#+DOWNLOADED: screenshot @ 2021-09-06 16:26:41
+[[./OT_fl1.png]]
+
+
+
+   
+
+* Is the logic in Diaz-Uriarte and Vasallo, 2019 wrong?
+- Not wrong, if we are only interested in computing the probability of paths to the maximum.
+  
+- What we did in that paper is one possible way of interpreting OTs (we said we were abusing them).
+  
+  - And is one way that, of course, cannot give genotype frequencies.
+
+  - In S2, note that under the model where all genotypes eventually acquire all mutations, there will be no WT, no A, and no B left. All will have been converted to AB.
+    
+  - In figure S2, all the B would eventually become AB, all the A too, and all   the WT would become AB, either getting A first or B first. Thus:
+  
+    - 2/3 of the genotypes reach AB via acquiring B first: $100 * 2/3 = 66.7$.
+    - 1/3 of the genotypes reach AB via acquiring A first: $100 * 1/3 = 33.3$.
+
+  - If we think of a transition matrix, this is what we did
+
+    |     | WT |   A |   B | A,B |
+    |-----+----+-----+-----+-----|
+    | WT  |    | 0.3 | 0.6 |     |
+    | A   |    |     |     | 1   |
+    | B   |    |     |     | 1   |
+    | A,B |    |     |     |     |
+
+
+ - In other words, if we assume all genotypes reach the genotype with all genes mutated, this seems a very reasonable procedure, that is also consistent. 
+
+  
+** But there are other ways of thinking about this:
+- Under S1, the following is possible:
+  - 42 end up as B as shown in the figure.
+  - Now, the 28 that are still WT transition to either A or B with the same proportions as given in the figure: 
+    - $28 * 42/72 = 16.3$ end up as B.
+    - $28 * 30/72 = 11.7$ end up as A, and suppose all these become AB.
+- So we have:
+  - Via the B path: $42 + 16.3 = 58.3$. These stay as B.
+  - Via the A path: $30 + 11.7 = 41.7$. These reach AB.
+          
+- These numbers are different from the 66.7 and 33.3 that we would give with the calculations in Diaz-Uriarte and Vasallo. Of course, part of the difference is that B, here, is a local maximum. 
+
+* Why isn't there this ambiguity with CBN?
+ - Because CBN (and MHN) give transition rates. So we have the rate of staying in the same genotype and a fully specified model for transitions over time.
+  - With OT there is nothing that plays the role of the diagonal entry in the transition rate matrix.
+    
+** Could we hack OT for that?
+- Does not seem reasonable.
+- Under S2, for example, if you tried to write the rate of staying in A as
+  $1-p_b$ it does not work. See the red text in the figure.
+- But then, *if you want a model that can be interpreted as CBN, use CBN*
+  - That has a catch, of course: if we knew the data can be represented as a tree, OT might work better (bias-variance trade-off, etc). 
+  - But this is a different story.
+    
+* So OT can work with local maxima
+- We just don't know.
+  - In the sense that we do not know the paths to end or to the next genotype.
+  - It can work in the sense of local maxima not violating assumptions.
+
+* Code for Oncotree?
+ The following simple code shows some numbers that match the frequencies used in this example. This is also included as file "ot-simple.R" under the examples directory. 
+
+#+begin_src R
+library(Oncotree)
+library(OncoSimulR)
+
+pa <- 0.3
+pb <- 0.6
+N <- 1000
+na <- N * pa * (1 - pb)
+nb <- N * pb * (1 - pa)
+nab <- N * pa * pb
+n00 <- N * (1 - pa) * (1 - pb)
+dB <- matrix(
+    c(
+        rep(c(0, 1), nb)
+      , rep(c(1, 0), na) 
+      , rep(c(1, 1), nab)
+      , rep(c(0, 0), n00)
+    ), ncol = 2, byrow = TRUE
+)
+colnames(dB) <- LETTERS[1:2]
+storage.mode(dB) <- "integer"
+sampledGenotypes(dB)
+
+ot.fit <- oncotree.fit(dB)
+
+## Weights. This is a very sample example
+## so the next two are identical
+## and identical to the pa and pb given.
+ot.fit$parent$est.weight
+ot.fit$parent$obs.weight
+
+## Predicted genotypes
+distribution.oncotree(ot.fit, with.probs = TRUE)
+#+end_src
+
+  
+
