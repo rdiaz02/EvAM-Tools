@@ -262,6 +262,99 @@ inner_transitionRate_3_1 <- function(i, j, genotypes, Theta) {
 }
 
 
+## row number of genotype, genotypes data frame
+##            Theta (as exp(theta))
+##            maximum number of mutations ->
+##      transition rate x -> y [only those that are not 0 by construction]
+##   output to be used for populating a sparse matrix
+transitionRateC3_SM <- function(i, genotypes,  Theta, maxmut,
+                            inner_transition) {
+
+    num_genots <- length(genotypes$num_mut)
+    ## Last genotype
+    ## But this is silly
+    if(i == num_genots) return(cbind(j = num_genots, x = 0))
+
+    ## t11 <- Sys.time()
+    ## All genotypes we are sure we cannot transition to
+    nmuts <- genotypes$num_mut[i]
+    ## Necessarily same of fewer mutations
+    ## Necessarily not reachable
+    if( (nmuts + 2) <= maxmut ) {
+        mi2 <- match(nmuts + 2, genotypes$num_mut)
+        upper_gg <- (mi2 - 1)
+    } else {
+        upper_gg <- num_genots
+    }
+
+    ## All those with same number of mutations are also
+    ## necessarily not reachable.
+    mi1 <- match(nmuts + 1, genotypes$num_mut)
+
+    ff <- function(x) inner_transition(i, x, genotypes, Theta)
+    qs <- vapply(mi1:upper_gg,
+                 ff,
+                 double(1)
+                 )
+    return(cbind(j = mi1:upper_gg, 
+                 x = qs))
+}
+
+
+## row number of genotype, genotypes data frame
+##            Theta (as exp(theta))
+##            maximum number of mutations -> transition rate x -> y
+transitionRateC3 <- function(i, genotypes,  Theta, maxmut,
+                            inner_transition) {
+
+    num_genots <- length(genotypes$num_mut)
+    ## Last genotype
+    if(i == num_genots) return(rep(0, num_genots)) 
+
+    ## t11 <- Sys.time()
+    ## All genotypes we are sure we cannot transition to
+    nmuts <- genotypes$num_mut[i]
+    ## Necessarily same of fewer mutations
+    tmp1 <- rep(0, length.out = (i - 1))
+    ## Necessarily not reachable
+    ## t12 <- Sys.time()
+    if( (nmuts + 2) <= maxmut ) {
+        mi2 <- match(nmuts + 2, genotypes$num_mut)
+        tmp3 <- rep(0, length.out = num_genots - mi2 + 1)
+        upper_gg <- (mi2 - 1)
+    } else {
+        tmp3 <- double(0)
+        upper_gg <- num_genots
+    }
+    ## t13 <- Sys.time()
+    ## All those with same number of mutations are also
+    ## necessarily not reachable.
+    mi1 <- match(nmuts + 1, genotypes$num_mut)
+    tmp2 <- rep(0, length.out = mi1 - i)
+    ##  t14 <- Sys.time()
+    ## The rest
+    ## gg <- genotypes[c(i, mi1:upper_gg), ]
+
+    ## t15 <- Sys.time()
+
+    ## ff <- function(x) inner_transition(1, x, gg, Theta)
+    ## qs <- vapply(2:nrow(gg),
+    ##              ff,
+    ##              double(1)
+    ##              )
+
+    ff <- function(x) inner_transition(i, x, genotypes, Theta)
+    qs <- vapply(mi1:upper_gg,
+                 ff,
+                 double(1)
+                 )
+    ## t16 <- Sys.time()
+    ## alltimes <- c(t12 - t11, t13 - t12, t14 - t13, t15 - t14, t16 - t15)
+    ## cat("\n    all times: ", alltimes, "\n")
+    return(c(tmp1, tmp2, qs, tmp3))
+}
+
+
 ######################################################################
 ######################################################################
 ######################################################################
@@ -516,32 +609,32 @@ allGenotypes_former <- function(k) {
 
 
 
-
-## genotype, genotype, Theta (as exp(theta)) -> transition rate x -> y
-transitionRate <- function(x, y, Theta) {
-    if(sum(y) != (sum(x) + 1) ) {
-        return(0)
-    } else {
-        posy <- which(y != x)
-        if(length(posy) != 1) {
-            return(0)
-        } else {
-            posx <- which(x == 1L)
-            if(length(posx) == 0) {
-                ret <- return(Theta[posy, posy])
-            } else {
-                ret <- (Theta[posy, posy] * prod(Theta[posy, posx]))
-            }
-            if(length(ret) > 1) {
-                cat("\n here")
-                stop()
-            }
-            else (return(ret))
-            ## if(length(posx) == 0) return(Theta[posy, posy])
-            ## else return(Theta[posy, posy] * cumprod(Theta[posy, posx]))
-        }
-    }
-}
+## ## Not used anywhere anymore
+## ## genotype, genotype, Theta (as exp(theta)) -> transition rate x -> y
+## transitionRate <- function(x, y, Theta) {
+##     if(sum(y) != (sum(x) + 1) ) {
+##         return(0)
+##     } else {
+##         posy <- which(y != x)
+##         if(length(posy) != 1) {
+##             return(0)
+##         } else {
+##             posx <- which(x == 1L)
+##             if(length(posx) == 0) {
+##                 ret <- return(Theta[posy, posy])
+##             } else {
+##                 ret <- (Theta[posy, posy] * prod(Theta[posy, posx]))
+##             }
+##             if(length(ret) > 1) {
+##                 cat("\n here")
+##                 stop()
+##             }
+##             else (return(ret))
+##             ## if(length(posx) == 0) return(Theta[posy, posy])
+##             ## else return(Theta[posy, posy] * cumprod(Theta[posy, posx]))
+##         }
+##     }
+## }
 
 ## this is faster
 ## genotype, genotype, Theta (as exp(theta)) -> transition rate x -> y
@@ -616,99 +709,10 @@ transitionRateC <- function(i, genotypes,  Theta, maxmut,
 
 
 
-## this is faster
-## row number of genotype, genotypes data frame
-##            Theta (as exp(theta))
-##            maximum number of mutations -> transition rate x -> y
-transitionRateC3 <- function(i, genotypes,  Theta, maxmut,
-                            inner_transition) {
-
-    num_genots <- length(genotypes$num_mut)
-    ## Last genotype
-    if(i == num_genots) return(rep(0, num_genots)) 
-
-    ## t11 <- Sys.time()
-    ## All genotypes we are sure we cannot transition to
-    nmuts <- genotypes$num_mut[i]
-    ## Necessarily same of fewer mutations
-    tmp1 <- rep(0, length.out = (i - 1))
-    ## Necessarily not reachable
-    ## t12 <- Sys.time()
-    if( (nmuts + 2) <= maxmut ) {
-        mi2 <- match(nmuts + 2, genotypes$num_mut)
-        tmp3 <- rep(0, length.out = num_genots - mi2 + 1)
-        upper_gg <- (mi2 - 1)
-    } else {
-        tmp3 <- double(0)
-        upper_gg <- num_genots
-    }
-    ## t13 <- Sys.time()
-    ## All those with same number of mutations are also
-    ## necessarily not reachable.
-    mi1 <- match(nmuts + 1, genotypes$num_mut)
-    tmp2 <- rep(0, length.out = mi1 - i)
-    ##  t14 <- Sys.time()
-    ## The rest
-    ## gg <- genotypes[c(i, mi1:upper_gg), ]
-
-    ## t15 <- Sys.time()
-
-    ## ff <- function(x) inner_transition(1, x, gg, Theta)
-    ## qs <- vapply(2:nrow(gg),
-    ##              ff,
-    ##              double(1)
-    ##              )
-
-    ff <- function(x) inner_transition(i, x, genotypes, Theta)
-    qs <- vapply(mi1:upper_gg,
-                 ff,
-                 double(1)
-                 )
-    ## t16 <- Sys.time()
-    ## alltimes <- c(t12 - t11, t13 - t12, t14 - t13, t15 - t14, t16 - t15)
-    ## cat("\n    all times: ", alltimes, "\n")
-    return(c(tmp1, tmp2, qs, tmp3))
-}
 
 
 
-## row number of genotype, genotypes data frame
-##            Theta (as exp(theta))
-##            maximum number of mutations ->
-##      transition rate x -> y [only those that are not 0 by construction]
-##   output to be used for populating a sparse matrix
-transitionRateC3_SM <- function(i, genotypes,  Theta, maxmut,
-                            inner_transition) {
 
-    num_genots <- length(genotypes$num_mut)
-    ## Last genotype
-    ## But this is silly
-    if(i == num_genots) return(cbind(j = num_genots, x = 0))
-
-    ## t11 <- Sys.time()
-    ## All genotypes we are sure we cannot transition to
-    nmuts <- genotypes$num_mut[i]
-    ## Necessarily same of fewer mutations
-    ## Necessarily not reachable
-    if( (nmuts + 2) <= maxmut ) {
-        mi2 <- match(nmuts + 2, genotypes$num_mut)
-        upper_gg <- (mi2 - 1)
-    } else {
-        upper_gg <- num_genots
-    }
-
-    ## All those with same number of mutations are also
-    ## necessarily not reachable.
-    mi1 <- match(nmuts + 1, genotypes$num_mut)
-
-    ff <- function(x) inner_transition(i, x, genotypes, Theta)
-    qs <- vapply(mi1:upper_gg,
-                 ff,
-                 double(1)
-                 )
-    return(cbind(j = mi1:upper_gg, 
-                 x = qs))
-}
 
 
 
@@ -796,5 +800,7 @@ inner_transitionRate_2 <- function(i, j, genotypes, Theta) {
 ##         }
 ##     }
 ## }
+
+
 
 
