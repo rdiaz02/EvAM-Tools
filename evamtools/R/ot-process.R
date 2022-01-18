@@ -211,12 +211,15 @@ ot_proc <- function(datax, nboot = 1000, distribution.oncotree = TRUE) {
         colnames(obs_genots)[ncol(obs_genots)] <- "Counts"
         message(" Ending distribution.oncotree ", date())
 
-        message(" Starting observed vs expected, oncotree ", date())
-        ## Observed and expected, 2 events. From vignette
-        est2way <- t(data.matrix(est_genots[2:(ncol(est_genots) - 1)])) %*% diag(est_genots$Prob) %*%
-            data.matrix(est_genots[2:(ncol(est_genots) - 1)])
-        obs2way <-t(ot.fit$data[,-1]) %*% ot.fit$data[,-1]/nrow(ot.fit$data)
-        message(" Ending observed vs expected, oncotree ", date())
+        ## Not using it now
+        ## message(" Starting observed vs expected, oncotree ", date())
+        ## ## Observed and expected, 2 events. From vignette
+        ## est2way <- t(data.matrix(est_genots[2:(ncol(est_genots) - 1)])) %*% diag(est_genots$Prob) %*%
+        ##     data.matrix(est_genots[2:(ncol(est_genots) - 1)])
+        ## obs2way <-t(ot.fit$data[,-1]) %*% ot.fit$data[,-1]/nrow(ot.fit$data)
+        ## message(" Ending observed vs expected, oncotree ", date())
+        est2way <- NA
+        obs2way <- NA
     } else {
         est_genots <- NA
         est2way <- NA

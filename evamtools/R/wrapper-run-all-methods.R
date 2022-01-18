@@ -1388,6 +1388,7 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
         OT_model = cpm_out_others$OT$edges,
         OT_f_graph = pre_trans_mat_others$OT$weighted_fgraph,
         OT_trans_mat = wg$OT,
+        OT_genots_predicted = cpm_out_others$OT$genots_predicted,
         ## OT_u = uw$OT,
         CBN_model = cpm_out_others$CBN_ot$edges,
         CBN_f_graph = pre_trans_mat_others$CBN_ot$weighted_fgraph,
