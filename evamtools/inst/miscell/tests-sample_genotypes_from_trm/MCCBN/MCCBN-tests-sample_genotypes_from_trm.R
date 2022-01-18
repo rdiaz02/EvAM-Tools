@@ -8,6 +8,8 @@
 ## Using the KS test is not 100% OK, since we have
 ## permutation tests, and thus p-values are discrete
 
+## Some of this code is also partially repeated in
+## my_chi_unif
 
 ## Using a chi-square to test for a uniform distribution
 my_chi_unif <- function(pv) {
@@ -75,3 +77,11 @@ png("10_test.png")
 load("p_values10_mccbn.RData")
 check_dist(p_values)
 dev.off()
+
+
+
+
+
+
+
+
