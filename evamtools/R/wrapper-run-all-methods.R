@@ -209,13 +209,14 @@ df_2_access_genots_and_graph <- function(x) {
     ## g: an igraph object, with a "Root"
     ## returns a list
     children <- sort(setdiff(V(g)$name, "Root"))
-    node_depth <- unlist(lapply(children,
-                                function(node)
-                                    max(unlist(lapply(all_simple_paths(g,
-                                                                       from = "Root",
-                                                                       to = node),
-                                                      length)))
-                                ))
+    node_depth <-
+        unlist(lapply(children,
+                      function(node)
+                          max(unlist(lapply(all_simple_paths(g,
+                                                             from = "Root",
+                                                             to = node),
+                                            length)))
+                      ))
     
     names(node_depth) <- children
     node_depth <- sort(node_depth)
@@ -225,8 +226,9 @@ df_2_access_genots_and_graph <- function(x) {
     i <- 1
     for(j in seq_along(node_depth)) {
 
-        tmp_gty_1 <- sort(setdiff(names(subcomponent(g, v = names(node_depth)[j],
-                                                     mode = "in")),
+        tmp_gty_1 <-
+            sort(setdiff(names(subcomponent(g, v = names(node_depth)[j],
+                                            mode = "in")),
                                   "Root"))
         all_gty[[i]] <- tmp_gty_1
 
@@ -264,7 +266,8 @@ df_2_access_genots_and_graph <- function(x) {
 
 
 
-## DAG of restrictions (as data frame) -> vector of accessible genotypes and graph of DAG of restrictions
+## DAG of restrictions (as data frame) ->
+##              vector of accessible genotypes and graph of DAG of restrictions
 ##  Under an OR model (not XOR, not AND), such as DBN
 ## return all the accessible genotypes
 ##     from a DAG of genes plus the DAG as igraph object
@@ -285,13 +288,13 @@ df_2_access_genots_and_graph_OR <- function(x) {
                                                              to = node),
                                             length)))
                       ))
-    
+
     names(node_depth) <- children
     node_depth <- sort(node_depth)
     ## pre-allocate a list.
     all_gty <- vector(mode = "list", length = 100) 
     i <- 1
-    for(j in seq_along(node_depth)) {
+    for (j in seq_along(node_depth)) {
         ## FIXME: we did this traversing above. Reuse that
         all_tmp_gty_1 <- lapply(
             all_simple_paths(g, from = "Root", to = names(node_depth)[j],
@@ -471,7 +474,8 @@ df_2_access_genots_and_graph_relationships <- function(x,
 ## BEWARE! This is the maximally connected fitness graph. This works with
 ## CPMs. But this is wrong, if, say, fitnesses are: A = 2, B = 3, AB = 2.5.
 ## This will place an arrow between B and AB, but there should  be no such edge.
-## See below for how to have a general procedure
+## See below for similar comments and a function that only returns
+## the truly accessible
 
 unrestricted_fitness_graph <- function(gacc, plot = FALSE) {
     
@@ -676,6 +680,7 @@ cpm_access_genots_paths_w_simplified_OR <-
 cpm_access_genots_paths_w_simplified_relationships <-
     function(data,
              parameter_column_name = c("Thetas", "Probabilities", "Lambdas")) {
+        
         tmp <-
             try(df_2_access_genots_and_graph_relationships(
                 data$edges[, c("From", "To")],
@@ -725,16 +730,11 @@ get_single_lambda <- function(x, row, col, weights) {
 
 
 
-## fitness graph, weights of probs/lambdas descendant gene given parent gene -> weighted fitness graph
+## fitness graph, weights of probs/lambdas descendant gene given parent gene
+##                                            -> weighted fitness graph
 ##             the fitness graph with weights (relative to each node)
 ##             of jumping to each of the descendant genotypes
-
-## ## No longer used. Turning into transition matrix done outside
-## ## 
-## ##          transition = TRUE: return transition matrix
-## ##          if they sumto zero by row this is really the transition matrix
-## ##          of genotypes
-transition_fg <- function(x, weights) { ## , transition = TRUE) {
+transition_fg <- function(x, weights) { 
     pos_do <- which(x == 1, arr.ind = TRUE)
     wfg <- x
     wfg[] <- 0
@@ -744,26 +744,15 @@ transition_fg <- function(x, weights) { ## , transition = TRUE) {
             pos_do[, 1], pos_do[, 2]))
     wfg[pos_do] <- tmp
         
-    ## ## Could use Map but let's use a loop instead
-    ## for(p in 1:nrow(pos_do)) {
-    ##     wfg[pos_do[p, ] ] <-  get_single_lambda(x,
-    ##                                             pos_do[p, 1], pos_do[p, 2],
-    ##                                             weights)
-    ## }
     return(wfg)
 }
 
 
-## fitness graph, weights of probs/lambdas descendant gene given parent gene -> weighted fitness graph
+## fitness graph, weights of probs/lambdas descendant gene given parent gene
+##                                           -> weighted fitness graph
 ##             the fitness graph with weights (relative to each node)
 ##             of jumping to each of the descendant genotypes
-
-## ## No longer used. Turning into transition matrix done outside
-## ## 
-## ##          transition = TRUE: return transition matrix
-## ##          if they sumto zero by row this is really the transition matrix
-## ##          of genotypes
-transition_fg_sparseM <- function(x, weights) { ## , transition = TRUE) {
+transition_fg_sparseM <- function(x, weights) { 
     ## pos_do <- which(x == 1, arr.ind = TRUE)
     pos_do <- as.matrix(summary(x)[, c("i", "j")])
     wfg <- x
@@ -781,86 +770,6 @@ transition_fg_sparseM <- function(x, weights) { ## , transition = TRUE) {
     ## }
     return(wfg)
 }
-
-## vector of paths to max, transition matrix genotypes ->
-##     weighted paths to max
-do_weighted_paths_to_max <- function(paths, trans_mat) {
-    probs <- vapply(paths, function(u) prob_single_path(u, trans_mat),
-                    FUN.VALUE = 0.0)
-    stopifnot(isTRUE(all.equal(sum(probs), 1)))
-    df <- data.frame(path = paths,
-                     probability = probs, stringsAsFactors = FALSE)
-
-    rownames(df) <- NULL
-    return(df)
-}
-
-## path to max, transition matrix genotypes ->
-##    probability of path
-prob_single_path <- function(path, trans_mat) {
-    ## the indices of the sequence of genotypes
-    ii <- which(row.names(trans_mat) %in%
-                strsplit(path, " -> ", fixed = TRUE)[[1]])
-    prod(trans_mat[cbind(ii[-length(ii)], ii[-1])])
-}
-
-
-
-## ## file with a single entry of cpm output -> accessible genotypes and paths
-## ##    file is an ANALYZED__ID* file, as produced by run-CPMs.R
-## cpm_out_to_paths_genots_w <- function(thefile,
-##                                       methods = c("CBN", "MCCBN")
-##                                       ## methods = c("OT", "CAPRESE",
-##                                       ##               "CAPRI_BIC", "CAPRI_AIC",
-##                                       ##           "CBN_ot", "MCCBN")
-##                                       ) {
-##     out <- NULL
-##     load(thefile)
-##     ## this creates the out, that codetools complaints about
-##     outn <- out[1:5]
-##     if(is.null(out$bootstrap)) {
-##         outn$bootstap <- FALSE
-##     } else {
-##         outn$bootstrap <- out$bootstrap
-##     }
-
-##     string0 <- as.data.frame(outn, stringsAsFactors = FALSE)
-
-##     string <- paste(paste(names(string0), string0, sep = "_"), collapse = "__")
-
-##     out_w <- cpm_access_genots_paths_w(out$cbn_out, string = string)
-
-##     theout <- c(outn,
-##                 out_paths_genots = list(out_w)
-##                 )
-    
-##     ## saveRDS(theout, file = paste0("paths_genots_index_", index, "_", string, ".rds"))
-##     ## naming more consistent with that of true fitness graphs
-##     saveRDS(theout, file = paste0("paths_", string, ".rds"))
-##     cat("\n       done string = ", string, "\n")
-
-##     likely_error <- out_w$likely_error
-##     paths_error <- out_w$paths_error
-    
-##     m1 <- data.frame(num_paths_to_max = out_w$num_paths_to_max,
-##                      num_accessible_genots = out_w$num_accessible_genots,
-##                      diversity_weighted_paths_to_max = out_w$diversity_weighted_paths_to_max)
-                     
-##     m1$replicate <- outn$iter
-##     likely_error <- as.data.frame(likely_error)
-##     paths_error <- as.data.frame(paths_error)
-    
-##     m1 <- cbind(m1, likely_error)
-##     m1 <- cbind(m1, paths_error)
-    
-##     rm(theout)
-##     dfoutn <- as.data.frame(outn)
-##     row.names(dfoutn) <- NULL
-    
-##     retout <- cbind(dfoutn, m1)
-##     return(retout)
-## }
-
 
 
 
@@ -902,20 +811,22 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
      
     x <- df_2_mat_integer(x)
 
-    ## cat("\n  Number of genes before limiting = ", ncol(x))
     ## Always limit to 15
     x <- pre_process(x, remove.constant = FALSE,
                      min.freq = 0, max.cols = 15)
-    
-    ## cat("\n  Number of genes after limiting = ", ncol(x), "\n")
 
     if(do_MCCBN)
-        methods <- c("OT", ##"CAPRESE", "CAPRI_BIC", "CAPRI_AIC",
+        methods <- c("OT",
                      "CBN_ot"
                    , "MCCBN")
     else
         methods <- c("OT", "CBN_ot")
 
+    ## We run MHN, HESBCN, DBN, each in its own call. OT and CBN in the same call.
+    ## Then, as appropriate, we might need to get transition matrices
+    ## on other calls.
+    ## This could be simplified/unified, but inherits from working code.
+    
     cat("\n     Doing MHN")
     time_schill <- system.time(
         out_schill <- do_MHN2(x, lambda = 1/nrow(x)))["elapsed"]
@@ -932,31 +843,32 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
     print("By default we run it here with dry_run = TRUE.
         HyperTraPS takes a long time and I do no want to block the script.
     ")
-    # time_HyperTraPS <- system.time(
-    #   out_HyperTraPS <- do_HyperTraPS(x, tmp_folder = HT_folder, dry_run = TRUE, plot = FALSE))["elapsed"]
+    ## time_HyperTraPS <- system.time(
+    ##   out_HyperTraPS <- do_HyperTraPS(x, tmp_folder = HT_folder,
+    ##                     dry_run = TRUE, plot = FALSE))["elapsed"]
 
-    # cat("\n  time HyperTraPS = ", time_HyperTraPS)
+    ## cat("\n  time HyperTraPS = ", time_HyperTraPS)
 
     cat("\n     Doing HESBCN")
     time_hesbcn <- system.time(
       out_hesbcn <- do_HESBCN(x))["elapsed"]
-    #   out_hesbcn <- NULL
     
     cat("\n  time HESBCN = ", time_hesbcn)
      
-    cpm_out_others <- ot_cbn_methods(x, cores_cbn = cores_cbn, do_MCCBN = do_MCCBN)
+    cpm_out_others <- ot_cbn_methods(x, cores_cbn = cores_cbn,
+                                     do_MCCBN = do_MCCBN)
+    ## For CBN, OT, get transition matrices and fitness graphs
+    ## Transition matrix only used later for CBN/MCCBN
     pre_trans_mat_others <- lapply(cpm_out_others[methods],
         cpm_access_genots_paths_w_simplified)
 
-    pre_trans_mat_new_CPMS <- lapply( #For the moment just for DBN (HESBCN in the future)
+    pre_trans_mat_new_CPMS <- lapply( 
         list(DBN = out_dbn
-        # , HyperTraPS = out_HyperTraPS
         ),
         cpm_access_genots_paths_w_simplified_OR)
     
-    pre_trans_mat_HESBCN <- lapply( #For the moment just for DBN (HESBCN in the future)
+    pre_trans_mat_HESBCN <- lapply(
         list(HESBCN = out_hesbcn
-        # , HyperTraPS = out_HyperTraPS
         ),
         cpm_access_genots_paths_w_simplified_relationships)
 
@@ -965,20 +877,21 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
     # pre_trans_mat_others["HyperTraPS"] <- list(pre_trans_mat_new_CPMS$HyperTraPS)
     cat("\n    getting transition matrices for all non-mhn methods \n")
 
-    ## ## Unweighted
-    ## uw <- lapply(pre_trans_mat_others, function(x) rowScaleMatrix(x$fgraph))
     ## Weighted
-    wg <- lapply(pre_trans_mat_others[c("OT", "MCCBN" , "CBN_ot", "DBN", "HyperTraPS", "HESBCN")[c(TRUE, do_MCCBN, TRUE, TRUE, FALSE, TRUE)]], 
-        function(x) x$trans_mat_genots)
-    ## Diagonal
-    td <- lapply(pre_trans_mat_others[c("MCCBN", "CBN_ot", "DBN", "HyperTraPS", "HESBCN")[c(do_MCCBN, TRUE, FALSE, FALSE, TRUE)]],
+    wg <-
+        lapply(pre_trans_mat_others[c("OT", "MCCBN" ,
+                                      "CBN_ot", "DBN",
+                                      "HyperTraPS", "HESBCN")[c(TRUE, do_MCCBN,
+                                                                TRUE, TRUE,
+                                                                FALSE, TRUE)]],
+               function(x) x$trans_mat_genots)
+    ## Time discretized, via uniformization
+    td <- lapply(pre_trans_mat_others[c("MCCBN", "CBN_ot",
+                                        "DBN", "HyperTraPS",
+                                        "HESBCN")[c(do_MCCBN, TRUE,
+                                                    FALSE, FALSE, TRUE)]],
                  function(x) trans_rate_to_trans_mat(x$weighted_fgraph,
                                                      method = "uniformization"))
-    ## ## Paranoid check
-    ## wg2 <- lapply(pre_trans_mat_others[c("OT", "MCCBN", "CBN_ot")],
-    ##               function(x) trans_rate_to_trans_mat(x$weighted_fgraph,
-    ##                                                   method = "competingExponentials"))
-    ## stopifnot(identical(wg, wg2))
 
     if(do_MCCBN) {
         MCCBN_model <- cpm_out_others$MCCBN$edges
@@ -997,20 +910,14 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE, HT_folde
         OT_f_graph = pre_trans_mat_others$OT$weighted_fgraph,
         OT_trans_mat = wg$OT,
         OT_genots_predicted = cpm_out_others$OT$genots_predicted,
-        ## OT_u = uw$OT,
         CBN_model = cpm_out_others$CBN_ot$edges,
         CBN_f_graph = pre_trans_mat_others$CBN_ot$weighted_fgraph,
         CBN_trans_mat = wg$CBN_ot,
         CBN_td_trans_mat = td$CBN_ot,
-        ## CBN_uw = uw$CBN_ot,
         MCCBN_model = MCCBN_model,
         MCCBN_f_graph = MCCBN_f_graph,
         MCCBN_trans_mat = MCCBN_trans_mat,
         MCCBN_td_trans_mat = MCCBN_td_trans_mat,
-        ## MCCBN_uw = uw$MCCBN,
-        ## CAPRESE = uw$CAPRESE,
-        ## CAPRI_BIC = uw$CAPRI_BIC,
-        ## CAPRI_AIC = uw$CAPRI_AIC,
         MHN_theta = out_schill$theta,
         MHN_exp_theta = exp(out_schill$theta),
         MHN_transitionRateMatrix = out_schill$transitionRateMatrix, 
@@ -1055,14 +962,36 @@ add_WT <- function(x, N = 10000) {
 }
 
 
-
-
-
 ## The code that follows is tested, and is the basis of much simplified
 ## code above, but this code itself is not actually used here.
 ## This was used in Diaz-Uriarte and Vasallo, 2019
 ## This was used to obtain paths to the global maximum from the CPMs
 ## all of which assumed a single global maximum.
+
+
+## vector of paths to max, transition matrix genotypes ->
+##     weighted paths to max
+do_weighted_paths_to_max <- function(paths, trans_mat) {
+    probs <- vapply(paths, function(u) prob_single_path(u, trans_mat),
+                    FUN.VALUE = 0.0)
+    stopifnot(isTRUE(all.equal(sum(probs), 1)))
+    df <- data.frame(path = paths,
+                     probability = probs, stringsAsFactors = FALSE)
+
+    rownames(df) <- NULL
+    return(df)
+}
+
+## path to max, transition matrix genotypes ->
+##    probability of path
+prob_single_path <- function(path, trans_mat) {
+    ## the indices of the sequence of genotypes
+    ii <- which(row.names(trans_mat) %in%
+                strsplit(path, " -> ", fixed = TRUE)[[1]])
+    prod(trans_mat[cbind(ii[-length(ii)], ii[-1])])
+}
+
+
 
 ## list of accessible genotypes -> global maximum
 ##    Beware: just a single maximum
