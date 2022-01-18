@@ -1,11 +1,10 @@
 ## A simplified version of code-all-methods-2-trans-matrix-max-genes-15.R
-## Not using MCCBN, CAPRESE, or CAPRI
-## But it gives more output of OT, MHN, CBN
+## Not using CAPRESE, or CAPRI
+## But it gives more output of OT, MHN, CBN. It can use MCCBN if
+## MCCBN_INSTALLED is set to TRUE
 ## And we produce plots
 
-## I comment out methods and tests
-
-## Copyright 2016, 2017, 2018, 2020 Ramon Diaz-Uriarte
+## Copyright 2016, 2017, 2018, 2020, 2022 Ramon Diaz-Uriarte
 
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -101,7 +100,7 @@ library(plot.matrix) ## for the plot of the theta matrix
 # source("hypertraps-process.R", echo = FALSE, max.deparse.length = 0)
 # source("hesbcn-process.R", echo = FALSE, max.deparse.length = 0)
 
-if(MCCBN_INSTALLED)
+# if(MCCBN_INSTALLED)
     # source("mccbn-process.R", echo = FALSE, max.deparse.length = 0)
 
 
