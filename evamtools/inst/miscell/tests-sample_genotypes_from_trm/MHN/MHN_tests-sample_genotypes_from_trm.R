@@ -7,9 +7,10 @@
 
 ## The permutation tests used code in
 ## sample_genotypes_from_trm.R
+## The files with the output use code in generate_p_values_data_sets.R
 ## The commented out code shows, for example, how the p_values8 file
 ## was generated.
-
+## That uses function pv_one_comp
 
 ## Using the KS test is not 100% OK, since we have
 ## permutation tests, and thus p-values are discrete
