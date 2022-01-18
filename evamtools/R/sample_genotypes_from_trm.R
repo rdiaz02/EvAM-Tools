@@ -277,7 +277,6 @@ sample_all_CPMs <- function(cpm_output
                 output$OT_genots_predicted
             ## The next one is NOT implicitly available.
             ##   see OT_transition_matrices.org
-            
             output[[sprintf("%s_genotype_transitions", method)]] <- NULL
         } else {
             if (method == "MHN") {
