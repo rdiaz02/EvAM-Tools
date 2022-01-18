@@ -1,8 +1,4 @@
-# pwd2 <- getwd()
-# setwd("../../R/")
-# source("access_genots_from_oncosimul.R")
-# setwd(pwd2)
-# rm(pwd2)
+## Testing functionality in access_genots_from_oncosimul.R
 
 
 test_that("Genotype not accessible if no increase in fitness wrt to ancestor", {
