@@ -1,4 +1,4 @@
-## Copyright 2020 Ramon Diaz-Uriarte
+## Copyright 2020, 2022 Ramon Diaz-Uriarte
 
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -26,52 +26,18 @@ source("../External-code/MHN/Likelihood.R")
 source("../External-code/MHN/RegularizedOptimization.R")
 source("../External-code/MHN/UtilityFunctions.R")
 
-## Use these wrappers
+
 ## observations (rows as patients, columns genes) -> transition matrix genotypes
 
 ##          Remember my transition matrices between genotypes have origin
 ##          in rows, destination in columns. Transposed w.r.t. to their
 ##          Figure 2, left.
 
-do_MHN <- function(x,  lambda = 1/nrow(x)) {
-    ## lambda 0.01 is what they use by default in their bioRxiv, p. 7 paper.
-    ## In the paper it is 1/nrow(x). See paper and emails.
-    ## What we did: for simulations we used lambda = 0.01.
-    ## (see, e.g., function mhn_on_split, in file run-Schill-MHN-trans-mat.R)
-    ## but for biological data we used lambda = 1/nrow(x).
-    ## Differences are often minor. lmabda = 0.01 seems an easier setting
-    ## for reproducibility with simulations since number of features
-    ## can actually change in sampled data sets.
-    ## See Suppl Mat.
-    mhnd <- Data.to.pD(x)
-    cat("\n      MHN: done Data.to.pD ", date(), "\n")
-    theta <- Learn.MHN(mhnd, lambda = lambda)
-    cat("\n      MHN: done Learn.MHN ", date(), "\n")
-    colnames(theta) <- rownames(theta) <- colnames(x)
-    trm <- theta_to_trans_rate_3(theta,
-                                 inner_transition = inner_transitionRate_3_1)
-    cat("\n      MHN: done theta_to_trans_rate_3 ", date(), "\n")
-
-    return(list(
-        theta = theta,
-        transitionRateMatrix = trm,
-        transitionMatrixTimeDiscretized =
-            trans_rate_to_trans_mat(trm,
-                                    method = "uniformization",
-                                    paranoidCheck = TRUE),
-        transitionMatrixCompExp =
-            trans_rate_to_trans_mat(trm,
-                                    method = "competingExponentials",
-                                    paranoidCheck = TRUE)
-                ))
-}
-
-
 ## Identical to do_MHN, but with an argument for sparse, and corresponding
 ## additional code
 do_MHN2 <- function(x,  lambda = 1/nrow(x), sparse = TRUE) {
-    ## lambda 0.01 is what they use by default (see bioRxiv, p. 7)
-    ## Nope, it is 1/nrow(x). See paper and emails.
+    ## lambda 0.01 is what they use by default in their bioRxiv, p. 7 paper.
+    ## In the paper it is 1/nrow(x). See paper and emails.
     mhnd <- Data.to.pD(x)
     cat("\n      MHN: done Data.to.pD ", date(), "\n")
     theta <- Learn.MHN(mhnd, lambda = lambda)
@@ -100,8 +66,6 @@ do_MHN2 <- function(x,  lambda = 1/nrow(x), sparse = TRUE) {
                                     paranoidCheck = TRUE)
                 ))
 }
-
-
 
 
 ## transition rate matrix -> transition matrix
@@ -162,6 +126,204 @@ trans_rate_to_trans_mat <- function(x,
 }
 
 
+## integer (number of genes) -> all genotypes as 0,1 vectors
+allGenotypes_3 <- function(k) {
+    ## From OncoSimulR
+    f1 <- function(n) {
+        lapply(seq.int(n), function(x) combinations(n = n, r = x))}
+
+    list.of.vectors <- function(y) {
+        ## there's got to be a simpler way
+        lapply(unlist(lapply(y, function(x) {apply(x, 1, list)}),
+                      recursive = FALSE),
+               function(m) m[[1]])
+    }
+   
+    mutated <- list.of.vectors(f1(k))
+    num_mutated <- lapply(mutated, length)
+    
+    ## number of genes, mutated positions -> binary genotype as vector of
+    ## 0, 1
+    binary_genotype <- function(x, k) {
+        y <- rep(0L, k)
+        y[x] <- 1L
+        return(y)
+    }
+    bin_genot <- lapply(mutated, function(x) binary_genotype(x, k = k))
+    
+    return(list(num_mut = c(0, unlist(num_mutated)),
+                mutated = c(list(NA), mutated),
+                bin_genotype = c(list(rep(0, k)), bin_genot)))
+
+}
+
+
+
+## theta from Learn.MHN
+##      function used to compute theta -> transition rate matrix
+##      Note that the diagonal is not added
+##         This computes the products of the Theta, as in Fig.2 right
+theta_to_trans_rate_3 <- function(theta,
+                                inner_transition = inner_transitionRate_3_1) {
+
+    ## t1 <- Sys.time()
+    Theta <- exp(theta)
+    geneNames <- colnames(theta)
+    
+    k <- ncol(theta)
+    genots <- allGenotypes_3(k)
+    numGenots <- length(genots$num_mut)
+
+    genotNames <- unlist(
+        lapply(genots$bin_genotype,
+               function(x)
+                   paste(geneNames[which(x == 1L)], sep = "", collapse = ", "))
+        )
+    genotNames[genotNames == ""] <- "WT"
+
+    ## This single call is the one that takes most time
+    ## t2 <- Sys.time()
+
+    TRM <- vapply(seq.int(numGenots),
+           function(x)
+               transitionRateC3(x, genotypes = genots,
+                               Theta = Theta, maxmut = k,
+                               inner_transition = inner_transition),
+           double(numGenots))
+    TRM <- matrix(TRM, ncol = numGenots, byrow = TRUE)
+    colnames(TRM) <- rownames(TRM) <- genotNames
+    ## t3 <- Sys.time()
+
+    ## cat("\nt2 - t1 :", t2 - t1)
+    ## cat("\nt3 - t2 :", t3 - t2)
+    ## cat("\n")
+    return(TRM)
+}
+
+
+
+## theta from Learn.MHN
+##      function used to compute trans rate matrix -> transition rate matrix
+theta_to_trans_rate_3_SM <- function(theta,
+                                     inner_transition = inner_transitionRate_3_1) {
+
+    ## t1 <- Sys.time()
+    Theta <- exp(theta)
+    geneNames <- colnames(theta)
+    
+    k <- ncol(theta)
+    genots <- allGenotypes_3(k)
+    numGenots <- length(genots$num_mut)
+
+    genotNames <- unlist(
+        lapply(genots$bin_genotype,
+               function(x)
+                   paste(geneNames[which(x == 1L)], sep = "", collapse = ", "))
+        )
+    genotNames[genotNames == ""] <- "WT"
+
+    ## Initialize sparseMatrix in first call
+    trmv <- transitionRateC3_SM(1, genotypes = genots,
+                                Theta = Theta, maxmut = k,
+                                inner_transition = inner_transition)
+    TRM <- sparseMatrix(i = rep(1, length(trmv[, "j"])),
+                        j = trmv[, "j"],
+                        x = trmv[, "x"],
+                        dims = c(numGenots, numGenots),
+                        dimnames = list(genotNames, genotNames))
+    ## Can skip last one
+    for(i in seq.int(2, numGenots - 1)) {
+        trmv <- transitionRateC3_SM(i, genotypes = genots,
+                                    Theta = Theta, maxmut = k,
+                                    inner_transition = inner_transition)
+        TRM[i = i, j = trmv[, "j"]] <- trmv[, "x"]
+    }
+    return(TRM)
+}
+
+
+## genotype position (row), genotype position,
+##    genotype data frame
+##    Theta (as exp(theta)) -> transition rate x -> y
+inner_transitionRate_3_1 <- function(i, j, genotypes, Theta) {
+    
+    if( genotypes$num_mut[j] != (genotypes$num_mut[i] + 1) ) return(0)
+
+    x <- genotypes$bin_genotype[[i]]
+    y <- genotypes$bin_genotype[[j]]
+
+    if( length(posy <- which(y != x)) != 1 ) return(0)
+
+    posx <- which(x == 1L)
+    if(length(posx) == 0) return(Theta[posy, posy])
+
+    return(Theta[posy, posy] * prod(Theta[posy, posx]))
+
+}
+
+
+######################################################################
+######################################################################
+######################################################################
+######################################################################
+
+###   The code below has other implementations of the same functionality
+###   It is now not used for computations, but it is used for testing
+###   as they are different implementations.
+
+
+
+
+## ## Seems hard to make it any faster
+## pd3 <- profileExpr(theta_to_trans_rate_3(Theta.BC, inner_transition = inner_transitionRate_3_1))
+## ## pd32 <- profileExpr(theta_to_trans_rate_3(Theta.BC, inner_transition = inner_transitionRate_3_2))
+## options(width = 150)
+## funSummary(pd3)
+## callSummary(pd3)
+
+## ## funSummary(pd32)
+## ## callSummary(pd32)
+
+
+# library(codetools)
+# checkUsageEnv(env = .GlobalEnv)
+
+
+
+## observations (rows as patients, columns genes) -> transition matrix genotypes
+
+##          Remember my transition matrices between genotypes have origin
+##          in rows, destination in columns. Transposed w.r.t. to their
+##          Figure 2, left.
+
+## Since this does not allow for sparse matrices, left only for testing.
+do_MHN <- function(x,  lambda = 1/nrow(x)) {
+    ## lambda 0.01 is what they use by default in their bioRxiv, p. 7 paper.
+    ## In the paper it is 1/nrow(x). See paper and emails.
+  
+    mhnd <- Data.to.pD(x)
+    cat("\n      MHN: done Data.to.pD ", date(), "\n")
+    theta <- Learn.MHN(mhnd, lambda = lambda)
+    cat("\n      MHN: done Learn.MHN ", date(), "\n")
+    colnames(theta) <- rownames(theta) <- colnames(x)
+    trm <- theta_to_trans_rate_3(theta,
+                                 inner_transition = inner_transitionRate_3_1)
+    cat("\n      MHN: done theta_to_trans_rate_3 ", date(), "\n")
+
+    return(list(
+        theta = theta,
+        transitionRateMatrix = trm,
+        transitionMatrixTimeDiscretized =
+            trans_rate_to_trans_mat(trm,
+                                    method = "uniformization",
+                                    paranoidCheck = TRUE),
+        transitionMatrixCompExp =
+            trans_rate_to_trans_mat(trm,
+                                    method = "competingExponentials",
+                                    paranoidCheck = TRUE)
+                ))
+}
+
 ## theta from Learn.MHN -> transition rate matrix
 ##      Note that the diagonal is not added
 ##         This computes the products of the Theta, as in Fig.2 right
@@ -207,6 +369,44 @@ theta_to_trans_rate_1 <- function(theta) {
     return(TRM)
 }
 
+## theta from Learn.MHN
+##      function used to compute theta -> transition rate matrix
+theta_to_trans_rate <- function(theta,
+                                inner_transition = inner_transitionRate_1) {
+
+    ## t1 <- Sys.time()
+    Theta <- exp(theta)
+    geneNames <- colnames(theta)
+    
+    k <- ncol(theta)
+    genots <- allGenotypes_2(k)
+    numGenots <- nrow(genots)
+
+    genotNames <- unlist(
+        lapply(genots$bin_genotype,
+               function(x)
+                   paste(geneNames[which(x == 1L)], sep = "", collapse = ", "))
+        )
+    genotNames[genotNames == ""] <- "WT"
+
+    ## This single call is the one that takes most time
+    ## t2 <- Sys.time()
+
+    TRM <- vapply(seq.int(numGenots),
+           function(x)
+               transitionRateC(x, genotypes = genots,
+                               Theta = Theta, maxmut = k,
+                               inner_transition = inner_transition),
+           double(numGenots))
+    TRM <- matrix(TRM, ncol = numGenots, byrow = TRUE)
+    colnames(TRM) <- rownames(TRM) <- genotNames
+    ## t3 <- Sys.time()
+
+    ## cat("\nt2 - t1 :", t2 - t1)
+    ## cat("\nt3 - t2 :", t3 - t2)
+    ## cat("\n")
+    return(TRM)
+}
 
 
 ## integer (number of genes) -> all genotypes as 0,1 vectors
@@ -243,40 +443,6 @@ allGenotypes_2 <- function(k) {
                            bin_genotype = I(list(rep(0, k)))),
                 df)
     return(df)
-}
-
-
-
-
-## integer (number of genes) -> all genotypes as 0,1 vectors
-allGenotypes_3 <- function(k) {
-    ## From OncoSimulR
-    f1 <- function(n) {
-        lapply(seq.int(n), function(x) combinations(n = n, r = x))}
-
-    list.of.vectors <- function(y) {
-        ## there's got to be a simpler way
-        lapply(unlist(lapply(y, function(x) {apply(x, 1, list)}),
-                      recursive = FALSE),
-               function(m) m[[1]])
-    }
-   
-    mutated <- list.of.vectors(f1(k))
-    num_mutated <- lapply(mutated, length)
-    
-    ## number of genes, mutated positions -> binary genotype as vector of
-    ## 0, 1
-    binary_genotype <- function(x, k) {
-        y <- rep(0L, k)
-        y[x] <- 1L
-        return(y)
-    }
-    bin_genot <- lapply(mutated, function(x) binary_genotype(x, k = k))
-    
-    return(list(num_mut = c(0, unlist(num_mutated)),
-                mutated = c(list(NA), mutated),
-                bin_genotype = c(list(rep(0, k)), bin_genot)))
-
 }
 
 
@@ -344,6 +510,11 @@ allGenotypes_former <- function(k) {
 ## canTransition <- function(x, y) {
 ##     sum(y - x) == 1
 ## }
+
+
+
+
+
 
 
 ## genotype, genotype, Theta (as exp(theta)) -> transition rate x -> y
@@ -540,24 +711,6 @@ transitionRateC3_SM <- function(i, genotypes,  Theta, maxmut,
 }
 
 
-## genotype position (row), genotype position,
-##    genotype data frame
-##    Theta (as exp(theta)) -> transition rate x -> y
-inner_transitionRate_3_1 <- function(i, j, genotypes, Theta) {
-    
-    if( genotypes$num_mut[j] != (genotypes$num_mut[i] + 1) ) return(0)
-
-    x <- genotypes$bin_genotype[[i]]
-    y <- genotypes$bin_genotype[[j]]
-
-    if( length(posy <- which(y != x)) != 1 ) return(0)
-
-    posx <- which(x == 1L)
-    if(length(posx) == 0) return(Theta[posy, posy])
-
-    return(Theta[posy, posy] * prod(Theta[posy, posx]))
-
-}
 
 ## genotype position (row), genotype position,
 ##    genotype data frame
@@ -643,157 +796,5 @@ inner_transitionRate_2 <- function(i, j, genotypes, Theta) {
 ##         }
 ##     }
 ## }
-
-
-
-
-## theta from Learn.MHN
-##      function used to compute theta -> transition rate matrix
-theta_to_trans_rate <- function(theta,
-                                inner_transition = inner_transitionRate_1) {
-
-    ## t1 <- Sys.time()
-    Theta <- exp(theta)
-    geneNames <- colnames(theta)
-    
-    k <- ncol(theta)
-    genots <- allGenotypes_2(k)
-    numGenots <- nrow(genots)
-
-    genotNames <- unlist(
-        lapply(genots$bin_genotype,
-               function(x)
-                   paste(geneNames[which(x == 1L)], sep = "", collapse = ", "))
-        )
-    genotNames[genotNames == ""] <- "WT"
-
-    ## This single call is the one that takes most time
-    ## t2 <- Sys.time()
-
-    TRM <- vapply(seq.int(numGenots),
-           function(x)
-               transitionRateC(x, genotypes = genots,
-                               Theta = Theta, maxmut = k,
-                               inner_transition = inner_transition),
-           double(numGenots))
-    TRM <- matrix(TRM, ncol = numGenots, byrow = TRUE)
-    colnames(TRM) <- rownames(TRM) <- genotNames
-    ## t3 <- Sys.time()
-
-    ## cat("\nt2 - t1 :", t2 - t1)
-    ## cat("\nt3 - t2 :", t3 - t2)
-    ## cat("\n")
-    return(TRM)
-}
-
-
-
-## theta from Learn.MHN
-##      function used to compute theta -> transition rate matrix
-##      Note that the diagonal is not added
-##         This computes the products of the Theta, as in Fig.2 right
-theta_to_trans_rate_3 <- function(theta,
-                                inner_transition = inner_transitionRate_3_1) {
-
-    ## t1 <- Sys.time()
-    Theta <- exp(theta)
-    geneNames <- colnames(theta)
-    
-    k <- ncol(theta)
-    genots <- allGenotypes_3(k)
-    numGenots <- length(genots$num_mut)
-
-    genotNames <- unlist(
-        lapply(genots$bin_genotype,
-               function(x)
-                   paste(geneNames[which(x == 1L)], sep = "", collapse = ", "))
-        )
-    genotNames[genotNames == ""] <- "WT"
-
-    ## This single call is the one that takes most time
-    ## t2 <- Sys.time()
-
-    TRM <- vapply(seq.int(numGenots),
-           function(x)
-               transitionRateC3(x, genotypes = genots,
-                               Theta = Theta, maxmut = k,
-                               inner_transition = inner_transition),
-           double(numGenots))
-    TRM <- matrix(TRM, ncol = numGenots, byrow = TRUE)
-    colnames(TRM) <- rownames(TRM) <- genotNames
-    ## t3 <- Sys.time()
-
-    ## cat("\nt2 - t1 :", t2 - t1)
-    ## cat("\nt3 - t2 :", t3 - t2)
-    ## cat("\n")
-    return(TRM)
-}
-
-
-
-## theta from Learn.MHN
-##      function used to compute trans rate matrix -> transition rate matrix
-theta_to_trans_rate_3_SM <- function(theta,
-                                     inner_transition = inner_transitionRate_3_1) {
-
-    ## t1 <- Sys.time()
-    Theta <- exp(theta)
-    geneNames <- colnames(theta)
-    
-    k <- ncol(theta)
-    genots <- allGenotypes_3(k)
-    numGenots <- length(genots$num_mut)
-
-    genotNames <- unlist(
-        lapply(genots$bin_genotype,
-               function(x)
-                   paste(geneNames[which(x == 1L)], sep = "", collapse = ", "))
-        )
-    genotNames[genotNames == ""] <- "WT"
-
-    ## Initialize sparseMatrix in first call
-    trmv <- transitionRateC3_SM(1, genotypes = genots,
-                                Theta = Theta, maxmut = k,
-                                inner_transition = inner_transition)
-    TRM <- sparseMatrix(i = rep(1, length(trmv[, "j"])),
-                        j = trmv[, "j"],
-                        x = trmv[, "x"],
-                        dims = c(numGenots, numGenots),
-                        dimnames = list(genotNames, genotNames))
-    ## Can skip last one
-    for(i in seq.int(2, numGenots - 1)) {
-        trmv <- transitionRateC3_SM(i, genotypes = genots,
-                                    Theta = Theta, maxmut = k,
-                                    inner_transition = inner_transition)
-        TRM[i = i, j = trmv[, "j"]] <- trmv[, "x"]
-    }
-    return(TRM)
-}
-
-# pwd <- getwd()
-# setwd("./MHN")
-# source("UtilityFunctions.R")
-# source("ModelConstruction.R")
-# source("Likelihood.R")
-# source("RegularizedOptimization.R")
-# setwd(pwd)
-# rm(pwd)
-
-
-
-## ## Seems hard to make it any faster
-## pd3 <- profileExpr(theta_to_trans_rate_3(Theta.BC, inner_transition = inner_transitionRate_3_1))
-## ## pd32 <- profileExpr(theta_to_trans_rate_3(Theta.BC, inner_transition = inner_transitionRate_3_2))
-## options(width = 150)
-## funSummary(pd3)
-## callSummary(pd3)
-
-## ## funSummary(pd32)
-## ## callSummary(pd32)
-
-
-# library(codetools)
-# checkUsageEnv(env = .GlobalEnv)
-
 
 
