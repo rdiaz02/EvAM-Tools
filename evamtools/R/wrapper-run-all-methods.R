@@ -161,7 +161,7 @@ all_methods <- function(x, nboot = 0, nboot_caprese_capri = 0,
                         nboot_cbn = 0, nboot_dip = 0,
                         n00 = "auto3", caprese_capri_minimal = TRUE,
                         caprese_capri_cores.ratio = 0,
-                        distribution_oncotree = FALSE,
+                        distribution_oncotree = TRUE,
                         min.freq = 0,
                         cores_cbn = 1,
                         do_MCCBN = FALSE) { ## I think we want to keep min.freq to 0?
