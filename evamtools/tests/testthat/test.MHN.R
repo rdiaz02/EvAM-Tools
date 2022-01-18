@@ -842,7 +842,9 @@ test_that("we are using the indices of theta correctly 4", {
 
 
 ## Tests with Schill's data
-path_to_Schill_data <- "../inst/miscell/MHN_data/"
+## this is from evamtools/R
+## path_to_Schill_data <- "../inst/miscell/MHN_data/"
+path_to_Schill_data <- "../../inst/miscell/MHN_data/"
 
 test_that("Working with breast cancer: identical results from different algos", {
     Dat <- readRDS(file = paste0(path_to_Schill_data, "BreastCancer.rds"))
