@@ -409,9 +409,9 @@ all_examples_csd_2 <- list(
   )
 )
 
-
-# for (i in names(all_examples_csd)){
-#   tmp <- all_examples_csd[[i]]
-#   tmp <- all_methods_2_trans_mat(tmp, do_MCCBN = TRUE)
-#   saveRDS(tmp, file = sprintf("./toy_outputs_cpms/%s.rds", i))
+# for (i in names(all_examples_csd_2[["csd"]])[2:11]){
+#   tmp <- all_examples_csd_2[["csd"]][[i]]$data
+#   tmp2 <- all_methods_2_trans_mat(tmp, do_MCCBN = TRUE)
+#   print("here")
+#   saveRDS(tmp2, file = sprintf("./toy_outputs_cpms/%s.rds", i))
 # }
