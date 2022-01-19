@@ -1,3 +1,19 @@
+## Copyright 2022 Ramon Diaz-Uriarte, Pablo Herrera Nieto.
+
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 
 #' @title Sample an indivial based on a transition rate matrix
 #' 
@@ -37,7 +53,7 @@ indiv_sample_from_trm <- function(trm, T_sampling, ngenots = NULL,
 }
 
 
-#' @title Sample an indivial based on a transition rate matrix
+#' @title Sample an individual from a transition rate matrix
 #' 
 #' We repeat the sums to compute the diagonal and the division
 #' If we sample a large number of times, possibly worth it to
@@ -46,8 +62,7 @@ indiv_sample_from_trm <- function(trm, T_sampling, ngenots = NULL,
 #' This is what I call "transition matrix standardized":
 #'    Diagonal is passed separately, entries in matrix are probabilities
 
-#' This will only be used in called after standardization
-#' therefore the "is.null" can be removed
+#' This will only be called after standardization
 
 #' @param trmstd transition rate matrix "standardized",
 #' @param diag diagonal of transition rate matrix, time of sampling of a case/individual
@@ -61,8 +76,6 @@ indiv_sample_from_trm_pre <- function(trmstd,
                                       T_sampling,
                                       ngenots,
                                       genot_names) {
-    ## if(is.null(ngenots)) ngenots <- ncol(trm)
-    ## if(is.null(genot_names)) genot_names <- colnames(trm)
     row <- 1
     t_accum <- 0
     genotype <- "WT" 
@@ -89,7 +102,7 @@ indiv_sample_from_trm_pre <- function(trmstd,
 }
 
 
-#' @title Sample a population
+#' @title Sample a population from a transition rate matrix
 #' 
 #' @description Like indiv_sample_from_trm, but for multiple times
 #' 
@@ -162,7 +175,7 @@ population_sample_from_trm <- function(trm, n_samples = 10,
 
 #' @title Process samples
 #' 
-#' @description Generate trajectories from simulated data
+#' @description Generate trajectories from data simulated from a given model.
 #' 
 #' @param sim list generated with mccbn::sample_genotypes. Relevant
 #' fields are described below
@@ -174,7 +187,10 @@ population_sample_from_trm <- function(trm, n_samples = 10,
 #' @return List with a list of trajectories (the order in which gene mutations
 #' are acquired), genotype frequencies and genotypes transition matrix (with
 #' counts of how many transitions between each genotype have been observed) 
-process_samples <- function(sim, n_genes, gene_names = NULL, output = c("frequencies", "state_counts", "transitions")){
+process_samples <- function(sim, n_genes, gene_names = NULL,
+                            output = c("frequencies",
+                                       "state_counts",
+                                       "transitions")){
     if(is.null(gene_names)) gene_names <- LETTERS[1:n_genes]
     
     #Checking input
@@ -238,7 +254,8 @@ process_samples <- function(sim, n_genes, gene_names = NULL, output = c("frequen
 
     #Calculate state_counts
     if(out_params["state_counts"]){
-        state_counts <- sample_to_pD_order(unlist(sim$trajectory), n_genes, gene_names)
+        state_counts <- sample_to_pD_order(unlist(sim$trajectory),
+                                           n_genes, gene_names)
         state_counts <- data.frame(
             Genotype = sorted_genotypes,
             Counts = state_counts
