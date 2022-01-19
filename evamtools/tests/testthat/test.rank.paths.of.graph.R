@@ -1,8 +1,6 @@
-
-library(igraph)
-
 adj_matrix <- matrix(0, nrow = 6, ncol = 6)
-rownames(adj_matrix) <- colnames(adj_matrix) <- c("WT", "A", "A, B", "A, C", "C", "C, D")
+rownames(adj_matrix) <- colnames(adj_matrix) <- c("WT", "A", "A, B",
+                                                  "A, C", "C", "C, D")
 
 adj_matrix["WT", "A"] <- 1000
 adj_matrix["WT", "C"] <- 500
