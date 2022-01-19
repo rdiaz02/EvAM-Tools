@@ -1,8 +1,5 @@
-
-
-simGenotypes <- readRDS("../../data/simulation_output.rds")
-
 test_that("Output are not generated with bad input", {
+    simGenotypes <- readRDS("../../data/simulation_output.rds")
     x <- simGenotypes
     x$trajectory <- NULL
     expect_error(process_samples(x, 5), 
@@ -14,6 +11,7 @@ test_that("Output are not generated with bad input", {
 })
 
 test_that("Output is returned only with the requested fields", {
+    simGenotypes <- readRDS("../../data/simulation_output.rds")
     out_params <- c("frequencies", "state_counts", "transitions")
     out_sim <- process_samples(simGenotypes, 5, output = out_params[1])
     expect_equal(sort(names(out_sim)), sort(out_params[1]))
@@ -34,6 +32,7 @@ test_that("Output is returned only with the requested fields", {
 })
 
 test_that("Output is correct", {
+    simGenotypes <- readRDS("../../data/simulation_output.rds")
     out <- process_samples(simGenotypes, 5)
     expect_equal(nrow(out$frequencies), 2**5)
     expect_equal(dim(out$transitions), c(2**5, 2**5))
@@ -74,5 +73,4 @@ test_that("Output is correct", {
     expect_equal(out$transitions["A, B", "A, B, C"], 1)
     expect_equal(out$transitions["A, B, C", "A, B, C, E"], 3)
     expect_equal(out$transitions["C, D, E", "A, C, D, E"], 2)
-
 })

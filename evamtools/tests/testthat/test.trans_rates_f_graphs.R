@@ -1,8 +1,7 @@
-MCCBN_INSTALLED <- require("mccbn", quietly = TRUE, warn.conflicts = TRUE)
-
-
 test_that("OT and CBN: algorithm consistency with MHN data examples", {
 
+    MCCBN_INSTALLED <- require("mccbn", quietly = TRUE, warn.conflicts = TRUE)
+    
     ## Check OT, CBN, MCCBN if installed
     ## for consistency of different algorithms 
     test_others <- function(data) {
