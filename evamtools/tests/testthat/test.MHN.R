@@ -1,3 +1,4 @@
+## We will use this hazard matrix and transition rates several times below.
 create_MHN_test_data <- function() {
     ## from rounding the first 4 x 4 entries of Schill's
     ## cancer example
@@ -120,7 +121,7 @@ test_that("transition rates between different genotypes are the
       trm1 <- tmp$trm1
       trm0 <- tmp$trm0
       rm(tmp)
-      
+
       ## Uniformization
       gamma <- max(abs(diag(trm1)))
       time_discr_trm <- diag(16) + trm1 / gamma
@@ -217,12 +218,12 @@ test_that("Compute TRM gives the same results with sparse matrices", {
     trm0 <- theta_to_trans_rate_3(theta0,
         inner_transition = inner_transitionRate_3_1
         )
-    
+
     trmSM <-
         theta_to_trans_rate_3_SM(theta0,
                                  inner_transition = inner_transitionRate_3_1
                                  )
-    
+
     trmSMm <- as.matrix(trmSM)
     expect_identical(trm0, trmSMm)
 })
@@ -233,8 +234,8 @@ test_that("we are using the indices of theta correctly 1", {
     ## Create some data
     N <- 200
     na <- N
-    nc <- N + 21 ## round( 10 * runif(1))
-    nab <- N + 5 ## round( 10 * runif(1))
+    nc <- N + 21
+    nab <- N + 5
     nbc <- N + 7 + round(10 * runif(1))
     n00 <- N / 10 + round(10 * runif(1))
     dB <- matrix(
@@ -248,7 +249,7 @@ test_that("we are using the indices of theta correctly 1", {
     )
     colnames(dB) <- LETTERS[1:4]
     sampledGenotypes(dB) ## from OncoSimulR
-    ## this crashes. Of course: don't do silly things like passing
+    ## Note :the next crashes. Of course: don't do silly things like passing
     ## a data frame with one or more colSums == 0
     try(do_MHN(dB), silent = TRUE)
     dB2 <- dB[, -4]
@@ -257,8 +258,9 @@ test_that("we are using the indices of theta correctly 1", {
     expect_equal(mm1$transitionRateMatrix["A", "A, B"],
                  exp(mm1$theta["B", "B"]) * exp(mm1$theta["B", "A"]))
 
-    ## not the same, though the first occasionally is identical if
-    ## symmetry and thetas are identical A, B and B, A, if na = nab. That
+    ## The next are left as interesting examples of why checking
+    ## for inequality does not always work.
+    ## If symmetry and thetas are identical A, B and B, A, if na = nab. That
     ## is why we make sure different N above
     ## stopifnot(mm1$transitionRateMatrix["A", "A, B"] != 
     ##           exp(mm1$theta["B", "B"]) * exp(mm1$theta["A", "B"]))
@@ -299,10 +301,8 @@ test_that("we are using the indices of theta correctly 1", {
     ##   print(exp(mm1$theta["A", "A"]))
     ##   print(sampledGenotypes(dB))
     ## }
-    
-    ## And output matches the observed
-    ## From A we move mostly to A, B
-    ## From B, we can move to either A, B or B, C
+  
+
 })
 
 
@@ -333,19 +333,6 @@ test_that("we are using the indices of theta correctly 2", {
     expect_equal(mm4$transitionRateMatrix["A", "A, B"],
                  exp(mm4$theta["B", "B"]) * exp(mm4$theta["B", "A"]))
     
-
-    ## not the same most of the time. Occasionally identical, but not a problem
-    ## See code below and above
-    ## stopifnot(mm4$transitionRateMatrix["A", "A, B"] != 
-    ##           exp(mm4$theta["B", "B"]) * exp(mm4$theta["A", "B"]))
-    
-    ## stopifnot(mm4$transitionRateMatrix["A", "A, B"] != 
-    ##           exp(mm4$theta["A", "A"]) * exp(mm4$theta["A", "B"]))
-    
-    ## stopifnot(mm4$transitionRateMatrix["A", "A, B"] != 
-    ##           exp(mm4$theta["A", "A"]) * exp(mm4$theta["B", "A"]))
-
-    ## same, of course
     expect_equal( mm4$transitionRateMatrix["B", "A, B"],
                  exp(mm4$theta["A", "A"]) * exp(mm4$theta["A", "B"]))
     
@@ -385,9 +372,8 @@ test_that("we are using the indices of theta correctly 2", {
                  exp(mm4$theta["A", "D"]) *
                  exp(mm4$theta["A", "C"]))
     
-                                        # round(mm4$transitionRateMatrix, 3)
     
-    ## And output matches the observed
+    ## A qualitative assessment: output matches the observed
     ## From A we move mostly to A, B
     ## From B, we can move to either A, B or B, C
     ## From C, we move to C, D
@@ -428,61 +414,13 @@ test_that("we are using the indices of theta correctly 3", {
     mm77$transitionRateMatrix["A", "A, B"]
     exp(mm77$theta["B", "B"]) * exp(mm77$theta["B", "A"])
     
-    ## same, of course
+
     expect_equal( mm77$transitionRateMatrix["A", "A, B"],
                  exp(mm77$theta["B", "B"]) * exp(mm77$theta["B", "A"]))
-    
-    ## not the same most of the time, though occasionally identical. Not a problem
-                                        # if(isTRUE(all.equal(
-                                        #   mm77$transitionRateMatrix["A", "A, B"], 
-                                        #   exp(mm77$theta["B", "B"]) * exp(mm77$theta["A", "B"])))) {
-                                        #   cat("\n \n Here they are identical too")
-                                        #   print(exp(mm77$theta["A", "B"]))
-                                        #   print(exp(mm77$theta["B", "A"]))
-                                        #   print(exp(mm77$theta["B", "B"]))
-                                        #   print(sampledGenotypes(dB))
-                                        # }
-    
-    
-    ## Same as above: this could, be chance, be equal
-    ## stopifnot(!isTRUE(all.equal(
-    ##     mm77$transitionRateMatrix["A", "A, B"], 
-    ##     exp(mm77$theta["A", "A"]) * exp(mm77$theta["A", "B"]))))
-    
-    ## stopifnot(!isTRUE(all.equal(
-    ##     mm77$transitionRateMatrix["A", "A, B"], 
-    ##     exp(mm77$theta["A", "A"]) * exp(mm77$theta["B", "A"]))))
-    
-    
-    ## same, of course
+
     expect_equal( mm77$transitionRateMatrix["A", "A, C"],
                  exp(mm77$theta["C", "C"]) * exp(mm77$theta["C", "A"]))
-    ## not necessarily always different if theta[a,c] != theta[c, a]
-    ## stopifnot(!isTRUE(all.equal(
-    ##     mm77$transitionRateMatrix["A", "A, C"], 
-    ##     exp(mm77$theta["C", "C"]) * exp(mm77$theta["A", "C"]))))
     
-                                        # if(isTRUE(all.equal(
-                                        #   mm77$transitionRateMatrix["A", "A, C"], 
-                                        #   exp(mm77$theta["C", "C"]) * exp(mm77$theta["A", "C"])))) {
-                                        #   cat("\n \n Here they are identical too 2")
-                                        #   print(exp(mm77$theta["A", "C"]))
-                                        #   print(exp(mm77$theta["C", "A"]))
-                                        #   print(exp(mm77$theta["C", "C"]))
-                                        #   print(sampledGenotypes(dB))
-                                        # }
-    
-    
-    ## stopifnot(!isTRUE(all.equal(
-    ##     mm77$transitionRateMatrix["A", "A, C"], 
-    ##     exp(mm77$theta["A", "A"]) * exp(mm77$theta["A", "C"]))))
-    
-    ## stopifnot(!isTRUE(all.equal(
-    ##     mm77$transitionRateMatrix["A", "A, C"], 
-    ##     exp(mm77$theta["A", "A"]) * exp(mm77$theta["C", "A"]))))
-    
-    
-    ## same, of course
     expect_equal( mm77$transitionRateMatrix["A, B", "A, B, C"],
                  exp(mm77$theta["C", "C"]) *
                  exp(mm77$theta["C", "A"]) *
@@ -531,12 +469,30 @@ test_that("we are using the indices of theta correctly 3", {
     
     ## And output matches the observed
     ## In particular: A, B to A,B,C vs A, B, D
+
+    ## As above, these could, by chance, be equal
+    ## if(isTRUE(all.equal(
+    ##   mm77$transitionRateMatrix["A", "A, B"], 
+    ##   exp(mm77$theta["B", "B"]) * exp(mm77$theta["A", "B"])))) {
+    ##   cat("\n \n Here they are identical too")
+    ##   print(exp(mm77$theta["A", "B"]))
+    ##   print(exp(mm77$theta["B", "A"]))
+    ##   print(exp(mm77$theta["B", "B"]))
+    ##   print(sampledGenotypes(dB))
+    ## }
+    
+    ## stopifnot(!isTRUE(all.equal(
+    ##     mm77$transitionRateMatrix["A", "A, B"], 
+    ##     exp(mm77$theta["A", "A"]) * exp(mm77$theta["A", "B"]))))
+    
+    ## stopifnot(!isTRUE(all.equal(
+    ##     mm77$transitionRateMatrix["A", "A, B"], 
+    ##     exp(mm77$theta["A", "A"]) * exp(mm77$theta["B", "A"]))))
 })
 
 
 
 test_that("we are using the indices of theta correctly 4", {
-    
     ## And a six gene example. Also testing the sparse matrix implementation
     N <- 200
     na <- N
@@ -593,16 +549,15 @@ test_that("we are using the indices of theta correctly 4", {
                  as.matrix(mm22$transitionMatrixTimeDiscretized))
     
     
-    ## This would fail, of course unless we turned them into matrices
+    ## This would fail, unless we turned them into matrices
     expect_false(identical(mm2$transitionRateMatrix,
                            mm22$transitionRateMatrix))
     expect_false(identical(mm2$transitionMatrixTimeDiscretized,
                            mm22$transitionMatrixTimeDiscretized))
     expect_false(identical(mm2$transitionMatrixCompExp,
                            mm22$transitionMatrixCompExp))
-    
-    
-    ## Does not seem great for how we go
+        
+    ## Incidentally, inference does not seem great for how we go
     ## ABCE to ABCDE and ABCEF. But probably a hard model anyway,
     
     ## From A to A, B:
@@ -610,105 +565,13 @@ test_that("we are using the indices of theta correctly 4", {
     mm2$transitionRateMatrix["A", "A, B"]
     exp(mm2$theta["B", "B"]) * exp(mm2$theta["B", "A"])
     
-    ## same, of course
+
     expect_equal( mm2$transitionRateMatrix["A", "A, B"],
                  exp(mm2$theta["B", "B"]) * exp(mm2$theta["B", "A"]))
-    
-    ## not the same, but not always
-    ## stopifnot(!isTRUE(all.equal(
-    ##     mm2$transitionRateMatrix["A", "A, B"], 
-    ##     exp(mm2$theta["B", "B"]) * exp(mm2$theta["A", "B"]))))
-    
-    ## stopifnot(!isTRUE(all.equal(
-    ##     mm2$transitionRateMatrix["A", "A, B"], 
-    ##     exp(mm2$theta["A", "A"]) * exp(mm2$theta["A", "B"]))))
-    
-    ## stopifnot(!isTRUE(all.equal(
-    ##     mm2$transitionRateMatrix["A", "A, B"], 
-    ##     exp(mm2$theta["A", "A"]) * exp(mm2$theta["B", "A"]))))
-    
-    ## if(isTRUE(all.equal(
-    ##   mm2$transitionRateMatrix["A", "A, B"], 
-    ##   exp(mm2$theta["B", "B"]) * exp(mm2$theta["A", "B"])))) {
-    ##   cat("\n \n Here they are identical too 3_1")
-    ##   print(exp(mm2$theta["A", "B"]))
-    ##   print(exp(mm2$theta["B", "A"]))
-    ##   print(exp(mm2$theta["B", "B"]))
-    ##   print(sampledGenotypes(dB))
-    ## }
-    ## if(isTRUE(all.equal(
-    ##   mm2$transitionRateMatrix["A", "A, B"], 
-    ##   exp(mm2$theta["A", "A"]) * exp(mm2$theta["A", "B"])))) {
-    ##   cat("\n \n Here they are identical too 3_2")
-    ##   print(exp(mm2$theta["A", "B"]))
-    ##   print(exp(mm2$theta["B", "A"]))
-    ##   print(exp(mm2$theta["A", "A"]))
-    ##   print(sampledGenotypes(dB))
-    ## }
-    ## if(isTRUE(all.equal(
-    ##   mm2$transitionRateMatrix["A", "A, B"], 
-    ##   exp(mm2$theta["A", "A"]) * exp(mm2$theta["B", "A"])))) {
-    ##   cat("\n \n Here they are identical too 3_3")
-    ##   print(exp(mm2$theta["A", "B"]))
-    ##   print(exp(mm2$theta["B", "A"]))
-    ##   print(exp(mm2$theta["A", "A"]))
-    ##   print(sampledGenotypes(dB))
-    ## }
-    
-    
-    
-    
-    
-    ## ## same, of course
-    ## expect_equal( mm2$transitionRateMatrix["A", "A, C"],
-    ##                     exp(mm2$theta["C", "C"]) * exp(mm2$theta["C", "A"])))
-    ## not the same, but not always
-    ## if(isTRUE(all.equal(
-    ##   mm2$transitionRateMatrix["A", "A, C"], 
-    ##   exp(mm2$theta["C", "C"]) * exp(mm2$theta["A", "C"])))) {
-    ##   cat("\n \n Here they are identical too 3_4")
-    ##   print(exp(mm2$theta["A", "C"]))
-    ##   print(exp(mm2$theta["C", "A"]))
-    ##   print(exp(mm2$theta["C", "C"]))
-    ##   print(sampledGenotypes(dB))
-    ## }
-    
-    ## if(isTRUE(all.equal(
-    ##   mm2$transitionRateMatrix["A", "A, C"], 
-    ##   exp(mm2$theta["A", "A"]) * exp(mm2$theta["A", "C"])))) {
-    ##   cat("\n \n Here they are identical too 3_5")
-    ##   print(exp(mm2$theta["A", "C"]))
-    ##   print(exp(mm2$theta["C", "A"]))
-    ##   print(exp(mm2$theta["A", "A"]))
-    ##   print(sampledGenotypes(dB))
-    ## }
-    
-    ## if(isTRUE(all.equal(
-    ##   mm2$transitionRateMatrix["A", "A, C"], 
-    ##   exp(mm2$theta["A", "A"]) * exp(mm2$theta["C", "A"])))) {
-    ##   cat("\n \n Here they are identical too 3_6")
-    ##   print(exp(mm2$theta["A", "C"]))
-    ##   print(exp(mm2$theta["C", "A"]))
-    ##   print(exp(mm2$theta["A", "A"]))
-    ##   print(sampledGenotypes(dB))
-    ## }
-    
-    
-    ## stopifnot(!isTRUE(all.equal(
-    ##     mm2$transitionRateMatrix["A", "A, C"], 
-    ##     exp(mm2$theta["C", "C"]) * exp(mm2$theta["A", "C"]))))
-    
-    ## Same story as above.
-    ## stopifnot(!isTRUE(all.equal(
-    ##     mm2$transitionRateMatrix["A", "A, C"], 
-    ##     exp(mm2$theta["A", "A"]) * exp(mm2$theta["A", "C"]))))
-    
-    ## stopifnot(!isTRUE(all.equal(
-    ##     mm2$transitionRateMatrix["A", "A, C"], 
-    ##     exp(mm2$theta["A", "A"]) * exp(mm2$theta["C", "A"]))))
-    
-    
-    ## same, of course
+
+    expect_equal( mm2$transitionRateMatrix["A", "A, C"],
+                        exp(mm2$theta["C", "C"]) * exp(mm2$theta["C", "A"]))
+   
     expect_equal( mm2$transitionRateMatrix["A, B", "A, B, C"],
                  exp(mm2$theta["C", "C"]) *
                  exp(mm2$theta["C", "A"]) *
@@ -836,6 +699,66 @@ test_that("we are using the indices of theta correctly 4", {
                  exp(mm22$theta["D", "F"]))
     
     ## tmp <- round(mm2$transitionRateMatrix, 3)
+
+   ## Same issues as in examples above
+ 
+    ## if(isTRUE(all.equal(
+    ##   mm2$transitionRateMatrix["A", "A, B"], 
+    ##   exp(mm2$theta["B", "B"]) * exp(mm2$theta["A", "B"])))) {
+    ##   cat("\n \n Here they are identical too 3_1")
+    ##   print(exp(mm2$theta["A", "B"]))
+    ##   print(exp(mm2$theta["B", "A"]))
+    ##   print(exp(mm2$theta["B", "B"]))
+    ##   print(sampledGenotypes(dB))
+    ## }
+    ## if(isTRUE(all.equal(
+    ##   mm2$transitionRateMatrix["A", "A, B"], 
+    ##   exp(mm2$theta["A", "A"]) * exp(mm2$theta["A", "B"])))) {
+    ##   cat("\n \n Here they are identical too 3_2")
+    ##   print(exp(mm2$theta["A", "B"]))
+    ##   print(exp(mm2$theta["B", "A"]))
+    ##   print(exp(mm2$theta["A", "A"]))
+    ##   print(sampledGenotypes(dB))
+    ## }
+    ## if(isTRUE(all.equal(
+    ##   mm2$transitionRateMatrix["A", "A, B"], 
+    ##   exp(mm2$theta["A", "A"]) * exp(mm2$theta["B", "A"])))) {
+    ##   cat("\n \n Here they are identical too 3_3")
+    ##   print(exp(mm2$theta["A", "B"]))
+    ##   print(exp(mm2$theta["B", "A"]))
+    ##   print(exp(mm2$theta["A", "A"]))
+    ##   print(sampledGenotypes(dB))
+    ## }
+  
+    ## if(isTRUE(all.equal(
+    ##   mm2$transitionRateMatrix["A", "A, C"], 
+    ##   exp(mm2$theta["C", "C"]) * exp(mm2$theta["A", "C"])))) {
+    ##   cat("\n \n Here they are identical too 3_4")
+    ##   print(exp(mm2$theta["A", "C"]))
+    ##   print(exp(mm2$theta["C", "A"]))
+    ##   print(exp(mm2$theta["C", "C"]))
+    ##   print(sampledGenotypes(dB))
+    ## }
+    
+    ## if(isTRUE(all.equal(
+    ##   mm2$transitionRateMatrix["A", "A, C"], 
+    ##   exp(mm2$theta["A", "A"]) * exp(mm2$theta["A", "C"])))) {
+    ##   cat("\n \n Here they are identical too 3_5")
+    ##   print(exp(mm2$theta["A", "C"]))
+    ##   print(exp(mm2$theta["C", "A"]))
+    ##   print(exp(mm2$theta["A", "A"]))
+    ##   print(sampledGenotypes(dB))
+    ## }
+    
+    ## if(isTRUE(all.equal(
+    ##   mm2$transitionRateMatrix["A", "A, C"], 
+    ##   exp(mm2$theta["A", "A"]) * exp(mm2$theta["C", "A"])))) {
+    ##   cat("\n \n Here they are identical too 3_6")
+    ##   print(exp(mm2$theta["A", "C"]))
+    ##   print(exp(mm2$theta["C", "A"]))
+    ##   print(exp(mm2$theta["A", "A"]))
+    ##   print(sampledGenotypes(dB))
+    ## }
 })
 
 
@@ -868,7 +791,7 @@ test_that("Working with breast cancer: identical results from different algos", 
     tt31 <- theta_to_trans_rate_3(Theta.BC,
                                   inner_transition = inner_transitionRate_3_1)
 
-    ## slow, and the faster one is slower!!
+    ## slow
     system.time(tt1 <- theta_to_trans_rate_1(Theta.BC))
     ## these two are very slow
     ## system.time(tt2 <- theta_to_trans_rate(Theta.BC))
