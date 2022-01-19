@@ -1,307 +1,406 @@
-# source("../R/code-all-methods-minimal.R")
+test_that("OT and CBN: algorithm consistency with MHN data examples", {
 
-####################### Tests #################
+    MCCBN_INSTALLED <- require("mccbn", quietly = TRUE, warn.conflicts = TRUE)
+    
+    ## Check OT, CBN, MCCBN if installed
+    ## for consistency of different algorithms 
+    test_others <- function(data) {
+        data <- as.matrix(data)
+        data <- df_2_mat_integer(data)
+        cpm_out_others2 <- ot_cbn_methods(data, do_MCCBN = MCCBN_INSTALLED)
+        
+        mm <- c("OT", "CBN_ot", "MCCBN")[c(TRUE, TRUE, MCCBN_INSTALLED)]
 
-## Not using a test_that block here. But doing it locally
-local({
+        mm0  <- lapply(cpm_out_others2[mm], cpm_access_genots_paths_w)
+        mmSM <- lapply(cpm_out_others2[mm], cpm_access_genots_paths_w_simplified)
+        ## Identical unweighted transition matrices (fitness graphs)
+        uw0 <- lapply(mm0, function(x) rowScaleMatrix(x$fgraph))
+        uwSM <- lapply(mmSM, function(x) rowScaleMatrix(x$fgraph))
+        uwSMm <- lapply(uwSM, as.matrix)
+        expect_identical(uw0, uwSMm)
+        
+        ## Identical Weighted transition matrices
+        wg0 <- lapply(mm0[c("OT"
+                          , "MCCBN"
+                          , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
+                      function(x) x$trans_mat_genots)
+        wgSM <- lapply(mmSM[c("OT"
+                            , "MCCBN"
+                            , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
+                       function(x) x$trans_mat_genots)
+        wgSMm <- lapply(wgSM, as.matrix)
+        expect_equal(wg0, wgSMm)
+        
+        ## Diagonal
+        td0 <- lapply(mm0[c("MCCBN",
+                            "CBN_ot")[c(MCCBN_INSTALLED, TRUE)]],
+                      function(x)
+                          trans_rate_to_trans_mat(x$weighted_fgraph,
+                                                  method = "uniformization")) 
+        tdSM <- lapply(mmSM[c("MCCBN",
+                              "CBN_ot")[c(MCCBN_INSTALLED, TRUE)]],
+                       function(x)
+                           trans_rate_to_trans_mat(x$weighted_fgraph,
+                                                   method = "uniformization")) 
+        tdSMm <- lapply(tdSM, as.matrix)
+        expect_equal(td0, tdSMm)
+        
+        ## recheck competing exponentials done differently
+        wg2 <-
+            lapply(mm0[c("OT", "MCCBN"
+                       , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
+                   function(x)
+                       trans_rate_to_trans_mat(x$weighted_fgraph,
+                                               method = "competingExponentials"))
+        wg2SM <-
+            lapply(mmSM[c("OT", "MCCBN"
+                        , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
+                   function(x)
+                       as.matrix(trans_rate_to_trans_mat(x$weighted_fgraph,
+                                                         method = "competingExponentials")))
+        expect_equal(wg2, wg2SM)
+    }
+    path_to_Schill_data <- "../../inst/miscell/MHN_data/"
+
+    Dat1 <- readRDS(file = paste0(path_to_Schill_data,
+                                  "BreastCancer.rds"))[1:50, 1:4]
+    test_others(Dat1)
+
+    ## Slow with CBN even with just 6 columns. Use a tiny number of columns
+    Dat1 <- readRDS(file = paste0(path_to_Schill_data,
+                                  "ColorectalCancer.rds"))[1:40, 4:7]
+    test_others(Dat1)
+
+    Dat1 <- readRDS(file = paste0(path_to_Schill_data,
+                                  "RenalCellCarcinoma.rds"))[1:30, 2:6]
+    test_others(Dat1)
+
+    Dat1 <- readRDS(file = paste0(path_to_Schill_data,
+                                  "Glioblastoma.rds"))[1:20, 1:5]
+    test_others(Dat1)
+
+    rm(Dat1)
+})
+
+
+test_that("weighted paths and transition matrices computations against
+hand-computed values,
+and identical results between algorithms with sparse matrices", {
+
+    ex0 <- list(edges = data.frame(
+                    From = c("Root", "B", "C", "D"),
+                    To =   c("B", "C", "D", "A"),
+                    rerun_lambda = c(1, 2, 3, 4)
+                ))
+    
+    
+    ex1 <- list(edges = data.frame(
+                    From = c("Root", "Root", "A", "B", "C"),
+                    To =   c("A", "B", "C", "C", "D"),
+                    rerun_lambda = c(1, 2, 3, 3, 4)
+                ))
+    
+    ex2 <- list(edges = data.frame(
+                    From = c("Root", "Root", "A", "B"),
+                    To =   c("A", "B", "C", "D"),
+                    rerun_lambda = c(10, 11, 12, 14)
+                ))
+    
+    ex3 <- list(edges = data.frame(
+                    From = c("Root", "Root", "A", "C"),
+                    To =   c("A", "B", "C", "D"),
+                    rerun_lambda = c(2, 3, 4, 5)
+                ))
+    
+    ex4 <- list(edges = data.frame(
+                    From = c("Root", "Root", "A", "A"),
+                    To =   c("A", "B", "C", "D"),
+                    rerun_lambda = c(1, 2, 3, 4)
+                ))
+    
+    ex5 <- list(edges = data.frame(
+                    From = c("Root", "Root", "Root", "A", "B", "C"),
+                    To =   c("A", "B", "C", "D", "D", "D"),
+                    rerun_lambda = c(1, 2, 3, 4, 4, 4)
+                ))
+    ## yes. this is wrong. Tested below.
+    ex5e <- list(edges = data.frame(
+                     From = c("Root", "Root", "Root", "A", "B", "C"),
+                     To =   c("A", "B", "C", "D", "D", "D"),
+                     rerun_lambda = c(1, 2, 3, 4, 4, 5)
+                 ))
+    
+    ex6 <- list(edges = data.frame(
+                    From = c("Root", "Root", "Root", "A", "B"),
+                    To =   c("A", "B", "D", "C", "C"),
+                    rerun_lambda = c(1, 2, 3, 5, 5)
+                ))
+    
+    ex7 <- list(edges = data.frame(
+                    From = c("Root", "E", "E", "E", "A", "B"),
+                    To =   c("E",    "A", "B", "D", "C", "C"),
+                    rerun_lambda = c(1, 2, 3, 4, 5, 5)
+                ))
+    
+    ex8 <- list(edges = data.frame(
+                    From = c("Root", "Root", "A", "B", "C", "C"),
+                    To =   c("A",     "B",   "C", "C", "D",  "E"),
+                    rerun_lambda = c(1, 2, 3, 3, 4, 5)
+                ))
+    
+    ex9 <- list(edges = data.frame(
+                    From = c("Root", "A", "B", "B", "B"),
+                    To =   c("A",    "B", "C", "D", "E"),
+                    rerun_lambda = c(6, 7, 8, 9, 10)
+                ))
+    ## wrong, triggers error
+    ex10e <- list(edges = data.frame(
+                      From = c("Root", "A", "A", "B", "C", "D"),
+                      To =   c("A",    "B", "C", "D", "D", "E"),
+                      rerun_lambda = c(1, 2, 3, 4, 5, 5)
+                  ))
+    
+    ex10 <- list(edges = data.frame(
+                     From = c("Root", "A", "A", "B", "C", "D"),
+                     To =   c("A",    "B", "C", "D", "D", "E"),
+                     rerun_lambda = c(1, 2, 3, 4, 4, 5)
+                 ))
+    
+    
+    ex11 <- list(edges = data.frame(
+                     From = c(rep("Root", 4), "A", "B", "C", "D"),
+                     To =   c("A",  "B", "C", "D", rep("E", 4)),
+                     rerun_lambda = c(3, 4, 5, 6, rep(7, 4))
+                 ))
+    
+    
+    
+    oex0 <- cpm_access_genots_paths_w(ex0)
+    oex1 <- cpm_access_genots_paths_w(ex1)
+    oex2 <- cpm_access_genots_paths_w(ex2)
+    oex3 <- cpm_access_genots_paths_w(ex3)
+    oex4 <- cpm_access_genots_paths_w(ex4)
+    oex5 <- cpm_access_genots_paths_w(ex5)
+    expect_error(cpm_access_genots_paths_w(ex5e), "Different lambda", fixed = TRUE)
+    
+    oex6 <- cpm_access_genots_paths_w(ex6)
+    oex7 <- cpm_access_genots_paths_w(ex7)
+    oex8 <- cpm_access_genots_paths_w(ex8)
+    oex9 <- cpm_access_genots_paths_w(ex9)
+    expect_error(cpm_access_genots_paths_w(ex10e), "Different lambda", fixed = TRUE)
+    oex10 <- cpm_access_genots_paths_w(ex10)
+    oex11 <- cpm_access_genots_paths_w(ex11)
+    
+    
+    expect_equivalent(oex0$weighted_paths[, 2], 1)
+    
+    expect_equivalent(oex1$weighted_paths[, 2],
+                      c(1/3 * 1 * 1 * 1, 2/3 * 1 * 1 * 1))
+    
+    expect_equivalent(oex2$weighted_paths[, 2],
+                      c(10/21 * 11/23 * 12/26 * 1,
+                        10/21 * 11/23 * 14/26 * 1,
+                        10/21 * 12/23 * 1     * 1,
+                        11/21 * 10/24 * 12/26 * 1,
+                        11/21 * 10/24 * 14/26 * 1,
+                        11/21 * 14/24 * 1     * 1))
+    
+    expect_equivalent(oex3$weighted_paths[, 2],
+                      c(2/5 * 3/7 * 1 * 1,
+                        2/5 * 4/7 * 3/8 * 1,
+                        2/5 * 4/7 * 5/8 * 1,
+                        3/5 * 1 *   1   * 1
+                        ))
+    
+    expect_equivalent(oex4$weighted_paths[, 2],
+                      c(1/3 * 2/9 * 3/7 * 1,
+                        1/3 * 2/9 * 4/7 * 1,
+                        1/3 * 3/9 * 2/6 * 1,
+                        1/3 * 3/9 * 4/6 * 1,
+                        1/3 * 4/9 * 2/5 * 1,
+                        1/3 * 4/9 * 3/5 * 1,
+                        2/3 * 1 *   3/7 * 1,
+                        2/3 * 1 *   4/7 * 1
+                        ))
+    
+    expect_equivalent(oex5$weighted_paths[, 2],
+                      c(1/6 * 2/5 * 1 * 1,
+                        1/6 * 3/5 * 1 * 1,
+                        2/6 * 1/4 * 1 * 1,
+                        2/6 * 3/4 * 1 * 1,
+                        3/6 * 1/3 * 1 * 1,
+                        3/6 * 2/3 * 1 * 1
+                        ))
+    
+    expect_equivalent(oex6$weighted_paths[, 2],
+                      c(1/6 * 2/5 * 3/8 * 1,
+                        1/6 * 2/5 * 5/8 * 1,
+                        1/6 * 3/5 * 1 * 1,
+                        2/6 * 1/4 * 3/8 * 1,
+                        2/6 * 1/4 * 5/8 * 1,
+                        2/6 * 3/4 * 1 * 1,
+                        3/6 * 1/3 * 1 * 1,
+                        3/6 * 2/3 * 1 * 1
+                        ))
+    
+    
+    expect_equivalent(oex7$weighted_paths[, 2],
+                      c(1 * 2/9 * 3/7 * 4/9,
+                        1 * 2/9 * 3/7 * 5/9,
+                        1 * 2/9 * 4/7 * 1,
+                        1 * 3/9 * 2/6 * 4/9,
+                        1 * 3/9 * 2/6 * 5/9,
+                        1 * 3/9 * 4/6 * 1,
+                        1 * 4/9 * 2/5 * 1,
+                        1 * 4/9 * 3/5 * 1
+                        ))
+    
+    expect_equivalent(oex8$weighted_paths[, 2],
+                      c(1/3 * 1 * 1 * 4/9,
+                        1/3 * 1 * 1 * 5/9,
+                        2/3 * 1 * 1 * 4/9,
+                        2/3 * 1 * 1 * 5/9
+                        ))
+    
+    
+    expect_equivalent(oex9$weighted_paths[, 2],
+                      c(6/6 * 7/7 * 8/27 * 9/19 * 10/10,
+                        6/6 * 7/7 * 8/27 * 10/19 * 9/9,                    
+                        6/6 * 7/7 * 9/27 * 8/18 * 10/10,
+                        6/6 * 7/7 * 9/27 * 10/18 * 8/8,                   
+                        6/6 * 7/7 * 10/27 * 8/17 * 9/9,
+                        6/6 * 7/7 * 10/27 * 9/17 * 8/8
+                        ))
+    
+    expect_equivalent(oex10$weighted_paths[, 2],
+                      c(1/1 * 2/5 * 3/3 * 4/4 * 5/5,
+                        1/1 * 3/5 * 2/2 * 4/4 * 5/5                                        
+                        ))
+    
+    expect_equivalent(oex11$weighted_paths[, 2],
+                      c(3/18 * 4/15 * 5/11 * 7/7,
+                        3/18 * 4/15 * 6/11 * 7/7,
+                        3/18 * 5/15 * 4/10 * 7/7,
+                        3/18 * 5/15 * 6/10 * 7/7,
+                        3/18 * 6/15 * 4/9 * 7/7,
+                        3/18 * 6/15 * 5/9 * 7/7,
+                        4/18 * 3/14 * 5/11 * 7/7,                    
+                        4/18 * 3/14 * 6/11 * 7/7,
+                        4/18 * 5/14 * 3/9 * 7/7,
+                        4/18 * 5/14 * 6/9 * 7/7,
+                        4/18 * 6/14 * 3/8 * 7/7,
+                        4/18 * 6/14 * 5/8 * 7/7,                    
+                        5/18 * 3/13 * 4/10 * 7/7,
+                        5/18 * 3/13 * 6/10 * 7/7,
+                        5/18 * 4/13 * 3/9 * 7/7,
+                        5/18 * 4/13 * 6/9 * 7/7,
+                        5/18 * 6/13 * 3/7 * 7/7,
+                        5/18 * 6/13 * 4/7 * 7/7,                    
+                        6/18 * 3/12 * 4/9 * 7/7,
+                        6/18 * 3/12 * 5/9 * 7/7,
+                        6/18 * 4/12 * 3/8 * 7/7,
+                        6/18 * 4/12 * 5/8 * 7/7,
+                        6/18 * 5/12 * 3/7 * 7/7,
+                        6/18 * 5/12 * 4/7 * 7/7                    
+                        ))
+    
+    
+    
+    
+    ## Test the simplified code
+    oex0_simplified <- cpm_access_genots_paths_w_simplified(ex0)
+    oex1_simplified <- cpm_access_genots_paths_w_simplified(ex1)
+    oex2_simplified <- cpm_access_genots_paths_w_simplified(ex2)
+    oex3_simplified <- cpm_access_genots_paths_w_simplified(ex3)
+    oex4_simplified <- cpm_access_genots_paths_w_simplified(ex4)
+    oex5_simplified <- cpm_access_genots_paths_w_simplified(ex5)
+    expect_error(cpm_access_genots_paths_w_simplified(ex5e), "Different lambda", fixed = TRUE)
+    
+    ## We are now using sparseMatrices: fuller testing component by component below
+    
+    oex6_simplified <- cpm_access_genots_paths_w_simplified(ex6)
+    oex7_simplified <- cpm_access_genots_paths_w_simplified(ex7)
+    oex8_simplified <- cpm_access_genots_paths_w_simplified(ex8)
+    oex9_simplified <- cpm_access_genots_paths_w_simplified(ex9)
+    expect_error(cpm_access_genots_paths_w_simplified(ex10e), "Different lambda", fixed = TRUE)
+    oex10_simplified <- cpm_access_genots_paths_w_simplified(ex10)
+    oex11_simplified <- cpm_access_genots_paths_w_simplified(ex11)
+    
+    expect_equal(oex0[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex0_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    
+    expect_equal(oex1[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex1_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    
+    expect_equal(oex2[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex2_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    
+    expect_equal(oex3[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex3_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    
+    expect_equal(oex4[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex4_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    
+    expect_equal(oex5[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex5_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    
+    expect_equal(oex6[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex6_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    
+    expect_equal(oex7[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex7_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    
+    expect_equal(oex8[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex8_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    
+    expect_equal(oex9[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex9_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    
+    expect_equal(oex10[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex10_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    
+    expect_equal(oex11[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex11_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    
+
+})
+
+
+test_that("unrestricted fitness graph and transition fitness graph:
+identical results from sparse and non-sparse algorithms.
+Correctness of the individual algorithms
+has been verified above", {
+    
+    gacc1 <- list("A", "B", "D", c("A", "B"),
+                  c("A", "D"), c("B", "D"),
+                  c("A", "C"), c("A", "B", "D"),
+                  c("A", "B", "C"), c("A", "C", "D"),
+                  c("A", "B", "C", "D"))
+    
+    am1 <- unrestricted_fitness_graph(gacc1)
+    am1M <- unrestricted_fitness_graph_sparseM(gacc1)
+    am1Mm <- as.matrix(am1M)
+    storage.mode(am1Mm) <- "integer"
+    expect_identical(am1, am1Mm)
+    
+    wg <- structure(list(To = c("A", "B", "C", "D"),
+                         OT_edgeWeight = c(0.525915054637741,
+                                           0.101508072999909,
+                                           0.108065026764796,
+                                           0.302542959038882)),
+                    row.names = c("A", "B", "C", "D"),
+                    class = "data.frame")
   
-  
-  ex0 <- list(edges = data.frame(
-    From = c("Root", "B", "C", "D"),
-    To =   c("B", "C", "D", "A"),
-    rerun_lambda = c(1, 2, 3, 4)
-  ))
-  
-  
-  ex1 <- list(edges = data.frame(
-    From = c("Root", "Root", "A", "B", "C"),
-    To =   c("A", "B", "C", "C", "D"),
-    rerun_lambda = c(1, 2, 3, 3, 4)
-  ))
-  
-  ex2 <- list(edges = data.frame(
-    From = c("Root", "Root", "A", "B"),
-    To =   c("A", "B", "C", "D"),
-    rerun_lambda = c(10, 11, 12, 14)
-  ))
-  
-  ex3 <- list(edges = data.frame(
-    From = c("Root", "Root", "A", "C"),
-    To =   c("A", "B", "C", "D"),
-    rerun_lambda = c(2, 3, 4, 5)
-  ))
-  
-  ex4 <- list(edges = data.frame(
-    From = c("Root", "Root", "A", "A"),
-    To =   c("A", "B", "C", "D"),
-    rerun_lambda = c(1, 2, 3, 4)
-  ))
-  
-  ex5 <- list(edges = data.frame(
-    From = c("Root", "Root", "Root", "A", "B", "C"),
-    To =   c("A", "B", "C", "D", "D", "D"),
-    rerun_lambda = c(1, 2, 3, 4, 4, 4)
-  ))
-  ## yes. this is wrong. Tested below.
-  ex5e <- list(edges = data.frame(
-    From = c("Root", "Root", "Root", "A", "B", "C"),
-    To =   c("A", "B", "C", "D", "D", "D"),
-    rerun_lambda = c(1, 2, 3, 4, 4, 5)
-  ))
-  
-  ex6 <- list(edges = data.frame(
-    From = c("Root", "Root", "Root", "A", "B"),
-    To =   c("A", "B", "D", "C", "C"),
-    rerun_lambda = c(1, 2, 3, 5, 5)
-  ))
-  
-  ex7 <- list(edges = data.frame(
-    From = c("Root", "E", "E", "E", "A", "B"),
-    To =   c("E",    "A", "B", "D", "C", "C"),
-    rerun_lambda = c(1, 2, 3, 4, 5, 5)
-  ))
-  
-  ex8 <- list(edges = data.frame(
-    From = c("Root", "Root", "A", "B", "C", "C"),
-    To =   c("A",     "B",   "C", "C", "D",  "E"),
-    rerun_lambda = c(1, 2, 3, 3, 4, 5)
-  ))
-  
-  ex9 <- list(edges = data.frame(
-    From = c("Root", "A", "B", "B", "B"),
-    To =   c("A",    "B", "C", "D", "E"),
-    rerun_lambda = c(6, 7, 8, 9, 10)
-  ))
-  ## wrong, triggers error
-  ex10e <- list(edges = data.frame(
-    From = c("Root", "A", "A", "B", "C", "D"),
-    To =   c("A",    "B", "C", "D", "D", "E"),
-    rerun_lambda = c(1, 2, 3, 4, 5, 5)
-  ))
-  
-  ex10 <- list(edges = data.frame(
-    From = c("Root", "A", "A", "B", "C", "D"),
-    To =   c("A",    "B", "C", "D", "D", "E"),
-    rerun_lambda = c(1, 2, 3, 4, 4, 5)
-  ))
-  
-  
-  ex11 <- list(edges = data.frame(
-    From = c(rep("Root", 4), "A", "B", "C", "D"),
-    To =   c("A",  "B", "C", "D", rep("E", 4)),
-    rerun_lambda = c(3, 4, 5, 6, rep(7, 4))
-  ))
-  
-  
-  
-  oex0 <- cpm_access_genots_paths_w(ex0)
-  oex1 <- cpm_access_genots_paths_w(ex1)
-  oex2 <- cpm_access_genots_paths_w(ex2)
-  oex3 <- cpm_access_genots_paths_w(ex3)
-  oex4 <- cpm_access_genots_paths_w(ex4)
-  oex5 <- cpm_access_genots_paths_w(ex5)
-  expect_error(cpm_access_genots_paths_w(ex5e), "Different lambda", fixed = TRUE)
-  
-  oex6 <- cpm_access_genots_paths_w(ex6)
-  oex7 <- cpm_access_genots_paths_w(ex7)
-  oex8 <- cpm_access_genots_paths_w(ex8)
-  oex9 <- cpm_access_genots_paths_w(ex9)
-  expect_error(cpm_access_genots_paths_w(ex10e), "Different lambda", fixed = TRUE)
-  oex10 <- cpm_access_genots_paths_w(ex10)
-  oex11 <- cpm_access_genots_paths_w(ex11)
-  
-  
-  expect_equivalent(oex0$weighted_paths[, 2], 1)
-  
-  expect_equivalent(oex1$weighted_paths[, 2],
-                    c(1/3 * 1 * 1 * 1, 2/3 * 1 * 1 * 1))
-  
-  expect_equivalent(oex2$weighted_paths[, 2],
-                    c(10/21 * 11/23 * 12/26 * 1,
-                      10/21 * 11/23 * 14/26 * 1,
-                      10/21 * 12/23 * 1     * 1,
-                      11/21 * 10/24 * 12/26 * 1,
-                      11/21 * 10/24 * 14/26 * 1,
-                      11/21 * 14/24 * 1     * 1))
-  
-  expect_equivalent(oex3$weighted_paths[, 2],
-                    c(2/5 * 3/7 * 1 * 1,
-                      2/5 * 4/7 * 3/8 * 1,
-                      2/5 * 4/7 * 5/8 * 1,
-                      3/5 * 1 *   1   * 1
-                    ))
-  
-  expect_equivalent(oex4$weighted_paths[, 2],
-                    c(1/3 * 2/9 * 3/7 * 1,
-                      1/3 * 2/9 * 4/7 * 1,
-                      1/3 * 3/9 * 2/6 * 1,
-                      1/3 * 3/9 * 4/6 * 1,
-                      1/3 * 4/9 * 2/5 * 1,
-                      1/3 * 4/9 * 3/5 * 1,
-                      2/3 * 1 *   3/7 * 1,
-                      2/3 * 1 *   4/7 * 1
-                    ))
-  
-  expect_equivalent(oex5$weighted_paths[, 2],
-                    c(1/6 * 2/5 * 1 * 1,
-                      1/6 * 3/5 * 1 * 1,
-                      2/6 * 1/4 * 1 * 1,
-                      2/6 * 3/4 * 1 * 1,
-                      3/6 * 1/3 * 1 * 1,
-                      3/6 * 2/3 * 1 * 1
-                    ))
-  
-  expect_equivalent(oex6$weighted_paths[, 2],
-                    c(1/6 * 2/5 * 3/8 * 1,
-                      1/6 * 2/5 * 5/8 * 1,
-                      1/6 * 3/5 * 1 * 1,
-                      2/6 * 1/4 * 3/8 * 1,
-                      2/6 * 1/4 * 5/8 * 1,
-                      2/6 * 3/4 * 1 * 1,
-                      3/6 * 1/3 * 1 * 1,
-                      3/6 * 2/3 * 1 * 1
-                    ))
-  
-  
-  expect_equivalent(oex7$weighted_paths[, 2],
-                    c(1 * 2/9 * 3/7 * 4/9,
-                      1 * 2/9 * 3/7 * 5/9,
-                      1 * 2/9 * 4/7 * 1,
-                      1 * 3/9 * 2/6 * 4/9,
-                      1 * 3/9 * 2/6 * 5/9,
-                      1 * 3/9 * 4/6 * 1,
-                      1 * 4/9 * 2/5 * 1,
-                      1 * 4/9 * 3/5 * 1
-                    ))
-  
-  expect_equivalent(oex8$weighted_paths[, 2],
-                    c(1/3 * 1 * 1 * 4/9,
-                      1/3 * 1 * 1 * 5/9,
-                      2/3 * 1 * 1 * 4/9,
-                      2/3 * 1 * 1 * 5/9
-                    ))
-  
-  
-  expect_equivalent(oex9$weighted_paths[, 2],
-                    c(6/6 * 7/7 * 8/27 * 9/19 * 10/10,
-                      6/6 * 7/7 * 8/27 * 10/19 * 9/9,                    
-                      6/6 * 7/7 * 9/27 * 8/18 * 10/10,
-                      6/6 * 7/7 * 9/27 * 10/18 * 8/8,                   
-                      6/6 * 7/7 * 10/27 * 8/17 * 9/9,
-                      6/6 * 7/7 * 10/27 * 9/17 * 8/8
-                    ))
-  
-  expect_equivalent(oex10$weighted_paths[, 2],
-                    c(1/1 * 2/5 * 3/3 * 4/4 * 5/5,
-                      1/1 * 3/5 * 2/2 * 4/4 * 5/5                                        
-                    ))
-  
-  expect_equivalent(oex11$weighted_paths[, 2],
-                    c(3/18 * 4/15 * 5/11 * 7/7,
-                      3/18 * 4/15 * 6/11 * 7/7,
-                      3/18 * 5/15 * 4/10 * 7/7,
-                      3/18 * 5/15 * 6/10 * 7/7,
-                      3/18 * 6/15 * 4/9 * 7/7,
-                      3/18 * 6/15 * 5/9 * 7/7,
-                      4/18 * 3/14 * 5/11 * 7/7,                    
-                      4/18 * 3/14 * 6/11 * 7/7,
-                      4/18 * 5/14 * 3/9 * 7/7,
-                      4/18 * 5/14 * 6/9 * 7/7,
-                      4/18 * 6/14 * 3/8 * 7/7,
-                      4/18 * 6/14 * 5/8 * 7/7,                    
-                      5/18 * 3/13 * 4/10 * 7/7,
-                      5/18 * 3/13 * 6/10 * 7/7,
-                      5/18 * 4/13 * 3/9 * 7/7,
-                      5/18 * 4/13 * 6/9 * 7/7,
-                      5/18 * 6/13 * 3/7 * 7/7,
-                      5/18 * 6/13 * 4/7 * 7/7,                    
-                      6/18 * 3/12 * 4/9 * 7/7,
-                      6/18 * 3/12 * 5/9 * 7/7,
-                      6/18 * 4/12 * 3/8 * 7/7,
-                      6/18 * 4/12 * 5/8 * 7/7,
-                      6/18 * 5/12 * 3/7 * 7/7,
-                      6/18 * 5/12 * 4/7 * 7/7                    
-                    ))
-  
-  
-  
-  
-  ## Test the simplified code
-  oex0_simplified <- cpm_access_genots_paths_w_simplified(ex0)
-  oex1_simplified <- cpm_access_genots_paths_w_simplified(ex1)
-  oex2_simplified <- cpm_access_genots_paths_w_simplified(ex2)
-  oex3_simplified <- cpm_access_genots_paths_w_simplified(ex3)
-  oex4_simplified <- cpm_access_genots_paths_w_simplified(ex4)
-  oex5_simplified <- cpm_access_genots_paths_w_simplified(ex5)
-  expect_error(cpm_access_genots_paths_w_simplified(ex5e), "Different lambda", fixed = TRUE)
-  
-  ## We are now using sparseMatrices: fuller testing component by component below
-  
-  oex6_simplified <- cpm_access_genots_paths_w_simplified(ex6)
-  oex7_simplified <- cpm_access_genots_paths_w_simplified(ex7)
-  oex8_simplified <- cpm_access_genots_paths_w_simplified(ex8)
-  oex9_simplified <- cpm_access_genots_paths_w_simplified(ex9)
-  expect_error(cpm_access_genots_paths_w_simplified(ex10e), "Different lambda", fixed = TRUE)
-  oex10_simplified <- cpm_access_genots_paths_w_simplified(ex10)
-  oex11_simplified <- cpm_access_genots_paths_w_simplified(ex11)
-  
-  expect_equal(oex0[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-               lapply(oex0_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
-  
-  expect_equal(oex1[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-               lapply(oex1_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
-  
-  expect_equal(oex2[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-               lapply(oex2_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
-  
-  expect_equal(oex3[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-               lapply(oex3_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
-  
-  expect_equal(oex4[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-               lapply(oex4_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
-  
-  expect_equal(oex5[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-               lapply(oex5_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
-  
-  expect_equal(oex6[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-               lapply(oex6_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
-  
-  expect_equal(oex7[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-               lapply(oex7_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
-  
-  expect_equal(oex8[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-               lapply(oex8_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
-  
-  expect_equal(oex9[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-               lapply(oex9_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
-  
-  expect_equal(oex10[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-               lapply(oex10_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
-  
-  expect_equal(oex11[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-               lapply(oex11_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
-  
-  gacc1 <- list("A", "B", "D", c("A", "B"), c("A", "D"), c("B", "D"), c("A", 
-                                                                        "C"), c("A", "B", "D"), c("A", "B", "C"), c("A", "C", "D"), c("A", 
-                                                                                                                                      "B", "C", "D"))
-  
-  am1 <- unrestricted_fitness_graph(gacc1)
-  am1M <- unrestricted_fitness_graph_sparseM(gacc1)
-  am1Mm <- as.matrix(am1M)
-  storage.mode(am1Mm) <- "integer"
-  expect_identical(am1, am1Mm)
-  
-  wg <- structure(list(To = c("A", "B", "C", "D"), OT_edgeWeight = c(0.525915054637741, 
-                                                                     0.101508072999909, 0.108065026764796, 0.302542959038882)), row.names = c("A", 
-                                                                                                                                              "B", "C", "D"), class = "data.frame")
-  
-  tm1 <- transition_fg(am1, wg)
-  tm1M <- transition_fg_sparseM(am1M, wg)
-  tm1M <- as.matrix(tm1M)
-  expect_identical(tm1, tm1M)
-  
-  ## To test with a full run. Checking sparse matrix implementation
-  cpm_out_others1 <- list(OT = list(edges = structure(list(From = c("Root", "Root", 
+    tm1 <- transition_fg(am1, wg)
+    tm1M <- transition_fg_sparseM(am1M, wg)
+    tm1M <- as.matrix(tm1M)
+    expect_identical(tm1, tm1M) 
+})
+
+
+test_that("Compare sparse matrix implementation against a full run", {
+
+ cpm_out_others1 <- list(OT = list(edges = structure(list(From = c("Root", "Root", 
 "A", "Root"), To = c("A", "B", "C", "D"), edge = c("Root -> A", 
 "Root -> B", "A -> C", "Root -> D"), OT_edgeBootFreq = c(NA, 
 NA, NA, NA), OT_edgeWeight = c(0.525915054637741, 0.101508072999909, 
@@ -563,8 +662,10 @@ NA, NA, NA), OT_edgeWeight = c(0.525915054637741, 0.101508072999909,
             logLik = -110.785248346005)), parameters = list(algorithm = "CAPRI", 
             command = "hc", regularization = "aic", do.boot = TRUE, 
             nboot = 100, pvalue = 0.05, min.boot = 3, min.stat = TRUE, 
-            boot.seed = NULL, silent = TRUE, error.rates = list(
-                epos = 0, eneg = 0), restart = 100), execution.time = structure(c(user.self = 0.0769999999999982, 
+            boot.seed = NULL, silent = TRUE,
+            error.rates = list(
+                                                 epos = 0, eneg = 0), restart = 100),
+        execution.time = structure(c(user.self = 0.0769999999999982, 
         sys.self = 0, elapsed = 0.0769999999993161, user.child = 0, 
         sys.child = 0), class = "proc_time"))), CBN_ot = list(
     edges = structure(list(From = c("Root", "C", "D", "A", "Root"
@@ -669,83 +770,4 @@ NA, NA, NA), OT_edgeWeight = c(0.525915054637741, 0.101508072999909,
   
   rm(mm, mm0, mmSM)
   rm(cpm_out_others1)
-  
-  test_others <- function(data) {
-    data <- as.matrix(data)
-    data <- df_2_mat_integer(data)
-    cpm_out_others2 <- ot_cbn_methods(data, do_MCCBN = MCCBN_INSTALLED)
-    
-    mm <- c("OT",
-            "CAPRESE", "CAPRI_BIC", "CAPRI_AIC",
-            "CBN_ot"
-            , "MCCBN")[c(TRUE, rep(FALSE, 3), TRUE, MCCBN_INSTALLED)]
-    
-    mm0  <- lapply(cpm_out_others2[mm], cpm_access_genots_paths_w)
-    mmSM <- lapply(cpm_out_others2[mm], cpm_access_genots_paths_w_simplified)
-    
-    ## Identical unweighted transition matrices (fitness graphs)
-    uw0 <- lapply(mm0, function(x) rowScaleMatrix(x$fgraph))
-    uwSM <- lapply(mmSM, function(x) rowScaleMatrix(x$fgraph))
-    uwSMm <- lapply(uwSM, as.matrix)
-    expect_identical(uw0, uwSMm)
-    
-    ## Identical Weighted transition matrices
-    wg0 <- lapply(mm0[c("OT" ,
-                        "MCCBN"
-                        , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
-                  function(x) x$trans_mat_genots)
-    wgSM <- lapply(mmSM[c("OT" ,
-                          "MCCBN"
-                          , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
-                   function(x) x$trans_mat_genots)
-    wgSMm <- lapply(wgSM, as.matrix)
-    expect_equal(wg0, wgSMm)
-    
-    ## Diagonal
-    td0 <- lapply(mm0[c("MCCBN",
-                        "CBN_ot")[c(MCCBN_INSTALLED, TRUE)]],
-                  function(x)
-                    trans_rate_to_trans_mat(x$weighted_fgraph,
-                                            method = "uniformization")) 
-    tdSM <- lapply(mmSM[c("MCCBN",
-                          "CBN_ot")[c(MCCBN_INSTALLED, TRUE)]],
-                   function(x)
-                     trans_rate_to_trans_mat(x$weighted_fgraph,
-                                             method = "uniformization")) 
-    tdSMm <- lapply(tdSM, as.matrix)
-    expect_equal(td0, tdSMm)
-    
-    ## recheck competing exponentials done differently
-    wg2 <- lapply(mm0[c("OT", "MCCBN"
-                        , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
-                  function(x) trans_rate_to_trans_mat(x$weighted_fgraph,
-                                                      method = "competingExponentials"))
-    wg2SM <- lapply(mmSM[c("OT", "MCCBN"
-                           , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
-                    function(x) as.matrix(trans_rate_to_trans_mat(x$weighted_fgraph,
-                                                                  method = "competingExponentials")))
-    expect_equal(wg2, wg2SM)
-    
-  }
-  
-  ## Additional testing
-  
-  test_that("CPM work with MHN examples", {
-
-    Dat1 <- readRDS(file="../../inst/miscell/MHN/data/BreastCancer.rds") [1:50, 1:4]
-    test_others(Dat1)
-    
-    
-    Dat1 <- readRDS(file="../../inst/miscell/MHN/data/ColorectalCancer.rds")[1:40, 1:6]
-    test_others(Dat1)
-    
-    Dat1 <- readRDS(file="../../inst/miscell/MHN/data/RenalCellCarcinoma.rds")[1:30,2:6]
-    test_others(Dat1)
-    
-    Dat1 <- readRDS(file="../../inst/miscell/MHN/data/Glioblastoma.rds")[1:20, 1:5]
-    test_others(Dat1)
-    
-    rm(Dat1)
-  }) 
-  
-}) ## end of testing
+ })

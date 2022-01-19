@@ -1,5 +1,7 @@
 ## We will use this hazard matrix and transition rates several times below.
-create_MHN_test_data <- function() {
+## Too long to include function def. inside a test_that block.
+##    give an unwieldy name to minimize possible conflicts.
+create_MHN_test_data_for_trans_rate_MHN_test <- function() {
     ## from rounding the first 4 x 4 entries of Schill's
     ## cancer example
 
@@ -105,7 +107,7 @@ test_that("Diagonals of MHN trm", {
     ## Adding the diagonal
     ## Q_ii = - \Sum Q_ji
     suppressWarnings(try(rm(tmp, trm1, trm0, me1, eme1), silent = TRUE))
-    tmp <- create_MHN_test_data()
+    tmp <- create_MHN_test_data_for_trans_rate_MHN_test()
     expect_equal(rep(0, 16), rowSums(tmp$trm1),
         check.attributes = FALSE
         )
@@ -117,7 +119,7 @@ test_that("transition rates between different genotypes are the
   same from time discretized and using the competing exponentials
   approach", {
       suppressWarnings(try(rm(tmp, trm1, trm0, me1, eme1), silent = TRUE))
-      tmp <- create_MHN_test_data()
+      tmp <- create_MHN_test_data_for_trans_rate_MHN_test()
       trm1 <- tmp$trm1
       trm0 <- tmp$trm0
       rm(tmp)
@@ -171,7 +173,7 @@ test_that("transition rates between different genotypes are the
 test_that("Verify code to obtain transition rate matrix, against
 a reference and using different algorithms", {
     suppressWarnings(try(rm(tmp, trm1, trm0, me1, eme1), silent = TRUE))
-    tmp <- create_MHN_test_data()
+    tmp <- create_MHN_test_data_for_trans_rate_MHN_test()
     me1 <- tmp$me1
     eme1 <- tmp$eme1
     trm0 <- tmp$trm0

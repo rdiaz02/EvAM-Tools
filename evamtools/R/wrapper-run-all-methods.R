@@ -1,9 +1,3 @@
-## A simplified version of code-all-methods-2-trans-matrix-max-genes-15.R
-## Not using CAPRESE, or CAPRI
-## But it gives more output of OT, MHN, CBN. It can use MCCBN if
-## MCCBN_INSTALLED is set to TRUE
-## And we produce plots
-
 ## Copyright 2016, 2017, 2018, 2020, 2022 Ramon Diaz-Uriarte
 
 ## This program is free software: you can redistribute it and/or modify
@@ -20,7 +14,7 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
+## wrap calling the CPMs.
 ## Given a data set (patients as rows, genes as columns) return the
 ## transition matrices between genotypes according to all methods.
 
@@ -28,21 +22,46 @@
 ## almost at the bottom.
 
 
+## No longer using CAPRESE or CAPRI. It gives more output of OT, MHN, CBN than
+## other former versions, such as
+## code-all-methods-2-trans-matrix-max-genes-15.R. It can use MCCBN if
+## MCCBN_INSTALLED is set to TRUE And we can produce plots (CPM-plotting.R)
+
+
+
 ## You need to have
-## - Schills code
-## - MCCBN installed: from git, then R CMD INSTALL: https://github.com/cbg-ethz/MC-CBN
+## - Schill's MHN code
+## - MCCBN if you use it.
 ## - CBN: use my version with fixes, in the repo:
 ##     cd to ct-cbn-0.1.04b-with-rdu-bug-fix-write-lambda-likelihood
-##     then:
-##       ./configure
-##       make
-##       and cp, mv, ln the two binaries to a place in the path
-##      BEWARE! sometimes weird things can happen (make not working, etc)
-##        if you have stale files. 
-##        If things break, the simplest is to checkout a new copy from the repo
-##        and do the ./configure , make dance there.
-##        Probably you need to have autoconf-archive installed.
-## - OT, and CAPRIand CAPRESE (the corresponding packages Oncotree and TRONCO)
+## - OT  (the corresponding package Oncotree)
+## - HESBCN
+## Full details in the README.md on the upper level directory.
+
+
+
+## By default, this will use the available cores
+## for MHN. For CBN we fix the OMP cores to one (setting
+## that as an env. var. right before calling cbn via system)
+##
+## See more comments and possible issues at bottom and
+## in the cbn-process.R file.
+## For more control, you might want to set
+## thiscores <- 36 ## or whatever
+## Then
+## export OPENBLAS_NUM_THREADS=thiscores
+## export OMP_NUM_THREADS=thiscores
+## in the script that launches analyses, unless those runs are parallelized.
+
+## If runs are parallelized, and you do many parallel runs, it might
+## be simpler and faster to set cores to 1 for everything (MHN included).
+## (See bottom: MHN will not run with cores > 1 if also using forking
+##  from mclapply)
+## And you can also do it here for R itself
+## library(RhpcBLASctl)
+## RhpcBLASctl::blas_set_num_threads(thiscores)
+## RhpcBLASctl::omp_set_num_threads(thiscores)
+
 
 
 
@@ -50,18 +69,6 @@
 ## having it installed. It then tests the MCCBN functionality too.
 MCCBN_INSTALLED <- TRUE
 
-
-## Since we are not parallelizing here, you might want to set
-thiscores <- 1
-## export OPENBLAS_NUM_THREADS=thiscores
-## export OMP_NUM_THREADS=thiscores
-## with the 36 substituted by the number of your CPUs
-## in the script that launches analyses (unless those runs are parallelized)
-## I also do it here for R itself
-
-# library(RhpcBLASctl)
-## RhpcBLASctl::blas_set_num_threads(thiscores)
-## RhpcBLASctl::omp_set_num_threads(thiscores)
 
 
 ## given the samples by genes matrix, run OT, CBN, and maybe MCCBN
@@ -749,7 +756,8 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
                function(x) x$trans_mat_genots)
     ## Time discretized, via uniformization
     td <- lapply(pre_trans_mat_others[c("MCCBN", "CBN_ot",
-                                        "DBN", "HyperTraPS",
+                                        "DBN", 
+                                        "HyperTraPS",
                                         "HESBCN")[c(do_MCCBN, TRUE,
                                                     TRUE, FALSE, TRUE)]],
                  function(x) trans_rate_to_trans_mat(x$weighted_fgraph,
@@ -789,7 +797,7 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
         DBN_likelihood = out_dbn$likelihood,
         DBN_f_graph = pre_trans_mat_new_CPMS$DBN$weighted_fgraph,
         DBN_trans_mat = pre_trans_mat_new_CPMS$DBN$trans_mat_genots,
-        DBN_td_trans_mat = td$DBN,
+        ## DBN_td_trans_mat = td$DBN, ## FIXME: I think this does not make sense
         HESBCN_model = out_hesbcn$edges,
         HESBCN_parent_set = out_hesbcn$parent_set,
         HESBCN_f_graph = pre_trans_mat_HESBCN$HESBCN$weighted_fgraph,
@@ -852,6 +860,7 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
 # ulimit::memory_limit()
 
 # }
+
 
 
 

@@ -1,17 +1,18 @@
-adj_matrix <- matrix(0, nrow = 6, ncol = 6)
-rownames(adj_matrix) <- colnames(adj_matrix) <- c("WT", "A", "A, B",
-                                                  "A, C", "C", "C, D")
-
-adj_matrix["WT", "A"] <- 1000
-adj_matrix["WT", "C"] <- 500
-adj_matrix["A", "A, B"] <- 500
-adj_matrix["A", "A, C"] <- 200
-adj_matrix["C", "A, C"] <- 100
-adj_matrix["C", "C, D"] <- 200
-
-g <- graph_from_adjacency_matrix(adj_matrix, mode = "directed", weighted = TRUE)
 
 test_that("Returns the correct number and type of vertex labels", {
+
+    adj_matrix <- matrix(0, nrow = 6, ncol = 6)
+    rownames(adj_matrix) <- colnames(adj_matrix) <- c("WT", "A", "A, B",
+                                                      "A, C", "C", "C, D")
+    adj_matrix["WT", "A"] <- 1000
+    adj_matrix["WT", "C"] <- 500
+    adj_matrix["A", "A, B"] <- 500
+    adj_matrix["A", "A, C"] <- 200
+    adj_matrix["C", "A, C"] <- 100
+    adj_matrix["C", "C, D"] <- 200
+
+    g <- graph_from_adjacency_matrix(adj_matrix, mode = "directed", weighted = TRUE)
+    
     all_genotypes <- c("WT", "A", "A, B", "A, C", "C", "C, D")
     all_paths <- rank_paths(g)
 

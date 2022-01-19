@@ -35,7 +35,7 @@ df_2_mat_integer <- function(x) {
 
 ## To make it explicit
 ## but do not set the last row to NaNs or similar.
-## Following same logic as in trans_rate_to_trans_mat (in MHN dir)
+## Following same logic as in trans_rate_to_trans_mat
 rowScaleMatrix <- function(x) {
     tm <- x
     sx <- rowSums(x)

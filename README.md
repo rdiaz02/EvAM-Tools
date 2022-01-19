@@ -53,7 +53,9 @@ FIXME: commit hash and date when we got the package.
 
 * HyperTraps: https://github.com/sgreenbury/HyperTraPS. Follow the instruction there to install the package through conda 
 and get a working enviroment with HyperTraPS installed. Add both the `bin` and the `src/python` to your `$PATH`. Also, add the `bin` folder to your $PATH. It is also convenient to run `echo "backend: Agg" > ~/.config/matplotlib/matplotlibrc`.
-* HESBCN: https://github.com/danro9685/HESBCN. For proper compilation you should modify line 23 in *Makefile* to include *LDLIBS = -lgsl -lm -lgslcblas*. You can also change compilation from gcc-5 to something a bit more up to date, like gcc-10. Finally, add this folder to your $PATH.
+
+* HESBCN: https://github.com/danro9685/HESBCN . For proper compilation you should modify line 23 in *Makefile* to include *LDLIBS = -lgsl -lm -lgslcblas*. You can also change compilation from gcc-5 to something a bit more up to date, like gcc-10. Finally, add the h-esbcn executable to your $PATH.
+
 
 # Directory code_from_what_genotype_next 
 
@@ -95,8 +97,8 @@ and get a working enviroment with HyperTraPS installed. Add both the `bin` and t
     - Their code is released under the GNU GPL.
 
     - You need to install that code and place the h-cbn and ct-cbn executables
-      (or links to them) in you path. Uncompress and the usual dance
-      (./configure, make)
+      (or links to them) in you path.  Uncompress and the usual dance
+      (./configure, make). Beware: if you have stale files around (from runs of make with other versions of gcc, for example), make might not work; the simplest fix is to checkout a new copy from the repo, extract, and repeat the ./configure, make, dance again.
 
 
 # Other optional code
