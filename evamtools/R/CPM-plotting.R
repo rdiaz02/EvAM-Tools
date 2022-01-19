@@ -34,7 +34,7 @@ plot_sampled_genots <- function(data) {
 #' 
 #' @param graph igraph object with genotype transition. The graph is expect to be directed and weighted
 #' @return List with all paths sorted in descreasing order of importance
-rank_paths <- function(graph){
+rank_paths <- function(graph) {
     g <- graph
     all_paths <- list()
     ## Starting from WT --> get the most likely children
