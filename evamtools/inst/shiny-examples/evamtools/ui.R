@@ -273,6 +273,9 @@ user_input <- function(){
         width: 100% !important; 
       }
 
+      input{
+        z-index: 100;
+      }
       .inlin label{ 
         display: table-cell; 
         text-align: left; 

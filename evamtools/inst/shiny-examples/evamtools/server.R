@@ -1,8 +1,8 @@
-library(DT)
-# library(guloMAM)
-library(OncoSimulR)
-library(shinyjs)
-library(igraph)
+# library(DT)
+# # library(guloMAM)
+# library(OncoSimulR)
+# library(shinyjs)
+# library(igraph)
 
 source("../../../data/toy_datasets.R")
 
@@ -202,14 +202,16 @@ plot_model <- function(cpm_output, mod){
 }
 
 compare_cpm_freqs <- function(data, type){
-    available_methods <- c("Source", "OT", "CBN", "MHN", "HESBCN", "MCCBN")
+    available_methods <- c("Source", "OT", "CBN", "DBN", "MHN", "HESBCN", "MCCBN")
     if(type %in% c("freqs")){
         all_counts <- data.frame(Genotype = data[["MHN_genotype_freqs"]]$Genotype)
         for(name in names(data)){
-            if(grepl("_genotype_freqs", name) & !grepl("^OT", name)){
+            if(grepl("_genotype_freqs", name)
+            #  & !grepl("^OT", name) ##Now we have genotypes frequencies for OT
+             ){
                 method_name <- strsplit(name, "_")[[1]][[1]]
                 all_counts[[method_name]] <- data[[name]]$Counts
-            }
+            } 
         }
         
         order_by_counts <- sort(rowSums(all_counts[-1]), 
@@ -276,9 +278,8 @@ compare_cpm_freqs <- function(data, type){
         return(all_the_data[order_by_counts, ])
 
     } else if(type %in% c("lambdas")){
-
-        lambda_field <- c("Lambdas", "OT_edgeWeight", "rerun_lambda", "Lambdas", "Lambdas")
-        names(lambda_field) <- c("Source", "OT", "CBN", "HESBCN", "MCCBN")
+        lambda_field <- c("Lambdas", "OT_edgeWeight", "rerun_lambda", "Lambdas", "lambda", "Thetas")
+        names(lambda_field) <- c("Source", "OT", "CBN", "HESBCN", "MCCBN", "DBN")
 
         gene_names <- sort(unique(data$OT_model$To))
         all_counts <- data.frame(Gene = gene_names)
@@ -662,8 +663,10 @@ server <- function(input, output, session) {
             tags$div(
                 numericInput("num_steps", "Sampling steps", 10000
                     , min = 0, max = 1000000, step = 1000, width="100%"),
-                checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("HyperTRAPS", "MCCBN"), choiceValues = c("hypertraps", "mccbn")),
-                tags$h4("DISCLAIMER: Both HyperTraps and MCCBN may take hours to run")
+                # checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("HyperTRAPS", "MCCBN"), choiceValues = c("hypertraps", "mccbn")),
+                checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("MCCBN"), choiceValues = c("mccbn")),
+                tags$h4("DISCLAIMER: MCCBN may take hours to run")
+                # tags$h4("DISCLAIMER: Both HyperTraps and MCCBN may take hours to run")
             )
             )
         )
@@ -1096,9 +1099,9 @@ server <- function(input, output, session) {
         progress$inc(1/5, detail = "Setting up data")
         Sys.sleep(0.5)
         progress$inc(2/5, detail = "Running CPMs")
-        cpm_output <- all_methods_2_trans_mat(data2run)
-
+        do_MCCBN <- "mccbn" %in% input$more_cpms
         
+        cpm_output <- all_methods_2_trans_mat(data2run, do_MCCBN = do_MCCBN)
         ## To see Source data in the results section
         if(input$input2build != "csd"){
             cpm_output$Source_f_graph <- source_trm
@@ -1283,7 +1286,7 @@ server <- function(input, output, session) {
                 tags$div(class = "inline",
                   checkboxGroupInput(inputId = "cpm2show", 
                       label = "CPMs to show", 
-                      choices = c("Source", "OT", "CBN", "MHN", "HESBCN"),
+                      choices = c("Source", "OT", "CBN", "MHN", "HESBCN", "DBN", "MCCBN"),
                       selected = c("CBN", "MHN", "HESBCN")),
                       
                 tags$div(class = "inline",
@@ -1383,6 +1386,13 @@ server <- function(input, output, session) {
             shinyjs::disable(selector = "#cpm2show input[value='Source']")
         }else{
             shinyjs::enable(selector = "#cpm2show input[value='Source']")
+        }
+        if(is.na(all_cpm_out$output[[selected]]$MCCBN_model)){
+            updateCheckboxGroupInput(session, "cpm2show", 
+                selected = setdiff(c(input$cpm2show), "Source"))
+            shinyjs::disable(selector = "#cpm2show input[value='MCCBN']")
+        }else{
+            shinyjs::enable(selector = "#cpm2show input[value='MCCBN']")
         }
     })
 
