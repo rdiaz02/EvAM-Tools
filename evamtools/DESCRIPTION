@@ -19,5 +19,7 @@ Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
 Imports: TRONCO, dplyr, igraph, OncoSimulR, stringr, Matrix, OncoBN, parallel, Oncotree
+    , Rgraphviz, codetools, data.table, foreach, gtools
+    , plot.matrix, pryr, readr
 Suggests: 
     testthat (>= 3.0.0)
