@@ -1,5 +1,21 @@
-source("../External-code/HESBCN/hesbcn-external.R")
-## TODO
+## Copyright 2021, 2022 Pablo Herrera Nieto
+
+## This program is free software: you can redistribute it and/or modify
+## it under the terms of the GNU General Public License as published by
+## the Free Software Foundation, either version 3 of the License, or
+## (at your option) any later version.
+
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU General Public License for more details.
+
+## You should have received a copy of the GNU General Public License
+## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+source("../../External-code/HESBCN/hesbcn-external.R")
+
 # Create something similar to cbn-process for checking if the package is installed
 
 ## Testing HESBCN programs available
@@ -9,7 +25,6 @@ if(.._EvamTools_test.hesbcn) {
         "\n\n",
         "\n******************************************************",
         "\n******************************************************\n",
-        ## "          OncoSimulT installation warning:\n",
         "\n  WARNING \n",
         "The external program h-esbcn was not found.",
         "You will not be able to use HESBCN.",
