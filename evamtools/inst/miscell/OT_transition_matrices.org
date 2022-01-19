@@ -2,7 +2,7 @@
 #+AUTHOR: Ramon Diaz-Uriarte
 #+TITLE: OT: transition matrices
 #+LATEX_HEADER: \usepackage[margin=1.7cm]{geometry}
-#+LATEX_HEADER: \usepackage{isodate}
+#+LATEX_HEADER: \usepackage[iso,english]{isodate}
 #+OPTIONS: toc:nil
 
 * Introduction: what this is about
@@ -126,8 +126,8 @@
  - Because CBN (and MHN) give transition rates. So we have the rate of staying in the same genotype and a fully specified model for transitions over time.
   - With OT there is nothing that plays the role of the diagonal entry in the transition rate matrix.
     
-** Could we hack OT for that?
-- Does not seem reasonable.
+** Could we hack the interpretation of OT for that?
+- Does not seem reasonable: these are untimed oncogenetic trees, and they are reconstructed as such.
 - Under S2, for example, if you tried to write the rate of staying in A as
   $1-p_b$ it does not work. See the red text in the figure.
 - But then, *if you want a model that can be interpreted as CBN, use CBN*
