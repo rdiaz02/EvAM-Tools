@@ -475,7 +475,7 @@ cpm_access_genots_paths_w_simplified <- function(x,
                                                      c("rerun_lambda",
                                                        "lambda",
                                                        "OT_edgeWeight")) {
-    if(inherits(x, "try-error") || is.na(x) || is.null(x)) {
+    if(inherits(x, "try-error") || all(is.na(x)) || is.null(x)) {
         return(list(
             fgraph = "ERROR_CPM_ANALYSIS",
             weighted_fgraph = "ERROR_CPM_ANALYSIS",

@@ -53,11 +53,12 @@ cpm_access_genots_paths_w <- function(x, string = NULL,
                                           c("rerun_lambda",
                                             "lambda",
                                             "OT_edgeWeight")) {
-    if(inherits(x, "try-error") || is.na(x) || is.null(x)) {
+
+    if(inherits(x, "try-error") || all(is.na(x)) || is.null(x)) {
         ## The CPM analysis produced no edges component, so
         ## nothing can be done
         if(inherits(x, "try-error")) likely_error <- "Error_in_run"
-        if(is.na(x)) likely_error <- "ncol_x"
+        if(all(is.na(x))) likely_error <- "ncol_x"
         if(is.null(x)) likely_error <- "other_error"
         return(list(accessible_genots = "ERROR_CPM_ANALYSIS",
                     num_accessible_genots = "ERROR_CPM_ANALYSIS",
@@ -172,7 +173,6 @@ cpm_access_genots_paths_w <- function(x, string = NULL,
     return(list(accessible_genots = accessible_genots,
                 num_accessible_genots = length(accessible_genots),
                 CPM_DAG_as_igraph = tmp$graph,
-                ## fgraph_AM = fgraph,
                 fgraph = fgraph,
                 num_paths_to_max = lpaths,
                 paths_error = paths_error,
