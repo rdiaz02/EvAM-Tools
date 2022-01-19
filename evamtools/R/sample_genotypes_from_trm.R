@@ -268,13 +268,29 @@ sample_all_CPMs <- function(cpm_output
     , methods = c("Source", "CBN", "MCCBN", "DBN", "MHN", "HESBCN", "OT")) {
     output <- cpm_output
     ## I have removed OT from the list of CPM to sample
-    ## And I haved "Source" for a source data type for the web server
+    ## And I have "Source" for a source data type for the web server
     if (is.null(gene_names)) gene_names <- LETTERS[1:n_genes]
 
     for (method in methods) {
         if (method == "OT") {
+            tmp_data <- output$OT_genots_predicted
+            genots <- tmp_data[2:(ncol(tmp_data) - 1)]
+
+            genots_2 <- unlist(apply(genots, 1, 
+                function(x) paste(names(genots)[x == 1], collapse = ", ")))
+            names(genots_2) <- NULL
+            genots_2[genots_2 == ""] <- "WT"
+
+            tmp_genotypes_sampled <- sample_to_pD_order(
+                sample(genots_2, n_samples, 
+                    prob = tmp_data$Prob, replace = TRUE),
+                n_genes, gene_names)
+            
             output[[sprintf("%s_genotype_freqs", method)]] <-
-                output$OT_genots_predicted
+                data.frame(
+                    Genotype = generate_sorted_genotypes(n_genes, gene_names),
+                    Counts = tmp_genotypes_sampled
+                )
             ## The next one is NOT implicitly available.
             ##   see OT_transition_matrices.org
             output[[sprintf("%s_genotype_transitions", method)]] <- NULL

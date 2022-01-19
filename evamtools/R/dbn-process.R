@@ -11,7 +11,7 @@
 do_DBN <- function(data) {
   invisible(capture.output(out <- fitCPN(data, algorithm = "DP")))
   thetas <- inferTheta(data, out)
-  dbn_out <- create_data_frame_from_theta(thetas, out, colnames(data))
+  dbn_out <- create_data_frame_from_theta(thetas, out)
   return(list(
     edges = dbn_out
               , thetas = thetas
@@ -20,7 +20,7 @@ do_DBN <- function(data) {
 }
 
 
-create_data_frame_from_theta <- function(thetas, out, gene_names) {  
+create_data_frame_from_theta <- function(thetas, out) {  
   ## Ugly patch to get a clean data.frame from the output of inferTheta
   out$edgelist[out$edgelist == "WT"] <- "Root"
   from_node <- out$edgelist[seq(1, length(out$edgelist), by=2)]
@@ -28,26 +28,37 @@ create_data_frame_from_theta <- function(thetas, out, gene_names) {
   edges <- mapply(function(x,y){paste(x, "->", y, sep="")}, from_node, to_node)
   names(edges) <- NULL
 
-  gene_names <- list()
+  # gene_names <- list()
+  # theta_values <- list()
+  # counter <- 1
+
+  # for (parents in thetas$parents){
+  #   for(parent in parents){
+  #     if(!(parent %in% gene_names)){
+  #       theta_values <- c(theta_values, thetas$thetas[[counter]])
+  #       gene_names <- c(gene_names, parent)
+  #     }
+  #   }
+  #   counter <- counter + 1
+  # }
+
+  # gene_names <- list()
   theta_values <- list()
   counter <- 1
-
   for (parents in thetas$parents){
     for(parent in parents){
-      if(!(parent %in% gene_names)){
         theta_values <- c(theta_values, thetas$thetas[[counter]])
-        gene_names <- c(gene_names, parent)
-      }
+        # gene_names <- c(gene_names, parent)
     }
     counter <- counter + 1
   }
-  gene_names <- unlist(gene_names)
-  gene_names[gene_names == "WT"] <- "Root"
-  gen
-  names(theta_values) <- gene_names
 
-  dbn_out <- data.frame(from_node, to_node
-    , edges, unlist(theta_values[from_node]))
+  theta_values <- unlist(theta_values)
+  dbn_out <- data.frame(from_node, to_node, edges, theta_values)
+  # gene_names[gene_names == "WT"] <- "Root"
+  # names(theta_values) <- gene_names
+
+  # dbn_out <- data.frame(from_node, to_node, edges, unlist(theta_values[from_node]))
     
   colnames(dbn_out) <- c("From", "To", "Edge", "Thetas")
   return(dbn_out)

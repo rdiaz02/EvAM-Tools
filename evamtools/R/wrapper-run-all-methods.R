@@ -716,7 +716,6 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
       out_hesbcn <- do_HESBCN(x))["elapsed"]
     
     cat("\n  time HESBCN = ", time_hesbcn)
-     
     cpm_out_others <- ot_cbn_methods(x, cores_cbn = cores_cbn,
                                      do_MCCBN = do_MCCBN)
     ## For CBN, OT, get transition matrices and fitness graphs
@@ -724,6 +723,7 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
     pre_trans_mat_others <- lapply(cpm_out_others[methods],
         cpm_access_genots_paths_w_simplified)
 
+    
     pre_trans_mat_new_CPMS <- lapply( 
         list(DBN = out_dbn
         ),
@@ -751,7 +751,7 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
     td <- lapply(pre_trans_mat_others[c("MCCBN", "CBN_ot",
                                         "DBN", "HyperTraPS",
                                         "HESBCN")[c(do_MCCBN, TRUE,
-                                                    FALSE, FALSE, TRUE)]],
+                                                    TRUE, FALSE, TRUE)]],
                  function(x) trans_rate_to_trans_mat(x$weighted_fgraph,
                                                      method = "uniformization"))
 
