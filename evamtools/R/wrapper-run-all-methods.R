@@ -756,7 +756,8 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
                function(x) x$trans_mat_genots)
     ## Time discretized, via uniformization
     td <- lapply(pre_trans_mat_others[c("MCCBN", "CBN_ot",
-                                        "DBN", "HyperTraPS",
+                                        "DBN", 
+                                        "HyperTraPS",
                                         "HESBCN")[c(do_MCCBN, TRUE,
                                                     FALSE, FALSE, TRUE)]],
                  function(x) trans_rate_to_trans_mat(x$weighted_fgraph,
@@ -796,7 +797,7 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
         DBN_likelihood = out_dbn$likelihood,
         DBN_f_graph = pre_trans_mat_new_CPMS$DBN$weighted_fgraph,
         DBN_trans_mat = pre_trans_mat_new_CPMS$DBN$trans_mat_genots,
-        DBN_td_trans_mat = td$DBN,
+        ## DBN_td_trans_mat = td$DBN, ## FIXME: I think this does not make sense
         HESBCN_model = out_hesbcn$edges,
         HESBCN_parent_set = out_hesbcn$parent_set,
         HESBCN_f_graph = pre_trans_mat_HESBCN$HESBCN$weighted_fgraph,
