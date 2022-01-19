@@ -292,7 +292,8 @@ df_2_access_genots_and_graph_OR <- function(x) {
 ## DAG of restrictions (as data frame), options info about gene_relations
 ##            -> vector of accessible genotypes and graph of DAG of restrictions
 ##  Under OR, AND, XOR models, as specified by gene_relations
-
+##  Called from cpm_access_genots_paths_w_simplified_relationships
+##   which itself is used for HESBCN
 df_2_access_genots_and_graph_relationships <- function(x,
                                                        gene_relations = NULL) {
 
@@ -589,7 +590,7 @@ cpm_access_genots_paths_w_simplified_OR <-
 cpm_access_genots_paths_w_simplified_relationships <-
     function(data,
              parameter_column_name = c("Thetas", "Probabilities", "Lambdas")) {
-        
+
         tmp <-
             try(df_2_access_genots_and_graph_relationships(
                 data$edges[, c("From", "To")],
