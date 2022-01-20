@@ -14,6 +14,11 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+## We are using inferTheta from OncoBN, and that is not exported
+## https://stackoverflow.com/a/46098814
+evam_inferTheta <- utils::getFromNamespace("inferTheta", "OncoBN")
+
+
 
 #' Run DBN on data
 #' 
@@ -23,7 +28,8 @@
 #' @return list$likelihood Float. Likelihood of the fit
 do_DBN <- function(data) {
   invisible(capture.output(out <- fitCPN(data, algorithm = "DP")))
-  thetas <- inferTheta(data, out)
+  ## thetas <- OncoBN:::inferTheta(data, out)
+  thetas <- evam_inferTheta(data, out)
   dbn_out <- create_data_frame_from_theta(thetas, out)
   return(list(
     edges = dbn_out
