@@ -22,4 +22,5 @@ Imports: TRONCO, dplyr, igraph, OncoSimulR, stringr, Matrix, OncoBN, parallel, O
     , Rgraphviz, codetools, data.table, foreach, gtools
     , plot.matrix, pryr, readr, DT, shinyjs
 Suggests: 
+    mccbn,
     testthat (>= 3.0.0), mccbn

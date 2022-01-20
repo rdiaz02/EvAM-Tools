@@ -1,20 +1,25 @@
 export("indiv_sample_from_trm_pre"
      , "population_sample_from_trm"
+     , "process_samples"
+     , "sample_all_CPMs"
      , "all_methods_2_trans_mat"
-     , "do_DBN", "do_HESBCN", "do_MHN2"
-     , "process_samples", "sample_all_CPMs"
+     , "do_DBN"
+     , "do_HESBCN"
+     , "do_MHN2"
+     , "inner_transitionRate_3_1"
      , "cpm2tm"
-     , "generate_sorted_genotypes"
-     , "plot_sampled_genots", "inner_transitionRate_3_1"
      , "theta_to_trans_rate_3_SM"
-     , "plot_genot_fg", "plot_DAG_fg", "runShiny"
      , "process_data"
+     , "plot_sampled_genots"
+     , "plot_genot_fg"
+     , "plot_DAG_fg"
+     , "runShiny"
+     , "generate_sorted_genotypes"
      )
 
 importFrom("grDevices", "rgb")
 importFrom("graphics", "axis", "legend", "lines", "par")
-importFrom("stats", "aggregate", "chisq.test", "decompose", "na.omit", "rexp",
-           "runif", "rnorm", "optim")
+
 importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert",
            "write.csv")
 importFrom("Matrix", "diag", "rowSums", "colSums", "summary")
@@ -22,17 +27,22 @@ importFrom("OncoSimulR", "sampledGenotypes", "evalAllGenotypes", "allFitnessEffe
 importFrom("stringr", "str_count", "str_replace", "str_split", "str_replace_all")
 importFrom("parallel", "detectCores", "mclapply")
 importFrom("OncoBN", "fitCPN")
-
-import(Oncotree)    
-import(igraph)
-import(plot.matrix)
-import(codetools)
-import(foreach)
+importFrom("relations", "as.relation", "transitive_reduction")
+importFrom("shinyjs", "enable", "disable")
+importFrom("DT", "renderDT")
+importFrom("Oncotree", "oncotree.fit", "marginal.distr", "distribution.oncotree")    
+importFrom("codetools", "checkUsageEnv")
+importFrom("gtools", "combinations")
+importFrom("igraph", "V", "E", "graph.data.frame"
+     , "get.adjacency", "all_simple_paths", "decompose"
+     , "subcomponent", "adjacent_vertices", "graph_from_adjacency_matrix")
+importFrom("stats", "aggregate", "chisq.test", "decompose", "na.omit", "rexp",
+           "runif", "rnorm", "optim")
+importFrom("plot.matrix", "plot")
+import(foreach)   
 import(gtools)
 import(pryr)
 import(readr)
 import(dplyr)
 import(Rgraphviz)
 import(data.table)
-import(DT)
-import(shinyjs)

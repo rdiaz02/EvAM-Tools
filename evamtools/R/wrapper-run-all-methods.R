@@ -669,10 +669,34 @@ transition_fg_sparseM <- function(x, weights) {
 
 
 
-## Pass a data set as a matrix with subjects as rows and genes as columns
-
+#' Runs the CPMs
+#'
+#' Executes all CPMS given some cross sectional data
+#'  
+#' @param x cross sectional data
+#' @param cores_cbn 
+#' @param do_MCCBN Wether to run MCCBN. Default is FALSE.
+#' @examples
+#'\dontrun{
+#' dB_c1 <- matrix(
+#'  c(
+#'      rep(c(1, 0, 0, 0, 0), 300) #A
+#'    , rep(c(0, 0, 1, 0, 0), 300) #C
+#'    , rep(c(1, 1, 0, 0, 0), 200) #AB
+#'    , rep(c(0, 0, 1, 1, 0), 200) #CD
+#'    , rep(c(1, 1, 1, 0, 0), 100) #ABC
+#'    , rep(c(1, 0, 1, 1, 0), 100) #ACD
+#'    , rep(c(1, 1, 0, 0, 1), 100) #ABE
+#'    , rep(c(0, 0, 1, 1, 1), 100) #CDE
+#'    , rep(c(1, 1, 1, 0, 1), 100) #ABCE
+#'    , rep(c(1, 0, 1, 1, 1), 100) #ACDE
+#'    , rep(c(1, 1, 1, 1, 0), 50) # ABCD
+#'    , rep(c(0, 0, 0, 0, 0), 10) # WT
+#'  ), ncol = 5, byrow = TRUE
+#' )
+#' colnames(dB_c1) <- LETTERS[1:5]
+#' out <- all_methods_2_trans_mat(dB_c1, do_MCCBN = FALSE)
 all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
-                                    HT_folder = NULL,
                                     max.cols = 15) {
      
     x <- df_2_mat_integer(x)
@@ -756,10 +780,9 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
                function(x) x$trans_mat_genots)
     ## Time discretized, via uniformization
     td <- lapply(pre_trans_mat_others[c("MCCBN", "CBN_ot",
-                                        "DBN", 
                                         "HyperTraPS",
                                         "HESBCN")[c(do_MCCBN, TRUE,
-                                                    TRUE, FALSE, TRUE)]],
+                                                    FALSE, TRUE)]],
                  function(x) trans_rate_to_trans_mat(x$weighted_fgraph,
                                                      method = "uniformization"))
 

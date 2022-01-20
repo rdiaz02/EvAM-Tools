@@ -169,7 +169,6 @@ cpm_layout <- function(graph){
 #' plot_genot_fg(out$MHN_trans_mat, dB_c2)
 #' dev.off()
 #' }
-
 plot_genot_fg <- function(trans_mat
     , observations = NULL
     , freqs = NULL
@@ -328,12 +327,20 @@ plot_genot_fg <- function(trans_mat
 
 
 
+#' Process data of CPMs to make it easier to plot
+#' 
+#' @param data Complete CPM output
+#' @param mod String for the CPM to process.
+#' @param prune_edges Boolean. Wether to remove genotype relationships carrying less than 1% of the flux
+#' @param plot_type String. You can choose between 4 options. Optional.
+#' genotypes: DAG with genotypes transitions
+#' matrix: respresents the transtion matrix as a heatmap
+#' transitions: shows the hypercubic genotype transitions 
+#'              running simulations is needed before this
+#' trans_mat: HyperTraps-like representation of the transition matrix
+#' @returns List with processed output of the CPM
 
 process_data <- function(data, mod, prune_edges = TRUE, plot_type = "transitions") {
-
-
-    dag_tree <- NULL
-    
     dag_tree <- NULL
     tryCatch (expr = {
         dag_model <- get(paste(mod, "_model", sep = ""), data)
@@ -343,7 +350,7 @@ process_data <- function(data, mod, prune_edges = TRUE, plot_type = "transitions
     dag_trans_mat <- get(paste(mod, "_trans_mat", sep = ""), data)
     fg <- graph_from_adjacency_matrix(dag_trans_mat, weighted = TRUE)
 
-    if(prune_edges) {
+    if(prune_edges == TRUE) {
         dag_trans_mat[dag_trans_mat < 0.01] <- 0
     }
 
@@ -357,7 +364,7 @@ process_data <- function(data, mod, prune_edges = TRUE, plot_type = "transitions
     tryCatch(expr = {
         td_trans_mat <- get(paste(mod, "_td_trans_mat", sep = ""), data)
         td_fg <- graph_from_adjacency_matrix(td_trans_mat, weighted = TRUE)
-        if(prune_edges) {
+        if(prune_edges == TRUE) {
             td_trans_mat[td_trans_mat < 0.01] <- 0
         }
         if (plot_type == "matrix"){
@@ -370,7 +377,7 @@ process_data <- function(data, mod, prune_edges = TRUE, plot_type = "transitions
     tryCatch(expr ={
         theta <- get(paste(mod, "_theta", sep=""), data)
     }, error = function(e) { })
-    # browser()
+
     return(list(dag_tree = dag_tree
         , dag_trans_mat = dag_trans_mat
         , fg = fg
@@ -390,7 +397,7 @@ process_data <- function(data, mod, prune_edges = TRUE, plot_type = "transitions
 #' or de transtionRateMatrix for MHN
 #' The bottom row has a custom plot for genotype transition
 
-#' @param x output from the cpm
+#' @param cpm_output output from the cpm
 #' @param data Original cross sectional data used to compute the model. Optional.
 #' @param models Output of the CPMs to plot. Current support is for OT, CBN, DBN, MCCBN and MHN Optional.
 #' @param orientation String. If it not "vertical" will be displayed with an horizontal layout. Optional.
@@ -400,8 +407,6 @@ process_data <- function(data, mod, prune_edges = TRUE, plot_type = "transitions
 #' transitions: shows the hypercubic genotype transitions 
 #'              running simulations is needed before this
 #' trans_mat: HyperTraps-like representation of the transition matrix
-#' @param prune_edges Threshold. Values below this number will be set to zero
-#' in the trm
 #' @param top_paths Number of most relevant paths to plot. Default NULL 
 #' will plot all paths
 #' @examples

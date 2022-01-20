@@ -160,11 +160,10 @@ str2int <- function(str_state, sep =", ", wt = "WT", n = NULL){
 #' @description Returns all sorted genotypes for a given number of genes
 #' 
 #' @param n_genes Ingeter >=0
-#' @param sep String. Separator between genes letters
-#' @param index.return Boolean. Wethter to return the indexes
+#' @param gene_names Vector of strings
+#'      If NULL, defaults gene_names will the firt n_genes letters of the alphabet
 #' 
 #' @return Vector with the sorted genotypes
-#' @return Optionally, returns the indexes of the int states
 generate_sorted_genotypes <- function(n_genes, gene_names = NULL){
     if (is.null(gene_names)) gene_names <- LETTERS[1:n_genes]
     # if(n_genes < 0) stop("Number of genes should be >= 0")

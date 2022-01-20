@@ -13,7 +13,9 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 #' @export
+#' Launchs the server with the web based app
 runShiny <- function() {
   appDir <- system.file("shiny-examples", "evamtools", package = "evamtools")
   if (appDir == "") {
