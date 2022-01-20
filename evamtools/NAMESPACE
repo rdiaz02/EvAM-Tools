@@ -39,6 +39,7 @@ importFrom("igraph", "V", "E", "graph.data.frame"
 importFrom("stats", "aggregate", "chisq.test", "decompose", "na.omit", "rexp",
            "runif", "rnorm", "optim")
 importFrom("plot.matrix", "plot")
+
 import(foreach)   
 import(gtools)
 import(pryr)

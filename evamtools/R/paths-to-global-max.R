@@ -163,7 +163,7 @@ cpm_access_genots_paths_w <- function(x, string = NULL,
         weighted_paths_to_max <- do_weighted_paths_to_max(paths_to_max,
                                                           trans_mat_genots)
         diversity_weighted_paths_to_max <-
-            OncoSimulR:::shannonI(weighted_paths_to_max[, "probability"])
+            evam_shannonI(weighted_paths_to_max[, "probability"])
 
     } else {
         weighted_paths_to_max <- NA

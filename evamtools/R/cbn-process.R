@@ -277,11 +277,11 @@ run.cbn <- function(x,
     ##                                 strictAdjMat = TRUE)
 
 
-    gr <- OncoSimulR:::posetToGraph(poset, names = c("Root", cnames),
+    gr <- evam_posetToGraph(poset, names = c("Root", cnames),
                                     addroot = TRUE, type = "adjmat",
                                     strictAdjMat = FALSE)
     gr <- sortAdjMat(gr)
-    OncoSimulR:::checkProperMinimalAdjMat(gr, orderedNames = FALSE)
+    evam_checkProperMinimalAdjMat(gr, orderedNames = FALSE)
     
     ## gr <- poset.to.graph(poset, names = cnames,
     ##                      addroot = FALSE, type = type.out)
@@ -429,7 +429,7 @@ call.external.cbn <- function(data,
             
             newnames <- c("Root", match(colnames(ot1)[-1], colnames(data)))
             colnames(ot1) <- rownames(ot1) <- newnames
-            write.poset(OncoSimulR:::OTtoPoset(ot1),
+            write.poset(evam_OTtoPoset(ot1),
                         ncol(data), dirname)
         }
     } else if (init.poset == "custom") {
@@ -646,7 +646,7 @@ run.oncotree <- function(x, ## type.out = "adjmat",
     storage.mode(am1) <- "integer"
     stopifnot(isTRUE(all.equal(am, am1)))
     sam1 <- sortAdjMat(am1)
-    OncoSimulR:::checkProperOTAdjMat(sam1)
+    evam_checkProperOTAdjMat(sam1)
     return(sam1)
     ## if(type.out == "adjmat")
     ##     return(sam1)
