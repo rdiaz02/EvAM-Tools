@@ -337,12 +337,12 @@ sample_all_CPMs <- function(cpm_output
     return(output)
 }
 
-evamtools_pipeline <- function(data){
-    n_genes <- ncol(data)
-    cpm_output <- all_methods_2_trans_mat(data) 
-    output <- sample_all_CPMs(cpm_output, 10000, n_genes)
-    return(output)
-}
+# evamtools_pipeline <- function(data){
+#     n_genes <- ncol(data)
+#     cpm_output <- all_methods_2_trans_mat(data) 
+#     output <- sample_all_CPMs(cpm_output, 10000, n_genes)
+#     return(output)
+# }
 
 
 #' @title Count genotypes 
