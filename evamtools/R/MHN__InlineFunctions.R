@@ -1,8 +1,28 @@
+## Files MHN__*.R: MHN__UtilityFunctions.R, MHN__RegularizedOptimization.R,
+## MHN__ModelConstruction.R, MHN__Likelihood.R, MHN__InlineFunctions.R,,
+## MHN__ExampleApplications.R
+
+##   Files obtained from https://github.com/RudiSchill/MHN
+##   Commit 49a8cc0 from 2018-08-16
+##   (we have added the "MHN__" and made minor modifications to conform to usage
+##   within an R package).
+  
+##   License: no license information available in the repository nor the files.
+  
+##   Author of code: from commit history, most likely Rudolf Schill.
+  
+##   Authors of paper/project: Schill, R., Solbrig, S., Wettig, T., & Spang, R.
+  
+##   Paper: Schill, R., Solbrig, S., Wettig, T., & Spang, R. (2020). Modelling
+##   cancer progression using Mutual Hazard Networks. Bioinformatics, 36(1),
+##   241–249. http://dx.doi.org/10.1093/bioinformatics/btz513
+
+
 # TW: inline functions for operations on 2^n-dimensional vectors
 # useful docs: [1] http://adv-r.had.co.nz/C-interface.html
 #              [2] https://github.com/cjgeyer/mat
 
-require("inline")
+## require("inline")
 
 #--------------------------------------------------------------------------------
 

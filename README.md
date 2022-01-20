@@ -1,5 +1,47 @@
 # License and copyright
 
+
+
+FIXME: add this as file COPYRIGHTS under /inst
+# Copyright and origin of files under evamtools/R
+
+- All files under evamtools/R are copyright Pablo Herrera Nieto and Ramon Diaz-Uriarte, except for the following:
+
+- File HESBCN__import.hesbcn.R: 
+   This file contains function import.hesbcn.
+   
+   Code from https://github.com/BIMIB-DISCo/PMCE/blob/main/Utilities/R/utils.R
+   Commit 5578c79 from 2021-09-29
+
+   License: Apache License 2.0, which is compatible with the GPL 3 used by the rest of this project.
+   
+   Author of code: from commit history, most likely Daniele Ramazzotti (danro9685)
+
+   Authors of project: F. Angaroni, K. Chen, C. Damiani, G. Caravagna, A. Graudenzi, D. Ramazotti.
+   
+  Paper:  Angaroni, F., Chen, K., Damiani, C., Caravagna, G., Graudenzi, A., &
+  Ramazzotti, D. (2021). PMCE: efficient inference of expressive models of cancer
+  evolution with high prognostic power. Bioinformatics, 38(3): 754-762. http://dx.doi.org/10.1093/bioinformatics/btab717
+
+
+
+- Files MHN__*.R: MHN__UtilityFunctions.R, MHN__RegularizedOptimization.R, MHN__ModelConstruction.R, MHN__Likelihood.R, MHN__InlineFunctions.R,,  MHN__ExampleApplications.R
+
+  Files obtained from https://github.com/RudiSchill/MHN
+  Commit 49a8cc0 from 2018-08-16
+  (we have added the "MHN__" and made minor modifications to conform to usage within an R package).
+  
+  License: no license information available in the repository nor the files.
+  
+  Author of code: from commit history, most likely Rudolf Schill.
+  
+  Authors of paper/project: Schill, R., Solbrig, S., Wettig, T., & Spang, R.
+  
+  Paper: Schill, R., Solbrig, S., Wettig, T., & Spang, R. (2020). Modelling cancer progression using Mutual Hazard Networks. Bioinformatics, 36(1),  241–249. http://dx.doi.org/10.1093/bioinformatics/btz513
+
+- This information is also provided under evamtools/inst/COPYRIGHTS and in the header of the files themselves, as comments.
+  
+
 # FIXME: need to update this file
 
 - Add a file of copyrights (e.g., like in
