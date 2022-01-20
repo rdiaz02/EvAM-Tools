@@ -3,13 +3,21 @@ Type: Package
 Title: Implimentation of CPM and related tools to test their performance
 Version: 0.0.0.9015
 Date: 2021-06-24 15:15:45
-Authors@R: c(person("Herrera-Nieto", "Pablo", email = "pablo.h.nieto@gmail.com", role = "aut"), 
-            person("Ramón", "Díaz Uriarte", email = "r.diaz@uam.es", role = c("cre", "aut")))
+Authors@R: c(person("Herrera-Nieto", "Pablo",
+	   email = "pablo.h.nieto@gmail.com", role = "aut"), 
+            person("Ramon", "Diaz-Uriarte",
+	    email = "r.diaz@uam.es", role = c("cre", "aut")),
+	    person("Daniele", "Ramazzotti", role = "ctb",
+	    comment = "import.hesbcn"),
+	    person("Rudolf", "Schill", role = "ctb",
+	    comment = "MHN"))
 Author: Ramon Diaz-Uriarte [aut, cre]
         Pablo Herrera-Nieto [aut]
-Maintainer: Ramón Díaz Uriarte <r.diaz@uam.es>
+	Daniele Ramazzotti [ctb],
+	Rudolf Schill [ctb]
+Maintainer: Ramon Diaz-Uriarte <r.diaz@uam.es>
 Description: Wrapper to run cancer progression models (CPMs) on
-    cross-sectinal data, to make finite sample using transition rate matrices,
+    cross-sectinal data, to obtain finite samples using transition rate matrices,
     and to compare the results of the different methods.
 URL: https://github.com/rdiaz02/EvAM-Tools
 BugReports: https://github.com/rdiaz02/EvAM-Tools/issues
@@ -21,4 +29,5 @@ RoxygenNote: 7.1.1
 Imports: dplyr, igraph, OncoSimulR, stringr, Matrix, OncoBN, parallel, Oncotree
     , Rgraphviz, codetools, data.table, gtools
     , plot.matrix, pryr, readr, DT, shinyjs
+    , inline
 Suggests: mccbn, testthat (>= 3.0.0)
