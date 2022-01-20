@@ -18,7 +18,7 @@ License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
-Imports: TRONCO, dplyr, igraph, OncoSimulR, stringr, Matrix, OncoBN, parallel, Oncotree
+Imports: dplyr, igraph, OncoSimulR, stringr, Matrix, OncoBN, parallel, Oncotree
     , Rgraphviz, codetools, data.table, foreach, gtools
     , plot.matrix, pryr, readr, DT, shinyjs
 Suggests: 

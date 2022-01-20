@@ -1,5 +1,8 @@
 ## Copyright 2016, 2017, 2018, 2022 Ramon Diaz-Uriarte
 
+## Not using this for anything 
+if (FALSE) {
+
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
 ## the Free Software Foundation, either version 3 of the License, or
@@ -610,3 +613,4 @@ capri_proc <- function(genotData = NULL, nboot = 100,
 ##                     res = otout))
 ##     }
 ## }
+}
