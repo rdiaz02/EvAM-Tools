@@ -23,12 +23,13 @@ importFrom("stringr", "str_count", "str_replace", "str_split", "str_replace_all"
 importFrom("parallel", "detectCores", "mclapply")
 importFrom("OncoBN", "fitCPN")
 
+importFrom("gtools", "combinations", "permute")
+
 import(Oncotree)    
 import(igraph)
 import(plot.matrix)
 import(codetools)
 import(foreach)
-import(gtools)
 import(pryr)
 import(readr)
 import(dplyr)
