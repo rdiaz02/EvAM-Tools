@@ -2,7 +2,8 @@
 test_that("DBN gives the same results as OncoSimul", {
 
     compare_DBN_cpm2tm <- function(codename) {
-        out <- readRDS(sprintf("../../data/toy_outputs_cpms/%s.rds", codename))
+        ## FIXME: don't do this. 
+        out <- readRDS(sprintf("../data/toy_outputs_cpms/%s.rds", codename))
         out_onco <- cpm2tm(out$DBN_model)
 
         order1 <- sort(rownames(out$DBN_trans_mat), index.return = TRUE)$ix
@@ -14,9 +15,12 @@ test_that("DBN gives the same results as OncoSimul", {
         expect_equal(ordered_computed_trm, ordered_trm_onco)
     }
 
-
-    source("../../data/toy_datasets.R")
+    ## FIXME: don't do this. 
+    source("../data/toy_datasets.R")
     for (i in names(all_examples_csd_2[["csd"]])[2:11]) {
         compare_methods <- compare_DBN_cpm2tm(i)
     }
 })
+
+
+

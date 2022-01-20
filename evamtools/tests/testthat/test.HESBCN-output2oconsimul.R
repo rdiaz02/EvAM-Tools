@@ -1,6 +1,7 @@
 test_that("HESBCN gives the same results as OncoSimul", {
 
     compare_HESBCN_cpm2tm <- function(codename) {
+        ## FIXME: don't do this. 
         out <- readRDS(sprintf("../../data/toy_outputs_cpms/%s.rds", codename))
         out$HESBCN_model$Relation <- sapply(
             out$HESBCN_model$To,
@@ -17,8 +18,8 @@ test_that("HESBCN gives the same results as OncoSimul", {
         expect_equal(ordered_computed_trm, ordered_trm_onco)
     }
 
-
-    source("../../data/toy_datasets.R")
+    ## FIXME: don't do this. 
+    source("../data/toy_datasets.R")
     for (i in names(all_examples_csd_2[["csd"]])[2:11]) {
         compare_methods <- compare_HESBCN_cpm2tm(i)
     }
