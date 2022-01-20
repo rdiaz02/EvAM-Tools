@@ -177,7 +177,7 @@ population_sample_from_trm <- function(trm, n_samples = 10,
 #' 
 #' @description Generate trajectories from data simulated from a given model.
 #' 
-#' @param sim list generated with mccbn::sample_genotypes. Relevant
+#' @param sim list generated with population_sample_from_trm. Relevant
 #' fields are described below
 #' $T_sum_events time of events for the mutations of each gene
 #' $obs_events data.frame with mutated before the end of the sampling time
