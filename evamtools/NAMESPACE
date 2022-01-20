@@ -25,7 +25,7 @@ importFrom("graphics", "axis", "legend", "lines", "par")
 
 importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert",
            "write.csv")
-importFrom("Matrix", "diag", "rowSums", "colSums", "summary",
+importFrom("Matrix", "diag", "rowSums", "colSums", "summary", "Matrix",
            "sparseMatrix")
 importFrom("OncoSimulR", "sampledGenotypes", "evalAllGenotypes",
            "allFitnessEffects")
@@ -54,6 +54,8 @@ importFrom("plot.matrix", "fmt")
 
 ## import(foreach)   
 ## import(gtools)
+
+importFrom("inline", "cfunction")
 import(pryr)
 import(readr)
 import(dplyr)
