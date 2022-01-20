@@ -14,12 +14,6 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-## We are using inferTheta from OncoBN, and that is not exported
-## https://stackoverflow.com/a/46098814
-evam_inferTheta <- utils::getFromNamespace("inferTheta", "OncoBN")
-
-
-
 #' Run DBN on data
 #' 
 #' @param data data.frame with cross sectional data

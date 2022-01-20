@@ -21,7 +21,7 @@
 ## Use OncoSimulR to obtain accessible genotypes and transition matrices between
 ## genotypes for CBN, OT, PMCE and DBN.
 
-## See comments and examples in ../OncoSimul-for-accessible-and-more-on-PMCE.org 
+## See comments and examples in ../OncoSimul-for-accessible-and-more-on-PMCE.org
 
 
 ## Additionally, since we compute and output fitness, can be used for simulations
@@ -45,6 +45,7 @@
 
 
 ## TODO lots of things could be removed from this file
+
 
 ## fitness, target max fitness. WT fitness always 1.
 scale_fitness_2 <- function(x, max_f) {
@@ -229,8 +230,10 @@ cpm_to_trans_mat_oncosimul <- function(x, max_f = NULL, sh = -Inf,
     ## Using wrap_accessibleGenotypes likely to be faster
     ## and this will only give truly accessible from WT, except
     ## for the borderline cases of equal fitness ancestor-descendant
-    fitness_mat <- OncoSimulR:::allGenotypes_to_matrix(fitness_all)
-    access_genots <- OncoSimulR:::wrap_accessibleGenotypes(fitness_mat, th = 0)
+    
+    fitness_mat <- evam_allGenotypes_to_matrix(fitness_all)
+    access_genots <- evam_wrap_accessibleGenotypes(fitness_mat, th = 0)
+    
     access_genots_fitness <- fitness_all[access_genots, "Fitness"]
     names(access_genots_fitness) <- fitness_all[access_genots, "Genotype"]
 
