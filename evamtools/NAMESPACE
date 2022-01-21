@@ -1,4 +1,5 @@
-useDynLib(evamtools, "C_kronvec", "C_grad_loop_j")
+useDynLib(evamtools, .registration = TRUE)
+
 
 ## Probably do not export most of these
 export(
