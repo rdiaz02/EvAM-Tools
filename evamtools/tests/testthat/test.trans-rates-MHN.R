@@ -763,18 +763,10 @@ test_that("we are using the indices of theta correctly 4", {
     ## }
 })
 
-
-
-
-## Tests with Schill's data
-## this is from evamtools/R
-## path_to_Schill_data <- "../inst/miscell/MHN_data/"
-## FIXME: this will not work. 
-path_to_Schill_data <- "../inst/miscell/MHN_data/"
-
-test_that("Working with breast cancer: identical results from different algos", {
-    Dat <- readRDS(file = paste0(path_to_Schill_data, "BreastCancer.rds"))
-
+test_that("Identical results from different algos", {
+    data(every_which_way_data)
+    Dat <- every_which_way_data[[2]]
+    
     pD <- Data.to.pD(Dat)
     Theta.BC <- Learn.MHN(pD, lambda = 0.01)
 
@@ -815,47 +807,18 @@ test_that("Working with breast cancer: identical results from different algos", 
 })
 
 
-## From Schill's ExampleApplications.R
-## additional tests and example calls
+## ## From Schill's ExampleApplications.R
+## ## additional tests and example calls
   
 
-test_that("do_MHN and do_MHN2 identical in Schill's data", {
-    DatBS <- readRDS(file = paste0(path_to_Schill_data,
-                                   "BreastCancer.rds")) [1:50, 1:4]
-    DatCC <- readRDS(file = paste0(path_to_Schill_data,
-                                   "ColorectalCancer.rds"))[1:300, 1:9]
-    DatRCC <- readRDS(file = paste0(path_to_Schill_data,
-                                    "RenalCellCarcinoma.rds"))[, 1:9]
+test_that("do_MHN and do_MHN2 identical in various data sets", {
 
-    datasets <- list(DatBS, DatCC, DatRCC)
-    datasets <- sapply(datasets, function(data) {
-        colnames(data) <- LETTERS[1:ncol(data)]
-        data <- as.matrix(data)
-        return(data)
-    })
+    data(every_which_way_data)
 
-
-    for (data in datasets) {
+    for (data in every_which_way_data[c(4, 6, 22)]) {        
         mhn0 <- do_MHN(data)
         mhnSM <- do_MHN2(data)
 
-        expect_identical(mhn0$theta, mhnSM$theta)
-        expect_identical(mhn0$transitionRateMatrix,
-                         as.matrix(mhnSM$transitionRateMatrix))
-        expect_equal(mhn0$transitionMatrixTimeDiscretized,
-                     as.matrix(mhnSM$transitionMatrixTimeDiscretized))
-        expect_equal(mhn0$transitionMatrixCompExp,
-                     as.matrix(mhnSM$transitionMatrixCompExp))
-    }
-
-
-    Dat11 <- readRDS(file = paste0(path_to_Schill_data, "Glioblastoma.rds"))
-
-    for (i in 1:10) {
-        Dat1 <- Dat11[, sample(1:ncol(Dat11), 6)]
-        Dat1 <- as.matrix(Dat1)
-        mhn0 <- do_MHN(Dat1)
-        mhnSM <- do_MHN2(Dat1)
         expect_identical(mhn0$theta, mhnSM$theta)
         expect_identical(mhn0$transitionRateMatrix,
                          as.matrix(mhnSM$transitionRateMatrix))

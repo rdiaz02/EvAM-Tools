@@ -176,7 +176,7 @@ do_HyperTraPS <- function(data = NULL, tmp_folder = NULL,
   genotypes_transition_counts$from <- vapply(genotypes_transition_counts$from, int2str, character(1))
   genotypes_transition_counts$to <- vapply(genotypes_transition_counts$to, int2str, character(1))
   g <- graph_from_data_frame(genotypes_transition_counts)
-  transition_count_matrix <- as_adjacency_matrix(g, attr="weight")
+  transition_count_matrix <- igraph::as_adjacency_matrix(g, attr="weight")
   states <- setdiff(colnames(transition_count_matrix), "WT")
   sorted_states <- c("WT", states[order(vapply(states, nchar, numeric(1)))])
   transition_count_matrix <- transition_count_matrix[sorted_states, sorted_states]
