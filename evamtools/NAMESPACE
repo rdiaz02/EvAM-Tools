@@ -1,3 +1,5 @@
+useDynLib(evamtools, "C_kronvec", "C_grad_loop_j")
+
 ## Probably do not export most of these
 export(
     ## "indiv_sample_from_trm_pre"
