@@ -67,7 +67,7 @@
 
 ## Set it to TRUE if you want to load MCCBN, which requires
 ## having it installed. It then tests the MCCBN functionality too.
-MCCBN_INSTALLED <- TRUE
+MCCBN_INSTALLED <- require(mccbn)
 
 
 
