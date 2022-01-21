@@ -18,7 +18,6 @@ importFrom("OncoSimulR", "sampledGenotypes", "evalAllGenotypes",
 importFrom("stringr", "str_count", "str_replace", "str_split",
            "str_replace_all")
 importFrom("parallel", "detectCores", "mclapply")
-importFrom("OncoBN", "fitCPN")
 importFrom("shinyjs", "enable", "disable")
 importFrom("DT", "renderDT")
 importFrom("Oncotree", "oncotree.fit", "marginal.distr",
@@ -35,3 +34,4 @@ importFrom("stats", "aggregate", "chisq.test", "na.omit", "rexp",
 ## See https://stackoverflow.com/a/59667634
 importFrom("plot.matrix", "fmt")
 
+## importFrom("OncoBN", "fitCPN")

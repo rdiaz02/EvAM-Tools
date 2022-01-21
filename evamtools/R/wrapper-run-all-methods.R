@@ -721,11 +721,10 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
 
     cat("\n  time MHN = ", time_schill)
     
-    cat("\n     Doing DBN\n\n")
-    time_dbn <- system.time(
-      out_dbn <- do_DBN(x))["elapsed"]
-    
-    cat("\n  time DBN = ", time_dbn)
+    ## cat("\n     Doing DBN\n\n")
+    ## time_dbn <- system.time(
+    ##   out_dbn <- do_DBN(x))["elapsed"]
+    ## cat("\n  time DBN = ", time_dbn)
 
     cat("\n     Doing HyperTraps")
     print("By default we run it here with dry_run = TRUE.
@@ -750,17 +749,17 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
         cpm_access_genots_paths_w_simplified)
 
     
-    pre_trans_mat_new_CPMS <- lapply( 
-        list(DBN = out_dbn
-        ),
-        cpm_access_genots_paths_w_simplified_OR)
+    ## pre_trans_mat_new_CPMS <- lapply( 
+    ##     list(DBN = out_dbn
+    ##     ),
+    ##     cpm_access_genots_paths_w_simplified_OR)
     
     pre_trans_mat_HESBCN <- lapply(
         list(HESBCN = out_hesbcn
         ),
         cpm_access_genots_paths_w_simplified_relationships)
 
-    pre_trans_mat_others["DBN"] <- list(pre_trans_mat_new_CPMS$DBN)
+    ## pre_trans_mat_others["DBN"] <- list(pre_trans_mat_new_CPMS$DBN)
     pre_trans_mat_others["HESBCN"] <- list(pre_trans_mat_HESBCN$HESBCN)
     # pre_trans_mat_others["HyperTraPS"] <- list(pre_trans_mat_new_CPMS$HyperTraPS)
     cat("\n    getting transition matrices for all non-mhn methods \n")
@@ -811,10 +810,10 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
         MHN_transitionRateMatrix = out_schill$transitionRateMatrix, 
         MHN_trans_mat = out_schill$transitionMatrixCompExp,
         MHN_td_trans_mat = out_schill$transitionMatrixTimeDiscretized,
-        DBN_model = out_dbn$edges,
-        DBN_likelihood = out_dbn$likelihood,
-        DBN_f_graph = pre_trans_mat_new_CPMS$DBN$weighted_fgraph,
-        DBN_trans_mat = pre_trans_mat_new_CPMS$DBN$trans_mat_genots,
+        ## DBN_model = out_dbn$edges,
+        ## DBN_likelihood = out_dbn$likelihood,
+        ## DBN_f_graph = pre_trans_mat_new_CPMS$DBN$weighted_fgraph,
+        ## DBN_trans_mat = pre_trans_mat_new_CPMS$DBN$trans_mat_genots,
         ## DBN_td_trans_mat = td$DBN, ## FIXME: I think this does not make sense
         HESBCN_model = out_hesbcn$edges,
         HESBCN_parent_set = out_hesbcn$parent_set,
