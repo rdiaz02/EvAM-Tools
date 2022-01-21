@@ -63,7 +63,7 @@ test_that("OT and CBN: algorithm consistency with various data examples", {
 
     data(every_which_way_data)
 
-    Dat1 <- every_which_way_data[[2]][1:50, 1:6]
+    Dat1 <- every_which_way_data[[2]][1:50, 1:4]
     test_others(Dat1)
 
     Dat1 <- every_which_way_data[[4]][1:50, 1:5]
@@ -72,7 +72,7 @@ test_that("OT and CBN: algorithm consistency with various data examples", {
     Dat1 <- every_which_way_data[[20]][1:50, 1:5]
     test_others(Dat1)
 
-    Dat1 <- every_which_way_data[[17]][1:50, 1:6]
+    Dat1 <- every_which_way_data[[16]][1:40, 2:6]
     test_others(Dat1)
 
     rm(Dat1)

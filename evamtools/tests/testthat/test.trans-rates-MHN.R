@@ -814,7 +814,8 @@ test_that("Identical results from different algos", {
 test_that("do_MHN and do_MHN2 identical in various data sets", {
 
     data(every_which_way_data)
-    for (data in every_which_way_data[c(4, 6, 22, 20, 18)]) {
+
+    for (data in every_which_way_data[c(4, 6, 22)]) {        
         mhn0 <- do_MHN(data)
         mhnSM <- do_MHN2(data)
 
