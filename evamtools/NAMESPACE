@@ -7,14 +7,14 @@ export(
     ##  , "population_sample_from_trm"
      "process_samples"
      , "sample_all_CPMs"
-     , "all_methods_2_trans_mat"
-     ## , "do_DBN"
-     ## , "do_HESBCN"
-     ## , "do_MHN2"
+    ## , "all_methods_2_trans_mat"
+    ## , "do_DBN"
+    ## , "do_HESBCN"
+    ## , "do_MHN2"
     ## inconsistent: why not export do_CBN, etc?
     ## , "inner_transitionRate_3_1"
-     ## , "cpm2tm"
-     ## , "theta_to_trans_rate_3_SM"
+    ## , "cpm2tm"
+    ## , "theta_to_trans_rate_3_SM"
      , "process_data"
      , "plot_sampled_genots"
      , "plot_genot_fg"
@@ -53,14 +53,15 @@ importFrom("stats", "aggregate", "chisq.test", "na.omit", "rexp",
 ## just something, so plot.matrix is available
 ## See https://stackoverflow.com/a/59667634
 importFrom("plot.matrix", "fmt")
-## importFrom("plot.matrix", "plot.matrix")
+
 
 ## import(foreach)   
 ## import(gtools)
 
-importFrom("inline", "cfunction")
+## importFrom("inline", "cfunction")
 import(pryr)
 import(readr)
+## FIXME: import only what is needed from dplyr
 import(dplyr)
 import(Rgraphviz)
 import(data.table)

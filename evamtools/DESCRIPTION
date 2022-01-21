@@ -29,5 +29,4 @@ RoxygenNote: 7.1.1
 Imports: dplyr, igraph, OncoSimulR, stringr, Matrix, OncoBN, parallel, Oncotree
     , Rgraphviz, codetools, data.table, gtools
     , plot.matrix, pryr, readr, DT, shinyjs
-    , inline
 Suggests: mccbn, testthat (>= 3.0.0)
