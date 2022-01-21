@@ -1,32 +1,14 @@
 useDynLib(evamtools, .registration = TRUE)
 
-
-## Probably do not export most of these
 export(
-    ## "indiv_sample_from_trm_pre"
-    ##  , "population_sample_from_trm"
-     # "process_samples"
-     # , 
      "sample_all_CPMs"
-    , "all_methods_2_trans_mat"
-    ## , "do_DBN"
-    ## , "do_HESBCN"
-    ## , "do_MHN2"
-    ## inconsistent: why not export do_CBN, etc?
-    ## , "inner_transitionRate_3_1"
-    ## , "cpm2tm"
-    ## , "theta_to_trans_rate_3_SM"
-     # , "process_data"
-     # , "plot_sampled_genots"
-     # , "plot_genot_fg"
      , "plot_CPMs"
      , "runShiny"
-     # , "generate_sorted_genotypes"
      )
 
+importFrom("shiny", "runApp", "Progress")
 importFrom("grDevices", "rgb")
 importFrom("graphics", "axis", "legend", "lines", "par", "title")
-
 importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert",
            "write.csv")
 importFrom("Matrix", "diag", "rowSums", "colSums", "summary", "Matrix",
@@ -37,33 +19,19 @@ importFrom("stringr", "str_count", "str_replace", "str_split",
            "str_replace_all")
 importFrom("parallel", "detectCores", "mclapply")
 importFrom("OncoBN", "fitCPN")
-## FIXME: I do not see transitive_reduction anywhere in the code
-## Without these mccbn wont work
-## FIXME: but mccbn has that in its "Depends", so mccbn will load it
-## when it is loaded or imported
-## importFrom("relations", "as.relation", "transitive_reduction", "relation_incidence")
 importFrom("shinyjs", "enable", "disable")
 importFrom("DT", "renderDT")
 importFrom("Oncotree", "oncotree.fit", "marginal.distr",
            "distribution.oncotree", "bootstrap.oncotree")    
-importFrom("codetools", "checkUsageEnv")
 importFrom("gtools", "combinations")
 importFrom("igraph", "V", "E", "graph.data.frame", "layout.reingold.tilford"
-     , "get.adjacency", "all_simple_paths", "decompose", "is_dag", "distances"
-     , "subcomponent", "adjacent_vertices", "graph_from_adjacency_matrix"
-     , "graph_from_data_frame", "head_of", "as_adjacency_matrix",
-       "make_directed_graph", "incident", "ends")
+         , "get.adjacency", "all_simple_paths", "decompose", "is_dag", "distances"
+         , "subcomponent", "adjacent_vertices", "graph_from_adjacency_matrix"
+         , "graph_from_data_frame", "head_of", "as_adjacency_matrix",
+           "make_directed_graph", "incident", "ends")
 importFrom("stats", "aggregate", "chisq.test", "na.omit", "rexp",
            "runif", "rnorm", "optim")
 ## just something, so plot.matrix is available
 ## See https://stackoverflow.com/a/59667634
 importFrom("plot.matrix", "fmt")
 
-## FIXME what do we need foreach for? mccbn. Again, mccbn will import it.
-## import(foreach)   
-import(pryr)
-import(readr)
-## FIXME: import only what is needed from dplyr
-import(dplyr)
-import(Rgraphviz)
-# import(data.table)

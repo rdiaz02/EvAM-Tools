@@ -26,7 +26,8 @@ License: GPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.1.1
-Imports: dplyr, igraph, OncoSimulR, stringr, Matrix, OncoBN, parallel, Oncotree
-    , Rgraphviz, codetools, data.table, gtools
-    , plot.matrix, pryr, readr, DT, shinyjs
+Imports: igraph, OncoSimulR, stringr, Matrix, OncoBN, parallel, Oncotree
+    , gtools
+    , plot.matrix
+    , DT, shinyjs, shiny
 Suggests: mccbn, testthat (>= 3.0.0)
