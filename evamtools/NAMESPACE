@@ -39,7 +39,9 @@ importFrom("parallel", "detectCores", "mclapply")
 importFrom("OncoBN", "fitCPN")
 ## FIXME: I do not see transitive_reduction anywhere in the code
 ## Without these mccbn wont work
-importFrom("relations", "as.relation", "transitive_reduction", "relation_incidence")
+## FIXME: but mccbn has that in its "Depends", so mccbn will load it
+## when it is loaded or imported
+## importFrom("relations", "as.relation", "transitive_reduction", "relation_incidence")
 importFrom("shinyjs", "enable", "disable")
 importFrom("DT", "renderDT")
 importFrom("Oncotree", "oncotree.fit", "marginal.distr",
@@ -56,9 +58,8 @@ importFrom("stats", "aggregate", "chisq.test", "na.omit", "rexp",
 ## See https://stackoverflow.com/a/59667634
 importFrom("plot.matrix", "fmt")
 
-
-import(foreach)   
-## importFrom("inline", "cfunction")
+## FIXME what do we need foreach for? mccbn. Again, mccbn will import it.
+## import(foreach)   
 import(pryr)
 import(readr)
 ## FIXME: import only what is needed from dplyr
