@@ -763,105 +763,67 @@ test_that("we are using the indices of theta correctly 4", {
     ## }
 })
 
+test_that("Identical results from different algos", {
+    data(every_which_way_data)
+    Dat <- every_which_way_data[[2]]
+    
+    pD <- Data.to.pD(Dat)
+    Theta.BC <- Learn.MHN(pD, lambda = 0.01)
 
-## ## FIXME: have this run again, with new data
+    colnames(Theta.BC) <- colnames(Dat)
+    rownames(Theta.BC) <- colnames(Theta.BC)
 
-## ## Tests with Schill's data
-## ## this is from evamtools/R
-## ## path_to_Schill_data <- "../inst/miscell/MHN_data/"
-## ## FIXME: this will not work. 
-## path_to_Schill_data <- "../inst/miscell/MHN_data/"
+    ## smaller:
+    e1 <- Theta.BC[1:4, 1:4]
 
-## test_that("Working with breast cancer: identical results from different algos", {
-##     Dat <- readRDS(file = paste0(path_to_Schill_data, "BreastCancer.rds"))
+    system.time(te1_1 <- theta_to_trans_rate_1(e1))
+    system.time(te1_2 <- theta_to_trans_rate(e1))
+    system.time(te1_3 <- theta_to_trans_rate_3(e1))
 
-##     pD <- Data.to.pD(Dat)
-##     Theta.BC <- Learn.MHN(pD, lambda = 0.01)
+    expect_identical(te1_1, te1_2)
+    expect_identical(te1_1, te1_3)
 
-##     colnames(Theta.BC) <- colnames(Dat)
-##     rownames(Theta.BC) <- colnames(Theta.BC)
+    tt31 <- theta_to_trans_rate_3(Theta.BC,
+                                  inner_transition = inner_transitionRate_3_1)
 
-##     ## smaller:
-##     e1 <- Theta.BC[1:4, 1:4]
-
-##     system.time(te1_1 <- theta_to_trans_rate_1(e1))
-##     system.time(te1_2 <- theta_to_trans_rate(e1))
-##     system.time(te1_3 <- theta_to_trans_rate_3(e1))
-
-##     expect_identical(te1_1, te1_2)
-##     expect_identical(te1_1, te1_3)
-
-##     tt31 <- theta_to_trans_rate_3(Theta.BC,
-##                                   inner_transition = inner_transitionRate_3_1)
-
-##     ## slow
-##     system.time(tt1 <- theta_to_trans_rate_1(Theta.BC))
-##     ## these two are very slow
-##     ## system.time(tt2 <- theta_to_trans_rate(Theta.BC))
-##     ## system.time(tt22 <- theta_to_trans_rate(Theta.BC,
-##     ##                                    inner_transition = inner_transitionRate_2))
-##     ## but see this! Culprit was accessing a data frame?
-##     system.time(
-##         tt31 <-
-##             theta_to_trans_rate_3(Theta.BC,
-##                                   inner_transition = inner_transitionRate_3_1))
-##     ## but this is slower by x2. Why? setdiff, I guess
-##     system.time(
-##         tt32 <-
-##             theta_to_trans_rate_3(Theta.BC,
-##                                   inner_transition = inner_transitionRate_3_2))
-##     expect_identical(tt1, tt31)
-##     expect_identical(tt31, tt32)
-## })
+    ## slow
+    system.time(tt1 <- theta_to_trans_rate_1(Theta.BC))
+    ## these two are very slow
+    ## system.time(tt2 <- theta_to_trans_rate(Theta.BC))
+    ## system.time(tt22 <- theta_to_trans_rate(Theta.BC,
+    ##                                    inner_transition = inner_transitionRate_2))
+    ## but see this! Culprit was accessing a data frame?
+    system.time(
+        tt31 <-
+            theta_to_trans_rate_3(Theta.BC,
+                                  inner_transition = inner_transitionRate_3_1))
+    ## but this is slower by x2. Why? setdiff, I guess
+    system.time(
+        tt32 <-
+            theta_to_trans_rate_3(Theta.BC,
+                                  inner_transition = inner_transitionRate_3_2))
+    expect_identical(tt1, tt31)
+    expect_identical(tt31, tt32)
+})
 
 
 ## ## From Schill's ExampleApplications.R
 ## ## additional tests and example calls
   
 
-## test_that("do_MHN and do_MHN2 identical in Schill's data", {
-##     DatBS <- readRDS(file = paste0(path_to_Schill_data,
-##                                    "BreastCancer.rds")) [1:50, 1:4]
-##     DatCC <- readRDS(file = paste0(path_to_Schill_data,
-##                                    "ColorectalCancer.rds"))[1:300, 1:9]
-##     DatRCC <- readRDS(file = paste0(path_to_Schill_data,
-##                                     "RenalCellCarcinoma.rds"))[, 1:9]
+test_that("do_MHN and do_MHN2 identical in various data sets", {
 
-##     datasets <- list(DatBS, DatCC, DatRCC)
-##     datasets <- sapply(datasets, function(data) {
-##         colnames(data) <- LETTERS[1:ncol(data)]
-##         data <- as.matrix(data)
-##         return(data)
-##     })
+    data(every_which_way_data)
+    for (data in every_which_way_data[c(4, 6, 22, 20, 18)]) {
+        mhn0 <- do_MHN(data)
+        mhnSM <- do_MHN2(data)
 
-
-##     for (data in datasets) {
-##         mhn0 <- do_MHN(data)
-##         mhnSM <- do_MHN2(data)
-
-##         expect_identical(mhn0$theta, mhnSM$theta)
-##         expect_identical(mhn0$transitionRateMatrix,
-##                          as.matrix(mhnSM$transitionRateMatrix))
-##         expect_equal(mhn0$transitionMatrixTimeDiscretized,
-##                      as.matrix(mhnSM$transitionMatrixTimeDiscretized))
-##         expect_equal(mhn0$transitionMatrixCompExp,
-##                      as.matrix(mhnSM$transitionMatrixCompExp))
-##     }
-
-
-##     Dat11 <- readRDS(file = paste0(path_to_Schill_data, "Glioblastoma.rds"))
-
-##     for (i in 1:10) {
-##         Dat1 <- Dat11[, sample(1:ncol(Dat11), 6)]
-##         Dat1 <- as.matrix(Dat1)
-##         mhn0 <- do_MHN(Dat1)
-##         mhnSM <- do_MHN2(Dat1)
-##         expect_identical(mhn0$theta, mhnSM$theta)
-##         expect_identical(mhn0$transitionRateMatrix,
-##                          as.matrix(mhnSM$transitionRateMatrix))
-##         expect_equal(mhn0$transitionMatrixTimeDiscretized,
-##                      as.matrix(mhnSM$transitionMatrixTimeDiscretized))
-##         expect_equal(mhn0$transitionMatrixCompExp,
-##                      as.matrix(mhnSM$transitionMatrixCompExp))
-##     }
-## })
+        expect_identical(mhn0$theta, mhnSM$theta)
+        expect_identical(mhn0$transitionRateMatrix,
+                         as.matrix(mhnSM$transitionRateMatrix))
+        expect_equal(mhn0$transitionMatrixTimeDiscretized,
+                     as.matrix(mhnSM$transitionMatrixTimeDiscretized))
+        expect_equal(mhn0$transitionMatrixCompExp,
+                     as.matrix(mhnSM$transitionMatrixCompExp))
+    }
+})

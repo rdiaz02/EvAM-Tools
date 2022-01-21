@@ -1,4 +1,4 @@
-test_that("OT and CBN: algorithm consistency with MHN data examples", {
+test_that("OT and CBN: algorithm consistency with various data examples", {
 
     MCCBN_INSTALLED <- require("mccbn", quietly = TRUE, warn.conflicts = TRUE)
     
@@ -60,27 +60,22 @@ test_that("OT and CBN: algorithm consistency with MHN data examples", {
                                                          method = "competingExponentials")))
         expect_equal(wg2, wg2SM)
     }
-    ## FIXME: have this run again, with new data.
-    ## path_to_Schill_data <- "../../inst/miscell/MHN_data/"
 
-    ## Dat1 <- readRDS(file = paste0(path_to_Schill_data,
-    ##                               "BreastCancer.rds"))[1:50, 1:4]
-    ## test_others(Dat1)
+    data(every_which_way_data)
 
-    ## ## Slow with CBN even with just 6 columns. Use a tiny number of columns
-    ## Dat1 <- readRDS(file = paste0(path_to_Schill_data,
-    ##                               "ColorectalCancer.rds"))[1:40, 4:7]
-    ## test_others(Dat1)
+    Dat1 <- every_which_way_data[[2]][1:50, 1:6]
+    test_others(Dat1)
 
-    ## Dat1 <- readRDS(file = paste0(path_to_Schill_data,
-    ##                               "RenalCellCarcinoma.rds"))[1:30, 2:6]
-    ## test_others(Dat1)
+    Dat1 <- every_which_way_data[[4]][1:50, 1:5]
+    test_others(Dat1)
 
-    ## Dat1 <- readRDS(file = paste0(path_to_Schill_data,
-    ##                               "Glioblastoma.rds"))[1:20, 1:5]
-    ## test_others(Dat1)
+    Dat1 <- every_which_way_data[[20]][1:50, 1:5]
+    test_others(Dat1)
 
-    ## rm(Dat1)
+    Dat1 <- every_which_way_data[[17]][1:50, 1:6]
+    test_others(Dat1)
+
+    rm(Dat1)
 })
 
 
