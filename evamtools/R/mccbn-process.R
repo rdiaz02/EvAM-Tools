@@ -52,6 +52,7 @@
 # library(mccbn)
 
 mccbn_proc <- function(x) {
+    require(mccbn)
     stopifnot(!is.null(colnames(x)))
     fit <- mccbn::learn_network(x)
     mle_index <- which.max(fit$logliks)

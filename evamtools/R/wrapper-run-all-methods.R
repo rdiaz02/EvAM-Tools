@@ -65,12 +65,6 @@
 
 
 
-## Set it to TRUE if you want to load MCCBN, which requires
-## having it installed. It then tests the MCCBN functionality too.
-MCCBN_INSTALLED <- require(mccbn)
-
-
-
 ## given the samples by genes matrix, run OT, CBN, and maybe MCCBN
 ## NOTE: MCCBN allowed to run with arbitrary number of columns
 ot_cbn_methods <- function(x, nboot = 0, 
