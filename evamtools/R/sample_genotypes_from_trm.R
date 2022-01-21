@@ -311,7 +311,9 @@ sample_all_CPMs <- function(cpm_output
             ## The next one is NOT implicitly available.
             ##   see OT_transition_matrices.org
             output[[sprintf("%s_genotype_transitions", method)]] <- NULL
-        } else {
+        }else if (method == "DBN"){
+            ## Do nothing
+        }else {
             if (method == "MHN") {
                 trm <- output$MHN_transitionRateMatrix
             } else {
