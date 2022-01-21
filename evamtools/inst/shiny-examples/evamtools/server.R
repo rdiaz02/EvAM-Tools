@@ -4,7 +4,7 @@
 # library(shinyjs)
 # library(igraph)
 
-source("../../../data/toy_datasets.R")
+# source("../../../data/toy_datasets.R")
 
 default_genes <- 3
 max_genes <- 10
@@ -44,7 +44,7 @@ plot_genotypes_freqs <- function(data){
         , horiz = FALSE
         , panel.first=grid())
     grid(nx = NA, ny = NULL, col='gray', lwd = 2)
-    ## TODO short genotypes
+    ## TODO sort genotypes
 }
 
 plot_dag <- function(dag, parent_set){
@@ -52,17 +52,17 @@ plot_dag <- function(dag, parent_set){
     standard_relationship <- "gray73"
     colors_relationships <- c(standard_relationship, standard_relationship, "cornflowerblue", "coral2")
     names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
-    dag <- graph_from_adjacency_matrix(dag, mode = "directed")
+    dag <- igraph::graph_from_adjacency_matrix(dag, mode = "directed")
     dag <- igraph::decompose(dag)[[1]]
     ## Plotting data
     if(!is.null(parent_set)){
-        for(i in setdiff(names(V(dag)), "WT")){
-            E(dag)[.to(i)]$color <- colors_relationships[parent_set[[i]]]
+        for(i in igraph::E(dag)){
+            igraph::E(dag)[i]$color <- colors_relationships[model_data2plot$parent_set[[igraph::head_of(dag, igraph::E(dag)[i])$name]]]
         }
-    } else E(dag)$color <- standard_relationship
+    } else igraph::E(dag)$color <- standard_relationship
         
     plot(dag
-        , layout = layout.reingold.tilford
+        , layout = igraph::layout.reingold.tilford
         , vertex.size = 30 
         , vertex.label.color = "black"
         , vertex.label.family = "Helvetica"
@@ -125,7 +125,7 @@ get_display_freqs <- function(freqs, n_genes, gene_names){
 
 get_csd <- function(complete_csd){
     if(is.null(complete_csd)) return(NULL)
-    csd <- data.frame(sampledGenotypes(complete_csd))
+    csd <- data.frame(OncoSimulR::sampledGenotypes(complete_csd))
     rownames(csd) <- csd$Genotype
     return(csd)
 }
@@ -137,15 +137,15 @@ available_cpms <- function(data){
 }
 
 get_mhn_data <- function(n_genes, n_samples, gene_names, thetas = NULL){
-    if(is.null(thetas)) thetas <- Random.Theta(n=n_genes)
+    if(is.null(thetas)) thetas <- evamtools:::Random.Theta(n=n_genes)
     rownames(thetas) <- colnames(thetas) <- gene_names
-    samples <- floor(Finite.Sample(Generate.pTh(thetas), n_samples)*n_samples)
-    trm <- theta_to_trans_rate_3_SM(thetas,
-                                    inner_transition = inner_transitionRate_3_1)
+    samples <- floor(evamtools:::Finite.Sample(evamtools:::Generate.pTh(thetas), n_samples)*n_samples)
+    trm <- evamtools:::theta_to_trans_rate_3_SM(thetas,
+                                    inner_transition = evamtools:::inner_transitionRate_3_1)
     state_names <- vapply(1:(ncol(trm)), function(x){
         x <- x - 1
         if(x == 0) state_name <- "WT"
-        else state_name <- paste(gene_names[which(int2binary(x, n_genes) == 1)], collapse = ", ")
+        else state_name <- paste(gene_names[which(evamtools:::int2binary(x, n_genes) == 1)], collapse = ", ")
         return(state_name)
     }, character(1))
     rownames(trm) <- colnames(trm) <- state_names
@@ -160,17 +160,17 @@ plot_model <- function(cpm_output, mod){
     colors_relationships <- c(standard_relationship, standard_relationship, "cornflowerblue", "coral2")
     names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
     
-    model_data2plot <- process_data(cpm_output, mod)
+    model_data2plot <- evamtools:::process_data(cpm_output, mod)
     ## Plotting data
     if(!is.null(model_data2plot$dag_tree)) {
 
         if(!is.null(model_data2plot$parent_set)){
             for(i in names(model_data2plot$parent_set)){
-                E(model_data2plot$dag_tree)[.to(i)]$color <- colors_relationships[model_data2plot$parent_set[[i]]]
+                igraph::E(model_data2plot$dag_tree)[.to(i)]$color <- colors_relationships[model_data2plot$parent_set[[i]]]
             }
-        } else E(model_data2plot$dag_tree)$color <- standard_relationship
+        } else igraph::E(model_data2plot$dag_tree)$color <- standard_relationship
         plot(model_data2plot$dag_tree
-            , layout = layout.reingold.tilford
+            , layout = igraph::layout.reingold.tilford
             , vertex.size = 55 
             , vertex.label.color = "black"
             , vertex.label.family = "Helvetica"
@@ -809,8 +809,8 @@ server <- function(input, output, session) {
             } else{
                 tmp_dag <- data$dag
                 tmp_dag [from_node, input$dag_to] = 1
-                g <- graph_from_adjacency_matrix(tmp_dag, mode = "directed")
-                if(is_dag(g)){
+                g <- igraph::graph_from_adjacency_matrix(tmp_dag, mode = "directed")
+                if(igraph::is_dag(g)){
                     data$dag <- tmp_dag
                 } else {
                     error_message <<- "This relationship breaks the DAG. Revise it."
@@ -899,9 +899,9 @@ server <- function(input, output, session) {
         progress$inc(1/2, detail = "Doing sampling")
         shinyjs::disable("resample_dag")
         tmp_data <- list(edges = dag_data(), parent_set = data$dag_parent_set)
-        trm <- cpm_access_genots_paths_w_simplified_relationships(tmp_data)$weighted_fgraph
-        samples <- population_sample_from_trm(trm, input$dag_samples)
-        process_data <- process_samples(samples, input$gene_number, data$gene_names[1:input$gene_number])
+        trm <- evamtools:::cpm_access_genots_paths_w_simplified_relationships(tmp_data)$weighted_fgraph
+        samples <- evamtools:::population_sample_from_trm(trm, input$dag_samples)
+        process_data <- evamtools:::process_samples(samples, input$gene_number, data$gene_names[1:input$gene_number])
         tmp_csd <- process_data$frequencies
         tmp_csd <- tmp_csd[tmp_csd$Counts > 0, ]
         rownames(tmp_csd) <- tmp_csd$Genotype
@@ -1237,7 +1237,7 @@ server <- function(input, output, session) {
                     output[[sprintf("plot_sims2_%s", mod)]] <- renderPlot({})
                 } else{
                     output[[sprintf("plot_sims2_%s", mod)]] <- renderPlot({
-                        pl <- plot_genot_fg(data2plot 
+                        pl <- evamtools:::plot_genot_fg(data2plot 
                             , all_cpm_out$output[[input$select_cpm]]$csd_data 
                             , all_cpm_out$output[[input$select_cpm]][[sprintf("%s_genotype_%s", mod, "freqs")]] 
                             , freq2label = input$freq2label

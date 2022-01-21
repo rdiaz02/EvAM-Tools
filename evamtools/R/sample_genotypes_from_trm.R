@@ -15,10 +15,10 @@
 
 
 
-#' @title Sample an indivial based on a transition rate matrix
+#' @title Sample an indivial from a transition rate matrix
 #' 
 #' @param trm transition rate matrix
-#' @param T_sampling Time to compute 
+#' @param T_sampling Time at which sampling happens.
 #' @param ngenots Number of genotypes
 #' @param genot_names String array with genotype names
 #' 
@@ -66,7 +66,7 @@ indiv_sample_from_trm <- function(trm, T_sampling, ngenots = NULL,
 
 #' @param trmstd transition rate matrix "standardized",
 #' @param diag diagonal of transition rate matrix, time of sampling of a case/individual
-#' @param T_sampling Time to compute 
+#' @param T_sampling Time at which sampling happens.
 #' @param ngenots Number of genotypes
 #' @param genot_names String array with genotype names
 #' 
@@ -109,7 +109,7 @@ indiv_sample_from_trm_pre <- function(trmstd,
 #' @param trm transition rate matrix, number of samples or times of samples,
 #' @param n_samples Int with the number of samples to be computed
 #' @param T_sampling Time at wich each individual in sample. By default they 
-#' are randomly generated
+#' are randomly generated from an exponential distribution of rate 1.
 #' @param pre_compute whether or not to precompute entries of the trans rate matrix (for speed)
 #' @param cores number of cores (pass 1 is you do not want to parallelize)
 #' 
@@ -311,7 +311,9 @@ sample_all_CPMs <- function(cpm_output
             ## The next one is NOT implicitly available.
             ##   see OT_transition_matrices.org
             output[[sprintf("%s_genotype_transitions", method)]] <- NULL
-        } else {
+        }else if (method == "DBN"){
+            ## Do nothing
+        }else {
             if (method == "MHN") {
                 trm <- output$MHN_transitionRateMatrix
             } else {

@@ -14,7 +14,7 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-source("../External-code/HESBCN/hesbcn-external.R")
+
 
 # Create something similar to cbn-process for checking if the package is installed
 

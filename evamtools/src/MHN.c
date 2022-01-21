@@ -1,14 +1,37 @@
-# TW: inline functions for operations on 2^n-dimensional vectors
-# useful docs: [1] http://adv-r.had.co.nz/C-interface.html
-#              [2] https://github.com/cjgeyer/mat
+ /* Files MHN__*.R: MHN__UtilityFunctions.R, MHN__RegularizedOptimization.R,
+    MHN__ModelConstruction.R, MHN__Likelihood.R, MHN__InlineFunctions.R,,
+    MHN__ExampleApplications.R */
 
-require("inline")
+ /*  Files obtained from https://github.com/RudiSchill/MHN */
+ /*  Commit 49a8cc0 from 2018-08-16 */
 
-#--------------------------------------------------------------------------------
+ /*  We have added the "MHN__" and made minor modifications to conform to usage
+     within an R package. We have moved the inline C code to MHN.c and done the
+     rest of the scaffolding for it to be used from the R package. */
+  
+ /*  License: no license information available in the repository nor the
+     files. */
+  
+ /*  Author of code: from commit history, most likely Rudolf Schill. */
+  
+ /*  Authors of paper/project: Schill, R., Solbrig, S., Wettig, T., & Spang,
+     R. */
+  
+ /*  Paper: Schill, R., Solbrig, S., Wettig, T., & Spang, R. (2020). Modelling
+     cancer progression using Mutual Hazard Networks. Bioinformatics, 36(1),
+     241–249. http://dx.doi.org/10.1093/bioinformatics/btz513 */
 
-# multiplies a Kronecker product with a vector
-code_kronvec <- "
-  #include <R_ext/BLAS.h>
+// For OMP need to use 
+// export PKG_LIBS="-lgomp"
+// export PKG_CFLAGS="-fopenmp"
+
+#include <R.h>
+#include <Rinternals.h>
+#include <R_ext/BLAS.h>
+#include <omp.h>
+
+
+SEXP C_kronvec(SEXP Theta, SEXP i_, SEXP x, SEXP diag_, SEXP transp_) {
   double *ptheta = REAL(Theta);
   int i          = asInteger(i_);
   double *px     = REAL(x);
@@ -77,15 +100,10 @@ code_kronvec <- "
   UNPROTECT(1);
 
   return out;
-"
-kronvec <- cfunction(signature(Theta="numeric", i_="integer", x="numeric", diag_="logical", transp_="logical"),
-                     body=code_kronvec,
-                     language=c("C"))
+}
 
-#--------------------------------------------------------------------------------
-# loop over j in Grad
-code_grad_loop_j <- "
-  #include <R_ext/BLAS.h>
+
+SEXP C_grad_loop_j(SEXP i_, SEXP n_, SEXP r) {
   int i        = asInteger(i_);
   int n        = asInteger(n_);
   double *pr   = REAL(r);
@@ -118,9 +136,4 @@ code_grad_loop_j <- "
   free(ptmp);
 
   return G;
-"
-grad_loop_j <- cfunction(signature(i_="integer", n_="integer", r="numeric"),
-                         body=code_grad_loop_j,
-                         language=c("C"),
-                         cppargs=c("-fopenmp -ftree-vectorize"))
-
+}

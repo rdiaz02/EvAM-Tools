@@ -4,12 +4,15 @@
 ## License: Apache License 2.0, which is compatible with the GPL 3 used by
 ## the rest of this project.
 
-## Author of code: from commit history, most likely D. Ramazotti (danro9685)
+## Author of code: from commit history, most likely Daniele Ramazzotti (danro9685)
 
 ## Authors of project: F. Angaroni, K. Chen, C. Damiani, G. Caravagna,
 ## A. Graudenzi, D. Ramazotti
 
-
+## Paper: Angaroni, F., Chen, K., Damiani, C., Caravagna, G., Graudenzi, A., &
+##   Ramazzotti, D. (2021). PMCE: efficient inference of expressive models of
+##   cancer evolution with high prognostic power. Bioinformatics, 38(3):
+##   754-762. http://dx.doi.org/10.1093/bioinformatics/btab717
 
 "import.hesbcn" <- function( file, genes = NULL ) {
 
