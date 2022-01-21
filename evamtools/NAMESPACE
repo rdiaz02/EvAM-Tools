@@ -5,9 +5,10 @@ useDynLib(evamtools, .registration = TRUE)
 export(
     ## "indiv_sample_from_trm_pre"
     ##  , "population_sample_from_trm"
-     "process_samples"
-     , "sample_all_CPMs"
-    ## , "all_methods_2_trans_mat"
+     # "process_samples"
+     # , 
+     "sample_all_CPMs"
+    , "all_methods_2_trans_mat"
     ## , "do_DBN"
     ## , "do_HESBCN"
     ## , "do_MHN2"
@@ -15,12 +16,12 @@ export(
     ## , "inner_transitionRate_3_1"
     ## , "cpm2tm"
     ## , "theta_to_trans_rate_3_SM"
-     , "process_data"
-     , "plot_sampled_genots"
-     , "plot_genot_fg"
-     , "plot_DAG_fg"
+     # , "process_data"
+     # , "plot_sampled_genots"
+     # , "plot_genot_fg"
+     , "plot_CPMs"
      , "runShiny"
-     , "generate_sorted_genotypes"
+     # , "generate_sorted_genotypes"
      )
 
 importFrom("grDevices", "rgb")
@@ -37,17 +38,18 @@ importFrom("stringr", "str_count", "str_replace", "str_split",
 importFrom("parallel", "detectCores", "mclapply")
 importFrom("OncoBN", "fitCPN")
 ## FIXME: I do not see transitive_reduction anywhere in the code
-## importFrom("relations", "as.relation", "transitive_reduction")
+## Without these mccbn wont work
+importFrom("relations", "as.relation", "transitive_reduction", "relation_incidence")
 importFrom("shinyjs", "enable", "disable")
 importFrom("DT", "renderDT")
 importFrom("Oncotree", "oncotree.fit", "marginal.distr",
            "distribution.oncotree", "bootstrap.oncotree")    
 importFrom("codetools", "checkUsageEnv")
 importFrom("gtools", "combinations")
-importFrom("igraph", "V", "E", "graph.data.frame"
-     , "get.adjacency", "all_simple_paths", "decompose"
+importFrom("igraph", "V", "E", "graph.data.frame", "layout.reingold.tilford"
+     , "get.adjacency", "all_simple_paths", "decompose", "is_dag", "distances"
      , "subcomponent", "adjacent_vertices", "graph_from_adjacency_matrix"
-     , "graph_from_data_frame")
+     , "graph_from_data_frame", "head_of")
 importFrom("stats", "aggregate", "chisq.test", "na.omit", "rexp",
            "runif", "rnorm", "optim")
 ## just something, so plot.matrix is available
@@ -55,9 +57,7 @@ importFrom("stats", "aggregate", "chisq.test", "na.omit", "rexp",
 importFrom("plot.matrix", "fmt")
 
 
-## import(foreach)   
-## import(gtools)
-
+import(foreach)   
 ## importFrom("inline", "cfunction")
 import(pryr)
 import(readr)
