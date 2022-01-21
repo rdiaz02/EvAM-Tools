@@ -25,12 +25,12 @@ export(
      )
 
 importFrom("grDevices", "rgb")
-importFrom("graphics", "axis", "legend", "lines", "par")
+importFrom("graphics", "axis", "legend", "lines", "par", "title")
 
 importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert",
            "write.csv")
 importFrom("Matrix", "diag", "rowSums", "colSums", "summary", "Matrix",
-           "sparseMatrix")
+           "sparseMatrix", "bandSparse")
 importFrom("OncoSimulR", "sampledGenotypes", "evalAllGenotypes",
            "allFitnessEffects")
 importFrom("stringr", "str_count", "str_replace", "str_split",
@@ -51,7 +51,8 @@ importFrom("gtools", "combinations")
 importFrom("igraph", "V", "E", "graph.data.frame", "layout.reingold.tilford"
      , "get.adjacency", "all_simple_paths", "decompose", "is_dag", "distances"
      , "subcomponent", "adjacent_vertices", "graph_from_adjacency_matrix"
-     , "graph_from_data_frame", "head_of")
+     , "graph_from_data_frame", "head_of", "as_adjacency_matrix",
+       "make_directed_graph", "incident", "ends")
 importFrom("stats", "aggregate", "chisq.test", "na.omit", "rexp",
            "runif", "rnorm", "optim")
 ## just something, so plot.matrix is available
@@ -65,4 +66,4 @@ import(readr)
 ## FIXME: import only what is needed from dplyr
 import(dplyr)
 import(Rgraphviz)
-import(data.table)
+# import(data.table)

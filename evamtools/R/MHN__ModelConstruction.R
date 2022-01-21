@@ -58,7 +58,7 @@ Build.Q <- function(Theta){
     Subdiags <- cbind(Subdiags, Q.Subdiag(Theta, i))
   }
   
-  Q <- bandSparse(2^n, k = -2^(0 : (n-1)), diagonals=Subdiags)
+  Q <- Matrix::bandSparse(2^n, k = -2^(0 : (n-1)), diagonals=Subdiags)
   diag(Q) <- -colSums(Q)
   
   return(Q)
