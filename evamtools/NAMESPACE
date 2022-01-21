@@ -1,7 +1,8 @@
 useDynLib(evamtools, .registration = TRUE)
 
 export(
-     "sample_all_CPMs"
+    "sample_all_CPMs"
+    , "all_methods_2_trans_mat"
      , "plot_CPMs"
      , "runShiny"
      )
@@ -34,4 +35,9 @@ importFrom("stats", "aggregate", "chisq.test", "na.omit", "rexp",
 ## See https://stackoverflow.com/a/59667634
 importFrom("plot.matrix", "fmt")
 
+## Because mccbn has a Depends, instead of proper imports.
+## ## But does not work either
+## importFrom("relations",
+##            "as.relation", "transitive_reduction",
+##            "relation_incidence")
 ## importFrom("OncoBN", "fitCPN")

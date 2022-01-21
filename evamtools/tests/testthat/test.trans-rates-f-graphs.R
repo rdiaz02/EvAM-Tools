@@ -1,11 +1,10 @@
 test_that("OT and CBN: algorithm consistency with various data examples", {
-
-    MCCBN_INSTALLED <- require("mccbn", quietly = TRUE, warn.conflicts = TRUE)
     
     ## Check OT, CBN, MCCBN if installed
     ## for consistency of different algorithms 
     test_others <- function(data) {
-        data <- as.matrix(data)
+        ## MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
+        MCCBN_INSTALLED <- FALSE
         data <- df_2_mat_integer(data)
         cpm_out_others2 <- ot_cbn_methods(data, do_MCCBN = MCCBN_INSTALLED)
         
