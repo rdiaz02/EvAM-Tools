@@ -25,3 +25,4 @@
 ##         compare_methods <- compare_HESBCN_cpm2tm(i)
 ##     }
 ## })
+## cat("\n Done test.HESBCN-output2oconsimul.R \n")

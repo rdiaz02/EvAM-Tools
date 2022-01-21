@@ -767,3 +767,5 @@ NA, NA, NA), OT_edgeWeight = c(0.525915054637741, 0.101508072999909,
   rm(mm, mm0, mmSM)
   rm(cpm_out_others1)
  })
+
+cat("\n Done test.trans-rates-f-graphs.R \n")

@@ -21,6 +21,6 @@
 ##         compare_methods <- compare_DBN_cpm2tm(i)
 ##     }
 ## })
-
+## cat("\n Done test.DBN-output2oncosimul.R \n")
 
 

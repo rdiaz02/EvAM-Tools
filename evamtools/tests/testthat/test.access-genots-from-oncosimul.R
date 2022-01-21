@@ -432,3 +432,4 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     ## cpm2tm(ex_cbn_out2, max_f = NULL)$lambdas
     ## cpm2tm(ex_cbn_out2, 1.01, 8)$lambdas
 })
+cat("\n Done test.access-genots-from-oncosimul.R \n")
