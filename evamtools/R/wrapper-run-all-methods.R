@@ -75,8 +75,6 @@ ot_cbn_methods <- function(x, nboot = 0,
                         cores_cbn = 1,
                         do_MCCBN = FALSE) { 
     
-    
-
     cat("\n     Doing OT")
     if(ncol(x) >= 2) {
         time_ot <- system.time(
@@ -692,7 +690,10 @@ transition_fg_sparseM <- function(x, weights) {
 #' out <- all_methods_2_trans_mat(dB_c1, do_MCCBN = FALSE)
 all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
                                     max.cols = 15) {
-     
+
+    if(do_MCCBN && !require(mccbn, quietly = TRUE))
+        stop("MC-CBN (mccbn) no installed")
+    
     x <- df_2_mat_integer(x)
     xoriginal <- x
     
