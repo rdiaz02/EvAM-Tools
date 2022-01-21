@@ -52,7 +52,7 @@
 # library(mccbn)
 
 mccbn_proc <- function(x) {
-    if (!require(mccbn, quietly = TRUE))
+    if (!requireNamespace("mccbn", quietly = TRUE))
         stop("MC-CBN (mccbn) no installed")
     
     stopifnot(!is.null(colnames(x)))

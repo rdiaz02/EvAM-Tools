@@ -691,7 +691,7 @@ transition_fg_sparseM <- function(x, weights) {
 all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
                                     max.cols = 15) {
 
-    if(do_MCCBN && !require(mccbn, quietly = TRUE))
+    if(do_MCCBN && !requireNamespace("mccbn", quietly = TRUE))
         stop("MC-CBN (mccbn) no installed")
     
     x <- df_2_mat_integer(x)
