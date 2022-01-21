@@ -154,3 +154,9 @@ kronvec <- function(Theta, i_, x, diag_, transp_)
 grad_loop_j <- function(i_, n_, r) .Call("C_grad_loop_j", i_, n_, r,
                                          PACKAGE = "evamtools")
 
+
+## RDU: for lack of a better place
+
+.onUnload <- function (libpath) {
+  library.dynam.unload("evamtools", libpath)
+}
