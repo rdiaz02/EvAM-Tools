@@ -16,6 +16,10 @@
 
 
 #' @title Sample an indivial from a transition rate matrix
+#'
+#' @description This is a transition *rate* matrix, *not* a matrix
+#' of transition probabilities between genotypes. For example, this
+#' cannot be used with OT.
 #' 
 #' @param trm transition rate matrix
 #' @param T_sampling Time at which sampling happens.
@@ -53,17 +57,18 @@ indiv_sample_from_trm <- function(trm, T_sampling, ngenots = NULL,
 }
 
 
-#' @title Sample an individual from a transition rate matrix
+#' @title Sample an individual from a transition rate matrix with precomputed
+#' matrix diagonal (and number of genotypes and genotype names).
+#'
+#' @description If we sample many individuals from the same process, it is worth
+#'     passing some common, precomputed values. This is what I call
+#'     "transition matrix standardized": Diagonal is passed separately, and
+#'     entries in the matrix are probabilities.
 #' 
-#' We repeat the sums to compute the diagonal and the division
-#' If we sample a large number of times, possibly worth it to
-#' have those precomputed
-
-#' This is what I call "transition matrix standardized":
-#'    Diagonal is passed separately, entries in matrix are probabilities
-
-#' This will only be called after standardization
-
+#' This is all for a transition *rate* matrix, *not* a matrix
+#' of transition probabilities between genotypes. For example, this
+#' cannot be used with OT.
+#'
 #' @param trmstd transition rate matrix "standardized",
 #' @param diag diagonal of transition rate matrix, time of sampling of a case/individual
 #' @param T_sampling Time at which sampling happens.
@@ -89,7 +94,6 @@ indiv_sample_from_trm_pre <- function(trmstd,
         t_accum <- t_accum + t_transition
         if(t_accum >= T_sampling ) break
         ## We transition. To what genotype?
-        ## pj <- trm[row, ]
         j <- sample(x = seq_len(ngenots), size = 1, prob = trmstd[row, ])
         genotype <- genot_names[j]
         trajectory <- c(trajectory, genotype)
@@ -102,9 +106,9 @@ indiv_sample_from_trm_pre <- function(trmstd,
 }
 
 
-#' @title Sample a population from a transition rate matrix
+#' @title Sample a population from a transition rate matrix.
 #' 
-#' @description Like indiv_sample_from_trm, but for multiple times
+#' @description Like indiv_sample_from_trm, but for multiple individuals.
 #' 
 #' @param trm transition rate matrix, number of samples or times of samples,
 #' @param n_samples Int with the number of samples to be computed
@@ -369,7 +373,7 @@ sample_to_pD_order <- function(x, ngenes, gene_names = NULL) {
                             State.to.Int(as.integer(gene_names %in%
                                                     strsplit(z, ", ")[[1]])),
                         numeric(1))
-    ## all_genots <- rep(unname(genot_int), x[, 2])
+
     return(tabulate(rep(unname(genot_int), x[, 2]),
                    nbins = 2^ngenes))
 }
