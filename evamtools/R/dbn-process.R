@@ -14,7 +14,9 @@
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## Commented out to avoid warning about fitCPN, until this
-## gets fixed.
+## gets fixed in Nicol's original code: they should be using
+## importFrom: https://github.com/phillipnicol/OncoBN/issues/2
+
 ## #' Run DBN on data
 ## #' 
 ## #' @param data data.frame with cross sectional data
