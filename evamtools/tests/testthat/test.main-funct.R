@@ -37,6 +37,7 @@ input_data <-
     )
 
 
+## From run on input_data
 
 pre_computed_output <- list(OT_model = structure(list(From = c("Root", "Root", "A", 
 "Root"), To = c("A", "B", "C", "D"), edge = c("Root -> A", "Root -> B", 
@@ -271,3 +272,4 @@ NA, NA, NA, NA)), class = "data.frame", row.names = c(NA, -5L
                                                        "C", "D"))))
 
 
+## Six other data sets, from our collection.
