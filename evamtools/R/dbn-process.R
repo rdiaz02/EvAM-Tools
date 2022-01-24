@@ -13,24 +13,27 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+## Commented out to avoid warning about fitCPN, until this
+## gets fixed in Nicol's original code: they should be using
+## importFrom: https://github.com/phillipnicol/OncoBN/issues/2
 
-#' Run DBN on data
-#' 
-#' @param data data.frame with cross sectional data
-#' @return list$edges Data.frame with From, To, Edge and Theta.
-#' @return list$thetas Thetas of the best fit
-#' @return list$likelihood Float. Likelihood of the fit
-do_DBN <- function(data) {
-  invisible(capture.output(out <- fitCPN(data, algorithm = "DP")))
-  ## thetas <- OncoBN:::inferTheta(data, out)
-  thetas <- evam_inferTheta(data, out)
-  dbn_out <- create_data_frame_from_theta(thetas, out)
-  return(list(
-    edges = dbn_out
-              , thetas = thetas
-              , likelihood = out$score
-              ))
-}
+## #' Run DBN on data
+## #' 
+## #' @param data data.frame with cross sectional data
+## #' @return list$edges Data.frame with From, To, Edge and Theta.
+## #' @return list$thetas Thetas of the best fit
+## #' @return list$likelihood Float. Likelihood of the fit
+## do_DBN <- function(data) {
+##   invisible(capture.output(out <- fitCPN(data, algorithm = "DP")))
+##   ## thetas <- OncoBN:::inferTheta(data, out)
+##   thetas <- evam_inferTheta(data, out)
+##   dbn_out <- create_data_frame_from_theta(thetas, out)
+##   return(list(
+##     edges = dbn_out
+##               , thetas = thetas
+##               , likelihood = out$score
+##               ))
+## }
 
 
 create_data_frame_from_theta <- function(thetas, out) {  

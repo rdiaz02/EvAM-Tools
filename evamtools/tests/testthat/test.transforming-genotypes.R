@@ -137,3 +137,5 @@ test_that("Transforming back and forth works", {
 #     )
 
 # })
+
+cat("\n Done test.transforming-genotypes.R \n")

@@ -828,3 +828,4 @@ test_that("do_MHN and do_MHN2 identical in various data sets", {
                      as.matrix(mhnSM$transitionMatrixCompExp))
     }
 })
+cat("\n Done test.trans-rates-MHN.R \n")

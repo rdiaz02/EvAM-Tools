@@ -76,3 +76,4 @@
 ##     expect_equal(out$transitions["A, B, C", "A, B, C, E"], 3)
 ##     expect_equal(out$transitions["C, D, E", "A, C, D, E"], 2)
 ## })
+## cat("\n Done test.processing-sampled-genotypes-trajectories-from-models.R \n")

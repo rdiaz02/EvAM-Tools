@@ -1,11 +1,10 @@
 test_that("OT and CBN: algorithm consistency with various data examples", {
-
-    MCCBN_INSTALLED <- require("mccbn", quietly = TRUE, warn.conflicts = TRUE)
     
     ## Check OT, CBN, MCCBN if installed
     ## for consistency of different algorithms 
     test_others <- function(data) {
-        data <- as.matrix(data)
+        ## MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
+        MCCBN_INSTALLED <- FALSE
         data <- df_2_mat_integer(data)
         cpm_out_others2 <- ot_cbn_methods(data, do_MCCBN = MCCBN_INSTALLED)
         
@@ -187,7 +186,8 @@ and identical results between algorithms with sparse matrices", {
     oex10 <- cpm_access_genots_paths_w(ex10)
     oex11 <- cpm_access_genots_paths_w(ex11)
     
-    
+    ## FIXME: avoid partial matching. $weighted_paths
+    ## should be weighted_paths_to_max
     expect_equivalent(oex0$weighted_paths[, 2], 1)
     
     expect_equivalent(oex1$weighted_paths[, 2],
@@ -767,3 +767,5 @@ NA, NA, NA), OT_edgeWeight = c(0.525915054637741, 0.101508072999909,
   rm(mm, mm0, mmSM)
   rm(cpm_out_others1)
  })
+
+cat("\n Done test.trans-rates-f-graphs.R \n")

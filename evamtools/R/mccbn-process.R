@@ -52,6 +52,9 @@
 # library(mccbn)
 
 mccbn_proc <- function(x) {
+    if (!requireNamespace("mccbn", quietly = TRUE))
+        stop("MC-CBN (mccbn) no installed")
+    
     stopifnot(!is.null(colnames(x)))
     fit <- mccbn::learn_network(x)
     mle_index <- which.max(fit$logliks)

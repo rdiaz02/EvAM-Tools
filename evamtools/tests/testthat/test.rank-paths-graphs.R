@@ -44,3 +44,5 @@ test_that("Returns the correct number and type of vertex labels", {
     expect_equal(labels_4, labels_40)
     expect_equal(labels_4, labels_null)
 })
+
+cat("\n Done test.rank-paths-graphs.R \n")
