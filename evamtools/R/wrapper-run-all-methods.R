@@ -868,6 +868,11 @@ all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
         HyperTraPS_td_trans_mat <- NA
     }
 
+    ## Getting all paths to global maximum
+    ## Simply call do_weighted_paths_to_max on a list of
+    ## transition matrices and a pre-created paths_to_max
+    ## Make sure we are not repeating expensive operations
+    
     return(list(
         OT_model = cpm_out_others$OT$edges,
         OT_f_graph = pre_trans_mat_others$OT$weighted_fgraph,
