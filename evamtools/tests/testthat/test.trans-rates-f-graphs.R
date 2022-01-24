@@ -186,7 +186,8 @@ and identical results between algorithms with sparse matrices", {
     oex10 <- cpm_access_genots_paths_w(ex10)
     oex11 <- cpm_access_genots_paths_w(ex11)
     
-    
+    ## FIXME: avoid partial matching. $weighted_paths
+    ## should be weighted_paths_to_max
     expect_equivalent(oex0$weighted_paths[, 2], 1)
     
     expect_equivalent(oex1$weighted_paths[, 2],
