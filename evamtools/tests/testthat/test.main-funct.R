@@ -37,6 +37,25 @@ input_data <-
     )
 
 
+data(every_which_way_data)
+
+Dat1 <- every_which_way_data[[2]][1:50, 1:4]
+Dat2 <- every_which_way_data[[4]][1:50, 1:5]
+Dat3 <- every_which_way_data[[20]][1:50, 1:5]
+Dat4 <- every_which_way_data[[16]][1:40, 2:6]
+
+
+## The above were run using a former version of the function, and output was
+## store using dput
+
+r1 <- all_methods_2_trans_mat(input_data, methods = c("CBN", "OT",
+                                                      "MHN", "HESBCN",
+                                                      "DBN", "MCCBN"))
+
+
+
+
+
 ## From run on input_data
 
 pre_computed_output <- list(OT_model = structure(list(From = c("Root", "Root", "A", 
@@ -270,6 +289,5 @@ NA, NA, NA, NA)), class = "data.frame", row.names = c(NA, -5L
     "33", "34", "35", "36", "37", "38", "39", "40", "41", "42", 
     "43", "44", "45", "46", "47", "48", "49", "50"), c("A", "B", 
                                                        "C", "D"))))
-
 
 ## Six other data sets, from our collection.
