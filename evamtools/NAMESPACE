@@ -40,4 +40,4 @@ importFrom("plot.matrix", "fmt")
 ## importFrom("relations",
 ##            "as.relation", "transitive_reduction",
 ##            "relation_incidence")
-## importFrom("OncoBN", "fitCPN")
+importFrom("OncoBN", "fitCPN")

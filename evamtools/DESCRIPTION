@@ -30,4 +30,5 @@ Imports: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree
     , gtools
     , plot.matrix
     , DT, shinyjs, shiny
+    , OncoBN
 Suggests: mccbn, testthat (>= 3.0.0)
