@@ -3,22 +3,22 @@
 
 test_that("Genotype not accessible if no increase in fitness wrt to ancestor", {
     x1 <- c("WT" = 1, "A" = 2, "B" = 1, "A, B" = 2.5)
-    ox1 <- genots_2_fgraph_and_trans_mat(x1)
+    ox1 <- evamtools:::genots_2_fgraph_and_trans_mat(x1)
     expect_equal(ox1$accessible_genotypes, c("A" = 2.0, "A, B" = 2.5))
 
     x2 <- c("WT" = 1, "A" = 2, "B" = 1, "A, B" = 2)
-    ox2 <- genots_2_fgraph_and_trans_mat(x2)
+    ox2 <- evamtools:::genots_2_fgraph_and_trans_mat(x2)
     expect_equal(ox2$accessible_genotypes, c("A" = 2.0))
 
     x3 <- c("WT" = 1, "A" = 2, "B" = 1, "A, B" = 2)
-    ox3 <- genots_2_fgraph_and_trans_mat(x3)
+    ox3 <- evamtools:::genots_2_fgraph_and_trans_mat(x3)
     expect_equal(ox3$accessible_genotypes, c("A" = 2.0))
 
     ## Also test the equality
     x4 <- c("WT" = 1, "A" = 2, "B" = 0.1, "C" = 1.1,
             "A, B" = 0.2, "B, C" = 1.1, "A, C" = 4,
             "A, B, C" = 4)
-    ox4 <- genots_2_fgraph_and_trans_mat(x4)
+    ox4 <- evamtools:::genots_2_fgraph_and_trans_mat(x4)
     expect_equal(ox4$accessible_genotypes,
                  c("A" = 2.0, "C" = 1.1, "A, C" = 4.0))
 })
@@ -26,14 +26,14 @@ test_that("Genotype not accessible if no increase in fitness wrt to ancestor", {
 
 test_that("Genotype not accessible if no path to it from WT",  {
     x3 <- c("WT" = 1, "A" = 2, "B" = 0.1, "A, B" = 0.2)
-    ox3 <- genots_2_fgraph_and_trans_mat(x3)
+    ox3 <- evamtools:::genots_2_fgraph_and_trans_mat(x3)
     expect_equal(ox3$accessible_genotypes, c("A" = 2.0))
 
     ## Also test the equality
     x4 <- c("WT" = 1, "A" = 2, "B" = 0.1, "C" = 0.9,
             "A, B" = 0.2, "B, C" = 3, "A, C" = 4,
             "A, B, C" = 4)
-    ox4 <- genots_2_fgraph_and_trans_mat(x4)
+    ox4 <- evamtools:::genots_2_fgraph_and_trans_mat(x4)
     expect_equal(ox4$accessible_genotypes, c("A" = 2.0, "A, C" = 4.0))
 
     x5 <- c("WT" = 1, "A" = 2, "B" = 0.1, "C" = 0.9, "D" = 1.2,
@@ -43,7 +43,7 @@ test_that("Genotype not accessible if no path to it from WT",  {
             "B, D" = 1.1,
             "A, D, C" = 5,
             "B, C, D" = 6)
-    ox5 <- genots_2_fgraph_and_trans_mat(x5)
+    ox5 <- evamtools:::genots_2_fgraph_and_trans_mat(x5)
     expect_equal(ox5$accessible_genotypes, c("A" = 2.0,
                                              "D" = 1.2,
                                              "A, B" = 2.2,
@@ -54,16 +54,16 @@ test_that("Genotype not accessible if no path to it from WT",  {
 
 
 
-test_that("Minimal tests for genots_2_fgraph_and_trans_mat
+test_that("Minimal tests for evamtools:::genots_2_fgraph_and_trans_mat
 under general fitness landscapes", {
-    ## A minimal set of tests for genots_2_fgraph_and_trans_mat
+    ## A minimal set of tests for evamtools:::genots_2_fgraph_and_trans_mat
     ## under general fitness landscapes
 
     x1 <- c(WT = 1, A = 2.5, B = 1.5,
             "A, B" = 2, D = 4,
             "A, B, C" = 3, "A, B, C, D" = 3.5)
 
-    x1o <- genots_2_fgraph_and_trans_mat(x1)
+    x1o <- evamtools:::genots_2_fgraph_and_trans_mat(x1)
 
     expect_equal(unname(x1o$transition_matrix)[1, ],
                  c(0, 1.5 / (1.5 + .5 + 3), .5 / (1.5 + .5 + 3),
@@ -81,7 +81,7 @@ under general fitness landscapes", {
             "A, B" = 2, D = 4,
             "A, B, C" = 3, "A, B, C, D" = 3.5)
 
-    x2o <- suppressMessages(genots_2_fgraph_and_trans_mat(x2))
+    x2o <- suppressMessages(evamtools:::genots_2_fgraph_and_trans_mat(x2))
 
     expect_equal(unname(x2o$transition_matrix)[1, ],
                  c(0, 0.5 / (0.5 + 2), 2 / (0.5 + 2))
@@ -93,9 +93,9 @@ under general fitness landscapes", {
     expect_equal(names(x2o$accessible_genotypes), c("A", "D"))
 })
 
-test_that("Testing cpm_access_genots_paths_w_simplified by comparing with
+test_that("Testing evamtools:::cpm_access_genots_paths_w_simplified by comparing with
 OncoSimulR's based cpm_to_trans_mat_oncosimul", {
-    ## Recall cpm2tm <- cpm_to_trans_mat_oncosimul
+    ## Recall evamtools:::cpm2tm <- cpm_to_trans_mat_oncosimul
 
     ## First, load a bunch of data structures
     ## From ex1.R
@@ -294,15 +294,15 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
 
 
     ## Should run. Just showing output
-    cpm2tm(ex_ot_out2, max_f = NULL)$transition_matrix
-    cpm_access_genots_paths_w_simplified(list(edges = ex_ot_out2))$trans_mat_genots
+    evamtools:::cpm2tm(ex_ot_out2, max_f = NULL)$transition_matrix
+    evamtools:::cpm_access_genots_paths_w_simplified(list(edges = ex_ot_out2))$trans_mat_genots
 
     ## Same transitions, different fitness
-    cpm2tm(ex_cbn_out2, max_f = NULL)$transition_matrix
-    cpm2tm(ex_cbn_out2, 8)$transition_matrix
+    evamtools:::cpm2tm(ex_cbn_out2, max_f = NULL)$transition_matrix
+    evamtools:::cpm2tm(ex_cbn_out2, 8)$transition_matrix
 
     ## Original code
-    cpm_access_genots_paths_w_simplified(list(edges = ex_cbn_out2))$trans_mat_genots
+    evamtools:::cpm_access_genots_paths_w_simplified(list(edges = ex_cbn_out2))$trans_mat_genots
 
 
     ## For testing
@@ -312,109 +312,109 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     }
 
     ## CBN
-    expect_equal(reorder_trans_mat(cpm2tm(ex_cbn_out1, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(cpm_access_genots_paths_w_simplified(
+    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_cbn_out1, max_f = NULL)$transition_matrix),
+                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
                      list(edges = ex_cbn_out1))$trans_mat_genots),
                  check.attributes = TRUE)
 
-    expect_equal(reorder_trans_mat(cpm2tm(ex_cbn_out2, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(cpm_access_genots_paths_w_simplified(
+    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_cbn_out2, max_f = NULL)$transition_matrix),
+                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
                      list(edges = ex_cbn_out2))$trans_mat_genots),
                  check.attributes = TRUE)
 
-    expect_equal(reorder_trans_mat(cpm2tm(ex_cbn_out3, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(cpm_access_genots_paths_w_simplified(
+    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_cbn_out3, max_f = NULL)$transition_matrix),
+                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
                      list(edges = ex_cbn_out3))$trans_mat_genots),
                  check.attributes = TRUE)
 
-    expect_equal(reorder_trans_mat(cpm2tm(ex_cbn_out4, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(cpm_access_genots_paths_w_simplified(
+    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_cbn_out4, max_f = NULL)$transition_matrix),
+                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
                      list(edges = ex_cbn_out4))$trans_mat_genots),
                  check.attributes = TRUE)
 
-    expect_equal(reorder_trans_mat(cpm2tm(ex_cbn_out5, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(cpm_access_genots_paths_w_simplified(
+    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_cbn_out5, max_f = NULL)$transition_matrix),
+                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
                      list(edges = ex_cbn_out5))$trans_mat_genots),
                  check.attributes = TRUE)
 
-    expect_equal(reorder_trans_mat(cpm2tm(ex_cbn_out6, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(cpm_access_genots_paths_w_simplified(
+    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_cbn_out6, max_f = NULL)$transition_matrix),
+                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
                      list(edges = ex_cbn_out6))$trans_mat_genots),
                  check.attributes = TRUE)
 
 
-    expect_equal(reorder_trans_mat(cpm2tm(ex_cbn_out7, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(cpm_access_genots_paths_w_simplified(
+    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_cbn_out7, max_f = NULL)$transition_matrix),
+                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
                      list(edges = ex_cbn_out7))$trans_mat_genots),
                  check.attributes = TRUE)
 
     
-    expect_equal(as.matrix(cpm2tm(ex_cbn_out2, max_f = NULL)$transition_matrix),
-                 as.matrix(cpm2tm(ex_cbn_out2, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(cpm2tm(ex_cbn_out1, max_f = NULL)$transition_matrix),
-                 as.matrix(cpm2tm(ex_cbn_out1, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(cpm2tm(ex_cbn_out4, max_f = NULL)$transition_matrix),
-                 as.matrix(cpm2tm(ex_cbn_out4, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(cpm2tm(ex_cbn_out4, max_f = NULL)$transition_matrix),
-                 as.matrix(cpm2tm(ex_cbn_out4, max_f = 4)$transition_matrix))
-    expect_equal(as.matrix(cpm2tm(ex_cbn_out5, max_f = NULL)$transition_matrix),
-                 as.matrix(cpm2tm(ex_cbn_out5, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(cpm2tm(ex_cbn_out6, max_f = NULL)$transition_matrix),
-                 as.matrix(cpm2tm(ex_cbn_out6, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(cpm2tm(ex_cbn_out7, max_f = NULL)$transition_matrix),
-                 as.matrix(cpm2tm(ex_cbn_out7, max_f = 4)$transition_matrix))
+    expect_equal(as.matrix(evamtools:::cpm2tm(ex_cbn_out2, max_f = NULL)$transition_matrix),
+                 as.matrix(evamtools:::cpm2tm(ex_cbn_out2, max_f = 2)$transition_matrix))
+    expect_equal(as.matrix(evamtools:::cpm2tm(ex_cbn_out1, max_f = NULL)$transition_matrix),
+                 as.matrix(evamtools:::cpm2tm(ex_cbn_out1, max_f = 2)$transition_matrix))
+    expect_equal(as.matrix(evamtools:::cpm2tm(ex_cbn_out4, max_f = NULL)$transition_matrix),
+                 as.matrix(evamtools:::cpm2tm(ex_cbn_out4, max_f = 2)$transition_matrix))
+    expect_equal(as.matrix(evamtools:::cpm2tm(ex_cbn_out4, max_f = NULL)$transition_matrix),
+                 as.matrix(evamtools:::cpm2tm(ex_cbn_out4, max_f = 4)$transition_matrix))
+    expect_equal(as.matrix(evamtools:::cpm2tm(ex_cbn_out5, max_f = NULL)$transition_matrix),
+                 as.matrix(evamtools:::cpm2tm(ex_cbn_out5, max_f = 2)$transition_matrix))
+    expect_equal(as.matrix(evamtools:::cpm2tm(ex_cbn_out6, max_f = NULL)$transition_matrix),
+                 as.matrix(evamtools:::cpm2tm(ex_cbn_out6, max_f = 2)$transition_matrix))
+    expect_equal(as.matrix(evamtools:::cpm2tm(ex_cbn_out7, max_f = NULL)$transition_matrix),
+                 as.matrix(evamtools:::cpm2tm(ex_cbn_out7, max_f = 4)$transition_matrix))
 
-    expect_equal(max(cpm2tm(ex_cbn_out2, max_f = 8)$accessible_genotypes),
+    expect_equal(max(evamtools:::cpm2tm(ex_cbn_out2, max_f = 8)$accessible_genotypes),
                  8)
-    expect_equal(max(cpm2tm(ex_cbn_out2, max_f = 3)$accessible_genotypes),
+    expect_equal(max(evamtools:::cpm2tm(ex_cbn_out2, max_f = 3)$accessible_genotypes),
                  3)
 
 
     ## OT 
-    expect_equal(reorder_trans_mat(cpm2tm(ex_ot_out1, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(cpm_access_genots_paths_w_simplified(
+    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_ot_out1, max_f = NULL)$transition_matrix),
+                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
                      list(edges = ex_ot_out1))$trans_mat_genots),
                  check.attributes = TRUE)
-    expect_equal(reorder_trans_mat(cpm2tm(ex_ot_out2, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(cpm_access_genots_paths_w_simplified(
+    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_ot_out2, max_f = NULL)$transition_matrix),
+                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
                      list(edges = ex_ot_out2))$trans_mat_genots),
                  check.attributes = TRUE)
-    expect_equal(reorder_trans_mat(cpm2tm(ex_ot_out3, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(cpm_access_genots_paths_w_simplified(
+    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_ot_out3, max_f = NULL)$transition_matrix),
+                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
                      list(edges = ex_ot_out3))$trans_mat_genots),
                  check.attributes = TRUE)
-    expect_equal(reorder_trans_mat(cpm2tm(ex_ot_out4, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(cpm_access_genots_paths_w_simplified(
+    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_ot_out4, max_f = NULL)$transition_matrix),
+                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
                      list(edges = ex_ot_out4))$trans_mat_genots),
                  check.attributes = TRUE)
-    expect_equal(reorder_trans_mat(cpm2tm(ex_ot_out5, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(cpm_access_genots_paths_w_simplified(
+    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_ot_out5, max_f = NULL)$transition_matrix),
+                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
                      list(edges = ex_ot_out5))$trans_mat_genots),
                  check.attributes = TRUE)
 
     ## tripwire. Should fail
-    ## expect_equal(as.matrix(cpm2tm(ex_ot_out1, max_f = NULL)$transition_matrix),
-    ##              reorder_trans_mat(cpm_access_genots_paths_w_simplified(
+    ## expect_equal(as.matrix(evamtools:::cpm2tm(ex_ot_out1, max_f = NULL)$transition_matrix),
+    ##              reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
     ##                  list(edges = ex_ot_out1))$trans_mat_genots),
     ##              check.attributes = FALSE)
 
 
-    expect_equal(as.matrix(cpm2tm(ex_ot_out2, max_f = NULL)$transition_matrix),
-                 as.matrix(cpm2tm(ex_ot_out2, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(cpm2tm(ex_ot_out1, max_f = NULL)$transition_matrix),
-                 as.matrix(cpm2tm(ex_ot_out1, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(cpm2tm(ex_ot_out4, max_f = NULL)$transition_matrix),
-                 as.matrix(cpm2tm(ex_ot_out4, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(cpm2tm(ex_ot_out4, max_f = NULL)$transition_matrix),
-                 as.matrix(cpm2tm(ex_ot_out4, max_f = 4)$transition_matrix))
-    expect_equal(as.matrix(cpm2tm(ex_ot_out5, max_f = NULL)$transition_matrix),
-                 as.matrix(cpm2tm(ex_ot_out5, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(cpm2tm(ex_ot_out3, max_f = NULL)$transition_matrix),
-                 as.matrix(cpm2tm(ex_ot_out3, max_f = 2)$transition_matrix))
+    expect_equal(as.matrix(evamtools:::cpm2tm(ex_ot_out2, max_f = NULL)$transition_matrix),
+                 as.matrix(evamtools:::cpm2tm(ex_ot_out2, max_f = 2)$transition_matrix))
+    expect_equal(as.matrix(evamtools:::cpm2tm(ex_ot_out1, max_f = NULL)$transition_matrix),
+                 as.matrix(evamtools:::cpm2tm(ex_ot_out1, max_f = 2)$transition_matrix))
+    expect_equal(as.matrix(evamtools:::cpm2tm(ex_ot_out4, max_f = NULL)$transition_matrix),
+                 as.matrix(evamtools:::cpm2tm(ex_ot_out4, max_f = 2)$transition_matrix))
+    expect_equal(as.matrix(evamtools:::cpm2tm(ex_ot_out4, max_f = NULL)$transition_matrix),
+                 as.matrix(evamtools:::cpm2tm(ex_ot_out4, max_f = 4)$transition_matrix))
+    expect_equal(as.matrix(evamtools:::cpm2tm(ex_ot_out5, max_f = NULL)$transition_matrix),
+                 as.matrix(evamtools:::cpm2tm(ex_ot_out5, max_f = 2)$transition_matrix))
+    expect_equal(as.matrix(evamtools:::cpm2tm(ex_ot_out3, max_f = NULL)$transition_matrix),
+                 as.matrix(evamtools:::cpm2tm(ex_ot_out3, max_f = 2)$transition_matrix))
 
-    expect_equal(max(cpm2tm(ex_ot_out2, max_f = 8)$accessible_genotypes),
+    expect_equal(max(evamtools:::cpm2tm(ex_ot_out2, max_f = 8)$accessible_genotypes),
                  8)
-    expect_equal(max(cpm2tm(ex_ot_out2, max_f = 3)$accessible_genotypes),
+    expect_equal(max(evamtools:::cpm2tm(ex_ot_out2, max_f = 3)$accessible_genotypes),
                  3)
 
     ## tripwire
@@ -429,7 +429,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     ## cpm_to_fitness_genots(ex_pmce_out1)
     ## cpm_to_fitness_genots(ex_cbn_out2, max_f = NULL)
     ## cpm_to_fitness_genots(ex_cbn_out2, max_f = 3)
-    ## cpm2tm(ex_cbn_out2, max_f = NULL)$lambdas
-    ## cpm2tm(ex_cbn_out2, 1.01, 8)$lambdas
+    ## evamtools:::cpm2tm(ex_cbn_out2, max_f = NULL)$lambdas
+    ## evamtools:::cpm2tm(ex_cbn_out2, 1.01, 8)$lambdas
 })
 cat("\n Done test.access-genots-from-oncosimul.R \n")

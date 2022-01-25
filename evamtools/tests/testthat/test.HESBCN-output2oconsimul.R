@@ -18,7 +18,7 @@ test_that("HESBCN gives the same results as OncoSimul", {
         expect_equal(ordered_computed_trm, ordered_trm_onco)
     }
 
-    for (i in names(all_examples_csd_2[["csd"]])[2:11]) {
+    for (i in names(examples_csd[["csd"]])[2:11]) {
         compare_methods <- compare_HESBCN_cpm2tm(i)
     }
 })
