@@ -700,11 +700,26 @@ transition_fg_sparseM <- function(x, weights) {
 #' )
 #' colnames(dB_c1) <- LETTERS[1:5]
 #' out <- all_methods_2_trans_mat(dB_c1, do_MCCBN = FALSE)
-all_methods_2_trans_mat <- function(x, cores_cbn = 1, do_MCCBN = FALSE,
+all_methods_2_trans_mat <- function(x, cores_cbn = 1,
+                                    methods = c("CBN", "OT", "HESBCN", "MHN",
+                                                "DBN"),
                                     max.cols = 15) {
 
+
+    if ("MCCBN" %in% methods) {
+        do_MCCBN <- TRUE
+    } else {
+        do_MCCBN <- FALSE
+    }
+
+    if ("DBN" %in% methods) {
+        do_DBN <- TRUE
+    } else {
+        do_DBN <- FALSE
+    }
+
     do_HyperTraPS <- FALSE
-    do_DBN <- FALSE
+
 
     ## FIXME: the same information is available from some of the
     ## pre_trans_mat_others and pre_trans_mat_new_CPMS and pre_trans_mat_HESBCN
