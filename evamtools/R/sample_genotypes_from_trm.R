@@ -186,6 +186,7 @@ population_sample_from_trm <- function(trm, n_samples = 10,
 #' $T_sum_events time of events for the mutations of each gene
 #' $obs_events data.frame with mutated before the end of the sampling time
 #' @param n_genes number of genes observed
+#' @param gene_names List of gene names. If NULL, genes will be named alphabetically
 #' @param output type of output that we want
 #' 
 #' @return List with a list of trajectories (the order in which gene mutations
@@ -279,6 +280,7 @@ process_samples <- function(sim, n_genes, gene_names = NULL,
 #' @param cpm_output Output from calling all_methods2trans_mat
 #' @param n_samples Number of samples to generate
 #' @param n_genes Number of samples that are in the sample
+#' @param gene_names List of gene names. If NULL, genes will be named alphabetically
 #' @param methods List of methods that we want to sample
 #' 
 #' @return modified cpm_outputd including a matrix with genotype transitions
@@ -360,6 +362,7 @@ sample_all_CPMs <- function(cpm_output
 
 #' @param x vector of genotypes
 #' @param ngenes total number of genes
+#' @param gene_names List of gene names. If NULL, genes will be named alphabetically
 #' 
 #' @return counts of all genotypes in same order as used by MHN
 sample_to_pD_order <- function(x, ngenes, gene_names = NULL) {

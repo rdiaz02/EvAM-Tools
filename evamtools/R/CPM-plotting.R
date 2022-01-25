@@ -142,6 +142,9 @@ cpm_layout <- function(graph){
 #' @param observations Original cross sectional data used to compute the model. Optional.
 #' @param freqs DataFrame with column $Genotype and $Freqs with their frequencies. Optional.
 #' @param top_paths Int>0. Default NULL. Most transited paths to label
+#' @param freqs2label Int>0. Laberl genotypes with a frequency larger taht freqs2label
+#' @param max_edge Int>0. Maximun width of edge. If NULL it will be infered from data.
+#' @param min_edge Int>0. Minimum width of edge. If NULL it will be infered from data.
 #' @examples 
 #' \dontrun{
 #' dB_c2 <- matrix(
@@ -329,7 +332,7 @@ plot_genot_fg <- function(trans_mat
 #' @param mod String for the CPM to process.
 #' @param prune_edges Boolean. Wether to remove genotype relationships carrying less than 1% of the flux
 #' @returns List with processed output of the CPM
-process_data <- function(data, mod, prune_edges = TRUE, plot_type = "transitions") {
+process_data <- function(data, mod, prune_edges = TRUE) {
     dag_tree <- NULL
     tryCatch (expr = {
         dag_model <- get(paste(mod, "_model", sep = ""), data)
