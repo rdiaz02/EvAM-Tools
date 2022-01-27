@@ -87,9 +87,15 @@ hand-computed values,
 and identical results between algorithms with sparse matrices, CBN", {
     ## testing weighted_paths is implicitly testing the transition matrix
     ## as weighted_paths is computed from the transition matrix
-    ## FIXME: in the future, and if under paranoia, have a few tests just
+    ## In the future, and if under paranoia, have a few tests just
     ## of the transition matrix. Though I do this with OT below.
     ## We use CBN, but the code does not differentiate between CBN and OT.
+
+    ## Even if we no longer use the nonsimplified version, leave here for
+    ## testing. As the _simplified version gives the same output for fgraph,
+    ## weighted_fgraph and trans_mat_genots as the nonsimplified, and as the
+    ## nonsimplified gives the correct weighted_paths, the trans_mat of the
+    ## simplified has to be correct.
 
     
     ex0 <- list(edges = data.frame(
@@ -811,15 +817,16 @@ and identical results between algorithms with sparse matrices, OT", {
                     OT_edgeWeight = c(0.1, 0.2, 0.3, 0.8)
                 ))
 
-    ot_0 <- evamtools:::cpm_access_genots_paths_w(ex0)
-    ot_1 <- evamtools:::cpm_access_genots_paths_w(ex1)
-    ot_2 <- evamtools:::cpm_access_genots_paths_w(ex2)
-    ot_3 <- evamtools:::cpm_access_genots_paths_w(ex3)    
+    ot_0 <- cpm_access_genots_paths_w(ex0)
+    ot_1 <- cpm_access_genots_paths_w(ex1)
+    ot_2 <- cpm_access_genots_paths_w(ex2)
+    ot_3 <- cpm_access_genots_paths_w(ex3)    
 
-    ot_0s <- evamtools:::cpm_access_genots_paths_w_simplified(ex0)
-    ot_1s <- evamtools:::cpm_access_genots_paths_w_simplified(ex1)
-    ot_2s <- evamtools:::cpm_access_genots_paths_w_simplified(ex2)
-    ot_3s <- evamtools:::cpm_access_genots_paths_w_simplified(ex3)    
+    ot_0s <- cpm_access_genots_paths_w_simplified(ex0)
+    ot_1s <- cpm_access_genots_paths_w_simplified(ex1)
+    ot_2s <- cpm_access_genots_paths_w_simplified(ex2)
+    ot_3s <- cpm_access_genots_paths_w_simplified(ex3)    
+
 
 
     ## Same results with the simplified and sparse matrix implementation
@@ -861,60 +868,52 @@ and identical results between algorithms with sparse matrices, OT", {
     expect_equivalent(ex_tm_ot0,
                       ot_0$trans_mat_genots)
 
-
     ex_tm_ot1 <- rbind(
-            c(0, 0.3/0.5, 0.2/0.5, rep(0, 6)),
-            c(0, 0, 0, 0.2/0.6, 0.4/0.6, rep(0, 4)),
-            c(0, 0, 0, 0.3/1.0, 0, 0.7/1.0,rep(0, 3)),
-            c(rep(0, 6), 0.4/1.1, 0.7/1.1, 0),
-            c(rep(0, 6), 1, 0, 0), 
-            c(rep(0, 7), 1, 0),
-            c(rep(0, 8), 1),
-            c(rep(0, 8), 1),
-            c(rep(0, 9))
+        c(0, 0.2/.6, 0.3/.6, 0.1/.6, 0, 0, 0, 0, 0, 0, 0, 0),
+        c(0, 0, 0, 0, 0.3/0.4, 0.1/0.4, 0, 0, 0, 0, 0, 0),
+        c(0, 0, 0, 0, .2/.3, 0, 0.1/.3, 0, 0, 0, 0, 0),
+        c(0, 0, 0, 0, 0, .2/1.3, .3/1.3, .8/1.3, 0, 0, 0, 0),
+        c(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0),
+        c(0, 0, 0, 0, 0, 0, 0, 0, .3/1.1, .8/1.1, 0, 0),
+        c(0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0, 0.8, 0),
+        c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2/.5, 0.3/.5, 0),
+        c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+        c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+        c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+        c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
         )
 
     expect_equivalent(ex_tm_ot1,
                       ot_1$trans_mat_genots)
     
 
+   ex_tm_ot2 <- rbind(
+       c(0, 1, 0, 0, 0, 0),
+       c(0, 0, 1, 0, 0, 0),
+       c(0, 0, 0, 0.4/.5, .1/.5, 0),
+       c(0, 0, 0, 0, 0, 1),
+       c(0, 0, 0, 0, 0, 1),
+       c(0, 0, 0, 0, 0, 0)       
+        )
 
+    expect_equivalent(ex_tm_ot2,
+                      ot_2$trans_mat_genots)
 
+   ex_tm_ot3 <- rbind(
+       c(0, 0.1/.3, 0.2/.3, 0, 0, 0, 0, 0, 0, 0),
+       c(0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+       c(0, 0, 0, 0.1/1.2, 0.3/1.2, 0.8/1.2, 0, 0, 0, 0),
+       c(0, 0, 0, 0, 0, 0, .3/1.1, .8/1.1, 0, 0),
+       c(0, 0, 0, 0, 0, 0, .1/.9, 0, .8/.9, 0),
+       c(0, 0, 0, 0, 0, 0, 0, 0.1/.4, .3/.4, 0),
+       c(0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+       c(0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+       c(0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+       c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)       
+        )
 
-    
-    expect_equivalent(ot_0$)
-    
-    expect_equivalent(oex11$weighted_paths[, 2],
-                      c(3/18 * 4/15 * 5/11 * 7/7,
-                        3/18 * 4/15 * 6/11 * 7/7,
-                        3/18 * 5/15 * 4/10 * 7/7,
-                        3/18 * 5/15 * 6/10 * 7/7,
-                        3/18 * 6/15 * 4/9 * 7/7,
-                        3/18 * 6/15 * 5/9 * 7/7,
-                        4/18 * 3/14 * 5/11 * 7/7,                    
-                        4/18 * 3/14 * 6/11 * 7/7,
-                        4/18 * 5/14 * 3/9 * 7/7,
-                        4/18 * 5/14 * 6/9 * 7/7,
-                        4/18 * 6/14 * 3/8 * 7/7,
-                        4/18 * 6/14 * 5/8 * 7/7,                    
-                        5/18 * 3/13 * 4/10 * 7/7,
-                        5/18 * 3/13 * 6/10 * 7/7,
-                        5/18 * 4/13 * 3/9 * 7/7,
-                        5/18 * 4/13 * 6/9 * 7/7,
-                        5/18 * 6/13 * 3/7 * 7/7,
-                        5/18 * 6/13 * 4/7 * 7/7,                    
-                        6/18 * 3/12 * 4/9 * 7/7,
-                        6/18 * 3/12 * 5/9 * 7/7,
-                        6/18 * 4/12 * 3/8 * 7/7,
-                        6/18 * 4/12 * 5/8 * 7/7,
-                        6/18 * 5/12 * 3/7 * 7/7,
-                        6/18 * 5/12 * 4/7 * 7/7                    
-                        ))
-    
-    
-    
-    
-
+    expect_equivalent(ex_tm_ot3,
+                      ot_3$trans_mat_genots)
 })
 
 
