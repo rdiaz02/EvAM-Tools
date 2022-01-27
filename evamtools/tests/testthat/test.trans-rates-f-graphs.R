@@ -1,3 +1,7 @@
+## Note that some of the transition matrix output is also tested
+## using very different code from OncoSimulR. See
+## test.access-genots-from-oncosimul.R
+
 test_that("OT and CBN: algorithm consistency with various data examples", {
     
     ## Check OT, CBN, MCCBN if installed
@@ -80,8 +84,14 @@ test_that("OT and CBN: algorithm consistency with various data examples", {
 
 test_that("weighted paths and transition matrices computations against
 hand-computed values,
-and identical results between algorithms with sparse matrices", {
+and identical results between algorithms with sparse matrices, CBN", {
+    ## testing weighted_paths is implicitly testing the transition matrix
+    ## as weighted_paths is computed from the transition matrix
+    ## FIXME: in the future, and if under paranoia, have a few tests just
+    ## of the transition matrix. Though I do this with OT below.
+    ## We use CBN, but the code does not differentiate between CBN and OT.
 
+    
     ex0 <- list(edges = data.frame(
                     From = c("Root", "B", "C", "D"),
                     To =   c("B", "C", "D", "A"),
@@ -363,9 +373,7 @@ and identical results between algorithms with sparse matrices", {
 
 
 test_that("unrestricted fitness graph and transition fitness graph:
-identical results from sparse and non-sparse algorithms.
-Correctness of the individual algorithms
-has been verified above", {
+identical results from sparse and non-sparse algorithms.", {
     
     gacc1 <- list("A", "B", "D", c("A", "B"),
                   c("A", "D"), c("B", "D"),
@@ -767,5 +775,150 @@ NA, NA, NA), OT_edgeWeight = c(0.525915054637741, 0.101508072999909,
   rm(mm, mm0, mmSM)
   rm(cpm_out_others1)
  })
+
+
+
+test_that("transition matrices computations against
+hand-computed values,
+and identical results between algorithms with sparse matrices, OT", {
+
+    ## Recall that OT and CBN are used identically when computing transition
+    ## matrices between genotypes and "weighted paths to maximum" and have very
+    ## exhaustive tests of CBN above. Those test weighted paths to maximum are
+    ## obtained from the transition matrices.
+    
+    ex0 <- list(edges = data.frame(
+                    From = c("Root", "Root", "A", "B"),
+                    To =   c("A", "B", "C", "D"),
+                    OT_edgeWeight = c(0.3, 0.2, 0.4, 0.7)
+                ))
+
+    ex1 <- list(edges = data.frame(
+                    From = c("Root", "Root", "Root", "C"),
+                    To =   c("A", "B", "C", "D"),
+                    OT_edgeWeight = c(0.2, 0.3, 0.1, 0.8)
+                ))
+
+    ex2 <- list(edges = data.frame(
+                    From = c("Root", "A", "B", "B"),
+                    To =   c("A", "B", "C", "D"),
+                    OT_edgeWeight = c(0.2, 0.3, 0.4, 0.1)
+                ))
+
+    ex3 <- list(edges = data.frame(
+                    From = c("Root", "Root", "B", "B"),
+                    To =   c("A", "B", "C", "D"),
+                    OT_edgeWeight = c(0.1, 0.2, 0.3, 0.8)
+                ))
+
+    ot_0 <- evamtools:::cpm_access_genots_paths_w(ex0)
+    ot_1 <- evamtools:::cpm_access_genots_paths_w(ex1)
+    ot_2 <- evamtools:::cpm_access_genots_paths_w(ex2)
+    ot_3 <- evamtools:::cpm_access_genots_paths_w(ex3)    
+
+    ot_0s <- evamtools:::cpm_access_genots_paths_w_simplified(ex0)
+    ot_1s <- evamtools:::cpm_access_genots_paths_w_simplified(ex1)
+    ot_2s <- evamtools:::cpm_access_genots_paths_w_simplified(ex2)
+    ot_3s <- evamtools:::cpm_access_genots_paths_w_simplified(ex3)    
+
+
+    ## Same results with the simplified and sparse matrix implementation
+    expect_equal(
+        ot_0[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+        lapply(ot_0s[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+               as.matrix))
+
+    expect_equal(
+        ot_1[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+        lapply(ot_1s[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+               as.matrix))
+    
+    
+    expect_equal(
+        ot_2[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+        lapply(ot_2s[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+               as.matrix))
+    
+    expect_equal(
+        ot_3[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+        lapply(ot_3s[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+               as.matrix))
+
+
+    ## Transition matrices
+    ex_tm_ot0 <- rbind(
+            c(0, 0.3/0.5, 0.2/0.5, rep(0, 6)),
+            c(0, 0, 0, 0.2/0.6, 0.4/0.6, rep(0, 4)),
+            c(0, 0, 0, 0.3/1.0, 0, 0.7/1.0,rep(0, 3)),
+            c(rep(0, 6), 0.4/1.1, 0.7/1.1, 0),
+            c(rep(0, 6), 1, 0, 0), 
+            c(rep(0, 7), 1, 0),
+            c(rep(0, 8), 1),
+            c(rep(0, 8), 1),
+            c(rep(0, 9))
+        )
+
+    expect_equivalent(ex_tm_ot0,
+                      ot_0$trans_mat_genots)
+
+
+    ex_tm_ot1 <- rbind(
+            c(0, 0.3/0.5, 0.2/0.5, rep(0, 6)),
+            c(0, 0, 0, 0.2/0.6, 0.4/0.6, rep(0, 4)),
+            c(0, 0, 0, 0.3/1.0, 0, 0.7/1.0,rep(0, 3)),
+            c(rep(0, 6), 0.4/1.1, 0.7/1.1, 0),
+            c(rep(0, 6), 1, 0, 0), 
+            c(rep(0, 7), 1, 0),
+            c(rep(0, 8), 1),
+            c(rep(0, 8), 1),
+            c(rep(0, 9))
+        )
+
+    expect_equivalent(ex_tm_ot1,
+                      ot_1$trans_mat_genots)
+    
+
+
+
+
+    
+    expect_equivalent(ot_0$)
+    
+    expect_equivalent(oex11$weighted_paths[, 2],
+                      c(3/18 * 4/15 * 5/11 * 7/7,
+                        3/18 * 4/15 * 6/11 * 7/7,
+                        3/18 * 5/15 * 4/10 * 7/7,
+                        3/18 * 5/15 * 6/10 * 7/7,
+                        3/18 * 6/15 * 4/9 * 7/7,
+                        3/18 * 6/15 * 5/9 * 7/7,
+                        4/18 * 3/14 * 5/11 * 7/7,                    
+                        4/18 * 3/14 * 6/11 * 7/7,
+                        4/18 * 5/14 * 3/9 * 7/7,
+                        4/18 * 5/14 * 6/9 * 7/7,
+                        4/18 * 6/14 * 3/8 * 7/7,
+                        4/18 * 6/14 * 5/8 * 7/7,                    
+                        5/18 * 3/13 * 4/10 * 7/7,
+                        5/18 * 3/13 * 6/10 * 7/7,
+                        5/18 * 4/13 * 3/9 * 7/7,
+                        5/18 * 4/13 * 6/9 * 7/7,
+                        5/18 * 6/13 * 3/7 * 7/7,
+                        5/18 * 6/13 * 4/7 * 7/7,                    
+                        6/18 * 3/12 * 4/9 * 7/7,
+                        6/18 * 3/12 * 5/9 * 7/7,
+                        6/18 * 4/12 * 3/8 * 7/7,
+                        6/18 * 4/12 * 5/8 * 7/7,
+                        6/18 * 5/12 * 3/7 * 7/7,
+                        6/18 * 5/12 * 4/7 * 7/7                    
+                        ))
+    
+    
+    
+    
+
+})
+
+
+
+
 
 cat("\n Done test.trans-rates-f-graphs.R \n")
