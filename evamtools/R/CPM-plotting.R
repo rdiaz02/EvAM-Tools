@@ -164,7 +164,7 @@ cpm_layout <- function(graph){
 #'  ), ncol = 5, byrow = TRUE
 #' )
 #' colnames(dB_c2) <- LETTERS[1:5]
-#' out <- all_methods_2_trans_mat(dB_c2)
+#' out <- evam(dB_c2)
 #' png("fluxes.png")
 #' par(mfrow = c(1, 1))
 #' plot_genot_fg(out$MHN_trans_mat, dB_c2)
@@ -408,7 +408,7 @@ process_data <- function(data, mod, prune_edges = TRUE) {
 #'  ), ncol = 5, byrow = TRUE
 #' )
 #' colnames(dB_c1) <- LETTERS[1:5]
-#' out <- all_methods_2_trans_mat(dB_c1, do_MCCBN = FALSE)
+#' out <- evam(dB_c1, do_MCCBN = FALSE)
 #' png("trans_at.png", width = 1000, height = 600, units = "px")
 #' plot_CPMs(out, dB_c1, plot_type = "trans_mat")
 #' dev.off()

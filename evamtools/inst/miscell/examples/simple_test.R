@@ -21,7 +21,7 @@ colnames(dB_c1) <- LETTERS[1:5]
 
 
 # out_with_simulations <- readRDS("cpm_out_with_simulations.rds")
-out <- all_methods_2_trans_mat(dB_c1, do_MCCBN=TRUE)
+out <- evam(dB_c1, do_MCCBN=TRUE)
 # do_HyperTraPS(dB_AND, "HyperTraPS_examples/HP_AND", runs = 500, bi=200, dry_run = TRUE)
 # plot_DAG_fg(out, dB_c1, plot_type = "matrix")
 

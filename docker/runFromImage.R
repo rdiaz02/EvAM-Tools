@@ -29,7 +29,7 @@ how2run <- function(opt){
             stop("Binary data should only contain 0 and 1")
         }
 
-        out <- all_methods_2_trans_mat(csd, do_MCCBN = TRUE)
+        out <- evam(csd, do_MCCBN = TRUE)
         out_with_simulations <- sample_all_CPMs(out, 100, 5)
         saveRDS(out_with_simulations, "/app/outside/cpm_out_with_simulations.rds")
     }

@@ -29,7 +29,7 @@ simGenotypes <- mccbn::sample_genotypes(700, true_p1,
 db2 <- simGenotypes$obs_events
 colnames(db2) <- LETTERS[1:3]
 sampledGenotypes(db2)
-out <- all_methods_2_trans_mat(db2)
+out <- evam(db2)
 plot_DAG_fg(out, db2)
 
 
@@ -48,7 +48,7 @@ simGenotypes <- mccbn::sample_genotypes(20000, true_p1,
 db2 <- simGenotypes$obs_events
 colnames(db2) <- LETTERS[1:4]
 sampledGenotypes(db2)
-out <- all_methods_2_trans_mat(db2)
+out <- evam(db2)
 plot_DAG_fg(out, db2)
 
 
@@ -70,15 +70,15 @@ simGenotypes <- mccbn::sample_genotypes(20000, true_p1,
 db2 <- simGenotypes$obs_events
 colnames(db2) <- LETTERS[1:6]
 sampledGenotypes(db2)
-out <- all_methods_2_trans_mat(db2)
+out <- evam(db2)
 plot_DAG_fg(out, db2)
 
 db3 <- remove_WT(db2, 1)
-out3 <- all_methods_2_trans_mat(db3)
+out3 <- evam(db3)
 plot_DAG_fg(out3, db3)
 
 db4 <- add_WT(db2, 100000)
-out4 <- all_methods_2_trans_mat(db4)
+out4 <- evam(db4)
 plot_DAG_fg(out4, db4)
 
 
@@ -96,11 +96,11 @@ simGenotypes <- mccbn::sample_genotypes(20000, true_p1,
 db2 <- simGenotypes$obs_events
 colnames(db2) <- LETTERS[1:5]
 sampledGenotypes(db2)
-out <- all_methods_2_trans_mat(db2)
+out <- evam(db2)
 plot_DAG_fg(out, db2)
 
 db3 <- remove_WT(db2, 1  )
-out3 <- all_methods_2_trans_mat(db3)
+out3 <- evam(db3)
 plot_DAG_fg(out3, db3)
 
 
@@ -115,7 +115,7 @@ simGenotypes <- mccbn::sample_genotypes(1000, true_p1,
 db2 <- simGenotypes$obs_events
 colnames(db2) <- LETTERS[1:7]
 sampledGenotypes(db2)
-out <- all_methods_2_trans_mat(db2)
+out <- evam(db2)
 plot_DAG_fg(out, db2)
 
 ## More
@@ -128,5 +128,5 @@ simGenotypes <- mccbn::sample_genotypes(1000, true_p1,
 db2 <- simGenotypes$obs_events
 colnames(db2) <- LETTERS[1:6]
 sampledGenotypes(db2)
-out <- all_methods_2_trans_mat(db2)
+out <- evam(db2)
 plot_DAG_fg(out, db2)

@@ -1101,7 +1101,7 @@ server <- function(input, output, session) {
         progress$inc(2/5, detail = "Running CPMs")
         do_MCCBN <- "mccbn" %in% input$more_cpms
         
-        cpm_output <- all_methods_2_trans_mat(data2run, do_MCCBN = do_MCCBN)
+        cpm_output <- evam(data2run, do_MCCBN = do_MCCBN)
         ## To see Source data in the results section
         if(input$input2build != "csd"){
             cpm_output$Source_f_graph <- source_trm

@@ -18,7 +18,7 @@
 ## Given a data set (patients as rows, genes as columns) return the
 ## transition matrices between genotypes according to all methods.
 
-## Done by function: all_methods_2_trans_mat
+## Done by function: evam (formerly all_methods_2_trans_mat)
 ## almost at the bottom.
 
 
@@ -61,75 +61,6 @@
 ## library(RhpcBLASctl)
 ## RhpcBLASctl::blas_set_num_threads(thiscores)
 ## RhpcBLASctl::omp_set_num_threads(thiscores)
-
-
-
-
-## given the samples by genes matrix, run OT, CBN, and maybe MCCBN
-## NOTE: MCCBN allowed to run with arbitrary number of columns
-ot_cbn_methods <- function(x, nboot = 0, 
-                        nboot_cbn = 0, 
-                        n00 = "auto3", 
-                        distribution_oncotree = TRUE,
-                        min.freq = 0,
-                        cores_cbn = 1,
-                        do_MCCBN = FALSE) { 
-    
-    cat("\n     Doing OT")
-    if(ncol(x) >= 2) {
-        time_ot <- system.time(
-            OT <- try(
-                suppressMessages(
-                    ot_proc(x,
-                            nboot = nboot,
-                            distribution.oncotree = distribution_oncotree))))["elapsed"]
-    } else {
-        OT <- NA
-        time_ot <- NA
-    }
-
-   
-    if(ncol(x) >= 2) {
-        cat("\n     Doing CBN")
-        time_cbn_ot <- system.time(
-            CBN_ot <- try(cbn_proc(x,
-                                   addname = "tmpo",
-                                   init.poset = "OT",
-                                   nboot = nboot_cbn, parall = TRUE,
-                                   cores = cores_cbn)))["elapsed"]
-    } else {
-        time_cbn_ot <- NA
-        CBN_ot <- NA
-    }
-    if (do_MCCBN) {
-        cat("\n     Doing MCCBN")
-        if(ncol(x) >= 2) {
-            time_mccbn <-
-                system.time(MCCBN <- try(mccbn_proc(x)))["elapsed"]
-        } else {
-            time_mccbn <- NA
-            MCCBN <- NA
-        }
-    } else {
-        time_mccbn <- NA
-        MCCBN <- NA
-    }
-
-    cat("\n                  _times_cpm: ot", time_ot,
-        " cbn ", time_cbn_ot,
-        " mccbn ", time_mccbn,
-        "\n")
-    out <- list(
-        OT = OT,
-        CBN_ot = CBN_ot,
-        MCCBN = MCCBN,
-        time_ot = time_ot,
-        time_cbn_ot = time_cbn_ot,
-        time_mccbn = time_mccbn
-    )
-    return(out)
-}
-
 
 
 
@@ -692,7 +623,8 @@ transition_fg_sparseM <- function(x, weights) {
 #'  
 #' @param x cross sectional data
 #' @param cores_cbn How many cores to use for CBN
-#' @param methods The methods to use.
+#' @param methods The methods to use. For now, the only thing that matters is
+#'     whether the vector includes the strings "MCCBN" and "DBN".
 #' @param max.cols Maximum number of columns to use in the analysis. If x has >
 #'     max.cols, selected columns are those with the largest number of events.
 #' @examples
