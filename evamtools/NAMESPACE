@@ -2,7 +2,8 @@ useDynLib(evamtools, .registration = TRUE)
 
 export(
     "sample_all_CPMs"
-    , "all_methods_2_trans_mat"
+    ##    , "all_methods_2_trans_mat"
+    , "evam"
      , "plot_CPMs"
      , "runShiny"
      )
@@ -40,4 +41,4 @@ importFrom("plot.matrix", "fmt")
 ## importFrom("relations",
 ##            "as.relation", "transitive_reduction",
 ##            "relation_incidence")
-## importFrom("OncoBN", "fitCPN")
+importFrom("OncoBN", "fitCPN")
