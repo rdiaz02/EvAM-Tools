@@ -10,6 +10,72 @@ test_that("OT and CBN: algorithm consistency with various data examples", {
     ## ot_cbn_methods is no longer used in the code directly. Here it is only
     ## really used as a wrapper to call OT, CBN and, if asked for, MCCBN.
     ## We could rewrite this without using ot_cbn_methods
+
+
+    ## given the samples by genes matrix, run OT, CBN, and maybe MCCBN
+    ## NOTE: MCCBN allowed to run with arbitrary number of columns
+    ot_cbn_methods <- function(x, nboot = 0, 
+                               nboot_cbn = 0, 
+                               n00 = "auto3", 
+                               distribution_oncotree = TRUE,
+                               min.freq = 0,
+                               cores_cbn = 1,
+                               do_MCCBN = FALSE) { 
+        
+        cat("\n     Doing OT")
+        if(ncol(x) >= 2) {
+            time_ot <- system.time(
+                OT <- try(
+                    suppressMessages(
+                        ot_proc(x,
+                                nboot = nboot,
+                                distribution.oncotree = distribution_oncotree))))["elapsed"]
+        } else {
+            OT <- NA
+            time_ot <- NA
+        }
+
+        
+        if(ncol(x) >= 2) {
+            cat("\n     Doing CBN")
+            time_cbn_ot <- system.time(
+                CBN_ot <- try(cbn_proc(x,
+                                       addname = "tmpo",
+                                       init.poset = "OT",
+                                       nboot = nboot_cbn, parall = TRUE,
+                                       cores = cores_cbn)))["elapsed"]
+        } else {
+            time_cbn_ot <- NA
+            CBN_ot <- NA
+        }
+        if (do_MCCBN) {
+            cat("\n     Doing MCCBN")
+            if(ncol(x) >= 2) {
+                time_mccbn <-
+                    system.time(MCCBN <- try(mccbn_proc(x)))["elapsed"]
+            } else {
+                time_mccbn <- NA
+                MCCBN <- NA
+            }
+        } else {
+            time_mccbn <- NA
+            MCCBN <- NA
+        }
+
+        cat("\n                  _times_cpm: ot", time_ot,
+            " cbn ", time_cbn_ot,
+            " mccbn ", time_mccbn,
+            "\n")
+        out <- list(
+            OT = OT,
+            CBN_ot = CBN_ot,
+            MCCBN = MCCBN,
+            time_ot = time_ot,
+            time_cbn_ot = time_cbn_ot,
+            time_mccbn = time_mccbn
+        )
+        return(out)
+    }
     
     test_others <- function(data) {
         ## MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
