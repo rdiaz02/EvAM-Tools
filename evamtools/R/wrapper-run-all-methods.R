@@ -531,8 +531,11 @@ cpm_access_genots_paths_w_simplified <- function(x,
     }
 
     if (length(which_col_weights) == 1) {
-        ## weighted_fgraph need not have each row sum to 1, if they are lambdas
-        ## from CBN for instance. So make sure they are transition matrices
+        ## weighted_fgraph need not have each row sum to 1.
+        ## Obvious if they are lambdas
+        ## from CBN for instance.
+        ## Neither do they sum to 1 from some OT models.
+        ## So make sure they are transition matrices
         ## between genotypes.
         trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
     } else {
