@@ -330,7 +330,7 @@ plot_genot_fg <- function(trans_mat
 #' 
 #' @param data Complete CPM output
 #' @param mod String for the CPM to process.
-#' @param prune_edges Boolean. Wether to remove genotype relationships carrying less than 1% of the flux
+#' @param prune_edges Boolean. Wether to remove genotype relationships carrying less than 1\% of the flux
 #' @returns List with processed output of the CPM
 process_data <- function(data, mod, prune_edges = TRUE) {
     dag_tree <- NULL
