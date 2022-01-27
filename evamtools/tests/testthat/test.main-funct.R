@@ -1,4 +1,4 @@
-if(TRUE) {
+if(FALSE) {
     test_that("evam gives identical results to pre-refactoring function", {
         ## Compare against a few pre-computed examples to allow
         ## for refactoring of the main function.
