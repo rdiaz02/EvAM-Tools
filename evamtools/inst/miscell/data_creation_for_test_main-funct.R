@@ -6,7 +6,11 @@
 
 
 library(relations)
-Sys.unsetenv("_R_CHECK_LENGTH_1_LOGIC2_")
+if(requireNamespace("mccbn", quietly = TRUE)) {
+    warning("To use mccbn we need to unset the environment ",
+            "variable _R_CHECK_LENGTH_1_LOGIC2_")
+    Sys.unsetenv("_R_CHECK_LENGTH_1_LOGIC2_")
+    }
 set.seed(1)
 test_main_input_data <- all_methods_2_trans_mat(input_data,
                                                 methods = c("CBN", "OT",

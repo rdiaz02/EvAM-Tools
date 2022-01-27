@@ -736,10 +736,6 @@ evam <- function(x, cores_cbn = 1,
     do_HyperTraPS <- FALSE
 
 
-    if(do_MCCBN && !requireNamespace("mccbn", quietly = TRUE))
-        stop("MC-CBN (mccbn) no installed")
-
-    
     ##########      Preprocessing: common to all methods
     x <- df_2_mat_integer(x)
     xoriginal <- x
@@ -781,7 +777,7 @@ evam <- function(x, cores_cbn = 1,
     ## MHN is fully self-contained
     message("Doing MHN")
     time_MHN <- system.time(
-        out_MHN <- do_MHN2(x, lambda = 1/nrow(x)))["elapsed"]
+        MHN_out <- do_MHN2(x, lambda = 1/nrow(x)))["elapsed"]
     message("time MHN = ", time_MHN)
 
 
@@ -802,32 +798,24 @@ evam <- function(x, cores_cbn = 1,
     
     message("Doing HESBCN")
     time_hesbcn <- system.time(
-      out_HESBCN <- do_HESBCN(x))["elapsed"]
+      HESBCN_out <- do_HESBCN(x))["elapsed"]
     message("time HESBCN = ", time_hesbcn)
 
 
-    ## ## In the OT-CBN family: which ones we use?
-    ## if(do_MCCBN)
-    ##     methods <- c("OT",
-    ##                  "CBN_ot"
-    ##                , "MCCBN")
-    ## else
-    ##     methods <- c("OT", "CBN_ot")
-
-  
+    
     message("Doing OT")
     time_ot <-
         system.time(
-            out_OT <- try(
+            OT_out <- try(
                 suppressMessages(
                     ot_proc(x,
                             nboot = 0,
-                            distribution.oncotree = distribution_oncotree))))["elapsed"]
+                            distribution.oncotree = TRUE))))["elapsed"]
     message("time OT = ", time_ot)
 
     message("Doing CBN")
     time_cbn_ot <- system.time(
-            out_CBN <- try(cbn_proc(x,
+           CBN_out <- try(cbn_proc(x,
                                    addname = "tmpo",
                                    init.poset = "OT",
                                    nboot = 0,
@@ -838,7 +826,7 @@ evam <- function(x, cores_cbn = 1,
     if(do_DBN) {
         message("Doing DBN\n\n")
         time_dbn <- system.time(
-            out_DBN <- do_DBN(x))["elapsed"]
+            DBN_out <- do_DBN(x))["elapsed"]
         message("time DBN = ", time_dbn)
     } 
     
@@ -848,100 +836,57 @@ evam <- function(x, cores_cbn = 1,
         } else {
             message("Doing MC-CBN")
             time_mccbn <-
-                system.time(out_MCCBN <- try(mccbn_proc(x)))["elapsed"]
+                system.time(MCCBN_out <- try(mccbn_proc(x)))["elapsed"]
+            message("time MC-CBN = ", time_mccbn)
         }
     }
 
     ## ######################################################################
     ##   From CPM output, obtain weighted fitness graph and transition matrix
-    ##   between genotypes. Beware that HESBCN and DBN use a different function
+    ##   between genotypes.
     ##
+    ##   Beware that HESBCN and DBN use a different function.
     ##   This does not use lapply on purpose.
 
-    OT_fg_tm <- cpm_access_genots_paths_w_simplified(out_OT)
-    CBN_fg_tm <- cpm_access_genots_paths_w_simplified(out_CBN)
+    OT_fg_tm <- cpm_access_genots_paths_w_simplified(OT_out)
+    CBN_fg_tm <- cpm_access_genots_paths_w_simplified(CBN_out)
     if(do_MCCBN)
-        MCCBN_fg_tm <- cpm_access_genots_paths_w_simplified(out_MCCBN)
-    HESBCN_fg_tm <- cpm_access_genots_paths_w_simplified_relationships(out_HESBCN)
+        MCCBN_fg_tm <- cpm_access_genots_paths_w_simplified(MCCBN_out)
+    HESBCN_fg_tm <- cpm_access_genots_paths_w_simplified_relationships(HESBCN_out)
     if(do_DBN)
-        DBN_fg_tm <- cpm_access_genots_paths_w_simplified_OR(out_DBN)
+        DBN_fg_tm <- cpm_access_genots_paths_w_simplified_OR(DBN_out)
 
+    
     ## ######################################################################
     ##    For methods for which it makes sense, obtain time discretized
     ##    transition rate matrix
-
-    CBN_td <-  trans_rate_to_trans_mat(CBN_fg_tm$weighted_fgraph,
+    ##    We use the same function for all cases.
+    
+    CBN_td_trans_mat <-  trans_rate_to_trans_mat(CBN_fg_tm$weighted_fgraph,
+                                       method = "uniformization")
+    if(do_MCCBN)
+        MCCBN_td_trans_mat <-  trans_rate_to_trans_mat(MCCBN_fg_tm$weighted_fgraph,
+                                       method = "uniformization")
+    HESBCN_td_trans_mat <-  trans_rate_to_trans_mat(HESBCN_fg_tm$weighted_fgraph,
                                        method = "uniformization")
     
-    
-    ## pre_trans_mat_HESBCN <- lapply(
-    ##     list(HESBCN = out_hesbcn
-    ##          ),
-    ##     cpm_access_genots_paths_w_simplified_relationships)
-    ## pre_trans_mat_others["HESBCN"] <- list(pre_trans_mat_HESBCN$HESBCN)
-
-  
-    ## if (do_DBN) {
-    ##     pre_trans_mat_new_CPMS <- lapply( 
-    ##         list(DBN = out_dbn
-    ##              ),
-    ##         cpm_access_genots_paths_w_simplified_OR)
-    ##     pre_trans_mat_others["DBN"] <- list(pre_trans_mat_new_CPMS$DBN)
-    ## } 
-
-
-   
-
-    
-    cat("\n    getting transition matrices for all non-mhn methods \n")
-
- 
-    ## Time discretized, via uniformization
-    ## Only makes sense for methods that return rates
-    td <- lapply(pre_trans_mat_others[c("MCCBN", "CBN_ot",
-                                        "HyperTraPS",
-                                        "HESBCN")[c(do_MCCBN, TRUE,
-                                                    do_HyperTraPS, TRUE)]],
-                 function(x) trans_rate_to_trans_mat(x$weighted_fgraph,
-                                                     method = "uniformization"))
 
     ## Return list always has the same elements
     ## Set to NA those for not run models.
-    if (do_MCCBN) {
-        MCCBN_model <- cpm_out_others$MCCBN$edges
-        MCCBN_f_graph <- pre_trans_mat_others$MCCBN$weighted_fgraph
-        MCCBN_trans_mat <- pre_trans_mat_others$MCCBN$trans_mat_genots
-        MCCBN_td_trans_mat <- td$MCCBN
-    } else {
-        MCCBN_model <- NA
-        MCCBN_f_graph <- NA
-        MCCBN_trans_mat <- NA
+    if (!do_MCCBN) {
+        MCCBN_out <- list(edges = NA)
+        MCCBN_fg_tm <- list(weighted_fgraph = NA, trans_mat_genots = NA)
         MCCBN_td_trans_mat <- NA
     }
-    
-    if (do_DBN) {
-        DBN_model <- out_dbn$edges
-        DBN_likelihood <- out_dbn$likelihood
-        DBN_f_graph <- pre_trans_mat_new_CPMS$DBN$weighted_fgraph
-        DBN_trans_mat <- pre_trans_mat_new_CPMS$DBN$trans_mat_genots
-    } else {
-        DBN_model <- NA
-        DBN_likelihood <- NA
-        DBN_f_graph <- NA
-        DBN_trans_mat <- NA
+    if (!do_DBN) {
+        DBN_out <- list(edges = NA, likelihood = NA)
+        DBN_fg_tm <- list(weighted_fgraph = NA, trans_mat_genots = NA)
     }
 
-    if (do_HyperTraPS) {
-        HyperTraPS_model <-  out_HyperTraPS$edges
-        HyperTraPS_f_graph <- pre_trans_mat_new_CPMS$HyperTraPS$weighted_fgraph
-        HyperTraPS_trans_mat <- pre_trans_mat_new_CPMS$HyperTraPS$trans_mat_genots
-        HyperTraPS_td_trans_mat <- td$HyperTraPS
-    } else {
-        HyperTraPS_model <- NA
-        HyperTraPS_f_graph <- NA
-        HyperTraPS_trans_mat <- NA
-        HyperTraPS_td_trans_mat <- NA
-    }
+    HyperTraPS_model <- NA
+    HyperTraPS_f_graph <- NA
+    HyperTraPS_trans_mat <- NA
+    HyperTraPS_td_trans_mat <- NA
 
     ## Getting all paths to global maximum
     ## Simply call do_weighted_paths_to_max on a list of
@@ -953,32 +898,38 @@ evam <- function(x, cores_cbn = 1,
     ## f_graph: remember this is the transition rate matrix
     ## for CBN, MCCBN, HESBCN 
     return(list(
-        OT_model = cpm_out_others$OT$edges,
-        OT_f_graph = pre_trans_mat_others$OT$weighted_fgraph,
-        OT_trans_mat = pre_trans_mat_others$OT$trans_mat_genots,
-        OT_genots_predicted = cpm_out_others$OT$genots_predicted,
-        CBN_model = cpm_out_others$CBN_ot$edges,
-        CBN_f_graph = pre_trans_mat_others$CBN_ot$weighted_fgraph,
-        CBN_trans_mat = pre_trans_mat_others$CBN$trans_mat_genots,
-        CBN_td_trans_mat = td$CBN_ot,
-        MCCBN_model = MCCBN_model,
-        MCCBN_f_graph = MCCBN_f_graph,
-        MCCBN_trans_mat = MCCBN_trans_mat,
+        OT_model = OT_out$edges,
+        OT_f_graph = OT_fg_tm$weighted_fgraph,
+        OT_trans_mat = OT_fg_tm$trans_mat_genots,
+        OT_genots_predicted = OT_out$genots_predicted,
+
+        CBN_model = CBN_out$edges,
+        CBN_f_graph = CBN_fg_tm$weighted_fgraph,
+        CBN_trans_mat = CBN_fg_tm$trans_mat_genots,
+        CBN_td_trans_mat = CBN_td_trans_mat,
+
+        MCCBN_model = MCCBN_out$edges,
+        MCCBN_f_graph = MCCBN_fg_tm$weighted_fgraph,
+        MCCBN_trans_mat = MCCBN_fg_tm$trans_mat_genots,
         MCCBN_td_trans_mat = MCCBN_td_trans_mat,
-        MHN_theta = out_MHN$theta,
-        MHN_exp_theta = exp(out_MHN$theta),
-        MHN_transitionRateMatrix = out_MHN$transitionRateMatrix,
-        MHN_trans_mat = out_MHN$transitionMatrixCompExp,
-        MHN_td_trans_mat = out_MHN$transitionMatrixTimeDiscretized,
-        DBN_model = DBN_model,
-        DBN_likelihood = DBN_likelihood,
-        DBN_f_graph = DBN_f_graph,
-        DBN_trans_mat = DBN_trans_mat,
-        HESBCN_model = out_hesbcn$edges,
-        HESBCN_parent_set = out_hesbcn$parent_set,
-        HESBCN_f_graph = pre_trans_mat_HESBCN$HESBCN$weighted_fgraph,
-        HESBCN_trans_mat = pre_trans_mat_HESBCN$HESBCN$trans_mat_genots,
-        HESBCN_td_trans_mat = td$HESBCN,
+
+        MHN_theta = MHN_out$theta,
+        MHN_exp_theta = exp(MHN_out$theta),
+        MHN_transitionRateMatrix = MHN_out$transitionRateMatrix,
+        MHN_trans_mat = MHN_out$transitionMatrixCompExp,
+        MHN_td_trans_mat = MHN_out$transitionMatrixTimeDiscretized,
+
+        DBN_model = DBN_out$edges,
+        DBN_likelihood = DBN_out$likelihood, 
+        DBN_f_graph = DBN_fg_tm$weighted_fgraph, 
+        DBN_trans_mat = DBN_fg_tm$trans_mat_genots,
+
+        HESBCN_model = HESBCN_out$edges,
+        HESBCN_parent_set = HESBCN_out$parent_set,
+        HESBCN_f_graph = HESBCN_fg_tm$weighted_fgraph,
+        HESBCN_trans_mat = HESBCN_fg_tm$trans_mat_genots,
+        HESBCN_td_trans_mat = HESBCN_td_trans_mat,
+
         HyperTraPS_model = HyperTraPS_model,
         HyperTraPS_f_graph = HyperTraPS_f_graph,
         HyperTraPS_trans_mat = HyperTraPS_trans_mat,

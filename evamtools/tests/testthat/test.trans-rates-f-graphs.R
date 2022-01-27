@@ -5,7 +5,12 @@
 test_that("OT and CBN: algorithm consistency with various data examples", {
     
     ## Check OT, CBN, MCCBN if installed
-    ## for consistency of different algorithms 
+    ## for consistency of different algorithms
+
+    ## ot_cbn_methods is no longer used in the code directly. Here it is only
+    ## really used as a wrapper to call OT, CBN and, if asked for, MCCBN.
+    ## We could rewrite this without using ot_cbn_methods
+    
     test_others <- function(data) {
         ## MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
         MCCBN_INSTALLED <- FALSE
@@ -204,12 +209,12 @@ and identical results between algorithms with sparse matrices, CBN", {
     
     ## FIXME: avoid partial matching. $weighted_paths
     ## should be weighted_paths_to_max
-    expect_equivalent(oex0$weighted_paths[, 2], 1)
+    expect_equivalent(oex0$weighted_paths_to_max[, 2], 1)
     
-    expect_equivalent(oex1$weighted_paths[, 2],
+    expect_equivalent(oex1$weighted_paths_to_max[, 2],
                       c(1/3 * 1 * 1 * 1, 2/3 * 1 * 1 * 1))
     
-    expect_equivalent(oex2$weighted_paths[, 2],
+    expect_equivalent(oex2$weighted_paths_to_max[, 2],
                       c(10/21 * 11/23 * 12/26 * 1,
                         10/21 * 11/23 * 14/26 * 1,
                         10/21 * 12/23 * 1     * 1,
@@ -217,14 +222,14 @@ and identical results between algorithms with sparse matrices, CBN", {
                         11/21 * 10/24 * 14/26 * 1,
                         11/21 * 14/24 * 1     * 1))
     
-    expect_equivalent(oex3$weighted_paths[, 2],
+    expect_equivalent(oex3$weighted_paths_to_max[, 2],
                       c(2/5 * 3/7 * 1 * 1,
                         2/5 * 4/7 * 3/8 * 1,
                         2/5 * 4/7 * 5/8 * 1,
                         3/5 * 1 *   1   * 1
                         ))
     
-    expect_equivalent(oex4$weighted_paths[, 2],
+    expect_equivalent(oex4$weighted_paths_to_max[, 2],
                       c(1/3 * 2/9 * 3/7 * 1,
                         1/3 * 2/9 * 4/7 * 1,
                         1/3 * 3/9 * 2/6 * 1,
@@ -235,7 +240,7 @@ and identical results between algorithms with sparse matrices, CBN", {
                         2/3 * 1 *   4/7 * 1
                         ))
     
-    expect_equivalent(oex5$weighted_paths[, 2],
+    expect_equivalent(oex5$weighted_paths_to_max[, 2],
                       c(1/6 * 2/5 * 1 * 1,
                         1/6 * 3/5 * 1 * 1,
                         2/6 * 1/4 * 1 * 1,
@@ -244,7 +249,7 @@ and identical results between algorithms with sparse matrices, CBN", {
                         3/6 * 2/3 * 1 * 1
                         ))
     
-    expect_equivalent(oex6$weighted_paths[, 2],
+    expect_equivalent(oex6$weighted_paths_to_max[, 2],
                       c(1/6 * 2/5 * 3/8 * 1,
                         1/6 * 2/5 * 5/8 * 1,
                         1/6 * 3/5 * 1 * 1,
@@ -256,7 +261,7 @@ and identical results between algorithms with sparse matrices, CBN", {
                         ))
     
     
-    expect_equivalent(oex7$weighted_paths[, 2],
+    expect_equivalent(oex7$weighted_paths_to_max[, 2],
                       c(1 * 2/9 * 3/7 * 4/9,
                         1 * 2/9 * 3/7 * 5/9,
                         1 * 2/9 * 4/7 * 1,
@@ -267,7 +272,7 @@ and identical results between algorithms with sparse matrices, CBN", {
                         1 * 4/9 * 3/5 * 1
                         ))
     
-    expect_equivalent(oex8$weighted_paths[, 2],
+    expect_equivalent(oex8$weighted_paths_to_max[, 2],
                       c(1/3 * 1 * 1 * 4/9,
                         1/3 * 1 * 1 * 5/9,
                         2/3 * 1 * 1 * 4/9,
@@ -275,7 +280,7 @@ and identical results between algorithms with sparse matrices, CBN", {
                         ))
     
     
-    expect_equivalent(oex9$weighted_paths[, 2],
+    expect_equivalent(oex9$weighted_paths_to_max[, 2],
                       c(6/6 * 7/7 * 8/27 * 9/19 * 10/10,
                         6/6 * 7/7 * 8/27 * 10/19 * 9/9,                    
                         6/6 * 7/7 * 9/27 * 8/18 * 10/10,
@@ -284,12 +289,12 @@ and identical results between algorithms with sparse matrices, CBN", {
                         6/6 * 7/7 * 10/27 * 9/17 * 8/8
                         ))
     
-    expect_equivalent(oex10$weighted_paths[, 2],
+    expect_equivalent(oex10$weighted_paths_to_max[, 2],
                       c(1/1 * 2/5 * 3/3 * 4/4 * 5/5,
                         1/1 * 3/5 * 2/2 * 4/4 * 5/5                                        
                         ))
     
-    expect_equivalent(oex11$weighted_paths[, 2],
+    expect_equivalent(oex11$weighted_paths_to_max[, 2],
                       c(3/18 * 4/15 * 5/11 * 7/7,
                         3/18 * 4/15 * 6/11 * 7/7,
                         3/18 * 5/15 * 4/10 * 7/7,
