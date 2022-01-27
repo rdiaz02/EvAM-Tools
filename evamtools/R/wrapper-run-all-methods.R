@@ -947,7 +947,8 @@ evam <- function(x, cores_cbn = 1,
     ## Simply call do_weighted_paths_to_max on a list of
     ## transition matrices and a pre-created paths_to_max
     ## Make sure we are not repeating expensive operations
-
+    ## When testing, compare against cpm_access_genots_paths_w
+    ## for OT and CBN
 
     ## f_graph: remember this is the transition rate matrix
     ## for CBN, MCCBN, HESBCN 
