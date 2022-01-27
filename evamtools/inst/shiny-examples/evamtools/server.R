@@ -220,9 +220,9 @@ compare_cpm_freqs <- function(data, type){
         all_counts[order_by_counts, ]
         return(all_counts[order_by_counts, ])
 
-    } else if(type %in% c("f_graph", "genotype_transitions", "trans_mat", "td_trans_mat")){
-        var2var <- c("f_graph", "genotype_transitions", "trans_mat", "td_trans_mat")
-        names(var2var) <- c("f_graph", "genotype_transitions", "trans_mat", "td_trans_mat")
+    } else if(type %in% c("trans_rate_mat", "genotype_transitions", "trans_mat", "td_trans_mat")){
+        var2var <- c("trans_rate_mat", "genotype_transitions", "trans_mat", "td_trans_mat")
+        names(var2var) <- c("trans_rate_mat", "genotype_transitions", "trans_mat", "td_trans_mat")
         
         var2use <- var2var[type]
         ## 1 Methods to compute
@@ -1104,6 +1104,7 @@ server <- function(input, output, session) {
         cpm_output <- evam(data2run, do_MCCBN = do_MCCBN)
         ## To see Source data in the results section
         if(input$input2build != "csd"){
+            ## FIXME: rename f_graph to trans_rate_mat: ???
             cpm_output$Source_f_graph <- source_trm
             cpm_output$Source_trans_mat <- rowScaleMatrix(source_trm)
         }
@@ -1121,7 +1122,8 @@ server <- function(input, output, session) {
             , input$gene_number, data$gene_names[1:input$gene_number])
         progress$inc(4/5, detail = "Post processing data")
         Sys.sleep(0.5)
-        new_data$MHN_f_graph <- new_data$MHN_transitionRateMatrix
+        ## FIXME: rename f_graph to trans_rate_mat?
+        new_data$MHN_f_graph <- new_data$MHN_trans_rate_mat
         new_data$OT_f_graph <- NULL
         orig_data <- list(data = data2run, name = data$name
             , type = input$input2build, gene_names = data$gene_names
@@ -1165,7 +1167,8 @@ server <- function(input, output, session) {
     )
 
     cpm_out <- readRDS("./test_data/AND_test_cpm.RDS")
-    cpm_out$MHN_f_graph <- cpm_out$MHN_transitionRateMatrix
+    ## FIXME: rename to trans_rate_mat??
+    cpm_out$MHN_f_graph <- cpm_out$MHN_trans_rate_mat
     
     all_cpm_out <- reactiveValues(output = list(user = cpm_out))
 
@@ -1219,7 +1222,7 @@ server <- function(input, output, session) {
                             , min_edge)
                     }
                 }
-            } else if (selected_plot_type== "f_graph") {
+            } else if (selected_plot_type== "trans_rate_mat") {
                 max_edge <- min_edge <- NULL
             }
 
@@ -1292,8 +1295,10 @@ server <- function(input, output, session) {
                 tags$div(class = "inline",
                   radioButtons(inputId = "data2plot", 
                       label = "Data to show", 
-                      choiceNames =  c("Transition Rate matrix", "Transitions", "Transition Probability Matrix", "Time Discretized transition matrix"),
-                      choiceValues = c("f_graph", "genotype_transitions", "trans_mat", "td_trans_mat"),
+                      choiceNames =  c("Transition rate matrix", "Transitions",
+                                       "Transition matrix", "Time-discretized transition matrix"),
+                      choiceValues = c("trans_rate_mat", "genotype_transitions",
+                                       "trans_mat", "td_trans_mat"),
                       selected = "genotype_transitions"
                       )
                     ),
@@ -1358,8 +1363,18 @@ server <- function(input, output, session) {
                 radioButtons(inputId = "data2table", 
                         label = "", 
                         inline = TRUE,
-                        choiceNames =  c("Transition Rates", "Genotype Transitions Counts", "Genotype frequencies", "Conditional Transition Probabilities", "Lambdas/probabilities", "Time discreticed transition matrix"),
-                        choiceValues =  c("f_graph", "genotype_transitions", "freqs", "trans_mat", "lambdas", "td_trans_mat"),
+                        choiceNames =  c("Transition rates",
+                                         "Genotype transitions counts",
+                                         "Genotype frequencies",
+                                         "Transition probabilities",
+                                         "Lambdas/probabilities",
+                                         "Time-discretized transition matrix"),
+                        choiceValues =  c("trans_rate_mat",
+                                          "genotype_transitions",
+                                          "freqs",
+                                          "trans_mat",
+                                          "lambdas",
+                                          "td_trans_mat"),
                         selected =  "freqs"
                         ),
                 tags$div( 
@@ -1399,7 +1414,8 @@ server <- function(input, output, session) {
     ## Upload button
     observeEvent(input$output_cpms, {
         cpm_out <- readRDS(input$output_cpms$datapath)
-        cpm_out$MHN_f_graph <- cpm_out$MHN_transitionRateMatrix
+        ## FIXME: f_graph to trans_rate_mat?
+        cpm_out$MHN_f_graph <- cpm_out$MHN_trans_rate_mat
         if(is.null(cpm_out$name)) cpm_out$name <- "User_Data"
         all_cpm_out$output[[cpm_out$name]] <- cpm_out
         updateRadioButtons(session, "select_cpm", selected = cpm_out$name)

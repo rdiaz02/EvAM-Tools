@@ -20,12 +20,12 @@
 #' Some of the specific ouputs are:
 #' \describe{
 #'   \item{csd_data}{csd_data, Dataframe with the cross sectional data that generated the results}
-#'   \item{*_f_graph}{Matrix with genotype-genotypes transition rates. Or probabilities for OT}
+#'   \item{*_trans_rate_mat}{Transition rate matrix.}
+#'   \item{*_f_graph}{For OT (and DBN?) what we call weighted fitness graph. These are not really probabilities, though they are obtained with an algorithm identical to the one used for the transition rate matrix.}
 #'   \item{*_model}{Contains the edges of the gene relationship DAG}
-#'   \item{*_trans_mat}{Conditional probability transition matrix}
-#'   \item{*_td_trans_mat}{Time discretized transition matrix}
+#'   \item{*_trans_mat}{Transition matrix between genotypes.}
+#'   \item{*_td_trans_mat}{Time discretized transition matrix.}
 #'   \item{OT_genots_predicted}{Genotype frequency for OT model}
-#'   \item{MHN_transitionRateMatrix}{Transition rate matrix of MHN}
 #' }
 "cpm_output"
 

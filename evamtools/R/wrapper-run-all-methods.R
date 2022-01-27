@@ -466,6 +466,7 @@ cpm_access_genots_paths_w_simplified <- function(x,
         ## Obvious if they are lambdas
         ## from CBN for instance.
         ## Neither do they sum to 1 from some OT models.
+        ## (see example ex1 in test.trans-rates-f-graphs.R)
         ## So make sure they are transition matrices
         ## between genotypes.
         trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
@@ -475,6 +476,8 @@ cpm_access_genots_paths_w_simplified <- function(x,
     
     return(list(
         fgraph = fgraph,
+        ## again: the weighted_fgraph is the transition rate matrix
+        ## for CBN and MCCBN. Not for OT.
         weighted_fgraph = weighted_fgraph,
         trans_mat_genots = trans_mat_genots
     ))
@@ -520,6 +523,7 @@ cpm_access_genots_paths_w_simplified_OR <-
 
         return(list(
             fgraph = fgraph,
+            ## Seems similar to OT. This ain't the transition rate matrix.
             weighted_fgraph = weighted_fgraph,
             trans_mat_genots = trans_mat_genots
         ))
@@ -565,6 +569,7 @@ cpm_access_genots_paths_w_simplified_relationships <-
 
         return(list(
             fgraph = fgraph,
+            ## weighted_fgraph is the transition rate matrix
             weighted_fgraph = weighted_fgraph,
             trans_mat_genots = trans_mat_genots
         ))
@@ -705,27 +710,20 @@ evam <- function(x, cores_cbn = 1,
     ##         list(pre_trans_mat_new_CPMS$HyperTraPS)
     ## } 
 
+
+    ## ######################################################################
+    ##      Run MHN
+    ##      MHN is fully self-contained: CPM, transition matrix, etc.
+    ## ######################################################################
     
-    ## MHN is fully self-contained
     message("Doing MHN")
     time_MHN <- system.time(
         MHN_out <- do_MHN2(x, lambda = 1/nrow(x)))["elapsed"]
     message("time MHN = ", time_MHN)
 
 
-    ## FIXME: the same information is available from some of the
-    ## pre_trans_mat_others and pre_trans_mat_new_CPMS and pre_trans_mat_HESBCN
-    ## Clarify and avoid duplication: costly with large number of genotypes
-    ## Seems to affect DBN and HyperTraPS, and HESBCN 
-    
-    ## This function has grown over time and would benefit from rewriting.
-    ## We run MHN, HESBCN, DBN, each in its own call. OT and CBN in the same call.
-    ## Then, as appropriate, we might need to get transition matrices
-    ## on other calls.
-    ## This could be simplified/unified, but inherits from working code.
-    
     ## ####################################################################
-    ##    Run each one of the CPMs themselves
+    ##    Run each one of the remaining CPMs
     ## ####################################################################
     
     message("Doing HESBCN")
@@ -779,7 +777,8 @@ evam <- function(x, cores_cbn = 1,
     ##
     ##   Beware that HESBCN and DBN use a different function.
     ##   This does not use lapply on purpose.
-
+    ## ######################################################################
+    
     OT_fg_tm <- cpm_access_genots_paths_w_simplified(OT_out)
     CBN_fg_tm <- cpm_access_genots_paths_w_simplified(CBN_out)
     if(do_MCCBN)
@@ -793,6 +792,7 @@ evam <- function(x, cores_cbn = 1,
     ##    For methods for which it makes sense, obtain time discretized
     ##    transition rate matrix
     ##    We use the same function for all cases.
+    ## ######################################################################
     
     CBN_td_trans_mat <-  trans_rate_to_trans_mat(CBN_fg_tm$weighted_fgraph,
                                        method = "uniformization")
@@ -816,11 +816,11 @@ evam <- function(x, cores_cbn = 1,
     }
 
     HyperTraPS_model <- NA
-    HyperTraPS_f_graph <- NA
+    HyperTraPS_trans_rate_mat <- NA
     HyperTraPS_trans_mat <- NA
     HyperTraPS_td_trans_mat <- NA
 
-    ## Getting all paths to global maximum
+    ## Future: Getting all paths to global maximum
     ## Simply call do_weighted_paths_to_max on a list of
     ## transition matrices and a pre-created paths_to_max
     ## Make sure we are not repeating expensive operations
@@ -828,7 +828,9 @@ evam <- function(x, cores_cbn = 1,
     ## for OT and CBN
 
     ## f_graph: remember this is the transition rate matrix
-    ## for CBN, MCCBN, HESBCN 
+    ## for CBN, MCCBN, HESBCN
+    ## For OT ... well, it is something else, but not really probabilities
+    ## of anything.
     return(list(
         OT_model = OT_out$edges,
         OT_f_graph = OT_fg_tm$weighted_fgraph,
@@ -836,18 +838,18 @@ evam <- function(x, cores_cbn = 1,
         OT_genots_predicted = OT_out$genots_predicted,
 
         CBN_model = CBN_out$edges,
-        CBN_f_graph = CBN_fg_tm$weighted_fgraph,
+        CBN_trans_rate_mat = CBN_fg_tm$weighted_fgraph,
         CBN_trans_mat = CBN_fg_tm$trans_mat_genots,
         CBN_td_trans_mat = CBN_td_trans_mat,
 
         MCCBN_model = MCCBN_out$edges,
-        MCCBN_f_graph = MCCBN_fg_tm$weighted_fgraph,
+        MCCBN_trans_rate_mat = MCCBN_fg_tm$weighted_fgraph,
         MCCBN_trans_mat = MCCBN_fg_tm$trans_mat_genots,
         MCCBN_td_trans_mat = MCCBN_td_trans_mat,
 
         MHN_theta = MHN_out$theta,
         MHN_exp_theta = exp(MHN_out$theta),
-        MHN_transitionRateMatrix = MHN_out$transitionRateMatrix,
+        MHN_trans_rate_mat = MHN_out$transitionRateMatrix,
         MHN_trans_mat = MHN_out$transitionMatrixCompExp,
         MHN_td_trans_mat = MHN_out$transitionMatrixTimeDiscretized,
 
@@ -858,12 +860,12 @@ evam <- function(x, cores_cbn = 1,
 
         HESBCN_model = HESBCN_out$edges,
         HESBCN_parent_set = HESBCN_out$parent_set,
-        HESBCN_f_graph = HESBCN_fg_tm$weighted_fgraph,
+        HESBCN_trans_rate_mat = HESBCN_fg_tm$weighted_fgraph,
         HESBCN_trans_mat = HESBCN_fg_tm$trans_mat_genots,
         HESBCN_td_trans_mat = HESBCN_td_trans_mat,
 
         HyperTraPS_model = HyperTraPS_model,
-        HyperTraPS_f_graph = HyperTraPS_f_graph,
+        HyperTraPS_trans_rate_mat = HyperTraPS_trans_rate_mat,
         HyperTraPS_trans_mat = HyperTraPS_trans_mat,
         HyperTraPS_td_trans_mat = HyperTraPS_td_trans_mat,
         csd_data = xoriginal

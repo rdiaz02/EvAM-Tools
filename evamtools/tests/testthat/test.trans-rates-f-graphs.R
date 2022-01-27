@@ -869,7 +869,10 @@ and identical results between algorithms with sparse matrices, OT", {
                     To =   c("A", "B", "C", "D"),
                     OT_edgeWeight = c(0.3, 0.2, 0.4, 0.7)
                 ))
-
+    ## This shows the weigthed_f_graph are not really conditional
+    ## probabilities of transition for OT.
+    ## See moving from C to each of its descendants
+    ## or A,C to each of its descendants
     ex1 <- list(edges = data.frame(
                     From = c("Root", "Root", "Root", "C"),
                     To =   c("A", "B", "C", "D"),

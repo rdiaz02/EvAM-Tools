@@ -47,6 +47,9 @@ if(FALSE) {
         ## Beware that CBN has a random component that cannot be fixed using
         ## set.seed. And the same thing happens with MCCBN.
 
+        ## Recall now we use trans_rate_mat consistently in output,
+        ## not transitionRateMatrix nor f_graph (for MCCBN, HESBCN, CBN)
+
         identical_parts <- c(
             "OT_model",                 "OT_f_graph"              ,
             "OT_trans_mat",             "OT_genots_predicted"     ,
