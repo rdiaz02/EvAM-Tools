@@ -156,11 +156,11 @@ test_that("OT and CBN: algorithm consistency with various data examples", {
 test_that("weighted paths and transition matrices computations against
 hand-computed values,
 and identical results between algorithms with sparse matrices, CBN", {
-    ## testing weighted_paths is implicitly testing the transition matrix
-    ## as weighted_paths is computed from the transition matrix
-    ## In the future, and if under paranoia, have a few tests just
-    ## of the transition matrix. Though I do this with OT below.
-    ## We use CBN, but the code does not differentiate between CBN and OT.
+    ## testing weighted_paths_to_max is implicitly testing the transition matrix
+    ## as weighted_paths is computed from the transition matrix In the future,
+    ## and if under paranoia, have a few tests just of the transition
+    ## matrix. Though I do this with OT below.  We use CBN, but the code does not
+    ## differentiate between CBN and OT.
 
     ## Even if we no longer use the nonsimplified version, leave here for
     ## testing. As the _simplified version gives the same output for fgraph,
@@ -273,8 +273,6 @@ and identical results between algorithms with sparse matrices, CBN", {
     oex10 <- cpm_access_genots_paths_w(ex10)
     oex11 <- cpm_access_genots_paths_w(ex11)
     
-    ## FIXME: avoid partial matching. $weighted_paths
-    ## should be weighted_paths_to_max
     expect_equivalent(oex0$weighted_paths_to_max[, 2], 1)
     
     expect_equivalent(oex1$weighted_paths_to_max[, 2],
