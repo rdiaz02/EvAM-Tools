@@ -202,7 +202,7 @@ plot_model <- function(cpm_output, mod){
 }
 
 create_tabular_data <- function(data, type){
-    available_methods <- c("Source", "OT", "CBN", "MHN", "HESBCN")
+    available_methods <- c("Source", "OT", "CBN", "MHN", "HESBCN", "DBN")
     # , "DBN", "MCCBN")
     if(type %in% c("freqs")){
         all_counts <- data.frame(Genotype = data[["MHN_genotype_freqs"]]$Genotype)
@@ -954,7 +954,7 @@ server <- function(input, output, session) {
     observeEvent(input$thetas_table_cell_edit, {
         info <-input$thetas_table_cell_edit
         data$thetas[1:input$gene_number, 1:input$gene_number] <- 
-            editData(data$thetas[1:input$gene_number, 1:input$gene_number], info, "thetas") 
+            DT::editData(data$thetas[1:input$gene_number, 1:input$gene_number], info, "thetas") 
         
         datasets$all_csd[[input$input2build]][[input$select_csd]]$thetas <- data$thetas
         ## Resample based on changes
@@ -1031,7 +1031,7 @@ server <- function(input, output, session) {
     observeEvent(input$csd_freqs_cell_edit, {
         info <- input$csd_freqs_cell_edit
         info[ , "col"] <- 2
-        data$csd_freqs <- editData(data$csd_freqs, info, "csd_freqs") 
+        data$csd_freqs <- DT::editData(data$csd_freqs, info, "csd_freqs") 
         ## Filtering out non-positive counts
         data$csd_freqs <- data$csd_freqs[data$csd_freqs[,2] > 0,]
         data$data <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
@@ -1081,10 +1081,10 @@ server <- function(input, output, session) {
         
         if(input$input2build == "dag"){
             tmp_data <- list(edges = dag_data(), parent_set = data$dag_parent_set)
-            source_trm <- cpm_access_genots_paths_w_simplified_relationships(tmp_data)$weighted_fgraph
+            source_trm <- evamtools:::cpm_access_genots_paths_w_simplified_relationships(tmp_data)$weighted_fgraph
         }else if(input$input2build == "matrix"){
-            source_trm <- theta_to_trans_rate_3_SM(data$thetas[1:input$gene_number, 1:input$gene_number],
-                                    inner_transition = inner_transitionRate_3_1)
+            source_trm <- evamtools:::theta_to_trans_rate_3_SM(data$thetas[1:input$gene_number, 1:input$gene_number],
+                                    inner_transition = evamtools:::inner_transitionRate_3_1)
         }
 
         ## TODO: Put everything with a try and display a modal if I have an error
@@ -1101,13 +1101,14 @@ server <- function(input, output, session) {
         Sys.sleep(0.5)
         progress$inc(2/5, detail = "Running CPMs")
         do_MCCBN <- "mccbn" %in% input$more_cpms
-        
-        cpm_output <- evam(data2run, do_MCCBN = do_MCCBN)
+        methods <- c("CBN", "OT", "HESBCN", "MHN", "DBN")
+        if(do_MCCBN) methods <- c(methods, "MCCBN")
+        cpm_output <- evam(data2run, methods = methods)
         ## To see Source data in the results section
         if(input$input2build != "csd"){
             ## FIXME: rename f_graph to trans_rate_mat: ???
-            cpm_output$Source_f_graph <- source_trm
-            cpm_output$Source_trans_mat <- rowScaleMatrix(source_trm)
+            cpm_output$Source_trans_rate_mat <- source_trm
+            cpm_output$Source_trans_mat <- evamtools:::rowScaleMatrix(source_trm)
         }
         if(input$input2build == "dag"){
             cpm_output$Source_model <- dag_data()
@@ -1124,7 +1125,7 @@ server <- function(input, output, session) {
         progress$inc(4/5, detail = "Post processing data")
         Sys.sleep(0.5)
         ## FIXME: rename f_graph to trans_rate_mat?
-        new_data$MHN_f_graph <- new_data$MHN_trans_rate_mat
+        # new_data$MHN_f_graph <- new_data$MHN_trans_rate_mat
         new_data$OT_f_graph <- NULL
         orig_data <- list(data = data2run, name = data$name
             , type = input$input2build, gene_names = data$gene_names
@@ -1167,9 +1168,10 @@ server <- function(input, output, session) {
             columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE)
     )
 
+    ## FIXME get sample data from namespace
     cpm_out <- readRDS("./test_data/AND_test_cpm.RDS")
     ## FIXME: rename to trans_rate_mat??
-    cpm_out$MHN_f_graph <- cpm_out$MHN_trans_rate_mat
+    # cpm_out$MHN_f_graph <- cpm_out$MHN_trans_rate_mat
     
     all_cpm_out <- reactiveValues(output = list(user = cpm_out))
 
@@ -1290,8 +1292,9 @@ server <- function(input, output, session) {
                 tags$div(class = "inline",
                   checkboxGroupInput(inputId = "cpm2show", 
                       label = "CPMs to show", 
-                      choices = c("Source", "OT", "CBN", "MHN", "HESBCN"),
-                    #   , "DBN", "MCCBN"),
+                      choices = c("Source", "OT", "CBN", "MHN", "HESBCN", "DBN"),
+                    #   , "DBN")
+                    # , "MCCBN"),
                       selected = c("CBN", "MHN", "HESBCN")),
                       
                 tags$div(class = "inline",
@@ -1417,7 +1420,7 @@ server <- function(input, output, session) {
     observeEvent(input$output_cpms, {
         cpm_out <- readRDS(input$output_cpms$datapath)
         ## FIXME: f_graph to trans_rate_mat?
-        cpm_out$MHN_f_graph <- cpm_out$MHN_trans_rate_mat
+        # cpm_out$MHN_f_graph <- cpm_out$MHN_trans_rate_mat
         if(is.null(cpm_out$name)) cpm_out$name <- "User_Data"
         all_cpm_out$output[[cpm_out$name]] <- cpm_out
         updateRadioButtons(session, "select_cpm", selected = cpm_out$name)

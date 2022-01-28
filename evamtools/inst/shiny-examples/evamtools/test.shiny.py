@@ -72,16 +72,17 @@ class evamtools_basics(unittest.TestCase):
 
     def _select_tab(self, input_type, name_dataset = None):
         csd_tab = self.driver.find_element_by_css_selector(f"#input2build .radio input[value={input_type}]")
-        csd_tab.click()
+        csd_tab.find_element_by_xpath('..').click()
+        # csd_tab.click()
         sleep(0.5)
         if(name_dataset):
             dataset_tab = self.driver.find_element_by_css_selector(f"#select_csd .radio input[value={name_dataset}]")
-            dataset_tab.click()
+            dataset_tab.find_element_by_xpath('..').click()
         sleep(0.5)
     
     def _select_result(self, cpm_name):
         dataset_tab = self.driver.find_element_by_css_selector(f"#cpm_list .radio input[value={cpm_name}]")
-        dataset_tab.click()
+        dataset_tab.find_element_by_xpath('..').click()
         sleep(0.5)
 
     def _process_genotype_table(self, data):
@@ -911,6 +912,7 @@ class evamtools_test_results(evamtools_basics):
 
         not_ot = available_cpms.copy()
         not_ot.remove("OT")
+        not_ot.remove("DBN")
 
         expected_tabular = not_ot.copy()
 
@@ -928,12 +930,13 @@ class evamtools_test_results(evamtools_basics):
         if input2build != "csd":
             expected_td_trans_mat.remove("Source")
             ## FIXME : check next
+
         tabular_types = {
-            "f_graph": expected_tabular_from_sims,
+            # "f_graph": expected_tabular_from_sims,
             "trans_rate_mat": expected_tabular_from_sims,            
             "genotype_transitions": expected_tabular_from_sims,
             "freqs": ["Genotype", "OT", *expected_tabular],
-            "trans_mat": ["From", "To", "OT", *expected_tabular],
+            "trans_mat": ["From", "To", "OT", "DBN", *expected_tabular],
             "lambdas": expected_lambdas,
             "td_trans_mat": expected_td_trans_mat,
         }
