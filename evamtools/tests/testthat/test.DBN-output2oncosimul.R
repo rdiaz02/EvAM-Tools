@@ -7,6 +7,17 @@ test_that("DBN gives the same results as OncoSimul", {
     ## We need to make sure we can examine what are the scenarios tested. Right
     ## now, this is opaque.
 
+    ## FIXME: what is this really testing? What function of evamtools is being
+    ## tested? I only see a call to cpm2tm. But not other calls to other
+    ## functions. For instance, to cpm_access_genots_paths_w_simplified or to
+    ## evam or whatever. In other words, if we were to make changes in functions
+    ## in evamtools, and introduce bugs, would this detect anything?
+
+    ## FIXME: the key is NOT testing cpm2tm, but testing the code used in
+    ## evamtools for the analysis of data.
+
+    ## FIXME: I do not see this function really testing anything.
+    
     ## FIXME: isn't this using global variables? What is cpm_output?
     
     compare_DBN_cpm2tm <- function(codename) {
