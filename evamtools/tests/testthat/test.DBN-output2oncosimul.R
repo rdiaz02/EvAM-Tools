@@ -7,6 +7,7 @@ test_that("DBN gives the same results as OncoSimul", {
     ## We need to make sure we can examine what are the scenarios tested. Right
     ## now, this is opaque.
 
+    ## FIXME: isn't this using global variables? What is cpm_output?
     
     compare_DBN_cpm2tm <- function(codename) {
         out <- cpm_output[[codename]]
