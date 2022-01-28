@@ -1,6 +1,14 @@
 ## FIXME: commented until fixed
 test_that("HESBCN gives the same results as OncoSimul", {
 
+    ## FIXME here, explain, EXPLICITLY and FULLY, where the data
+    ## are  (i.e., where the RData is) and how and where the R file
+    ## that generate the RData is.
+    ## We need to make sure we can examine what are the scenarios tested. Right
+    ## now, this is opaque.
+
+    ## FIXME: isn't this using global variables? What is cpm_output?
+    
     compare_HESBCN_cpm2tm <- function(codename) {
         out <- cpm_output[[codename]]
         out$HESBCN_model$Relation <- sapply(
@@ -18,6 +26,10 @@ test_that("HESBCN gives the same results as OncoSimul", {
         expect_equal(ordered_computed_trm, ordered_trm_onco)
     }
 
+    ## FIXME: referring to a list by index instead of name is often confusing in
+    ## these cases. Why 2? Why not 1? Why not beyond 11? Etc. And what are 2 to
+    ## 11?
+    
     for (i in names(examples_csd[["csd"]])[2:11]) {
         compare_methods <- compare_HESBCN_cpm2tm(i)
     }
