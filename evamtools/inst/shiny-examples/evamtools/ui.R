@@ -1,7 +1,7 @@
-library(DT)
+# library(DT)
 # library(shinydashboard)
-library(markdown)
-library(shinyjs)
+# library(markdown)
+# library(shinyjs)
 
 # source("ui/user_input_csd.R")
 # source("ui/see_results_simple.R")
@@ -42,7 +42,7 @@ cpm_info <- function(){
         "
     ))),
     tags$div(id = "cpm_info",
-      includeMarkdown("test.md")
+      includeMarkdown("landing_page.md")
     )
   )
 }
@@ -391,6 +391,9 @@ user_input <- function(){
         #select_csd div.radio{
           width: 140px;
         }
+        #select_cpm div.radio{
+          width: 130px;
+        }
       }
 
       @media only screen and (min-width: 1900px) {
@@ -399,6 +402,9 @@ user_input <- function(){
         }
         #select_csd div.radio{
           width: 150px;
+        }
+        #select_cpm div.radio{
+          width: 140px;
         }
       }
 
@@ -417,6 +423,18 @@ user_input <- function(){
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
+      }
+      
+      #input2build input[type=radio]{
+        visibility:hidden;
+      }
+
+      #csd_list input[type=radio]{
+        visibility:hidden;
+      }
+
+      #cpm_list input[type=radio]{
+        visibility:hidden;
       }
 
       #input2build div label{
