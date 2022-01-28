@@ -201,7 +201,7 @@ plot_model <- function(cpm_output, mod){
     title(mod, cex.main = 1.8)
 }
 
-compare_cpm_freqs <- function(data, type){
+create_tabular_data <- function(data, type){
     available_methods <- c("Source", "OT", "CBN", "MHN", "HESBCN")
     # , "DBN", "MCCBN")
     if(type %in% c("freqs")){
@@ -1352,7 +1352,7 @@ server <- function(input, output, session) {
 
     ## Tabular data
     genotype_freq_df <- reactive({
-        compare_cpm_freqs(all_cpm_out$output[[
+        create_tabular_data(all_cpm_out$output[[
             input$select_cpm]]
             ,  input$data2table )
         }
