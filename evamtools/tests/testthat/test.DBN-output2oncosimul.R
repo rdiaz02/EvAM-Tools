@@ -1,7 +1,14 @@
 test_that("DBN gives the same results as OncoSimul", {
 
+
+    ## FIXME here, explain, EXPLICITLY and FULLY, where the data
+    ## are  (i.e., where the RData is) and how and where the R file
+    ## that generate the RData is.
+    ## We need to make sure we can examine what are the scenarios tested. Right
+    ## now, this is opaque.
+
+    
     compare_DBN_cpm2tm <- function(codename) {
-        ## FIXME: don't do this. 
         out <- cpm_output[[codename]]
         out_onco <- evamtools:::cpm2tm(out$DBN_model)
 
@@ -14,7 +21,10 @@ test_that("DBN gives the same results as OncoSimul", {
         expect_equal(ordered_computed_trm, ordered_trm_onco)
     }
 
-    ## FIXME: don't do this. 
+    ## FIXME: referring to a list by index instead of name is often confusing in
+    ## these cases. Why 2? Why not 1? Why not beyond 11? Etc. And what are 2 to
+    ## 11?
+
     for (i in names(examples_csd[["csd"]])[2:11]) {
         compare_methods <- compare_DBN_cpm2tm(i)
     }
