@@ -2,7 +2,7 @@
 % Please edit documentation in R/CPM-plotting.R
 \name{rank_paths}
 \alias{rank_paths}
-\title{Computes the relevance of the paths starting on WT based on edge weigth}
+\title{Order paths of a weigthed directd graph}
 \usage{
 rank_paths(graph)
 }

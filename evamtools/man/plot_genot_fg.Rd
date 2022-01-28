@@ -9,7 +9,7 @@ plot_genot_fg(
   observations = NULL,
   freqs = NULL,
   top_paths = NULL,
-  freqlabel = NULL,
+  freq2label = NULL,
   max_edge = NULL,
   min_edge = NULL
 )
@@ -24,11 +24,11 @@ Entries will be normalized}
 
 \item{top_paths}{Int>0. Default NULL. Most transited paths to label}
 
+\item{freq2label}{Int>0. Laberl genotypes with a frequency larger taht freqs2label}
+
 \item{max_edge}{Int>0. Maximun width of edge. If NULL it will be infered from data.}
 
 \item{min_edge}{Int>0. Minimum width of edge. If NULL it will be infered from data.}
-
-\item{freq2label}{Int>0. Laberl genotypes with a frequency larger taht freq2label}
 }
 \description{
 Plot hypercubic genotype transitions
