@@ -415,7 +415,7 @@ all_examples_csd_2 <- list(
 # cpm_output <- list()
 # for (i in names(all_examples_csd_2[["csd"]])[2:11]){
 #   tmp <- all_examples_csd_2[["csd"]][[i]]$data
-#   cpm_output[[i]] <- all_methods_2_trans_mat(tmp, do_MCCBN = TRUE)
+#   cpm_output[[i]] <- evam(tmp, do_MCCBN = TRUE)
 # }
 
 # save(cpm_output, file = "../../../data/cpm_output.RData")

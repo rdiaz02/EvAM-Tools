@@ -19,5 +19,5 @@ simGenotypes <- mccbn::sample_genotypes(20000, true_p1,
 db2 <- simGenotypes$obs_events
 colnames(db2) <- LETTERS[1:4]
 sampledGenotypes(db2)
-out <- all_methods_2_trans_mat(db2)
+out <- evam(db2)
 plot_DAG_fg(out, db2)

@@ -1,8 +1,8 @@
 Package: evamtools
 Type: Package
 Title: Implimentation of CPM and related tools to test their performance
-Version: 0.0.0.9015
-Date: 2021-06-24 15:15:45
+Version: 0.0.0.93
+Date: 2022-01-27 
 Authors@R: c(person("Herrera-Nieto", "Pablo",
 	   email = "pablo.h.nieto@gmail.com", role = "aut"), 
             person("Ramon", "Diaz-Uriarte",
@@ -17,7 +17,7 @@ Author: Ramon Diaz-Uriarte [aut, cre]
 	Rudolf Schill [ctb]
 Maintainer: Ramon Diaz-Uriarte <r.diaz@uam.es>
 Description: Wrapper to run cancer progression models (CPMs) on
-    cross-sectinal data, to obtain finite samples using transition rate matrices,
+    cross-sectional data, to obtain finite samples using transition rate matrices,
     and to compare the results of the different methods.
 URL: https://github.com/rdiaz02/EvAM-Tools
 BugReports: https://github.com/rdiaz02/EvAM-Tools/issues
@@ -30,4 +30,5 @@ Imports: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree
     , gtools
     , plot.matrix
     , DT, shinyjs, shiny
+    , OncoBN
 Suggests: mccbn, testthat (>= 3.0.0)

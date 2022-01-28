@@ -30,7 +30,7 @@ dB <- matrix(
 colnames(dB) <- LETTERS[1:2]
 storage.mode(dB) <- "integer"
 sampledGenotypes(dB)
-out <- all_methods_2_trans_mat(dB)
+out <- evam(dB)
 plot_DAG_fg(out, dB)
 
 
@@ -50,7 +50,7 @@ dB <- matrix(
     ), ncol = 2, byrow = TRUE
 )
 colnames(dB) <- LETTERS[1:2]
-out <- all_methods_2_trans_mat(dB)
+out <- evam(dB)
 plot_DAG_fg(out, dB)
 
 
@@ -78,7 +78,7 @@ dB <- matrix(
     ), ncol = 3, byrow = TRUE
 )
 colnames(dB) <- LETTERS[1:3]
-out <- all_methods_2_trans_mat(dB)
+out <- evam(dB)
 
 db3 <- remove_WT(dB, 1)
 db4 <- add_WT(db3, 10 * nrow(db3))
@@ -90,9 +90,9 @@ plot_sampled_genots(db3)
 plot_sampled_genots(db4)
 plot_sampled_genots(db5)
 par(mfrow=c(1,1))
-out3 <- all_methods_2_trans_mat(db3)
-out4 <- all_methods_2_trans_mat(db4)
-out5 <- all_methods_2_trans_mat(db5)
+out3 <- evam(db3)
+out4 <- evam(db4)
+out5 <- evam(db5)
 
 ## CBN and OT have very similar transition matrices
 ## regardless of the WT frequency
@@ -132,7 +132,7 @@ dB <- matrix(
 colnames(dB) <- LETTERS[1:3]
 ## dB <- dB[, sample(ncol(dB))]
 ## dB <- dB[sample(nrow(dB)), ]
-out <- all_methods_2_trans_mat(dB)
+out <- evam(dB)
 plot_DAG_fg(out, dB)
 
 
@@ -156,7 +156,7 @@ dB <- matrix(
     ), ncol = 4, byrow = TRUE
 )
 colnames(dB) <- LETTERS[1:4]
-out <- all_methods_2_trans_mat(dB)
+out <- evam(dB)
 plot_DAG_fg(out, dB)
 
 

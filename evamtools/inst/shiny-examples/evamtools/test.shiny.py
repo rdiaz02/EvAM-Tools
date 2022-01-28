@@ -927,9 +927,10 @@ class evamtools_test_results(evamtools_basics):
         expected_td_trans_mat = expected_tabular_from_sims.copy()
         if input2build != "csd":
             expected_td_trans_mat.remove("Source")
-
+            ## FIXME : check next
         tabular_types = {
             "f_graph": expected_tabular_from_sims,
+            "trans_rate_mat": expected_tabular_from_sims,            
             "genotype_transitions": expected_tabular_from_sims,
             "freqs": ["Genotype", "OT", *expected_tabular],
             "trans_mat": ["From", "To", "OT", *expected_tabular],

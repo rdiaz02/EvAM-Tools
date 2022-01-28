@@ -317,14 +317,10 @@ sample_all_CPMs <- function(cpm_output
             ## The next one is NOT implicitly available.
             ##   see OT_transition_matrices.org
             output[[sprintf("%s_genotype_transitions", method)]] <- NULL
-        }else if (method == "DBN"){
+        } else if (method == "DBN"){
             ## Do nothing
-        }else {
-            if (method == "MHN") {
-                trm <- output$MHN_transitionRateMatrix
-            } else {
-                trm <- output[[sprintf("%s_f_graph", method)]]
-            }
+        } else {
+            trm <- output[[sprintf("%s_trans_rate_mat", method)]]
             if (any(!is.na(trm))) {
                 print(sprintf("Running %s", method))
                 sims <- population_sample_from_trm(trm, n_samples = n_samples)
@@ -347,7 +343,7 @@ sample_all_CPMs <- function(cpm_output
 
 # evamtools_pipeline <- function(data){
 #     n_genes <- ncol(data)
-#     cpm_output <- all_methods_2_trans_mat(data) 
+#     cpm_output <- evam(data) 
 #     output <- sample_all_CPMs(cpm_output, 10000, n_genes)
 #     return(output)
 # }

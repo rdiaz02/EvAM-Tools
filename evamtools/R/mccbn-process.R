@@ -48,8 +48,8 @@
 ## sudo apt-get install libboost-filesystem1.67-dev libboost-graph-parallel1.67-dev libboost-iostreams1.67-dev libboost-locale1.67-dev libboost-regex1.67-dev libboost-serialization1.67-dev libboost-system1.67-dev libboost-test1.67-dev libboost1.67-dev libboost1.67-tools-dev libboost-graph1.67-dev libboost-graph1.67.0
 
 
-## A minimal wrapper. No bootstrap or anything like that for now.
-# library(mccbn)
+## FIXME: this is using OT-CBN, not H-CBN2, right?
+
 
 mccbn_proc <- function(x) {
     if (!requireNamespace("mccbn", quietly = TRUE))

@@ -1,7 +1,82 @@
+## Note that some of the transition matrix output is also tested
+## using very different code from OncoSimulR. See
+## test.access-genots-from-oncosimul.R
+
 test_that("OT and CBN: algorithm consistency with various data examples", {
     
     ## Check OT, CBN, MCCBN if installed
-    ## for consistency of different algorithms 
+    ## for consistency of different algorithms
+
+    ## ot_cbn_methods is no longer used in the code directly. Here it is only
+    ## really used as a wrapper to call OT, CBN and, if asked for, MCCBN.
+    ## We could rewrite this without using ot_cbn_methods
+
+
+    ## given the samples by genes matrix, run OT, CBN, and maybe MCCBN
+    ## NOTE: MCCBN allowed to run with arbitrary number of columns
+    ot_cbn_methods <- function(x, nboot = 0, 
+                               nboot_cbn = 0, 
+                               n00 = "auto3", 
+                               distribution_oncotree = TRUE,
+                               min.freq = 0,
+                               cores_cbn = 1,
+                               do_MCCBN = FALSE) { 
+        
+        cat("\n     Doing OT")
+        if(ncol(x) >= 2) {
+            time_ot <- system.time(
+                OT <- try(
+                    suppressMessages(
+                        ot_proc(x,
+                                nboot = nboot,
+                                distribution.oncotree = distribution_oncotree))))["elapsed"]
+        } else {
+            OT <- NA
+            time_ot <- NA
+        }
+
+        
+        if(ncol(x) >= 2) {
+            cat("\n     Doing CBN")
+            time_cbn_ot <- system.time(
+                CBN_ot <- try(cbn_proc(x,
+                                       addname = "tmpo",
+                                       init.poset = "OT",
+                                       nboot = nboot_cbn, parall = TRUE,
+                                       cores = cores_cbn)))["elapsed"]
+        } else {
+            time_cbn_ot <- NA
+            CBN_ot <- NA
+        }
+        if (do_MCCBN) {
+            cat("\n     Doing MCCBN")
+            if(ncol(x) >= 2) {
+                time_mccbn <-
+                    system.time(MCCBN <- try(mccbn_proc(x)))["elapsed"]
+            } else {
+                time_mccbn <- NA
+                MCCBN <- NA
+            }
+        } else {
+            time_mccbn <- NA
+            MCCBN <- NA
+        }
+
+        cat("\n                  _times_cpm: ot", time_ot,
+            " cbn ", time_cbn_ot,
+            " mccbn ", time_mccbn,
+            "\n")
+        out <- list(
+            OT = OT,
+            CBN_ot = CBN_ot,
+            MCCBN = MCCBN,
+            time_ot = time_ot,
+            time_cbn_ot = time_cbn_ot,
+            time_mccbn = time_mccbn
+        )
+        return(out)
+    }
+    
     test_others <- function(data) {
         ## MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
         MCCBN_INSTALLED <- FALSE
@@ -80,8 +155,20 @@ test_that("OT and CBN: algorithm consistency with various data examples", {
 
 test_that("weighted paths and transition matrices computations against
 hand-computed values,
-and identical results between algorithms with sparse matrices", {
+and identical results between algorithms with sparse matrices, CBN", {
+    ## testing weighted_paths_to_max is implicitly testing the transition matrix
+    ## as weighted_paths is computed from the transition matrix In the future,
+    ## and if under paranoia, have a few tests just of the transition
+    ## matrix. Though I do this with OT below.  We use CBN, but the code does not
+    ## differentiate between CBN and OT.
 
+    ## Even if we no longer use the nonsimplified version, leave here for
+    ## testing. As the _simplified version gives the same output for fgraph,
+    ## weighted_fgraph and trans_mat_genots as the nonsimplified, and as the
+    ## nonsimplified gives the correct weighted_paths, the trans_mat of the
+    ## simplified has to be correct.
+
+    
     ex0 <- list(edges = data.frame(
                     From = c("Root", "B", "C", "D"),
                     To =   c("B", "C", "D", "A"),
@@ -186,14 +273,12 @@ and identical results between algorithms with sparse matrices", {
     oex10 <- cpm_access_genots_paths_w(ex10)
     oex11 <- cpm_access_genots_paths_w(ex11)
     
-    ## FIXME: avoid partial matching. $weighted_paths
-    ## should be weighted_paths_to_max
-    expect_equivalent(oex0$weighted_paths[, 2], 1)
+    expect_equivalent(oex0$weighted_paths_to_max[, 2], 1)
     
-    expect_equivalent(oex1$weighted_paths[, 2],
+    expect_equivalent(oex1$weighted_paths_to_max[, 2],
                       c(1/3 * 1 * 1 * 1, 2/3 * 1 * 1 * 1))
     
-    expect_equivalent(oex2$weighted_paths[, 2],
+    expect_equivalent(oex2$weighted_paths_to_max[, 2],
                       c(10/21 * 11/23 * 12/26 * 1,
                         10/21 * 11/23 * 14/26 * 1,
                         10/21 * 12/23 * 1     * 1,
@@ -201,14 +286,14 @@ and identical results between algorithms with sparse matrices", {
                         11/21 * 10/24 * 14/26 * 1,
                         11/21 * 14/24 * 1     * 1))
     
-    expect_equivalent(oex3$weighted_paths[, 2],
+    expect_equivalent(oex3$weighted_paths_to_max[, 2],
                       c(2/5 * 3/7 * 1 * 1,
                         2/5 * 4/7 * 3/8 * 1,
                         2/5 * 4/7 * 5/8 * 1,
                         3/5 * 1 *   1   * 1
                         ))
     
-    expect_equivalent(oex4$weighted_paths[, 2],
+    expect_equivalent(oex4$weighted_paths_to_max[, 2],
                       c(1/3 * 2/9 * 3/7 * 1,
                         1/3 * 2/9 * 4/7 * 1,
                         1/3 * 3/9 * 2/6 * 1,
@@ -219,7 +304,7 @@ and identical results between algorithms with sparse matrices", {
                         2/3 * 1 *   4/7 * 1
                         ))
     
-    expect_equivalent(oex5$weighted_paths[, 2],
+    expect_equivalent(oex5$weighted_paths_to_max[, 2],
                       c(1/6 * 2/5 * 1 * 1,
                         1/6 * 3/5 * 1 * 1,
                         2/6 * 1/4 * 1 * 1,
@@ -228,7 +313,7 @@ and identical results between algorithms with sparse matrices", {
                         3/6 * 2/3 * 1 * 1
                         ))
     
-    expect_equivalent(oex6$weighted_paths[, 2],
+    expect_equivalent(oex6$weighted_paths_to_max[, 2],
                       c(1/6 * 2/5 * 3/8 * 1,
                         1/6 * 2/5 * 5/8 * 1,
                         1/6 * 3/5 * 1 * 1,
@@ -240,7 +325,7 @@ and identical results between algorithms with sparse matrices", {
                         ))
     
     
-    expect_equivalent(oex7$weighted_paths[, 2],
+    expect_equivalent(oex7$weighted_paths_to_max[, 2],
                       c(1 * 2/9 * 3/7 * 4/9,
                         1 * 2/9 * 3/7 * 5/9,
                         1 * 2/9 * 4/7 * 1,
@@ -251,7 +336,7 @@ and identical results between algorithms with sparse matrices", {
                         1 * 4/9 * 3/5 * 1
                         ))
     
-    expect_equivalent(oex8$weighted_paths[, 2],
+    expect_equivalent(oex8$weighted_paths_to_max[, 2],
                       c(1/3 * 1 * 1 * 4/9,
                         1/3 * 1 * 1 * 5/9,
                         2/3 * 1 * 1 * 4/9,
@@ -259,7 +344,7 @@ and identical results between algorithms with sparse matrices", {
                         ))
     
     
-    expect_equivalent(oex9$weighted_paths[, 2],
+    expect_equivalent(oex9$weighted_paths_to_max[, 2],
                       c(6/6 * 7/7 * 8/27 * 9/19 * 10/10,
                         6/6 * 7/7 * 8/27 * 10/19 * 9/9,                    
                         6/6 * 7/7 * 9/27 * 8/18 * 10/10,
@@ -268,12 +353,12 @@ and identical results between algorithms with sparse matrices", {
                         6/6 * 7/7 * 10/27 * 9/17 * 8/8
                         ))
     
-    expect_equivalent(oex10$weighted_paths[, 2],
+    expect_equivalent(oex10$weighted_paths_to_max[, 2],
                       c(1/1 * 2/5 * 3/3 * 4/4 * 5/5,
                         1/1 * 3/5 * 2/2 * 4/4 * 5/5                                        
                         ))
     
-    expect_equivalent(oex11$weighted_paths[, 2],
+    expect_equivalent(oex11$weighted_paths_to_max[, 2],
                       c(3/18 * 4/15 * 5/11 * 7/7,
                         3/18 * 4/15 * 6/11 * 7/7,
                         3/18 * 5/15 * 4/10 * 7/7,
@@ -363,9 +448,7 @@ and identical results between algorithms with sparse matrices", {
 
 
 test_that("unrestricted fitness graph and transition fitness graph:
-identical results from sparse and non-sparse algorithms.
-Correctness of the individual algorithms
-has been verified above", {
+identical results from sparse and non-sparse algorithms.", {
     
     gacc1 <- list("A", "B", "D", c("A", "B"),
                   c("A", "D"), c("B", "D"),
@@ -767,5 +850,146 @@ NA, NA, NA), OT_edgeWeight = c(0.525915054637741, 0.101508072999909,
   rm(mm, mm0, mmSM)
   rm(cpm_out_others1)
  })
+
+
+
+test_that("transition matrices computations against
+hand-computed values,
+and identical results between algorithms with sparse matrices, OT", {
+
+    ## Recall that OT and CBN are used identically when computing transition
+    ## matrices between genotypes and "weighted paths to maximum" and have very
+    ## exhaustive tests of CBN above. Those test weighted paths to maximum are
+    ## obtained from the transition matrices.
+    
+    ex0 <- list(edges = data.frame(
+                    From = c("Root", "Root", "A", "B"),
+                    To =   c("A", "B", "C", "D"),
+                    OT_edgeWeight = c(0.3, 0.2, 0.4, 0.7)
+                ))
+    ## This shows the weigthed_f_graph are not really conditional
+    ## probabilities of transition for OT.
+    ## See moving from C to each of its descendants
+    ## or A,C to each of its descendants
+    ex1 <- list(edges = data.frame(
+                    From = c("Root", "Root", "Root", "C"),
+                    To =   c("A", "B", "C", "D"),
+                    OT_edgeWeight = c(0.2, 0.3, 0.1, 0.8)
+                ))
+
+    ex2 <- list(edges = data.frame(
+                    From = c("Root", "A", "B", "B"),
+                    To =   c("A", "B", "C", "D"),
+                    OT_edgeWeight = c(0.2, 0.3, 0.4, 0.1)
+                ))
+
+    ex3 <- list(edges = data.frame(
+                    From = c("Root", "Root", "B", "B"),
+                    To =   c("A", "B", "C", "D"),
+                    OT_edgeWeight = c(0.1, 0.2, 0.3, 0.8)
+                ))
+
+    ot_0 <- cpm_access_genots_paths_w(ex0)
+    ot_1 <- cpm_access_genots_paths_w(ex1)
+    ot_2 <- cpm_access_genots_paths_w(ex2)
+    ot_3 <- cpm_access_genots_paths_w(ex3)    
+
+    ot_0s <- cpm_access_genots_paths_w_simplified(ex0)
+    ot_1s <- cpm_access_genots_paths_w_simplified(ex1)
+    ot_2s <- cpm_access_genots_paths_w_simplified(ex2)
+    ot_3s <- cpm_access_genots_paths_w_simplified(ex3)    
+
+
+
+    ## Same results with the simplified and sparse matrix implementation
+    expect_equal(
+        ot_0[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+        lapply(ot_0s[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+               as.matrix))
+
+    expect_equal(
+        ot_1[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+        lapply(ot_1s[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+               as.matrix))
+    
+    
+    expect_equal(
+        ot_2[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+        lapply(ot_2s[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+               as.matrix))
+    
+    expect_equal(
+        ot_3[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+        lapply(ot_3s[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+               as.matrix))
+
+
+    ## Transition matrices
+    ex_tm_ot0 <- rbind(
+            c(0, 0.3/0.5, 0.2/0.5, rep(0, 6)),
+            c(0, 0, 0, 0.2/0.6, 0.4/0.6, rep(0, 4)),
+            c(0, 0, 0, 0.3/1.0, 0, 0.7/1.0,rep(0, 3)),
+            c(rep(0, 6), 0.4/1.1, 0.7/1.1, 0),
+            c(rep(0, 6), 1, 0, 0), 
+            c(rep(0, 7), 1, 0),
+            c(rep(0, 8), 1),
+            c(rep(0, 8), 1),
+            c(rep(0, 9))
+        )
+
+    expect_equivalent(ex_tm_ot0,
+                      ot_0$trans_mat_genots)
+
+    ex_tm_ot1 <- rbind(
+        c(0, 0.2/.6, 0.3/.6, 0.1/.6, 0, 0, 0, 0, 0, 0, 0, 0),
+        c(0, 0, 0, 0, 0.3/0.4, 0.1/0.4, 0, 0, 0, 0, 0, 0),
+        c(0, 0, 0, 0, .2/.3, 0, 0.1/.3, 0, 0, 0, 0, 0),
+        c(0, 0, 0, 0, 0, .2/1.3, .3/1.3, .8/1.3, 0, 0, 0, 0),
+        c(0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0),
+        c(0, 0, 0, 0, 0, 0, 0, 0, .3/1.1, .8/1.1, 0, 0),
+        c(0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0, 0.8, 0),
+        c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0.2/.5, 0.3/.5, 0),
+        c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+        c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+        c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+        c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0)
+        )
+
+    expect_equivalent(ex_tm_ot1,
+                      ot_1$trans_mat_genots)
+    
+
+   ex_tm_ot2 <- rbind(
+       c(0, 1, 0, 0, 0, 0),
+       c(0, 0, 1, 0, 0, 0),
+       c(0, 0, 0, 0.4/.5, .1/.5, 0),
+       c(0, 0, 0, 0, 0, 1),
+       c(0, 0, 0, 0, 0, 1),
+       c(0, 0, 0, 0, 0, 0)       
+        )
+
+    expect_equivalent(ex_tm_ot2,
+                      ot_2$trans_mat_genots)
+
+   ex_tm_ot3 <- rbind(
+       c(0, 0.1/.3, 0.2/.3, 0, 0, 0, 0, 0, 0, 0),
+       c(0, 0, 0, 1, 0, 0, 0, 0, 0, 0),
+       c(0, 0, 0, 0.1/1.2, 0.3/1.2, 0.8/1.2, 0, 0, 0, 0),
+       c(0, 0, 0, 0, 0, 0, .3/1.1, .8/1.1, 0, 0),
+       c(0, 0, 0, 0, 0, 0, .1/.9, 0, .8/.9, 0),
+       c(0, 0, 0, 0, 0, 0, 0, 0.1/.4, .3/.4, 0),
+       c(0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+       c(0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+       c(0, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+       c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0)       
+        )
+
+    expect_equivalent(ex_tm_ot3,
+                      ot_3$trans_mat_genots)
+})
+
+
+
+
 
 cat("\n Done test.trans-rates-f-graphs.R \n")

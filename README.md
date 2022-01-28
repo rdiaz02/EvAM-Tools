@@ -148,6 +148,11 @@ and get a working enviroment with HyperTraPS installed. Add both the `bin` and t
       - For now, the default is not to use MC-CBN. If you want to use it, you'll
       need to install the MC-CBN package. Note that you need older versions of
       libboost: https://github.com/cbg-ethz/MC-CBN/issues/5
+	  
+	  - Note also that to run MC-CBN you need to unset the environment variable `_R_CHECK_LENGTH_1_LOGIC2_` , because of a problem explained here:
+	   https://github.com/cbg-ethz/MC-CBN/issues/9
+
+	  
 
 # Tests
 FIXME write this better

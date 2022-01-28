@@ -19,10 +19,11 @@ rm(pwd0)
 # I have to do this with several tests, not just with one, choose several of them
 # Data set up
 
+## recall evam used to be called all_methods_2_trans_mat
 out <- readRDS("../data/out_cpms.rds")
 
 for (i in c("AND", "c2", "c4")){
-    out <- all_methods_2_trans_mat(all_examples[[i]])
+    out <- evam(all_examples[[i]])
     # out <- out
 
     ## MHN
@@ -42,7 +43,7 @@ for (i in c("AND", "c2", "c4")){
 
     ## Custom simulations
 
-    sim <- simulate_population_2(out$MHN_transitionRateMatrix, n_samples = 50000)
+    sim <- simulate_population_2(out$MHN_trans_rate_mat, n_samples = 50000)
     trajs <- process_simulations(sim)
 
     ## CBN simulations

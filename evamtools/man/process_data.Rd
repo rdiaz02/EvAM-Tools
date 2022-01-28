@@ -11,7 +11,7 @@ process_data(data, mod, prune_edges = TRUE)
 
 \item{mod}{String for the CPM to process.}
 
-\item{prune_edges}{Boolean. Wether to remove genotype relationships carrying less than 1% of the flux}
+\item{prune_edges}{Boolean. Wether to remove genotype relationships carrying less than 1\% of the flux}
 }
 \value{
 List with processed output of the CPM

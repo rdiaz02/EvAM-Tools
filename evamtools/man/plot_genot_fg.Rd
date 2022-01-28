@@ -52,7 +52,7 @@ c(
  ), ncol = 5, byrow = TRUE
 )
 colnames(dB_c2) <- LETTERS[1:5]
-out <- all_methods_2_trans_mat(dB_c2)
+out <- evam(dB_c2)
 png("fluxes.png")
 par(mfrow = c(1, 1))
 plot_genot_fg(out$MHN_trans_mat, dB_c2)
