@@ -17,8 +17,11 @@ class evamtools_basics(unittest.TestCase):
     
     def _get_status(self, type_of_input = "csd"):
         number_of_genes = int(self.driver.find_element_by_css_selector("#gene_number").get_attribute("value"))
+        sleep(0.1)
         selected_input2build = self.driver.find_element_by_css_selector("#input2build input:checked").get_attribute("value")
+        sleep(0.1)
         selected_dataset = self.driver.find_element_by_css_selector("#select_csd input:checked").get_attribute("value")
+        sleep(0.1)
 
         if(type_of_input == "csd"):
             gene_names = self.driver.find_elements_by_css_selector("#genotype .checkbox input[type=checkbox]")
@@ -203,7 +206,7 @@ class evamtools_basic_functionality(evamtools_basics):
         pass
     
 ## TESTING CSD 
-class test_csd_input(evamtools_basics):
+class evamtools_csd_input(evamtools_basics):
     def test_modiying_genotype_with_buttons(self):
         ## Initial status
         sleep(0.2)
@@ -323,7 +326,7 @@ class test_csd_input(evamtools_basics):
         assert(out_genotypes["AC"] == prev_genotypes["AC"])
         assert(out_genotypes["ABCD"] == prev_genotypes["ABCD"])
 
-    def test_change_gene_number_CSD(self):
+    def test_change_gene_number(self):
         ## Select Linear & save data
         sleep(0.2)
         self._select_tab("csd", "Linear")
@@ -358,10 +361,11 @@ class test_csd_input(evamtools_basics):
         new_genotypes_dict = self._get_genotypes_dict()
         assert(new_genotypes_dict["ABCDE"]== 100)
 
-    def test_change_gene_names_CSD(self):
+    def test_change_gene_names(self): 
         ## Select Linear & save data
         sleep(0.2)
         self._select_tab("csd", "Linear")
+        sleep(0.2)
         initial_genotypes = self._get_table_info()
         initial_genotypes_dict = self._process_genotype_table(initial_genotypes)
 
@@ -385,9 +389,10 @@ class test_csd_input(evamtools_basics):
         genotype_info = self._get_table_info()
         genotype_info_dict = self._process_genotype_table(genotype_info)
 
+        # Failed for no reason
         assert(genotype_info_dict == expected_genotypes_dict)
 
-    def test_save_data_set_CSD(self):
+    def test_save_data_set(self):
         ## Selecting LINEAR
         sleep(0.2)
         self._select_tab("csd", "Linear")
@@ -521,7 +526,7 @@ class test_dag_input(evamtools_basics):
         sleep(3)
         assert(analysis_button.is_enabled())
 
-    def test_change_gene_names_DAG(self):
+    def test_change_gene_names(self):
         ## Increasing number of genes
         sleep(0.2)
         self._select_tab("dag")
@@ -680,7 +685,7 @@ class test_dag_input(evamtools_basics):
         ]
         assert(dag_info == expected_dag_info)
 
-    def test_save_data_set_DAG(self):
+    def test_save_data_set(self):
         ## Increasing number of genes
         self._select_tab("dag")
         old_dag = self._get_dag_info()
@@ -770,7 +775,7 @@ class test_matrix_input(evamtools_basics):
         assert(analysis_button.is_enabled())
 
     
-    def test_change_names_MATRIX(self):
+    def test_change_names(self):
         self._select_tab("matrix")
         slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
         move = ActionChains(self.driver)
@@ -791,7 +796,7 @@ class test_matrix_input(evamtools_basics):
 
         assert(theta_table == expected_theta_table)
 
-    def test_change_gene_number_MATRIX(self):
+    def test_change_gene_number(self):
         self._select_tab("matrix")
         slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
         move = ActionChains(self.driver)
@@ -802,7 +807,7 @@ class test_matrix_input(evamtools_basics):
 
         assert(status["gene_names"] == ["A", "B", "C", "D", "E", "F"])
 
-    def test_save_data_set_MATRIX(self):
+    def test_save_data_set(self):
         ## Increasing number of genes
         self._select_tab("matrix", "test1")
         old_thetas = self._get_theta_table()
@@ -885,8 +890,8 @@ class test_matrix_input(evamtools_basics):
         self._select_tab("matrix", "test1")
         sleep(1)
         theta_table = self._get_theta_table()
-
-        assert(theta_table == old_thetas)
+        sleep(0.1)
+        assert(theta_table == old_thetas) ## Failed then OK
 
         self._select_tab("dag")
         sleep(1)
@@ -901,8 +906,8 @@ class evamtools_test_results(evamtools_basics):
         available_cpms = self.driver.find_elements_by_css_selector("#cpm2show .checkbox input")
         available_cpms = [i.get_attribute("value") for i in available_cpms]
         available_cpms.remove("Source")
-        if not do_mccbn: 
-            available_cpms.remove("MCCBN")
+        # if not do_mccbn: 
+        #     available_cpms.remove("MCCBN")
 
         not_ot = available_cpms.copy()
         not_ot.remove("OT")
@@ -937,8 +942,8 @@ class evamtools_test_results(evamtools_basics):
             sleep(0.4)
             table_info = self._get_cpm_table()
             print(k)
-            print(tabular_types[k])
-            print(table_info[0])
+            print("what I want", tabular_types[k])
+            print("what I see ", table_info[0])
             assert(set(table_info[0]) == set(tabular_types[k]))
 
     def _basic_results_test(self, data):
@@ -955,6 +960,7 @@ class evamtools_test_results(evamtools_basics):
         ## Check name of downloaded file
         download_button = self.driver.find_element_by_css_selector("#download_cpm").click()
         sleep(1)
+        base_folder = os.getcwd()
         os.chdir(os.path.join(os.path.expanduser("~"), "Downloads"))
         last_created_file = sorted(filter(os.path.isfile, os.listdir('.')), key=os.path.getmtime)[-1]
         assert(last_created_file[-4:] == ".RDS")
@@ -965,8 +971,8 @@ class evamtools_test_results(evamtools_basics):
         assert(source_option.is_enabled() == (data["tab"] != "csd" ))
 
         ## Check wether "MCCBN" should be dissabled
-        source_option = self.driver.find_element_by_css_selector("#cpm2show input[value=MCCBN]")
-        assert(source_option.is_enabled() == data["mccbn"])
+        # source_option = self.driver.find_element_by_css_selector("#cpm2show input[value=MCCBN]")
+        # assert(source_option.is_enabled() == data["mccbn"])
 
         ## Check functionality of 'Modify data' button
         self.driver.find_element_by_css_selector("#modify_data").click()
@@ -974,9 +980,11 @@ class evamtools_test_results(evamtools_basics):
 
         status = self._get_status(data["tab"])
         assert(status["number_of_genes"] == data["number_of_genes"])
+        if status["selected_dataset"] != data["name"]: pdb.set_trace()
         assert(status["selected_dataset"] == data["name"])
         assert(status["selected_input2build"] == data["tab"])
         assert(status["gene_names"] == data["gene_names"])
+        os.chdir(base_folder)
 
     def _get_cpm_table(self):
         row_table = self.driver.find_elements_by_css_selector("#cpm_freqs tr")
@@ -1066,7 +1074,6 @@ class evamtools_test_results(evamtools_basics):
         new_gene_names = ["A", "B1", "C", "D3"]
         self._change_gene_names(new_gene_names)
 
-
         self.driver.find_element_by_css_selector("#resample_dag").click()
         sleep(5)
 
@@ -1127,16 +1134,15 @@ class evamtools_test_results(evamtools_basics):
         
         expected_data = {"tab": "matrix", "gene_names": ["A", "B", "C"],
             "name": new_dataset_name, "number_of_genes": 3, "mccbn": False}
-
-        self._basic_results_test(expected_data) 
+        self._basic_results_test(expected_data) ## Sometimes fails for no apparent reason
         self._go_to("result_viewer")
         self._check_tabular_data(expected_data["tab"], expected_data["mccbn"])
     
-    def test_running_MCCBN(self):
-        pdb.set_trace()
-        self.driver.find_element_by_css_selector("#advanced_options").click()
-        sleep(1)
-        self.driver.find_element_by_css_selector("#more_cpms input[value='mccbn']").click()
+    # def test_running_MCCBN(self):
+    #     pdb.set_trace()
+    #     self.driver.find_element_by_css_selector("#advanced_options").click()
+    #     sleep(1)
+    #     self.driver.find_element_by_css_selector("#more_cpms input[value='mccbn']").click()
         # ## Load data
         # self._select_tab("matrix", "test1")
         # sleep(0.5)
@@ -1181,4 +1187,4 @@ class evamtools_test_results(evamtools_basics):
         # self._check_tabular_data(expected_data["tab"], expected_data["mccbn"])
 
 if __name__ == "__main__":
-    unittest.main()
+    unittest.main(failfast=True)

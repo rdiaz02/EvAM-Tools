@@ -57,7 +57,7 @@ plot_dag <- function(dag, parent_set){
     ## Plotting data
     if(!is.null(parent_set)){
         for(i in igraph::E(dag)){
-            igraph::E(dag)[i]$color <- colors_relationships[model_data2plot$parent_set[[igraph::head_of(dag, igraph::E(dag)[i])$name]]]
+            igraph::E(dag)[i]$color <- colors_relationships[parent_set[[igraph::head_of(dag, igraph::E(dag)[i])$name]]]
         }
     } else igraph::E(dag)$color <- standard_relationship
         
@@ -202,7 +202,8 @@ plot_model <- function(cpm_output, mod){
 }
 
 compare_cpm_freqs <- function(data, type){
-    available_methods <- c("Source", "OT", "CBN", "DBN", "MHN", "HESBCN", "MCCBN")
+    available_methods <- c("Source", "OT", "CBN", "MHN", "HESBCN")
+    # , "DBN", "MCCBN")
     if(type %in% c("freqs")){
         all_counts <- data.frame(Genotype = data[["MHN_genotype_freqs"]]$Genotype)
         for(name in names(data)){
@@ -382,7 +383,7 @@ standarize_all_datasets <- function(datasets){
 }
 
 server <- function(input, output, session) {
-    all_csd_data <- standarize_all_datasets(all_examples_csd_2)
+    all_csd_data <- standarize_all_datasets(examples_csd)
     min_genes <- 2
     max_genes <- 10
     default_mhn_samples <- 5000
@@ -1286,7 +1287,8 @@ server <- function(input, output, session) {
                 tags$div(class = "inline",
                   checkboxGroupInput(inputId = "cpm2show", 
                       label = "CPMs to show", 
-                      choices = c("Source", "OT", "CBN", "MHN", "HESBCN", "DBN", "MCCBN"),
+                      choices = c("Source", "OT", "CBN", "MHN", "HESBCN"),
+                    #   , "DBN", "MCCBN"),
                       selected = c("CBN", "MHN", "HESBCN")),
                       
                 tags$div(class = "inline",
