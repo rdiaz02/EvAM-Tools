@@ -44,6 +44,8 @@ plot_sampled_genots <- function(data) {
 }
 
 
+#' Order paths of a weigthed directd graph
+#' 
 #' Computes the relevance of the paths starting on WT based on edge weigth
 #' 
 #' @param graph igraph object with genotype transition. The graph is expect to be directed and weighted
@@ -88,7 +90,10 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL, typ
     )))
     vertex_labels <- vapply(V(graph)$name,
         function(x){
-            if (x %in% nodes_in_top_paths) return(x)
+            if (x %in% nodes_in_top_paths){
+                if (type === "genotype") return(x)
+                else if (type == "acquisition") return(sprintf("+%s", strsplit(x, ", ")[[1]][[-1]]))
+            } 
             else return("")
         },
         character(1))
