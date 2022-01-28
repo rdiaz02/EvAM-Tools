@@ -14,6 +14,7 @@ class evamtools_basics(unittest.TestCase):
         self.driver.maximize_window()
         self.driver.get("http://127.0.0.1:3000/")
         self.driver.maximize_window()
+        self._go_to("csd_builder")
     
     def _get_status(self, type_of_input = "csd"):
         number_of_genes = int(self.driver.find_element_by_css_selector("#gene_number").get_attribute("value"))

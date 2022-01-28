@@ -122,12 +122,12 @@ Add screnshot
 
 3. *Tabular data*: represents the raw values computed from the model or extracted from the samples. This includes: 
   
-  * *Transition rates*: This option is not available for OT or DBN.
+  * *Transition rates*: rates of an exponential that model the trnasition from one genotype to another. This option is not available for OT or DBN.
   * *Genotype transitions counts*: times a transition from genotype A to genotype B has been observed when sampling. This option is not available for OT or DBN.
   * *Genotype frequencies*: frequency of each genotype. This option is not available for OT or DBN.
   * *Transition probabilities*: conditional probabilities of transitions to a genotypes given a previous one.
   * *Lambdas/probabilities*: parameters of each model. This option is not available for MHN. 
-  * *Time-discretized transition matrix*:  This option is not available for OT or DBN.
+  * *Time-discretized transition matrix*:  the time-discretized version of the transition probability matrix. This option is not available for OT or DBN.
 
 
 # What is a cancer progression model (CPM)?<a id="cpms"></a>

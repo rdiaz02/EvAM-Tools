@@ -18,7 +18,7 @@ cpm_info <- function(){
           margin: 0;
           padding: 0;
           width: 100%;
-          height: 100vh;
+          # height: 100vh;
           top: 0;
           left: 0;
           position: absolute;
@@ -522,6 +522,9 @@ user_input <- function(){
 ui <- 
   navbarPage( id = "navbar",
     title = "evamtools",
+    tabPanel("About EVAM-tools",
+      cpm_info()
+    ),
     tabPanel("User input", 
       value = "csd_builder",
       user_input()
@@ -532,9 +535,6 @@ ui <-
     ),
     tabPanel("Example Library",
       "WIP"
-    ),
-    tabPanel("About CPMs",
-      cpm_info()
     ),
     tags$head(
       tags$style(

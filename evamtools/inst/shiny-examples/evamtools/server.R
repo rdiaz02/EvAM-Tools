@@ -1059,8 +1059,11 @@ server <- function(input, output, session) {
             plot_dag(tmp_dag
                 , data$dag_parent_set[1:genes2show])
         }else if(input$input2build %in% c("matrix")){
-            if(!is.null(data$thetas)){
+            if(!is.null(data$thetas) 
+                && length(data$thetas[1:input$gene_number, 1:input$gene_number])>0){
                 op <- par(mar=c(3, 3, 5, 3), las = 1)
+                print("Here")
+                print(data$thetas[1:input$gene_number, 1:input$gene_number])
                 plot(data$thetas[1:input$gene_number, 1:input$gene_number], cex = 1.8, digits = 2, key = NULL
                     , axis.col = list(side = 3)
                     , xlab = "Effect of this (effector)"
@@ -1206,26 +1209,30 @@ server <- function(input, output, session) {
             ## To make all plots of the same type comparable
             max_edge <- 0
             min_edge <- 0
-            if(selected_plot_type %in% c("trans_mat", "td_trans_mat")){
-                min_edge <- 0
-                max_edge <- 1
-            } else if (selected_plot_type == "genotype_transitions") {
-                for(i in input$cpm2show){
-                    if (i != "OT"){
-                        tmp_data <- all_cpm_out$output[[input$select_cpm]][[sprintf("%s_%s", i, selected_plot_type)]]
-                        
-                        tmp_max_edge <- max(tmp_data)
-                        max_edge <- ifelse(tmp_max_edge > max_edge
-                            , tmp_max_edge
-                            , max_edge)
-                        
-                        tmp_min_edge <- min(tmp_data)
-                        mom_edge <- ifelse(tmp_min_edge > min_edge
-                            , tmp_min_edge
-                            , min_edge)
+            if(!(is.null(selected_plot_type))){
+                if (selected_plot_type %in% c("trans_mat", "td_trans_mat")){
+                    min_edge <- 0
+                    max_edge <- 1
+                } else if (selected_plot_type == "genotype_transitions") {
+                    for(i in input$cpm2show){
+                        if (i != "OT"){
+                            tmp_data <- all_cpm_out$output[[input$select_cpm]][[sprintf("%s_%s", i, selected_plot_type)]]
+                            
+                            tmp_max_edge <- max(tmp_data)
+                            max_edge <- ifelse(tmp_max_edge > max_edge
+                                , tmp_max_edge
+                                , max_edge)
+                            
+                            tmp_min_edge <- min(tmp_data)
+                            mom_edge <- ifelse(tmp_min_edge > min_edge
+                                , tmp_min_edge
+                                , min_edge)
+                        }
                     }
+                } else if (selected_plot_type == "trans_rate_mat") {
+                    max_edge <- min_edge <- NULL
                 }
-            } else if (selected_plot_type== "trans_rate_mat") {
+            } else {
                 max_edge <- min_edge <- NULL
             }
 
