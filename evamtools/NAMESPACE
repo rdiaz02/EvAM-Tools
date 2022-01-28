@@ -9,6 +9,7 @@ export(
      )
 
 importFrom("shiny", "runApp", "Progress")
+importFrom("shinyjs", "useShinyjs", "enable", "disable", "disabled")
 importFrom("grDevices", "rgb")
 importFrom("graphics", "axis", "legend", "lines", "par", "title")
 importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert",
@@ -21,7 +22,7 @@ importFrom("stringr", "str_count", "str_replace", "str_split",
            "str_replace_all")
 importFrom("parallel", "detectCores", "mclapply")
 importFrom("shinyjs", "enable", "disable")
-importFrom("DT", "renderDT")
+importFrom("DT", "renderDT", "DTOutput")
 importFrom("Oncotree", "oncotree.fit", "marginal.distr",
            "distribution.oncotree", "bootstrap.oncotree")    
 importFrom("gtools", "combinations")

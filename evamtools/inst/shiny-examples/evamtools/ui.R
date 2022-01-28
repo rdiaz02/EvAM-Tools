@@ -189,7 +189,7 @@ results_simple <- function(){
 
 user_input <- function(){
   fluidPage(
-    useShinyjs(),
+    shinyjs::useShinyjs(),
     tags$head(
       tags$style(HTML("
       body{
@@ -482,7 +482,7 @@ user_input <- function(){
               uiOutput("dataset_name"),
               tags$div(
                 tags$div(class = "download_button",
-                  disabled(actionButton("save_csd_data", "Save Data")),
+                  shinyjs::disabled(actionButton("save_csd_data", "Save Data")),
                 ),
                 tags$div(class = "download_button",
                   downloadButton("download_csd", "Download your data")

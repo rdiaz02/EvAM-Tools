@@ -723,7 +723,7 @@ server <- function(input, output, session) {
                         ),
                         actionButton("add_edge", "Add edge"),
                         tags$h3("DAG table"),
-                        DTOutput("dag_table"),
+                        DT::DTOutput("dag_table"),
                         numericInput("dag_samples", "Total genotypes to sample", value = default_mhn_samples, min= 100, max = 10000, step = 100, width = "50%"),
                         actionButton("resample_dag", "Sample from DAG")
                     )
@@ -738,7 +738,7 @@ server <- function(input, output, session) {
                 if(!is.null(data$thetas)){
                     tags$div(
                         tags$h3("Thetas table"),
-                        DTOutput("thetas_table"),
+                        DT::DTOutput("thetas_table"),
                         numericInput("mhn_samples", "Total genotypes to sample", value = default_mhn_samples, min= 100, max= 10000, step = 100, width = "50%"),
                         actionButton("resample_mhn", "Sample from MHN")
                     )
@@ -755,7 +755,7 @@ server <- function(input, output, session) {
                     actionButton("display_help", "Help"),
                 ),
                 tags$div(id = "csd_table", 
-                    DTOutput("csd_freqs")
+                    DT::DTOutput("csd_freqs")
                 )
             )
         }
@@ -1380,7 +1380,7 @@ server <- function(input, output, session) {
                         selected =  "freqs"
                         ),
                 tags$div( 
-                    DTOutput("cpm_freqs")
+                    DT::DTOutput("cpm_freqs")
                 )
             )
         }

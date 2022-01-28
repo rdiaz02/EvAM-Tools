@@ -1,12 +1,3 @@
-for styling
-
-1. increase font size
-2. blue for titles and for rule
-3. table: make it wider, with more space
-4. padding top and botton in image
-
-make this the landing page
-
 # What is Evam-tools?
 ***
 ```Evam-tools``` is a package that allows to infeer cancer evolutionary pathways  starting from [_cross sectional data **(CSD)**_](#helpcsd) base on the output of [_cancer progression models  **(CPMs)**_](#cpms).
@@ -129,11 +120,36 @@ Add screnshot
 <img src="transitions_dbxor.png" width=850>
 </center>
 
-3. *Tabular data*:
+3. *Tabular data*: represents the raw values computed from the model or extracted from the samples. This includes: 
+  
+  * *Transition rates*: This option is not available for OT or DBN.
+  * *Genotype transitions counts*: times a transition from genotype A to genotype B has been observed when sampling. This option is not available for OT or DBN.
+  * *Genotype frequencies*: frequency of each genotype. This option is not available for OT or DBN.
+  * *Transition probabilities*: conditional probabilities of transitions to a genotypes given a previous one.
+  * *Lambdas/probabilities*: parameters of each model. This option is not available for MHN. 
+  * *Time-discretized transition matrix*:  This option is not available for OT or DBN.
 
-Sampling plot
-
-Tabular data
 
 # What is a cancer progression model (CPM)?<a id="cpms"></a>
 ***
+
+Cancer progression models (CPMs) use cross-sectional data to infer probabilistic relationships between mutational events that lead to the disease. 
+
+# What CPMs are included in ```Evam-tools```?<a id="cpms"></a>
+***
+
+*  **Oncogenetic Tress (OT):** this is the simplest graphical model. Restrictions are represented as a tree. Hence, a parent node can have many children, but children have a single parent.
+*  **Conjuntive Bayesian Networks (CBN):** this model generalizes the tree-based restricion of OT to a direct acyclic graph (DAG). A DAG allows to include multiple parents. In CBN, when a node depends of many parent events, all of the them have to be present for the children to appear. In that sense, CBN models this relationships as conjuntive, in other words, it models the AND relationship.
+*  **Disjuntive Bayesian Networks (DBN):** models multiple parent with the OR relationship.
+*  **Monte Carlo CBN (MCCBN):** this is an implementation of CBN using Monte Carlo expectationi-maximization algorithm to work with a large number of mutations.
+*  **Progression Models of Cancer Evolution (PMCE):** is also a graphical model which main features it the aumatic detection of logical formulas AND, OR and XOR.
+*  **Mutual Hazard networks (MHN):** in this model dpeendencies are not deterministic. In that sense, we do not see a direct dependence relationship, i.e. mutation B depends on mutation A. Conversely, an envent is influenced by all others. So, one event can make other more like (the presence of A promotes B) and also inhibiting it (the presence of A inhibits B). Hence, MHN includes multiple dependencies and is not limited to DAG schemes. The main parameters is a theta matrix that represents how one event influences other.
+
+for styling
+
+1. increase font size
+2. blue for titles and for rule
+3. table: make it wider, with more space
+4. padding top and botton in image
+
+make this the landing page
