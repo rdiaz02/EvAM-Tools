@@ -91,7 +91,7 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL, typ
     vertex_labels <- vapply(V(graph)$name,
         function(x){
             if (x %in% nodes_in_top_paths){
-                if (type === "genotype") return(x)
+                if (type == "genotype") return(x)
                 else if (type == "acquisition") return(sprintf("+%s", strsplit(x, ", ")[[1]][[-1]]))
             } 
             else return("")
@@ -147,7 +147,7 @@ cpm_layout <- function(graph){
 #' @param observations Original cross sectional data used to compute the model. Optional.
 #' @param freqs DataFrame with column $Genotype and $Freqs with their frequencies. Optional.
 #' @param top_paths Int>0. Default NULL. Most transited paths to label
-#' @param freqs2label Int>0. Laberl genotypes with a frequency larger taht freqs2label
+#' @param freq2label Int>0. Laberl genotypes with a frequency larger taht freqs2label
 #' @param max_edge Int>0. Maximun width of edge. If NULL it will be infered from data.
 #' @param min_edge Int>0. Minimum width of edge. If NULL it will be infered from data.
 #' @examples 
