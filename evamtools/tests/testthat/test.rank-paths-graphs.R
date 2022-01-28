@@ -1,3 +1,6 @@
+#' Test the procedure of node labeling for the plot_genot_fg function
+#' It labels nodes as those involved in the most transited paths
+#' that star in the root of the tree and that lead to any leave 
 
 test_that("Returns the correct number and type of vertex labels", {
 
@@ -11,10 +14,10 @@ test_that("Returns the correct number and type of vertex labels", {
     adj_matrix["C", "A, C"] <- 100
     adj_matrix["C", "C, D"] <- 200
 
-    g <- graph_from_adjacency_matrix(adj_matrix, mode = "directed", weighted = TRUE)
+    g <- igraph::graph_from_adjacency_matrix(adj_matrix, mode = "directed", weighted = TRUE)
     
     all_genotypes <- c("WT", "A", "A, B", "A, C", "C", "C, D")
-    all_paths <- rank_paths(g)
+    all_paths <- evamtools:::rank_paths(g)
 
     l1 <- c("WT", "A", "A, B", "", "", "")
     names(l1) <- all_genotypes
@@ -30,13 +33,13 @@ test_that("Returns the correct number and type of vertex labels", {
 
 
 
-    labels_1 <- compute_vertex_labels(g, all_paths, top_paths = 1)$vertex_labels
-    labels_2 <- compute_vertex_labels(g, all_paths, top_paths = 2)$vertex_labels
-    labels_3 <- compute_vertex_labels(g, all_paths, top_paths = 3)$vertex_labels
-    labels_4 <- compute_vertex_labels(g, all_paths, top_paths = 4)$vertex_labels
-    labels_40 <- compute_vertex_labels(g, all_paths, top_paths = 40)$vertex_labels
-    labels_null <- compute_vertex_labels(g, all_paths, top_paths = NULL)$vertex_labels
-
+    labels_1 <- evamtools:::compute_vertex_labels(g, all_paths, top_paths = 1)$vertex_labels
+    labels_2 <- evamtools:::compute_vertex_labels(g, all_paths, top_paths = 2)$vertex_labels
+    labels_3 <- evamtools:::compute_vertex_labels(g, all_paths, top_paths = 3)$vertex_labels
+    labels_4 <- evamtools:::compute_vertex_labels(g, all_paths, top_paths = 4)$vertex_labels
+    labels_40 <- evamtools:::compute_vertex_labels(g, all_paths, top_paths = 40)$vertex_labels
+    labels_null <- evamtools:::compute_vertex_labels(g, all_paths, top_paths = NULL)$vertex_labels
+    browser()
     expect_equal(labels_1, l1)
     expect_equal(labels_2, l2)
     expect_equal(labels_3, l3)
