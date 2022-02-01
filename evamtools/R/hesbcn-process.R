@@ -64,16 +64,22 @@ do_HESBCN <- function(data, n_steps=100000,
     ## 242 to 257)
     
     # Setting tmp folder
-    date_time <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")
-    random_letters <- paste(c("_",
-        tmp_folder,
-        "_",
-        LETTERS[floor(runif(4, min = 1, max = 26))]), collapse = "")
-    tmp_folder <- paste(c(date_time, random_letters), collapse = "")
-
-    tmp_folder <- file.path("/", "tmp", "HESBCN", tmp_folder)
-    dir.create(tmp_folder, recursive = TRUE)
-
+    if(is.null(tmp_folder)) {
+        tmp_folder <- tempfile()
+        dirname0 <- NULL
+        if(!is.null(addname)) {
+            dirname0 <- tmp_folder
+            tmp_folder <- paste0(tmp_folder, "/",
+                              "_cbn_", init.poset, "_",
+                              addname)
+        }
+        if(!silent)
+            message(paste("\n Using dir", tmp_folder))
+        if(dir.exists(tmp_folder)) {
+            stop("dirname ", tmp_folder, "exists")
+        }
+        dir.create(tmp_folder, recursive = TRUE)
+    }
     setwd(tmp_folder)
 
     orig_gene_names <- colnames(data)
