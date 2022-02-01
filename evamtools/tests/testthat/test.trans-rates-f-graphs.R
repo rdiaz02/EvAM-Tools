@@ -2,156 +2,6 @@
 ## using very different code from OncoSimulR. See
 ## test.access-genots-from-oncosimul.R
 
-test_that("OT and CBN: algorithm consistency with various data examples", {
-    
-    ## Check OT, CBN, MCCBN if installed
-    ## for consistency of different algorithms
-
-    ## ot_cbn_methods is no longer used in the code directly. Here it is only
-    ## really used as a wrapper to call OT, CBN and, if asked for, MCCBN.
-    ## We could rewrite this without using ot_cbn_methods
-
-
-    ## given the samples by genes matrix, run OT, CBN, and maybe MCCBN
-    ## NOTE: MCCBN allowed to run with arbitrary number of columns
-    ot_cbn_methods <- function(x, nboot = 0, 
-                               nboot_cbn = 0, 
-                               n00 = "auto3", 
-                               distribution_oncotree = TRUE,
-                               min.freq = 0,
-                               cores_cbn = 1,
-                               do_MCCBN = FALSE) { 
-        
-        cat("\n     Doing OT")
-        if(ncol(x) >= 2) {
-            time_ot <- system.time(
-                OT <- try(
-                    suppressMessages(
-                        ot_proc(x,
-                                nboot = nboot,
-                                distribution.oncotree = distribution_oncotree))))["elapsed"]
-        } else {
-            OT <- NA
-            time_ot <- NA
-        }
-
-        
-        if(ncol(x) >= 2) {
-            cat("\n     Doing CBN")
-            time_cbn_ot <- system.time(
-                CBN_ot <- try(cbn_proc(x,
-                                       addname = "tmpo",
-                                       init.poset = "OT",
-                                       nboot = nboot_cbn, parall = TRUE,
-                                       cores = cores_cbn)))["elapsed"]
-        } else {
-            time_cbn_ot <- NA
-            CBN_ot <- NA
-        }
-        if (do_MCCBN) {
-            cat("\n     Doing MCCBN")
-            if(ncol(x) >= 2) {
-                time_mccbn <-
-                    system.time(MCCBN <- try(mccbn_proc(x)))["elapsed"]
-            } else {
-                time_mccbn <- NA
-                MCCBN <- NA
-            }
-        } else {
-            time_mccbn <- NA
-            MCCBN <- NA
-        }
-
-        cat("\n                  _times_cpm: ot", time_ot,
-            " cbn ", time_cbn_ot,
-            " mccbn ", time_mccbn,
-            "\n")
-        out <- list(
-            OT = OT,
-            CBN_ot = CBN_ot,
-            MCCBN = MCCBN,
-            time_ot = time_ot,
-            time_cbn_ot = time_cbn_ot,
-            time_mccbn = time_mccbn
-        )
-        return(out)
-    }
-    
-    test_others <- function(data) {
-        ## MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
-        MCCBN_INSTALLED <- FALSE
-        data <- df_2_mat_integer(data)
-        cpm_out_others2 <- ot_cbn_methods(data, do_MCCBN = MCCBN_INSTALLED)
-        
-        mm <- c("OT", "CBN_ot", "MCCBN")[c(TRUE, TRUE, MCCBN_INSTALLED)]
-
-        mm0  <- lapply(cpm_out_others2[mm], cpm_access_genots_paths_w)
-        mmSM <- lapply(cpm_out_others2[mm], cpm_access_genots_paths_w_simplified)
-        ## Identical unweighted transition matrices (fitness graphs)
-        uw0 <- lapply(mm0, function(x) rowScaleMatrix(x$fgraph))
-        uwSM <- lapply(mmSM, function(x) rowScaleMatrix(x$fgraph))
-        uwSMm <- lapply(uwSM, as.matrix)
-        expect_identical(uw0, uwSMm)
-        
-        ## Identical Weighted transition matrices
-        wg0 <- lapply(mm0[c("OT"
-                          , "MCCBN"
-                          , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
-                      function(x) x$trans_mat_genots)
-        wgSM <- lapply(mmSM[c("OT"
-                            , "MCCBN"
-                            , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
-                       function(x) x$trans_mat_genots)
-        wgSMm <- lapply(wgSM, as.matrix)
-        expect_equal(wg0, wgSMm)
-        
-        ## Diagonal
-        td0 <- lapply(mm0[c("MCCBN",
-                            "CBN_ot")[c(MCCBN_INSTALLED, TRUE)]],
-                      function(x)
-                          trans_rate_to_trans_mat(x$weighted_fgraph,
-                                                  method = "uniformization")) 
-        tdSM <- lapply(mmSM[c("MCCBN",
-                              "CBN_ot")[c(MCCBN_INSTALLED, TRUE)]],
-                       function(x)
-                           trans_rate_to_trans_mat(x$weighted_fgraph,
-                                                   method = "uniformization")) 
-        tdSMm <- lapply(tdSM, as.matrix)
-        expect_equal(td0, tdSMm)
-        
-        ## recheck competing exponentials done differently
-        wg2 <-
-            lapply(mm0[c("OT", "MCCBN"
-                       , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
-                   function(x)
-                       trans_rate_to_trans_mat(x$weighted_fgraph,
-                                               method = "competingExponentials"))
-        wg2SM <-
-            lapply(mmSM[c("OT", "MCCBN"
-                        , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
-                   function(x)
-                       as.matrix(trans_rate_to_trans_mat(x$weighted_fgraph,
-                                                         method = "competingExponentials")))
-        expect_equal(wg2, wg2SM)
-    }
-
-    data(every_which_way_data)
-
-    Dat1 <- every_which_way_data[[2]][1:50, 1:4]
-    test_others(Dat1)
-
-    Dat1 <- every_which_way_data[[4]][1:50, 1:5]
-    test_others(Dat1)
-
-    Dat1 <- every_which_way_data[[20]][1:50, 1:5]
-    test_others(Dat1)
-
-    Dat1 <- every_which_way_data[[16]][1:40, 2:6]
-    test_others(Dat1)
-
-    rm(Dat1)
-})
-
 
 test_that("weighted paths and transition matrices computations against
 hand-computed values,
@@ -988,6 +838,155 @@ and identical results between algorithms with sparse matrices, OT", {
                       ot_3$trans_mat_genots)
 })
 
+test_that("OT and CBN: algorithm consistency with various data examples", {
+    
+    ## Check OT, CBN, MCCBN if installed
+    ## for consistency of different algorithms
+
+    ## ot_cbn_methods is no longer used in the code directly. Here it is only
+    ## really used as a wrapper to call OT, CBN and, if asked for, MCCBN.
+    ## We could rewrite this without using ot_cbn_methods
+
+
+    ## given the samples by genes matrix, run OT, CBN, and maybe MCCBN
+    ## NOTE: MCCBN allowed to run with arbitrary number of columns
+    ot_cbn_methods <- function(x, nboot = 0, 
+                               nboot_cbn = 0, 
+                               n00 = "auto3", 
+                               distribution_oncotree = TRUE,
+                               min.freq = 0,
+                               cores_cbn = 1,
+                               do_MCCBN = FALSE) { 
+        
+        cat("\n     Doing OT")
+        if(ncol(x) >= 2) {
+            time_ot <- system.time(
+                OT <- try(
+                    suppressMessages(
+                        ot_proc(x,
+                                nboot = nboot,
+                                distribution.oncotree = distribution_oncotree))))["elapsed"]
+        } else {
+            OT <- NA
+            time_ot <- NA
+        }
+
+        
+        if(ncol(x) >= 2) {
+            cat("\n     Doing CBN")
+            time_cbn_ot <- system.time(
+                CBN_ot <- try(cbn_proc(x,
+                                       addname = "tmpo",
+                                       init.poset = "OT",
+                                       nboot = nboot_cbn, parall = TRUE,
+                                       cores = cores_cbn)))["elapsed"]
+        } else {
+            time_cbn_ot <- NA
+            CBN_ot <- NA
+        }
+        if (do_MCCBN) {
+            cat("\n     Doing MCCBN")
+            if(ncol(x) >= 2) {
+                time_mccbn <-
+                    system.time(MCCBN <- try(mccbn_proc(x)))["elapsed"]
+            } else {
+                time_mccbn <- NA
+                MCCBN <- NA
+            }
+        } else {
+            time_mccbn <- NA
+            MCCBN <- NA
+        }
+
+        cat("\n                  _times_cpm: ot", time_ot,
+            " cbn ", time_cbn_ot,
+            " mccbn ", time_mccbn,
+            "\n")
+        out <- list(
+            OT = OT,
+            CBN_ot = CBN_ot,
+            MCCBN = MCCBN,
+            time_ot = time_ot,
+            time_cbn_ot = time_cbn_ot,
+            time_mccbn = time_mccbn
+        )
+        return(out)
+    }
+    
+    test_others <- function(data) {
+        ## MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
+        MCCBN_INSTALLED <- FALSE
+        data <- df_2_mat_integer(data)
+        cpm_out_others2 <- ot_cbn_methods(data, do_MCCBN = MCCBN_INSTALLED)
+        
+        mm <- c("OT", "CBN_ot", "MCCBN")[c(TRUE, TRUE, MCCBN_INSTALLED)]
+
+        mm0  <- lapply(cpm_out_others2[mm], cpm_access_genots_paths_w)
+        mmSM <- lapply(cpm_out_others2[mm], cpm_access_genots_paths_w_simplified)
+        ## Identical unweighted transition matrices (fitness graphs)
+        uw0 <- lapply(mm0, function(x) rowScaleMatrix(x$fgraph))
+        uwSM <- lapply(mmSM, function(x) rowScaleMatrix(x$fgraph))
+        uwSMm <- lapply(uwSM, as.matrix)
+        expect_identical(uw0, uwSMm)
+        
+        ## Identical Weighted transition matrices
+        wg0 <- lapply(mm0[c("OT"
+                          , "MCCBN"
+                          , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
+                      function(x) x$trans_mat_genots)
+        wgSM <- lapply(mmSM[c("OT"
+                            , "MCCBN"
+                            , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
+                       function(x) x$trans_mat_genots)
+        wgSMm <- lapply(wgSM, as.matrix)
+        expect_equal(wg0, wgSMm)
+        
+        ## Diagonal
+        td0 <- lapply(mm0[c("MCCBN",
+                            "CBN_ot")[c(MCCBN_INSTALLED, TRUE)]],
+                      function(x)
+                          trans_rate_to_trans_mat(x$weighted_fgraph,
+                                                  method = "uniformization")) 
+        tdSM <- lapply(mmSM[c("MCCBN",
+                              "CBN_ot")[c(MCCBN_INSTALLED, TRUE)]],
+                       function(x)
+                           trans_rate_to_trans_mat(x$weighted_fgraph,
+                                                   method = "uniformization")) 
+        tdSMm <- lapply(tdSM, as.matrix)
+        expect_equal(td0, tdSMm)
+        
+        ## recheck competing exponentials done differently
+        wg2 <-
+            lapply(mm0[c("OT", "MCCBN"
+                       , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
+                   function(x)
+                       trans_rate_to_trans_mat(x$weighted_fgraph,
+                                               method = "competingExponentials"))
+        wg2SM <-
+            lapply(mmSM[c("OT", "MCCBN"
+                        , "CBN_ot")[c(TRUE, MCCBN_INSTALLED, TRUE)]],
+                   function(x)
+                       as.matrix(trans_rate_to_trans_mat(x$weighted_fgraph,
+                                                         method = "competingExponentials")))
+        expect_equal(wg2, wg2SM)
+    }
+
+    data(every_which_way_data)
+
+    Dat1 <- every_which_way_data[[2]][1:50, 1:4]
+    test_others(Dat1)
+
+    Dat1 <- every_which_way_data[[4]][1:50, 1:5]
+    test_others(Dat1)
+
+    Dat1 <- every_which_way_data[[20]][1:50, 1:5]
+    test_others(Dat1)
+
+    Dat1 <- every_which_way_data[[16]][1:40, 2:6]
+    test_others(Dat1)
+
+    rm(Dat1)
+})
 
 
 
