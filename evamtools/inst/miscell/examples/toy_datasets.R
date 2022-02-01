@@ -1,4 +1,4 @@
-## This generates data/cpm_output.RData and data/all_csd_examples
+## This generates data/all_csd_examples.RData
 
 dB_linear <- matrix(
   c(
