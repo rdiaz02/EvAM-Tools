@@ -25,13 +25,13 @@ colnames(dB_AND) <- LETTERS[1:4]
 
 dB_OR <- matrix(
   c(
-    rep(c(1, 0, 0, 0), 200) #A
-    , rep(c(1, 0, 1, 0), 100) #AC
-    , rep(c(1, 1, 0, 0), 100) #AB
-    , rep(c(1, 1, 1, 0), 50) #ABC
-    , rep(c(1, 1, 0, 1), 50) #ABD
-    , rep(c(1, 0, 1, 1), 50) #ACD
-    , rep(c(1, 1, 1, 1), 10) #ABCD
+    rep(c(1, 0, 0, 0), 400) #A
+    , rep(c(1, 0, 1, 0), 200) #AC
+    , rep(c(1, 1, 0, 0), 200) #AB
+    , rep(c(1, 1, 1, 0), 100) #ABC
+    , rep(c(1, 1, 0, 1), 150) #ABD
+    , rep(c(1, 0, 1, 1), 150) #ACD
+    , rep(c(1, 1, 1, 1), 50) #ABCD
     , rep(c(0, 0, 0, 0), 10) #WT
   ), ncol = 4, byrow = TRUE
 )
@@ -39,11 +39,12 @@ colnames(dB_OR) <- LETTERS[1:4]
 
 dB_XOR <- matrix(
   c(
-    rep(c(1, 0, 0, 0), 200) #A
-    , rep(c(1, 1, 0, 0), 100) #AB
-    , rep(c(1, 0, 1, 0), 100) #AC
-    , rep(c(1, 1, 0, 1), 50) #ABD
-    , rep(c(1, 0, 1, 1), 50) #ACD
+    rep(c(1, 0, 0, 0), 400) #A
+    , rep(c(1, 1, 0, 0), 300) #AB
+    , rep(c(1, 0, 1, 0), 300) #AC
+    , rep(c(1, 1, 1, 0), 200) #ABC
+    , rep(c(1, 1, 0, 1), 100) #ABD
+    , rep(c(1, 0, 1, 1), 100) #ACD
     , rep(c(0, 0, 0, 0), 10) #WT
   ), ncol = 4, byrow = TRUE
 )
@@ -147,14 +148,14 @@ colnames(dB_c4) <- LETTERS[1:4]
 
 dB_c5 <- matrix(
   c(
-      rep(c(1, 0, 0, 0), 300) #A
-    , rep(c(0, 1, 0, 0), 300) #B
-    , rep(c(0, 0, 1, 0), 300) #C
-    , rep(c(1, 1, 0, 0), 200) #AB
-    , rep(c(1, 0, 1, 0), 200) #AC
-    , rep(c(0, 1, 1, 0), 200) #BC
-    , rep(c(1, 1, 1, 0), 100) #ABC
-    , rep(c(1, 1, 1, 1), 50)  #ABCD
+      rep(c(1, 0, 0, 0), 500) #A
+    , rep(c(0, 1, 0, 0), 500) #B
+    , rep(c(0, 0, 1, 0), 500) #C
+    , rep(c(1, 1, 0, 0), 400) #AB
+    , rep(c(1, 0, 1, 0), 400) #AC
+    , rep(c(0, 1, 1, 0), 400) #BC
+    , rep(c(1, 1, 1, 0), 10) #ABC
+    , rep(c(1, 1, 1, 1), 600)  #ABCD
     , rep(c(0, 0, 0, 0), 10) # WT
   ), ncol = 4, byrow = TRUE
 )
@@ -257,31 +258,6 @@ dB_cv3 <- matrix(
   ), ncol = 4, byrow = TRUE
 )
 colnames(dB_cv3) <- LETTERS[1:4]
-
-## Make a test with the real world data of the pmce paper
-
-# do_HyperTraPS("Bladder_Urothelial_Carcinoma.csv", "HyperTraPS_examples/HP_pmce", runs = 1000, bi=500)
-# sample_freqs(dB_OR, "HyperTraPS_examples/HP_OR/freqs.jpg")
-
-all_examples_csd <- list(
-  linear = dB_linear
-  , AND = dB_AND 
-  , OR = dB_OR 
-  , XOR = dB_XOR 
-  , rse = dB_rse 
-  , se = dB_se 
-  , c1 = dB_c1 
-  , c2 = dB_c2 
-  , c2_2 = dB_c2_2 
-  , c3 = dB_c3 
-  , c4 = dB_c4 
-  , c5 = dB_c5 
-  # , c6 = dB_c6 
-  , c7 = dB_c7 
-  , cv1 = dB_cv1
-  , cv2 = dB_cv2
-  , cv3 = dB_cv3
-)
 
 dag_linear <- matrix(0, ncol=5, nrow=5)
 rownames(dag_linear) <- colnames(dag_linear) <- c("WT", "A", "B", "C", "D")
@@ -415,7 +391,7 @@ all_examples_csd_2 <- list(
 # cpm_output <- list()
 # for (i in names(all_examples_csd_2[["csd"]])[2:11]){
 #   tmp <- all_examples_csd_2[["csd"]][[i]]$data
-#   cpm_output[[i]] <- evam(tmp, do_MCCBN = TRUE)
+#   cpm_output[[i]] <- evam(tmp)
 # }
 
-# save(cpm_output, file = "../../../data/cpm_output.RData")
+# save(cpm_output, file = "../../data/cpm_output.RData")

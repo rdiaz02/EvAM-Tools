@@ -56,8 +56,9 @@ rm(.._EvamTools_test.hesbcn)
 #' and a data.frame with From-To edges and associated lambdas.
 do_HESBCN <- function(data, n_steps=100000, 
     tmp_folder="", seed=NULL, clean_dir=FALSE){
-    # Setting tmp folder
+    orig_folder <- getwd()
 
+    # Setting tmp folder
     date_time <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")
     random_letters <- paste(c("_",
         tmp_folder,
@@ -67,7 +68,6 @@ do_HESBCN <- function(data, n_steps=100000,
 
     tmp_folder <- file.path("/", "tmp", "HESBCN", tmp_folder)
     dir.create(tmp_folder, recursive = TRUE)
-    orig_folder <- getwd()
 
     setwd(tmp_folder)
 
