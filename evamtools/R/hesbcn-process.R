@@ -58,6 +58,11 @@ do_HESBCN <- function(data, n_steps=100000,
     tmp_folder="", seed=NULL, clean_dir=FALSE){
     orig_folder <- getwd()
 
+
+    ## FIXME: please, don't do this for creating and accessing temp
+    ## directories. Use tempfile() See examples in cbn-process.R (around lines
+    ## 242 to 257)
+    
     # Setting tmp folder
     date_time <- format(Sys.time(), "%Y-%m-%d_%H-%M-%S")
     random_letters <- paste(c("_",
