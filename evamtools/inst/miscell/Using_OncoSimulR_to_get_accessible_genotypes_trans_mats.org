@@ -46,7 +46,7 @@
 - So we do as follows:
   - Set $s_i = \lambda_i$ (for OT, we use edgeWeight instead of \lambda).
   - Obtain the fitness of all genotypes from OncoSimulR.
-  - If so desired (e.g., to ensure the maximum fitness is a specific number),  multiply all fitness values by the appropriate scaling factor.
+  - If so desired (e.g., to ensure the maximum fitness is a specific number),  multiply all fitness values (not the WT, which is kept at 1) by the appropriate scaling factor.
 
 ** Crucial assumption above
 - We compute fitness above assuming that only one of two things can happen: a mutation provides a fitness benefit or it leads to death. When the requirements are satisfied, a mutation conveys a fitness increase ($\lambda_i$); otherwise, the cell with the mutation has fitness 0.
