@@ -30,7 +30,7 @@ importFrom("igraph", "V", "E", "graph.data.frame", "layout.reingold.tilford"
          , "get.adjacency", "all_simple_paths", "decompose", "is_dag", "distances"
          , "subcomponent", "adjacent_vertices", "graph_from_adjacency_matrix"
          , "graph_from_data_frame", "head_of", "as_adjacency_matrix",
-           "make_directed_graph", "incident", "ends")
+           "make_directed_graph", "incident", "ends", "as_data_frame")
 importFrom("stats", "aggregate", "chisq.test", "na.omit", "rexp",
            "runif", "rnorm", "optim")
 ## just something, so plot.matrix is available
