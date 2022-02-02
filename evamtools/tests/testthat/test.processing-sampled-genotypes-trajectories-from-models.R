@@ -1,5 +1,26 @@
-## FIXME commented until rds issues solved
-## use RData, not rds.
+trajectory <- list(
+    c("WT", "C", "C, D"),
+    c("WT", "C", "C, E", "C, D, E", "A, C, D, E"),
+    c("WT", "A", "A, B"),
+    c("WT", "C"),
+    c("WT", "A", "A, B", "A, B, C", "A, B, C, E"),
+    c("WT", "C", "C, E", "C, D, E", "A, C, D, E"),
+    c("WT", "C", "C, D"),
+    c("WT", "C", "A, C", "A, B, C", "A, B, C, E"),
+    c("WT", "C"), 
+    c("WT", "C", "A, C", "A, B, C", "A, B, C, E")
+)
+
+obs_events <- c(
+    "C, D", "A, C, D, E", "A, B", "C", "A, B, C, E",
+    "A, C, D, E", "C, D", "A, B, C, E", "C", "A, B, C, E"
+)
+
+sampling_output <- list(
+    trajectory = trajectory, 
+    obs_events = obs_events
+)
+
 test_that("Output are not generated with bad input", {
     simGenotypes <- sampling_output
     x <- simGenotypes
