@@ -45,12 +45,19 @@ rm(.._EvamTools_test.hesbcn)
 #' @param tmp_folder Folder name where the oput is located. 
 #' It will be place under /tmp/HESBCN/tmp_folder
 #' @param seed Seed to run the experiment
+#' @param addname String to append to the temporary folder name. Default NULL
+#' @param silent Whether to run show message showing the folder name where HESBCN is run
 #' @param clean_dir Whether to delete the folder upon completion
 #' 
 #' @return A list with the adjacency matrix, the lambdas, the parent set
 #' and a data.frame with From-To edges and associated lambdas.
-do_HESBCN <- function(data, n_steps=100000, 
-    tmp_folder="", seed=NULL, clean_dir=FALSE){
+do_HESBCN <- function(data, 
+    n_steps=100000, 
+    tmp_folder=NULL, 
+    seed=NULL, 
+    clean_dir=FALSE,
+    addname = NULL,
+    silent = TRUE){
     orig_folder <- getwd()
 
     # Setting tmp folder
@@ -60,8 +67,7 @@ do_HESBCN <- function(data, n_steps=100000,
         if(!is.null(addname)) {
             dirname0 <- tmp_folder
             tmp_folder <- paste0(tmp_folder, "/",
-                              "_cbn_", init.poset, "_",
-                              addname)
+                              "_hesbcn_", addname)
         }
         if(!silent)
             message(paste("\n Using dir", tmp_folder))
