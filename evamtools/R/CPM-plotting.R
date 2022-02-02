@@ -73,7 +73,6 @@ rank_paths <- function(graph) {
 #' "genotype" option returns the genotype of the vertex.
 #' "acquisition" option returns the genotype acquire along the path.
 compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL, type = "genotype"
-# , vertex_labels =  TRUE
 ){
     if(is.null(top_paths)) top_paths <- length(paths_from_graph)
     else if(is.numeric(top_paths)){
@@ -187,8 +186,6 @@ plot_genot_fg <- function(trans_mat
     unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
     rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
 
-    # graph <- graph_from_adjacency_matrix(trans_mat, weighted = TRUE, mode = "directed")
-
     num_genes <- length(unique_genes_names)
     graph <- igraph::graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
     graph <- igraph::decompose(graph)[[1]] ## We do not want disconnected nodes
@@ -207,6 +204,7 @@ plot_genot_fg <- function(trans_mat
 
     ## Layout
     lyt <- cpm_layout(graph)
+
     ## Labels
     sorted_paths <- rank_paths(graph)
     if(is.null(freq2label)){
@@ -265,7 +263,6 @@ plot_genot_fg <- function(trans_mat
     node_sizes[node_sizes <= 0.01] <- 0.01
     node_sizes <- (node_sizes - min(node_sizes))/(max(node_sizes) - min(node_sizes)) * (max_size - min_size) + min_size
     if(all(node_sizes == min_size)) node_sizes <- rep(15, length(node_sizes))
-    # sizes[sizes < 10] <- 10
     igraph::V(graph)$size <- node_sizes
 
     igraph::V(graph)$label.family <- "Helvetica"
@@ -276,8 +273,6 @@ plot_genot_fg <- function(trans_mat
     w <- igraph::E(graph)$weight
     max_edge <- ifelse(is.null(max_edge), max(w), max_edge)
     min_edge <- ifelse(is.null(min_edge), min(w), min_edge)
-    # tmp_w <- w / max_edge 
-    # w[tmp_w <= 0.05] <- 0.05
 
     min_width <- 3
     max_width <- 13
@@ -295,10 +290,10 @@ plot_genot_fg <- function(trans_mat
         , vertex.label.cex = 1.2
         , vertex.label = labels$vertex_labels
         , font.best = 2
-        # , vertex.label.cex = 1
         , vertex.frame.width = 0
         , edge.color = rgb(0.5, 0.5, 0.5, transparent_w2)
-        # , edge.color = rgb(0.5, 0.5, 0.5, 1)
+        # , edge.color = rgb(0.5, 0.5, 0.5, 1) 
+        ## Some error in my latop because, I cannot add alpha channel
         , edge.arrow.size = 0
         , xlab = "Number of features acquired"
         , edge.width = w2
@@ -325,7 +320,6 @@ plot_genot_fg <- function(trans_mat
             , x.intersp = c(0, 0)
             )
     }
-    # par(opx)
     title(xlab = "Number of features acquired", line = 2)
 }
 
@@ -383,7 +377,6 @@ process_data <- function(data, mod, prune_edges = TRUE) {
 #' By default it creates a top row with the DAG of the CPM 
 #' or de transtionRateMatrix for MHN
 #' The bottom row has a custom plot for genotype transition
-
 #' @param cpm_output output from the cpm
 #' @param data Original cross sectional data used to compute the model. Optional.
 #' @param models Output of the CPMs to plot. Current support is for OT, CBN, DBN, MCCBN and MHN Optional.
@@ -431,20 +424,6 @@ plot_CPMs <- function(cpm_output, data, orientation = "horizontal",
     if (!(plot_type %in% c("transitions", "probabilities"))){
         stop(sprintf("Plot type %s is not supported", plot_type))
     }
-    # plot_fg <- function(fg) {
-    #     ## Ideas from: https://stackoverflow.com/a/48368540
-    #     lyt <- layout.reingold.tilford(fg)
-    #     opx <- par(mar=c(2, 0.5, 2, 0.5))
-    #     plot(fg,
-    #          ## If I plot them sideways, labels in self-transitions
-    #          ## overlap. FIXME. This sucks, I want them sideways!
-    #          ## layout = -lyt[, 2:1],
-    #          layout = lyt,
-    #          edge.label = round(E(fg)$weight, 2),
-    #          vertex.color = "SkyBlue2",
-    #          edge.label.color = "black")
-    #     par(opx)
-    # }
 
     ## List of available models
     available_models <- models[
@@ -516,25 +495,6 @@ plot_CPMs <- function(cpm_output, data, orientation = "horizontal",
             par(op)
         }
 
-        # if (plot_type == "matrix"){
-        #     plot(model_data2plot$dag_trans_mat
-        #         , digits = 1, xlab = "", ylab = ""
-        #         , axis.col = list(side = 1, las = 2)
-        #         , axis.row = list(side = 2, las = 1) 
-        #         , main = paste(mod, ": trans matrix", sep = " ")
-        #         , cex.axis = 0.7
-        #         , mgp = c(2, 1, 0)
-        #         , key = NULL)
-            
-        #     if (!is.null(model_data2plot$td_trans_mat)){
-        #         plot(model_data2plot$td_trans_mat, 
-        #             digits = 1, cex.axis = 0.7,
-        #             main = paste(mod, ": trans td matrix", sep = " "), 
-        #             xlab = "", ylab = "",
-        #             axis.col = list(side = 1, las = 2), axis.row = list(side = 2, las = 1), 
-        #             mgp = c(2, 1, 0), key = NULL)
-        #     }
-        # } else 
         if (plot_type == "probabilities") {
             plot_genot_fg(model_data2plot$trans_mat, top_paths = top_paths)
         } else if (plot_type == "transitions") {
