@@ -13,11 +13,6 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-
-
-# Create something similar to cbn-process for checking if the package is installed
-
 ## Testing HESBCN programs available
 .._EvamTools_test.hesbcn <- Sys.which("h-esbcn") == ""
 if(.._EvamTools_test.hesbcn) {
@@ -58,11 +53,6 @@ do_HESBCN <- function(data, n_steps=100000,
     tmp_folder="", seed=NULL, clean_dir=FALSE){
     orig_folder <- getwd()
 
-
-    ## FIXME: please, don't do this for creating and accessing temp
-    ## directories. Use tempfile() See examples in cbn-process.R (around lines
-    ## 242 to 257)
-    
     # Setting tmp folder
     if(is.null(tmp_folder)) {
         tmp_folder <- tempfile()
@@ -101,14 +91,6 @@ do_HESBCN <- function(data, n_steps=100000,
     # Reading output
     model_info <- import.hesbcn("output.txt", genes = orig_gene_names)
 
-    # Updating gene names
-    # gene_names <- orig_gene_names
-    # names(model_info$parent_set) <- gene_names
-    # rownames(model_info$lambdas_matrix) <-
-    # colnames(model_info$lambdas_matrix) <-
-    # rownames(model_info$adjacency_matrix) <-
-    # colnames(model_info$adjacency_matrix) <- c("Root", gene_names)
-
     indexes_array <- data.frame(which(model_info$lambdas_matrix > 0, arr.ind = TRUE))
     indexes_list <- which(model_info$lambdas_matrix > 0, arr.ind = TRUE)
     lambdas <- model_info$lambdas_matrix[indexes_list]
@@ -117,13 +99,6 @@ do_HESBCN <- function(data, n_steps=100000,
     edges <- paste(from, to, sep = "->")
     adjacency_matrix_2 <- data.frame(From = from, To = to, Edge = edges, Lambdas = lambdas)
     model_info$edges <- adjacency_matrix_2
-
-
-    # Transforming data from model
-    # weighted_fgraph <- generate_trans_matrix(model_info$hesbcn_out, "Lambdas")
-
-    # ##TODO: include thetas for out-of-the-path mutations?
-    # trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
 
     # Housekeeping
     setwd(orig_folder)
