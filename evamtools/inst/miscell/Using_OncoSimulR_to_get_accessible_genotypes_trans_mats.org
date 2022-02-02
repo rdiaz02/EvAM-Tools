@@ -33,12 +33,13 @@
   - If we write, as is common, $W_{AB} = W_A \  (1 + s_B)$, we get from the above $Pr(A \rightarrow AB) = \frac{s_B}{s_B + s_C}$.
        
   - (So, actually, the $s_i$ are the relative differences, not just
-    differences, in fitness: $s_B = \frac{W_{AB} - W_A}{W_A}$.)
+    differences, in fitness: $s_B = \frac{W_{AB} - W_A}{W_A}$, as shown also in p.7 of the supplementary material of Weinreich, D. M., Delaney, N. F., DePristo, M. A., & Hartl, D. L. (2006). Darwinian Evolution Can Follow Only Very Few Mutational Paths to Fitter Proteins. Science, 312(5770), 111–114.https://dx.doi.org/10.1126/science.1123539 .)
        
   - (We wrote $W_{AB} = W_A \ (1 + s_B)$. This we can do as we explained what the meaning of the $s_i$ are: selection coefficient from gene $i$ with its restrictions satisfied. See below: [[*Transition probabilities using an epistatic specification][Transition probabilities using an epistatic specification]].)
    
 - Note that this is the same procedure as in Weinreich et al., 2006, (Weinreich, D. M., Delaney, N. F., DePristo, M. A., & Hartl, D. L. (2006). Darwinian Evolution Can Follow Only Very Few Mutational Paths to Fitter Proteins. Science, 312(5770), 111–114.https://dx.doi.org/10.1126/science.1123539) supplementary material, p. 4): $s_{i \rightarrow j}$ "the selection coefficient for the mutation that carries allele i to allele j" (where selection coefficient has the usual definition, e.g., Gillespie, 2004 (Population genetics: a concise guide, 2nd. Baltimore, Md: The Johns Hopkins University Press.), p. 63 ---but we write $W_{AB} = W_A \ (1 + s_B)$, and thus if $s_B > 0$ AB is fitter than A).
-   
+  - See their S5b, which shows the relationship between the expected value of the conditioned probability of fixation in a mutation from $i$ to $j$ and the expected value of the ratio of the selection coefficient for the mutation that turns $i$ to $j$ over the sum of selection coefficients of beneficial mutations that turn $i$ into all other alleles; see also their figure S1 in p.\ 7 that shows the accuracy of their expression.
+    
 - Note: In Gerstung et al., 2011 (Gerstung, M., Eriksson, N., Lin, J., Vogelstein, B., & Beerenwinkel, N. (2011). The Temporal Order of Genetic and Pathway Alterations in Tumorigenesis. PLoS ONE, 6(11), 27136. https://dx.doi.org/10.1371/journal.pone.0027136), PLoS ONE (p.8) the relationship between $\lambda_i$ and $s_i$ is also discussed.
      
 - And why the fitness difference with respect to the ancestor and not just a  ratio of fitnesses? Suppose $W_{AC} < W_A < W_{AB}$. The procedure above  correctly would say that we always transition from A to AB.
