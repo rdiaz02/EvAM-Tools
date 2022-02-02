@@ -1,7 +1,7 @@
 #+OPTIONS: ^:nil
 #+AUTHOR: Ramon Diaz-Uriarte
 #+TITLE: Using OncoSimulR to get accessible genotypes and transition matrices
-#+LATEX_HEADER: \usepackage[margin=1.7cm]{geometry}
+#+LATEX_HEADER: \usepackage[a4paper,margin=1.7cm]{geometry}
 #+LATEX_HEADER: \usepackage[iso,english]{isodate}
 
 * Note:
