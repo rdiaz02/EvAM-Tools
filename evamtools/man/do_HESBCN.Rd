@@ -7,9 +7,11 @@
 do_HESBCN(
   data,
   n_steps = 1e+05,
-  tmp_folder = "",
+  tmp_folder = NULL,
   seed = NULL,
-  clean_dir = FALSE
+  clean_dir = FALSE,
+  addname = NULL,
+  silent = TRUE
 )
 }
 \arguments{
@@ -24,6 +26,10 @@ It will be place under /tmp/HESBCN/tmp_folder}
 \item{seed}{Seed to run the experiment}
 
 \item{clean_dir}{Whether to delete the folder upon completion}
+
+\item{addname}{String to append to the temporary folder name. Default NULL}
+
+\item{silent}{Whether to run show message showing the folder name where HESBCN is run}
 }
 \value{
 A list with the adjacency matrix, the lambdas, the parent set
