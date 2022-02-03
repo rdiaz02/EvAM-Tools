@@ -383,6 +383,7 @@ standarize_all_datasets <- function(datasets){
 }
 
 server <- function(input, output, session) {
+    examples_csd$csd <- examples_csd$csd[1:5]
     all_csd_data <- standarize_all_datasets(examples_csd)
     min_genes <- 2
     max_genes <- 10
