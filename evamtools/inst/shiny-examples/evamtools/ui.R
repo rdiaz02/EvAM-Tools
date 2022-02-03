@@ -564,15 +564,21 @@ ui <-
           margin: 0;
           padding: 0;
         }
+
         .navbar{
           padding-left: 20px;
           margin-bottom: 0px;
           position: fixed;
           width: 100%;
         }
+
         .dropdown-menu > li > a{
           font-size: 15px;
           padding: 10px 10px;
+        }
+
+        body .tab-content{
+          margin-top: 50px;
         }
         "
       )))
