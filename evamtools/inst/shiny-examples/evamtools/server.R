@@ -1,10 +1,5 @@
-# library(DT)
-# # library(guloMAM)
-# library(OncoSimulR)
-# library(shinyjs)
-# library(igraph)
-
-# source("../../../data/toy_datasets.R")
+#'  I followed this link to structure the shiny app whithin the package
+#'  https://deanattali.com/2015/04/21/r-package-shiny-app/
 
 default_genes <- 3
 max_genes <- 10
