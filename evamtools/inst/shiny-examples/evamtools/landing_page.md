@@ -105,9 +105,7 @@ We can infeer dependecy relationship:
 # How to interpret the ```Results```?<a id="helpresults"></a>
 ***
 
-The results sections looks like this:
-
-Add screnshot
+The results sections includes:
 
 1. *Plotting the model*: here you can see either the **DAG** of each CPM showing the infered dependency relationships or the **transition rate matrix** in the case some [_CPMs_](#cpms).
 1. *Plotting the sampling*: this plot is a bit more complex. It represents the flow that we have sampled using the output of its [_CPM_](#cpms). It highlights the most relevant genotypes and transitions between genotypes. It is created by making random samples using the parameters from the [_CPM_](#cpms) and counting the transitions observed and counting the transitions observed (defining edge width) and the genotype frequency (node size).  
