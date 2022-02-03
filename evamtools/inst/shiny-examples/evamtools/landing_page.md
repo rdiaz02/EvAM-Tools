@@ -6,8 +6,7 @@ This web interface provides a user-friendly interactive version of the package.
 Here you can define complex scenarios with few click and check the predictions of several softwares.  
 
 * In the ```Input``` tab you can define data sets to run ```Evam-tools```.
-* In the ```Results``` tab you can see the output of [_cancer progression models  **(CPMs)**_](#cpms). 
-* In the ```Examples``` tab you can see some pre-defined data sets that you can run or modify. 
+* In the ```Results``` tab you can see the output of [_CPMs_](#cpms). 
 
 <center>
 <img src="evamtools.png" width=850/>
@@ -20,7 +19,7 @@ Link to the package.
 # What is _cross-sectional data_?<a id="helpcsd"></a> 
 ***
 
-_CSD_ represents a collection of screened patients. 
+_Cross sectional data, or CSD,_ represents a collection of screened patients. 
 For each of those patients, the state of several events has been checked. 
 For events we can refeer to single point mutations, insertions, deletions or any other genetic modification.
 
@@ -33,15 +32,12 @@ You can do it by going to the ```User Input``` tab in the navigation bar at the 
 
 This web interface allows to define _CSD_ in three different ways:
 
-* _By directly defining genotypes frequencies_ : you directly define what mutations are observed in how many patients.
-* _By deriving genotype frequencies from a **direct acyclic graph (DAG)**_ : here you define 
-dependency relationships between genes.
-* _By deriving genotype frequencies from a **transition rate matrix**_ : the transition rate matrix reflects how every gene affects each other, by making them more likely to mutate (positive theta) or less likely (negative theta).
-
-You can also use precomputed _CSD_ in the ```Examples``` tab and modify them.
+* _By directly **defining genotypes frequencies**_ : you directly define what mutations are observed in how many patients.
+* _By deriving genotype frequencies from a **direct acyclic graph (DAG)**_ : here you define dependency relationships between genes.
+* _By deriving genotype frequencies from a **transition rate matrix**_ : the transition rate matrix reflects how genes affects each other, by making them more likely to mutate (positive theta) or less likely (negative theta).
 
 Once you have created an scenario or selected one, you can hit the ```Run evamtools!``` button.
-This will run several [_cancer progression models  **(CPMs)**_](#cpms) and will display their [results](#helpresults). 
+This will run several [_CPMs_](#cpms) and will display their [results](#helpresults). 
 
 You can also increase or decrease the number of genes, or rename genes.
 
@@ -133,7 +129,7 @@ Add screnshot
 # What is a cancer progression model (CPM)?<a id="cpms"></a>
 ***
 
-Cancer progression models (CPMs) use cross-sectional data to infer probabilistic relationships between mutational events that lead to the disease. 
+Cancer progression models use cross-sectional data to infer probabilistic relationships between mutational events that lead to the disease. 
 
 # What CPMs are included in ```Evam-tools```?<a id="cpms"></a>
 ***
@@ -144,12 +140,3 @@ Cancer progression models (CPMs) use cross-sectional data to infer probabilistic
 *  **Monte Carlo CBN (MCCBN):** this is an implementation of CBN using Monte Carlo expectationi-maximization algorithm to work with a large number of mutations.
 *  **Progression Models of Cancer Evolution (PMCE):** is also a graphical model which main features it the aumatic detection of logical formulas AND, OR and XOR.
 *  **Mutual Hazard networks (MHN):** in this model dpeendencies are not deterministic. In that sense, we do not see a direct dependence relationship, i.e. mutation B depends on mutation A. Conversely, an envent is influenced by all others. So, one event can make other more like (the presence of A promotes B) and also inhibiting it (the presence of A inhibits B). Hence, MHN includes multiple dependencies and is not limited to DAG schemes. The main parameters is a theta matrix that represents how one event influences other.
-
-for styling
-
-1. increase font size
-2. blue for titles and for rule
-3. table: make it wider, with more space
-4. padding top and botton in image
-
-make this the landing page

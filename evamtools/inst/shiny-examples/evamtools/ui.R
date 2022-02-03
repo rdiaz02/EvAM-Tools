@@ -1,11 +1,3 @@
-# library(DT)
-# library(shinydashboard)
-# library(markdown)
-# library(shinyjs)
-
-# source("ui/user_input_csd.R")
-# source("ui/see_results_simple.R")
-
 cpm_info <- function(){
   tags$div(id = "background",
     tags$head(
@@ -28,7 +20,6 @@ cpm_info <- function(){
           background: white;
           padding: 10px 50px;
           width: 75%;
-          # height: 100vh;
           margin: auto;
           margin-top: 100px;
           border: 5px solid white;
@@ -36,6 +27,35 @@ cpm_info <- function(){
           box-shadow: 0 0 10px 5px rgba(160,160,160, 0.5);
         }
 
+        #cpm_info hr{
+          border-top: 3px solid #0892d0;
+        }
+
+        #cpm_info table{
+          width: 50%;
+          text-align: center;
+        }
+
+        #cpm_info h1{
+          color: #0892d0;
+          margin-top: 0;
+          margin-bottom: 0;
+        }
+
+        #cpm_info td, #cpm_info th {
+          border: 1px solid #ddd;
+          padding: 8px;
+        }
+
+        #cpm_info tr:nth-child(even){background-color: #08B5FF;}
+
+        #cpm_info th {
+          padding-top: 12px;
+          padding-bottom: 12px;
+          text-align: center;
+          background-color: #08B5FF;
+          color: white;
+        }
         .container-fluid{
           padding:0;
         }
@@ -533,9 +553,9 @@ ui <-
       value = "result_viewer",
       results_simple()
     ),
-    tabPanel("Example Library",
-      "WIP"
-    ),
+    # tabPanel("Example Library",
+    #   "WIP"
+    # ),
     tags$head(
       tags$style(
         HTML(
@@ -547,6 +567,8 @@ ui <-
         .navbar{
           padding-left: 20px;
           margin-bottom: 0px;
+          position: fixed;
+          width: 100%;
         }
         .dropdown-menu > li > a{
           font-size: 15px;
