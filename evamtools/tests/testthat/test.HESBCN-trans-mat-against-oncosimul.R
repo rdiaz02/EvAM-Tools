@@ -126,7 +126,8 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     for(ex in all_examples){
         run_test_for_dataset(ex)
     }
-
+    set.seed(NULL)
+    
     ## Doesn't give us much, since most are Single
     ## ## Repeat with some examples from real data sets
     ## data(every_which_way_data)
