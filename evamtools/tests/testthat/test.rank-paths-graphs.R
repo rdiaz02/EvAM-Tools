@@ -39,7 +39,7 @@ test_that("Returns the correct number and type of vertex labels", {
     labels_4 <- evamtools:::compute_vertex_labels(g, all_paths, top_paths = 4)$vertex_labels
     labels_40 <- evamtools:::compute_vertex_labels(g, all_paths, top_paths = 40)$vertex_labels
     labels_null <- evamtools:::compute_vertex_labels(g, all_paths, top_paths = NULL)$vertex_labels
-    browser()
+    
     expect_equal(labels_1, l1)
     expect_equal(labels_2, l2)
     expect_equal(labels_3, l3)
