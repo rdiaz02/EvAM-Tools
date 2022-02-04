@@ -2,9 +2,52 @@
 ## cpm_to_trans_mat_oncosimul, the function that uses OncoSimulR
 
 test_that("Testing evamtools:::cpm_access_genots_paths_w_simplified by comparing with
-OncoSimulR's based cpm_to_trans_mat_oncosimul", {
+OncoSimulR's based cpm_to_trans_mat_oncosimul.", {
     ## Recall evamtools:::cpm2tm <- cpm_to_trans_mat_oncosimul
 
+
+    ## The first set of tests use pre-run analyses. So we would not catch
+    ## changes in the code that gives the analysis itself. See below for
+    ## code that does that.
+
+
+
+    ## Functions for testing
+    reorder_trans_mat <- function(x) {
+        gg <- c(1, 1 + order(colnames(x)[-1]))
+        return(as.matrix(x[gg, gg]))
+    }
+    
+    run_test_for_dataset1 <- function(data) {
+        expect_equal(
+            reorder_trans_mat(evamtools:::cpm2tm(data, max_f = NULL)$transition_matrix),
+            reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
+                                              list(edges = data))$trans_mat_genots),
+            check.attributes = TRUE)
+
+        ## Do not run next test if fitness is absurdly large as scaling will fail
+        ## as it should.
+        max_fitness <- max(evamtools:::cpm2tm(data, max_f = NULL)$accessible_genotypes)
+        if(max_fitness < 1e10) {
+            maxff <- sample(c(2, 3, 3.5, 3.8, 4, 5, 8), size = 1)
+            expect_equal(as.matrix(evamtools:::cpm2tm(data, max_f = NULL)$transition_matrix),
+                         as.matrix(evamtools:::cpm2tm(data, max_f = maxff)$transition_matrix))
+        }
+    }
+
+    ## this takes the object, not the object$edges
+    run_test_for_dataset <- function(data){
+        expect_equal(reorder_trans_mat(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
+                    reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
+                        data)$trans_mat_genots),
+                    check.attributes = TRUE)
+        maxff <- sample(c(2, 3, 3.5, 3.8, 4, 5, 8), size = 1)
+        expect_equal(as.matrix(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
+                    as.matrix(evamtools:::cpm2tm(data$edges, max_f = maxff)$transition_matrix))
+    }
+
+
+    
     ## First, load a bunch of data structures
     ## From ex1.R
     ex_cbn_out1 <- structure(list(From = c("Root", "Root"),
@@ -201,105 +244,133 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
                                           "B", "C", "D", "E", "F"))
 
 
-    ## Should run. Just showing output
-    evamtools:::cpm2tm(ex_ot_out2, max_f = NULL)$transition_matrix
-    evamtools:::cpm_access_genots_paths_w_simplified(list(edges = ex_ot_out2))$trans_mat_genots
-
-    ## Same transitions, different fitness
-    evamtools:::cpm2tm(ex_cbn_out2, max_f = NULL)$transition_matrix
-    evamtools:::cpm2tm(ex_cbn_out2, 8)$transition_matrix
-
-    ## Original code
-    evamtools:::cpm_access_genots_paths_w_simplified(list(edges = ex_cbn_out2))$trans_mat_genots
-
-
-    ## For testing
-    reorder_trans_mat <- function(x) {
-        gg <- c(1, 1 + order(colnames(x)[-1]))
-        return(as.matrix(x[gg, gg]))
-    }
-
-    ## CBN
-    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_cbn_out1, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
-                     list(edges = ex_cbn_out1))$trans_mat_genots),
-                 check.attributes = TRUE)
-
-    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_cbn_out2, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
-                     list(edges = ex_cbn_out2))$trans_mat_genots),
-                 check.attributes = TRUE)
-
-    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_cbn_out3, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
-                     list(edges = ex_cbn_out3))$trans_mat_genots),
-                 check.attributes = TRUE)
-
-    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_cbn_out4, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
-                     list(edges = ex_cbn_out4))$trans_mat_genots),
-                 check.attributes = TRUE)
-
-    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_cbn_out5, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
-                     list(edges = ex_cbn_out5))$trans_mat_genots),
-                 check.attributes = TRUE)
-
-    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_cbn_out6, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
-                     list(edges = ex_cbn_out6))$trans_mat_genots),
-                 check.attributes = TRUE)
-
-
-    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_cbn_out7, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
-                     list(edges = ex_cbn_out7))$trans_mat_genots),
-                 check.attributes = TRUE)
+   
 
     
-    expect_equal(as.matrix(evamtools:::cpm2tm(ex_cbn_out2, max_f = NULL)$transition_matrix),
-                 as.matrix(evamtools:::cpm2tm(ex_cbn_out2, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(evamtools:::cpm2tm(ex_cbn_out1, max_f = NULL)$transition_matrix),
-                 as.matrix(evamtools:::cpm2tm(ex_cbn_out1, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(evamtools:::cpm2tm(ex_cbn_out4, max_f = NULL)$transition_matrix),
-                 as.matrix(evamtools:::cpm2tm(ex_cbn_out4, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(evamtools:::cpm2tm(ex_cbn_out4, max_f = NULL)$transition_matrix),
-                 as.matrix(evamtools:::cpm2tm(ex_cbn_out4, max_f = 4)$transition_matrix))
-    expect_equal(as.matrix(evamtools:::cpm2tm(ex_cbn_out5, max_f = NULL)$transition_matrix),
-                 as.matrix(evamtools:::cpm2tm(ex_cbn_out5, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(evamtools:::cpm2tm(ex_cbn_out6, max_f = NULL)$transition_matrix),
-                 as.matrix(evamtools:::cpm2tm(ex_cbn_out6, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(evamtools:::cpm2tm(ex_cbn_out7, max_f = NULL)$transition_matrix),
-                 as.matrix(evamtools:::cpm2tm(ex_cbn_out7, max_f = 4)$transition_matrix))
+    precomputed_datasets <- list(ex_cbn_out1, ex_cbn_out2, ex_cbn_out3,
+                     ex_cbn_out4, ex_cbn_out5, ex_cbn_out6,
+                     ex_cbn_out7, ex_ot_out1, ex_ot_out2,
+                     ex_ot_out3, ex_ot_out4, ex_ot_out5)
 
-    expect_equal(max(evamtools:::cpm2tm(ex_cbn_out2, max_f = 8)$accessible_genotypes),
-                 8)
-    expect_equal(max(evamtools:::cpm2tm(ex_cbn_out2, max_f = 3)$accessible_genotypes),
-                 3)
+    for(ex in precomputed_datasets){
+        run_test_for_dataset1(ex)
+    }
 
 
-    ## OT 
-    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_ot_out1, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
-                     list(edges = ex_ot_out1))$trans_mat_genots),
-                 check.attributes = TRUE)
-    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_ot_out2, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
-                     list(edges = ex_ot_out2))$trans_mat_genots),
-                 check.attributes = TRUE)
-    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_ot_out3, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
-                     list(edges = ex_ot_out3))$trans_mat_genots),
-                 check.attributes = TRUE)
-    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_ot_out4, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
-                     list(edges = ex_ot_out4))$trans_mat_genots),
-                 check.attributes = TRUE)
-    expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_ot_out5, max_f = NULL)$transition_matrix),
-                 reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
-                     list(edges = ex_ot_out5))$trans_mat_genots),
-                 check.attributes = TRUE)
+    data(all_examples_csd)
+    ## Run OT and CBN
+    do_OT <- function(x) suppressMessages(evamtools:::ot_proc(x,nboot = 0,
+                                             distribution.oncotree = TRUE))
+    ex_ot_and <- do_OT(examples_csd$csd$AND$data)
+    ex_ot_linear <- do_OT(examples_csd$csd$Linear$data)
+    ex_ot_or <- do_OT(examples_csd$csd$OR$data)
+    ex_ot_xor <- do_OT(examples_csd$csd$XOR$data)
+    ex_ot_c1 <- do_OT(examples_csd$csd$c1$data)
+    ex_ot_c3 <- do_OT(examples_csd$csd$c3$data)
+    ex_ot_c4c2 <- do_OT(examples_csd$csd$c4c2$data)
+    
 
+    do_CBN <- function(x) suppressMessages(evamtools:::cbn_proc(x,
+                                                                addname = "tmpo",
+                                               init.poset = "OT",
+                                               nboot = 0,
+                                               parall = TRUE,
+                                               cores = 1))
+    ex_cbn_and <- do_CBN(examples_csd$csd$AND$data)
+    ex_cbn_linear <- do_CBN(examples_csd$csd$Linear$data)
+    ex_cbn_or <- do_CBN(examples_csd$csd$OR$data)
+    ex_cbn_xor <- do_CBN(examples_csd$csd$XOR$data)
+    ex_cbn_c1 <- do_CBN(examples_csd$csd$c1$data)
+    ex_cbn_c3 <- do_CBN(examples_csd$csd$c3$data)
+    ex_cbn_c4c2 <- do_CBN(examples_csd$csd$c4c2$data)
+    
+    all_ot_examples <- list(ex_ot_and, ex_ot_linear, ex_ot_or, ex_ot_xor,
+        ex_ot_c1, ex_ot_c3, ex_ot_c4c2)
+
+    all_cbn_examples <- list(ex_cbn_and, ex_cbn_linear, ex_cbn_or, ex_cbn_xor,
+        ex_cbn_c1, ex_cbn_c3, ex_cbn_c4c2)
+   
+
+    for (ex in all_ot_examples) {
+        run_test_for_dataset(ex)
+    }
+
+    for (ex in all_cbn_examples) {
+        run_test_for_dataset(ex)
+    }
+
+
+
+  ## Add the examples used for HESBCN with mixes of relationships
+    set.seed(2)
+    d1 <- data.frame(A = sample(c(1, 0), prob = c(0.7, 0.2), size = 200, replace = TRUE),
+                     B = sample(c(1, 0), prob = c(0.85, 0.2), size = 200, replace = TRUE))
+    d1$C <- 0
+    d1$D <- 0
+    d1$E <- 0
+    d1$F <- 0
+    d1$C[(d1$A == 1) & (d1$B == 1)] <- 1
+    d1$D[(d1$A == 1) | (d1$B == 1)] <- 1
+    d1$D[100:200] <- 0
+    d1$E[xor((d1$A == 1), (d1$B == 1))] <- 1
+    d1$F[(d1$C == 1) & (d1$D == 1)] <- 1
+    d2 <- rbind(d1,
+                data.frame(A = sample(c(1, 0), size = 25, prob = c(0.5, 0.2), replace = TRUE),
+                           B = sample(c(1, 0), size = 25, prob = c(0.5, 0.2), replace = TRUE),
+                           C = 0,
+                           D = sample(c(1, 0), size = 25, replace = TRUE),
+                           E = 0,
+                           F = 0))
+    d3 <- d2
+    d3$C[(d3$A == 1) & (d3$B == 1)] <- 1
+    
+    set.seed(22)
+    d111 <- data.frame(A = sample(c(1, 0), prob = c(0.7, 0.2), size = 2000, replace = TRUE),
+                     B = sample(c(1, 0), prob = c(0.85, 0.2), size = 2000, replace = TRUE))
+    d111$C <- 0
+    d111$D <- 0
+    d111$E <- 0
+    d111$F <- 0
+    d111$C[(d111$A == 1) & (d111$B == 1)] <- 1
+    d111$D[(d111$A == 1) | (d111$B == 1)] <- 1
+    d111$D[100:200] <- 0
+    d111$E[xor((d111$A == 1), (d111$B == 1))] <- 1
+    d111$F[(d111$C == 1) & (d111$D == 1)] <- 1
+    d222 <- rbind(d111,
+                data.frame(A = sample(c(1, 0), size = 250, prob = c(0.5, 0.2), replace = TRUE),
+                           B = sample(c(1, 0), size = 250, prob = c(0.5, 0.2), replace = TRUE),
+                           C = 0,
+                           D = sample(c(1, 0), size = 25, replace = TRUE),
+                           E = 0,
+                           F = 0))
+    d333 <- d222
+    d333$C[(d333$A == 1) & (d333$B == 1)] <- 1
+
+    set.seed(NULL)
+
+    ## Adds a lot of time, and given all the above not justified
+    ## d3_1 <- do_CBN(d3)
+    ## d2_1 <- do_CBN(d2)
+    ## d222_1 <- do_CBN(d222)
+    ## d333_1 <- do_CBN(d333)
+
+    d3_1_o <- do_OT(d3)
+    d2_1_o <- do_OT(d2)
+    d222_1_o <- do_OT(d222)
+    d333_1_o <- do_OT(d333)
+
+    
+    all_mixed_examples <- list(## d3_1, d2_1, d222_1, d333_1,
+                               d3_1_o, d2_1_o, d222_1_o, d333_1_o)
+    
+    for(ex in all_mixed_examples){
+        run_test_for_dataset(ex)
+    }
+    set.seed(NULL)
+
+
+    
+    
     ## tripwire. Should fail
     ## expect_equal(as.matrix(evamtools:::cpm2tm(ex_ot_out1, max_f = NULL)$transition_matrix),
     ##              reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
@@ -307,23 +378,6 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     ##              check.attributes = FALSE)
 
 
-    expect_equal(as.matrix(evamtools:::cpm2tm(ex_ot_out2, max_f = NULL)$transition_matrix),
-                 as.matrix(evamtools:::cpm2tm(ex_ot_out2, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(evamtools:::cpm2tm(ex_ot_out1, max_f = NULL)$transition_matrix),
-                 as.matrix(evamtools:::cpm2tm(ex_ot_out1, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(evamtools:::cpm2tm(ex_ot_out4, max_f = NULL)$transition_matrix),
-                 as.matrix(evamtools:::cpm2tm(ex_ot_out4, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(evamtools:::cpm2tm(ex_ot_out4, max_f = NULL)$transition_matrix),
-                 as.matrix(evamtools:::cpm2tm(ex_ot_out4, max_f = 4)$transition_matrix))
-    expect_equal(as.matrix(evamtools:::cpm2tm(ex_ot_out5, max_f = NULL)$transition_matrix),
-                 as.matrix(evamtools:::cpm2tm(ex_ot_out5, max_f = 2)$transition_matrix))
-    expect_equal(as.matrix(evamtools:::cpm2tm(ex_ot_out3, max_f = NULL)$transition_matrix),
-                 as.matrix(evamtools:::cpm2tm(ex_ot_out3, max_f = 2)$transition_matrix))
-
-    expect_equal(max(evamtools:::cpm2tm(ex_ot_out2, max_f = 8)$accessible_genotypes),
-                 8)
-    expect_equal(max(evamtools:::cpm2tm(ex_ot_out2, max_f = 3)$accessible_genotypes),
-                 3)
 
     ## tripwire
     ## expect_true(1 == 2)
@@ -342,3 +396,4 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
 })
 
 cat("\n Done test.OT-CBN-trans-mat-against-oncosimul.R \n")
+
