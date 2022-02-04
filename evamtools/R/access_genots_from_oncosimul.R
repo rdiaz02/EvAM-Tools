@@ -50,6 +50,9 @@
 ## fitness, target max fitness. WT fitness always 1.
 scale_fitness_2 <- function(x, max_f) {
     max_x <- max(x)
+    if(max_x > 1e10) {
+        warning("Maximum fitness > 1e10. Expect numerical problems.")
+    }
     return(1.0 +  (x - 1) * ((max_f - 1) / (max_x - 1)))
 }
 
@@ -62,9 +65,8 @@ cpm_out_to_oncosimul <- function(x, sh = -Inf) {
     if ("rerun_lambda" %in% names(x)) { ## CBN
         s <- x$rerun_lambda
         typeDep <- "AND"
-    } else if ("Relation" %in% names(x)) { ## PMCE
-        if(exists("Lambdas", where = x))
-            s <- x$Lambdas
+    } else if ("Relation" %in% names(x)) { ## HESBCN (same thing as PMCE)
+        s <- x$Lambdas
         typeDep <- x$Relation
         typeDep[typeDep == "Single"] <- "AND"
     } else if ("OT_edgeWeight" %in% names(x)) { ## OT
