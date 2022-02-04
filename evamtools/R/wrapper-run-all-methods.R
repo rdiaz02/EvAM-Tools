@@ -497,7 +497,8 @@ cpm_access_genots_paths_w_simplified <- function(x,
 ## cpm_access_genots_paths_w_simplified
 cpm_access_genots_paths_w_simplified_OR <-
     function(data,
-             parameter_column_name = c("Thetas", "Probabilities")) {
+             parameter_column_name = c("Thetas")) {
+##             parameter_column_name = c("Thetas", "Probabilities")) {
 
         tmp <-
             try(df_2_access_genots_and_graph_OR(data$edges[, c("From", "To")]))
@@ -541,7 +542,8 @@ cpm_access_genots_paths_w_simplified_OR <-
 
 cpm_access_genots_paths_w_simplified_relationships <-
     function(data,
-             parameter_column_name = c("Thetas", "Probabilities", "Lambdas")) {
+             parameter_column_name = c("Lambdas")) {             
+        ## parameter_column_name = c("Thetas", "Probabilities", "Lambdas")) {
 
         tmp <-
             try(df_2_access_genots_and_graph_relationships(
