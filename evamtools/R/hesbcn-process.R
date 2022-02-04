@@ -42,12 +42,11 @@ rm(.._EvamTools_test.hesbcn)
 #' @param data Cross secitonal data. Matrix of genes (columns)
 #' and individuals (rows)
 #' @param n_steps Number of steps to run. Default: 100000
-#' @param tmp_folder Folder name where the oput is located. 
+#' @param tmp_dir Directory name where the oput is located. 
 #' It will be place under /tmp/HESBCN/tmp_folder
 #' @param seed Seed to run the experiment
 #' @param addname String to append to the temporary folder name. Default NULL
 #' @param silent Whether to run show message showing the folder name where HESBCN is run
-#' @param clean_dir Whether to delete the folder upon completion
 #' 
 #' @return A list with the adjacency matrix, the lambdas, the parent set
 #' and a data.frame with From-To edges and associated lambdas.
@@ -59,40 +58,35 @@ do_HESBCN <- function(data,
     silent = TRUE) {
 
     # Setting tmp folder
-    if(is.null(tmp_dir)) {
+    if (is.null(tmp_dir)) {
         tmp_dir <- tempfile()
         dirname0 <- NULL
-        if(!is.null(addname)) {
+        if (!is.null(addname)) {
             dirname0 <- tmp_dir
             tmp_dir <- paste0(tmp_dir, "/",
                               "_hesbcn_", addname)
         }
-        if(!silent)
+        if (!silent)
             message(paste("\n Using dir", tmp_dir))
-        if(dir.exists(tmp_dir)) {
+        if (dir.exists(tmp_dir)) {
             stop("dirname ", tmp_dir, "exists")
         }
         dir.create(tmp_dir, recursive = TRUE)
     }
-    ## setwd(tmp_dir)
 
     orig_gene_names <- colnames(data)
     colnames(data) <- LETTERS[1:ncol(data)]
 
     write.csv(data, file = paste0(tmp_dir, "/input.txt"),
               row.names = FALSE, quote = FALSE)
- 
+
     # Launching
-    print("Running HESBCN")
+    message("Running HESBCN")
     if (is.null(seed)) {
-        ## command <- sprintf("h-esbcn -d input.txt -o output.txt -n %1.f", 
-        ##                    n_steps)
         command <- paste0("h-esbcn -d ",
                           tmp_dir, "/input.txt -o ",
                           tmp_dir, "/output.txt -n ", n_steps)
     } else if (is.numeric(seed) & seed > 0) {
-        ## command <- sprintf("h-esbcn -d input.txt -o output.txt -n %1.f -s %1.f", 
-        ##                    n_steps, seed)
         command <- paste0("h-esbcn -d ",
                           tmp_dir, "/input.txt -o ",
                           tmp_dir, "/output.txt -n ", n_steps,
@@ -115,13 +109,12 @@ do_HESBCN <- function(data,
 
     ## Create a "Relation" column, so the $edges component is easy to understand
     ## That is also used when translating to OncoSimulR
-    
     model_info$edges$Relation <- vapply(
         model_info$edges$To,
         function(x) model_info$parent_set[x],
         "some_string"
     )
-    
+
     return(model_info)
 }
 

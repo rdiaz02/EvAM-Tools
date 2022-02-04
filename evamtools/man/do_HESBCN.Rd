@@ -19,7 +19,7 @@ and individuals (rows)}
 
 \item{n_steps}{Number of steps to run. Default: 100000}
 
-\item{tmp_dir}{Folder name where the oput is located. 
+\item{tmp_dir}{Directory name where the oput is located. 
 It will be place under /tmp/HESBCN/tmp_folder}
 
 \item{seed}{Seed to run the experiment}
