@@ -1,5 +1,29 @@
 test_that("HESBCN: computation of the transition rate matrix
 against hand-computed ones", {
+
+    ## The examples were prepared using as example a former version of do_HESBCN
+    ## that did not have Relation
+    add_relation <- function(y) {
+        y$edges$Relation <- vapply(
+            y$edges$To,
+            function(x) y$parent_set[x],
+            "some_string"
+        )
+        return(y)
+    }
+    ## Compare OncoSimulR with cpm_access_...
+    reorder_trans_mat <- function(x) {
+        gg <- c(1, 1 + order(colnames(x)[-1]))
+        return(as.matrix(x[gg, gg]))
+    }
+    compare_OncoSimul <- function(out) {
+        expect_equal(
+            reorder_trans_mat(evamtools:::cpm2tm(out$edges, max_f = NULL)$transition_matrix),
+            reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(
+                                              out)$trans_mat_genots),
+            check.attributes = TRUE)
+    }
+    
     test1 <- list()
     test1$edges <- data.frame(
         From = c("Root", "Root", "Root", "A", "B", "C", "D", "E"),
@@ -9,7 +33,6 @@ against hand-computed ones", {
     )
     test1$parent_set <- c("Single", "Single", "Single", "AND", "Single", "XOR")
     names(test1$parent_set) <- LETTERS[1:length(test1$parent_set)]
-
 
     accesible_genotypes_t1 <- c("WT", "A", "B", "C", "A, B", "A, C", "B, C", "C, E"
                               , "A, B, C", "A, B, D", "B, C, E", "C, E, F", "A, C, E", "A, B, C, D", "A, B, C, E"
@@ -195,6 +218,15 @@ against hand-computed ones", {
     compare_hesbcn_trms(computed_trm2, trm2)
     compare_hesbcn_trms(computed_trm3, trm3)
     compare_hesbcn_trms(computed_trm4, trm4)
+
+    test1 <- add_relation(test1)
+    test2 <- add_relation(test2)
+    test3 <- add_relation(test3)
+    
+    compare_OncoSimul(test1)
+    compare_OncoSimul(test2)
+    compare_OncoSimul(test3)
+
 })
 
 
@@ -262,3 +294,24 @@ test_that("XOR: was broken. Fixed in commit 43ea25d", {
 
 
 cat("\n Done test.HESBCN-transition-reate-matrices.R \n")
+
+
+
+
+
+
+
+
+test_that("More tests, just of the accessible, and comparing numbers with OncoSimul", {
+    test1 <- list()
+    test1$edges <- data.frame(
+        From = c("Root", "Root", "Root", "A", "B", "C", "D", "E"),
+        To = c("A", "B", "C", "D", "D", "E", "F", "F"),
+        Edge = c("Root->A", "Root->B", "Root->C", "A->D", "B->D", "C->E", "D->F", "E->F"),
+        Lambdas = c(1, 2, 3, 4, 4, 5, 6, 6)
+    )
+    test1$parent_set <- c("Single", "Single", "Single", "AND", "Single", "XOR")
+    names(test1$parent_set) <- LETTERS[1:length(test1$parent_set)]
+
+
+})
