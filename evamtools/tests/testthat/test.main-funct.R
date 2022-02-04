@@ -4,7 +4,8 @@ if(FALSE) {
         ## for refactoring of the main function.
 
         ## No need to run on every R CMD check.
-
+        ## And other functions, such as HESBCN are also possible unstable
+        
         input_data <-
             structure(
                 c(0L, 0L, 1L, 1L, 1L, 1L, 1L, 1L, 
