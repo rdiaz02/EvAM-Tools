@@ -37,9 +37,9 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
                     reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_OR(
                         data)$trans_mat_genots),
                     check.attributes = TRUE)
-
+        maxff <- sample(c(2, 3, 3.5, 3.8, 4, 5, 8), size = 1)
         expect_equal(as.matrix(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
-                    as.matrix(evamtools:::cpm2tm(data$edges, max_f = 2)$transition_matrix))
+                    as.matrix(evamtools:::cpm2tm(data$edges, max_f = maxff)$transition_matrix))
     }
 
     for(i in all_examples){
@@ -70,7 +70,6 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
 
     ## The last four are slow tests
     for(i in seq_along(out_dd)) {
-        cat("\n Doing i = ", i , "\n")
         run_test_for_dataset(out_dd[[i]])
     }
 

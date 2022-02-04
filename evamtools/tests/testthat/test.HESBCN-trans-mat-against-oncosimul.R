@@ -25,8 +25,9 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
         ## as it should.
         max_fitness <- max(evamtools:::cpm2tm(data$edges, max_f = NULL)$accessible_genotypes)
         if(max_fitness < 1e10) {
+            maxff <- sample(c(2, 3, 3.5, 3.8, 4, 5, 8), size = 1)
             expect_equal(as.matrix(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
-                         as.matrix(evamtools:::cpm2tm(data$edges, max_f = 2)$transition_matrix))
+                         as.matrix(evamtools:::cpm2tm(data$edges, max_f = maxff)$transition_matrix))
         }
     }
     
@@ -117,8 +118,6 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     d3_1 <- evamtools:::do_HESBCN(d3, seed = 1) ## AND, OR,XOR, Single
     d3_2 <- evamtools:::do_HESBCN(d3, seed = 6)
     d3_3 <- evamtools:::do_HESBCN(d3, seed = 7)
-    ## d3_4 <- evamtools:::do_HESBCN(d3, seed = 8)
-    ## d333_1 <- evamtools:::do_HESBCN(d333, seed = 6) ## single, OR, XOR
     d333_2 <- evamtools:::do_HESBCN(d333, seed = 222) ## single, OR, XOR, AND
 
     all_mixed_examples <- list(d3_1, d3_2, d3_3, d3_3, d333_2)
