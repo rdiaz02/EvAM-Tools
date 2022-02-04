@@ -32,18 +32,18 @@ do_MHN2 <- function(x,  lambda = 1/nrow(x), sparse = TRUE) {
     ## lambda 0.01 is what they use by default in their bioRxiv, p. 7 paper.
     ## In the paper it is 1/nrow(x). See paper and emails.
     mhnd <- Data.to.pD(x)
-    cat("\n      MHN: done Data.to.pD ", date(), "\n")
+    message("\n      MHN: done Data.to.pD ", date(), "\n")
     theta <- Learn.MHN(mhnd, lambda = lambda)
-    cat("\n      MHN: done Learn.MHN ", date(), "\n")
+    message("\n      MHN: done Learn.MHN ", date(), "\n")
     colnames(theta) <- rownames(theta) <- colnames(x)
     if(!sparse) {
         trm <- theta_to_trans_rate_3(theta,
                                      inner_transition = inner_transitionRate_3_1)
-        cat("\n      MHN: done theta_to_trans_rate_3 ", date(), "\n")
+        message("\n      MHN: done theta_to_trans_rate_3 ", date(), "\n")
     } else {
         trm <- theta_to_trans_rate_3_SM(theta,
                                         inner_transition = inner_transitionRate_3_1)
-        cat("\n      MHN: done theta_to_trans_rate_3_SM ", date(), "\n")
+        message("\n      MHN: done theta_to_trans_rate_3_SM ", date(), "\n")
     }
     
     return(list(
@@ -186,11 +186,6 @@ theta_to_trans_rate_3 <- function(theta,
            double(numGenots))
     TRM <- matrix(TRM, ncol = numGenots, byrow = TRUE)
     colnames(TRM) <- rownames(TRM) <- genotNames
-    ## t3 <- Sys.time()
-
-    ## cat("\nt2 - t1 :", t2 - t1)
-    ## cat("\nt3 - t2 :", t3 - t2)
-    ## cat("\n")
     return(TRM)
 }
 
@@ -342,9 +337,6 @@ transitionRateC3 <- function(i, genotypes,  Theta, maxmut,
                  ff,
                  double(1)
                  )
-    ## t16 <- Sys.time()
-    ## alltimes <- c(t12 - t11, t13 - t12, t14 - t13, t15 - t14, t16 - t15)
-    ## cat("\n    all times: ", alltimes, "\n")
     return(c(tmp1, tmp2, qs, tmp3))
 }
 
@@ -389,13 +381,13 @@ do_MHN <- function(x,  lambda = 1/nrow(x)) {
     ## In the paper it is 1/nrow(x). See paper and emails.
   
     mhnd <- Data.to.pD(x)
-    cat("\n      MHN: done Data.to.pD ", date(), "\n")
+    message("\n      MHN: done Data.to.pD ", date(), "\n")
     theta <- Learn.MHN(mhnd, lambda = lambda)
-    cat("\n      MHN: done Learn.MHN ", date(), "\n")
+    message("\n      MHN: done Learn.MHN ", date(), "\n")
     colnames(theta) <- rownames(theta) <- colnames(x)
     trm <- theta_to_trans_rate_3(theta,
                                  inner_transition = inner_transitionRate_3_1)
-    cat("\n      MHN: done theta_to_trans_rate_3 ", date(), "\n")
+    message("\n      MHN: done theta_to_trans_rate_3 ", date(), "\n")
 
     return(list(
         theta = theta,
@@ -448,11 +440,6 @@ theta_to_trans_rate_1 <- function(theta) {
 
     TRM <- matrix(TRM, ncol = numGenots, byrow = FALSE)
     colnames(TRM) <- rownames(TRM) <- genotNames
-    ## t3 <- Sys.time()
-
-    ## cat("\nt2 - t1 :", t2 - t1)
-    ## cat("\nt3 - t2 :", t3 - t2)
-    ## cat("\n")
     return(TRM)
 }
 
@@ -476,8 +463,6 @@ theta_to_trans_rate <- function(theta,
         )
     genotNames[genotNames == ""] <- "WT"
 
-    ## This single call is the one that takes most time
-    ## t2 <- Sys.time()
 
     TRM <- vapply(seq.int(numGenots),
            function(x)
@@ -487,11 +472,6 @@ theta_to_trans_rate <- function(theta,
            double(numGenots))
     TRM <- matrix(TRM, ncol = numGenots, byrow = TRUE)
     colnames(TRM) <- rownames(TRM) <- genotNames
-    ## t3 <- Sys.time()
-
-    ## cat("\nt2 - t1 :", t2 - t1)
-    ## cat("\nt3 - t2 :", t3 - t2)
-    ## cat("\n")
     return(TRM)
 }
 
@@ -604,40 +584,18 @@ transitionRateC <- function(i, genotypes,  Theta, maxmut,
         tmp3 <- double(0)
         upper_gg <- num_genots
     }
-    ## t13 <- Sys.time()
     ## All those with same number of mutations are also
     ## necessarily not reachable.
     mi1 <- match(nmuts + 1, genotypes$num_mut)
     tmp2 <- rep(0, length.out = mi1 - i)
-    ##  t14 <- Sys.time()
-    ## The rest
-    ## gg <- genotypes[c(i, mi1:upper_gg), ]
-
-    ## t15 <- Sys.time()
-
-    ## ff <- function(x) inner_transition(1, x, gg, Theta)
-    ## qs <- vapply(2:nrow(gg),
-    ##              ff,
-    ##              double(1)
-    ##              )
 
     ff <- function(x) inner_transition(i, x, genotypes, Theta)
     qs <- vapply(mi1:upper_gg,
                  ff,
                  double(1)
                  )
-    ## t16 <- Sys.time()
-    ## alltimes <- c(t12 - t11, t13 - t12, t14 - t13, t15 - t14, t16 - t15)
-    ## cat("\n    all times: ", alltimes, "\n")
     return(c(tmp1, tmp2, qs, tmp3))
 }
-
-
-
-
-
-
-
 
 
 

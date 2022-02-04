@@ -858,7 +858,7 @@ test_that("OT and CBN: algorithm consistency with various data examples", {
                                cores_cbn = 1,
                                do_MCCBN = FALSE) { 
         
-        cat("\n     Doing OT")
+        message("\n     Doing OT")
         if(ncol(x) >= 2) {
             time_ot <- system.time(
                 OT <- try(
@@ -873,7 +873,7 @@ test_that("OT and CBN: algorithm consistency with various data examples", {
 
         
         if(ncol(x) >= 2) {
-            cat("\n     Doing CBN")
+            message("\n     Doing CBN")
             time_cbn_ot <- system.time(
                 CBN_ot <- try(cbn_proc(x,
                                        addname = "tmpo",
@@ -885,7 +885,7 @@ test_that("OT and CBN: algorithm consistency with various data examples", {
             CBN_ot <- NA
         }
         if (do_MCCBN) {
-            cat("\n     Doing MCCBN")
+            message("\n     Doing MCCBN")
             if(ncol(x) >= 2) {
                 time_mccbn <-
                     system.time(MCCBN <- try(mccbn_proc(x)))["elapsed"]
@@ -898,7 +898,7 @@ test_that("OT and CBN: algorithm consistency with various data examples", {
             MCCBN <- NA
         }
 
-        cat("\n                  _times_cpm: ot", time_ot,
+        message("\n                  _times_cpm: ot", time_ot,
             " cbn ", time_cbn_ot,
             " mccbn ", time_mccbn,
             "\n")

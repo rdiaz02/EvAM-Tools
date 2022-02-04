@@ -75,7 +75,7 @@ f_cbn <- function(x, init.poset = c("linear", "OT"), nboot = 0,
     init.poset <- match.arg(init.poset)
     ## Be verbose since this is soooo slooooow to know where we are
     if(verbose)
-        cat("\n     doing data ", x$name, "\n")
+        message("\n     doing data ", x$name, "\n")
     datax <- x$out$popSample
     datax <- pre_process(datax, remove.constant = FALSE, max.cols = 10) ## 12 and beyond it gets
     ## painfully slow Using up to 12 actually benefits CBN in these
@@ -96,7 +96,7 @@ f_cbn <- function(x, init.poset = c("linear", "OT"), nboot = 0,
                                   nboot = nboot, parall = parall,
                                   silent = cbn_proc_silent))
             if(inherits(otout, "try-error")) {
-                cat("\n Error in f_cbn, addname = ", addnn,
+                warning("\n Error in f_cbn, addname = ", addnn,
                     " scenario = ", x$scenario, " name = ", x$name,
                     " params = ", x$params, "\n")
             }
@@ -133,7 +133,7 @@ cbn_proc <- function(x, addname, init.poset = "linear", nboot = 0,
             nn <- names(CBN_edgeBootFreq)
             for(i in seq.int(nboot)) {
                 if(verbose)
-                    cat("\n  .... doing bootstrap ", i, "\n")
+                    message("\n  .... doing bootstrap ", i, "\n")
                 ind <- sample(nrow(x), nrow(x), replace = TRUE)
                 bx <- x[ind, , drop = FALSE]
                 addnameb <- paste0(addname, "b", i, paste(sample(letters, 3), collapse=""))
@@ -397,7 +397,7 @@ call.external.cbn <- function(data,
     } else{
         OMPthreads <- cores
     }
-    cat("\n Exporting OMP_threads from call.external.cbn. OMP_NUM_THREADS = ", OMPthreads, "\n")
+    message("\n Exporting OMP_threads from call.external.cbn. OMP_NUM_THREADS = ", OMPthreads, "\n")
     ompt <- paste("export OMP_NUM_THREADS=", OMPthreads, "; ", sep = "")
 
     if(createdir)
@@ -419,7 +419,7 @@ call.external.cbn <- function(data,
         ##  poset, but explore around.
         ot1 <- try(run.oncotree(data)) ## , type.out = "adjmat"))
         if(inherits(ot1, "try-error")) {
-            cat("\n   Error using OT for init poset; using linear.poset\n")
+            warning("\n   Error using OT for init poset; using linear.poset\n")
             write.linear.poset(data, dirname)
         } else {
             ## Remember that the posets always number starting from 1. But OT
