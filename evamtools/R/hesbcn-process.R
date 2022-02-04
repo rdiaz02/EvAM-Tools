@@ -57,7 +57,6 @@ do_HESBCN <- function(data,
     seed = NULL,
     addname = NULL,
     silent = TRUE) {
-    orig_folder <- getwd()
 
     # Setting tmp folder
     if(is.null(tmp_dir)) {
@@ -123,9 +122,6 @@ do_HESBCN <- function(data,
         "some_string"
     )
     
-    ## Housekeeping
-    setwd(orig_folder)
-
     return(model_info)
 }
 
