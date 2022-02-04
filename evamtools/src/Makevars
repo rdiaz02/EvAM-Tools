@@ -1,0 +1,2 @@
+PKG_LIBS="-lgomp"
+PKG_CFLAGS="-fopenmp"
