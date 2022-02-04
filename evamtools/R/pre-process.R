@@ -77,7 +77,7 @@ pre_process <- function(x, remove.constant, min.freq = 0.05,
         x <- x[, -rm1, drop = FALSE]
     ## Any duplicated cols
     x <- merge_all_dups(x)
-    ## For CBN
+    ## More than max.cols?
     if(!is.null(max.cols)) {
         nc <- ncol(x)
         if(nc > max.cols) {
