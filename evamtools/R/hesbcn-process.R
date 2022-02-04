@@ -51,51 +51,59 @@ rm(.._EvamTools_test.hesbcn)
 #' 
 #' @return A list with the adjacency matrix, the lambdas, the parent set
 #' and a data.frame with From-To edges and associated lambdas.
-do_HESBCN <- function(data, 
-    n_steps=100000, 
-    tmp_folder=NULL, 
-    seed=NULL, 
-    clean_dir=FALSE,
+do_HESBCN <- function(data,
+    n_steps = 100000,
+    tmp_dir = NULL,
+    seed = NULL,
     addname = NULL,
-    silent = TRUE){
+    silent = TRUE) {
     orig_folder <- getwd()
 
     # Setting tmp folder
-    if(is.null(tmp_folder)) {
-        tmp_folder <- tempfile()
+    if(is.null(tmp_dir)) {
+        tmp_dir <- tempfile()
         dirname0 <- NULL
         if(!is.null(addname)) {
-            dirname0 <- tmp_folder
-            tmp_folder <- paste0(tmp_folder, "/",
+            dirname0 <- tmp_dir
+            tmp_dir <- paste0(tmp_dir, "/",
                               "_hesbcn_", addname)
         }
         if(!silent)
-            message(paste("\n Using dir", tmp_folder))
-        if(dir.exists(tmp_folder)) {
-            stop("dirname ", tmp_folder, "exists")
+            message(paste("\n Using dir", tmp_dir))
+        if(dir.exists(tmp_dir)) {
+            stop("dirname ", tmp_dir, "exists")
         }
-        dir.create(tmp_folder, recursive = TRUE)
+        dir.create(tmp_dir, recursive = TRUE)
     }
-    setwd(tmp_folder)
+    ## setwd(tmp_dir)
 
     orig_gene_names <- colnames(data)
     colnames(data) <- LETTERS[1:ncol(data)]
 
-    write.csv(data, "input.txt", row.names = FALSE, quote = FALSE)
+    write.csv(data, file = paste0(tmp_dir, "/input.txt"),
+              row.names = FALSE, quote = FALSE)
  
     # Launching
     print("Running HESBCN")
     if (is.null(seed)) {
-        command <- sprintf("h-esbcn -d input.txt -o output.txt -n %1.f", 
-            n_steps)
+        ## command <- sprintf("h-esbcn -d input.txt -o output.txt -n %1.f", 
+        ##                    n_steps)
+        command <- paste0("h-esbcn -d ",
+                          tmp_dir, "/input.txt -o ",
+                          tmp_dir, "/output.txt -n ", n_steps)
     } else if (is.numeric(seed) & seed > 0) {
-        command <- sprintf("h-esbcn -d input.txt -o output.txt -n %1.f -s %1.f", 
-            n_steps, seed)
+        ## command <- sprintf("h-esbcn -d input.txt -o output.txt -n %1.f -s %1.f", 
+        ##                    n_steps, seed)
+        command <- paste0("h-esbcn -d ",
+                          tmp_dir, "/input.txt -o ",
+                          tmp_dir, "/output.txt -n ", n_steps,
+                          " -s ", seed)
     }
     system(command, ignore.stdout = TRUE)
 
     # Reading output
-    model_info <- import.hesbcn("output.txt", genes = orig_gene_names)
+    model_info <- import.hesbcn(paste0(tmp_dir, "/output.txt"),
+                                genes = orig_gene_names)
 
     indexes_array <- data.frame(which(model_info$lambdas_matrix > 0, arr.ind = TRUE))
     indexes_list <- which(model_info$lambdas_matrix > 0, arr.ind = TRUE)
