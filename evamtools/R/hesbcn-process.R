@@ -106,11 +106,17 @@ do_HESBCN <- function(data,
     adjacency_matrix_2 <- data.frame(From = from, To = to, Edge = edges, Lambdas = lambdas)
     model_info$edges <- adjacency_matrix_2
 
-    # Housekeeping
+    ## Create a "Relation" column, so the $edges component is easy to understand
+    ## That is also used when translating to OncoSimulR
+    
+    model_info$edges$Relation <- vapply(
+        model_info$edges$To,
+        function(x) model_info$parent_set[x],
+        "some_string"
+    )
+    
+    ## Housekeeping
     setwd(orig_folder)
-    if (clean_dir) {
-        unlink(tmp_folder, recursive = TRUE)
-    }
 
     return(model_info)
 }
