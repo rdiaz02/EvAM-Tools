@@ -40,6 +40,17 @@
 
 
 
+
+######################################################################
+######################################################################
+###
+###
+###       Cores, OMP, etc
+###
+###
+######################################################################
+######################################################################
+
 ## By default, this will use the available cores
 ## for MHN. For CBN we fix the OMP cores to one (setting
 ## that as an env. var. right before calling cbn via system)
@@ -63,8 +74,40 @@
 ## RhpcBLASctl::omp_set_num_threads(thiscores)
 
 
+######################################################################
+######################################################################
+###
+###
+###       df_2_access_genots_and_graph* and cpm_access_genots_paths*
+###
+###
+######################################################################
+######################################################################
 
-## This is coming from
+## cpm_access_genots_paths_w* : CPM -> transition matrices
+## df_2_access_genots_and_graph*: CPM output -> accessible genotypes
+
+## cpm_access_* calls df_2_access_*
+
+## OT and CBN: df_2_access_genots_and_graph, cpm_access_genots_paths_w_simplified
+##    These were the first written. Assume and AND if more than one parent
+
+## DBN: df_2_access_genots_and_graph_OR, cpm_access_genots_paths_w_simplified_OR
+##     Derived from previous, assume OR if multiple parents
+
+## HESBCN: df_2_access_genots_and_graph_relationships,
+##          cpm_access_genots_paths_w_simplified_relationships
+##     Derived from the OT/CBN. Since HESBCN can have AND and XOR and OR, a vector
+##     that specifies the relationship if multiple parents is needed.
+
+
+
+
+
+
+
+
+## Some of this is coming from
 ## Cancer_Data_sets/CPM-weighted-paths-biol.R
 ## in the supplementary material for Diaz-Uriarte and Vasallo.
 ## We leave in there things we don't really need. Simpler.
@@ -545,6 +588,10 @@ cpm_access_genots_paths_w_simplified_relationships <-
              parameter_column_name = c("Lambdas")) {             
         ## parameter_column_name = c("Thetas", "Probabilities", "Lambdas")) {
 
+        ## Use the "parent_set" component, which is returned
+        ## from HESBCN itself, not the "Relation" component
+        ## which we create from the paernt_set. "Relation" is shown
+        ## for a human to easily interpret the $edges data frame
         tmp <-
             try(df_2_access_genots_and_graph_relationships(
                 data$edges[, c("From", "To")],
