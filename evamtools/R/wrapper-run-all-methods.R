@@ -280,8 +280,11 @@ df_2_access_genots_and_graph_relationships <- function(x,
                 parents_of_rel <-
                     adjacent_vertices(g, rel_idx, mode = c("in"))[[rel_idx]]$name
                 ## XOR relationship not futfilled
-                if (relationship == "XOR" &&
-                    all(parents_of_rel %in% genotype)) return(FALSE)
+                ## Wrong! Enough if two are present
+                ## if (relationship == "XOR" &&
+                ##     all(parents_of_rel %in% genotype)) return(FALSE)
+                 if (relationship == "XOR" &&
+                    (sum(parents_of_rel %in% genotype) > 1)) return(FALSE)
                 ## AND relationship not futfilled
                 if (relationship == "AND" &&
                     !all(parents_of_rel %in% genotype)) return(FALSE)
