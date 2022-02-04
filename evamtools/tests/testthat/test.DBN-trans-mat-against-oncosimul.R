@@ -141,6 +141,6 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     }
 })
 
-cat("\n Done test.DBN-output2oncosimul.R \n")
+cat("\n Done test.DBN-trans-mat-against-oncosimul.R \n")
 
 
