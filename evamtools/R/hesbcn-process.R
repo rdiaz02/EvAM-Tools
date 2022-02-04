@@ -107,6 +107,18 @@ do_HESBCN <- function(data,
     adjacency_matrix_2 <- data.frame(From = from, To = to, Edge = edges, Lambdas = lambdas)
     model_info$edges <- adjacency_matrix_2
 
+    ## Check we are not in the strange case of AND when hanging from Root
+    for(ic in seq_along(model_info$parent_set)) {
+        if(model_info$parent_set[ic] != "AND") next
+        name_child <- names(model_info$parent_set)[ic]
+        parents <- model_info$edges[model_info$edges$To == name_child, "From"]
+        if((length(parents) == 1) && (parents == "Root")) {
+            warning("The strange case of AND when hanging from root happened. ",
+                    "Setting 'AND' to 'Single'")
+            model_info$parent_set[ic] <- "Single"
+        }
+    }
+    
     ## Create a "Relation" column, so the $edges component is easy to understand
     ## That is also used when translating to OncoSimulR
     model_info$edges$Relation <- vapply(
@@ -117,5 +129,3 @@ do_HESBCN <- function(data,
 
     return(model_info)
 }
-
-
