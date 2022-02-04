@@ -21,16 +21,12 @@
 ## Use OncoSimulR to obtain accessible genotypes and transition matrices between
 ## genotypes for CBN, OT, PMCE and DBN.
 
-## See comments and examples in ../OncoSimul-for-accessible-and-more-on-PMCE.org
-
+## See comments and examples in 
+## inst/miscell/Using_OncoSimulR_to_get_accessible_genotypes_trans_mats.org
 
 ## Additionally, since we compute and output fitness, can be used for simulations
 ## (and shows the equivalence between lambdas and selection coefficients).
 
-## Code for CBN and OT tested. For DBN not tested (nor fully implemented). For
-## PMCE not tested.
-
-## FIXME:
 ## For CBN, MCCBN, should allow to use time discretization.
 ##   But this requires proper definition of this process.
 
@@ -75,7 +71,6 @@ cpm_out_to_oncosimul <- function(x, sh = -Inf) {
     } else if ("Thetas" %in% names(x)) { ## Something for DB
         s <- x$Thetas
         typeDep <- "OR"
-    } else if ("otro" %in% names(x)) { ## MCCBN
     } else {
         stop("Input not recognized")
     }
@@ -254,61 +249,6 @@ cpm_to_trans_mat_oncosimul <- function(x, max_f = NULL, sh = -Inf,
 ## shorter
 cpm2tm <- cpm_to_trans_mat_oncosimul
 
-# library(codetools)
-# checkUsageEnv(env = .GlobalEnv)
-
-
-# source(file = "tests-access_genots_from_oncosimul.R", echo = TRUE)
-
-######################################################################
-######################################################################
-
-#########      Examples
-
-###### CBN
-# ex_cbn_out2 <- structure(list(From = c("Root", "A", "Root", "C"),
-#                               To = c("A", "B", "C", "D"),
-#                               edge = c("Root -> A", "A -> B", "Root -> C", "C -> D"),
-#                               init_lambda = c(0.689845, 2.734304, 0.6988, 2.463583),
-#                               final_lambda = c(0.689845, 2.734304, 0.6988, 2.463583),
-#                               rerun_lambda = c(0.689845, 2.734304, 0.6988, 2.463583),
-#                               CBN_edgeBootFreq = c(NA, NA, NA, NA)),
-#                          class = "data.frame", row.names = c("A", "B", "C", "D"))
-
-# cpm2tm(ex_cbn_out2)
-
-# ######    PMCE
-# ## From email 20-May-2021, at 17:32:51
-# ex_pmce_out1 <- read.table("ex_pmce_out1.txt", header = TRUE)
-
-# outp1 <- cpm2tm(ex_pmce_out1)
-
-# ## plot
-
-# plot(allFitnessEffects(cpm_out_to_oncosimul(ex_pmce_out1)))
-
-# plot(allFitnessEffects(cpm_out_to_oncosimul(ex_pmce_out1)),
-#      "igraph", layout = layout.reingold.tilford)
-
-## 
-# ex_pmce_email <- read.table("ex_pmce_email.txt", header = TRUE)
-
-# out_em <- cpm2tm(ex_pmce_email)
-
-# pdf(file = "DAG_pmce_example.pdf")
-# plot(allFitnessEffects(cpm_out_to_oncosimul(ex_pmce_email)))
-# dev.off()
-
-## 
-# ex_pmce_email <- read.table("ex_pmce_email.txt", header = TRUE)
-
-# out_em <- cpm2tm(ex_pmce_email)
-
-# pdf(file = "DAG_pmce_example.pdf")
-# plot(allFitnessEffects(cpm_out_to_oncosimul(ex_pmce_email)))
-# dev.off()
-
-
 
 # #### Tiny OR and XOR
 
@@ -318,43 +258,5 @@ cpm2tm <- cpm_to_trans_mat_oncosimul
 
 # ex_xor <- read.table("ex_pmce_xor.txt", header = TRUE, sep = "\t")
 # out_xor <- cpm2tm(ex_xor)
-
-
-## Load the stomach output
-
-
-## ## Stomach data example
-## ## https://github.com/BIMIB-DISCo/PMCE/blob/main/results_files/Stomach_Adenocarcinoma_aic.txt
-## ## And it is results[[14]]
-## load("results.RData")
-## stomach <- results[[14]]$hesbcn$lambdas_matrix
-## pnoz <- which(stomach != 0, arr.ind = TRUE)
-
-## df1 <- data.frame(From = rownames(stomach)[pnoz[, 1]],
-##         To = colnames(stomach)[pnoz[, 2]], lambda = stomach[pnoz])
-
-## df1$Edge <- paste(df1$From, "->", df1$To)
-
-## relation <- results[[14]]$hesbcn$parent_set
-## df1$Relation <- relation[df1$To]
-
-## df1 <- df1[, c(1, 2, 4, 3, 5)]
-## stomach_pmce <- df1
-
-# load("stomach_pmce.RData")
-
-# stomach_out <- cpm2tm(stomach_pmce)
-
-# plot(allFitnessEffects(
-#     cpm_out_to_oncosimul(stomach_pmce)),
-#      "igraph", layout = layout.reingold.tilford)
-
-
-# plot(allFitnessEffects(
-#     cpm_out_to_oncosimul(stomach_pmce)))
-     
-
-
-# stomach_out$accessible_genotypes
 
 

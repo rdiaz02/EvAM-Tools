@@ -377,22 +377,8 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul.", {
     ##                  list(edges = ex_ot_out1))$trans_mat_genots),
     ##              check.attributes = FALSE)
 
-
-
     ## tripwire
     ## expect_true(1 == 2)
-    ## ## Running internal functions
-    ## cpm_out_to_oncosimul(ex_pmce_out1)
-    ## cpm_out_to_oncosimul(ex_cbn_out2)
-    ## cpm_out_to_oncosimul(ex_cbn_out2)
-    ## cpm_to_fitness_genots(ex_cbn_out1)
-    ## cpm_to_fitness_genots(ex_cbn_out2)
-    ## cpm_to_fitness_genots(ex_ot_out2)
-    ## cpm_to_fitness_genots(ex_pmce_out1)
-    ## cpm_to_fitness_genots(ex_cbn_out2, max_f = NULL)
-    ## cpm_to_fitness_genots(ex_cbn_out2, max_f = 3)
-    ## evamtools:::cpm2tm(ex_cbn_out2, max_f = NULL)$lambdas
-    ## evamtools:::cpm2tm(ex_cbn_out2, 1.01, 8)$lambdas
 })
 
 cat("\n Done test.OT-CBN-trans-mat-against-oncosimul.R \n")
