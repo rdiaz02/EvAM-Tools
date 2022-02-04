@@ -1,40 +1,66 @@
-trajectory <- list(
-    c("WT", "C", "C, D"),
-    c("WT", "C", "C, E", "C, D, E", "A, C, D, E"),
-    c("WT", "A", "A, B"),
-    c("WT", "C"),
-    c("WT", "A", "A, B", "A, B, C", "A, B, C, E"),
-    c("WT", "C", "C, E", "C, D, E", "A, C, D, E"),
-    c("WT", "C", "C, D"),
-    c("WT", "C", "A, C", "A, B, C", "A, B, C, E"),
-    c("WT", "C"), 
-    c("WT", "C", "A, C", "A, B, C", "A, B, C, E")
-)
 
-obs_events <- c(
-    "C, D", "A, C, D, E", "A, B", "C", "A, B, C, E",
-    "A, C, D, E", "C, D", "A, B, C, E", "C", "A, B, C, E"
-)
-
-sampling_output <- list(
-    trajectory = trajectory, 
-    obs_events = obs_events
-)
 
 test_that("Output are not generated with bad input", {
-    simGenotypes <- sampling_output
-    x <- simGenotypes
+    trajectory <- list(
+        c("WT", "C", "C, D"),
+        c("WT", "C", "C, E", "C, D, E", "A, C, D, E"),
+        c("WT", "A", "A, B"),
+        c("WT", "C"),
+        c("WT", "A", "A, B", "A, B, C", "A, B, C, E"),
+        c("WT", "C", "C, E", "C, D, E", "A, C, D, E"),
+        c("WT", "C", "C, D"),
+        c("WT", "C", "A, C", "A, B, C", "A, B, C, E"),
+        c("WT", "C"), 
+        c("WT", "C", "A, C", "A, B, C", "A, B, C, E")
+    )
+
+    obs_events <- c(
+        "C, D", "A, C, D, E", "A, B", "C", "A, B, C, E",
+        "A, C, D, E", "C, D", "A, B, C, E", "C", "A, B, C, E"
+    )
+
+    
+    sampling_output <- list(
+        trajectory = trajectory, 
+        obs_events = obs_events
+    )
+
+    x <- sampling_output
     x$trajectory <- NULL
     expect_error(evamtools:::process_samples(x, 5), 
-        "trajectory is missing from your samples")
-    x <- simGenotypes
+                 "trajectory is missing from your samples")
+    x <- sampling_output
     x$obs_events <- NULL
     expect_error(evamtools:::process_samples(x, 5), 
-        "obs_events is missing from your samples")
+                 "obs_events is missing from your samples")
 })
 
 test_that("Output is returned only with the requested fields", {
-    simGenotypes <- sampling_output
+
+    trajectory <- list(
+        c("WT", "C", "C, D"),
+        c("WT", "C", "C, E", "C, D, E", "A, C, D, E"),
+        c("WT", "A", "A, B"),
+        c("WT", "C"),
+        c("WT", "A", "A, B", "A, B, C", "A, B, C, E"),
+        c("WT", "C", "C, E", "C, D, E", "A, C, D, E"),
+        c("WT", "C", "C, D"),
+        c("WT", "C", "A, C", "A, B, C", "A, B, C, E"),
+        c("WT", "C"), 
+        c("WT", "C", "A, C", "A, B, C", "A, B, C, E")
+    )
+
+    obs_events <- c(
+        "C, D", "A, C, D, E", "A, B", "C", "A, B, C, E",
+        "A, C, D, E", "C, D", "A, B, C, E", "C", "A, B, C, E"
+    )
+
+
+    simGenotypes <- list(
+        trajectory = trajectory,
+        obs_events = obs_events
+    )
+    
     out_params <- c("frequencies", "state_counts", "transitions")
     out_sim <- evamtools:::process_samples(simGenotypes, 5, output = out_params[1])
     expect_equal(sort(names(out_sim)), sort(out_params[1]))
@@ -54,8 +80,34 @@ test_that("Output is returned only with the requested fields", {
     expect_warning(evamtools:::process_samples(simGenotypes, 5, output = c(out_params, "bad request", "bad request 2")), "The following parameters cannot be returned: bad request, bad request 2")
 })
 
+
+
 test_that("Output is correct", {
-    simGenotypes <- sampling_output
+     trajectory <- list(
+        c("WT", "C", "C, D"),
+        c("WT", "C", "C, E", "C, D, E", "A, C, D, E"),
+        c("WT", "A", "A, B"),
+        c("WT", "C"),
+        c("WT", "A", "A, B", "A, B, C", "A, B, C, E"),
+        c("WT", "C", "C, E", "C, D, E", "A, C, D, E"),
+        c("WT", "C", "C, D"),
+        c("WT", "C", "A, C", "A, B, C", "A, B, C, E"),
+        c("WT", "C"), 
+        c("WT", "C", "A, C", "A, B, C", "A, B, C, E")
+    )
+
+    obs_events <- c(
+        "C, D", "A, C, D, E", "A, B", "C", "A, B, C, E",
+        "A, C, D, E", "C, D", "A, B, C, E", "C", "A, B, C, E"
+    )
+
+
+    simGenotypes <- list(
+        trajectory = trajectory,
+        obs_events = obs_events
+    )
+    
+   
     out <- evamtools:::process_samples(simGenotypes, 5)
     expect_equal(nrow(out$frequencies), 2**5)
     expect_equal(dim(out$transitions), c(2**5, 2**5))
