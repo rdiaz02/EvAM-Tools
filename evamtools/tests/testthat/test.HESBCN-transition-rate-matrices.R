@@ -199,7 +199,7 @@ against hand-computed ones", {
 
 
 
-test_that("XOR: this broke. Fixed in commit 43ea25d", {
+test_that("XOR: was broken. Fixed in commit 43ea25d", {
 
     ## The bug happened because we considered an XOR precluded a genotype
     ## from existing only if all of the parents were present. But a XOR
