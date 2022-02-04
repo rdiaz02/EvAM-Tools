@@ -49,11 +49,13 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     ex_hesbcn_c1 <- evamtools:::do_HESBCN(examples_csd$csd$c1$data)
     ex_hesbcn_c3 <- evamtools:::do_HESBCN(examples_csd$csd$c3$data)
     ex_hesbcn_c4c2 <- evamtools:::do_HESBCN(examples_csd$csd$c4c2$data)
-
-   
+    ## This used to break with the strange AND from Root
+    ddbroot <- evamtools:::do_HESBCN(examples_csd$csd$AND$data, seed = 8)
+    ## Used to show inaccessible genotypes, like ABC
+    ddex16 <- evamtools:::do_HESBCN(examples_csd$csd$c1$data, seed = 16)
     
     all_examples <- list(ex_hesbcn_and, ex_hesbcn_linear, ex_hesbcn_or, ex_hesbcn_xor,
-        ex_hesbcn_c1, ex_hesbcn_c3, ex_hesbcn_c4c2)
+        ex_hesbcn_c1, ex_hesbcn_c3, ex_hesbcn_c4c2, ddbroot)
 
     
 

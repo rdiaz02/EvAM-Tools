@@ -198,4 +198,67 @@ against hand-computed ones", {
 })
 
 
+
+test_that("XOR: this broke. Fixed in commit 43ea25d", {
+
+    ## The bug happened because we considered an XOR precluded a genotype
+    ## from existing only if all of the parents were present. But a XOR
+    ## is FALSE just with 2 present.
+    
+    ## can be obtained, or could be obtained, doing
+    ## evamtools:::do_HESBCN(examples_csd$csd$c1$data, seed = 16)
+    out_xor3 <- list(adjacency_matrix = structure(c(0, 0, 0, 0, 0, 0, 1, 0, 0, 
+0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 
+1, 0, 0, 0, 0, 0), .Dim = c(6L, 6L), .Dimnames = list(c("Root", 
+"A", "B", "C", "D", "E"), c("Root", "A", "B", "C", "D", "E"))), 
+    lambdas_matrix = structure(c(0, 0, 0, 0, 0, 0, 2.34709, 0, 
+    0, 0, 0, 0, 0, 5.87286666666667, 0, 5.87286666666667, 5.87286666666667, 
+    0, 2.40422, 0, 0, 0, 0, 0, 1.49066, 0, 0, 0, 0, 0, 0.233288, 
+    0, 0, 0, 0, 0), .Dim = c(6L, 6L), .Dimnames = list(c("Root", 
+    "A", "B", "C", "D", "E"), c("Root", "A", "B", "C", "D", "E"
+    ))), parent_set = c(A = "Single", B = "XOR", C = "Single", 
+    D = "Single", E = "Single"), epsilon = 0.140155, edges = structure(list(
+        From = c("Root", "A", "C", "D", "Root", "Root", "Root"
+        ), To = c("A", "B", "B", "B", "C", "D", "E"), Edge = c("Root->A", 
+        "A->B", "C->B", "D->B", "Root->C", "Root->D", "Root->E"
+        ), Lambdas = c(2.34709, 5.87286666666667, 5.87286666666667, 
+        5.87286666666667, 2.40422, 1.49066, 0.233288), Relation = c("Single", 
+        "XOR", "XOR", "XOR", "Single", "Single", "Single")), row.names = c(NA, 
+    -7L), class = "data.frame"))
+
+    oux3 <- evamtools:::cpm_access_genots_paths_w_simplified_relationships(
+                            out_xor3)
+
+
+##     $edges
+##   From To    Edge Lambdas Relation
+## 1 Root  A Root->A  2.3471   Single
+## 2    A  B    A->B  5.8729      XOR
+## 3    C  B    C->B  5.8729      XOR
+## 4    D  B    D->B  5.8729      XOR
+## 5 Root  C Root->C  2.4042   Single
+## 6 Root  D Root->D  1.4907   Single
+## 7 Root  E Root->E  0.2333   Single
+
+    ## With the above, the following genotypes can definitely not exist
+    existing <- colnames(oux3$trans_mat_genots)
+    cannot_e <- c("A, B, C", "A, B, C, E", "A, B, D", "A, B, D, E",
+                  "B, C, D", "B, C, D, E")
+    expect_false(any(cannot_e %in% existing))
+
+    ## Compare OncoSimulR with cpm_access_...
+    reorder_trans_mat <- function(x) {
+        gg <- c(1, 1 + order(colnames(x)[-1]))
+        return(as.matrix(x[gg, gg]))
+    }
+
+    expect_equal(
+        reorder_trans_mat(evamtools:::cpm2tm(out_xor3$edges, max_f = NULL)$transition_matrix),
+        reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(
+                                          out_xor3)$trans_mat_genots),
+        check.attributes = TRUE)
+    
+})
+
+
 cat("\n Done test.HESBCN-transition-reate-matrices.R \n")
