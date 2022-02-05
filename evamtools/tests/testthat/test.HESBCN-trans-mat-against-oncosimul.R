@@ -117,10 +117,10 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     set.seed(NULL)
     
     ## Examples that mix output
-    d3_1 <- evamtools:::do_HESBCN(d3, seed = 1) ## AND, OR,XOR, Single
+    d3_1 <- evamtools:::do_HESBCN(d3, seed = 1) ## AND, OR, XOR, Single
     d3_2 <- evamtools:::do_HESBCN(d3, seed = 6)
     d3_3 <- evamtools:::do_HESBCN(d3, seed = 7)
-    d333_2 <- evamtools:::do_HESBCN(d333, seed = 222) ## single, OR, XOR, AND
+    d333_2 <- evamtools:::do_HESBCN(d333, seed = 222) ## AND, OR, XOR, Single
 
     all_mixed_examples <- list(d3_1, d3_2, d3_3, d3_3, d333_2)
     
@@ -130,33 +130,8 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     set.seed(NULL)
     
     ## Doesn't give us much, since most are Single
-    ## ## Repeat with some examples from real data sets
     ## data(every_which_way_data)
-
-    ## dd <- list(
-    ##     Dat1 = every_which_way_data[[2]][1:50, 1:4]
-    ##   , Dat2 = every_which_way_data[[4]][1:50, 1:5]
-    ##   , Dat3 = every_which_way_data[[20]][1:50, 1:5]
-    ##   , Dat4 <- every_which_way_data[[16]][1:40, 2:6]
-    ##   , Dat5 = every_which_way_data[[2]][ , 1:7]
-    ##   , Dat6 = every_which_way_data[[4]][1:60, 1:7]
-    ##   , Dat7 = every_which_way_data[[20]][, 1:7]
-    ##   , Dat8 = every_which_way_data[[16]][, 1:7]
-    ## )
-
-    ## dd <- lapply(dd, function(z) {
-    ##     tmp <- evamtools:::df_2_mat_integer(z)
-    ##     tmp <- evamtools:::pre_process(tmp, remove.constant = FALSE)
-    ##     return(tmp)
-    ## })
-    
-    ## out_dd <- lapply(dd, evamtools:::do_HESBCN)
-
-    ## ## The last four are slow tests
-    ## for(i in seq_along(out_dd)) {
-    ##     run_test_for_dataset(out_dd[[i]])
-    ## }
-
+    ## see ../../other_miscell/test.run_hesbcn_continuously.R if you want that.
     
 })
 

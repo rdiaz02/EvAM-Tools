@@ -1,12 +1,31 @@
-## Testing that cpm_access_genots_paths_w_simplified_relationships gives same output as
-## cpm_to_trans_mat_oncosimul, the function that uses OncoSimulR
+## Execute this for as long as you want to check we no longer get
+## errors and to compare against OncoSimulR.
 
-## FIXME: once everything has been tested and running for a while, rm some of the
-## tests below (from real data), as way to slow and probably overkill
 
 library(evamtools)
 library(testthat)
 data(all_examples_csd)
+
+## Real data
+data(every_which_way_data)
+
+rdd <- list(
+    Dat1 = every_which_way_data[[2]][1:50, 1:4]
+  , Dat2 = every_which_way_data[[4]][1:50, 1:5]
+  , Dat3 = every_which_way_data[[20]][1:50, 1:5]
+  , Dat4 <- every_which_way_data[[16]][1:40, 2:6]
+  , Dat5 = every_which_way_data[[2]][ , 1:7]
+  , Dat6 = every_which_way_data[[4]][1:60, 1:7]
+  , Dat7 = every_which_way_data[[20]][, 1:7]
+  , Dat8 = every_which_way_data[[16]][, 1:7]
+)
+
+rdd_processed <- lapply(rdd, function(z) {
+    tmp <- evamtools:::df_2_mat_integer(z)
+    tmp <- evamtools:::pre_process(tmp, remove.constant = FALSE)
+    return(tmp)
+})
+
 
 s <- 1
 while(TRUE) {
@@ -122,10 +141,10 @@ while(TRUE) {
     set.seed(NULL)
     
     ## Examples that mix output
-    d3_1 <- evamtools:::do_HESBCN(d3, seed = s) ## AND, OR,XOR, Single
+    d3_1 <- evamtools:::do_HESBCN(d3, seed = s) ## AND, OR,XOR, Single with some seeds
     d3_2 <- evamtools:::do_HESBCN(d3, seed = s)
     d3_3 <- evamtools:::do_HESBCN(d3, seed = s)
-    d333_2 <- evamtools:::do_HESBCN(d333, seed = s) ## single, OR, XOR, AND
+    d333_2 <- evamtools:::do_HESBCN(d333, seed = s) ## single, OR, XOR, AND with some seeds
 
     all_mixed_examples <- list(d3_1, d3_2, d3_3, d3_3, d333_2)
     
@@ -134,35 +153,17 @@ while(TRUE) {
     }
     set.seed(NULL)
     
+
+    ## Real data sets
     ## Doesn't give us much, since most are Single
-    ## ## Repeat with some examples from real data sets
-    ## data(every_which_way_data)
-
-    ## dd <- list(
-    ##     Dat1 = every_which_way_data[[2]][1:50, 1:4]
-    ##   , Dat2 = every_which_way_data[[4]][1:50, 1:5]
-    ##   , Dat3 = every_which_way_data[[20]][1:50, 1:5]
-    ##   , Dat4 <- every_which_way_data[[16]][1:40, 2:6]
-    ##   , Dat5 = every_which_way_data[[2]][ , 1:7]
-    ##   , Dat6 = every_which_way_data[[4]][1:60, 1:7]
-    ##   , Dat7 = every_which_way_data[[20]][, 1:7]
-    ##   , Dat8 = every_which_way_data[[16]][, 1:7]
-    ## )
-
-    ## dd <- lapply(dd, function(z) {
-    ##     tmp <- evamtools:::df_2_mat_integer(z)
-    ##     tmp <- evamtools:::pre_process(tmp, remove.constant = FALSE)
-    ##     return(tmp)
-    ## })
+    ## But for a long running test, this is OK
     
-    ## out_dd <- lapply(dd, evamtools:::do_HESBCN)
+    out_rdd <- lapply(rdd_processed,
+                      function(d) evamtools:::do_HESBCN(d, seed = s))
 
-    ## ## The last four are slow tests
-    ## for(i in seq_along(out_dd)) {
-    ##     run_test_for_dataset(out_dd[[i]])
-    ## }
-
-
+    for(i in seq_along(out_rdd)) {
+        run_test_for_dataset(out_rdd[[i]])
+    }
 
     s <- s + 1
 }
