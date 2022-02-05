@@ -26,11 +26,11 @@ rdd_processed <- lapply(rdd, function(z) {
     return(tmp)
 })
 
-
+iters <- 1
 s <- sample(1:1e6, size = 1)
 
 while(TRUE) {
-    cat("\n Seed = ", s, "\n")
+    cat("\n Seed = ", s, ". Doing iteration ", iters, "\n")
     set.seed(s)
     ## Recall evamtools:::cpm2tm <- cpm_to_trans_mat_oncosimul
 
@@ -167,5 +167,6 @@ while(TRUE) {
         run_test_for_dataset(out_rdd[[i]])
     }
 
+    iters <- iters + 1
     s <- s + 1
 }
