@@ -27,7 +27,8 @@ rdd_processed <- lapply(rdd, function(z) {
 })
 
 
-s <- 1
+s <- sample(1:1e6, size = 1)
+
 while(TRUE) {
     cat("\n Seed = ", s, "\n")
     set.seed(s)
@@ -157,11 +158,12 @@ while(TRUE) {
     ## Real data sets
     ## Doesn't give us much, since most are Single
     ## But for a long running test, this is OK
-    
+    cat("\n Running rdd analysis \n")
     out_rdd <- lapply(rdd_processed,
                       function(d) evamtools:::do_HESBCN(d, seed = s))
 
     for(i in seq_along(out_rdd)) {
+        cat("\n Comparing rdd number ", i, "\n")
         run_test_for_dataset(out_rdd[[i]])
     }
 
