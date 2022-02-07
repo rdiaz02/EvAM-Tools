@@ -137,10 +137,3 @@ do_HESBCN <- function(data,
     return(model_info)
 }
 
-
-
-fix_lambdas <- function(mat) {
-    ## First, test
-    csm <- colSums(mat)
-    stopifnot(isTRUE(all(cms == )))
-}
