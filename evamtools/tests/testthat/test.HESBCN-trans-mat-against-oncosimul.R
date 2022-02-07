@@ -127,38 +127,15 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
                            F = 0))
     d3 <- d2
     d3$C[(d3$A == 1) & (d3$B == 1)] <- 1
-    
-    set.seed(22)
-    d111 <- data.frame(A = sample(c(1, 0), prob = c(0.7, 0.2), size = 2000, replace = TRUE),
-                     B = sample(c(1, 0), prob = c(0.85, 0.2), size = 2000, replace = TRUE))
-    d111$C <- 0
-    d111$D <- 0
-    d111$E <- 0
-    d111$F <- 0
-    d111$C[(d111$A == 1) & (d111$B == 1)] <- 1
-    d111$D[(d111$A == 1) | (d111$B == 1)] <- 1
-    d111$D[100:200] <- 0
-    d111$E[xor((d111$A == 1), (d111$B == 1))] <- 1
-    d111$F[(d111$C == 1) & (d111$D == 1)] <- 1
-    d222 <- rbind(d111,
-                data.frame(A = sample(c(1, 0), size = 250, prob = c(0.5, 0.2), replace = TRUE),
-                           B = sample(c(1, 0), size = 250, prob = c(0.5, 0.2), replace = TRUE),
-                           C = 0,
-                           D = sample(c(1, 0), size = 25, replace = TRUE),
-                           E = 0,
-                           F = 0))
-    d333 <- d222
-    d333$C[(d333$A == 1) & (d333$B == 1)] <- 1
 
-    set.seed(NULL)
-    
     ## Examples that mix output
-    d3_1 <- evamtools:::do_HESBCN(d3, seed = 1) ## AND, OR, XOR, Single
-    d3_2 <- evamtools:::do_HESBCN(d3, seed = 6)
-    d3_3 <- evamtools:::do_HESBCN(d3, seed = 7)
-    d333_2 <- evamtools:::do_HESBCN(d333, seed = 222) ## AND, OR, XOR, Single
+    d3_1 <- evamtools:::do_HESBCN(d3, seed = 26) ## AND, OR, Single
+    d3_2 <- evamtools:::do_HESBCN(d3, seed = 31)  ## AND, XOR, Single
+    set.seed(NULL)
+    d3_3 <- evamtools:::do_HESBCN(d3)
+    d3_4 <- evamtools:::do_HESBCN(d3)
 
-    all_mixed_examples <- list(d3_1, d3_2, d3_3, d3_3, d333_2)
+    all_mixed_examples <- list(d3_1, d3_2, d3_3, d3_4)
     
     for(ex in all_examples){
         run_test_for_dataset(ex)
