@@ -1,4 +1,4 @@
-## Copyright 2021, 2022 Pablo Herrera Nieto
+## Copyright 2021, 2022 Pablo Herrera Nieto, Ramon Diaz-Uriarte
 
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -97,12 +97,19 @@ do_HESBCN <- function(data,
     # Reading output
     model_info <- import.hesbcn(paste0(tmp_dir, "/output.txt"),
                                 genes = orig_gene_names)
+ 
+    indexes <- which(model_info$lambdas_matrix > 0, arr.ind = TRUE)
+    lambdas <- model_info$lambdas[indexes[, "col"] - 1]
+    from <- rownames(model_info$lambdas_matrix)[indexes[, "row"]]
+    to <- colnames(model_info$lambdas_matrix)[indexes[, "col"]]
 
-    indexes_array <- data.frame(which(model_info$lambdas_matrix > 0, arr.ind = TRUE))
-    indexes_list <- which(model_info$lambdas_matrix > 0, arr.ind = TRUE)
-    lambdas <- model_info$lambdas_matrix[indexes_list]
-    from <- rownames(model_info$lambdas_matrix)[indexes_array$row]
-    to <- colnames(model_info$lambdas_matrix)[indexes_array$col]
+    ## Check lambdas
+    ## Remember their R code divides the lambdas when placing them
+    ## in the matrix, but the lambdas, as rates, are the original, undivided ones.
+    stopifnot(isTRUE(all.equal(colSums(model_info$lambdas_matrix)[-1],
+                               model_info$lambdas,
+                               check.attributes = FALSE)))
+    
     edges <- paste(from, to, sep = "->")
     adjacency_matrix_2 <- data.frame(From = from, To = to, Edge = edges, Lambdas = lambdas)
     model_info$edges <- adjacency_matrix_2
@@ -128,4 +135,12 @@ do_HESBCN <- function(data,
     )
 
     return(model_info)
+}
+
+
+
+fix_lambdas <- function(mat) {
+    ## First, test
+    csm <- colSums(mat)
+    stopifnot(isTRUE(all(cms == )))
 }
