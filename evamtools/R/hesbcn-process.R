@@ -110,9 +110,10 @@ do_HESBCN <- function(data,
                                model_info$lambdas,
                                check.attributes = FALSE)))
     
-    edges <- paste(from, to, sep = "->")
-    adjacency_matrix_2 <- data.frame(From = from, To = to, Edge = edges, Lambdas = lambdas)
-    model_info$edges <- adjacency_matrix_2
+    model_info$edges <- data.frame(From = from,
+                                   To = to,
+                                   Edge = paste(from, to, sep = "->"),
+                                   Lambdas = lambdas)
 
     ## Check we are not in the strange case of AND when hanging from Root
     for(ic in seq_along(model_info$parent_set)) {
@@ -133,7 +134,6 @@ do_HESBCN <- function(data,
         function(x) model_info$parent_set[x],
         "some_string"
     )
-
     return(model_info)
 }
 
