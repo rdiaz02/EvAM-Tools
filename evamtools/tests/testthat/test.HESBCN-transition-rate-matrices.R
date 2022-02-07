@@ -293,25 +293,173 @@ test_that("XOR: was broken. Fixed in commit 43ea25d", {
 })
 
 
-cat("\n Done test.HESBCN-transition-reate-matrices.R \n")
+test_that("Tests with three parents, just of the accessible, and comparing numbers with OncoSimul", {
 
+    ## We check the accessible genotypes against hand-computed ones
+    ## and fitness against OncoSimulR's
 
+    ## Yes, some configurations have some parts that are a bit absurd
+    
+    add_relation <- function(y) {
+        y$edges$Relation <- vapply(
+            y$edges$To,
+            function(x) y$parent_set[x],
+            "some_string"
+        )
+        return(y)
+    }
+    
+    ## Compare OncoSimulR with cpm_access_...
+    reorder_trans_mat <- function(x) {
+        gg <- c(1, 1 + order(colnames(x)[-1]))
+        return(as.matrix(x[gg, gg]))
+    }
+    compare_OncoSimul <- function(out) {
+        expect_equal(
+            reorder_trans_mat(evamtools:::cpm2tm(out$edges, max_f = NULL)$transition_matrix),
+            reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(
+                                              out)$trans_mat_genots),
+            check.attributes = TRUE)
+    }
 
-
-
-
-
-
-test_that("More tests, just of the accessible, and comparing numbers with OncoSimul", {
+    compare_access_genots <- function(out, expected_accessible) {
+        agenots <- colnames(evamtools:::cpm_access_genots_paths_w_simplified_relationships(
+                                                 out)$trans_mat_genots)
+        expect_equal(sort(agenots), sort(expected_accessible))
+    }
+      
     test1 <- list()
     test1$edges <- data.frame(
-        From = c("Root", "Root", "Root", "A", "B", "C", "D", "E"),
-        To = c("A", "B", "C", "D", "D", "E", "F", "F"),
-        Edge = c("Root->A", "Root->B", "Root->C", "A->D", "B->D", "C->E", "D->F", "E->F"),
-        Lambdas = c(1, 2, 3, 4, 4, 5, 6, 6)
+        From = c("Root", "Root", "Root", "A", "B", "C", "A", "D"),
+        To = c("A", "B", "C", "D", "D", "D", "E", "E"),
+        Edge = c("Root -> A", "Root -> B", "Root -> C",
+                 "A -> D", "B -> D", "C -> D",
+                 "A -> E", "D -> E"),
+        Lambdas = c(1, 2, 3, 4, 4, 4, 5, 5)
     )
-    test1$parent_set <- c("Single", "Single", "Single", "AND", "Single", "XOR")
+    test1$parent_set <- c("Single", "Single", "Single", "AND", "XOR")
     names(test1$parent_set) <- LETTERS[1:length(test1$parent_set)]
+    test1 <- add_relation(test1)
+
+    ag1 <- c("WT", "A", "B", "C", "A, B", "A, C", "B, C",
+             "A, B, C", "A, B, C, D",
+             "A, E",
+             ## "D, E", This cannot happen, because of D's deps
+             "A, B, E",
+             "A, C, E",
+             "A, B, C, E")
+
+    compare_OncoSimul(test1)
+    compare_access_genots(test1, ag1)
 
 
+
+    test2 <- list()
+    test2$edges <- data.frame(
+        From = c("Root", "Root", "Root", "A", "B", "C", "A", "D"),
+        To = c("A", "B", "C", "D", "D", "D", "E", "E"),
+        Edge = c("Root -> A", "Root -> B", "Root -> C",
+                 "A -> D", "B -> D", "C -> D",
+                 "A -> E", "D -> E"),
+        Lambdas = c(1, 2, 3, 4, 4, 4, 5, 5)
+    )
+    test2$parent_set <- c("Single", "Single", "Single", "XOR", "AND")
+    names(test2$parent_set) <- LETTERS[1:length(test2$parent_set)]
+    test2 <- add_relation(test2)
+
+    ag2 <- c("WT", "A", "B", "C", "A, B", "A, C", "B, C", "A, B, C",
+             "A, D", "B, D", "C, D",
+             "A, D, E")
+    
+    compare_OncoSimul(test2)
+    compare_access_genots(test2, ag2)
+
+
+    test3 <- list()
+    test3$edges <- data.frame(
+        From = c("Root", "Root", "Root", "A", "B", "C", "A", "D"),
+        To = c("A", "B", "C", "D", "D", "D", "E", "E"),
+        Edge = c("Root -> A", "Root -> B", "Root -> C",
+                 "A -> D", "B -> D", "C -> D",
+                 "A -> E", "D -> E"),
+        Lambdas = c(1, 2, 3, 4, 4, 4, 5, 5)
+    )
+    test3$parent_set <- c("Single", "Single", "Single", "XOR", "OR")
+    names(test3$parent_set) <- LETTERS[1:length(test3$parent_set)]
+    test3 <- add_relation(test3)
+
+    ag3 <- c("WT", "A", "B", "C", "A, B", "A, C", "B, C", "A, B, C",
+             "A, D", "B, D", "C, D",
+             "A, E", "A, D, E",
+             "A, B, E", "A, C, E", "A, B, C, E",
+             "B, D, E", "C, D, E") 
+    compare_OncoSimul(test3)
+    compare_access_genots(test3, ag3)
+
+    test4 <- list()
+    test4$edges <- data.frame(
+        From = c("Root", "Root", "Root", "A", "B", "C", "A", "D"),
+        To = c("A", "B", "C", "D", "D", "D", "E", "E"),
+        Edge = c("Root -> A", "Root -> B", "Root -> C",
+                 "A -> D", "B -> D", "C -> D",
+                 "A -> E", "D -> E"),
+        Lambdas = c(1, 2, 3, 4, 4, 4, 5, 5)
+    )
+    test4$parent_set <- c("Single", "Single", "Single", "OR", "XOR")
+    names(test4$parent_set) <- LETTERS[1:length(test4$parent_set)]
+    test4 <- add_relation(test4)
+
+    ag4 <- c("WT", "A", "B", "C", "A, B", "A, C", "B, C", "A, B, C",
+             "A, D", "B, D", "C, D",
+             "A, B, D", "A, C, D", "B, C, D", "A, B, C, D",
+             "A, E", "A, B, E", "A, C, E", "A, B, C, E",
+             "B, D, E", "C, D, E", "B, C, D, E")
+
+    compare_OncoSimul(test4)
+    compare_access_genots(test4, ag4)
+
+    test5 <- list()
+    test5$edges <- data.frame(
+        From = c("Root", "Root", "Root", "A", "B", "C", "A", "D"),
+        To = c("A", "B", "C", "D", "D", "D", "E", "E"),
+        Edge = c("Root -> A", "Root -> B", "Root -> C",
+                 "A -> D", "B -> D", "C -> D",
+                 "A -> E", "D -> E"),
+        Lambdas = c(1, 2, 3, 4, 4, 4, 5, 5)
+    )
+    test5$parent_set <- c("Single", "Single", "Single", "OR", "AND")
+    names(test5$parent_set) <- LETTERS[1:length(test5$parent_set)]
+    test5 <- add_relation(test5)
+
+    ag5 <- c("WT", "A", "B", "C", "A, B", "A, C", "B, C", "A, B, C",
+             "A, D", "B, D", "C, D",
+             "A, B, D", "A, C, D", "B, C, D", "A, B, C, D",
+             "A, D, E", "A, B, D, E", "A, C, D, E", "A, B, C, D, E")
+
+    compare_OncoSimul(test5)
+    compare_access_genots(test5, ag5)
+
+    test6 <- list()
+    test6$edges <- data.frame(
+        From = c("Root", "Root", "Root", "A", "B", "C", "A", "D"),
+        To = c("A", "B", "C", "D", "D", "D", "E", "E"),
+        Edge = c("Root -> A", "Root -> B", "Root -> C",
+                 "A -> D", "B -> D", "C -> D",
+                 "A -> E", "D -> E"),
+        Lambdas = c(1, 2, 3, 4, 4, 4, 5, 5)
+    )
+    test6$parent_set <- c("Single", "Single", "Single", "AND", "OR")
+    names(test6$parent_set) <- LETTERS[1:length(test6$parent_set)]
+    test6 <- add_relation(test6)
+
+    ag6 <- c("WT", "A", "B", "C", "A, B", "A, C", "B, C", "A, B, C",
+             "A, B, C, D",
+             "A, E", "A, B, E", "A, C, E", "A, B, C, E",
+             "A, B, C, D, E")
+
+    compare_OncoSimul(test6)
+    compare_access_genots(test6, ag6)
 })
+
+
+cat("\n Done test.HESBCN-transition-reate-matrices.R \n")
