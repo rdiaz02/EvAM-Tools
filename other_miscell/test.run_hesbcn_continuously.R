@@ -13,7 +13,7 @@ rdd <- list(
     Dat1 = every_which_way_data[[2]][1:50, 1:4]
   , Dat2 = every_which_way_data[[4]][1:50, 1:5]
   , Dat3 = every_which_way_data[[20]][1:50, 1:5]
-  , Dat4 <- every_which_way_data[[16]][1:40, 2:6]
+  , Dat4 = every_which_way_data[[16]][1:40, 2:6]
   , Dat5 = every_which_way_data[[2]][ , 1:7]
   , Dat6 = every_which_way_data[[4]][1:60, 1:7]
   , Dat7 = every_which_way_data[[20]][, 1:7]
@@ -49,6 +49,15 @@ while(TRUE) {
                     "smallest lambda < 1e-15")
             ## We compute products of numbers close to R's smallest limit.
             ## We are probably fine with numbers even as small as 2e-16, but to be safe.
+        } else if (sum(data$edges$Lambda < 1e-12) >= 1) {
+          warning("Skipping comparison with OncoSimul's ",
+                  "numerical values of transition rate matrix: ",
+                  "one or more lambdas < 1e-12.",
+                  " Comparing only sets of accessible genotypes")
+          cno <- colnames(reorder_trans_mat(cpm2_out$transition_matrix))
+          cnd <- colnames(
+              reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(                                              data)$trans_mat_genots))
+          expect_true(all(cno == cnd))
         } else {
             expect_equal(
             reorder_trans_mat(cpm2_out$transition_matrix),
@@ -65,8 +74,18 @@ while(TRUE) {
         ratio_lambdas <- max(data$edges$Lambdas)/min(data$edges$Lambdas)
         if((max_fitness < 1e10) && (ratio_lambdas < 1e9))  {
             maxff <- sample(c(2, 3, 3.5, 3.8, 4, 5, 8), size = 1)
+            this_tolerance <- testthat_tolerance()
+            if(min(data$edges$Lambdas) < 1e-5) {
+                warning("Smallest lambda < 1e-5. Setting tolerance to 1e-6 ",
+                        "for numerical comparison of transition rates ",
+                        "between max_f = NULL and max_f = maxff")
+                this_tolerance <- 1e-6
+            }
             expect_equal(as.matrix(cpm2_out$transition_matrix),
-                         as.matrix(evamtools:::cpm2tm(data$edges, max_f = maxff)$transition_matrix))
+                         as.matrix(evamtools:::cpm2tm(data$edges, max_f = maxff)$transition_matrix),
+                         tolerance = this_tolerance
+                         )
+            rm(this_tolerance)
         } else {
             warning("Skipping comparison of transition matrices with ",
                     "different fitness scaling",
