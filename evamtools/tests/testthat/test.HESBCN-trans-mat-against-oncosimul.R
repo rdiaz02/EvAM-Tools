@@ -27,7 +27,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
                   " Comparing only sets of accessible genotypes")
           cno <- colnames(reorder_trans_mat(cpm2_out$transition_matrix))
           cnd <- colnames(
-              reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(                                              data)$trans_mat_genots))
+              reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(data)$trans_mat_genots))
           expect_true(all(cno == cnd))
         } else {
             expect_equal(
@@ -77,6 +77,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
 
     data(all_examples_csd)
     ## Run HESBCN.
+    ## The names declare intent; often, you just get "Single"
     ex_hesbcn_and <- evamtools:::do_HESBCN(examples_csd$csd$AND$data)
     ex_hesbcn_linear <- evamtools:::do_HESBCN(examples_csd$csd$Linear$data)
     ex_hesbcn_or <- evamtools:::do_HESBCN(examples_csd$csd$OR$data)
@@ -94,7 +95,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
 
     
 
-    for(i in all_examples){
+    for (i in all_examples) {
         run_test_for_dataset(i)
     }
 
