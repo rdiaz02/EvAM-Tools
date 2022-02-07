@@ -1,7 +1,5 @@
 ## Testing functionality in access_genots_from_oncosimul.R
 
-
-
 test_that("Genotype not accessible if no increase in fitness wrt to ancestor", {
     x1 <- c("WT" = 1, "A" = 2, "B" = 1, "A, B" = 2.5)
     ox1 <- evamtools:::genots_2_fgraph_and_trans_mat(x1)

@@ -7,9 +7,8 @@
 do_HESBCN(
   data,
   n_steps = 1e+05,
-  tmp_folder = NULL,
+  tmp_dir = NULL,
   seed = NULL,
-  clean_dir = FALSE,
   addname = NULL,
   silent = TRUE
 )
@@ -20,12 +19,10 @@ and individuals (rows)}
 
 \item{n_steps}{Number of steps to run. Default: 100000}
 
-\item{tmp_folder}{Folder name where the oput is located. 
+\item{tmp_dir}{Directory name where the oput is located. 
 It will be place under /tmp/HESBCN/tmp_folder}
 
 \item{seed}{Seed to run the experiment}
-
-\item{clean_dir}{Whether to delete the folder upon completion}
 
 \item{addname}{String to append to the temporary folder name. Default NULL}
 

@@ -7,7 +7,7 @@ test_that("weighted paths and transition matrices computations against
 hand-computed values,
 and identical results between algorithms with sparse matrices, CBN", {
     ## testing weighted_paths_to_max is implicitly testing the transition matrix
-    ## as weighted_paths is computed from the transition matrix In the future,
+    ## as weighted_paths is computed from the transition matrix. In the future,
     ## and if under paranoia, have a few tests just of the transition
     ## matrix. Though I do this with OT below.  We use CBN, but the code does not
     ## differentiate between CBN and OT.

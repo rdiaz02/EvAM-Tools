@@ -42,60 +42,61 @@ rm(.._EvamTools_test.hesbcn)
 #' @param data Cross secitonal data. Matrix of genes (columns)
 #' and individuals (rows)
 #' @param n_steps Number of steps to run. Default: 100000
-#' @param tmp_folder Folder name where the oput is located. 
+#' @param tmp_dir Directory name where the oput is located. 
 #' It will be place under /tmp/HESBCN/tmp_folder
 #' @param seed Seed to run the experiment
 #' @param addname String to append to the temporary folder name. Default NULL
 #' @param silent Whether to run show message showing the folder name where HESBCN is run
-#' @param clean_dir Whether to delete the folder upon completion
 #' 
 #' @return A list with the adjacency matrix, the lambdas, the parent set
 #' and a data.frame with From-To edges and associated lambdas.
-do_HESBCN <- function(data, 
-    n_steps=100000, 
-    tmp_folder=NULL, 
-    seed=NULL, 
-    clean_dir=FALSE,
+do_HESBCN <- function(data,
+    n_steps = 100000,
+    tmp_dir = NULL,
+    seed = NULL,
     addname = NULL,
-    silent = TRUE){
-    orig_folder <- getwd()
+    silent = TRUE) {
 
     # Setting tmp folder
-    if(is.null(tmp_folder)) {
-        tmp_folder <- tempfile()
+    if (is.null(tmp_dir)) {
+        tmp_dir <- tempfile()
         dirname0 <- NULL
-        if(!is.null(addname)) {
-            dirname0 <- tmp_folder
-            tmp_folder <- paste0(tmp_folder, "/",
+        if (!is.null(addname)) {
+            dirname0 <- tmp_dir
+            tmp_dir <- paste0(tmp_dir, "/",
                               "_hesbcn_", addname)
         }
-        if(!silent)
-            message(paste("\n Using dir", tmp_folder))
-        if(dir.exists(tmp_folder)) {
-            stop("dirname ", tmp_folder, "exists")
+        if (!silent)
+            message(paste("\n Using dir", tmp_dir))
+        if (dir.exists(tmp_dir)) {
+            stop("dirname ", tmp_dir, "exists")
         }
-        dir.create(tmp_folder, recursive = TRUE)
+        dir.create(tmp_dir, recursive = TRUE)
     }
-    setwd(tmp_folder)
 
     orig_gene_names <- colnames(data)
     colnames(data) <- LETTERS[1:ncol(data)]
 
-    write.csv(data, "input.txt", row.names = FALSE, quote = FALSE)
- 
+    write.csv(data, file = paste0(tmp_dir, "/input.txt"),
+              row.names = FALSE, quote = FALSE)
+
     # Launching
-    print("Running HESBCN")
+    message("Running HESBCN")
     if (is.null(seed)) {
-        command <- sprintf("h-esbcn -d input.txt -o output.txt -n %1.f", 
-            n_steps)
+        command <- paste0("h-esbcn -d ",
+                          tmp_dir, "/input.txt -o ",
+                          tmp_dir, "/output.txt -n ", n_steps)
     } else if (is.numeric(seed) & seed > 0) {
-        command <- sprintf("h-esbcn -d input.txt -o output.txt -n %1.f -s %1.f", 
-            n_steps, seed)
+        command <- paste0("h-esbcn -d ",
+                          tmp_dir, "/input.txt -o ",
+                          tmp_dir, "/output.txt -n ", n_steps,
+                          " -s ", seed)
     }
     system(command, ignore.stdout = TRUE)
 
     # Reading output
-    model_info <- import.hesbcn("output.txt", genes = orig_gene_names)
+    model_info <- import.hesbcn(paste0(tmp_dir, "/output.txt"),
+                                genes = orig_gene_names)
 
     indexes_array <- data.frame(which(model_info$lambdas_matrix > 0, arr.ind = TRUE))
     indexes_list <- which(model_info$lambdas_matrix > 0, arr.ind = TRUE)
@@ -106,13 +107,25 @@ do_HESBCN <- function(data,
     adjacency_matrix_2 <- data.frame(From = from, To = to, Edge = edges, Lambdas = lambdas)
     model_info$edges <- adjacency_matrix_2
 
-    # Housekeeping
-    setwd(orig_folder)
-    if (clean_dir) {
-        unlink(tmp_folder, recursive = TRUE)
+    ## Check we are not in the strange case of AND when hanging from Root
+    for(ic in seq_along(model_info$parent_set)) {
+        if(model_info$parent_set[ic] != "AND") next
+        name_child <- names(model_info$parent_set)[ic]
+        parents <- model_info$edges[model_info$edges$To == name_child, "From"]
+        if((length(parents) == 1) && (parents == "Root")) {
+            warning("The strange case of AND when hanging from root happened. ",
+                    "Setting 'AND' to 'Single'")
+            model_info$parent_set[ic] <- "Single"
+        }
     }
+    
+    ## Create a "Relation" column, so the $edges component is easy to understand
+    ## That is also used when translating to OncoSimulR
+    model_info$edges$Relation <- vapply(
+        model_info$edges$To,
+        function(x) model_info$parent_set[x],
+        "some_string"
+    )
 
     return(model_info)
 }
-
-
