@@ -193,5 +193,5 @@ We use testthat to test our R code. Those tests will run automatically with the 
 
 In addition, under evamtools/inst/miscell/tests-sample_genotypes_from_trm we have the output of tests that were run to verify the code for sampling genotypes from the transition rate matrices. We compared the output of our code with that from the code of the original authors (MHN, MCCBN) for a large set of cases.
 
-<span style="color:red"> FIXME: Pablo writes this: Selenium tests of the server</span>
+```diff - FIXME: Pablo writes this: Selenium tests of the server```
 
