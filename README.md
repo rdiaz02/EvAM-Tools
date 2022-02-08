@@ -1,5 +1,6 @@
 # EvAM Tools
 
+## EvAM Tools: purpose
 Tools for evolutionary accumulation, or event accumulation, models. For now, this refers to "Cancer Progression Models" (CPM) but these are not limited to cancer.
 
 We provide an R package, evamtools, and a shiny (https://shiny.rstudio.com/) app that allows to:
@@ -22,9 +23,9 @@ We provide an R package, evamtools, and a shiny (https://shiny.rstudio.com/) app
 <!--                                           "td_trans_mat"), -->
 
 
-## References
+### References ###
 
-### OT
+#### OT ####
 
 
 - Szabo, A., & Boucher, K. M. (2008). Oncogenetic Trees. In W. Tan, & L. Hanin
@@ -37,7 +38,7 @@ We provide an R package, evamtools, and a shiny (https://shiny.rstudio.com/) app
   genome hybridization data. J Comput Biol, 6(1), 37–51.
 
 
-### CBN
+#### CBN ####
 
 
 - Gerstung, M., Baudis, M., Moch, H., & Beerenwinkel, N. (2009). Quantifying
@@ -57,14 +58,14 @@ We provide an R package, evamtools, and a shiny (https://shiny.rstudio.com/) app
   727–735. http://dx.doi.org/10.1093/bioinformatics/btw459
 
 
-### MHN
+#### MHN ####
 
 
 - Schill, R., Solbrig, S., Wettig, T., & Spang, R. (2020). Modelling cancer
   progression using Mutual Hazard Networks. Bioinformatics, 36(1),
   241–249. http://dx.doi.org/10.1093/bioinformatics/btz513
 
-### HESBCN
+#### HESBCN ####
 
 
 - Angaroni, F., Chen, K., Damiani, C., Caravagna, G., Graudenzi, A., &
@@ -72,7 +73,8 @@ We provide an R package, evamtools, and a shiny (https://shiny.rstudio.com/) app
   evolution with high prognostic power. Bioinformatics, 38(3),
   754–762. http://dx.doi.org/10.1093/bioinformatics/btab717
 
-### Conditional prediction of genotypes and probabilities of paths from CPMs
+#### Conditional prediction of genotypes and probabilities of paths from CPMs ####
+
 - 
 
 - Diaz-Uriarte}, R., & Vasallo, C. (2019). Every which way? On predicting tumor
@@ -84,9 +86,9 @@ We provide an R package, evamtools, and a shiny (https://shiny.rstudio.com/) app
 
 
 
-# Copyright and origin of files
+## Copyright and origin of files ##
 
-## Copyright and origin of files under evamtools/R
+### Copyright and origin of files under evamtools/R ###
 
 - All files under evamtools/R are copyright Pablo Herrera Nieto and Ramon Diaz-Uriarte (and released under the GPL v3 license) except for the following:
 
@@ -130,7 +132,7 @@ We provide an R package, evamtools, and a shiny (https://shiny.rstudio.com/) app
 - Some of the code for transition rate matrices, input from different CPMs, tests, etc (authored by Ramon Diaz-Uriarte, released under the GPL-3) has been previously used in Diaz-Uriarte and Vasallo, 2019 (all code available from https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1007246#sec019, files S1 Dataset and S2 Dataset) and Diaz-Colunga and Diaz-Uriarte, 2021 (repository: https://github.com/rdiaz02/what_genotype_next).
 
     
-## ct-cbn:
+### ct-cbn: ###
 
 This repository includes code by:
 
@@ -141,7 +143,8 @@ This repository includes code by:
   
 
 
-# How to install to run just the R package?
+## How to install to run just the R package? ##
+
   * Install CBN
     - Use the file ct-cbn-0.1.04b-RDU.tar.gz.
     - Uncompress. Then the usual ./configure, make.
@@ -162,29 +165,28 @@ This repository includes code by:
 <!-- and get a working enviroment with HyperTraPS installed. Add both the `bin` and the `src/python` to your `$PATH`. Also, add the `bin` folder to your $PATH. It is also convenient to run `echo "backend: Agg" > ~/.config/matplotlib/matplotlibrc`. -->
 
 	  
-#  How to install to also run the Shiny app? <span style="color:red"> FIXME: Pablo writes this</span>
+## How to install to also run the Shiny app? <span style="color:red"> FIXME: Pablo writes this</span> ##
+
   * Install the evamtools R package as explained [above](#how-to-install-to-run-just-the-r-package).
   * Then ... <span style="color:red"> FIXME: Pablo writes this</span>
 
 
 
-# How to run the shiny app locally  <span style="color:red"> FIXME: Pablo writes this</span>
+## How to run the shiny app locally  <span style="color:red"> FIXME: Pablo writes this</span> ##
 
-# How to create a Docker image  <span style="color:red"> FIXME: Pablo writes this</span>
+## How to create a Docker image  <span style="color:red"> FIXME: Pablo writes this</span> ##
 
-## How to update the Docker image if you change the code  <span style="color:red">FIXME: Pablo writes this</span>
+### How to update the Docker image if you change the code  <span style="color:red">FIXME: Pablo writes this</span> ###
 
-# How to run the shiny app in a local intranet  <span style="color:red">FIXME: Pablo writes this</span>
+## How to run the shiny app in a local intranet  <span style="color:red">FIXME: Pablo writes this</span> ##
 
-## From the Docker image
+### From the Docker image ###
 
-## Without the Docker image
-
-
+### Without the Docker image ###
 
 
 
-# Tests
+## Tests ##
 
 We use testthat to test our R code. Those tests will run automatically with the usual procedures from testthat or while doing `R CMD check`. For example, we check that transition rate matrices and transition probability matrices give identical results when compared to finding them via OncoSimulR (file test.OT-CBN-trans-mat-against-oncosimul.R and test.HESBCN-trans-mat-against-oncosimul.R) and against hand-computed examples (file test.trans-rates-f-graphs.R and test.HESBCN-transition-rate-matrices.R).
 
