@@ -1,5 +1,6 @@
-% Created 2022-02-08 Tue 09:52
-% Intended LaTeX compiler: pdflatex
+% Created 2022-02-08 Tue 09:52 from org
+% Intended LaTeX compiler: pdflatex. Modified by RDU
+\synctex=1
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage[T1]{fontenc}
@@ -177,7 +178,7 @@ If B depends on A, when we consider the transition from A to B, we can use a sin
 Thus, for any genotype, do \(\prod (1 + s_i)\), where \(s_i = \lambda_i\) when the restrictions are satisfied.
 \end{itemize}
 
-\subsection{Even more details about CBN, \(s\), \(\lambda\)}
+\subsubsection{Even more details about CBN, \(s\), \(\lambda\)}
 \label{sec:orgcc4dcbe}
 \begin{itemize}
 \item Remember that having \(\lambda_i < 0\) makes no sense.
@@ -369,11 +370,10 @@ WT &  & $\lambda_A$ & $\lambda_B$ & $\lambda_C$ &  &  &  &  &  &  &  &  &  &  & 
  4    B  C    B->C 13.1389      XOR
  5    A  D    A->D  0.2156       OR
  6    B  D    B->D  0.2156       OR
-
-
 \end{verbatim}
 
 \begin{itemize}
+\item From the above output, these are the lambdas: $\lambda_A = 7.3644, \lambda_B = 2.367, \lambda_C = 13.1389, \lambda_D = 0.2156$.
 \item Focusing only on A, B, D, to see gene D we can follow four paths.
 \begin{itemize}
 \item The first two involve only two mutations:
