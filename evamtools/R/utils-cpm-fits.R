@@ -15,12 +15,6 @@
 
 
 
-## a simple check
-any_constant_col <- function(x) {
-    nr <- nrow(x)
-    mcs <- max(colSums(x))
-    any(mcs == nr)
-}
 
 ## convert data frame to a matrix with 0L and 1L
 df_2_mat_integer <- function(x) {
@@ -111,3 +105,11 @@ add_WT <- function(x, N = 10000) {
     return(x)
 }
 
+
+
+## ## a simple check
+## any_constant_col <- function(x) {
+##     nr <- nrow(x)
+##     mcs <- max(colSums(x))
+##     any(mcs == nr)
+## }
