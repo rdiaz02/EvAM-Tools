@@ -64,7 +64,7 @@ cpm_out_to_oncosimul <- function(x, sh = -Inf) {
     } else if ("OT_edgeWeight" %in% names(x)) { ## OT
         s <- x$OT_edgeWeight
         typeDep <- "AND"
-    } else if ("Thetas" %in% names(x)) { ## Something for DB
+    } else if ("Thetas" %in% names(x)) { ## DBN
         s <- x$Thetas
         typeDep <- "OR"
     } else {

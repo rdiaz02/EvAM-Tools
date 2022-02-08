@@ -195,7 +195,7 @@ theta_to_trans_rate_3 <- function(theta,
 
 
 ## theta from Learn.MHN
-##      function used to compute trans rate matrix -> transition rate matrix
+##      theta -> transition rate matrix
 theta_to_trans_rate_3_SM <- function(theta,
                                      inner_transition = inner_transitionRate_3_1) {
 
@@ -447,7 +447,7 @@ theta_to_trans_rate_1 <- function(theta) {
 }
 
 ## theta from Learn.MHN
-##      function used to compute theta -> transition rate matrix
+##      theta -> transition rate matrix
 theta_to_trans_rate <- function(theta,
                                 inner_transition = inner_transitionRate_1) {
 
