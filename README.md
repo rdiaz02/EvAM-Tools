@@ -40,6 +40,8 @@ We provide an R package, evamtools, and a shiny (https://shiny.rstudio.com/) app
 
 #### CBN ####
 
+- Beerenwinkel, N., & Sullivant, S. (2009). Markov models for accumulating
+  mutations. Biometrika, 96(3), 645.
 
 - Gerstung, M., Baudis, M., Moch, H., & Beerenwinkel, N. (2009). Quantifying
   cancer progression with conjunctive Bayesian networks. Bioinformatics, 25(21),
@@ -50,6 +52,9 @@ We provide an R package, evamtools, and a shiny (https://shiny.rstudio.com/) app
   N. (2011). The Temporal Order of Genetic and Pathway Alterations in
   Tumorigenesis. PLoS ONE, 6(11),
   27136. http://dx.doi.org/10.1371/journal.pone.0027136
+
+
+
 
 
 - Montazeri, H., Kuipers, J., Kouyos, R., B\"oni, J\"urg, Yerly, S., Klimkait,
@@ -141,12 +146,11 @@ We provide an R package, evamtools, and a shiny (https://shiny.rstudio.com/) app
     
 ### ct-cbn: ###
 
-This repository includes code by:
-
-- Niko Beerenwinkel, Moritz Gerstung, and Seth Sullivant. This is file ct-cbn-0.1.04b-RDU.tar.gz, a
-   modification by RDU of the ct-cbn code from
-   https://bsse.ethz.ch/cbg/software/ct-cbn.html.
-   - The modification involves a minor bug fix (which, however, could be related to non-identifiability) as well as producing output with lambdas and likelihood from the initial run and each of the iterations.
+   This repository includes ct-​cbn-0.1.04b, from
+   https://bsse.ethz.ch/cbg/software/ct-cbn.html, whose authors are Niko Beerenwinkel, Moritz Gerstung, and Seth Sullivant. It is released under the GNU GPL.
+   
+   The code included in this repo is file ct-cbn-0.1.04b-RDU.tar.gz, a
+   modification by RDU of the above code that includes: a minor bug fix (which, however, could be related to non-identifiability); output with lambdas and likelihood from the initial run and each of the iterations.
   
 
 
