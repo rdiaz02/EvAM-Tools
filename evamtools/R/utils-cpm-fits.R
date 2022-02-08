@@ -81,7 +81,7 @@ add_pseudosamples <- function(x, n00 = "auto3") {
         ## add just 1
         fmax <- max(colSums(x))/nrow(x)
         if(fmax == 1) {
-            cat("\n  Added one pseudosample \n ")
+            message("\n  Added one pseudosample \n ")
             n00 <- 1
         } else { 
             n00 <- 0
