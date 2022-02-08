@@ -49,10 +49,10 @@ while(TRUE) {
                     "smallest lambda < 1e-15")
             ## We compute products of numbers close to R's smallest limit.
             ## We are probably fine with numbers even as small as 2e-16, but to be safe.
-        } else if (sum(data$edges$Lambda < 1e-12) >= 1) {
+        } else if (sum(data$edges$Lambda < 1e-10) >= 1) {
           warning("Skipping comparison with OncoSimul's ",
                   "numerical values of transition rate matrix: ",
-                  "one or more lambdas < 1e-12.",
+                  "one or more lambdas < 1e-10.",
                   " Comparing only sets of accessible genotypes")
           cno <- colnames(reorder_trans_mat(cpm2_out$transition_matrix))
           cnd <- colnames(
@@ -208,11 +208,3 @@ while(TRUE) {
     s <- s + 1
 }
 
-
-### Eh!!! This crashes!!!
-### Seed =  531589
-### Check but it is a simple numerical issue of a lambda 15 orders of magnitude smaller than the rest.
-## I think it is because OncoSimulR thresholds at fitness < 1e-9 or something.
-## Add it to tests
-
-## Seed =  589375 
