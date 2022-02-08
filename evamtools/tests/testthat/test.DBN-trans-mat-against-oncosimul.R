@@ -1,3 +1,4 @@
+if(FALSE) {
 ## Testing that cpm_access_genots_paths_w_simplified_OR gives same output as
 ## cpm_to_trans_mat_oncosimul, the function that uses OncoSimulR
 test_that("Testing evamtools:::cpm_access_genots_paths_w_simplified_OR by comparing with
@@ -139,3 +140,4 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
 cat("\n Done test.DBN-trans-mat-against-oncosimul.R \n")
 
 
+}

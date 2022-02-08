@@ -204,7 +204,7 @@ cpm_access_genots_paths_w <- function(x, string = NULL,
 ## similar comments and a function that only returns
 ## the truly accessible
 
-unrestricted_fitness_graph <- function(gacc, plot = FALSE) {
+unrestricted_fitness_graph <- function(gacc) {
     
     gs <- unlist(lapply(gacc, function(g) paste0(g, collapse = ", ")))
     gs <- c("WT", gs)
@@ -229,8 +229,8 @@ unrestricted_fitness_graph <- function(gacc, plot = FALSE) {
             }
         }
     }
-    if (plot)
-        mccbn::plot_poset(adjmat) ## , title = "G0 (unrestricted)")
+    ## if (plot)
+    ##     mccbn::plot_poset(adjmat) ## , title = "G0 (unrestricted)")
 
     stopifnot(all(adjmat %in% c(0L, 1L) ))
     storage.mode(adjmat) <- "integer"

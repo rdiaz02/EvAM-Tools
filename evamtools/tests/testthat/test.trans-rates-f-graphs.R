@@ -885,14 +885,15 @@ test_that("OT and CBN: algorithm consistency with various data examples", {
             CBN_ot <- NA
         }
         if (do_MCCBN) {
-            message("\n     Doing MCCBN")
-            if(ncol(x) >= 2) {
-                time_mccbn <-
-                    system.time(MCCBN <- try(mccbn_proc(x)))["elapsed"]
-            } else {
-                time_mccbn <- NA
-                MCCBN <- NA
-            }
+            stop("MC-CBN disabled now")
+            ## message("\n     Doing MCCBN")
+            ## if(ncol(x) >= 2) {
+            ##     time_mccbn <-
+            ##         system.time(MCCBN <- try(mccbn_proc(x)))["elapsed"]
+            ## } else {
+            ##     time_mccbn <- NA
+            ##     MCCBN <- NA
+            ## }
         } else {
             time_mccbn <- NA
             MCCBN <- NA

@@ -13,39 +13,40 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+## Not used now
+if(FALSE) {
+    ## This is using OT-CBN, not H-CBN2
+    mccbn_proc <- function(x) {
+        if (!requireNamespace("mccbn", quietly = TRUE))
+            stop("MC-CBN (mccbn) no installed")
+        
+        stopifnot(!is.null(colnames(x)))
+        fit <- mccbn::learn_network(x)
+        mle_index <- which.max(fit$logliks)
+        am <- fit$posets[[mle_index]]
+        df1 <- igraph::as_data_frame(graph_from_adjacency_matrix(am))
+        colnames(df1) <- c("From", "To")
+        no_parent <- setdiff(colnames(x), df1[, 2])
+        dfr <- rbind(
+            data.frame(From = "Root", To = no_parent,
+                       stringsAsFactors = FALSE),
+            df1)
+        dfr$edge = paste(dfr[, "From"],
+                         dfr[, "To"],
+                         sep = " -> ")
+        ## of course, lambda is per child
 
-## This is using OT-CBN, not H-CBN2
-mccbn_proc <- function(x) {
-    if (!requireNamespace("mccbn", quietly = TRUE))
-        stop("MC-CBN (mccbn) no installed")
-    
-    stopifnot(!is.null(colnames(x)))
-    fit <- mccbn::learn_network(x)
-    mle_index <- which.max(fit$logliks)
-    am <- fit$posets[[mle_index]]
-    df1 <- igraph::as_data_frame(graph_from_adjacency_matrix(am))
-    colnames(df1) <- c("From", "To")
-    no_parent <- setdiff(colnames(x), df1[, 2])
-    dfr <- rbind(
-        data.frame(From = "Root", To = no_parent,
-                   stringsAsFactors = FALSE),
-        df1)
-    dfr$edge = paste(dfr[, "From"],
-                     dfr[, "To"],
-                     sep = " -> ")
-    ## of course, lambda is per child
+        ## if using MC-CBN pre 2020-10-07 
+        ## lambda <- fit$fits[[mle_index]]$par
 
-    ## if using MC-CBN pre 2020-10-07 
-    ## lambda <- fit$fits[[mle_index]]$par
+        ## if using MC-CBN post 2020-10-07 
+        lambda <- fit$fits[[mle_index]]$lambda
 
-    ## if using MC-CBN post 2020-10-07 
-    lambda <- fit$fits[[mle_index]]$lambda
-
-    names(lambda) <- colnames(am)
-    dfr$lambda <- lambda[dfr$To]
-    return(list(edges = dfr))
+        names(lambda) <- colnames(am)
+        dfr$lambda <- lambda[dfr$To]
+        return(list(edges = dfr))
+    }
 }
-
 
 ## ## Using the new functionality. Extremely slow.
 ## ## The only non-defaults are threads (thrds)

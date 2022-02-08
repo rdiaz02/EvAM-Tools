@@ -792,14 +792,16 @@ evam <- function(x, cores_cbn = 1,
     } 
     
     if(do_MCCBN) {
-        if( !requireNamespace("mccbn", quietly = TRUE)) {
-            warning("MC-CBN (mccbn) no installed. Not running MC-CBN")
-        } else {
-            message("Doing MC-CBN")
-            time_mccbn <-
-                system.time(MCCBN_out <- try(mccbn_proc(x)))["elapsed"]
-            message("time MC-CBN = ", time_mccbn)
-        }
+        stop("MC-CBN disabled")
+        ## if( !requireNamespace("mccbn", quietly = TRUE)) {
+        ##     warning("MC-CBN (mccbn) no installed. Not running MC-CBN")
+        ## } else {
+        ##     stop("MC-CBN disabled now")
+        ##     ## message("Doing MC-CBN")
+        ##     ## time_mccbn <-
+        ##     ##     system.time(MCCBN_out <- try(mccbn_proc(x)))["elapsed"]
+        ##     ## message("time MC-CBN = ", time_mccbn)
+        ## }
     }
 
     ## ######################################################################

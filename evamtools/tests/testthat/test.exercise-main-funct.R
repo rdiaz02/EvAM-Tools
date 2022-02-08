@@ -4,8 +4,7 @@ test_that("Minimal test: we can run", {
     Dat1 <- every_which_way_data[[16]][1:40, 2:6]
     out <- suppressMessages(evam(Dat1,
                                  methods = c("CBN", "OT",
-                                             "MHN", "HESBCN",
-                                             "DBN")))
+                                             "MHN", "HESBCN")))
     expect_true(exists("OT_model", where = out))
 })
 
@@ -16,34 +15,38 @@ test_that("We can deal with duplicated columns and columns without events and co
 
     data(every_which_way_data)
     Dat1 <- every_which_way_data[[16]][1:40, 2:6]
-    Dat1[, "rep_5"] <- Dat1[, 5]
+    Dat1[, "rep_1"] <- Dat1[, 1]
     Dat1[, "no_event"] <- rep(0, nrow(Dat1))
     Dat1[, "constant"] <- rep(1, nrow(Dat1))
     
     out1 <- suppressMessages(evam(Dat1[, 1:6],
                                   methods = c("CBN", "OT",
-                                              "MHN", "HESBCN",
-                                              "DBN")))
+                                              "MHN", "HESBCN")))
     expect_true(exists("OT_model", where = out1))
 
     out2 <- suppressMessages(evam(Dat1[, c(1:5, 7)],
                                   methods = c("CBN", "OT",
-                                              "MHN", "HESBCN",
-                                              "DBN")))
+                                              "MHN", "HESBCN")))
     expect_true(exists("OT_model", where = out2))
 
     out3 <- suppressMessages(evam(Dat1[, c(1:5, 8)],
                                   methods = c("CBN", "OT",
-                                              "MHN", "HESBCN",
-                                              "DBN")))
+                                              "MHN", "HESBCN")))
     expect_true(exists("OT_model", where = out3))
 
 
     out4 <- suppressMessages(evam(Dat1,
                                   methods = c("CBN", "OT",
-                                              "MHN", "HESBCN",
-                                              "DBN")))
+                                              "MHN", "HESBCN")))
     expect_true(exists("OT_model", where = out4))
+
+    out5 <- suppressMessages(evam(Dat1,
+                                  methods = c("CBN", "OT",
+                                              "MHN", "HESBCN"),
+                                  max.cols = 3))
+    expect_true(exists("OT_model", where = out5))
+
+    
 
 })
 
@@ -73,22 +76,19 @@ test_that("Examples from initial-simple-examples", {
 
     out3 <- suppressMessages(evam(db3,
                                   methods = c("CBN", "OT",
-                                              "MHN", "HESBCN",
-                                              "DBN")))
+                                              "MHN", "HESBCN")))
     expect_true(exists("OT_model", where = out3))
 
 
     out4 <- suppressMessages(evam(db4,
                                   methods = c("CBN", "OT",
-                                              "MHN", "HESBCN",
-                                              "DBN")))
+                                              "MHN", "HESBCN")))
     expect_true(exists("OT_model", where = out4))
 
 
     out5 <- suppressMessages(evam(db5,
                                   methods = c("CBN", "OT",
-                                              "MHN", "HESBCN",
-                                              "DBN")))
+                                              "MHN", "HESBCN")))
     expect_true(exists("OT_model", where = out5))
 })
 

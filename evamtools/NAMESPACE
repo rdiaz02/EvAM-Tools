@@ -15,7 +15,7 @@ importFrom("graphics", "axis", "legend", "lines", "par", "title")
 importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert",
            "write.csv")
 importFrom("Matrix", "diag", "rowSums", "colSums", "summary", "Matrix",
-           "sparseMatrix", "bandSparse")
+           "sparseMatrix", "bandSparse", "t")
 importFrom("OncoSimulR", "sampledGenotypes", "evalAllGenotypes",
            "allFitnessEffects")
 importFrom("stringr", "str_count", "str_replace", "str_split",
@@ -42,4 +42,4 @@ importFrom("plot.matrix", "fmt")
 ## importFrom("relations",
 ##            "as.relation", "transitive_reduction",
 ##            "relation_incidence")
-importFrom("OncoBN", "fitCPN")
+## importFrom("OncoBN", "fitCPN")
