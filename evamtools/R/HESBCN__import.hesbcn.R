@@ -14,6 +14,9 @@
 ##   cancer evolution with high prognostic power. Bioinformatics, 38(3):
 ##   754-762. http://dx.doi.org/10.1093/bioinformatics/btab717
 
+
+## Modified by RDU to force the return of the undivided lambdas
+
 "import.hesbcn" <- function( file, genes = NULL ) {
 
     # read results from file
@@ -77,7 +80,11 @@
     epsilon = as.numeric(gsub("Best epsilon = ","",results[nrow(results),1]))
     
     # return results
-    hesbcn = list(adjacency_matrix=adjacency_matrix,lambdas_matrix=lambdas_matrix,parent_set=parent_set,epsilon=epsilon)
+    hesbcn = list(adjacency_matrix = adjacency_matrix,
+                  lambdas_matrix = lambdas_matrix,
+                  parent_set = parent_set,
+                  epsilon = epsilon,
+                  lambdas = lambdas)
     return(hesbcn)
 
 }

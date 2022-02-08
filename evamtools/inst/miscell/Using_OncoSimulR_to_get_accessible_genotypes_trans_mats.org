@@ -1,11 +1,11 @@
 #+OPTIONS: ^:nil
 #+AUTHOR: Ramon Diaz-Uriarte
-#+TITLE: Using OncoSimulR to get accessible genotypes and transition matrices
+#+TITLE: Using OncoSimulR to get accessible genotypes and transition matrices 
 #+LATEX_HEADER: \usepackage[a4paper,margin=2.3cm]{geometry}
 #+LATEX_HEADER: \usepackage[iso,english]{isodate}
 
-* Note:
-  - Most of this implemented in access_genots_from_oncosimul.R. 
+* Introduction
+Here I explain how we can use OncoSimulR to get accessible genotypes and transition matrices for CBN, OT, and HESBCN. I also clarify how our code interprets the output of HESBCN (not only as it concerns using OncoSimulR). The code for using OncoSimulR is implemented in access_genots_from_oncosimul.R. 
   
 * Using OncoSimulR to get accessible genotypes and transition matrices
 
@@ -160,118 +160,224 @@
    
 
 
-* What about PMCE?
+* What about HESBCN/PMCE?
+Here we detail how we interpret and use the results from the method described in 
 
-   Whether or not what we do makes sense depends on what PMCE really does. 
+- Angaroni, F., Chen, K., Damiani, C., Caravagna, G., Graudenzi, A., & Ramazzotti, D. (2021). PMCE: efficient inference of expressive models of cancer evolution with high prognostic power. Bioinformatics, 38(3), 754–762. http://dx.doi.org/10.1093/bioinformatics/btab717 
 
-[[./PMCE_1.png]]
+We can repeat what we did above, with OR and XOR replaced by, well, OR and XOR in OncoSimulR (OR and XOR are also called SM and XMPN in OncoSimulR). Details follow.
 
-Suppose the above DAG. The left is the simplest representation, but if we look at the plots from PMCE the right one is much more similar to the one in their paper: there is a node that is not really any of the genes, and from there you get the dependent gene. 
+** Lambdas from the output: "Best Lambdas" and "lambdas_matrix"
+- The output returned by the HESBCN function contains a "Best Lambdas". The output returned by function "import.hesbcn" (that we have included in the code) has an object called "lambdas_matrix" where each of the lambdas for a gene is divided by the number of parents. This can be checked for any of their examples. Code that shows three examples, with XOR, OR, AND is available under "inst/miscell/HESBCN-lambdas-from-examples.R".
+- It is the output from "Best lambdas" (i.e., the undivided lambdas) that are "[the] rates of the Poisson processes of the continuous-time HMM, associated with the vertices of the model, which allow one to estimate the expected waiting time of a node, given that its predecessor has occurred." (p. 756).
+- (What is the division: an  operation that modifies an internal data structure, and just a temporary operation, done merely for implementation purposes. In line 95 of the code (as of current version, in https://github.com/BIMIB-DISCo/PMCE/blob/main/Utilities/R/utils.R) the divided lambdas are again summed, so the partition disappears: "curr_in_lambda = sum(hesbcn$lambdas_matrix[,curr_node])", and it is that value that is used in further downstream computations;  email with the authors on 2021-07-09).
+
+** Interpreting OR and XOR (and AND)
+- I find Figure 1C  of their paper possibly confusing. First, the non-confusing part:  node "D" has a rate when exactly one of B XOR C has occured, and node "G" some other rate when E or F or both E or F have occurred.
+- Now, the (for me, at least) possibly confusing part: it seems that the node called "B xor C" is such that B and C have the same rates of dependencies on A. Similarly, the node called "E or F" seems to indicate that both E and F have the same rate. But this need not be so.
+  - In fact, all of the examples we have looked at, and the examples in their output, do not satisfy that. For instance, in the example above of Bladder Urothelial Carcinoma, KMT2D depends on KMT2C and TP53, but the rate for KMT2C is 0.1991 and that for TP53 is 0.8062.
+- The $\lambda$ for a gene is the rate of the process until that mutation appears and is fixated, given all the dependencies of that gene are satisfied (which is, of course, the same interpretation as under CBN).
+- But the rate at which the parents are satisfied can differ.
+- The code in inst/miscell/HESBCN-OR-XOR-AND-lambda-and-rates.R contains examples of how we use those lambdas.
+*** Three examples
+**** OR
+- Suppose output such as this (again, see file inst/miscell/HESBCN-OR-XOR-AND-lambda-and-rates.R for how to reproduce it).
+
+\begin{verbatim}
+ $adjacency_matrix
+      Root A B C D
+ Root    0 1 1 0 0
+ A       0 0 0 1 1
+ B       0 0 0 1 1
+ C       0 0 0 0 0
+ D       0 0 0 0 0
+
+ $lambdas_matrix
+      Root     A     B     C      D
+ Root    0 7.364 2.367 0.000 0.0000
+ A       0 0.000 0.000 6.569 0.1078
+ B       0 0.000 0.000 6.569 0.1078
+ C       0 0.000 0.000 0.000 0.0000
+ D       0 0.000 0.000 0.000 0.0000
+
+ $parent_set
+        A        B        C        D 
+ "Single" "Single"    "XOR"     "OR" 
+
+
+ $lambdas
+ [1]  7.3644  2.3673 13.1389  0.2156
+
+ $edges
+   From To    Edge Lambdas Relation
+ 1 Root  A Root->A  7.3644   Single
+ 2 Root  B Root->B  2.3673   Single
+ 3    A  C    A->C 13.1389      XOR
+ 4    B  C    B->C 13.1389      XOR
+ 5    A  D    A->D  0.2156       OR
+ 6    B  D    B->D  0.2156       OR
+
+
+\end{verbatim}
+
+- Focusing only on A, B, D, to see gene D we can follow four paths.
+  - The first two involve only two mutations:
+    - $WT \rightarrow A \rightarrow AD$
+    - $WT \rightarrow B \rightarrow BD$
+    - The first is much faster, since the rate for the transition from WT to A is 7.4 compared to 2.4 of the transition B to D (from competing exponentials, the probabilities of moving to A and B are 0.76 and 0.24, respectively).
+  - In the other two paths D is the third gene to appear:
+    - $WT \rightarrow A \rightarrow AB \rightarrow ABD$
+    - $WT \rightarrow B \rightarrow AB \rightarrow ABD$
+    - These two paths take the same time, on average: both A and B need to appear (with rates given by $\lambda_A$, $\lambda_B$) and then we need D to appear ($\lambda_D$).
+ 
+  - Similarly, to get to genotype "A, B, D" we can follow these paths:
+    - $WT \rightarrow A \rightarrow AB \rightarrow ABD$
+    - $WT \rightarrow B \rightarrow AB \rightarrow ABD$
+    - $WT \rightarrow A \rightarrow AD \rightarrow ABD$
+    - $WT \rightarrow B \rightarrow BD \rightarrow ABD$
+    - All of them take the same expected time, as we need for A, B, and D to happen, each governed by $\lambda_A$, $\lambda_B$, $\lambda_D$, respectively.
+- In terms of fitness, if we use OncoSimulR, we would write, for the fitness of AB: $(1 + \lambda_A) (1 + \lambda_B)$, for AD $(1 + \lambda_A) (1 + \lambda_D)$, and for ABD $(1 + \lambda_A) (1 + \lambda_B) (1 + \lambda_D)$.
+  - Note, specifically, that genotypes $AD$ and $BD$ are not fitness equivalent, unless $\lambda_A = \lambda_B$.
+**** XOR
+- Using the above example, and focusing only on A, B, C, these are the only ways of seeing a C:
+  - $WT \rightarrow A \rightarrow AC$
+  - $WT \rightarrow B \rightarrow BC$
+  - As we have a XOR, no routes can go through AB.
+  - The first is much faster and common than the second ($\lambda_A = 7.4; \lambda_B = 2.4$).
+  - Fitness of $AC$ is $(1 + \lambda_A) (1 + \lambda_C)$ and of $BC$ $(1 + \lambda_B) (1 + \lambda_C)$. 
+
+**** Both OR and XOR
+- There is nothing new. As an example, gaining both C and D mutations.
+  - $WT \rightarrow A \rightarrow AC \rightarrow ACD$
+  - $WT \rightarrow B \rightarrow BC \rightarrow BCD$
+  - $WT \rightarrow A \rightarrow AD \rightarrow ACD$
+  - $WT \rightarrow B \rightarrow BD \rightarrow BCD$
+  - There is no path going through $AB$ since C has a XOR relationship on A and B.
+    
+  - In the first path we first need to wait for A to happen (rate $\lambda_A$) then C ($\lambda_C$) then D ($\lambda_D$).
+  - Same for the second, with B instead of A. The first path is much more common than the second.
+  - The third path transposes the order of occurrence of D and C, but takes the same average time as the third. Note that the fitness of the final genotype is the same through both routes, only the order of steps changes.
+  - The fourth path transposes the order of occurrence of D and C, but takes the same average time as the fourth. Note that the fitness of the final genotype is the same through both routes, only the order of steps changes.
+  
+
+
+
+# # Then,
+
+
+
+
+# #    Whether or not what we do makes sense depends on what PMCE really does. 
+
+# # [[./PMCE_1.png]]
+
+# # Suppose the above DAG. The left is the simplest representation, but if we look at the plots from PMCE the right one is much more similar to the one in their paper: there is a node that is not really any of the genes, and from there you get the dependent gene. 
 
  
 
-[[./PMCE_2.png]]
+# # [[./PMCE_2.png]]
 
-With the above DAG, the set of accessible genotypes and the fitness graph is the one given above. 
-
-** Fitness relationships between genotypes
-   I think this is a set of fitness relationships between genotypes that must  hold, regardless of the interpretation of some specific terms:
-   - $W_{WT} < W_A < W_{AC}$
-   - $W_{WT} < W_B < W_{BC}$
-   - $W_{WT} < W_{AB} < W_{ABC}$
-   - $W_C = 0$ (relationship not satisfied).
+# # With the above DAG, the set of accessible genotypes and the fitness graph is the one given above. 
 
 
-   Here, we are avoiding interpreting the OR. We are simply reasoning under a
-   model of accumulating independent mutations with their restrictions
-   satisfied. Now the tricky parts.
+# ** Fitness relationships between genotypes
+#    I think this is a set of fitness relationships between genotypes that must  hold, regardless of the interpretation of some specific terms:
+#    - $W_{WT} < W_A < W_{AC}$
+#    - $W_{WT} < W_B < W_{BC}$
+#    - $W_{WT} < W_{AB} < W_{ABC}$
+#    - $W_C = 0$ (relationship not satisfied).
+
+
+#    Here, we are avoiding interpreting the OR. We are simply reasoning under a
+#    model of accumulating independent mutations with their restrictions
+#    satisfied. Now the tricky parts.
      
 
    
 
-** Is $W_{AC} = W_{BC}$?
-   Right now, it is not. We compute each fitness as the product of the respective
-   terms: $(1 + \lambda_A) \ (1 + \lambda_C)$ and $(1 + \lambda_B) \ (1 +
-   \lambda_C)$. They would be the same only iff $\lambda_A = \lambda_B$.
+# ** Is $W_{AC} = W_{BC}$?
+#    Right now, it is not. We compute each fitness as the product of the respective
+#    terms: $(1 + \lambda_A) \ (1 + \lambda_C)$ and $(1 + \lambda_B) \ (1 +
+#    \lambda_C)$. They would be the same only iff $\lambda_A = \lambda_B$.
 
-   But the author's intention might be to actually assume the two are identical
-   if "A and B are *fitness equivalent*". (This idea is much more prevalent in
-   previous papers of this authors, and in the preprint ---not the final--
-   version of the paper Ramazzotti, D. et al., 2018, "Modeling Cumulative
-   Biological Phenomena with Suppes-Bayes Causal Networks" which is cited as an
-   apparently key reference for this one).
+#    But the author's intention might be to actually assume the two are identical
+#    if "A and B are *fitness equivalent*". (This idea is much more prevalent in
+#    previous papers of this authors, and in the preprint ---not the final--
+#    version of the paper Ramazzotti, D. et al., 2018, "Modeling Cumulative
+#    Biological Phenomena with Suppes-Bayes Causal Networks" which is cited as an
+#    apparently key reference for this one).
 
-*** Modules for fitness equivalence
-   If fitness equivalent is required, in OncoSimulR genes A and B should be
-   modeled as two genes of the same module (see section 3.5 of the vignette).
+# *** Modules for fitness equivalence
+#    If fitness equivalent is required, in OncoSimulR genes A and B should be
+#    modeled as two genes of the same module (see section 3.5 of the vignette).
 
-   There are two problems, though, with using modules: first, this forces the
-   fitness effects of all genes to be the same. Second, modules cannot share
-   genes. 
+#    There are two problems, though, with using modules: first, this forces the
+#    fitness effects of all genes to be the same. Second, modules cannot share
+#    genes. 
 
-   When thinking about $\lambda$ I do not know what to make of this. It is
-   possible in OncoSimulR, however, to be fitness equivalent but to have
-   different mutation rates. (This is a flexibility that OncoSimulR provides
-   because it uses and explicit evolutionary model, and not the confusing
-   generative model of PMCE). But the no-sharing of genes between modules
-   precludes modeling many examples from PMCE.
+#    When thinking about $\lambda$ I do not know what to make of this. It is
+#    possible in OncoSimulR, however, to be fitness equivalent but to have
+#    different mutation rates. (This is a flexibility that OncoSimulR provides
+#    because it uses and explicit evolutionary model, and not the confusing
+#    generative model of PMCE). But the no-sharing of genes between modules
+#    precludes modeling many examples from PMCE.
 
-*** Epistasis for specifying fitness equivalence
-   A convoluted alternative when using OncoSimulR is to force those relationships
-   to the desired values using epistatic terms. This is of course completely
-   flexible. It has advantages and disadvantages:
-   - It shows explicitly what (mess of a) model PMCE implies.
-   - It is almost the same as specifying fitness of each genotype passing the
-     matrix of genotypes and fitness.
+# *** Epistasis for specifying fitness equivalence
+#    A convoluted alternative when using OncoSimulR is to force those relationships
+#    to the desired values using epistatic terms. This is of course completely
+#    flexible. It has advantages and disadvantages:
+#    - It shows explicitly what (mess of a) model PMCE implies.
+#    - It is almost the same as specifying fitness of each genotype passing the
+#      matrix of genotypes and fitness.
 
-** Is $W_{AB} = W_A = W_B$?
+# ** Is $W_{AB} = W_A = W_B$?
 
-   If A and B are fitness equivalent, I think $\lambda_A = \lambda_B$, and having
-   both mutations together should confer no fitness advantage. That is NOT what
-   is being done now. I think that only makes sense if we specify identical
-   lambdas for both.
+#    If A and B are fitness equivalent, I think $\lambda_A = \lambda_B$, and having
+#    both mutations together should confer no fitness advantage. That is NOT what
+#    is being done now. I think that only makes sense if we specify identical
+#    lambdas for both.
 
-   Again, if $W_A \ne W_B$ we can still try to model some kind of fitness
-   equivalence using epistatic terms. But then, which of these is the right
-   option (assume $W_A > W_B$, or $\lambda_A > \lambda_B$):
+#    Again, if $W_A \ne W_B$ we can still try to model some kind of fitness
+#    equivalence using epistatic terms. But then, which of these is the right
+#    option (assume $W_A > W_B$, or $\lambda_A > \lambda_B$):
 
-   - $W_{AB} = min(W_A, W_B)$
-   - $W_{AB} = max(W_A, W_B)$
-   - $W_{AB} = mean(W_A, W_B)$
-   - Something else :-)
+#    - $W_{AB} = min(W_A, W_B)$
+#    - $W_{AB} = max(W_A, W_B)$
+#    - $W_{AB} = mean(W_A, W_B)$
+#    - Something else :-)
 
-** Is $W_{ABC} = W_{AC}$ or $W_{ABC} = W_{BC}$ or both?
-   Again, that depends on what is the fitness contribution of the not needed
-   mutation in the OR.
+# ** Is $W_{ABC} = W_{AC}$ or $W_{ABC} = W_{BC}$ or both?
+#    Again, that depends on what is the fitness contribution of the not needed
+#    mutation in the OR.
 
-   Thinking in terms of their Suppes' causation, it would seem $W_{ABC} = W_{AC}
-   = W_{BC}$.
+#    Thinking in terms of their Suppes' causation, it would seem $W_{ABC} = W_{AC}
+#    = W_{BC}$.
 
-** What if we tried to remain agnostic about fitness, and only thought about transitions?
-   One problem is, then, that this model is not identified in an evolutionary
-   sense. It would be impossible to simulate data under evolutionary scenarios
-   and say which ones fit or do not fit the model.
+# ** What if we tried to remain agnostic about fitness, and only thought about transitions?
+#    One problem is, then, that this model is not identified in an evolutionary
+#    sense. It would be impossible to simulate data under evolutionary scenarios
+#    and say which ones fit or do not fit the model.
 
-   But even if we tried that, the following questions are not clear:
+#    But even if we tried that, the following questions are not clear:
 
-   - What is $Pr(A \rightarrow AB)$? Is it 0 or something else? What else?
+#    - What is $Pr(A \rightarrow AB)$? Is it 0 or something else? What else?
 
-* And DBN (Nicol et al. "Oncogenetic Network Estimation with Disjunctive Bayesian Networks")?
+# * And DBN (Nicol et al. "Oncogenetic Network Estimation with Disjunctive Bayesian Networks")?
 
-  Many questions will be similar. I haven't looked at it in any detail but we  should make sure that we know how to set fitness to all of the relationships  given above (i.e., we have definite answers about them). If not, we should ask the authors.
+#   Many questions will be similar. I haven't looked at it in any detail but we  should make sure that we know how to set fitness to all of the relationships  given above (i.e., we have definite answers about them). If not, we should ask the authors.
 
-  In other words, there is nothing specific about OncoSimulR here: it is a matter  of how the OR relationships, the disjunctive relationships, in their paper are  interpreted.
+#   In other words, there is nothing specific about OncoSimulR here: it is a matter  of how the OR relationships, the disjunctive relationships, in their paper are  interpreted.
 
-* HyperTraPS?
+# * HyperTraPS?
 
-  I think that none of this applies to HyperTraPS: their paper, as far as I can tell, says nothing about possible evolutionary interpretations in terms of selection, etc. This is purely a phenomenological model.
+#   I think that none of this applies to HyperTraPS: their paper, as far as I can tell, says nothing about possible evolutionary interpretations in terms of selection, etc. This is purely a phenomenological model.
 
-  Thus, I do not see how we would try to map their model to explicit evolutionary models. (This does not mean their model cannot be assessed using evolutionary simulations, though).
+#   Thus, I do not see how we would try to map their model to explicit evolutionary models. (This does not mean their model cannot be assessed using evolutionary simulations, though).
 
   
- We need to think this, in case I am missing something. We also need to see if some interpretations are available in some of the other HyperTraPS-related papers: 
+#  We need to think this, in case I am missing something. We also need to see if some interpretations are available in some of the other HyperTraPS-related papers: 
 
-  - Johnston, I. G., Røyrvik, Ellen C. (2020). Data-Driven Inference Reveals   Distinct and Conserved Dynamic Pathways of Tool Use Emergence across Animal  Taxa. iScience, 23(6), 101245. http://dx.doi.org/10.1016/j.isci.2020.101245
+#   - Johnston, I. G., Røyrvik, Ellen C. (2020). Data-Driven Inference Reveals   Distinct and Conserved Dynamic Pathways of Tool Use Emergence across Animal  Taxa. iScience, 23(6), 101245. http://dx.doi.org/10.1016/j.isci.2020.101245
 
   
   

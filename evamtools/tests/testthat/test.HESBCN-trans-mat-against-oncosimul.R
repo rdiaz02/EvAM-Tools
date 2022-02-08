@@ -1,9 +1,6 @@
 ## Testing that cpm_access_genots_paths_w_simplified_relationships gives same output as
 ## cpm_to_trans_mat_oncosimul, the function that uses OncoSimulR
 
-## FIXME: once everything has been tested and running for a while, rm some of the
-## tests below (from real data), as way to slow and probably overkill
-
 test_that("Testing evamtools:::cpm_access_genots_paths_w_simplified_relationships by comparing with
 OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     ## Recall evamtools:::cpm2tm <- cpm_to_trans_mat_oncosimul
@@ -15,21 +12,59 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     }
 
     run_test_for_dataset <- function(data) {
-        expect_equal(
-            reorder_trans_mat(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
+        ## Used in several places. Run just once
+        cpm2_out <- evamtools:::cpm2tm(data$edges, max_f = NULL)
+        if(min(data$edges$Lambda) < 1e-15) {
+            warning("Skipping comparison with OncoSimul's ",
+                    "transition rate matrix: ",
+                    "smallest lambda < 1e-15")
+            ## We compute products of numbers close to R's smallest limit.
+            ## We are probably fine with numbers even as small as 2e-16, but to be safe.
+        } else if (sum(data$edges$Lambda < 1e-12) >= 1) {
+          warning("Skipping comparison with OncoSimul's ",
+                  "numerical values of transition rate matrix: ",
+                  "one or more lambdas < 1e-12.",
+                  " Comparing only sets of accessible genotypes")
+          cno <- colnames(reorder_trans_mat(cpm2_out$transition_matrix))
+          cnd <- colnames(
+              reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(data)$trans_mat_genots))
+          expect_true(all(cno == cnd))
+        } else {
+            expect_equal(
+            reorder_trans_mat(cpm2_out$transition_matrix),
             reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(
                                               data)$trans_mat_genots),
             check.attributes = TRUE)
+        }
 
         ## Do not run next test if fitness is absurdly large as scaling will fail
-        ## as it should.
-        max_fitness <- max(evamtools:::cpm2tm(data$edges, max_f = NULL)$accessible_genotypes)
-        if(max_fitness < 1e10) {
+        ## (as it should).  Do not run it either if ratio of largest to smallest
+        ## lambda is > 1e9 as in products we accumulate tiny errors that give
+        ## differences of the order of 1e-8.
+        max_fitness <- max(cpm2_out$accessible_genotypes)
+        ratio_lambdas <- max(data$edges$Lambdas)/min(data$edges$Lambdas)
+        if((max_fitness < 1e10) && (ratio_lambdas < 1e9))  {
             maxff <- sample(c(2, 3, 3.5, 3.8, 4, 5, 8), size = 1)
-            expect_equal(as.matrix(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
-                         as.matrix(evamtools:::cpm2tm(data$edges, max_f = maxff)$transition_matrix))
+            this_tolerance <- testthat_tolerance()
+            if(min(data$edges$Lambdas) < 1e-5) {
+                warning("Smallest lambda < 1e-5. Setting tolerance to 1e-6 ",
+                        "for numerical comparison of transition rates ",
+                        "between max_f = NULL and max_f = maxff")
+                this_tolerance <- 1e-6
+            }
+            expect_equal(as.matrix(cpm2_out$transition_matrix),
+                         as.matrix(evamtools:::cpm2tm(data$edges, max_f = maxff)$transition_matrix),
+                         tolerance = this_tolerance
+                         )
+            rm(this_tolerance)
+        } else {
+            warning("Skipping comparison of transition matrices with ",
+                    "different fitness scaling",
+                    ifelse(max_fitness >= 1e10, ". max_fitness >= 1e10", ""),
+                    ifelse(ratio_lambdas >= 1e9, ". Ratio of Lambdas >= 1e9"))
         }
     }
+   
     
     ## First, load a bunch of data structures
     ## Adapted from test.OT-CBN-trans-mat-against-oncosimul.R
@@ -42,6 +77,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
 
     data(all_examples_csd)
     ## Run HESBCN.
+    ## The names declare intent; often, you just get "Single"
     ex_hesbcn_and <- evamtools:::do_HESBCN(examples_csd$csd$AND$data)
     ex_hesbcn_linear <- evamtools:::do_HESBCN(examples_csd$csd$Linear$data)
     ex_hesbcn_or <- evamtools:::do_HESBCN(examples_csd$csd$OR$data)
@@ -59,7 +95,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
 
     
 
-    for(i in all_examples){
+    for (i in all_examples) {
         run_test_for_dataset(i)
     }
 
@@ -91,38 +127,15 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
                            F = 0))
     d3 <- d2
     d3$C[(d3$A == 1) & (d3$B == 1)] <- 1
-    
-    set.seed(22)
-    d111 <- data.frame(A = sample(c(1, 0), prob = c(0.7, 0.2), size = 2000, replace = TRUE),
-                     B = sample(c(1, 0), prob = c(0.85, 0.2), size = 2000, replace = TRUE))
-    d111$C <- 0
-    d111$D <- 0
-    d111$E <- 0
-    d111$F <- 0
-    d111$C[(d111$A == 1) & (d111$B == 1)] <- 1
-    d111$D[(d111$A == 1) | (d111$B == 1)] <- 1
-    d111$D[100:200] <- 0
-    d111$E[xor((d111$A == 1), (d111$B == 1))] <- 1
-    d111$F[(d111$C == 1) & (d111$D == 1)] <- 1
-    d222 <- rbind(d111,
-                data.frame(A = sample(c(1, 0), size = 250, prob = c(0.5, 0.2), replace = TRUE),
-                           B = sample(c(1, 0), size = 250, prob = c(0.5, 0.2), replace = TRUE),
-                           C = 0,
-                           D = sample(c(1, 0), size = 25, replace = TRUE),
-                           E = 0,
-                           F = 0))
-    d333 <- d222
-    d333$C[(d333$A == 1) & (d333$B == 1)] <- 1
 
-    set.seed(NULL)
-    
     ## Examples that mix output
-    d3_1 <- evamtools:::do_HESBCN(d3, seed = 1) ## AND, OR, XOR, Single
-    d3_2 <- evamtools:::do_HESBCN(d3, seed = 6)
-    d3_3 <- evamtools:::do_HESBCN(d3, seed = 7)
-    d333_2 <- evamtools:::do_HESBCN(d333, seed = 222) ## AND, OR, XOR, Single
+    d3_1 <- evamtools:::do_HESBCN(d3, seed = 26) ## AND, OR, Single
+    d3_2 <- evamtools:::do_HESBCN(d3, seed = 31)  ## AND, XOR, Single
+    set.seed(NULL)
+    d3_3 <- evamtools:::do_HESBCN(d3)
+    d3_4 <- evamtools:::do_HESBCN(d3)
 
-    all_mixed_examples <- list(d3_1, d3_2, d3_3, d3_3, d333_2)
+    all_mixed_examples <- list(d3_1, d3_2, d3_3, d3_4)
     
     for(ex in all_examples){
         run_test_for_dataset(ex)
@@ -134,83 +147,6 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     ## see ../../other_miscell/test.run_hesbcn_continuously.R if you want that.
     
 })
-
-
-
-
-
-## test_that("Testing evamtools:::cpm_access_genots_paths_w_simplified_relationships
-## by comparing with
-## OncoSimulR's based cpm_to_trans_mat_oncosimul. Use the CBN examples", {
-
-##     ## HESBCN relationships are a superset of those in CBN. Thus, the
-##     ## examples in test.OT-CBN-trans.mat-against-oncosimul.R for CBN
-##     ## should also be handled identically by the code for HESBCN.
-
-##     ## Required changes:
-##     ##   - use only "rerun_lambda" and rename to "Lambdas"
-##     ##   - parent_set: create and set to AND
-
-##     ## For testing
-##     reorder_trans_mat <- function(x) {
-##         gg <- c(1, 1 + order(colnames(x)[-1]))
-##         return(as.matrix(x[gg, gg]))
-##     }
-
-##     fcomp <- function(zz) {
-        
-##         expect_equal(reorder_trans_mat(evamtools:::cpm2tm(zz, max_f = NULL)$transition_matrix),
-##                  reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(
-##                      list(edges = zz))$trans_mat_genots),
-##                  check.attributes = TRUE)
-##         expect_equal(as.matrix(evamtools:::cpm2tm(zz$edges, max_f = NULL)$transition_matrix),
-##                     as.matrix(evamtools:::cpm2tm(zz$edges, max_f = 2)$transition_matrix))
-##     }
-
-    
-##     ex_cbn_out1 <- list(edges = structure(list(From = c("Root", "Root"),
-##                                   To = c("A", "B"),
-##                                   edge = c("Root -> A", "Root -> B"),
-##                                   Lambdas = c(88.234297, 268.921382)),
-##                                   class = "data.frame",
-##                                   row.names = c("A", "B")),
-##                         parent_set =
-##                             structure(
-##                                 c("AND", "AND"),
-##                                 class = "list",
-##                                 names = c("A", "B")))
-
-   
-    
-##      expect_equal(reorder_trans_mat(evamtools:::cpm2tm(ex_cbn_out1, max_f = NULL)$transition_matrix),
-##                  reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(
-##                      list(edges = ex_cbn_out1))$trans_mat_genots),
-##               check.attributes = TRUE)
-  
-
-##     run_test_for_dataset <- function(data){
-        
-##         ## Same transitions, different fitness
-##         evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix
-##         evamtools:::cpm2tm(data$edges, 8)$transition_matrix
-
-##         ## Original code
-##         evamtools:::cpm_access_genots_paths_w_simplified_relationships(data)$trans_mat_genots
-        
-##         expect_equal(reorder_trans_mat(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
-##                     reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(
-##                         data)$trans_mat_genots),
-##                     check.attributes = TRUE)
-
-##         expect_equal(as.matrix(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
-##                     as.matrix(evamtools:::cpm2tm(data$edges, max_f = 2)$transition_matrix))
-##     }
-
-##     for(i in all_examples){
-##         run_test_for_dataset(i)
-##     }
-## })
-
 
 cat("\n Done test.HESBCN-trans-mat-against-oncosimul.R \n")
 
