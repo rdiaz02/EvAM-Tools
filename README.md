@@ -190,12 +190,21 @@ This repository includes code by:
 
 
 
-## Tests ##
+## Main files and directories
 
-We use testthat to test our R code. Those tests will run automatically with the usual procedures from testthat or while doing `R CMD check`. For example, we check that transition rate matrices and transition probability matrices give identical results when compared to finding them via OncoSimulR (file test.OT-CBN-trans-mat-against-oncosimul.R and test.HESBCN-trans-mat-against-oncosimul.R) and against hand-computed examples (file test.trans-rates-f-graphs.R and test.HESBCN-transition-rate-matrices.R).
+### Dockerfile    [FIXME: Pablo writes this](#)  
+### docker   [FIXME: Pablo writes this](#) 
+### evamtools
+    The R package itself with standard organization. Directories and files under inst:
+  * shiny-examples: [FIXME: Pablo writes this](#) Explicar los subdirectorios y ficheros principales.
+  * miscell/Using_OncoSimulR_to_get_accessible_genotypes_trans_mats.tex: explanation of using OncoSimulR to check transition matrices, the equivalence of lambdas to terms in fitness expressions, and interpretation of the lambdas for HESBCN with OR and XOR.
+  * miscell/examples: examples referred to from other files (for example, from the former tex file).
+  * miscell/tests-sample_genotypes_from_trm: output of tests that were run to verify the code for sampling genotypes from the transition rate matrices. We compared the output of our code with that from the code of the original authors (MHN, MCCBN) for a large set of cases.
+      
+	Note that the R package uses testthat to test our R code. Those tests will run automatically with the usual procedures from testthat or while doing `R CMD check`. For example, we check that transition rate matrices and transition probability matrices give identical results when compared to finding them via OncoSimulR (file test.OT-CBN-trans-mat-against-oncosimul.R and test.HESBCN-trans-mat-against-oncosimul.R) and against hand-computed examples (file test.trans-rates-f-graphs.R and test.HESBCN-transition-rate-matrices.R). The tests in evamtools/tests/testthat are separate from the tests under  inst/miscell/tests-sample_genotypes_from_trm  
+	
 
 
-In addition, under evamtools/inst/miscell/tests-sample_genotypes_from_trm we have the output of tests that were run to verify the code for sampling genotypes from the transition rate matrices. We compared the output of our code with that from the code of the original authors (MHN, MCCBN) for a large set of cases.
 
 
 [FIXME: Pablo writes this: Selenium tests of the server](#)
