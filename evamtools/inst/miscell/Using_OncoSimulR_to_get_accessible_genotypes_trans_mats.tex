@@ -1,0 +1,453 @@
+% Created 2022-02-08 Tue 09:52
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage[a4paper,margin=2.3cm]{geometry}
+\usepackage[iso,english]{isodate}
+\usepackage{longtable}
+\usepackage[dvipsnames,table]{xcolor}
+\usepackage{lscape}
+\author{Ramon Diaz-Uriarte}
+\date{\today}
+\title{Using OncoSimulR to get accessible genotypes and transition matrices}
+\hypersetup{
+ pdfauthor={Ramon Diaz-Uriarte},
+ pdftitle={Using OncoSimulR to get accessible genotypes and transition matrices},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 28.0.90 (Org mode 9.5.1)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+
+
+\section{Introduction}
+\label{sec:org58f26ba}
+Here I explain how we can use OncoSimulR to get accessible genotypes and transition matrices for CBN, OT, and HESBCN. I also clarify how our code interprets the output of HESBCN (not only as it concerns using OncoSimulR). The code for using OncoSimulR is implemented in access\_genots\_from\_oncosimul.R. 
+
+\section{Using OncoSimulR to get accessible genotypes and transition matrices}
+\label{sec:org653c242}
+
+OncoSimulR has had, for a long time, the AND, XOR, OR operations (see the help of "allFitnessEffects", under "typeDep"), if a gene depends on other genes with the same relationship for all parents. Since we can obtain the fitness of genotypes, obtaining accessible genotypes is simple:
+
+
+\begin{itemize}
+\item Use an appropriate setting for the "s"
+\item Use \(-\infty\) for sh (so if restrictions are not satisfied, a genotype has
+fitness 0).
+\item Evaluate the fitness of genotypes.
+\item Call function "genots\_2\_fgraph\_and\_trans\_mat".
+\begin{itemize}
+\item This is a general function.
+\item In particular, it does not assume that mutations that do not kill a
+genotype always increase fitness or at least do not decrease it.
+\item This function returns accessible genotypes, fitness graph, and transition matrices directly from the fitness of the genotypes.
+\end{itemize}
+\end{itemize}
+
+\subsection{Computing fitness of genotypes: for CBN and OT}
+\label{sec:org65f3210}
+\begin{itemize}
+\item OncoSimulR, when using DAGs, uses a model of fitness (birth rate), for a  genotype with restrictions satisfied as \(\Pi (1 + s_i)\). 
+\begin{itemize}
+\item Again, to emphasize the above: \(s_i\), when using OncoSimulR with a DAG, is  the selection coefficient from gene \(i\) \textbf{with its restrictions satisfied.}
+\end{itemize}
+\item Recall that the transition probabilities can be computed from competing   exponentials. For example, suppose from genotype A we can go to enotypes AB and AC. The probability of going to AB should be \(\lambda_B/(\lambda_B +  \lambda_C)\).
+\item As explained in Hosseini et al., 2019 (Hosseini, S., Diaz-Uriarte, Ramon, Markowetz, F., \& Beerenwinkel, N. (2019). Estimating the predictability of cancer evolution. Bioinformatics,   35(14), 389–397. \url{https://dx.doi.org/10.1093/bioinformatics/btz332}), p. i392, let us define the selective  coefficient of a mutation \(i\) as the fitness difference that it causes along the mutational pathway.
+
+\begin{itemize}
+\item Using our previous example, that would be \(Pr(A \rightarrow AB) = \frac{W_{AB}- W_{A}}{(W_{AB} - W_A) + (W_{AC} - W_A)}\), where \(W_x\) is fitness of  genotype \(x\).
+
+\item If we write, as is common, \(W_{AB} = W_A \  (1 + s_B)\), we get from the above \(Pr(A \rightarrow AB) = \frac{s_B}{s_B + s_C}\).
+
+\item (So, actually, the \(s_i\) are the relative differences, not just
+differences, in fitness: \(s_B = \frac{W_{AB} - W_A}{W_A}\), as shown also in p.7 of the supplementary material of Weinreich, D. M., Delaney, N. F., DePristo, M. A., \& Hartl, D. L. (2006). Darwinian Evolution Can Follow Only Very Few Mutational Paths to Fitter Proteins. Science, 312(5770), 111–114.\url{https://dx.doi.org/10.1126/science.1123539} .)
+
+\item (We wrote \(W_{AB} = W_A \ (1 + s_B)\). This we can do as we explained what the meaning of the \(s_i\) are: selection coefficient from gene \(i\) with its restrictions satisfied. See below: \hyperref[sec:orge68f649]{Transition probabilities using an epistatic specification}.)
+\end{itemize}
+
+\item Note that this is the same procedure as in Weinreich et al., 2006, (Weinreich, D. M., Delaney, N. F., DePristo, M. A., \& Hartl, D. L. (2006). Darwinian Evolution Can Follow Only Very Few Mutational Paths to Fitter Proteins. Science, 312(5770), 111–114.\url{https://dx.doi.org/10.1126/science.1123539}) supplementary material, p. 4): \(s_{i \rightarrow j}\) "the selection coefficient for the mutation that carries allele i to allele j" (where selection coefficient has the usual definition, e.g., Gillespie, 2004 (Population genetics: a concise guide, 2nd. Baltimore, Md: The Johns Hopkins University Press.), p. 63 ---but we write \(W_{AB} = W_A \ (1 + s_B)\), and thus if \(s_B > 0\) AB is fitter than A; see also p.7 of the supplementary material of Weinreich et al., 2006).
+\begin{itemize}
+\item See their S5b, which shows the relationship between the expected value of the conditioned probability of fixation in a mutation from \(i\) to \(j\) and the expected value of the ratio of the selection coefficient for the mutation that turns \(i\) to \(j\) over the sum of selection coefficients of beneficial mutations that turn \(i\) into all other alleles; see also their figure S1 in p.$\backslash$ 7 that shows the accuracy of their expression.
+\end{itemize}
+
+\item Note: In Gerstung et al., 2011 (Gerstung, M., Eriksson, N., Lin, J., Vogelstein, B., \& Beerenwinkel, N. (2011). The Temporal Order of Genetic and Pathway Alterations in Tumorigenesis. PLoS ONE, 6(11), 27136. \url{https://dx.doi.org/10.1371/journal.pone.0027136}), PLoS ONE (p.8) the relationship between \(\lambda_i\) and \(s_i\) is also discussed.
+
+\item And why the fitness difference with respect to the ancestor and not just a  ratio of fitnesses? Suppose \(W_{AC} < W_A < W_{AB}\). The procedure above  correctly would say that we always transition from A to AB.
+
+\item So we do as follows:
+\begin{itemize}
+\item Set \(s_i = \lambda_i\) (for OT, we use edgeWeight instead of \(\lambda\)).
+\item Obtain the fitness of all genotypes from OncoSimulR.
+\item If so desired (e.g., to ensure the maximum fitness is a specific number),  multiply all fitness values (not the WT, which is kept at 1) by the appropriate scaling factor.
+\end{itemize}
+\end{itemize}
+
+\subsection{Crucial assumption above}
+\label{sec:org57fee67}
+\begin{itemize}
+\item We compute fitness above assuming that only one of two things can happen: a mutation provides a fitness benefit or it leads to death. When the requirements are satisfied, a mutation conveys a fitness increase (\(\lambda_i\)); otherwise, the cell with the mutation has fitness 0.
+
+\item Strictly, mutations without dependencies satisfied might not be lethal, but they should not confer any fitness advantage, so that we will never observe them (Gerstung et al., 2009, p. 2810, say "(\ldots{}) mutations that need to be present before mutation i can fixate." and Gerstung and Beerenwinkel, 2010, , p. 126, "with steps including both mutation and clonal expansion occurring at effective rates k j").
+
+\item In OncoSimulR, in addition to the \(s_i\), it is possible to set \texttt{sh = 0}, meaning there is no penalty for not respecting the restrictions. When \texttt{sh = 0} there is also no fitness gain, either, so fitness for those genotypes ends up being the fitness of the immediate parent (there is no contribution from the gen without restrictions satisfied to the fitness of the parent genotype). Regardless, when \texttt{sh = 0}, the transition matrix does not change compared to the transition matrix we obtain if we assume that mutations to genotypes with non-satisfied dependencies lead to a fitness of 0.
+\end{itemize}
+
+
+\begin{itemize}
+\item To elaborate on this point: The output from the code, with \texttt{sh = 0}, will result in more genotypes being shown as accessible. It is arguable, though, that those genotypes are not really accessible, since their fitness is never larger than the fitness of their ancestor. So the probability of transitioning to them will be 0 under the expressions above when in SSWM. We have changed the code so that now something is only shown as accessible if its fitness is strictly larger than the fitness of its ancestor.
+
+\item (Actually, in OncoSimulR, the \(s_h\) can vary by gene, so we could have different \(s_{hi}\), but this does not affect these arguments).
+\end{itemize}
+
+
+\subsection{A detail about the fitness specification with OncoSimulR's DAGs and epistatic fitness specifications}
+\label{sec:orgcea5033}
+
+\begin{itemize}
+\item We said above: "Again, to emphasize the above: \(s_i\), when using OncoSimulR with a DAG, is the selection coefficient from gene \(i\) \textbf{with its restrictions satisfied.}"
+
+\item This also means, when using DAGs in OncoSimulR, that terms such as \(s_{ij}\) are not used in that specification: they are not needed as the DAG models do not include epistasis beyond that given by the DAG, and all these epistatic interactions we capture with the DAG and the \(s_i\) and \(s_h\), which denote the fitness effects when restrictions are satisfied and not satisfied, respectively.
+
+\item But with OncoSimulR you can also specify fitness with the usual multiplicative expression where you specify explicitly the contribution of genes and gene interactions (e.g., \(s_{ij}\) for the effect of the interaction between genes \(i\) and \(j\), so that fitness of the genotype with both \(i\) and \(j\) mutated would be \((1 + s_i)\ (1 + s_j)\ (1 + s_{ij})\)).
+
+\item In other words, suppose \(j\) depends on \(i\). The usual epistatic interaction fitness specification would write: \(W_{ij} = (1 + s_i)\ (1 + s_j)\ (1 + s_{ij})\) and \(W_j = (1 + s_j)\).
+
+\item Using the DAG, if the restriction is not satisfied, i.e., for genotype with only \(j\): \(W_j = (1 + s_h)\). If the restriction is satisfied, \(W_{ij} = (1 + s_i) (1 + s_j)\). So the meaning of the \(s\) is different.
+
+\item To fully elaborate here, and give a more complex example, suppose C depends on both A and B, according to the DAG. 
+
+\begin{itemize}
+\item When using the DAG, then, these are
+the expressions for some genotypes:
+\begin{itemize}
+\item \(W_{ABC} = (1 + s_A) (1 + s_B) (1 + s_C)\)
+\item \(W_{AC}  = (1 + s_A) (1 + s_h)\)
+\item (If we had gene-specific \(s_h\), such as \(s_{hC}\), that does not
+change anything fundamental, just adds a subscript)
+\end{itemize}
+\item If we were to use an epistatic specification:
+\begin{itemize}
+\item \(W_{ABC} = (1 + s_A) (1 + s_B) (1 + s_C) (1 + s_{AB}) (1 + s_{AC}) (1 + s_{BC}) (1 + s_{ABC})\)
+\item \(W_{AC}  = (1 + s_A) (1 + s_C) (1 + s_{AC})\)
+\end{itemize}
+\end{itemize}
+
+\item Therefore, the meaning of the \(s_i\) is not the same under both specifications. That is why we said "\(s_i\), when using OncoSimulR with a DAG, is the selection coefficient from gene \(i\) \textbf{with its restrictions satisfied.}" and "terms such as \(s_{ij}\) are not used in that specification: they are not needed as the DAG models do not include epistasis beyond that given by the DAG, and all these epistatic interactions we capture (\ldots{})".
+
+\item Yes, sure, we could always re-write the \(s_{i}\) and \(s_{hi}\) in the DAG specification as a function of the \(s_i, s_{ij}, s_{ijk}\) in the epistatic specification. (See section \hyperref[sec:orge68f649]{Transition probabilities using an epistatic specification}).
+
+\item This was just for the sake of completeness. The use of \(s_h\) and the epistatic fitness specification is fully explained in the documentation of OncoSimulR and its vignette, and is not in the scope of this document.
+\end{itemize}
+
+
+\subsection{Transition probabilities using an epistatic specification}
+\label{sec:orge68f649}
+\begin{itemize}
+\item Suppose B and C both depend on A. If we were to use an specification with epistasis, instead of how we have used and interpreted the \(s_i\) using the DAGs, then we would have to write \(W_{AB} = W_A \ (1 + s_B^*) \ (1 + s_{AB}^*)\), where now I am using \(s*\) to make the sets of \(s\) clearly distinct. We can express the \(s_B\) as a function of \(s_B^*\) and \(s_{AB}^*\). If we set \(s_B^* = 0\) (similar to setting \texttt{sh = 0}) then \(s_B = s_{AB}^*\). Otherwise, the expression will be \(s_B = ((1 + s_B^*)\ (1 + s_{AB}^*)) - 1\); and, to respect the restrictions, it must be the case that \(s_B^* < 0\).
+
+\item The expressions for probabilities of transition become messier, but you end up with a ratio of \\
+\[ \frac{increase\_in\_fitness\_from\_acquiring\_B}{increase\_in\_fitness\_from\_acquiring\_B + increase\_in\_fitness\_from\_acquiring\_C} \]
+
+where \(increase\_in\_fitness\_from\_acquiring\_B\) would include the effect of B, \(s_B^*\), and the epistatic interaction, \(s_{AB}^*\).
+
+\item \(s_B\) is still the relative fitness difference \(\frac{W_{AB} - W_A}{W_A}\). Which is the same as saying that \(((1 + s_B^*)\ (1 + s_{AB}^*)) - 1 = \frac{W_{AB} - W_A}{W_A}\) is the relative fitness difference.
+
+\item This shows we can directly use the DAG fitness specification where we take the \(s_i\) as the selection coefficient from gene \(i\) with its restrictions satisfied.
+
+\item And why do we do what we do with CBN? Because it simplifies everything and fitness can be written as \(\prod (1 + s_i)\) for any genotype with its restrictions satisfied. 
+
+If neither A nor B depend on anything, then the expression for fitness is \((1 + s_A)\ (1 + s_B)\) because, under CBN, there is no epistasis here so \(s_{AB} = 0\) (look, for example, at the transition rate matrix in Montazeri et al., 2016, Figure 1, for the transition from genotype 1 to genotype 1,2 or from genotype 2 to genotype 1,2). 
+
+If B depends on A, when we consider the transition from A to B, we can use a single term, \((1 + s_X)\) to multiply \((1 + s_A)\), and that \(s_X = \lambda_B\). That \(\lambda_B\) is the (relative) increase in fitness due to B, when B's restrictions are satisfied (for example, in Example 1 in Montazeri et al., 2016 (Large-scale inference of conjunctive Bayesian networks. Bioinformatics, 32(17), 727–735. \url{https://dx.doi.org/10.1093/bioinformatics/btw459}), see the transition rate matrix from genotype 2 to genotype 2,4 ---notice that Figure 1 is correct, but the matrix in Example 1 has a typo, and is missing the entry for \(\lambda_4\); or look at the transition from 1,2 to 1,2,3 and 1,2,4). You can think of this \(s_X\) as the joint combination of the effect of B on its own and the epistasis of A and B; but thinking of B on its own is a moot point, since B on its own (i.e., without A, without its restrictions satisfied) is not a genotype that can be observed. 
+
+Thus, for any genotype, do \(\prod (1 + s_i)\), where \(s_i = \lambda_i\) when the restrictions are satisfied.
+\end{itemize}
+
+\subsection{Even more details about CBN, \(s\), \(\lambda\)}
+\label{sec:orgcc4dcbe}
+\begin{itemize}
+\item Remember that having \(\lambda_i < 0\) makes no sense.
+
+\item Suppose a model where A and B depend on no one, D depends on A and C depends on both A and B.
+
+\item Simple case:
+\begin{itemize}
+\item \(W_{AD} = (1 + \lambda_A) (1 + s_D) (1 + s_{AD})\)
+\item \(W_{AD} = (1 + \lambda_A) (1 + \lambda_D)\)
+\item So: \(1 + s_{AD} = \frac{1 + \lambda_D}{1 + s_D}\)
+\item If \(s_D = 0\) we get the \(s_{AD} = \lambda_D\) or "the epistatic term is     equal to the lambda".
+\item If \(s_D < 0\) then the epistatic term, \(s_{AD} > \lambda_D\): it has to be large enough to compensate for the decrease in fitness from the single \(D\).
+\item This can matter if we try to generate \(s_{xy\ldots}\) from some
+distribution and match them to the \(\lambda\).
+\end{itemize}
+
+\item Beware, though, of a simple interpretation of the \(s_D\) as \(s_h\),
+specially when there are more genes. An example:
+
+\begin{itemize}
+\item \(W_{ADC} = (1 + \lambda_A) (1 + s_D) (1 + s_{AD}) (1 +
+    s_C) (1 + s_{DC}) (1 + s_{AC}) (1 + s_{ACD})\)
+\item But we can replace the second and third terms:
+\begin{itemize}
+\item \(W_{ADC} = (1 + \lambda_A) (1 + \lambda_D) (1 + s_C) (1 + s_{DC}) (1 + s_{AC}) (1 + s_{ACD})\)
+\end{itemize}
+\item OncoSimulR is NOT replacing all the extra terms by \(s_h\).
+\begin{itemize}
+\item If it did you would get:
+\begin{itemize}
+\item \(W_{ADC} = (1 + \lambda_A) (1 + \lambda_D) (1 + s_h)^4\)
+\end{itemize}
+\item But what OncoSimul actually gives you is:
+\begin{itemize}
+\item \(W_{ADC} = (1 + \lambda_A) (1 + \lambda_D) (1 + s_h)\)
+\end{itemize}
+\item Why? Because only one gene, C, has not got its restrictions satisfied.
+\item In other words, the number of \((1 + s_h)\) is equal to the number of genes (not genes and gene combinations) with their restrictions not satisfied.
+\end{itemize}
+
+\item In particular, note that this is not correct:
+\begin{itemize}
+\item \(W_{ADC} = (1 + \lambda_A) (1 + s_h) (1 + s_{AD}) (1 + s_h) (1 + s_h) (1 + s_h) (1 + s_h)\)
+\item Where the first \(s_h\) would correspond to \(s_D\) and the rest to C,  AC, DC, ACD.
+\item And thus, it is not correct to write:  \(1 + s_{AD} = \frac{1 + \lambda_D}{1 + s_h}\)
+\end{itemize}
+
+\item Of course, if \(s_h < 0\) then \(W_{ADC} < W_{AD}\).
+\end{itemize}
+
+\item And with this same DAG, we can write either:
+\begin{itemize}
+\item \(W_{ABC} = (1 + \lambda_A) (1 + \lambda_B) (1 + \lambda_C)\)
+\item \(W_{ABC} = (1 + \lambda_A) (1 + \lambda_B) (1 + s_C) (1 + s_{AC}) (1 + s_{BC}) (1 + s_{ABC})\)
+\item As before we could do: \((1 + s_{ABC}) = \frac{1 + \lambda_C}{(1 + s_C) (1 + s_{AC}) (1 +  s_{BC})}\)
+
+\item And this shows again that the epistatic term for ABC (i.e., when restrictions are satisfied) might have to be very large to compensate for large negative fitness effects of mutations without restrictions satisfied (e.g., \(s_C\)).
+\end{itemize}
+\end{itemize}
+
+
+
+
+
+\section{What about HESBCN/PMCE?}
+\label{sec:org1904b6b}
+Here we detail how we interpret and use the results from the method described in 
+
+\begin{itemize}
+\item Angaroni, F., Chen, K., Damiani, C., Caravagna, G., Graudenzi, A., \& Ramazzotti, D. (2021). PMCE: efficient inference of expressive models of cancer evolution with high prognostic power. Bioinformatics, 38(3), 754–762. \url{http://dx.doi.org/10.1093/bioinformatics/btab717}
+\end{itemize}
+
+We can repeat what we did above, with OR and XOR replaced by, well, OR and XOR in OncoSimulR (OR and XOR are also called SM and XMPN in OncoSimulR). Details follow.
+
+\subsection{Lambdas from the output: "Best Lambdas" and "lambdas\_matrix"}
+\label{sec:orgd732357}
+\begin{itemize}
+\item The output returned by the HESBCN function contains a "Best Lambdas". The output returned by function "import.hesbcn" (that we have included in the code) has an object called "lambdas\_matrix" where each of the lambdas for a gene is divided by the number of parents. This can be checked for any of their examples. Code that shows three examples, with XOR, OR, AND is available under "inst/miscell/HESBCN-lambdas-from-examples.R".
+\item It is the output from "Best lambdas" (i.e., the undivided lambdas) that are "[the] rates of the Poisson processes of the continuous-time HMM, associated with the vertices of the model, which allow one to estimate the expected waiting time of a node, given that its predecessor has occurred." (p. 756).
+\item (What is the division? An  operation that modifies an internal data structure, and just a temporary operation, done merely for implementation purposes. In line 95 of the code (as of current version, in \url{https://github.com/BIMIB-DISCo/PMCE/blob/main/Utilities/R/utils.R}) the divided lambdas are again summed, so the partition disappears: "curr\_in\_lambda = sum(hesbcn\$lambdas\_matrix[,curr\_node])", and it is that value that is used in further downstream computations;  email with the authors on 2021-07-09).
+\end{itemize}
+
+\subsection{Interpreting OR and XOR (and AND)}
+\label{sec:org94629c0}
+\begin{itemize}
+\item I find Figure 1C  of their paper possibly confusing. First, the non-confusing part:  node "D" has a rate when exactly one of B XOR C has occured, and node "G" some other rate when E or F or both E or F have occurred. (Note: the figure shows \$\(\tau\)\$s, not \$\(\lambda\)\$s. The comments here refer to the \$\(\lambda\)\$s).
+\item Now, the (for me, at least) possibly confusing part: it seems that the node called "B xor C" is such that B and C have the same rates of dependencies on A; in other words, it would seem to imply that \(\lambda_B = \lambda_C\). Similarly, the node called "E or F" seems to indicate that both E and F have the same rate, so \(\lambda_E = \lambda_F\). But this need not be so.
+\begin{itemize}
+\item In fact, all of the examples we have looked at, and the examples in their output, do not satisfy that the rates to the genes that are part of a XOR, OR, or AND relationship are the same. For instance, in the example above of Bladder Urothelial Carcinoma (see "inst/miscell/HESBCN-lambdas-from-examples.R"), KMT2D depends on KMT2C and TP53, but the rate for KMT2C, \(\lambda_{KMT2C} = 0.1991\) and that for TP53, \(\lambda_{TP53} = 0.8062\).
+\end{itemize}
+\item The \(\lambda\) for a gene is the rate of the process until that mutation appears and is fixated, given all the dependencies of that gene are satisfied (which is, of course, the same interpretation as under CBN); again:  "[the] rates of the Poisson processes of the continuous-time HMM, associated with the vertices of the model, which allow one to estimate the expected waiting time of a node, given that its predecessor has occurred." (p. 756).
+\item But the rate at which the parents are satisfied can differ (as it was the case for CBN).
+\begin{itemize}
+\item A difference with respect to CBN is that, with CBN, if a gene D depends on three genes A, B, C, regardless of the lambdas of each of A, B, C, D can only happen once all of A, B, C are present. With OR and XOR relationships this is no longer the case: one can see D with just A, for example.
+\end{itemize}
+\item Combining AND, XOR, OR? Just apply the rules to each type of dependency. In the HESBCN model if a gene depends on a set of genes, it has the same type of dependency on all the genes of that set.
+\end{itemize}
+
+\subsubsection{An example with OR and XOR}
+\label{sec:org6769f8f}
+\begin{itemize}
+\item In this example:
+\end{itemize}
+\begin{itemize}
+ \item A, B, C depend on none.
+ \item D depends, with an OR, on both A and B
+ \item E depends, with an XOR, on B and C
+ \item Transition rate matrix is shown below: rows are origin, column destination. $\lambda$s are those from "Best Lambdas".
+ \end{itemize}
+
+ \begin{landscape}
+ \begin{table}[ht]
+   \rowcolors{2}{gray!25}{white}
+\centering
+\begin{tabular}{rlllllllllllllllllllll}
+  \hline
+ & WT & A & B & C & AB & AC & AD & BC & BD & BE & CE & ABC & ABD & ABE & ACD & ACE & BCD & BDE & ABCD & ABDE & ACDE \\ 
+  \hline
+WT &  & $\lambda_A$ & $\lambda_B$ & $\lambda_C$ &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\ 
+  A &  &  &  &  & $\lambda_B$ & $\lambda_C$ & $\lambda_D$ &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\ 
+  B &  &  &  &  & $\lambda_A$ &  &  & $\lambda_C$ & $\lambda_D$ & $\lambda_E$ &  &  &  &  &  &  &  &  &  &  &  \\ 
+  C &  &  &  &  &  & $\lambda_A$ &  & $\lambda_B$ &  &  & $\lambda_E$ &  &  &  &  &  &  &  &  &  &  \\ 
+  AB &  &  &  &  &  &  &  &  &  &  &  & $\lambda_C$ & $\lambda_D$ & $\lambda_E$ &  &  &  &  &  &  &  \\ 
+  AC &  &  &  &  &  &  &  &  &  &  &  & $\lambda_B$ &  &  & $\lambda_D$ & $\lambda_E$ &  &  &  &  &  \\ 
+  AD &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_B$ &  & $\lambda_C$ &  &  &  &  &  &  \\ 
+  BC &  &  &  &  &  &  &  &  &  &  &  & $\lambda_A$ &  &  &  &  & $\lambda_D$ &  &  &  &  \\ 
+  BD &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_A$ &  &  &  & $\lambda_C$ & $\lambda_E$ &  &  &  \\ 
+  BE &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_A$ &  &  &  & $\lambda_D$ &  &  &  \\ 
+  CE &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_A$ &  &  &  &  &  \\ 
+  ABC &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_D$ &  &  \\ 
+  ABD &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_C$ &  &  \\ 
+  ABE &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_D$ &  \\ 
+  ACD &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_B$ &  & $\lambda_E$ \\ 
+  ACE &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_E$ \\ 
+  BCD &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_A$ &  &  \\ 
+  BDE &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_A$ &  \\ 
+  ABCD &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\ 
+  ABDE &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\ 
+  ACDE &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\ 
+   \hline
+\end{tabular}
+\end{table}
+ \end{landscape}
+
+
+\subsubsection{Three examples from actual analysis}
+\label{sec:orgdc3f991}
+\begin{itemize}
+\item The code in inst/miscell/HESBCN-OR-XOR-AND-lambda-and-rates.R contains examples of how we use those lambdas.
+\end{itemize}
+\begin{enumerate}
+\item OR
+\label{sec:org9d47997}
+\begin{itemize}
+\item Suppose output such as this (again, see file inst/miscell/HESBCN-OR-XOR-AND-lambda-and-rates.R for how to reproduce it).
+\end{itemize}
+
+\begin{verbatim}
+ $adjacency_matrix
+      Root A B C D
+ Root    0 1 1 0 0
+ A       0 0 0 1 1
+ B       0 0 0 1 1
+ C       0 0 0 0 0
+ D       0 0 0 0 0
+
+ $lambdas_matrix
+      Root     A     B     C      D
+ Root    0 7.364 2.367 0.000 0.0000
+ A       0 0.000 0.000 6.569 0.1078
+ B       0 0.000 0.000 6.569 0.1078
+ C       0 0.000 0.000 0.000 0.0000
+ D       0 0.000 0.000 0.000 0.0000
+
+ $parent_set
+        A        B        C        D 
+ "Single" "Single"    "XOR"     "OR" 
+
+
+ $lambdas
+ [1]  7.3644  2.3673 13.1389  0.2156
+
+ $edges
+   From To    Edge Lambdas Relation
+ 1 Root  A Root->A  7.3644   Single
+ 2 Root  B Root->B  2.3673   Single
+ 3    A  C    A->C 13.1389      XOR
+ 4    B  C    B->C 13.1389      XOR
+ 5    A  D    A->D  0.2156       OR
+ 6    B  D    B->D  0.2156       OR
+
+
+\end{verbatim}
+
+\begin{itemize}
+\item Focusing only on A, B, D, to see gene D we can follow four paths.
+\begin{itemize}
+\item The first two involve only two mutations:
+\begin{itemize}
+\item \(WT \rightarrow A \rightarrow AD\)
+\item \(WT \rightarrow B \rightarrow BD\)
+\item The first is much faster, since the rate for the transition from WT to A is 7.4 compared to 2.4 of the transition B to D (from competing exponentials, the probabilities of moving to A and B are 0.76 and 0.24, respectively).
+\end{itemize}
+\item In the other two paths D is the third gene to appear:
+\begin{itemize}
+\item \(WT \rightarrow A \rightarrow AB \rightarrow ABD\)
+\item \(WT \rightarrow B \rightarrow AB \rightarrow ABD\)
+\item These two paths take the same time, on average: both A and B need to appear (with rates given by \(\lambda_A\), \(\lambda_B\)) and then we need D to appear (\(\lambda_D\)).
+\end{itemize}
+
+\item Similarly, to get to genotype "A, B, D" we can follow these paths:
+\begin{itemize}
+\item \(WT \rightarrow A \rightarrow AB \rightarrow ABD\)
+\item \(WT \rightarrow B \rightarrow AB \rightarrow ABD\)
+\item \(WT \rightarrow A \rightarrow AD \rightarrow ABD\)
+\item \(WT \rightarrow B \rightarrow BD \rightarrow ABD\)
+\item All of them take the same expected time, as we need for A, B, and D to happen, each governed by \(\lambda_A\), \(\lambda_B\), \(\lambda_D\), respectively.
+\end{itemize}
+\end{itemize}
+\item In terms of fitness, if we use OncoSimulR, we would write, for the fitness of AB: \((1 + \lambda_A) (1 + \lambda_B)\), for AD \((1 + \lambda_A) (1 + \lambda_D)\), and for ABD \((1 + \lambda_A) (1 + \lambda_B) (1 + \lambda_D)\).
+\begin{itemize}
+\item Note, specifically, that genotypes \(AD\) and \(BD\) are not fitness equivalent, unless \(\lambda_A = \lambda_B\).
+\end{itemize}
+\end{itemize}
+\item XOR
+\label{sec:orgc1e93a8}
+\begin{itemize}
+\item Using the above example, and focusing only on A, B, C, these are the only ways of seeing a C:
+\begin{itemize}
+\item \(WT \rightarrow A \rightarrow AC\)
+\item \(WT \rightarrow B \rightarrow BC\)
+\item As we have a XOR, no routes can go through AB.
+\item The first is much faster and common than the second (\(\lambda_A = 7.4; \lambda_B = 2.4\)).
+\item Fitness of \(AC\) is \((1 + \lambda_A) (1 + \lambda_C)\) and of \(BC\) \((1 + \lambda_B) (1 + \lambda_C)\).
+\end{itemize}
+\end{itemize}
+
+\item Both OR and XOR
+\label{sec:org5edd44b}
+\begin{itemize}
+\item There is nothing new. As an example, gaining both C and D mutations.
+\begin{itemize}
+\item \(WT \rightarrow A \rightarrow AC \rightarrow ACD\)
+\item \(WT \rightarrow B \rightarrow BC \rightarrow BCD\)
+\item \(WT \rightarrow A \rightarrow AD \rightarrow ACD\)
+\item \(WT \rightarrow B \rightarrow BD \rightarrow BCD\)
+\item There is no path going through \(AB\) since C has a XOR relationship on A and B.
+
+\item In the first path we first need to wait for A to happen (rate \(\lambda_A\)) then C (\(\lambda_C\)) then D (\(\lambda_D\)).
+\item Same for the second, with B instead of A. The first path is much more common than the second.
+\item The third path transposes the order of occurrence of D and C, but takes the same average time as the third. Note that the fitness of the final genotype is the same through both routes, only the order of steps changes.
+\item The fourth path transposes the order of occurrence of D and C, but takes the same average time as the fourth. Note that the fitness of the final genotype is the same through both routes, only the order of steps changes.
+\end{itemize}
+\end{itemize}
+\end{enumerate}
+
+\subsubsection{Combining AND, OR, XOR?}
+\label{sec:org78cffb2}
+Nothing changes. Use the rules for AND where there is an AND, XOR where there is a XOR, OR where there is an OR. Again, in the HESBCN model if a gene depends on a set of genes, it has the same type of dependency on all the genes of that set.
+
+
+
+
+\section{Advantages of doing this with OncoSimulR}
+\label{sec:org4a55091}
+\begin{itemize}
+\item We make the fitness model explicit
+\item We can double check the code for getting fitness graphs and transition
+probabilities as some critical computations are being done with very
+different code.
+\end{itemize}
+\end{document}
