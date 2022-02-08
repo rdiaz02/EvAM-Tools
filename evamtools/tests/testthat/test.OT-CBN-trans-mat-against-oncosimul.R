@@ -257,7 +257,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul.", {
     }
 
 
-    data(all_examples_csd)
+    data(examples_csd)
     ## Run OT and CBN
     do_OT <- function(x) suppressMessages(evamtools:::ot_proc(x,nboot = 0,
                                              distribution.oncotree = TRUE))

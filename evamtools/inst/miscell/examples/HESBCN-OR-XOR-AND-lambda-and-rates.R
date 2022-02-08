@@ -1,4 +1,4 @@
-data(all_examples_csd)
+data(examples_csd)
 ex_hesbcn_or <- evamtools:::do_HESBCN(examples_csd$csd$OR$data, seed = 9)
 
 ## Output

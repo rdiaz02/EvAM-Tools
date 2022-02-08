@@ -75,7 +75,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
 
     ## Output from running evamtools:::do_HESBCN(examples_csd$csd$AND$data)
 
-    data(all_examples_csd)
+    data(examples_csd)
     ## Run HESBCN.
     ## The names declare intent; often, you just get "Single"
     ex_hesbcn_and <- evamtools:::do_HESBCN(examples_csd$csd$AND$data)
