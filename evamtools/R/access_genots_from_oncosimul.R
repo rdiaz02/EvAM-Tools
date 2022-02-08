@@ -22,7 +22,7 @@
 ## genotypes for CBN, OT, PMCE and DBN.
 
 ## See comments and examples in 
-## inst/miscell/Using_OncoSimulR_to_get_accessible_genotypes_trans_mats.org
+## inst/miscell/Using_OncoSimulR_to_get_accessible_genotypes_trans_mats.tex
 
 ## Additionally, since we compute and output fitness, can be used for simulations
 ## (and shows the equivalence between lambdas and selection coefficients).
@@ -37,10 +37,6 @@
 ######################################################################
 ######################################################################
 ######################################################################
-
-
-
-## TODO lots of things could be removed from this file
 
 
 ## fitness, target max fitness. WT fitness always 1.

@@ -22,25 +22,6 @@
 ## almost at the bottom.
 
 
-## No longer using CAPRESE or CAPRI. It gives more output of OT, MHN, CBN than
-## other former versions, such as
-## code-all-methods-2-trans-matrix-max-genes-15.R. It can use MCCBN if
-## MCCBN_INSTALLED is set to TRUE And we can produce plots (CPM-plotting.R)
-
-
-
-## You need to have
-## - Schill's MHN code
-## - MCCBN if you use it.
-## - CBN: use my version with fixes, in the repo:
-##     cd to ct-cbn-0.1.04b-with-rdu-bug-fix-write-lambda-likelihood
-## - OT  (the corresponding package Oncotree)
-## - HESBCN
-## Full details in the README.md on the upper level directory.
-
-
-
-
 ######################################################################
 ######################################################################
 ###
@@ -111,7 +92,6 @@
 ## Cancer_Data_sets/CPM-weighted-paths-biol.R
 ## in the supplementary material for Diaz-Uriarte and Vasallo.
 ## We leave in there things we don't really need. Simpler.
-
 
 ## DAG of restrictions (as data frame) ->
 ##              vector of accessible genotypes and graph of DAG of restrictions
@@ -674,36 +654,36 @@ transition_fg_sparseM <- function(x, weights) {
 
 
 
-#' Runs the CPMs
-#'
-#' Executes all CPMS given a cross sectional data set
-#'  
-#' @param x cross sectional data
-#' @param cores_cbn How many cores to use for CBN
-#' @param methods The methods to use. For now, the only thing that matters is
-#'     whether the vector includes the strings "MCCBN" and "DBN".
-#' @param max.cols Maximum number of columns to use in the analysis. If x has >
-#'     max.cols, selected columns are those with the largest number of events.
-#' @examples
-#'\dontrun{
-#' dB_c1 <- matrix(
-#'  c(
-#'      rep(c(1, 0, 0, 0, 0), 300) #A
-#'    , rep(c(0, 0, 1, 0, 0), 300) #C
-#'    , rep(c(1, 1, 0, 0, 0), 200) #AB
-#'    , rep(c(0, 0, 1, 1, 0), 200) #CD
-#'    , rep(c(1, 1, 1, 0, 0), 100) #ABC
-#'    , rep(c(1, 0, 1, 1, 0), 100) #ACD
-#'    , rep(c(1, 1, 0, 0, 1), 100) #ABE
-#'    , rep(c(0, 0, 1, 1, 1), 100) #CDE
-#'    , rep(c(1, 1, 1, 0, 1), 100) #ABCE
-#'    , rep(c(1, 0, 1, 1, 1), 100) #ACDE
-#'    , rep(c(1, 1, 1, 1, 0), 50) # ABCD
-#'    , rep(c(0, 0, 0, 0, 0), 10) # WT
-#'  ), ncol = 5, byrow = TRUE
-#' )
-#' colnames(dB_c1) <- LETTERS[1:5]
-#' out <- all_methods_2_trans_mat(dB_c1, do_MCCBN = FALSE)
+## #' Runs the CPMs
+## #'
+## #' Executes all CPMS given a cross sectional data set
+## #'  
+## #' @param x cross sectional data
+## #' @param cores_cbn How many cores to use for CBN
+## #' @param methods The methods to use. For now, the only thing that matters is
+## #'     whether the vector includes the strings "MCCBN" and "DBN".
+## #' @param max.cols Maximum number of columns to use in the analysis. If x has >
+## #'     max.cols, selected columns are those with the largest number of events.
+## #' @examples
+## #'\dontrun{
+## #' dB_c1 <- matrix(
+## #'  c(
+## #'      rep(c(1, 0, 0, 0, 0), 300) #A
+## #'    , rep(c(0, 0, 1, 0, 0), 300) #C
+## #'    , rep(c(1, 1, 0, 0, 0), 200) #AB
+## #'    , rep(c(0, 0, 1, 1, 0), 200) #CD
+## #'    , rep(c(1, 1, 1, 0, 0), 100) #ABC
+## #'    , rep(c(1, 0, 1, 1, 0), 100) #ACD
+## #'    , rep(c(1, 1, 0, 0, 1), 100) #ABE
+## #'    , rep(c(0, 0, 1, 1, 1), 100) #CDE
+## #'    , rep(c(1, 1, 1, 0, 1), 100) #ABCE
+## #'    , rep(c(1, 0, 1, 1, 1), 100) #ACDE
+## #'    , rep(c(1, 1, 1, 1, 0), 50) # ABCD
+## #'    , rep(c(0, 0, 0, 0, 0), 10) # WT
+## #'  ), ncol = 5, byrow = TRUE
+## #' )
+## #' colnames(dB_c1) <- LETTERS[1:5]
+## #' out <- all_methods_2_trans_mat(dB_c1, do_MCCBN = FALSE)
 evam <- function(x, cores_cbn = 1,
                  methods = c("CBN", "OT", "HESBCN", "MHN"),
                  max.cols = 15) {
@@ -928,8 +908,13 @@ evam <- function(x, cores_cbn = 1,
 
 
 #####################################################################
+#####################################################################
+##                Getting an idea of sizes of data if
+##                we did not use sparse matrices
+##
+#####################################################################
+#####################################################################
 
-## Getting an idea of sizes of data if we did not use sparse matrices
 # if(FALSE) {
 # ## 8 bytes per float as can be checked doing
 # u <- runif((2^10) * (2^10))
@@ -957,6 +942,16 @@ evam <- function(x, cores_cbn = 1,
 # ulimit::memory_limit()
 
 # }
+
+
+
+######################################################################
+######################################################################
+##
+##      mapply, OMP threads, etc
+##
+######################################################################
+######################################################################
 
 
 ## MHN does not run if we use mclapply after setting the threads for OMP >

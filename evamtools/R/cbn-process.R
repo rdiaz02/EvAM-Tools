@@ -21,12 +21,6 @@
 ## always numbered 1 to number of nodes passed.  Done when reading
 ## posetToGraph, in the names argument.
 
-
-## Is this fair or unfair? OT is certainly a lot smarter than the original
-## CBN implementation. We are going to make CBN smarter. And here we are
-## not comparing the original methods.
-
-
 ## Note also that starting from an OT or similar is done in their 2009
 ## paper: see page 2812-2813, in the Jiang example.
 
@@ -34,8 +28,8 @@
 ## close to zero, freq. at the bottom of graph.
 
 ## Some functions limit columns/genes to 10. 12 was what Farahani and Lagergren
-## did in theri comparison with H-CBN, and as Gerstung et al do. But going from
-## 10 to 12 is painfully slow.
+## did in theri comparison with H-CBN, and as Gerstung et al do.
+
 
 ## Testing CBN programs available
 .._OncoSimul_test.ctcbn <- system("ct-cbn -h", ignore.stdout = TRUE)
@@ -61,54 +55,6 @@ if(.._OncoSimul_test.ctcbn || .._OncoSimul_test.hcbn) {
 }
 rm(.._OncoSimul_test.ctcbn)
 rm(.._OncoSimul_test.hcbn)
-## Done with the testing
-
-# ## library(data.table)
-# library(parallel)
-# ## library(graph)
-# library(Oncotree)
-# library(igraph)
-
-
-f_cbn <- function(x, init.poset = c("linear", "OT"), nboot = 0,
-                  verbose = FALSE, parall = FALSE, cbn_proc_silent = TRUE) {
-    init.poset <- match.arg(init.poset)
-    ## Be verbose since this is soooo slooooow to know where we are
-    if(verbose)
-        message("\n     doing data ", x$name, "\n")
-    datax <- x$out$popSample
-    datax <- pre_process(datax, remove.constant = FALSE, max.cols = 10) ## 12 and beyond it gets
-    ## painfully slow Using up to 12 actually benefits CBN in these
-    ## scenarios since there are no patterns
-    if(ncol(datax) < 2) {
-        return(list(
-            scenario = x$scenario,
-            name = x$name, params = x$params,
-            nocols = TRUE,
-            time = NA,
-            res = NA))
-    } else {
-        addnn <- paste0(x$scenario, "_", x$name)
-        for(i in c("|", ".", "=", ",")) addnn <- gsub(i, "", addnn, fixed = TRUE)
-        time <- system.time({ 
-            otout <- try(cbn_proc(datax, addname = addnn,
-                                  init.poset = init.poset,
-                                  nboot = nboot, parall = parall,
-                                  silent = cbn_proc_silent))
-            if(inherits(otout, "try-error")) {
-                warning("\n Error in f_cbn, addname = ", addnn,
-                    " scenario = ", x$scenario, " name = ", x$name,
-                    " params = ", x$params, "\n")
-            }
-        })
-        return(list(
-            scenario = x$scenario,
-            name = x$name, params = x$params,
-            nocols = FALSE,
-            time = time,
-            res = otout))
-    }
-}
 
 
 ## be very careful using cores > 1. I think OMP can actually
@@ -171,36 +117,13 @@ cbn_proc <- function(x, addname, init.poset = "linear", nboot = 0,
                     return(tmp)
                 }
             }
-            ## paralfunc <- function(index, odata = x) {
-            ##     dd <- boot_data_index(odata, index)
-            ##     addnameb <- paste0(addname, "b", index, paste(sample(letters, 3),
-            ##                                                   collapse=""))
-            ##     tmp <- run.cbn(dd, addname = addnameb, init.poset = init.poset,
-            ##                    cores = cores, silent = silent)
-            ##     if(index > 0) {
-            ##         return(tmp$edge)
-            ##     } else {
-            ##         return(tmp)
-            ##     }
-            ## }
             ## Do not use mclapply at all. No parallel to allow multiple indep. runs
-            ## alledges <- mclapply(ll, function(z) paralfunc(z), mc.cores = mc.cores)
-            ## FIXME: But why hack here, instead of just using the option of parall = FALSE?
-            ## Anyway, this was done on commit b9027d5, on 2016-09-26.
-            ## But could do as I do in DiP, where this is smarter.
             alledges <- lapply(ll, function(z) paralfunc(z))
             edges <- alledges[[1]]
             CBN_edgeBootFreq <- rep(0, nrow(edges))
             names(CBN_edgeBootFreq) <- edges[, "edge"]
             nn <- names(CBN_edgeBootFreq)
             tedges <- table(unlist(alledges[-1])) ## gives all.
-            ## Beware: this is inverted w.r.t. to above: here
-            ## we want positions of tedges to extract
-            ## and those are the ones present in nn
-            ## posadd2 <- na.omit(match(nn, names(tedges)))
-            ## if(length(posadd))
-            ##   CBN_edgeBootFreq[names(tedges)[posadd2]] <- tedges[posadd2]
-            ## Alternatively, via intersect
             nm_in_boot_table <- intersect(nn, names(tedges))
             if(length(nm_in_boot_table))
                 CBN_edgeBootFreq[nm_in_boot_table] <- tedges[nm_in_boot_table]
@@ -229,15 +152,10 @@ run.cbn <- function(x,
                     cores = 1,
                     custom.poset = NULL
                     ) {
-    ## cat("\n here; dirname ", dirname, " addname = ", addname , "\n")
+
     if(is.null(steps))
         steps <- ncol(x)^2 ## Their default
     
-    ## if(is.null(filename)) {
-    ##     filename <- tempfile()
-    ##     if(!silent)
-    ##         message(paste("Using directory and file ", filename))
-    ## }
     if(is.null(dirname)) {
         dirname <- tempfile()
         dirname0 <- NULL
@@ -270,22 +188,12 @@ run.cbn <- function(x,
     ## closure, do not use.  Why leave root? Because oncotree and treemix
     ## seem to use it. And because it is cleaner and clearer.
 
-    ## Note that we are checking the output, but not in posetToGraph,
-    ## because we do not want the orderedNames check.
-    ## gr <- OncoSimulR:::posetToGraph(poset, names = c("Root", cnames),
-    ##                                 addroot = TRUE, type = type.out,
-    ##                                 strictAdjMat = TRUE)
-
-
     gr <- evam_posetToGraph(poset, names = c("Root", cnames),
                                     addroot = TRUE, type = "adjmat",
                                     strictAdjMat = FALSE)
     gr <- sortAdjMat(gr)
     evam_checkProperMinimalAdjMat(gr, orderedNames = FALSE)
     
-    ## gr <- poset.to.graph(poset, names = cnames,
-    ##                      addroot = FALSE, type = type.out)
-
     lambdas <- read.lambda(dirname)
     rerun_lambda <- rerun_final_lambda(dirname)
     lambdas <- cbind(lambdas, rerun_lambda = rerun_lambda)
@@ -304,10 +212,6 @@ run.cbn <- function(x,
         if(!is.null(dirname0))
             file.remove(dirname0)
     }
-
-    ## if(type.out == "adjmat") return(gr)
-    ## else if (type.out == "graphNEL") return(as(gr, "graphNEL"))
-    ## return(gr)
 
     ## We simply want the edges list, as simpler for bootstrap later
     present <- which(gr == 1, arr.ind = TRUE)
@@ -355,16 +259,6 @@ sortAdjMat <- function(am) {
     }
     return(am[cn, cn])
 }
-
-
-
-## Later, we will want much more info recovered, such as the probs, etc.
-## But unclear where from. The .lambda file is written at the start, so it
-## seems not to get updated at end, in contrast to the poset.
-
-## I think I'd need to call external a second time (and a different
-## external), a second time, once we are done estimating the poset. But
-## this is all completely unclear.
 
 
 
@@ -452,9 +346,6 @@ call.external.cbn <- function(data,
   ## Remove option -m, the printing of most likely path as
   ##    - we do not use it now
   ##    - it can lead to strange problems getting millions of ceros printed out
-  ## zzz <- system(paste(ompt, paste("h-cbn -f",  file, "-s", 
-  ##                                 "-T", temp,  "-N", steps,
-  ##                                 "-m -w")), ignore.stdout = silent)
   
   zzz <- system(paste(ompt, paste("h-cbn -f",  dirname, "-s", 
                                   "-T", temp,  "-N", steps,
@@ -594,22 +485,9 @@ write.poset <- function(poset, ncoldata, dirname) {
 }
 
 
-
-
-run.oncotree <- function(x, ## type.out = "adjmat",
+run.oncotree <- function(x, 
                          error.fun = function(x, y) { sum((x - y)^2)},
                          recover.failure = TRUE) {
-    ## if(hack.all.occurrences) {
-    ##     cs <- colSums(x)
-    ##     nsubs <- nrow(x)
-    ##     all.occurr <- which(cs == nsubs)
-    ##     if(length(all.occurr)) {
-    ##         message(" Using the hack for all occurrences")
-    ##         rows.flip <- sample(seq.int(nsubs), length(all.occurr))
-    ##         mm <- cbind(rows.flip, all.occurr)
-    ##         x[mm] <- 0
-    ##     }
-    ## }
 
     ## yes, ugly, but I do not want to specify it
     onco.fit <- try(oncotree.fit(x, error.fun = error.fun))
@@ -621,7 +499,6 @@ run.oncotree <- function(x, ## type.out = "adjmat",
         ## no, I do not return anything here. I want it to fail, and be
         ## captured with a try if needed.
     }
-        
     
     gdf <- graph.data.frame(data.frame(parents = onco.fit$parent$parent[-1],
                                        children = onco.fit$parent$child[-1]
@@ -630,16 +507,6 @@ run.oncotree <- function(x, ## type.out = "adjmat",
                             vertices = NULL)
     ## This would be faster if getting a graphNEL, but unsafer so let's be
     ## very strict
-    ## if(type.out == "adjmat") {
-    ##     am <- get.adjacency(gdf, sparse = FALSE)
-    ##     am1 <- am
-    ##     storage.mode(am1) <- "integer"
-    ##     stopifnot(all.equal(am, am1))
-    ##     sam1 <- sortAdjMat(am1)
-    ##     OncoSimulR:::checkProperOTAdjMat(sam1)
-    ##     return(sam1)
-    ## }
-    ## else if (type.out == "graphNEL") return(igraph.to.graphNEL(gdf))
 
     am <- get.adjacency(gdf, sparse = FALSE)
     am1 <- am
@@ -653,239 +520,7 @@ run.oncotree <- function(x, ## type.out = "adjmat",
     ## else if (type.out == "graphNEL")
     ##     return(as(sam1, "graphNEL"))
 }
-
-## #' @title Simulate MCCBN sample
-## #' 
-## #' @description Generate a simulation with user parameters or with random ones
-## #' 
-## #' @TODO test
-## #' 
-## #' @param poset Matrix of n_genes x n_genes. Fill with 
-## #' 0 and 1
-## #' @param n_genes Int >= 2. Number of genes to simulates
-## #' @param lambdas Vector with the rate for each gene.
-## #' @param lambda_s Int. Sampling parameter. Default 1.
-## #' @param seed Int
-## #' 
-## #' @return List with the poset, the lambdas, the lambda_s 
-## #' and the result of the simulations
-# simulate_mccbn <- function(poset = NULL, n_genes = 5, lambdas = NULL, n = 10000,
-#     seed = NULL, lambda_s = 1){
-    
-#     if(n_genes < 2){
-#         stop("Minimun number of genes supported is 2")
-#     }
-
-#     if(!is.null(seed)) set.seed(seed)
-
-#     if(is.null(poset)){
-#         poset <- mccbn::random_poset(n_genes)
-#     } else if(length(poset) != n_genes**2){
-#         stop("Mismatch between number of genes and poset dimensions")
-#     }
-
-#     if(is.null(lambda_s)) lambda_s <- 1
-
-#     if(is.null(lambdas)) { 
-#         lambdas <- runif(n_genes, 1/n_genes*lambda_s, n_genes*lambda_s)
-#     } else if(length(lambdas) != n_genes){
-#         stop("Mismatch between number of genes and lambdas")
-#     } else if(any(lambdas < 0)){
-#         stop("Lambdas can only take positive values")
-#     }
-
-#     #Check n, lambda_s, theta
-#     simGenotypes <- mccbn::sample_genotypes(n, poset,
-#                                         sampling_param = lambda_s,
-#                                         lambdas = lambdas)
-#     return(list(
-#         poset = poset,
-#         lambdas = lambdas,
-#         lambda_s = lambda_s,
-#         results = process_simulations(simGenotypes)))
-# }
-
-
-## Later, we will want much more info recovered, such as the probs, etc.
-## But unclear where from. The .lambda file is written at the start, so it
-## seems not to get updated at end, in contrast to the poset.
-
-## I think I'd need to call external a second time (and a different
-## external), a second time, once we are done estimating the poset. But
-## this is all completely unclear. Well, it is no longer unclear. That is
-## the way to do it. And how I do it.
-
-
-
-## ## ## simple example
-## x <- matrix(sample(c(0, 1), 1000, replace = TRUE), ncol = 10)
-## x[x[, 1] == 0, 2] <- 0
-## x[x[, 1] == 1, 2] <- 1
-## x[x[, 1] == 1, 4] <- 1
-## x[x[, 1] == 0, 4] <- 0
-## x[1:3, 4] <- c(1, 1, 1)
-## x[1:3, 2] <- c(0, 1, 0)
-## colnames(x) <- letters[4:13]
-
-## oo <- run.cbn(x, file = "~/tmp/ff213", rnfile = FALSE)
-## missing intermediate and final nodes
-## look at this too: read.poset(dirname = "~/tmp/ff213", 5)
-
-## Yes, CBN and DiProg, return all nodes, even if some has freq 0.
-## z <- x
-## z[, 3] <- 0
-
-## run with oncotree, CBN, and DiProg.
-## DiProg places them in the DAG file as nodes.
-
-## CBN gives the total number as the number of nodes in poset, even if you
-## pass events with no occurrences. And the .lambda file contains
-## estimates of for all.
-
-
-
-
-
-
-## This adds a useless extra layer now
-## doCBN <- function(x, init.poset = "linear") {
-##     if((length(x) == 1) && (is.na(x))) {
-##         message("doCBN: file is missing")
-##         outEdges <- NA
-##         walltime <- NA
-##     } else if(ncol(x) == 0L) {
-##         message("doCBN: file has 0 columns")
-##         outEdges <- NA
-##         walltime <- NA
-##     } else {
-        
-##         walltime <- unix.time({
-##             outEdges <- try(run.cbn(x,
-##                                      filename = NULL,
-##                                      ## the next breaks with mclapply
-##                                      ## filename = paste0("/tmp/cbn_", deparse(substitute(x))),
-##                                      ## type.out = "adjmat",
-##                                      init.poset =  init.poset, ## linear or OT
-##                                      cores = 1,
-##                                      silent = TRUE))
-##         })[[3]]
-    
-##         if(inherits(outEdges, "try-error")) {
-##             outEdges <- NA
-##             walltime <- NA
-##         }
-##     }
-##     return(list(outEdges = outEdges, walltime = walltime))
-## }
-
-
-
-## read.poset <- function(dirname, maxn, verbose = FALSE) {
-##     ## Read a poset as generated by h-cbn
-##     tmp <- scan(paste(dirname, "/00000.poset", sep = ""),
-##                 quiet = !verbose,
-##                 what = integer())
-##     tmp0 <- scan(paste(dirname, "/00000.poset", sep = ""),
-##                  quiet = !verbose)
-##     stopifnot(isTRUE(all.equal(tmp, tmp0)))
-##     tmp <- tmp[-(length(tmp))]
-##     nn <- tmp[1]
-##     tmp <- tmp[-1]
-##     tmp <- matrix(tmp, ncol = 2, byrow = TRUE)
-##     ## nodes with no ancestors or descendants
-##     missing.nodes <- setdiff(1:nn, unique(tmp))
-##     if(length(missing.nodes)) {
-##         if(verbose)
-##             message("Reading a poset with missing nodes") ## this is OK if a node not placed in the graph
-##         if(maxn != nn)
-##             stop("maxn != nn and missing nodes. Probably should not happen") ## FIXME: stop here?
-##         mnm <- matrix(c(missing.nodes, rep(NA, length(missing.nodes))),
-##                       ncol = 2) ## this is perfectly OK, and
-##                                 ## poset.to.graph will do what it should
-##         tmp <- rbind(tmp, mnm)  ## ditto.
-##     } else {
-##         if(maxn != nn)  ## FIXME: I think I should stop in this case,
-##                         ## unless the user says o.w. But poset.to.graph will break anyway.
-##             stop("No missing nodes but maxn != nn. Probably should not happen")
-##     }
-##     return(tmp)
-## }
-
-
-
-## not done here, as we use a function defined in run-all-methods.R
 ## library(codetools)
 ## checkUsageEnv(env = .GlobalEnv)
 
 
-
-
-
-
-
-
-## read.poset2 <- function(dirname, maxn, genenames, verbose = FALSE) {
-##     stopifnot(length(genenames) == maxn)
-##     dirname <- paste(dirname, "/00000.poset", sep = "")
-##     tmp <- scan(dirname,
-##                 quiet = !verbose,
-##                 what = integer())
-##     tmp0 <- scan(dirname,
-##                  quiet = !verbose)
-##     stopifnot(isTRUE(all.equal(tmp, tmp0)))
-##     tmp <- tmp[-(length(tmp))]
-##     nn <- tmp[1]
-##     tmp <- tmp[-1]
-
-##     allnodes <- seq.int(maxn)
-##     missing.nodes <- setdiff(allnodes, unique(as.vector(tmp)))
-##     missing.nodes.n <- genenames[missing.nodes]
-##     tmp <- matrix(tmp, ncol = 2, byrow = TRUE)
-##     fromRoot <- genenames[setdiff(tmp[, 1], tmp[, 2])]
-    
-##     tmpn <- cbind(genenames[tmp[, 1]],
-##                   genenames[tmp[, 2]])
-##     tmpn <- rbind(tmpn,
-##                   cbind(rep("Root", length(fromRoot)),
-##                         fromRoot))
-    
-##     if(length(missing.nodes.n)) {
-##         mnm <- cbind(rep("Root", length(missing.nodes.n)),
-##                      missing.nodes.n)
-##         tmpn <- rbind(tmpn, mnm)
-##     }
-##     return(data.frame(From = tmpn[, 1],
-##                       To =   tmpn[, 2],
-##                       edge = paste(tmpn[, 1],
-##                                    tmpn[, 2],
-##                                    sep = " -> ")
-##                       ))
-## }
-
-
-## cbn_proc <- function(x, addname, init.poset = "linear", nboot = 100,
-##                      verbose = FALSE, cores = 1, silent = TRUE) {
-##     ## Returns CBN and bootstrap freqs of edges
-##     edges <- run.cbn(x, addname = addname, init.poset = init.poset,
-##                      cores = cores, silent = silent)
-##     CBN_edgeBootFreq <- rep(0, nrow(edges))
-##     names(CBN_edgeBootFreq) <- edges[, "edge"]
-##     nn <- names(CBN_edgeBootFreq)
-##     for(i in seq.int(nboot)) {
-##         if(verbose)
-##             cat("\n  .... doing bootstrap ", i, "\n")
-##         ind <- sample(nrow(x), nrow(x), replace = TRUE)
-##         bx <- x[ind, , drop = FALSE]
-##         addnameb <- paste0(addname, "b", i, paste(sample(letters, 3), collapse=""))
-##         bootedges <- run.cbn(bx, addname = addnameb, init.poset = init.poset,
-##                              cores = cores, silent = silent)$edge
-##         posadd <- na.omit(match(bootedges, nn))
-##         if(length(posadd))
-##             CBN_edgeBootFreq[posadd] <- CBN_edgeBootFreq[posadd] + 1
-##     }
-##     edges <- cbind(edges, CBN_edgeBootFreq = CBN_edgeBootFreq/nboot,
-##                    stringsAsFactors = FALSE)
-##     return(list(edges = edges,
-##                 nboot = nboot,
-##                 init.poset = init.poset))
-## }

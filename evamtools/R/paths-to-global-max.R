@@ -1,3 +1,4 @@
+## Copyright 2016, 2017, 2018, 2020, 2022 Ramon Diaz-Uriarte
 
 ## The code that follows is tested, and is the basis of much simplified
 ## code in wrapper-run-all-methods.R
