@@ -49,10 +49,10 @@ while(TRUE) {
                     "smallest lambda < 1e-15")
             ## We compute products of numbers close to R's smallest limit.
             ## We are probably fine with numbers even as small as 2e-16, but to be safe.
-        } else if (sum(data$edges$Lambda < 1e-10) >= 1) {
+        } else if (sum(data$edges$Lambda < 1e-9) >= 1) {
           warning("Skipping comparison with OncoSimul's ",
                   "numerical values of transition rate matrix: ",
-                  "one or more lambdas < 1e-10.",
+                  "one or more lambdas < 1e-9.",
                   " Comparing only sets of accessible genotypes")
           cno <- colnames(reorder_trans_mat(cpm2_out$transition_matrix))
           cnd <- colnames(
