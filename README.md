@@ -165,20 +165,20 @@ This repository includes code by:
 <!-- and get a working enviroment with HyperTraPS installed. Add both the `bin` and the `src/python` to your `$PATH`. Also, add the `bin` folder to your $PATH. It is also convenient to run `echo "backend: Agg" > ~/.config/matplotlib/matplotlibrc`. -->
 
 	  
-## How to install to also run the Shiny app? <span style="color:red"> FIXME: Pablo writes this</span> ##
+## How to install to also run the Shiny app? [ FIXME: Pablo writes this] ##
 
   * Install the evamtools R package as explained [above](#how-to-install-to-run-just-the-r-package).
-  * Then ... <span style="color:red"> FIXME: Pablo writes this</span>
+  * Then ... [ FIXME: Pablo writes this]
 
 
 
-## How to run the shiny app locally  <span style="color:red"> FIXME: Pablo writes this</span> ##
+## How to run the shiny app locally  [ FIXME: Pablo writes this] ##
 
-## How to create a Docker image  <span style="color:red"> FIXME: Pablo writes this</span> ##
+## How to create a Docker image  [ FIXME: Pablo writes this] ##
 
-### How to update the Docker image if you change the code  <span style="color:red">FIXME: Pablo writes this</span> ###
+### How to update the Docker image if you change the code  [FIXME: Pablo writes this] ###
 
-## How to run the shiny app in a local intranet  <span style="color:red">FIXME: Pablo writes this</span> ##
+## How to run the shiny app in a local intranet  [FIXME: Pablo writes this] ##
 
 ### From the Docker image ###
 
