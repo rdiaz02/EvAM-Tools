@@ -59,7 +59,7 @@ rm(.._OncoSimul_test.hcbn)
 
 ## be very careful using cores > 1. I think OMP can actually
 ## slow things down.
-cbn_proc <- function(x, addname, init.poset = "linear", nboot = 0,
+cbn_proc <- function(x, addname, init.poset = "OT", nboot = 0,
                      verbose = FALSE, cores = 1, silent = TRUE,
                      parall = FALSE, mc.cores = detectCores(),
                      rmfile = TRUE) {
@@ -330,7 +330,7 @@ call.external.cbn <- function(data,
         write.poset(custom.poset, ncol(data), dirname)
     } else { ## Use ct-cbn to search and create starting poset;
         ## possibly eternal. NOT RECOMMENDED
-        warning("Not using an intial poset can take VERY long")
+        warning("Not using an initial poset can take VERY long")
         writeLines(as.character(c(ncol(data), 0)),
                    con = paste(dirname, ".poset", sep = ""))
         ## First create the lambda file

@@ -43,7 +43,7 @@ test_that("We can deal with duplicated columns and columns without events and co
     out5 <- suppressMessages(evam(Dat1,
                                   methods = c("CBN", "OT",
                                               "MHN", "HESBCN"),
-                                  max.cols = 3))
+                                  max_cols = 3))
     expect_true(exists("OT_model", where = out5))
 
     
@@ -93,5 +93,19 @@ test_that("Examples from initial-simple-examples", {
 })
 
 
+test_that("We can run evam with non-default arguments", {
+    data(every_which_way_data)
+    Dat1 <- every_which_way_data[[16]][1:40, 2:8]
+    out <- suppressMessages(evam(Dat1,
+                                  methods = c("CBN", "OT",
+                                              "MHN", "HESBCN"),
+                                 max_cols = 4,
+                                 cbn_cores = 2,
+                                 cbn_init_poset = "linear",
+                                 hesbcn_steps = 20000,
+                                 hesbcn_seed = 4,
+                                 mhn_lambda = 1/10))
+    expect_true(exists("OT_model", where = out))
+})
 
 cat("\n Done test.exercise-main-funct.R \n")
