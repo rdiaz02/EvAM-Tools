@@ -15,7 +15,7 @@
 ##   754-762. http://dx.doi.org/10.1093/bioinformatics/btab717
 
 
-## Modified by RDU to force the return of the undivided lambdas
+## Modified by RDU to force the return of the undivided lambdas, "Best Lambdas"
 
 "import.hesbcn" <- function( file, genes = NULL ) {
 
