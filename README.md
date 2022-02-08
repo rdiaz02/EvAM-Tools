@@ -78,7 +78,11 @@ We provide an R package, evamtools, and a shiny (https://shiny.rstudio.com/) app
 
 #### Conditional prediction of genotypes and probabilities of paths from CPMs ####
 
-- 
+- Diaz-Colunga}, J., & Diaz-Uriarte, Ramon (2021). Conditional prediction of
+  consecutive tumor evolution using cancer progression models: What genotype
+  comes next? PLOS Computational Biology, 17(12),
+  1009055. http://dx.doi.org/10.1371/journal.pcbi.1009055
+
 
 - Diaz-Uriarte}, R., & Vasallo, C. (2019). Every which way? On predicting tumor
   evolution using cancer progression models. PLOS Computational Biology, 15(8),
@@ -195,7 +199,7 @@ This repository includes code by:
 ### Dockerfile    [FIXME: Pablo writes this](#)  
 ### docker   [FIXME: Pablo writes this](#) 
 ### evamtools
-    The R package itself with standard organization. Directories and files under inst:
+The R package itself with standard organization. Directories and files under inst:
   * shiny-examples: [FIXME: Pablo writes this](#) Explicar los subdirectorios y ficheros principales.
   * miscell/Using_OncoSimulR_to_get_accessible_genotypes_trans_mats.tex: explanation of using OncoSimulR to check transition matrices, the equivalence of lambdas to terms in fitness expressions, and interpretation of the lambdas for HESBCN with OR and XOR.
   * miscell/examples: examples referred to from other files (for example, from the former tex file).
