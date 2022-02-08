@@ -82,7 +82,7 @@ differences, in fitness: \(s_B = \frac{W_{AB} - W_A}{W_A}\), as shown also in p.
 
 \item Note that this is the same procedure as in Weinreich et al., 2006, (Weinreich, D. M., Delaney, N. F., DePristo, M. A., \& Hartl, D. L. (2006). Darwinian Evolution Can Follow Only Very Few Mutational Paths to Fitter Proteins. Science, 312(5770), 111–114.\url{https://dx.doi.org/10.1126/science.1123539}) supplementary material, p. 4): \(s_{i \rightarrow j}\) "the selection coefficient for the mutation that carries allele i to allele j" (where selection coefficient has the usual definition, e.g., Gillespie, 2004 (Population genetics: a concise guide, 2nd. Baltimore, Md: The Johns Hopkins University Press.), p. 63 ---but we write \(W_{AB} = W_A \ (1 + s_B)\), and thus if \(s_B > 0\) AB is fitter than A; see also p.7 of the supplementary material of Weinreich et al., 2006).
 \begin{itemize}
-\item See their S5b, which shows the relationship between the expected value of the conditioned probability of fixation in a mutation from \(i\) to \(j\) and the expected value of the ratio of the selection coefficient for the mutation that turns \(i\) to \(j\) over the sum of selection coefficients of beneficial mutations that turn \(i\) into all other alleles; see also their figure S1 in p.$\backslash$ 7 that shows the accuracy of their expression.
+\item See their S5b, which shows the relationship between the expected value of the conditioned probability of fixation in a mutation from \(i\) to \(j\) and the expected value of the ratio of the selection coefficient for the mutation that turns \(i\) to \(j\) over the sum of selection coefficients of beneficial mutations that turn \(i\) into all other alleles; see also their figure S1 in p.~ 7 that shows the accuracy of their expression.
 \end{itemize}
 
 \item Note: In Gerstung et al., 2011 (Gerstung, M., Eriksson, N., Lin, J., Vogelstein, B., \& Beerenwinkel, N. (2011). The Temporal Order of Genetic and Pathway Alterations in Tumorigenesis. PLoS ONE, 6(11), 27136. \url{https://dx.doi.org/10.1371/journal.pone.0027136}), PLoS ONE (p.8) the relationship between \(\lambda_i\) and \(s_i\) is also discussed.
@@ -95,7 +95,10 @@ differences, in fitness: \(s_B = \frac{W_{AB} - W_A}{W_A}\), as shown also in p.
 \item Obtain the fitness of all genotypes from OncoSimulR.
 \item If so desired (e.g., to ensure the maximum fitness is a specific number),  multiply all fitness values (not the WT, which is kept at 1) by the appropriate scaling factor.
 \end{itemize}
+
+Is the above correct for OT? Strictly not as OT are untimed oncogenetic trees. (And, yes, we are aware that under OT if you have, say, both A and B descend from root, the probability of genotype A is $p_a (1 - p_b)$).
 \end{itemize}
+
 
 \subsection{Crucial assumption above}
 \label{sec:org57fee67}
