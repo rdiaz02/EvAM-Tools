@@ -4,7 +4,7 @@
 Tools for evolutionary accumulation, or event accumulation, models. For now, this refers to "Cancer Progression Models" (CPM) but these are not limited to cancer.
 
 We provide an R package, evamtools, and a shiny (https://shiny.rstudio.com/) app that allows to:
-  * Run state-of-the-art CPM methods, including Conjuntive Bayesian Networks (CBN), Oncogenetic trees (OT), Mutual Hazard Networks (MHN), and Hidden Extended Suppes-Bayes Causal Networks (H-ESBCNs, PMCE), with a single function call.
+  * Run state-of-the-art CPM methods, including Conjuntive Bayesian Networks (CBN), Oncogenetic trees (OT), Mutual Hazard Networks (MHN), and Hidden Extended Suppes-Bayes Causal Networks (H-ESBCNs ---PMCE---), with a single function call.
   * From the fitted models, represent, graphically, the fitted models (DAGs of restrictions or matrix of hazards, as appropriate), the transition matrices and transition rate matrices (where appropriate) between genotypes.
   * Using the shiny app, easily visualize the effects of changes in genotype composition on the fitted models by entering user-defined cross-sectional data using a GUI.
 
@@ -65,13 +65,16 @@ We provide an R package, evamtools, and a shiny (https://shiny.rstudio.com/) app
   progression using Mutual Hazard Networks. Bioinformatics, 36(1),
   241–249. http://dx.doi.org/10.1093/bioinformatics/btz513
 
-#### HESBCN ####
+#### HESBCN (PMCE) ####
 
 
 - Angaroni, F., Chen, K., Damiani, C., Caravagna, G., Graudenzi, A., &
   Ramazzotti, D. (2021). PMCE: efficient inference of expressive models of cancer
   evolution with high prognostic power. Bioinformatics, 38(3),
   754–762. http://dx.doi.org/10.1093/bioinformatics/btab717
+
+(About terminology: we will often refer to HESBCN, as that is the program we use, as shown here: https://github.com/danro9685/HESBCN. H-ESBCN is part of the PMCE procedure).
+
 
 #### Conditional prediction of genotypes and probabilities of paths from CPMs ####
 
