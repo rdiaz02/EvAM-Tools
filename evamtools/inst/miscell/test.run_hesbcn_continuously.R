@@ -1,5 +1,5 @@
-## Execute this for as long as you want to check we no longer get
-## errors and to compare against OncoSimulR.
+## Execute this for as long as you want to check rare, rare, unusual
+## output is handeld OK and to compare against OncoSimulR.
 
 
 library(evamtools)
