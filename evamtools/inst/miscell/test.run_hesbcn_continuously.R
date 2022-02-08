@@ -90,7 +90,7 @@ while(TRUE) {
             warning("Skipping comparison of transition matrices with ",
                     "different fitness scaling",
                     ifelse(max_fitness >= 1e10, ". max_fitness >= 1e10", ""),
-                    ifelse(ratio_lambdas >= 1e9, ". Ratio of Lambdas >= 1e9"))
+                    ifelse(ratio_lambdas >= 1e9, ". Ratio of Lambdas >= 1e9", ""))
         }
     }
     
