@@ -19,6 +19,9 @@
 ## matrices. In general, the best option is to use do_MHN2 for moderate to
 ## large numbers of features.
 
+## Yes, I implemented several Theta -> transition rate, when Schill
+## already provides Build.Q. Oh well, I don't remember what I was thinking.
+## Anyway, this is another check. :-)
 
 ## observations (rows as patients, columns genes) -> transition matrix genotypes
 
