@@ -73,7 +73,7 @@ We provide an R package, evamtools, and a shiny (https://shiny.rstudio.com/) app
   evolution with high prognostic power. Bioinformatics, 38(3),
   754–762. http://dx.doi.org/10.1093/bioinformatics/btab717
 
- (About terminology: we will often refer to HESBCN, as that is the program we use, as shown here: https://github.com/danro9685/HESBCN. H-ESBCN is part of the PMCE procedure).
+   (About terminology: we will often refer to HESBCN, as that is the program we use, as shown here: https://github.com/danro9685/HESBCN. H-ESBCN is part of the PMCE procedure).
 
 
 #### Conditional prediction of genotypes and probabilities of paths from CPMs ####
