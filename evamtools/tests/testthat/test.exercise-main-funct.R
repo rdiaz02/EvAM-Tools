@@ -60,8 +60,10 @@ test_that("We can deal with duplicated columns and columns without events and co
     exercise_sample_all_CPMs(out5)
 
     ## Some examples with random, weird names
-    iters <- 10
+    ## Could probably bring to fewer
+    iters <- 5
     dd <- Dat1
+    dd <- dd[1:30, ]
     for(i in 1:iters) {
         ngenes <- ncol(dd)
         gn <- vector(mode = "character", length = ngenes)
