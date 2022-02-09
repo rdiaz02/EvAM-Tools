@@ -11,7 +11,6 @@ class evamtools_basics(unittest.TestCase):
     def setUp(self):
         self.driver = webdriver.Chrome('chromedriver')
         self.driver.implicitly_wait(1)
-        self.driver.maximize_window()
         self.driver.get("http://127.0.0.1:3000/")
         self.driver.maximize_window()
         self._go_to("csd_builder")
@@ -72,14 +71,15 @@ class evamtools_basics(unittest.TestCase):
         sleep(1)
 
     def _select_tab(self, input_type, name_dataset = None):
+        self._scroll2top()
         csd_tab = self.driver.find_element_by_css_selector(f"#input2build .radio input[value={input_type}]")
         csd_tab.find_element_by_xpath('..').click()
         # csd_tab.click()
-        sleep(0.5)
+        sleep(0.7)
         if(name_dataset):
             dataset_tab = self.driver.find_element_by_css_selector(f"#select_csd .radio input[value={name_dataset}]")
             dataset_tab.find_element_by_xpath('..').click()
-        sleep(0.5)
+        sleep(0.7)
     
     def _select_result(self, cpm_name):
         dataset_tab = self.driver.find_element_by_css_selector(f"#cpm_list .radio input[value={cpm_name}]")
@@ -99,6 +99,8 @@ class evamtools_basics(unittest.TestCase):
         return self._process_genotype_table(self._get_table_info())
 
     def _change_gene_names(self, new_names):
+        
+
         self.driver.find_element_by_css_selector("#change_gene_names").click()
         input_new_gene_names = self.driver.find_element_by_css_selector("#new_gene_names")
         input_new_gene_names.clear()
@@ -130,7 +132,11 @@ class evamtools_basics(unittest.TestCase):
         row_text = [i.text.split(" ") for i in row_table]
         return row_text
 
-class evamtools_basic_functionality(evamtools_basics):
+    def _scroll2top(self):
+        self.driver.execute_script("window.scrollBy(0,-document.body.scrollHeight)")
+
+## TESTING BASIC FUNCTIONALITY
+class test_basic_functionality(evamtools_basics):
     # Testing basic input navigation
     def test_switch_tab(self):
         ## Go to CSD-LINEAR
@@ -159,7 +165,7 @@ class evamtools_basic_functionality(evamtools_basics):
 
     def test_load_csv_dataset(self):
         upload = self.driver.find_element_by_css_selector(".upload_file input[type=file]")
-        upload.send_keys(os.path.join(os.getcwd(), "test_data", "good_csd.csv"))
+        upload.send_keys(os.path.join(os.getcwd(), "good_csd.csv"))
         sleep(2)
         status = self._get_status()
         assert(status["number_of_genes"] == 4)
@@ -169,13 +175,13 @@ class evamtools_basic_functionality(evamtools_basics):
 
     def test_load_corrupt_csv_dataset(self):
         upload = self.driver.find_element_by_css_selector(".upload_file input[type=file]")
-        upload.send_keys(os.path.join(os.getcwd(), "test_data", "bad_csd.csv"))
+        upload.send_keys(os.path.join(os.getcwd(), "bad_csd.csv"))
         error_message = self._get_error_message()
         assert(error_message, "Your csv data can not be loaded. Make sure it only contains 0 and 1.")
     
     def test_load_CSD_dataset(self):
         upload = self.driver.find_element_by_css_selector(".upload_file input[type=file]")
-        upload.send_keys(os.path.join(os.getcwd(), "test_data", "FREQ_csd.RDS"))
+        upload.send_keys(os.path.join(os.getcwd(), "FREQ_csd.RDS"))
         sleep(2)
         status = self._get_status()
         assert(status["number_of_genes"] == 4)
@@ -185,7 +191,7 @@ class evamtools_basic_functionality(evamtools_basics):
 
     def test_load_DAG_dataset(self):
         upload = self.driver.find_element_by_css_selector(".upload_file input[type=file]")
-        upload.send_keys(os.path.join(os.getcwd(), "test_data", "DAG_csd.RDS"))
+        upload.send_keys(os.path.join(os.getcwd(), "DAG_csd.RDS"))
         sleep(2)
         status = self._get_status("dag")
         assert(status["number_of_genes"] == 4)
@@ -195,20 +201,16 @@ class evamtools_basic_functionality(evamtools_basics):
 
     def test_load_MATRIX_dataset(self):
         upload = self.driver.find_element_by_css_selector(".upload_file input[type=file]")
-        upload.send_keys(os.path.join(os.getcwd(), "test_data", "MHN_csd.RDS"))
+        upload.send_keys(os.path.join(os.getcwd(), "MHN_csd.RDS"))
         sleep(2)
         status = self._get_status("matrix")
-        print(status)
         assert(status["number_of_genes"] == 3)
         assert(status["selected_dataset"] == "MHN")
         assert(status["selected_input2build"] == "matrix")
         assert(status["gene_names"] == ["A", "B", "C"])
     
-    def test_load_csd_from_examples_tab(self):
-        pass
-    
 ## TESTING CSD 
-class evamtools_csd_input(evamtools_basics):
+class test_csd_input(evamtools_basics):
     def test_modiying_genotype_with_buttons(self):
         ## Initial status
         sleep(0.2)
@@ -257,8 +259,6 @@ class evamtools_csd_input(evamtools_basics):
         sleep(1.5)
         current_freq = self.driver.find_element_by_css_selector("#genotype_freq").get_attribute("value")
         sleep(1)
-        # if(current_freq != "100"):
-        #     pdb.set_trace()
         assert(int(current_freq) == 100) ## This sometimes fails with invalid literal for int() with base 10: ''
 
         ## Freq changes based on available data 
@@ -286,9 +286,8 @@ class evamtools_csd_input(evamtools_basics):
 
     def test_modify_table(self):
         ## Select AND dataset
-        sleep(0.2)
         self._select_tab("csd", "AND")
-        sleep(0.2)
+        sleep(0.6)
 
         ## Check Status
         status = self._get_status()
@@ -330,6 +329,7 @@ class evamtools_csd_input(evamtools_basics):
 
     def test_change_gene_number(self):
         ## Select Linear & save data
+        self.driver.set_window_size(1366, 768)
         sleep(0.2)
         self._select_tab("csd", "Linear")
         initial_genotypes = self._get_table_info()
@@ -443,6 +443,7 @@ class evamtools_csd_input(evamtools_basics):
                 assert(new_genotypes_dict[genotype] == initial_genotypes_dict[genotype])
 
         ## Check dataset restoration
+        sleep(0.2)
         self._select_tab("csd", "Linear")
         final_genotypes = self._get_table_info()
 
@@ -452,6 +453,7 @@ class evamtools_csd_input(evamtools_basics):
 class test_dag_input(evamtools_basics):
     def test_modifying_dag(self):
         ## Increasing number of genes
+        self.driver.set_window_size(1366, 768)
         sleep(0.2)
         self._select_tab("dag")
         slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
@@ -504,6 +506,7 @@ class test_dag_input(evamtools_basics):
 
     def test_more_dag_modifations(self):
         ## Increasing number of genes
+        self.driver.set_window_size(1366, 768)
         sleep(0.2)
         self._select_tab("dag")
         slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
@@ -530,6 +533,7 @@ class test_dag_input(evamtools_basics):
 
     def test_change_gene_names(self):
         ## Increasing number of genes
+        self.driver.set_window_size(1366, 768)
         sleep(0.2)
         self._select_tab("dag")
         slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
@@ -689,6 +693,8 @@ class test_dag_input(evamtools_basics):
 
     def test_save_data_set(self):
         ## Increasing number of genes
+        self.driver.set_window_size(1366, 768)
+        sleep(0.2)
         self._select_tab("dag")
         old_dag = self._get_dag_info()
         slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
@@ -776,7 +782,6 @@ class test_matrix_input(evamtools_basics):
 
         assert(analysis_button.is_enabled())
 
-    
     def test_change_names(self):
         self._select_tab("matrix")
         slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
@@ -810,11 +815,13 @@ class test_matrix_input(evamtools_basics):
         assert(status["gene_names"] == ["A", "B", "C", "D", "E", "F"])
 
     def test_save_data_set(self):
-        ## Increasing number of genes
         self._select_tab("matrix", "test1")
         old_thetas = self._get_theta_table()
 
         # Changing gene number
+        if self.driver.get_window_size()["width"] > 1500:
+            self.driver.set_window_size(1366, 768)
+        sleep(0.2)
         slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
         move = ActionChains(self.driver)
         move.click_and_hold(slider_input).move_by_offset(60, 0).release().perform()
@@ -903,7 +910,7 @@ class test_matrix_input(evamtools_basics):
         assert(theta_table == expected_theta_table)
 
 ## TESTING RESULTS
-class evamtools_test_results(evamtools_basics):
+class test_results(evamtools_basics):
     def _check_tabular_data(self, input2build, do_mccbn = False):
         available_cpms = self.driver.find_elements_by_css_selector("#cpm2show .checkbox input")
         available_cpms = [i.get_attribute("value") for i in available_cpms]
@@ -913,7 +920,7 @@ class evamtools_test_results(evamtools_basics):
 
         not_ot = available_cpms.copy()
         not_ot.remove("OT")
-        not_ot.remove("DBN")
+        # not_ot.remove("DBN")
 
         expected_tabular = not_ot.copy()
 
@@ -937,7 +944,7 @@ class evamtools_test_results(evamtools_basics):
             "trans_rate_mat": expected_tabular_from_sims,            
             "genotype_transitions": expected_tabular_from_sims,
             "freqs": ["Genotype", "OT", *expected_tabular],
-            "trans_mat": ["From", "To", "OT", "DBN", *expected_tabular],
+            "trans_mat": ["From", "To", "OT", *expected_tabular],
             "lambdas": expected_lambdas,
             "td_trans_mat": expected_td_trans_mat,
         }
@@ -953,7 +960,6 @@ class evamtools_test_results(evamtools_basics):
 
     def _basic_results_test(self, data):
         ## Check status
-        # pdb.set_trace()
         active_cpms = self.driver.find_elements_by_css_selector("#cpm2show .checkbox input[checked=checked]")
         active_cpms = [i.get_attribute("value") for i in active_cpms]
         for i in active_cpms:
@@ -981,11 +987,10 @@ class evamtools_test_results(evamtools_basics):
 
         ## Check functionality of 'Modify data' button
         self.driver.find_element_by_css_selector("#modify_data").click()
-        sleep(1)
+        sleep(1.5)
 
         status = self._get_status(data["tab"])
         assert(status["number_of_genes"] == data["number_of_genes"])
-        if status["selected_dataset"] != data["name"]: pdb.set_trace()
         assert(status["selected_dataset"] == data["name"])
         assert(status["selected_input2build"] == data["tab"])
         assert(status["gene_names"] == data["gene_names"])
@@ -993,7 +998,7 @@ class evamtools_test_results(evamtools_basics):
 
     def _get_cpm_table(self):
         row_table = self.driver.find_elements_by_css_selector("#cpm_freqs tr")
-        row_text = [i.text.replace(", ", ",").split(" ") for i in row_table]
+        row_text = [ i.text.replace(", ", ",").split(" ") for i in row_table ]
         return row_text
 
     def test_results_on_load(self):
@@ -1011,7 +1016,7 @@ class evamtools_test_results(evamtools_basics):
 
         ## Uploading data
         upload = self.driver.find_element_by_css_selector("input#output_cpms[type=file]")
-        upload.send_keys(os.path.join(os.getcwd(), "test_data", "AND_test_cpm.RDS")) 
+        upload.send_keys(os.path.join(os.getcwd(), "AND_test_cpm.RDS")) 
         sleep(1)
 
         ## Status changes after uploading some data
@@ -1023,7 +1028,7 @@ class evamtools_test_results(evamtools_basics):
         assert(len(download_button) == 0)
 
         expected_data = {"tab": "csd", "gene_names": ["A", "B", "C", "D"],
-            "name": "AND_test", "number_of_genes": 4, "mccbn": False}
+            "name": "AND_new", "number_of_genes": 4, "mccbn": False}
         self._basic_results_test(expected_data)     
 
     def test_results_on_CSD(self):
@@ -1046,6 +1051,7 @@ class evamtools_test_results(evamtools_basics):
         sleep(1)
 
         ## Run analysis
+        self._scroll2top()
         self.driver.find_element_by_css_selector("#analysis").click()
         sleep(1)
         self._select_tab("csd", "User")
@@ -1056,11 +1062,11 @@ class evamtools_test_results(evamtools_basics):
         self._select_result(new_dataset_name)
         
         expected_data = {"tab": "csd", "gene_names": ["A", "B", "C", "D"],
-            "name": new_dataset_name, "number_of_genes": 4, "mccbn": False}
+            "name": new_dataset_name, "number_of_genes": 4}
 
         self._basic_results_test(expected_data) 
         self._go_to("result_viewer")
-        self._check_tabular_data(expected_data["tab"], expected_data["mccbn"])
+        self._check_tabular_data(expected_data["tab"])
 
     def test_results_on_DAG(self):
         ## Load data
@@ -1093,6 +1099,7 @@ class evamtools_test_results(evamtools_basics):
         sleep(1)
         
         ## Run analysis
+        self._scroll2top()
         self.driver.find_element_by_css_selector("#analysis").click()
         sleep(1)
         self._select_tab("csd", "User")
@@ -1128,6 +1135,7 @@ class evamtools_test_results(evamtools_basics):
         sleep(1)
 
         ## Run analysis
+        self._scroll2top()
         self.driver.find_element_by_css_selector("#analysis").click()
         sleep(1)
         self._select_tab("csd", "User")
@@ -1192,4 +1200,4 @@ class evamtools_test_results(evamtools_basics):
         # self._check_tabular_data(expected_data["tab"], expected_data["mccbn"])
 
 if __name__ == "__main__":
-    unittest.main(failfast=True)
+    unittest.main(failfast=False)
