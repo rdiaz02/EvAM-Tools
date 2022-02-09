@@ -221,8 +221,10 @@ process_samples <- function(sim, n_genes,
         warning(sprintf("The following parameters cannot be returned: %s"
             , paste(not_valid_params, collapse = ", " )))
 
+    
     #Set up
     output <- list()
+    ## This is the same as calling generate_sorted_genotypes
     n_states <- 2**n_genes
     sorted_genotypes <- vapply(0:(n_states - 1), function(x) {
         tmp_genotype <- paste(gene_names[int2binary(x, n_genes) == 1]
@@ -303,7 +305,7 @@ sample_all_CPMs <- function(cpm_output
     ## , n_genes
     ## , gene_names = NULL
     , methods = c("Source", "CBN", "MCCBN", "OncoBN", "MHN", "HESBCN", "OT")) {
-    output <- cpm_output
+    output <- ()
     ## And I have "Source" for a source data type for the web server
     ## if (is.null(gene_names)) gene_names <- LETTERS[seq_along(n_genes)]
 
@@ -313,9 +315,9 @@ sample_all_CPMs <- function(cpm_output
     for (method in methods) {
         if (method %in% c("OT", "OncoBN")) {
             if(method == "OT")
-                tmp_data <- output$OT_genots_predicted
+                tmp_data <- cpm_output$OT_genots_predicted
             else if(method == "OncoBN")
-                tmp_data <- output$OncoBN_genots_predicted
+                tmp_data <- cpm_output$OncoBN_genots_predicted
             
             genots <- tmp_data[2:(ncol(tmp_data) - 1)]
 
@@ -338,7 +340,7 @@ sample_all_CPMs <- function(cpm_output
             ##   see OT_transition_matrices.org
             output[[sprintf("%s_genotype_transitions", method)]] <- NULL
         } else {
-            trm <- output[[sprintf("%s_trans_rate_mat", method)]]
+            trm <- cpm_output[[sprintf("%s_trans_rate_mat", method)]]
             if (any(!is.na(trm))) {
                 print(sprintf("Running %s", method))
                 sims <- population_sample_from_trm(trm, n_samples = n_samples)
