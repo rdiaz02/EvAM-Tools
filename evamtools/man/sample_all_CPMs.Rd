@@ -10,19 +10,13 @@ though not from a transition rate matrix}
 sample_all_CPMs(
   cpm_output,
   n_samples,
-  n_genes,
-  gene_names = NULL,
-  methods = c("Source", "CBN", "MCCBN", "DBN", "MHN", "HESBCN", "OT")
+  methods = c("Source", "CBN", "MCCBN", "OncoBN", "MHN", "HESBCN", "OT")
 )
 }
 \arguments{
 \item{cpm_output}{Output from calling all_methods2trans_mat}
 
 \item{n_samples}{Number of samples to generate}
-
-\item{n_genes}{Number of samples that are in the sample}
-
-\item{gene_names}{List of gene names. If NULL, genes will be named alphabetically}
 
 \item{methods}{List of methods that we want to sample}
 }

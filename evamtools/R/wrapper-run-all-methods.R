@@ -651,13 +651,18 @@ transition_fg_sparseM <- function(x, weights) {
 
 ## Main function. data frame or matrix -> output
 evam <- function(x,
-                 methods = c("CBN", "OT", "HESBCN", "MHN"),
+                 methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN"),
                  max_cols = 15,
                  cbn_cores = 1,
                  cbn_init_poset = "OT",
                  hesbcn_steps = 100000,
                  hesbcn_seed = NULL,
-                 mhn_lambda = 1/nrow(x)
+                 mhn_lambda = 1/nrow(x),
+                 oncobn_model = "DBN",
+                 oncobn_algorithm = "DP",
+                 oncobn_epsilon = min(colMeans(x)/2),
+                 oncobn_silent = TRUE,
+                 ot_with_errors_dist_ot = TRUE
                  ) {
 
     if(!(cbn_init_poset %in% c("OT", "linear")))
@@ -670,10 +675,10 @@ evam <- function(x,
         do_MCCBN <- FALSE
     }
 
-    if ("DBN" %in% methods) {
-        do_DBN <- TRUE
+    if ("OncoBN" %in% methods) {
+        do_OncoBN <- TRUE
     } else {
-        do_DBN <- FALSE
+        do_OncoBN <- FALSE
     }
 
     do_HyperTraPS <- FALSE
@@ -748,7 +753,8 @@ evam <- function(x,
                 suppressMessages(
                     ot_proc(x,
                             nboot = 0,
-                            distribution.oncotree = TRUE))))["elapsed"]
+                            distribution.oncotree = TRUE,
+                            with_errors_dist_ot = ot_with_errors_dist_ot))))["elapsed"]
     message("time OT = ", time_ot)
 
     message("Doing CBN")
@@ -761,11 +767,15 @@ evam <- function(x,
                                    cores = cbn_cores)))["elapsed"]
     message("time CBN = ", time_cbn_ot)
 
-    if(do_DBN) {
-        message("Doing DBN\n\n")
+    if(do_OncoBN) {
+        message("Doing OncoBN\n\n")
         time_dbn <- system.time(
-            DBN_out <- do_DBN(x))["elapsed"]
-        message("time DBN = ", time_dbn)
+            OncoBN_out <- do_OncoBN(x,
+                                    model = oncobn_model,
+                                    algorithm = oncobn_algorithm,
+                                    epsilon = oncobn_epsilon,
+                                    silent = oncobn_silent))["elapsed"]
+        message("time OncoBN = ", time_dbn)
     } 
     
     if(do_MCCBN) {
@@ -785,7 +795,7 @@ evam <- function(x,
     ##   From CPM output, obtain weighted fitness graph and transition matrix
     ##   between genotypes.
     ##
-    ##   Beware that HESBCN and DBN use a different function.
+    ##   Beware that HESBCN and OncoBN use a different function.
     ##   This does not use lapply on purpose.
     ## ######################################################################
     
@@ -794,9 +804,12 @@ evam <- function(x,
     if(do_MCCBN)
         MCCBN_fg_tm <- cpm_access_genots_paths_w_simplified(MCCBN_out)
     HESBCN_fg_tm <- cpm_access_genots_paths_w_simplified_relationships(HESBCN_out)
-    if(do_DBN)
-        DBN_fg_tm <- cpm_access_genots_paths_w_simplified_OR(DBN_out)
-
+    if(do_OncoBN) {
+        if (OncoBN_out$model == "DBN")
+            OncoBN_fg_tm <- cpm_access_genots_paths_w_simplified_OR(OncoBN_out)
+        else if (OncoBN_out$model == "CBN")
+            OncoBN_fg_tm <- cpm_access_genots_paths_w_simplified(OncoBN_out)
+    }
     
     ## ######################################################################
     ##    For methods for which it makes sense, obtain time discretized
@@ -820,9 +833,9 @@ evam <- function(x,
         MCCBN_fg_tm <- list(weighted_fgraph = NA, trans_mat_genots = NA)
         MCCBN_td_trans_mat <- NA
     }
-    if (!do_DBN) {
-        DBN_out <- list(edges = NA, likelihood = NA)
-        DBN_fg_tm <- list(weighted_fgraph = NA, trans_mat_genots = NA)
+    if (!do_OncoBN) {
+        OncoBN_out <- list(edges = NA, likelihood = NA)
+        OncoBN_fg_tm <- list(weighted_fgraph = NA, trans_mat_genots = NA)
     }
 
     HyperTraPS_model <- NA
@@ -863,10 +876,13 @@ evam <- function(x,
         MHN_trans_mat = MHN_out$transitionMatrixCompExp,
         MHN_td_trans_mat = MHN_out$transitionMatrixTimeDiscretized,
 
-        DBN_model = DBN_out$edges,
-        DBN_likelihood = DBN_out$likelihood, 
-        DBN_f_graph = DBN_fg_tm$weighted_fgraph, 
-        DBN_trans_mat = DBN_fg_tm$trans_mat_genots,
+        OncoBN_model = OncoBN_out$edges,
+        OncoBN_likelihood = OncoBN_out$likelihood, 
+        OncoBN_f_graph = OncoBN_fg_tm$weighted_fgraph, 
+        OncoBN_trans_mat = OncoBN_fg_tm$trans_mat_genots,
+        OncoBN_genots_predicted = OncoBN_out$genots_predicted,
+        OncoBN_fitted_model = OncoBN_out$model,
+        OncoBN_epsilon = OncoBN_out$epsilon,
 
         HESBCN_model = HESBCN_out$edges,
         HESBCN_parent_set = HESBCN_out$parent_set,
@@ -878,7 +894,8 @@ evam <- function(x,
         HyperTraPS_trans_rate_mat = HyperTraPS_trans_rate_mat,
         HyperTraPS_trans_mat = HyperTraPS_trans_mat,
         HyperTraPS_td_trans_mat = HyperTraPS_td_trans_mat,
-        csd_data = xoriginal
+        original_data = xoriginal,
+        analyzed_data = x
          ))
 }
 

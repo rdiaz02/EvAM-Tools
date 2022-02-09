@@ -92,7 +92,9 @@ ot_consensus_sb <- function(x) {
 
 ot_consensus <- ot_consensus_sb
 
-ot_proc <- function(datax, nboot = 1000, distribution.oncotree = TRUE) {
+ot_proc <- function(datax, nboot = 1000,
+                    distribution.oncotree = TRUE,
+                    with_errors_dist_ot = TRUE) {
 
     ## Like ot_proc, but gives frequency of original tree
     error.fun <- "std"
@@ -162,8 +164,9 @@ ot_proc <- function(datax, nboot = 1000, distribution.oncotree = TRUE) {
         ## which we probably don't want anyway.
         message(" Starting distribution.oncotree ", date())
         ## Observed and expected frequencies of genotypes
-        est_genots <- distribution.oncotree(ot.fit, with.probs = TRUE,
-                                            with.errors = FALSE) ## TRUE)
+        est_genots <- distribution.oncotree(ot.fit,
+                                            with.probs = TRUE,
+                                            with.errors = with_errors_dist_ot)
         tt <- as.data.frame(datax)
         obs_genots <- aggregate(tt, by = tt, length)[1:(ncol(tt) + 1)]
         colnames(obs_genots)[ncol(obs_genots)] <- "Counts"

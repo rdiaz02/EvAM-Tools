@@ -220,41 +220,44 @@ process_samples <- function(sim, n_genes, gene_names = NULL,
     #Set up
     output <- list()
     n_states <- 2**n_genes
-    sorted_genotypes <- vapply(0:(n_states - 1), function(x){
+    sorted_genotypes <- vapply(0:(n_states - 1), function(x) {
         tmp_genotype <- paste(gene_names[int2binary(x, n_genes) == 1]
             , collapse = ", ")
         tmp_genotype <- ifelse(tmp_genotype == "", "WT", tmp_genotype)
         return(tmp_genotype)
     }, character(1))
+    
     trajectories <- sim$trajectory
 
     #Calculate frequencies
-    if(out_params["frequencies"]){
-        frequencies <- sample_to_pD_order(sim$obs_events, n_genes, gene_names)
+    if (out_params["frequencies"]) {
+        frequencies_tmp <- sample_to_pD_order(sim$obs_events, n_genes, gene_names)
         frequencies <- data.frame(
             Genotype = sorted_genotypes,
-            Counts = frequencies
+            Counts = frequencies_tmp
         )
         rownames(frequencies) <- NULL
-
         output$frequencies <- frequencies
     }
 
     #Calculate transitions
-    if(out_params["transitions"]){
-        t <- matrix(0L, nrow = n_states, ncol = n_states)
-        colnames(t) <- rownames(t) <- sorted_genotypes
+    if (out_params["transitions"]) {
+        tt <- matrix(0L, nrow = n_states, ncol = n_states)
+        ## FIXME: this is WRONG!
+        ## a trajectory, traj, can be
+        ## C, EZH_algo
+        ## but the rows/columns will be EZH_algo, C
+        colnames(tt) <- rownames(tt) <- sorted_genotypes
         for(traj in trajectories){
             steps <- length(traj) - 1 
             if(steps > 0){
                 for(i in 1:steps){
-                    t[traj[i], traj[i + 1]] <-
-                        t[traj[i], traj[i + 1]] + 1
+                    tt[traj[i], traj[i + 1]] <-
+                        tt[traj[i], traj[i + 1]] + 1
                 }
             }
         } 
-
-        output$transitions <- t
+        output$transitions <- tt
     }
 
     #Calculate state_counts
@@ -279,24 +282,28 @@ process_samples <- function(sim, n_genes, gene_names = NULL,
 #' 
 #' @param cpm_output Output from calling all_methods2trans_mat
 #' @param n_samples Number of samples to generate
-#' @param n_genes Number of samples that are in the sample
-#' @param gene_names List of gene names. If NULL, genes will be named alphabetically
 #' @param methods List of methods that we want to sample
 #' 
 #' @return modified cpm_outputd including a matrix with genotype transitions
 sample_all_CPMs <- function(cpm_output
     , n_samples
-    , n_genes
-    , gene_names = NULL
-    , methods = c("Source", "CBN", "MCCBN", "DBN", "MHN", "HESBCN", "OT")) {
+    ## , n_genes
+    ## , gene_names = NULL
+    , methods = c("Source", "CBN", "MCCBN", "OncoBN", "MHN", "HESBCN", "OT")) {
     output <- cpm_output
-    ## I have removed OT from the list of CPM to sample
     ## And I have "Source" for a source data type for the web server
-    if (is.null(gene_names)) gene_names <- LETTERS[1:n_genes]
+    ## if (is.null(gene_names)) gene_names <- LETTERS[seq_along(n_genes)]
 
+    gene_names <- colnames(cpm_output$analyzed_data)
+    n_genes <- length(gene_names)
+    
     for (method in methods) {
-        if (method == "OT") {
-            tmp_data <- output$OT_genots_predicted
+        if (method %in% c("OT", "OncoBN")) {
+            if(method == "OT")
+                tmp_data <- output$OT_genots_predicted
+            else if(method == "OncoBN")
+                tmp_data <- output$OncoBN_genots_predicted
+            
             genots <- tmp_data[2:(ncol(tmp_data) - 1)]
 
             genots_2 <- unlist(apply(genots, 1, 
@@ -317,8 +324,6 @@ sample_all_CPMs <- function(cpm_output
             ## The next one is NOT implicitly available.
             ##   see OT_transition_matrices.org
             output[[sprintf("%s_genotype_transitions", method)]] <- NULL
-        } else if (method == "DBN"){
-            ## Do nothing
         } else {
             trm <- output[[sprintf("%s_trans_rate_mat", method)]]
             if (any(!is.na(trm))) {

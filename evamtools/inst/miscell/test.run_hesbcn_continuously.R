@@ -4,7 +4,7 @@
 
 library(evamtools)
 library(testthat)
-data(all_examples_csd)
+data(examples_csd)
 
 ## Real data
 data(every_which_way_data)
