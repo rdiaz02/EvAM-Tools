@@ -192,9 +192,7 @@ docker build --tag evamtools .
 
 **That is incomplete**
 - From what directory:?
-- In fact, that fails for me with "ocker build" requires exactly 1 argument."
-- And https://docs.docker.com/engine/reference/commandline/build/
-    - seems to me to indicate that is not the correct invocation of docker
+
 - Can you give a link of how to install docker? (Under debian, simply apt install docker does not give an executable)
     - Can you give a list of packages to install before that in Ubuntu/Debian?
 - The Dockerfile does not seem to install R; is it because it uses rocker/verse?
@@ -203,6 +201,8 @@ docker build --tag evamtools .
     - https://github.com/rocker-org/rocker-versioned2
     - Please, give, explicitly, the *current version of R being used*	
 
+
+- Why not distribute a pre-built docker image?
 
 
 ### How to update the Docker image if you change the code  
