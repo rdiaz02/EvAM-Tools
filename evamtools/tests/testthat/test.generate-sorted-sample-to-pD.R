@@ -208,4 +208,218 @@ test_that("generate_sorted_genotypes and sample_to_pD_order same order", {
         expect_equal(out_gsg3, expect_out_gsg3)
     }
 })
+
+
+test_that("Paranoia: checking an example table", {
+    s1 <- c("EZH2_msmut, C", "C", "WT", "EZH2_msmut, F_NRAS_msmut", "EZH2_msmut, D", 
+"C", "WT", "WT", "WT", "WT", "WT", "WT", "WT", "EZH2_msmut", 
+"WT", "EZH2_msmut", "WT", "EZH2_msmut", "D", "WT", "EZH2_msmut", 
+"WT", "WT", "F_NRAS_msmut", "WT", "WT", "WT", "C", "WT", "WT", 
+"C", "WT", "WT", "WT", "WT", "WT", "C", "WT", "WT", "WT", "WT", 
+"WT", "WT", "WT", "EZH2_msmut", "WT", "WT", "C, F_NRAS_msmut", 
+"WT", "WT", "WT", "WT", "WT", "WT", "WT", "WT", "EZH2_msmut, F_NRAS_msmut", 
+"F_NRAS_msmut", "EZH2_msmut", "WT", "WT", "WT", "WT", "WT", "EZH2_msmut", 
+"WT", "WT", "WT", "WT", "C, D", "WT", "WT", "EZH2_msmut", "WT", 
+"WT", "C, F_NRAS_msmut", "WT", "EZH2_msmut", "WT", "WT", "WT", 
+"EZH2_msmut", "C", "WT", "WT", "F_NRAS_msmut", "D", "WT", "WT", 
+"WT", "WT", "WT", "EZH2_msmut", "F_NRAS_msmut", "WT", "F_NRAS_msmut", 
+"EZH2_msmut, D", "WT", "WT", "WT", "WT", "WT", "WT", "WT", "WT", 
+"WT", "WT", "EZH2_msmut, D", "C", "EZH2_msmut, D", "D", "WT", 
+"WT", "WT", "WT", "WT", "WT", "EZH2_msmut", "EZH2_msmut, C", 
+"WT", "EZH2_msmut", "EZH2_msmut", "C, F_NRAS_msmut", "WT", "WT", 
+"WT", "WT", "WT", "WT", "WT", "WT", "D, F_NRAS_msmut", "EZH2_msmut", 
+"EZH2_msmut", "WT", "WT", "EZH2_msmut", "WT", "C", "WT", "WT", 
+"WT", "WT", "WT", "WT", "WT", "D", "D, F_NRAS_msmut", "EZH2_msmut, D, F_NRAS_msmut", 
+"WT", "WT", "F_NRAS_msmut", "WT", "C", "WT", "WT", "EZH2_msmut, F_NRAS_msmut", 
+"EZH2_msmut", "WT", "WT", "WT", "WT", "C", "WT", "WT", "WT", 
+"WT", "WT", "WT", "EZH2_msmut, D", "EZH2_msmut", "C", "WT", "WT", 
+"WT", "WT", "WT", "WT", "WT", "WT", "WT", "C", "F_NRAS_msmut", 
+"WT", "WT", "EZH2_msmut", "WT", "C", "WT", "WT", "C", "WT", "EZH2_msmut", 
+"EZH2_msmut", "EZH2_msmut", "WT", "EZH2_msmut, F_NRAS_msmut", 
+"WT", "WT", "WT", "D", "WT", "WT", "WT", "WT", "WT", "WT", "C", 
+"WT", "WT", "WT", "C", "WT", "WT", "C", "WT", "F_NRAS_msmut", 
+"WT", "C", "WT", "WT", "WT", "WT", "WT", "C", "D", "WT", "D", 
+"EZH2_msmut", "WT", "WT", "C", "WT", "WT", "WT", "WT", "WT", 
+"WT", "WT", "WT", "EZH2_msmut", "D", "WT", "EZH2_msmut", "WT", 
+"WT", "EZH2_msmut", "C", "C, D, F_NRAS_msmut", "D", "C, D", "D", 
+"WT", "WT", "EZH2_msmut, D", "WT", "F_NRAS_msmut", "WT", "WT", 
+"WT", "EZH2_msmut", "F_NRAS_msmut", "C", "WT", "WT", "C", "WT", 
+"WT", "WT", "WT", "WT", "WT", "EZH2_msmut", "EZH2_msmut, C, F_NRAS_msmut", 
+"D", "EZH2_msmut, F_NRAS_msmut", "WT", "WT", "WT", "C", "WT", 
+"WT", "WT", "F_NRAS_msmut", "EZH2_msmut, C", "WT", "WT", "WT", 
+"WT", "WT", "EZH2_msmut, D", "WT", "WT", "EZH2_msmut, D", "EZH2_msmut, F_NRAS_msmut", 
+"WT", "F_NRAS_msmut", "WT", "EZH2_msmut", "EZH2_msmut", "WT", 
+"WT", "WT", "WT", "EZH2_msmut, D", "EZH2_msmut", "WT", "WT", 
+"WT", "WT", "WT", "WT", "WT", "WT", "EZH2_msmut", "WT", "EZH2_msmut, D", 
+"EZH2_msmut, C, D", "WT", "WT", "WT", "EZH2_msmut, F_NRAS_msmut", 
+"C", "C", "EZH2_msmut, C", "EZH2_msmut, C", "WT", "C", "WT", 
+"EZH2_msmut", "WT", "EZH2_msmut", "WT", "F_NRAS_msmut", "EZH2_msmut", 
+"WT", "WT", "WT", "D", "WT", "WT", "WT", "F_NRAS_msmut", "WT", 
+"WT", "C", "WT", "WT", "EZH2_msmut", "WT", "WT", "D", "WT", "WT", 
+"WT", "EZH2_msmut", "EZH2_msmut", "WT", "C", "WT", "WT", "WT", 
+"WT", "WT", "WT", "WT", "C", "WT", "EZH2_msmut", "WT", "EZH2_msmut", 
+"WT", "WT", "WT", "WT", "WT", "EZH2_msmut, C, F_NRAS_msmut", 
+"WT", "WT", "WT", "WT", "WT", "WT", "D", "F_NRAS_msmut", "WT", 
+"C", "D", "WT", "C", "C", "WT", "EZH2_msmut", "WT", "F_NRAS_msmut", 
+"WT", "C", "WT", "WT", "F_NRAS_msmut", "C", "EZH2_msmut", "WT", 
+"WT", "WT", "EZH2_msmut", "F_NRAS_msmut", "WT", "C, D", "WT", 
+"WT", "WT", "WT", "EZH2_msmut", "EZH2_msmut", "EZH2_msmut, D", 
+"WT", "WT", "WT", "EZH2_msmut", "WT", "EZH2_msmut", "WT", "EZH2_msmut", 
+"D", "WT", "WT", "WT", "WT", "WT", "WT", "WT", "WT", "WT", "WT", 
+"C", "EZH2_msmut", "C", "C", "WT", "EZH2_msmut", "WT", "F_NRAS_msmut", 
+"C", "C", "WT", "WT", "WT", "EZH2_msmut", "WT", "C", "WT", "WT", 
+"EZH2_msmut", "WT", "WT", "D", "F_NRAS_msmut", "WT", "WT", "WT", 
+"WT", "WT", "WT", "WT", "EZH2_msmut, C", "WT", "D", "WT", "EZH2_msmut", 
+"WT", "EZH2_msmut", "WT", "WT", "WT", "WT", "WT", "EZH2_msmut, F_NRAS_msmut", 
+"WT", "WT", "WT", "WT", "WT", "WT", "C", "WT", "EZH2_msmut, D", 
+"EZH2_msmut, D", "WT", "WT", "WT", "C", "C", "C", "WT", "EZH2_msmut, C", 
+"F_NRAS_msmut", "D", "F_NRAS_msmut", "WT", "WT", "WT", "WT", 
+"WT", "WT", "WT", "EZH2_msmut", "WT", "WT", "C, F_NRAS_msmut", 
+"WT", "WT", "WT", "EZH2_msmut", "WT", "WT", "WT", "WT", "EZH2_msmut", 
+"WT", "WT", "WT", "EZH2_msmut, F_NRAS_msmut", "WT", "WT", "EZH2_msmut", 
+"WT", "EZH2_msmut, F_NRAS_msmut", "WT", "WT", "WT", "WT", "C", 
+"WT", "WT", "C", "WT", "WT", "WT", "D", "WT", "WT", "EZH2_msmut, F_NRAS_msmut", 
+"WT", "WT", "WT", "WT", "WT", "WT", "EZH2_msmut", "WT", "WT", 
+"WT", "EZH2_msmut", "WT", "C", "WT", "EZH2_msmut, D, F_NRAS_msmut", 
+"WT", "WT", "WT", "WT", "D", "WT", "WT", "WT", "WT", "WT", "EZH2_msmut", 
+"WT", "WT", "WT", "WT", "WT", "D", "WT", "F_NRAS_msmut", "EZH2_msmut, D", 
+"EZH2_msmut", "F_NRAS_msmut", "EZH2_msmut", "WT", "EZH2_msmut", 
+"EZH2_msmut, D, F_NRAS_msmut", "C", "WT", "F_NRAS_msmut", "WT", 
+"WT", "WT", "WT", "F_NRAS_msmut", "WT", "WT", "WT", "WT", "WT", 
+"WT", "WT", "WT", "EZH2_msmut, C", "WT", "WT", "WT", "WT", "C", 
+"WT", "WT", "WT", "WT", "EZH2_msmut, D", "F_NRAS_msmut", "WT", 
+"F_NRAS_msmut", "WT", "WT", "WT", "EZH2_msmut", "WT", "WT", "WT", 
+"EZH2_msmut", "EZH2_msmut", "WT", "D", "WT", "WT", "WT", "EZH2_msmut", 
+"WT", "WT", "WT", "WT", "EZH2_msmut", "D", "WT", "WT", "WT", 
+"EZH2_msmut", "WT", "F_NRAS_msmut", "EZH2_msmut, F_NRAS_msmut", 
+"WT", "WT", "EZH2_msmut", "C", "WT", "WT", "EZH2_msmut", "WT", 
+"EZH2_msmut", "WT", "WT", "C", "WT", "WT", "WT", "WT", "WT", 
+"EZH2_msmut", "WT", "WT", "WT", "WT", "WT", "WT", "EZH2_msmut", 
+"WT", "WT", "D", "WT", "WT", "D", "WT", "D", "WT", "C", "WT", 
+"WT", "WT", "EZH2_msmut, F_NRAS_msmut", "WT", "C", "WT", "WT", 
+"D", "WT", "EZH2_msmut, F_NRAS_msmut", "WT", "WT", "WT", "WT", 
+"WT", "WT", "WT", "EZH2_msmut", "WT", "WT", "WT", "WT", "WT", 
+"C", "WT", "WT", "EZH2_msmut, C", "F_NRAS_msmut", "EZH2_msmut, D", 
+"WT", "C", "WT", "WT", "D", "WT", "WT", "WT", "WT", "EZH2_msmut, F_NRAS_msmut", 
+"EZH2_msmut, F_NRAS_msmut", "EZH2_msmut, D", "EZH2_msmut", "EZH2_msmut", 
+"EZH2_msmut, D", "WT", "EZH2_msmut", "C", "F_NRAS_msmut", "WT", 
+"WT", "WT", "WT", "WT", "WT", "D", "EZH2_msmut, F_NRAS_msmut", 
+"WT", "WT", "WT", "C", "WT", "EZH2_msmut", "WT", "WT", "C", "WT", 
+"C", "EZH2_msmut, C", "D", "F_NRAS_msmut", "C", "WT", "EZH2_msmut", 
+"WT", "WT", "WT", "EZH2_msmut, D, F_NRAS_msmut", "WT", "EZH2_msmut, D", 
+"WT", "F_NRAS_msmut", "WT", "C", "WT", "D", "WT", "D", "WT", 
+"EZH2_msmut", "WT", "WT", "C", "D", "WT", "WT", "WT", "WT", "WT", 
+"WT", "C", "WT", "WT", "WT", "WT", "WT", "EZH2_msmut, C", "WT", 
+"WT", "WT", "WT", "WT", "EZH2_msmut", "F_NRAS_msmut", "EZH2_msmut", 
+"EZH2_msmut, D, F_NRAS_msmut", "WT", "WT", "F_NRAS_msmut", "WT", 
+"WT", "WT", "WT", "WT", "EZH2_msmut, C, F_NRAS_msmut", "WT", 
+"WT", "WT", "WT", "WT", "D, F_NRAS_msmut", "WT", "WT", "WT", 
+"WT", "WT", "WT", "WT", "WT", "WT", "WT", "WT", "WT", "EZH2_msmut, C", 
+"WT", "WT", "WT", "WT", "C", "WT", "WT", "WT", "WT", "WT", "C", 
+"D, F_NRAS_msmut", "WT", "WT", "WT", "WT", "EZH2_msmut, C", "WT", 
+"WT", "WT", "WT", "WT", "WT", "WT", "WT", "D, F_NRAS_msmut", 
+"WT", "EZH2_msmut", "WT", "WT", "WT", "C", "WT", "EZH2_msmut", 
+"EZH2_msmut, D", "WT", "WT", "C", "EZH2_msmut", "WT", "EZH2_msmut, F_NRAS_msmut", 
+"EZH2_msmut, D", "WT", "WT", "WT", "D", "WT", "C", "WT", "WT", 
+"WT", "WT", "EZH2_msmut", "WT", "WT", "EZH2_msmut", "WT", "WT", 
+"WT", "WT", "WT", "EZH2_msmut, D", "WT", "WT", "WT", "D, F_NRAS_msmut", 
+"C", "WT", "WT", "WT", "WT", "EZH2_msmut, C", "WT", "WT", "C", 
+"WT", "F_NRAS_msmut", "WT", "WT", "WT", "WT", "D", "WT", "WT", 
+"WT", "C", "WT", "WT", "WT", "WT", "WT", "WT", "WT", "WT", "WT", 
+"WT", "F_NRAS_msmut", "WT", "WT", "WT", "WT", "WT", "EZH2_msmut, C, D", 
+"C", "WT", "WT", "WT", "WT", "WT", "WT", "D", "WT", "WT", "D", 
+"WT", "WT", "WT", "WT", "WT", "WT", "WT", "WT", "WT", "WT", "WT", 
+"WT", "WT", "EZH2_msmut", "EZH2_msmut", "WT", "WT", "WT", "D", 
+"C", "WT", "C", "WT", "WT", "WT", "D", "WT", "D", "EZH2_msmut", 
+"WT", "WT", "WT", "EZH2_msmut", "WT", "EZH2_msmut, C", "WT", 
+"WT", "WT", "WT", "WT", "EZH2_msmut, F_NRAS_msmut", "F_NRAS_msmut", 
+"WT", "WT", "D", "WT", "WT", "C", "WT", "WT", "WT", "WT", "WT", 
+"WT", "WT", "EZH2_msmut, D", "EZH2_msmut", "EZH2_msmut, F_NRAS_msmut", 
+"WT", "WT", "WT", "WT", "WT", "EZH2_msmut", "WT")
+
+    table(s1)
+    
+    gene_names <- c("EZH2_msmut", "C", "D", "F_NRAS_msmut")
+    n_genes <- length(gene_names)
+
+    outgs <- generate_sorted_genotypes(n_genes, gene_names)
+    outgpd <- sample_to_pD_order(s1, n_genes, gene_names)
+
+    ## I can't do  table(s1)[outgs]
+    ## as the order of the names of genes is different in some genotypes
+    ## and that is precisely what I want to verify: it works OK if I resort them
+
+    s2 <- s1
+    s2 <- gsub("EZH2_msmut, C, F_NRAS_msmut", "C, EZH2_msmut, F_NRAS_msmut",
+               s2, fixed = TRUE)
+    s2 <- gsub("EZH2_msmut, D, F_NRAS_msmut", "D, EZH2_msmut, F_NRAS_msmut",
+               s2, fixed = TRUE)
+    ## s2 <- gsub("C, EZH2_msmut, D", "C, D, EZH2_msmut",
+    ##            s2, fixed = TRUE)
+    s2 <- gsub("EZH2_msmut, C, D", "C, D, EZH2_msmut",
+               s2, fixed = TRUE)
+    s2 <- gsub("EZH2_msmut, D", "D, EZH2_msmut", s2, fixed = TRUE)
+    s2 <- gsub("EZH2_msmut, C", "C, EZH2_msmut", s2, fixed = TRUE)
+
+    nums <- table(s2)[outgs]
+    nums[is.na(nums)] <- 0
+    
+    expect_equal(as.vector(nums), outgpd, check.attributes = FALSE)
+})
+
+
+
+
+test_that("Test with same order of genes", {
+    ## This could fail when things are OK
+    ## because in OncoSimulR I use mixedsort
+    ## which sorts slightly differently and ignores case
+    N <- 10000
+    iters <- 20
+    for(i in 1:iters) {
+        ngenes <- 7
+        gn <- vector(mode = "character", length = ngenes)
+
+        ## create weird gene names
+        for(g in seq_len(ngenes)) {
+            l1 <- sample(c(LETTERS, letters), 1)
+            rest <-  c(sample(
+                c(
+                    sample(c("_",  "=", "?", "#", "@", "%", "&", "!"), 4, replace = TRUE)
+                    , sample(0:9, 4, replace = TRUE)
+                    , sample(c(letters, LETTERS), 4, replace = TRUE)
+                )))
+            
+            rest <- paste(rest, sep = "", collapse = "")
+            gn[g] <- paste0(l1, rest)
+        }
+        
+        gn <- sort(gn)
+        rf <- OncoSimulR::rfitness(ngenes)
+        colnames(rf)[1:ngenes] <- gn
+        ag <- OncoSimulR::evalAllGenotypes(OncoSimulR::allFitnessEffects(genotFitness = rf),
+                               addwt = TRUE)
+
+        ## Undo what gtools::mixedsort has done or this test
+        ## can fail because the table has, as entries, the original
+        ## genotypes, those with the genes sorted by mixedsort.
+        genotypes_resorted <-
+            unname(vapply(ag[, "Genotype"],
+                   function(u)
+                       paste(sort(strsplit(u, split = ", ", fixed = TRUE)[[1]]),
+                             collapse = ", "), "something"))
+        
+        sx <- sample(genotypes_resorted, N, prob = ag[, "Fitness"], replace = TRUE)
+
+        outgs <- evamtools:::generate_sorted_genotypes(ngenes, gn)
+        outgpd <-  evamtools:::sample_to_pD_order(sx, ngenes, gn)
+
+        ot <- table(sx)
+        oto <- ot[outgs]
+        oto[is.na(oto)] <- 0
+        expect_equal(as.vector(oto), outgpd, check.attributes = FALSE)
+    }
+})
+
+
 cat("\n Done test.generate-sorted-sample-to-pD. \n")
