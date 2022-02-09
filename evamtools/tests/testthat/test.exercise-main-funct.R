@@ -58,6 +58,35 @@ test_that("We can deal with duplicated columns and columns without events and co
     exercise_sample_all_CPMs(out3)
     exercise_sample_all_CPMs(out4)
     exercise_sample_all_CPMs(out5)
+
+    ## Some examples with random, weird names
+    iters <- 10
+    dd <- Dat1
+    for(i in 1:iters) {
+        ngenes <- ncol(dd)
+        gn <- vector(mode = "character", length = ngenes)
+
+        ## create weird gene names
+        for(g in seq_len(ngenes)) {
+            l1 <- sample(c(LETTERS, letters), 1)
+            rest <-  c(sample(
+                c(
+                    sample(c("_",  "=", "?", "#", "@", "%", "&", "!"), 4, replace = TRUE)
+                    , sample(0:9, 4, replace = TRUE)
+                    , sample(c(letters, LETTERS), 4, replace = TRUE)
+                )))
+            
+            rest <- paste(rest, sep = "", collapse = "")
+            gn[g] <- paste0(l1, rest)
+        }
+        colnames(dd) <- gn
+        outdd <- suppressMessages(evam(dd,
+                                  methods = c("CBN", "OT", "OncoBN",
+                                              "MHN", "HESBCN"),
+                                  max_cols = 4))
+        expect_true(exists("OT_model", where = outdd))
+        exercise_sample_all_CPMs(outdd)
+    }
 })
 
 
