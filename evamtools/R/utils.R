@@ -155,6 +155,8 @@ str2int <- function(str_state, sep =", ", wt = "WT", n = NULL){
     return(binary2int(binary_state))
 }
 
+
+
 #' @title List of sorted genotypes
 #' 
 #' @description Returns all sorted genotypes for a given number of genes
@@ -165,10 +167,13 @@ str2int <- function(str_state, sep =", ", wt = "WT", n = NULL){
 #' 
 #' @return Vector with the sorted genotypes
 generate_sorted_genotypes <- function(n_genes, gene_names = NULL){
-    if (is.null(gene_names)) gene_names <- LETTERS[1:n_genes]
-    # if(n_genes < 0) stop("Number of genes should be >= 0")
-    if(n_genes == 0) {states <- c()}
-    else {n_states <- 2**n_genes}
+    if(n_genes < 0) stop("Number of genes should be >= 0")
+    if(n_genes == 0) {
+        states <- c()
+        n_states <- 0
+    } else {
+        n_states <- 2**n_genes
+    }
 
     if(is.null(gene_names)) gene_names <- LETTERS[1:n_genes]
 
@@ -181,4 +186,38 @@ generate_sorted_genotypes <- function(n_genes, gene_names = NULL){
 
     return(sorted_genotypes)
 }
+
+
+
+
+
+## RDU: FIXME: Esto está roto!!!
+##  Por ejemplo, con n_genes = 0 no funciona
+##  Y qué sentido tiene dar algo con 0 genes?
+## #' @title List of sorted genotypes
+## #' 
+## #' @description Returns all sorted genotypes for a given number of genes
+## #' 
+## #' @param n_genes Ingeter >=0
+## #' @param gene_names Vector of strings
+## #'      If NULL, defaults gene_names will the firt n_genes letters of the alphabet
+## #' 
+## #' @return Vector with the sorted genotypes
+## generate_sorted_genotypes <- function(n_genes, gene_names = NULL){
+##     if (is.null(gene_names)) gene_names <- LETTERS[1:n_genes]
+##     # if(n_genes < 0) stop("Number of genes should be >= 0")
+##     if(n_genes == 0) {states <- c()}
+##     else {n_states <- 2**n_genes}
+
+##     if(is.null(gene_names)) gene_names <- LETTERS[1:n_genes]
+
+##     sorted_genotypes <- vapply(0:(n_states - 1), function(x){
+##         tmp_genotype <- paste(gene_names[int2binary(x, n_genes) == 1]
+##             , collapse = ", ")
+##         tmp_genotype <- ifelse(tmp_genotype == "", "WT", tmp_genotype)
+##         return(tmp_genotype)
+##     }, character(1))
+
+##     return(sorted_genotypes)
+## }
 
