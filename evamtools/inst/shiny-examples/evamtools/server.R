@@ -18,6 +18,7 @@ template_csd_data <- matrix(0, ncol=3, nrow=0)
 check_if_csd <- function(data){
     tmp_names <- c("data", "dag", "dag_parent_set", "gene_names", "name", "type", "thetas")
     types <- c("csd", "dag", "matrix")
+    if(is.null(data)) return(FALSE)
     if(all(tmp_names %in% names(data))){
         if((data$type %in% types 
         & all(unique(c(data$data)) %in% c(0, 1)))){
@@ -197,7 +198,7 @@ plot_model <- function(cpm_output, mod){
 }
 
 create_tabular_data <- function(data, type){
-    available_methods <- c("Source", "OT", "CBN", "MHN", "HESBCN", "DBN")
+    available_methods <- c("Source", "OT", "CBN", "MHN", "HESBCN")
     # , "DBN", "MCCBN")
     if(type %in% c("freqs")){
         all_counts <- data.frame(Genotype = data[["MHN_genotype_freqs"]]$Genotype)
@@ -275,7 +276,7 @@ create_tabular_data <- function(data, type){
 
     } else if(type %in% c("lambdas")){
         lambda_field <- c("Lambdas", "OT_edgeWeight", "rerun_lambda", "Lambdas", "lambda", "Thetas")
-        names(lambda_field) <- c("Source", "OT", "CBN", "HESBCN", "MCCBN", "DBN")
+        names(lambda_field) <- c("Source", "OT", "CBN", "HESBCN", "MCCBN")
 
         gene_names <- sort(unique(data$OT_model$To))
         all_counts <- data.frame(Gene = gene_names)
@@ -1058,8 +1059,6 @@ server <- function(input, output, session) {
             if(!is.null(data$thetas) 
                 && length(data$thetas[1:input$gene_number, 1:input$gene_number])>0){
                 op <- par(mar=c(3, 3, 5, 3), las = 1)
-                print("Here")
-                print(data$thetas[1:input$gene_number, 1:input$gene_number])
                 plot(data$thetas[1:input$gene_number, 1:input$gene_number], cex = 1.8, digits = 2, key = NULL
                     , axis.col = list(side = 3)
                     , xlab = "Effect of this (effector)"
@@ -1100,8 +1099,9 @@ server <- function(input, output, session) {
         Sys.sleep(0.5)
         progress$inc(2/5, detail = "Running CPMs")
         do_MCCBN <- "mccbn" %in% input$more_cpms
-        methods <- c("CBN", "OT", "HESBCN", "MHN", "DBN")
-        if(do_MCCBN) methods <- c(methods, "MCCBN")
+        methods <- c("CBN", "OT", "HESBCN", "MHN")
+        # , "DBN"
+        # if(do_MCCBN) methods <- c(methods, "MCCBN")
         cpm_output <- evam(data2run, methods = methods)
         ## To see Source data in the results section
         if(input$input2build != "csd"){
@@ -1168,7 +1168,7 @@ server <- function(input, output, session) {
     )
 
     ## FIXME get sample data from namespace
-    cpm_out <- readRDS("./test_data/AND_test_cpm.RDS")
+    cpm_out <- and_cpm_with_simulations
     ## FIXME: rename to trans_rate_mat??
     # cpm_out$MHN_f_graph <- cpm_out$MHN_trans_rate_mat
     
@@ -1295,7 +1295,7 @@ server <- function(input, output, session) {
                 tags$div(class = "inline",
                   checkboxGroupInput(inputId = "cpm2show", 
                       label = "CPMs to show", 
-                      choices = c("Source", "OT", "CBN", "MHN", "HESBCN", "DBN"),
+                      choices = c("Source", "OT", "CBN", "MHN", "HESBCN"),
                     #   , "DBN")
                     # , "MCCBN"),
                       selected = c("CBN", "MHN", "HESBCN")),
