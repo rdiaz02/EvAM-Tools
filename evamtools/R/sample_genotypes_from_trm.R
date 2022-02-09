@@ -230,7 +230,9 @@ process_samples <- function(sim, n_genes,
         tmp_genotype <- ifelse(tmp_genotype == "", "WT", tmp_genotype)
         return(tmp_genotype)
     }, character(1))
-    
+
+    ## FIXME RDU: how do we know they are ordered in the same way?
+    ## sorted_genotypes AND sample_to_pD_order
     #Calculate frequencies
     if (out_params["frequencies"]) {
         counts_tmp <- sample_to_pD_order(sim$obs_events, n_genes, gene_names)
@@ -269,6 +271,8 @@ process_samples <- function(sim, n_genes,
         output$transitions <- tt
     }
 
+    ## FIXME: same issues. Assuming ordered in the same way
+    ## sample_to_pD and sorted_genotypes
     #Calculate state_counts
     if(out_params["state_counts"]){
         state_counts <- sample_to_pD_order(unlist(sim$trajectory),
