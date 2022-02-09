@@ -186,9 +186,20 @@ We provide an R package, evamtools, and a shiny (https://shiny.rstudio.com/) app
 ## How to run the shiny app locally ##
 To launch the shiny app just open an R terminal and type ```library(evamtools);runShiny()```
 
-## How to create a Docker image  [FIXME: Pablo writes this](#) ##
+## How to create a Docker image  [FIXME: Pablo writes this](#** ##
 
 docker build --tag evamtools .
+
+**That is incomplete**
+- From what directory
+- Can you give a list of pckages to install before that in Ubuntu/Debian?
+- The Dockerfile does not seem to install R; is it because it uses rocker/verse?
+- Does that need to be run as root?
+- Are you sure this is using R-4.1.2? I think we might need something else:
+    - https://github.com/rocker-org/rocker-versioned2
+    - Please, give, explicitly, the *current version of R being used*	
+
+
 
 ### How to update the Docker image if you change the code  
 [FIXME: Pablo writes this](#) ###
@@ -199,6 +210,12 @@ Just as above. But this time it should run much faster, because many steps will 
 ### From the Docker image ###
 docker build --tag evamtools . #To create the image
 docker run -p 3000:3000 evamtools #To run the image connecting port 3000 of the computer with port 3000 of the container
+
+**I think that is mixing installation with running**
+- Is the run instruction issued from some directory?
+
+
+
 
 ### Without the Docker image ###
 
@@ -225,3 +242,4 @@ The R package itself with standard organization. Directories and files under ins
   There are test of the basic functionlity of the web page (navigation, loading files...), working with csd, dag and matrix inputs (loading examples, modifying values, changes gene names and number), and checking interface behaviour in the results' tab.
 
 
+**How are the tests run?**
