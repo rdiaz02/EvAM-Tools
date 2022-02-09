@@ -1,6 +1,6 @@
 ## Avoid use of ":::". Instead, use approach in
 ## https://stackoverflow.com/a/46098814
-
+## And note that this is all code that I (RDU) control as is from OncoSimulR
 evam_allGenotypes_to_matrix <-
     utils::getFromNamespace("allGenotypes_to_matrix",
                             "OncoSimulR")
@@ -25,9 +25,3 @@ evam_posetToGraph <- utils::getFromNamespace("posetToGraph",
 
 evam_shannonI <- utils::getFromNamespace("shannonI",
                                          "OncoSimulR")
-
-## evam_inferTheta <- utils::getFromNamespace("inferTheta", "OncoBN")
-
-
-
-
