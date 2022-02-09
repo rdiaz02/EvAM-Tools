@@ -1,5 +1,3 @@
-
-
 test_that("Output are not generated with bad input", {
     trajectory <- list(
         c("WT", "C", "C, D"),

@@ -58,15 +58,19 @@ cpm_out_to_oncosimul <- function(x, sh = -Inf) {
         s <- x$rerun_lambda
         typeDep <- "AND"
     } else if ("Relation" %in% names(x)) { ## HESBCN (same thing as PMCE)
-        s <- x$Lambdas
+        ## Also using this for DBN, as it could return an AND
+        if("Lambdas" %in% names(x) ) ## HESBCN
+            s <- x$Lambdas
+        if("Thetas" %in% names(x) ) ## DBN
+            s <- x$Thetas
         typeDep <- x$Relation
         typeDep[typeDep == "Single"] <- "AND"
     } else if ("OT_edgeWeight" %in% names(x)) { ## OT
         s <- x$OT_edgeWeight
         typeDep <- "AND"
-    } else if ("Thetas" %in% names(x)) { ## DBN
-        s <- x$Thetas
-        typeDep <- "OR"
+    ## } else if ("Thetas" %in% names(x)) { ## DBN
+    ##     s <- x$Thetas
+    ##     typeDep <- "OR"
     } else {
         stop("Input not recognized")
     }
