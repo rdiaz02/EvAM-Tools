@@ -7,7 +7,7 @@
 process_samples(
   sim,
   n_genes,
-  gene_names = NULL,
+  gene_names,
   output = c("frequencies", "state_counts", "transitions")
 )
 }
@@ -19,7 +19,7 @@ $obs_events data.frame with mutated before the end of the sampling time}
 
 \item{n_genes}{number of genes observed}
 
-\item{gene_names}{List of gene names. If NULL, genes will be named alphabetically}
+\item{gene_names}{List of gene names. Required.}
 
 \item{output}{type of output that we want}
 }
