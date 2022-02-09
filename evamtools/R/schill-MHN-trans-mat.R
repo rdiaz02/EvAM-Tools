@@ -39,6 +39,10 @@ do_MHN2 <- function(x,  lambda = 1/nrow(x), sparse = TRUE) {
     theta <- Learn.MHN(mhnd, lambda = lambda)
     message("\n      MHN: done Learn.MHN ", date(), "\n")
     colnames(theta) <- rownames(theta) <- colnames(x)
+    ## Reorder, so genotype names and transition rate matrix
+    ## have names ordered
+    oindex <- order(colnames(theta))
+    theta <- theta[oindex, oindex]
     if(!sparse) {
         trm <- theta_to_trans_rate_3(theta,
                                      inner_transition = inner_transitionRate_3_1)
@@ -198,11 +202,10 @@ theta_to_trans_rate_3 <- function(theta,
 ##      theta -> transition rate matrix
 theta_to_trans_rate_3_SM <- function(theta,
                                      inner_transition = inner_transitionRate_3_1) {
-
+    
     ## t1 <- Sys.time()
     Theta <- exp(theta)
     geneNames <- colnames(theta)
-    
     k <- ncol(theta)
     genots <- allGenotypes_3(k)
     numGenots <- length(genots$num_mut)
@@ -388,6 +391,10 @@ do_MHN <- function(x,  lambda = 1/nrow(x)) {
     theta <- Learn.MHN(mhnd, lambda = lambda)
     message("\n      MHN: done Learn.MHN ", date(), "\n")
     colnames(theta) <- rownames(theta) <- colnames(x)
+    ## Reorder, so genotype names and transition rate matrix
+    ## have names ordered
+    oindex <- order(colnames(theta))
+    theta <- theta[oindex, oindex]
     trm <- theta_to_trans_rate_3(theta,
                                  inner_transition = inner_transitionRate_3_1)
     message("\n      MHN: done theta_to_trans_rate_3 ", date(), "\n")
