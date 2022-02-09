@@ -173,7 +173,7 @@ str2int <- function(str_state, sep =", ", wt = "WT", n = NULL){
 generate_sorted_genotypes <- function(n_genes, gene_names = NULL){
     if(n_genes <= 0) stop("Number of genes should be > 0")
     n_states <- 2**n_genes
-    if(is.null(gene_names)) gene_names <- LETTERS[seq_along(n_genes)]
+    if(is.null(gene_names)) gene_names <- LETTERS[seq_len(n_genes)]
     stopifnot(n_genes == length(gene_names))
     gene_names <- sort(gene_names)
     
