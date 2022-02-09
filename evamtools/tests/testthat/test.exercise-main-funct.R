@@ -3,12 +3,18 @@ test_that("Minimal test: we can run", {
     data(every_which_way_data)
     Dat1 <- every_which_way_data[[16]][1:40, 2:6]
     out <- suppressMessages(evam(Dat1,
-                                 methods = c("CBN", "OT",
+                                 methods = c("CBN", "OT", "OncoBN",
                                              "MHN", "HESBCN")))
     expect_true(exists("OT_model", where = out))
 })
 
 
+exercise_sample_all_CPMs <- function(out) {
+    samp <- evamtools:::sample_all_CPMs(out, 1000)
+    se <- paste0(c("CBN", "OT", "OncoBN", "MHN", "HESBCN"),
+                 "_genotype_freqs")
+    expect_true(all(vapply(se, function(x) exists(x, samp), TRUE)))  
+}
 
 
 test_that("We can deal with duplicated columns and columns without events and constant columns", {
@@ -20,34 +26,38 @@ test_that("We can deal with duplicated columns and columns without events and co
     Dat1[, "constant"] <- rep(1, nrow(Dat1))
     
     out1 <- suppressMessages(evam(Dat1[, 1:6],
-                                  methods = c("CBN", "OT",
+                                  methods = c("CBN", "OT", "OncoBN",
                                               "MHN", "HESBCN")))
     expect_true(exists("OT_model", where = out1))
 
     out2 <- suppressMessages(evam(Dat1[, c(1:5, 7)],
-                                  methods = c("CBN", "OT",
+                                  methods = c("CBN", "OT", "OncoBN",
                                               "MHN", "HESBCN")))
     expect_true(exists("OT_model", where = out2))
 
     out3 <- suppressMessages(evam(Dat1[, c(1:5, 8)],
-                                  methods = c("CBN", "OT",
+                                  methods = c("CBN", "OT", "OncoBN",
                                               "MHN", "HESBCN")))
     expect_true(exists("OT_model", where = out3))
 
 
     out4 <- suppressMessages(evam(Dat1,
-                                  methods = c("CBN", "OT",
+                                  methods = c("CBN", "OT", "OncoBN",
                                               "MHN", "HESBCN")))
     expect_true(exists("OT_model", where = out4))
 
     out5 <- suppressMessages(evam(Dat1,
-                                  methods = c("CBN", "OT",
+                                  methods = c("CBN", "OT", "OncoBN",
                                               "MHN", "HESBCN"),
                                   max_cols = 3))
     expect_true(exists("OT_model", where = out5))
 
-    
 
+    exercise_sample_all_CPMs(out1)
+    exercise_sample_all_CPMs(out2)
+    exercise_sample_all_CPMs(out3)
+    exercise_sample_all_CPMs(out4)
+    exercise_sample_all_CPMs(out5)
 })
 
 
@@ -75,21 +85,27 @@ test_that("Examples from initial-simple-examples", {
     db5 <- evamtools:::add_WT(db3, 5 * nrow(db3))
 
     out3 <- suppressMessages(evam(db3,
-                                  methods = c("CBN", "OT",
+                                  methods = c("CBN", "OT", "OncoBN",
                                               "MHN", "HESBCN")))
     expect_true(exists("OT_model", where = out3))
 
 
     out4 <- suppressMessages(evam(db4,
-                                  methods = c("CBN", "OT",
+                                  methods = c("CBN", "OT", "OncoBN",
                                               "MHN", "HESBCN")))
     expect_true(exists("OT_model", where = out4))
 
 
     out5 <- suppressMessages(evam(db5,
-                                  methods = c("CBN", "OT",
+                                  methods = c("CBN", "OT", "OncoBN",
                                               "MHN", "HESBCN")))
     expect_true(exists("OT_model", where = out5))
+
+
+    exercise_sample_all_CPMs(out3)
+    exercise_sample_all_CPMs(out4)
+    exercise_sample_all_CPMs(out5)    
+   
 })
 
 
@@ -97,15 +113,21 @@ test_that("We can run evam with non-default arguments", {
     data(every_which_way_data)
     Dat1 <- every_which_way_data[[16]][1:40, 2:8]
     out <- suppressMessages(evam(Dat1,
-                                  methods = c("CBN", "OT",
+                                  methods = c("CBN", "OT", "OncoBN",
                                               "MHN", "HESBCN"),
                                  max_cols = 4,
                                  cbn_cores = 2,
                                  cbn_init_poset = "linear",
                                  hesbcn_steps = 20000,
                                  hesbcn_seed = 4,
-                                 mhn_lambda = 1/10))
+                                 mhn_lambda = 1/10,
+                                 oncobn_model = "CBN",
+                                 oncobn_epsilon = 0.01,
+                                 ot_with_errors_dist_ot = FALSE
+                                 ))
     expect_true(exists("OT_model", where = out))
+
+    exercise_sample_all_CPMs(out)
 })
 
 cat("\n Done test.exercise-main-funct.R \n")
