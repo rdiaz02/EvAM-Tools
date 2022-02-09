@@ -192,11 +192,15 @@ population_sample_from_trm <- function(trm, n_samples = 10,
 #' @return List with a list of trajectories (the order in which gene mutations
 #' are acquired), genotype frequencies and genotypes transition matrix (with
 #' counts of how many transitions between each genotype have been observed) 
-process_samples <- function(sim, n_genes, gene_names = NULL,
+process_samples <- function(sim, n_genes,
+                            gene_names,
                             output = c("frequencies",
                                        "state_counts",
                                        "transitions")){
-    if(is.null(gene_names)) gene_names <- LETTERS[1:n_genes]
+
+    ## RDU: gene_names should never be null, as there is a sim
+    ## with things in there
+    ## if(is.null(gene_names)) stop("gene_names ")gene_names <- LETTERS[1:n_genes]
     
     #Checking input
     params <- c("trajectory", "obs_events")
@@ -227,19 +231,24 @@ process_samples <- function(sim, n_genes, gene_names = NULL,
         return(tmp_genotype)
     }, character(1))
     
-    trajectories <- sim$trajectory
-
     #Calculate frequencies
     if (out_params["frequencies"]) {
-        frequencies_tmp <- sample_to_pD_order(sim$obs_events, n_genes, gene_names)
+        counts_tmp <- sample_to_pD_order(sim$obs_events, n_genes, gene_names)
         frequencies <- data.frame(
             Genotype = sorted_genotypes,
-            Counts = frequencies_tmp
+            Counts = counts_tmp
         )
         rownames(frequencies) <- NULL
         output$frequencies <- frequencies
     }
 
+    trajectories <- sim$trajectory
+
+    ## FIXME: this does not scale. With 12 genes we have a 1.7e7 matrix!
+    
+    ## The logic is wrong. It assumes that genotypes, as given by
+    ## sorted_genotypes, correspond to the genotypes as they exist
+    ## in sim$trajectory (thus sim$obs_events).
     #Calculate transitions
     if (out_params["transitions"]) {
         tt <- matrix(0L, nrow = n_states, ncol = n_states)
@@ -310,7 +319,7 @@ sample_all_CPMs <- function(cpm_output
                 function(x) paste(names(genots)[x == 1], collapse = ", ")))
             names(genots_2) <- NULL
             genots_2[genots_2 == ""] <- "WT"
-
+            ## RDU FIXME how do we know they are ordered in the same way!!??
             tmp_genotypes_sampled <- sample_to_pD_order(
                 sample(genots_2, n_samples, 
                     prob = tmp_data$Prob, replace = TRUE),
@@ -330,7 +339,8 @@ sample_all_CPMs <- function(cpm_output
                 print(sprintf("Running %s", method))
                 sims <- population_sample_from_trm(trm, n_samples = n_samples)
                 psamples <- process_samples(sims,
-                                            n_genes, gene_names,
+                                            n_genes,
+                                            gene_names,
                                             output = c("transitions",
                                                        "frequencies")
                                             )
