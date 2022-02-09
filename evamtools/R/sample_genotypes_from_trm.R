@@ -372,10 +372,13 @@ sample_all_CPMs <- function(cpm_output
 #' @param gene_names List of gene names. If NULL, genes will be named alphabetically
 #' 
 #' @return counts of all genotypes in same order as used by MHN
+#'         gene_names is always sorted inside the function to ensure
+#'         results do not differ by gene_names order
 sample_to_pD_order <- function(x, ngenes, gene_names = NULL) {
-    if(is.null(gene_names)) gene_names <- LETTERS[1:ngenes]
+    if(is.null(gene_names)) gene_names <- LETTERS[seq_along(ngenes)]
+    stopifnot(ngenes == length(gene_names))
     x <- as.data.frame(table(x), stringsAsFactors = FALSE)
-    
+    gene_names <- sort(gene_names)
     genot_int <- x[, 1]
     genot_int <- gsub("WT", "", genot_int)
     genot_int <- vapply(genot_int,
