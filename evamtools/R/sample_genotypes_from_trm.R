@@ -360,20 +360,20 @@ sample_all_CPMs <- function(cpm_output
     return(output)
 }
 
-#' @title Count genotypes 
-#' 
-#' Take a sample (a vector), with genotypes as "A, B", etc
-#' and return a vector of frequencies (counts) in the exact same
-#' order as used by MHN
-#' A much faster implementation
+## #' @title Count genotypes 
+## #' 
+## #' Take a sample (a vector), with genotypes as "A, B", etc
+## #' and return a vector of frequencies (counts) in the exact same
+## #' order as used by MHN
+## #' A much faster implementation
 
-#' @param x vector of genotypes
-#' @param ngenes total number of genes
-#' @param gene_names List of gene names. If NULL, genes will be named alphabetically
-#' 
-#' @return counts of all genotypes in same order as used by MHN
-#'         gene_names is always sorted inside the function to ensure
-#'         results do not differ by gene_names order
+## #' @param x vector of genotypes
+## #' @param ngenes total number of genes
+## #' @param gene_names List of gene names. If NULL, genes will be named alphabetically
+## #' 
+## #' @return counts of all genotypes in same order as used by MHN
+## #'         gene_names is always sorted inside the function to ensure
+## #'         results do not differ by gene_names order
 sample_to_pD_order <- function(x, ngenes, gene_names = NULL) {
     if(is.null(gene_names)) gene_names <- LETTERS[seq_along(ngenes)]
     stopifnot(ngenes == length(gene_names))
@@ -390,3 +390,5 @@ sample_to_pD_order <- function(x, ngenes, gene_names = NULL) {
     return(tabulate(rep(unname(genot_int), x[, 2]),
                    nbins = 2^ngenes))
 }
+
+
