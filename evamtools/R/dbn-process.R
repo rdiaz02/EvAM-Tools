@@ -17,24 +17,28 @@
 ## gets fixed in Nicol's original code: they should be using
 ## importFrom: https://github.com/phillipnicol/OncoBN/issues/2
 
-#' Run DBN on data
-#' 
-#' @param data data.frame with cross sectional data
-#' @return list$edges Data.frame with From, To, Edge and Theta.
-#' @return list$thetas Thetas of the best fit
-#' @return list$likelihood Float. Likelihood of the fit
-do_DBN <- function(data) {
-  invisible(capture.output(out <- fitCPN(data, algorithm = "DP")))
-  ## thetas <- OncoBN:::inferTheta(data, out)
-  thetas <- evam_inferTheta(data, out)
-  dbn_out <- igraph::as_data_frame(out$graph)
-  dbn_out$from[dbn_out$from == "WT"] <- "Root"
-  dbn_out$edges <- mapply(function(x,y){paste(x, "->", y, sep="")}, dbn_out$from, dbn_out$to)
-  dbn_out$thetas <- rep(unlist(thetas$thetas), vapply(thetas$parents, length, integer(1)))
-  colnames(dbn_out) <- c("From", "To", "Edge", "Thetas")
-  return(list(
-    edges = dbn_out
-              , thetas = thetas
-              , likelihood = out$score
-              ))
+
+## Not used now
+if(FALSE) {
+    #' Run DBN on data
+    #' 
+    #' @param data data.frame with cross sectional data
+    #' @return list$edges Data.frame with From, To, Edge and Theta.
+    #' @return list$thetas Thetas of the best fit
+    #' @return list$likelihood Float. Likelihood of the fit
+    do_DBN <- function(data) {
+        invisible(capture.output(out <- fitCPN(data, algorithm = "DP")))
+        ## thetas <- OncoBN:::inferTheta(data, out)
+        thetas <- evam_inferTheta(data, out)
+        dbn_out <- igraph::as_data_frame(out$graph)
+        dbn_out$from[dbn_out$from == "WT"] <- "Root"
+        dbn_out$edges <- mapply(function(x,y){paste(x, "->", y, sep="")}, dbn_out$from, dbn_out$to)
+        dbn_out$thetas <- rep(unlist(thetas$thetas), vapply(thetas$parents, length, integer(1)))
+        colnames(dbn_out) <- c("From", "To", "Edge", "Thetas")
+        return(list(
+            edges = dbn_out
+          , thetas = thetas
+          , likelihood = out$score
+        ))
+    }
 }

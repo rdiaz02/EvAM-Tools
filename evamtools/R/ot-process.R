@@ -18,46 +18,6 @@ options(mc.cores = 1L)
 options(boot.parallel = "no")
 options(boot.ncpus = 1L)
 
-## rm(list = ls())
-# library(Oncotree)
-# library(help = Oncotree)
-
-
-## Also return the frequency of the original tree
-## see
-## > print.boottree
-## function (x, ...) 
-## {
-##     orig.string <- paste(x$original$parent.num, collapse = ".")
-##     boot.idx <- match(orig.string, as.character(x$tree.list$Tree))
-##     cat("Out of the", sum(x$tree.list$Freq), "replicates", "there are", 
-##         nrow(x$tree.list), "unique trees with frequencies from", 
-##         max(x$tree.list$Freq), "down to", min(x$tree.list$Freq), 
-##         "\n")
-##     cat("The bootstrap process found the original tree", x$tree.list$Freq[boot.idx], 
-##         "times\n")
-##     invisible(x)
-## }
-
-f_ot <- function(x, nboot = 100) {
-    datax <- x$out$popSample
-    datax <- pre_process(datax, remove.constant = FALSE)
-    if(ncol(datax) < 2) {
-        return(list(name = x$name, params = x$params,
-                    nocols = TRUE,
-                    time = NA,
-                    res = NA))
-    } else {
-        time <- system.time({
-            otout <- try(ot_proc(datax, nboot = nboot))
-        })
-        return(list(name = x$name, params = x$params,
-                    nocols = FALSE,
-                    time = time,
-                    res = otout))
-    }
-}
-
 ot_consensus_sb <- function(x) {
     ## Taking the code from plot.boottree
     child <- x$original$child
@@ -78,7 +38,6 @@ ot_consensus_sb <- function(x) {
     ## mostfreq <- list(child = child, parent = parent,
     ##                  parent.num = parent.num)
 
-    
     ## Now, extract the From and To in my usual way
     edges.matrix <- cbind(parent = parent,
                           child = child)
@@ -98,39 +57,38 @@ ot_consensus_sb <- function(x) {
 }
 
 
-## You can verify this function by running examples
-## and doing plot(boot, draw.consensus = TRUE, minfreq = 100)
-ot_consensus_mine <- function(fit, boot) {
-    cn <- colnames(fit$data)
-    child <- boot$original$child
-    stopifnot(child[1] == "Root")
-    child <- child[-1]
-    consensus <- boot$consensus
-    stopifnot(consensus[1] == 0)
-    stopifnot(sum(consensus == 0) == 1)
-    parent <-cn[consensus[-1]]
-    return(data.frame(
-        From = parent,
-        To = child,
-        edge = paste(parent, child, sep = " -> "),
-        stringsAsFactors = FALSE
-    ))
-}
-## Some checks
-check_ot_consensus <- function(data, nb) {
-    otf <- oncotree.fit(data)
-    otb <- bootstrap.oncotree(otf, R = nb, type = "nonparametric")
-    par(mfrow = c(2, 1))
-    plot(otb, draw.consensus = TRUE, minfreq = 100)
-    cat("\n mine\n")
-    print(mine <- ot_consensus_mine(otf, otb))
-    cat("\n sb\n")
-    print(otsb <- ot_consensus_sb(otb))
-    identical(otsb, mine)
-}
-## and do, for instance
-## check_ot_consensus(ov.cgh, 5)
-
+## ## You can verify this function by running examples
+## ## and doing plot(boot, draw.consensus = TRUE, minfreq = 100)
+## ot_consensus_mine <- function(fit, boot) {
+##     cn <- colnames(fit$data)
+##     child <- boot$original$child
+##     stopifnot(child[1] == "Root")
+##     child <- child[-1]
+##     consensus <- boot$consensus
+##     stopifnot(consensus[1] == 0)
+##     stopifnot(sum(consensus == 0) == 1)
+##     parent <-cn[consensus[-1]]
+##     return(data.frame(
+##         From = parent,
+##         To = child,
+##         edge = paste(parent, child, sep = " -> "),
+##         stringsAsFactors = FALSE
+##     ))
+## }
+## ## Some checks
+## check_ot_consensus <- function(data, nb) {
+##     otf <- oncotree.fit(data)
+##     otb <- bootstrap.oncotree(otf, R = nb, type = "nonparametric")
+##     par(mfrow = c(2, 1))
+##     plot(otb, draw.consensus = TRUE, minfreq = 100)
+##     cat("\n mine\n")
+##     print(mine <- ot_consensus_mine(otf, otb))
+##     cat("\n sb\n")
+##     print(otsb <- ot_consensus_sb(otb))
+##     identical(otsb, mine)
+## }
+## ## and do, for instance
+## ## check_ot_consensus(ov.cgh, 5)
 
 ot_consensus <- ot_consensus_sb
 
@@ -237,7 +195,7 @@ ot_proc <- function(datax, nboot = 1000, distribution.oncotree = TRUE) {
                       OT_obsMarginal = obs_marginal[edges.matrix[, "child"]],
                       OT_predMarginal = pred_marginal[edges.matrix[, "child"]],
                       stringsAsFactors = FALSE),
-                consensus = consensus, ## ot_consensus(ot.boot),
+                consensus = consensus, 
                 OT_error.fun  = error.fun,
                 ot.boot.original = ot.boot.original, ## Frequency of original tree among boot
                 genots_predicted = est_genots,
@@ -246,79 +204,6 @@ ot_proc <- function(datax, nboot = 1000, distribution.oncotree = TRUE) {
                 two_way_observed = obs2way
                       ))
 }
-
-## For genotypes, obs and pred
-## then match dd and the tt table, but I might as well
-## paste and tabulate and compare, create a long table with indicator,
-## do a chi-square, and test and find largest diffs
-
-
-## require(gtools)
-## require(dplyr)
-## freq_combs <- function(x, joint = 3) {
-##     ## First columns are genes, last is Prob or Freq
-##     ## Beware to remove the 1, if coming from OT expected
-
-##     ## When using this, make sure the observed and predicted have columns
-##     ## ordered the same way.
-
-    
-##     ## joint: 3 for three-way, etc.
-##     ng <- ncol(x) - 1
-##     cc <- combinations(ng, joint)
-
-##     yes_comb <- function(z, s = joint) {
-##         ## these have the given joint combination
-##         which(rowSums(z[, , drop = FALSE]) == s)
-##     }
-
-
-##     these_cols_comb <- function(cols, data = x) {
-##         joint <- length(cols)
-##         ## data has the genotypes and the last column is freq
-##         rr <- yes_comb(data[, cols, drop = FALSE], s = joint)
-##         s <- 0
-##         if(length(rr) > 0) {
-##             s <- sum(data[rr, ncol(data)])
-##         }
-##         nn <- paste(colnames(data)[cols], collapse = ",")
-##         return(data.frame(comb = nn, freq = s, stringsAsFactors = FALSE))
-##     }
-##     browser()
-##     return(dplyr::bind_rows(apply(cc, 1,
-##                                   function(u) these_cols_comb(u, x))))
-## }
-
-
-
-
-## The "drop = FALSE" here but not in old versions: if we never have a
-## single column of data, then edges.matrix always has at least two rows.
-
-## In former versions, pre_process would not allow passing a constant
-## column. So any column would have at least two states. And all the
-## functions only attempt anything if the number of columns is at least
-## 2. So with two columns, one constant, we would never call any analysis
-## function.
-
-
-## pre_process now allows passing a constant column. So we have two
-## columns. Analysis is allowed. But then OT removes the constant column.
-
-
-## Why do we allow now data with only a single column? Because we now are
-## trying to also recover the Root -> something. If you know you are going
-## to exclude those, then data sets with only 1 column make no sense.
-
-
-
-
-## FIXME: to add?
-
-## rank order of worst predicted genes?
-## small bootstrap
-## discrepancy consensus and original
-
 
 # library(codetools)
 # checkUsageEnv(env = .GlobalEnv)

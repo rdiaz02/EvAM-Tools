@@ -28,8 +28,10 @@
 #include <R.h>
 #include <Rinternals.h>
 #include <R_ext/BLAS.h>
-#include <omp.h>
 
+#ifdef _OPENMP
+# include <omp.h>
+#endif
 
 SEXP C_kronvec(SEXP Theta, SEXP i_, SEXP x, SEXP diag_, SEXP transp_) {
   double *ptheta = REAL(Theta);

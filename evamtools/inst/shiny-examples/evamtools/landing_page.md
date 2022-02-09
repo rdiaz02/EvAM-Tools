@@ -1,9 +1,9 @@
 # What is Evam-tools?
 ***
-```Evam-tools``` is a package that allows to infeer cancer evolutionary pathways  starting from [_cross sectional data **(CSD)**_](#helpcsd) base on the output of [_cancer progression models  **(CPMs)**_](#cpms).
+```Evam-tools``` is a package that allows to infer cancer evolutionary pathways  from [_cross sectional data **(CSD)**_](#helpcsd) base on the output of [_cancer progression models  **(CPMs)**_](#cpms).
 
 This web interface provides a user-friendly interactive version of the package. 
-Here you can define complex scenarios with few click and check the predictions of several softwares.  
+Here you can define complex scenarios with a few click and check the predictions of several models.
 
 * In the ```Input``` tab you can define data sets to run ```Evam-tools```.
 * In the ```Results``` tab you can see the output of [_CPMs_](#cpms). 
@@ -12,16 +12,15 @@ Here you can define complex scenarios with few click and check the predictions o
 <img src="evamtools.png" width=850/>
 </center>
 
-```Evam-tools``` is is also available as an R command package.
-Link to the package. 
+```Evam-tools``` is is also available as an R package.
+(See installation instructions in https://github.com/rdiaz02/EvAM-Tools#how-to-install-to-run-just-the-r-package)
 
 
 # What is _cross-sectional data_?<a id="helpcsd"></a> 
 ***
 
-_Cross sectional data, or CSD,_ represents a collection of screened patients. 
-For each of those patients, the state of several events has been checked. 
-For events we can refeer to single point mutations, insertions, deletions or any other genetic modification.
+In cross-sectional data, a single sample has been taken from each patient. That single sample represents the "observed genotype" of the tumor of that patient.
+Genotype can refer to single point mutations, insertions, deletions or any other genetic modification.
 
 In summary, _CSD_ is a binary matrix, filled either with _0_ if an event is not observed in a patient, or with _1_ if it is observed.
 
@@ -116,12 +115,14 @@ The results sections includes:
 
 3. *Tabular data*: represents the raw values computed from the model or extracted from the samples. This includes: 
   
-  * *Transition rates*: rates of an exponential that model the trnasition from one genotype to another. This option is not available for OT or DBN.
-  * *Genotype transitions counts*: times a transition from genotype A to genotype B has been observed when sampling. This option is not available for OT or DBN.
-  * *Genotype frequencies*: frequency of each genotype. This option is not available for OT or DBN.
-  * *Transition probabilities*: conditional probabilities of transitions to a genotypes given a previous one.
-  * *Lambdas/probabilities*: parameters of each model. This option is not available for MHN. 
-  * *Time-discretized transition matrix*:  the time-discretized version of the transition probability matrix. This option is not available for OT or DBN.
+  * *Transition rates*: the transition rate matrix of the continuous time Markov chain that models the transition from one genotype to another. This option is not available for OT, as OT does not return rates. <!-- or DBN. -->
+  * *Transition probabilities*: conditional probability of transitions to a genotype (obtained using competing exponentials from the transition rate matrix; for OT this is actually a abuse of the untimed oncogenetic tree model, as explained in Diaz-Uriarte & Vasallo, 2019).
+  * *Genotype frequencies*: absolute frequencies of each genotype as obtained by sampling from the given model. For all models except OT, obtained by simulating a sampling process from the transition rate matrix with observation time distributed as an exponential of rate 1. For OT, obtained from the code of Szabo & Boucher (package Oncotree) that gives the predicted probabilities of the genotypes according to the OT model; we then use multinomial sampling from the predicted probabilities. <!-- This option is not available for OT or DBN. -->
+
+  * *Genotype transitions counts*: the number of times a transition from genotype A to genotype B has been observed when sampling. This option is not available for OT as this is undefined for OT. <!-- or DBN. -->
+
+  * *Lambdas/probabilities*: parameters of each model. This option is not available for MHN, that returns hazards.
+  * *Time-discretized transition matrix*:  the time-discretized version of the transition rate matrix. This option is not available for OT (as it requires rates).
 
 
 # What is a cancer progression model (CPM)?<a id="cpms"></a>
@@ -134,7 +135,8 @@ Cancer progression models use cross-sectional data to infer probabilistic relati
 
 *  **Oncogenetic Tress (OT):** this is the simplest graphical model. Restrictions are represented as a tree. Hence, a parent node can have many children, but children have a single parent.
 *  **Conjuntive Bayesian Networks (CBN):** this model generalizes the tree-based restricion of OT to a direct acyclic graph (DAG). A DAG allows to include multiple parents. In CBN, when a node depends of many parent events, all of the them have to be present for the children to appear. In that sense, CBN models this relationships as conjuntive, in other words, it models the AND relationship.
-*  **Disjuntive Bayesian Networks (DBN):** models multiple parent with the OR relationship.
-*  **Monte Carlo CBN (MCCBN):** this is an implementation of CBN using Monte Carlo expectationi-maximization algorithm to work with a large number of mutations.
-*  **Progression Models of Cancer Evolution (PMCE):** is also a graphical model which main features it the aumatic detection of logical formulas AND, OR and XOR.
-*  **Mutual Hazard networks (MHN):** in this model dpeendencies are not deterministic. In that sense, we do not see a direct dependence relationship, i.e. mutation B depends on mutation A. Conversely, an envent is influenced by all others. So, one event can make other more like (the presence of A promotes B) and also inhibiting it (the presence of A inhibits B). Hence, MHN includes multiple dependencies and is not limited to DAG schemes. The main parameters is a theta matrix that represents how one event influences other.
+<!-- *  **Disjuntive Bayesian Networks (DBN):** models multiple parent with the OR relationship. -->
+<!-- *  **Monte Carlo CBN (MCCBN):** this is an implementation of CBN using Monte Carlo expectationi-maximization algorithm to work with a large number of mutations. -->
+*  **Hidden Extended Suppes-Bayes Causal Networks (H-ESBCN):** is somewhat similar to CBN, but it includes automatic detection of logical formulas AND, OR and XOR. Note: H-ESBCN is used by its authors as part of Progression Models of Cancer Evolution (PMCE).
+    
+*  **Mutual Hazard networks (MHN):** in this model dpeendencies are not deterministic and events can make other events  more like or less likely (inhibiting influence). Hence, MHN includes multiple dependencies and is not limited to DAG schemes. The main parameters is a theta matrix of multiplicative hazards that represents how one event influences other events.

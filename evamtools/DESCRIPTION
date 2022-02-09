@@ -1,7 +1,7 @@
 Package: evamtools
 Type: Package
 Title: Implimentation of CPM and related tools to test their performance
-Version: 0.0.0.97
+Version: 0.98.1
 Date: 2022-01-27 
 Authors@R: c(person("Herrera-Nieto", "Pablo",
 	   email = "pablo.h.nieto@gmail.com", role = "aut"), 
@@ -30,5 +30,4 @@ Imports: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree
     , gtools
     , plot.matrix
     , DT, shinyjs, shiny
-    , OncoBN
-Suggests: mccbn, testthat (>= 3.0.0)
+Suggests: testthat (>= 3.0.0)

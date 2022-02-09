@@ -112,7 +112,7 @@ do_HESBCN <- function(data,
     
     model_info$edges <- data.frame(From = from,
                                    To = to,
-                                   Edge = paste(from, to, sep = "->"),
+                                   Edge = paste(from, to, sep = " -> "),
                                    Lambdas = lambdas)
 
     ## Check we are not in the strange case of AND when hanging from Root

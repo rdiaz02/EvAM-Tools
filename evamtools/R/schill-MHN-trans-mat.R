@@ -19,6 +19,9 @@
 ## matrices. In general, the best option is to use do_MHN2 for moderate to
 ## large numbers of features.
 
+## Yes, I implemented several Theta -> transition rate, when Schill
+## already provides Build.Q. Oh well, I don't remember what I was thinking.
+## Anyway, this is another check. :-)
 
 ## observations (rows as patients, columns genes) -> transition matrix genotypes
 
@@ -192,7 +195,7 @@ theta_to_trans_rate_3 <- function(theta,
 
 
 ## theta from Learn.MHN
-##      function used to compute trans rate matrix -> transition rate matrix
+##      theta -> transition rate matrix
 theta_to_trans_rate_3_SM <- function(theta,
                                      inner_transition = inner_transitionRate_3_1) {
 
@@ -444,7 +447,7 @@ theta_to_trans_rate_1 <- function(theta) {
 }
 
 ## theta from Learn.MHN
-##      function used to compute theta -> transition rate matrix
+##      theta -> transition rate matrix
 theta_to_trans_rate <- function(theta,
                                 inner_transition = inner_transitionRate_1) {
 

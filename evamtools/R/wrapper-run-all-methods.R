@@ -22,25 +22,6 @@
 ## almost at the bottom.
 
 
-## No longer using CAPRESE or CAPRI. It gives more output of OT, MHN, CBN than
-## other former versions, such as
-## code-all-methods-2-trans-matrix-max-genes-15.R. It can use MCCBN if
-## MCCBN_INSTALLED is set to TRUE And we can produce plots (CPM-plotting.R)
-
-
-
-## You need to have
-## - Schill's MHN code
-## - MCCBN if you use it.
-## - CBN: use my version with fixes, in the repo:
-##     cd to ct-cbn-0.1.04b-with-rdu-bug-fix-write-lambda-likelihood
-## - OT  (the corresponding package Oncotree)
-## - HESBCN
-## Full details in the README.md on the upper level directory.
-
-
-
-
 ######################################################################
 ######################################################################
 ###
@@ -111,7 +92,6 @@
 ## Cancer_Data_sets/CPM-weighted-paths-biol.R
 ## in the supplementary material for Diaz-Uriarte and Vasallo.
 ## We leave in there things we don't really need. Simpler.
-
 
 ## DAG of restrictions (as data frame) ->
 ##              vector of accessible genotypes and graph of DAG of restrictions
@@ -669,46 +649,21 @@ transition_fg_sparseM <- function(x, weights) {
 
 
 
-
-
-
-
-
-#' Runs the CPMs
-#'
-#' Executes all CPMS given a cross sectional data set
-#'  
-#' @param x cross sectional data
-#' @param cores_cbn How many cores to use for CBN
-#' @param methods The methods to use. For now, the only thing that matters is
-#'     whether the vector includes the strings "MCCBN" and "DBN".
-#' @param max.cols Maximum number of columns to use in the analysis. If x has >
-#'     max.cols, selected columns are those with the largest number of events.
-#' @examples
-#'\dontrun{
-#' dB_c1 <- matrix(
-#'  c(
-#'      rep(c(1, 0, 0, 0, 0), 300) #A
-#'    , rep(c(0, 0, 1, 0, 0), 300) #C
-#'    , rep(c(1, 1, 0, 0, 0), 200) #AB
-#'    , rep(c(0, 0, 1, 1, 0), 200) #CD
-#'    , rep(c(1, 1, 1, 0, 0), 100) #ABC
-#'    , rep(c(1, 0, 1, 1, 0), 100) #ACD
-#'    , rep(c(1, 1, 0, 0, 1), 100) #ABE
-#'    , rep(c(0, 0, 1, 1, 1), 100) #CDE
-#'    , rep(c(1, 1, 1, 0, 1), 100) #ABCE
-#'    , rep(c(1, 0, 1, 1, 1), 100) #ACDE
-#'    , rep(c(1, 1, 1, 1, 0), 50) # ABCD
-#'    , rep(c(0, 0, 0, 0, 0), 10) # WT
-#'  ), ncol = 5, byrow = TRUE
-#' )
-#' colnames(dB_c1) <- LETTERS[1:5]
-#' out <- all_methods_2_trans_mat(dB_c1, do_MCCBN = FALSE)
-evam <- function(x, cores_cbn = 1,
+## Main function. data frame or matrix -> output
+evam <- function(x,
                  methods = c("CBN", "OT", "HESBCN", "MHN"),
-                 max.cols = 15) {
+                 max_cols = 15,
+                 cbn_cores = 1,
+                 cbn_init_poset = "OT",
+                 hesbcn_steps = 100000,
+                 hesbcn_seed = NULL,
+                 mhn_lambda = 1/nrow(x)
+                 ) {
 
-
+    if(!(cbn_init_poset %in% c("OT", "linear")))
+        stop("cbn_init_poset must be one of OT or linear. ",
+             " Custom not allowed in call from evam.")
+    
     if ("MCCBN" %in% methods) {
         do_MCCBN <- TRUE
     } else {
@@ -732,7 +687,7 @@ evam <- function(x, cores_cbn = 1,
     ## remove.constant makes no difference IFF we add pseudosamples, as
     ## there can be no constant column when we add pseudosamples
     x <- pre_process(x, remove.constant = FALSE,
-                     min.freq = 0, max.cols = max.cols)
+                     min.freq = 0, max.cols = max_cols)
 
     if(ncol(x) < 2) {
         warning("Fewer than 2 columns in data set")
@@ -769,7 +724,7 @@ evam <- function(x, cores_cbn = 1,
     
     message("Doing MHN")
     time_MHN <- system.time(
-        MHN_out <- do_MHN2(x, lambda = 1/nrow(x)))["elapsed"]
+        MHN_out <- do_MHN2(x, lambda = mhn_lambda))["elapsed"]
     message("time MHN = ", time_MHN)
 
 
@@ -779,7 +734,9 @@ evam <- function(x, cores_cbn = 1,
     
     message("Doing HESBCN")
     time_hesbcn <- system.time(
-      HESBCN_out <- do_HESBCN(x))["elapsed"]
+        HESBCN_out <- do_HESBCN(x,
+                                n_steps = hesbcn_steps,
+                                seed = hesbcn_seed))["elapsed"]
     message("time HESBCN = ", time_hesbcn)
 
 
@@ -798,10 +755,10 @@ evam <- function(x, cores_cbn = 1,
     time_cbn_ot <- system.time(
            CBN_out <- try(cbn_proc(x,
                                    addname = "tmpo",
-                                   init.poset = "OT",
+                                   init.poset = cbn_init_poset,
                                    nboot = 0,
                                    parall = TRUE,
-                                   cores = 1)))["elapsed"]
+                                   cores = cbn_cores)))["elapsed"]
     message("time CBN = ", time_cbn_ot)
 
     if(do_DBN) {
@@ -812,14 +769,16 @@ evam <- function(x, cores_cbn = 1,
     } 
     
     if(do_MCCBN) {
-        if( !requireNamespace("mccbn", quietly = TRUE)) {
-            warning("MC-CBN (mccbn) no installed. Not running MC-CBN")
-        } else {
-            message("Doing MC-CBN")
-            time_mccbn <-
-                system.time(MCCBN_out <- try(mccbn_proc(x)))["elapsed"]
-            message("time MC-CBN = ", time_mccbn)
-        }
+        stop("MC-CBN disabled")
+        ## if( !requireNamespace("mccbn", quietly = TRUE)) {
+        ##     warning("MC-CBN (mccbn) no installed. Not running MC-CBN")
+        ## } else {
+        ##     stop("MC-CBN disabled now")
+        ##     ## message("Doing MC-CBN")
+        ##     ## time_mccbn <-
+        ##     ##     system.time(MCCBN_out <- try(mccbn_proc(x)))["elapsed"]
+        ##     ## message("time MC-CBN = ", time_mccbn)
+        ## }
     }
 
     ## ######################################################################
@@ -928,8 +887,13 @@ evam <- function(x, cores_cbn = 1,
 
 
 #####################################################################
+#####################################################################
+##                Getting an idea of sizes of data if
+##                we did not use sparse matrices
+##
+#####################################################################
+#####################################################################
 
-## Getting an idea of sizes of data if we did not use sparse matrices
 # if(FALSE) {
 # ## 8 bytes per float as can be checked doing
 # u <- runif((2^10) * (2^10))
@@ -957,6 +921,16 @@ evam <- function(x, cores_cbn = 1,
 # ulimit::memory_limit()
 
 # }
+
+
+
+######################################################################
+######################################################################
+##
+##      mapply, OMP threads, etc
+##
+######################################################################
+######################################################################
 
 
 ## MHN does not run if we use mclapply after setting the threads for OMP >

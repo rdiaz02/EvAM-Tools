@@ -101,6 +101,17 @@ create_MHN_test_data_for_trans_rate_MHN_test <- function() {
     ))
 }
 
+## Compare theta_to_trans_rate_3_SM and
+## Schill's Build.Q. Recall Schill's has diagonal
+## and is transposed w.r.t. what we give
+compare_to_Build.Q <- function(x) {
+    bq <- evamtools:::Build.Q(x)
+    bq <- t(bq)
+    diag(bq) <- 0
+    t3sm <- evamtools:::theta_to_trans_rate_3_SM(x)
+    expect_equal(t3sm, bq, check.attributes = FALSE)
+}
+
 
 test_that("Diagonals of MHN trm", {
     ## paranoid check
@@ -205,6 +216,8 @@ a reference and using different algorithms", {
     expect_equal(eme1[3, 3] * eme1[3, 4], trm0["D", "C, D"])
     ## This is different, of course
     expect_false(eme1[3, 3] * eme1[4, 3] == trm0["D", "C, D"])
+
+    compare_to_Build.Q(me1)
 })
 
 
@@ -228,6 +241,7 @@ test_that("Compute TRM gives the same results with sparse matrices", {
 
     trmSMm <- as.matrix(trmSM)
     expect_identical(trm0, trmSMm)
+    compare_to_Build.Q(theta0)
 })
     
 
@@ -804,6 +818,9 @@ test_that("Identical results from different algos", {
                                   inner_transition = inner_transitionRate_3_2))
     expect_identical(tt1, tt31)
     expect_identical(tt31, tt32)
+
+    compare_to_Build.Q(e1)
+    compare_to_Build.Q(Theta.BC)
 })
 
 

@@ -18,6 +18,9 @@
 ## Set up: operate in a conda environment: Follow installation in README.md
 #library(imager)
 
+
+if(FALSE) {
+
 #' Runs HyperTraPS model
 #' This function runs command line tools to call to HyperTraps.
 #' Then processes the output
@@ -213,3 +216,4 @@ features2model <- function(data){
 
 
 create_transition_probabi <- function() {}
+}

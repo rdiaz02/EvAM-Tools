@@ -20,10 +20,10 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
                     "smallest lambda < 1e-15")
             ## We compute products of numbers close to R's smallest limit.
             ## We are probably fine with numbers even as small as 2e-16, but to be safe.
-        } else if (sum(data$edges$Lambda < 1e-12) >= 1) {
+        } else if (sum(data$edges$Lambda < 1e-9) >= 1) {
           warning("Skipping comparison with OncoSimul's ",
                   "numerical values of transition rate matrix: ",
-                  "one or more lambdas < 1e-12.",
+                  "one or more lambdas < 1e-9.",
                   " Comparing only sets of accessible genotypes")
           cno <- colnames(reorder_trans_mat(cpm2_out$transition_matrix))
           cnd <- colnames(
@@ -61,7 +61,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
             warning("Skipping comparison of transition matrices with ",
                     "different fitness scaling",
                     ifelse(max_fitness >= 1e10, ". max_fitness >= 1e10", ""),
-                    ifelse(ratio_lambdas >= 1e9, ". Ratio of Lambdas >= 1e9"))
+                    ifelse(ratio_lambdas >= 1e9, ". Ratio of Lambdas >= 1e9", ""))
         }
     }
    
@@ -75,7 +75,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
 
     ## Output from running evamtools:::do_HESBCN(examples_csd$csd$AND$data)
 
-    data(all_examples_csd)
+    data(examples_csd)
     ## Run HESBCN.
     ## The names declare intent; often, you just get "Single"
     ex_hesbcn_and <- evamtools:::do_HESBCN(examples_csd$csd$AND$data)

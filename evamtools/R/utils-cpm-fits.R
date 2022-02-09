@@ -15,12 +15,6 @@
 
 
 
-## a simple check
-any_constant_col <- function(x) {
-    nr <- nrow(x)
-    mcs <- max(colSums(x))
-    any(mcs == nr)
-}
 
 ## convert data frame to a matrix with 0L and 1L
 df_2_mat_integer <- function(x) {
@@ -81,7 +75,7 @@ add_pseudosamples <- function(x, n00 = "auto3") {
         ## add just 1
         fmax <- max(colSums(x))/nrow(x)
         if(fmax == 1) {
-            cat("\n  Added one pseudosample \n ")
+            message("\n  Added one pseudosample \n ")
             n00 <- 1
         } else { 
             n00 <- 0
@@ -111,3 +105,11 @@ add_WT <- function(x, N = 10000) {
     return(x)
 }
 
+
+
+## ## a simple check
+## any_constant_col <- function(x) {
+##     nr <- nrow(x)
+##     mcs <- max(colSums(x))
+##     any(mcs == nr)
+## }

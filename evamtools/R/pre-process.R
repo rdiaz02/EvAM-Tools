@@ -38,6 +38,7 @@ merge_all_dups <- function(x) {
 ## that will be unique, for whose pressence we test before starting, and
 ## that will also be used in the unfusing code.
 merge_the_ident <- function(x, column) {
+    message("Merging duplicates")
     ## Merges a column, column, identified as duplicated
     thedup <- x[, column]
     cnpre <- colnames(x)
@@ -69,7 +70,7 @@ pre_process <- function(x, remove.constant, min.freq = 0.05,
     nsubj <- nrow(x)
     cs1 <- colSums(x)
     ## Anything constant or with freq less than min.freq.
-    if(remove.constant)
+    if(remove.constant) 
         rm1 <- which( (cs1 == 0) | (cs1 == nsubj) | (cs1 < (min.freq * nsubj)))
     else
         rm1 <- which( (cs1 == 0) | (cs1 < (min.freq * nsubj)))

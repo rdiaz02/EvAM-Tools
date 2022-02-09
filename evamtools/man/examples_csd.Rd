@@ -13,7 +13,7 @@ A list with 3 items:
 }
 }
 \usage{
-examples_csd
+data(examples_csd)
 }
 \description{
 A list of cross sectional data set to be used as example inputs.

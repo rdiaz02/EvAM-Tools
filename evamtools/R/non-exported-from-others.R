@@ -26,7 +26,7 @@ evam_posetToGraph <- utils::getFromNamespace("posetToGraph",
 evam_shannonI <- utils::getFromNamespace("shannonI",
                                          "OncoSimulR")
 
-evam_inferTheta <- utils::getFromNamespace("inferTheta", "OncoBN")
+## evam_inferTheta <- utils::getFromNamespace("inferTheta", "OncoBN")
 
 
 

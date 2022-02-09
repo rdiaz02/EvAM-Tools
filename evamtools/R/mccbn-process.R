@@ -13,6 +13,62 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+## Not used now
+if(FALSE) {
+    ## This is using OT-CBN, not H-CBN2
+    mccbn_proc <- function(x) {
+        if (!requireNamespace("mccbn", quietly = TRUE))
+            stop("MC-CBN (mccbn) no installed")
+        
+        stopifnot(!is.null(colnames(x)))
+        fit <- mccbn::learn_network(x)
+        mle_index <- which.max(fit$logliks)
+        am <- fit$posets[[mle_index]]
+        df1 <- igraph::as_data_frame(graph_from_adjacency_matrix(am))
+        colnames(df1) <- c("From", "To")
+        no_parent <- setdiff(colnames(x), df1[, 2])
+        dfr <- rbind(
+            data.frame(From = "Root", To = no_parent,
+                       stringsAsFactors = FALSE),
+            df1)
+        dfr$edge = paste(dfr[, "From"],
+                         dfr[, "To"],
+                         sep = " -> ")
+        ## of course, lambda is per child
+
+        ## if using MC-CBN pre 2020-10-07 
+        ## lambda <- fit$fits[[mle_index]]$par
+
+        ## if using MC-CBN post 2020-10-07 
+        lambda <- fit$fits[[mle_index]]$lambda
+
+        names(lambda) <- colnames(am)
+        dfr$lambda <- lambda[dfr$To]
+        return(list(edges = dfr))
+    }
+}
+
+## ## Using the new functionality. Extremely slow.
+## ## The only non-defaults are threads (thrds)
+## ## and L.
+## posets <- mccbn::candidate_posets(db2, rep(1, nrow(db2)), 0.9)
+## poset0 <- posets[[length(posets)]]
+
+## fit <- mccbn::adaptive.simulated.annealing(poset0,
+##                                            db2, L = 100,
+##                                            max.iter.asa = 10000L,
+##                                            thrds = 8)
+
+
+
+######################################################################
+######################################################################
+###
+###  libboost issues
+###
+######################################################################
+######################################################################
+
 
 ## You need to do first
 ## sudo apt-get install dh-autoreconf autoconf automake autotools-dev autoconf autoconf-archive
@@ -46,50 +102,3 @@
 ## libboost-thread1.74.0:amd64
 
 ## sudo apt-get install libboost-filesystem1.67-dev libboost-graph-parallel1.67-dev libboost-iostreams1.67-dev libboost-locale1.67-dev libboost-regex1.67-dev libboost-serialization1.67-dev libboost-system1.67-dev libboost-test1.67-dev libboost1.67-dev libboost1.67-tools-dev libboost-graph1.67-dev libboost-graph1.67.0
-
-
-## FIXME: this is using OT-CBN, not H-CBN2, right?
-
-
-mccbn_proc <- function(x) {
-    if (!requireNamespace("mccbn", quietly = TRUE))
-        stop("MC-CBN (mccbn) no installed")
-    
-    stopifnot(!is.null(colnames(x)))
-    fit <- mccbn::learn_network(x)
-    mle_index <- which.max(fit$logliks)
-    am <- fit$posets[[mle_index]]
-    df1 <- igraph::as_data_frame(graph_from_adjacency_matrix(am))
-    colnames(df1) <- c("From", "To")
-    no_parent <- setdiff(colnames(x), df1[, 2])
-    dfr <- rbind(
-        data.frame(From = "Root", To = no_parent,
-                   stringsAsFactors = FALSE),
-        df1)
-    dfr$edge = paste(dfr[, "From"],
-                     dfr[, "To"],
-                     sep = " -> ")
-    ## of course, lambda is per child
-
-    ## if using MC-CBN pre 2020-10-07 
-    ## lambda <- fit$fits[[mle_index]]$par
-
-    ## if using MC-CBN post 2020-10-07 
-    lambda <- fit$fits[[mle_index]]$lambda
-
-    names(lambda) <- colnames(am)
-    dfr$lambda <- lambda[dfr$To]
-    return(list(edges = dfr))
-}
-
-
-## ## Using the new functionality. Extremely slow.
-## ## The only non-defaults are threads (thrds)
-## ## and L.
-## posets <- mccbn::candidate_posets(db2, rep(1, nrow(db2)), 0.9)
-## poset0 <- posets[[length(posets)]]
-
-## fit <- mccbn::adaptive.simulated.annealing(poset0,
-##                                            db2, L = 100,
-##                                            max.iter.asa = 10000L,
-##                                            thrds = 8)
