@@ -191,8 +191,12 @@ To launch the shiny app just open an R terminal and type ```library(evamtools);r
 docker build --tag evamtools .
 
 **That is incomplete**
-- From what directory
-- Can you give a list of pckages to install before that in Ubuntu/Debian?
+- From what directory:?
+- In fact, that fails for me with "ocker build" requires exactly 1 argument."
+- And https://docs.docker.com/engine/reference/commandline/build/
+    - seems to me to indicate that is not the correct invocation of docker
+- Can you give a link of how to install docker? (Under debian, simply apt install docker does not give an executable)
+    - Can you give a list of packages to install before that in Ubuntu/Debian?
 - The Dockerfile does not seem to install R; is it because it uses rocker/verse?
 - Does that need to be run as root?
 - Are you sure this is using R-4.1.2? I think we might need something else:
@@ -211,13 +215,16 @@ Just as above. But this time it should run much faster, because many steps will 
 docker build --tag evamtools . #To create the image
 docker run -p 3000:3000 evamtools #To run the image connecting port 3000 of the computer with port 3000 of the container
 
+
 **I think that is mixing installation with running**
 - Is the run instruction issued from some directory?
+- Is this run as root or a user? Explain the pros and cons. If possible, set up to run as user, not root.
 
 
 
+### Without the Docker image ### [FIXME: Pablo writes this](#) ###
+*** This is not yet written. Please, complete ***
 
-### Without the Docker image ###
 
 
 ## Main files and directories
