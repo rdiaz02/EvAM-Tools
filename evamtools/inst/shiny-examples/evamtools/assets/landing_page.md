@@ -41,7 +41,7 @@ This will run several [_CPMs_](#cpms) and will display their [results](#helpresu
 You can also increase or decrease the number of genes, or rename genes.
 
 # How to build an scenario of cancer evolutions that makes some sense? A simple example <a id="examples"></a>
-
+***
 Image a simple scenarios where only study 3 genes (A, B ,and C). 
 
 We sample 12 patients and we observe the following:
@@ -115,11 +115,12 @@ The results sections includes:
 
 3. *Tabular data*: represents the raw values computed from the model or extracted from the samples. This includes: 
   
-  * *Transition rates*: the transition rate matrix of the continuous time Markov chain that models the transition from one genotype to another. This option is not available for OT, as OT does not return rates. <!-- or DBN. -->
+  * *Transition rates*: the transition rate matrix of the continuous time Markov chain that models the transition from one genotype to another. This option is not available for OT, as OT does not return rates.
   * *Transition probabilities*: conditional probability of transitions to a genotype (obtained using competing exponentials from the transition rate matrix; for OT this is actually a abuse of the untimed oncogenetic tree model, as explained in Diaz-Uriarte & Vasallo, 2019).
-  * *Genotype frequencies*: absolute frequencies of each genotype as obtained by sampling from the given model. For all models except OT, obtained by simulating a sampling process from the transition rate matrix with observation time distributed as an exponential of rate 1. For OT, obtained from the code of Szabo & Boucher (package Oncotree) that gives the predicted probabilities of the genotypes according to the OT model; we then use multinomial sampling from the predicted probabilities. <!-- This option is not available for OT or DBN. -->
+  * *Genotype frequencies*: absolute frequencies of each genotype as obtained by sampling from the given model. For all models except OT, obtained by simulating a sampling process from the transition rate matrix with observation time distributed as an exponential of rate 1. For OT, obtained from the code of Szabo & Boucher (package Oncotree) that gives the predicted probabilities of the genotypes according to the OT model; we then use multinomial sampling from the predicted probabilities. 
 
-  * *Genotype transitions counts*: the number of times a transition from genotype A to genotype B has been observed when sampling. This option is not available for OT as this is undefined for OT. <!-- or DBN. -->
+
+  * *Genotype transitions counts*: the number of times a transition from genotype A to genotype B has been observed when sampling. This option is not available for OT as this is undefined for OT. or DBN.
 
   * *Lambdas/probabilities*: parameters of each model. This option is not available for MHN, that returns hazards.
   * *Time-discretized transition matrix*:  the time-discretized version of the transition rate matrix. This option is not available for OT (as it requires rates).
@@ -135,8 +136,6 @@ Cancer progression models use cross-sectional data to infer probabilistic relati
 
 *  **Oncogenetic Tress (OT):** this is the simplest graphical model. Restrictions are represented as a tree. Hence, a parent node can have many children, but children have a single parent.
 *  **Conjuntive Bayesian Networks (CBN):** this model generalizes the tree-based restricion of OT to a direct acyclic graph (DAG). A DAG allows to include multiple parents. In CBN, when a node depends of many parent events, all of the them have to be present for the children to appear. In that sense, CBN models this relationships as conjuntive, in other words, it models the AND relationship.
-<!-- *  **Disjuntive Bayesian Networks (DBN):** models multiple parent with the OR relationship. -->
-<!-- *  **Monte Carlo CBN (MCCBN):** this is an implementation of CBN using Monte Carlo expectationi-maximization algorithm to work with a large number of mutations. -->
 *  **Hidden Extended Suppes-Bayes Causal Networks (H-ESBCN):** is somewhat similar to CBN, but it includes automatic detection of logical formulas AND, OR and XOR. Note: H-ESBCN is used by its authors as part of Progression Models of Cancer Evolution (PMCE).
     
 *  **Mutual Hazard networks (MHN):** in this model dpeendencies are not deterministic and events can make other events  more like or less likely (inhibiting influence). Hence, MHN includes multiple dependencies and is not limited to DAG schemes. The main parameters is a theta matrix of multiplicative hazards that represents how one event influences other events.

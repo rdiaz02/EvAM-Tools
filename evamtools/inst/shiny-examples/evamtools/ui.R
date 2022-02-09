@@ -62,7 +62,7 @@ cpm_info <- function(){
         "
     ))),
     tags$div(id = "cpm_info",
-      includeMarkdown("landing_page.md")
+      includeMarkdown("assets/landing_page.md")
     )
   )
 }
@@ -445,17 +445,17 @@ user_input <- function(){
         text-overflow: ellipsis;
       }
       
-      #input2build input[type=radio]{
-        visibility:hidden;
-      }
+      # #input2build input[type=radio]{
+      #   visibility:hidden;
+      # }
 
-      #csd_list input[type=radio]{
-        visibility:hidden;
-      }
+      # #csd_list input[type=radio]{
+      #   visibility:hidden;
+      # }
 
-      #cpm_list input[type=radio]{
-        visibility:hidden;
-      }
+      # #cpm_list input[type=radio]{
+      #   visibility:hidden;
+      # }
 
       #input2build div label{
         padding-left: 20px;
@@ -526,9 +526,9 @@ user_input <- function(){
             tags$div(class = "download_button submit_button",
               actionButton("analysis", "Run evamtools!")
             ),
-            tags$div(class = "download_button",
-              actionButton("advanced_options", "Advanced Options")
-            ),
+            # tags$div(class = "download_button",
+            #   actionButton("advanced_options", "Advanced Options")
+            # ),
             plotOutput("plot")
             ,
             plotOutput("dag_plot")
@@ -553,9 +553,6 @@ ui <-
       value = "result_viewer",
       results_simple()
     ),
-    # tabPanel("Example Library",
-    #   "WIP"
-    # ),
     tags$head(
       tags$style(
         HTML(
