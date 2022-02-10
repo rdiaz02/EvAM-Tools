@@ -177,10 +177,10 @@ We provide an R package, evamtools, and a shiny (https://shiny.rstudio.com/) app
 
 	  
 ## How to install to also run the Shiny app? [FIXME: Pablo writes this](#) ##
-
   * Install the evamtools R package as explained [above](#how-to-install-to-run-just-the-r-package).
   * Then ... [FIXME: Pablo writes this](#)
 
+No hay que hacer nada especial para ejecutar shiny, esta se podría borrar
 
 
 ## How to run the shiny app locally ##
@@ -188,7 +188,7 @@ To launch the shiny app just open an R terminal and type ```library(evamtools);r
 
 ## How to create a Docker image  [FIXME: Pablo writes this](#** ##
 
-docker build --tag evamtools .
+From `EvAM-Tools` run: `docker build --tag evamtools .` to buid the image
 
 **That is incomplete**
 - From what directory:?
@@ -216,9 +216,11 @@ Just as above. But this time it should run much faster, because many steps will 
 ## How to run the shiny app in a local intranet  [FIXME: Pablo writes this](#) ##
 
 ### From the Docker image ###
+
+```
 docker build --tag evamtools . #To create the image
 docker run -p 3000:3000 evamtools #To run the image connecting port 3000 of the computer with port 3000 of the container
-
+```
 
 **I think that is mixing installation with running**
 - Is the run instruction issued from some directory?
@@ -229,6 +231,9 @@ docker run -p 3000:3000 evamtools #To run the image connecting port 3000 of the 
 ### Without the Docker image ### [FIXME: Pablo writes this](#) ###
 *** This is not yet written. Please, complete ***
 
+To run the shiny app you may want to change the port (right now it run in 3000). This can be done by modifying line 27 
+in `evamtools/runShiny.R`.
+Then, the app has to be launched
 
 
 ## Main files and directories
@@ -241,7 +246,7 @@ Finally it also deals with the installation of third party code.
 ### docker   [FIXME: Pablo writes this](#) 
 ### evamtools
 The R package itself with standard organization. Directories and files under inst:
-  * shiny-examples: code for the shiny application. The application consists on two main files: server.R (that controls the logic) and ui.R (includes all the interface). [FIXME: Pablo writes this](#) Explicar los subdirectorios y ficheros principales.
+  * shiny-examples: code for the shiny application. The application consists on two main files: server.R (that controls the logic) and ui.R (includes all the interface). There are two main files for the applications: server.R (with the logic) and ui.R (with the front-end). There are two additional folders: assets (with files for the landing page) and test_shiny_app (with Selenium tests for the app and testing related files). [FIXME: Pablo writes this](#) Explicar los subdirectorios y ficheros principales.
   * miscell/Using_OncoSimulR_to_get_accessible_genotypes_trans_mats.tex: explanation of using OncoSimulR to check transition matrices, the equivalence of lambdas to terms in fitness expressions, and interpretation of the lambdas for HESBCN with OR and XOR.
   * miscell/examples: examples referred to from other files (for example, from the former tex file).
   * miscell/tests-sample_genotypes_from_trm: output of tests that were run to verify the code for sampling genotypes from the transition rate matrices. We compared the output of our code with that from the code of the original authors (MHN, MCCBN) for a large set of cases.
@@ -254,3 +259,25 @@ The R package itself with standard organization. Directories and files under ins
 
 
 **How are the tests run?**
+Before launching the test you have to install a web driver. 
+For testing, I use Chrome. To download the Chrome web driver go to [https://chromedriver.chromium.org/downloads]/(https://chromedriver.chromium.org/downloads)
+and select the version supporting your browser.
+Once the web driver is downloaded, extract it and make it available from $PATH.
+
+To run selenium test first the shiny serve has to be running. 
+Then, in a separate console, go to
+`evamtools/inst/shiny-examples/evamtools/test_shiny_app` and type:
+
+```bash
+python test.shiny.py ## To run all tests
+#or
+python test.shiny.py className.testName ## To run a particular test
+```
+
+If you change the server where the shiny app is running, then the driver has to be changed.
+This is done in line 14 of `evamtools/inst/shiny-examples/evamtools/test_shiny_app/test.shiny.py`
+
+Running all test takes around 8 minutes, writes considerable amount of temporary files (more than 1Gb) and 
+makes the terminal useless (windows will be continously opening).
+Also, the tests are designed to run in a screen with 1377x768 resolution, but they have adapted to bigger screens,
+but not fully tested in those settings.
