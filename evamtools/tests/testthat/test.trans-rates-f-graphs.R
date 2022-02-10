@@ -925,10 +925,11 @@ test_that("OT and CBN: algorithm consistency with various data examples", {
         mm0  <- lapply(cpm_out_others2[mm],  cpm_access_genots_paths_w)
         mmSM <- lapply(cpm_out_others2[mm], cpm2tm)
         ## Identical unweighted transition matrices (fitness graphs)
-        uw0 <- lapply(mm0, function(x) rowScaleMatrix(x$fgraph))
-        uwSM <- lapply(mmSM, function(x) rowScaleMatrix(x$fgraph))
-        uwSMm <- lapply(uwSM, as.matrix)
-        expect_identical(uw0, uwSMm)
+        ## we no longer return fgraph, at least now
+        ## uw0 <- lapply(mm0, function(x) rowScaleMatrix(x$fgraph))
+        ## uwSM <- lapply(mmSM, function(x) rowScaleMatrix(x$fgraph))
+        ## uwSMm <- lapply(uwSM, as.matrix)
+        ## expect_identical(uw0, uwSMm)
         
         ## Identical Weighted transition matrices
         wg0 <- lapply(mm0[c("OT"

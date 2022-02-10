@@ -464,7 +464,7 @@ cpm2tm <- function(x,
     ##    If at all possible, always use the simplest processing possibe
 
     ## sanity check
-    if(exists(x$parent_set) && !(exists(x$edges$Relation)))
+    if(exists("parent_set", x) && !(exists("Relation", x$edges)))
         stop("x has parent_set but no Relation. Old format?")
 
     
