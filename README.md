@@ -233,7 +233,7 @@ docker run -p 3000:3000 evamtools #To run the image connecting port 3000 of the 
 
 To run the shiny app you may want to change the port (right now it run in 3000). This can be done by modifying line 27 
 in `evamtools/runShiny.R`.
-Then, the app has to be launched
+Then, the app has to be launched as explained above andthe corresponding port in the server has to be open to make it visible. 
 
 
 ## Main files and directories
@@ -275,9 +275,11 @@ python test.shiny.py className.testName ## To run a particular test
 ```
 
 If you change the server where the shiny app is running, then the driver has to be changed.
-This is done in line 14 of `evamtools/inst/shiny-examples/evamtools/test_shiny_app/test.shiny.py`
+This is done in line 14 of `evamtools/inst/shiny-examples/evamtools/test_shiny_app/test.shiny.py`.
+Testing the public server directly can also be considered once it is up.
 
 Running all test takes around 8 minutes, writes considerable amount of temporary files (more than 1Gb) and 
 makes the terminal useless (windows will be continously opening).
 Also, the tests are designed to run in a screen with 1377x768 resolution, but they have adapted to bigger screens,
 but not fully tested in those settings.
+
