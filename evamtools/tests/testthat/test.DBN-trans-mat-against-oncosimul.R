@@ -1,8 +1,8 @@
-## Testing that cpm_access_genots_paths_w_simplified_OR gives same output as
+## Testing that cpm2tm gives same output as
 ## cpm_to_trans_mat_oncosimul, the function that uses OncoSimulR
-test_that("Testing evamtools:::cpm_access_genots_paths_w_simplified_OR by comparing with
+test_that("Testing evamtools:::cpm2tm by comparing with
 OncoSimulR's based cpm_to_trans_mat_oncosimul", {
-    ## Recall evamtools:::cpm2tm <- cpm_to_trans_mat_oncosimul
+    ## Recall evamtools:::cpm2F2tm <- cpm_to_trans_mat_oncosimul
 
     ## First, load a bunch of data structures
     ## Adapted from test.OT-CBN-trans-mat-against-oncosimul.R
@@ -65,34 +65,34 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     }
 
     run_test_for_dataset_OR <- function(data){
-        expect_equal(reorder_trans_mat(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
-                    reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_OR(
+        expect_equal(reorder_trans_mat(evamtools:::cpm2F2tm(data$edges, max_f = NULL)$transition_matrix),
+                    reorder_trans_mat(evamtools:::cpm2tm(
                         data)$trans_mat_genots),
                     check.attributes = TRUE)
         maxff <- sample(c(2, 3, 3.5, 3.8, 4, 5, 8), size = 1)
-        expect_equal(as.matrix(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
-                    as.matrix(evamtools:::cpm2tm(data$edges, max_f = maxff)$transition_matrix))
+        expect_equal(as.matrix(evamtools:::cpm2F2tm(data$edges, max_f = NULL)$transition_matrix),
+                    as.matrix(evamtools:::cpm2F2tm(data$edges, max_f = maxff)$transition_matrix))
     }
 
 
     run_test_for_dataset_AND <- function(data){
-        expect_equal(reorder_trans_mat(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
-                    reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
+        expect_equal(reorder_trans_mat(evamtools:::cpm2F2tm(data$edges, max_f = NULL)$transition_matrix),
+                    reorder_trans_mat(evamtools:::cpm2tm(
                         data)$trans_mat_genots),
                     check.attributes = TRUE)
         maxff <- sample(c(2, 3, 3.5, 3.8, 4, 5, 8), size = 1)
-        expect_equal(as.matrix(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
-                    as.matrix(evamtools:::cpm2tm(data$edges, max_f = maxff)$transition_matrix))
+        expect_equal(as.matrix(evamtools:::cpm2F2tm(data$edges, max_f = NULL)$transition_matrix),
+                    as.matrix(evamtools:::cpm2F2tm(data$edges, max_f = maxff)$transition_matrix))
     }
 
     run_test_for_dataset_Relations <- function(data){
-        expect_equal(reorder_trans_mat(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
-                    reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(
+        expect_equal(reorder_trans_mat(evamtools:::cpm2F2tm(data$edges, max_f = NULL)$transition_matrix),
+                    reorder_trans_mat(evamtools:::cpm2tm(
                         data)$trans_mat_genots),
                     check.attributes = TRUE)
         maxff <- sample(c(2, 3, 3.5, 3.8, 4, 5, 8), size = 1)
-        expect_equal(as.matrix(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
-                    as.matrix(evamtools:::cpm2tm(data$edges, max_f = maxff)$transition_matrix))
+        expect_equal(as.matrix(evamtools:::cpm2F2tm(data$edges, max_f = NULL)$transition_matrix),
+                    as.matrix(evamtools:::cpm2F2tm(data$edges, max_f = maxff)$transition_matrix))
     }
 
     

@@ -32,7 +32,7 @@ s <- sample(1:1e6, size = 1)
 while(TRUE) {
     cat("\n Seed = ", s, ". Doing iteration ", iters, "\n")
     set.seed(s)
-    ## Recall evamtools:::cpm2tm <- cpm_to_trans_mat_oncosimul
+    ## Recall evamtools:::cpm2F2tm <- cpm_to_trans_mat_oncosimul
 
     ## For testing
     reorder_trans_mat <- function(x) {
@@ -42,7 +42,7 @@ while(TRUE) {
 
     run_test_for_dataset <- function(data) {
         ## Used in several places. Run just once
-        cpm2_out <- evamtools:::cpm2tm(data$edges, max_f = NULL)
+        cpm2_out <- evamtools:::cpm2F2tm(data$edges, max_f = NULL)
         if(min(data$edges$Lambda) < 1e-15) {
             warning("Skipping comparison with OncoSimul's ",
                     "transition rate matrix: ",
@@ -56,12 +56,12 @@ while(TRUE) {
                   " Comparing only sets of accessible genotypes")
           cno <- colnames(reorder_trans_mat(cpm2_out$transition_matrix))
           cnd <- colnames(
-              reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(                                              data)$trans_mat_genots))
+              reorder_trans_mat(evamtools:::cpm2tm(                                              data)$trans_mat_genots))
           expect_true(all(cno == cnd))
         } else {
             expect_equal(
             reorder_trans_mat(cpm2_out$transition_matrix),
-            reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(
+            reorder_trans_mat(evamtools:::cpm2tm(
                                               data)$trans_mat_genots),
             check.attributes = TRUE)
         }
@@ -82,7 +82,7 @@ while(TRUE) {
                 this_tolerance <- 1e-6
             }
             expect_equal(as.matrix(cpm2_out$transition_matrix),
-                         as.matrix(evamtools:::cpm2tm(data$edges, max_f = maxff)$transition_matrix),
+                         as.matrix(evamtools:::cpm2F2tm(data$edges, max_f = maxff)$transition_matrix),
                          tolerance = this_tolerance
                          )
             rm(this_tolerance)

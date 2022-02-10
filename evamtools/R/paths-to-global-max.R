@@ -79,7 +79,7 @@ cpm_access_genots_paths_w <- function(x, string = NULL,
     }
     
     x <- x$edges
-    tmp <- try(df_2_access_genots_and_graph(x[, c("From", "To")]))
+    tmp <- try(DAG_2_access_genots(x[, c("From", "To")]))
     
     if(inherits(tmp, "try-error")) {
         stop("how is this happening? there was edges component!")

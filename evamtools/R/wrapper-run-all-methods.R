@@ -59,34 +59,30 @@
 ######################################################################
 ###
 ###
-###       df_2_access_genots_and_graph* and cpm_access_genots_paths*
+###       DAG_2_access_genots* and cpm2tm
 ###
 ###
 ######################################################################
 ######################################################################
 
-## cpm_access_genots_paths_w* : CPM -> transition matrices
-## df_2_access_genots_and_graph*: CPM output -> accessible genotypes
+## cpm2tm : CPM -> transition matrices
+## DAG_2_access_genots*: CPM output -> accessible genotypes
 
-## cpm_access_* calls df_2_access_*
+## cpm2tm can call 3 different DAG_2_access_genots*
 
-## OT and CBN: df_2_access_genots_and_graph, cpm_access_genots_paths_w_simplified
+## OT and CBN: DAG_2_access_genots
 ##    These were the first written. Assume and AND if more than one parent
 
-## DBN: df_2_access_genots_and_graph_OR, cpm_access_genots_paths_w_simplified_OR
-##     Derived from previous, assume OR if multiple parents
+## OncoBN: if CBN model, same as OT and CBN. If DBN model:
+##   DAG_2_access_genots_OR. Derived from previous, uses OR
+##   if multiple parents
 
-## HESBCN: df_2_access_genots_and_graph_relationships,
-##          cpm_access_genots_paths_w_simplified_relationships
-##     Derived from the OT/CBN. Since HESBCN can have AND and XOR and OR, a vector
-##     that specifies the relationship if multiple parents is needed.
+## HESBCN: if only AND, as for OT/CBN. If only OR, as for OncoBN with DBN.
+##  o.w. (XOR or mixtures of any of AND/OR/XOR): cpm2tm_relationships
+##    A vector that specifies the relationship if multiple parents
+##    is used.
 
-## Yes, they could be unified and use only a single one. But each individual
-## one is faster, when it can be used, and allows for checking (e.g.,
-## DBN models fit with relations compared to AND and OR)
-
-
-
+## We try to use the simplest possible for speed and simplicity of code.
 
 
 
@@ -102,7 +98,7 @@
 ## Under an AND model, such as CBN
 ## return all the accessible genotypes
 ##     from a DAG of genes plus the DAG as igraph object
-df_2_access_genots_and_graph <- function(x) {
+DAG_2_access_genots <- function(x) {
     
     ## minor detail: if x is a sparse adjacency mat.
     ##    from igraph this still works. But don't do that.
@@ -123,11 +119,9 @@ df_2_access_genots_and_graph <- function(x) {
     names(node_depth) <- children
     node_depth <- sort(node_depth)
     ## pre-allocate a list.
-    ## FIXME: Could be smarter as a function of dim(x)?
     all_gty <- vector(mode = "list", length = 100) 
     i <- 1
     for(j in seq_along(node_depth)) {
-
         tmp_gty_1 <-
             sort(setdiff(names(subcomponent(g, v = names(node_depth)[j],
                                             mode = "in")),
@@ -173,7 +167,7 @@ df_2_access_genots_and_graph <- function(x) {
 ##  Under an OR model (not XOR, not AND), such as DBN
 ## return all the accessible genotypes
 ##     from a DAG of genes plus the DAG as igraph object
-df_2_access_genots_and_graph_OR <- function(x) {
+DAG_2_access_genots_OR <- function(x) {
     
     ## minor detail: if x is a sparse adjacency mat.
     ##    from igraph this still works. But don't do that.
@@ -249,9 +243,9 @@ df_2_access_genots_and_graph_OR <- function(x) {
 ## DAG of restrictions (as data frame), options info about gene_relations
 ##            -> vector of accessible genotypes and graph of DAG of restrictions
 ##  Under OR, AND, XOR models, as specified by gene_relations
-##  Called from cpm_access_genots_paths_w_simplified_relationships
+##  Called from cpm2tm_relationships
 ##   which itself is used for HESBCN
-df_2_access_genots_and_graph_relationships <- function(x,
+DAG_2_access_genots_relationships <- function(x,
                                                        gene_relations = NULL) {
 
     ## check if genotype follows the XOR/AND relationship.
@@ -362,8 +356,8 @@ df_2_access_genots_and_graph_relationships <- function(x,
 ##                  To = c("A", "D", "B", "E", "C", "C"))
 
 
-## df_2_access_genots_and_graph_OR(x2)
-## df_2_access_genots_and_graph_OR(x3)
+## DAG_2_access_genots_OR(x2)
+## DAG_2_access_genots_OR(x3)
 
 
 
@@ -423,7 +417,7 @@ unrestricted_fitness_graph_sparseM <- function(gacc) {
 
 ## To be used with output from CBN, MCCBN, OT
 
-## Based on cpm_access_genots_paths_w  but only with necessary output
+## Based on cpm2tm  but only with necessary output
 ##  for both speed and size and using sparse matrices.
 ##  No paths are computed, so multiple global max is a moot point
 
@@ -435,11 +429,15 @@ unrestricted_fitness_graph_sparseM <- function(gacc) {
 ## probabilities of an untimed oncogenetic tree.  Computing transition
 ## probabilities between genotypes (as well as "weighted fitness graphs") is
 ## abusing what OTs strictly provide.
-cpm_access_genots_paths_w_simplified <- function(x, 
-                                                 names_weights_paths =
-                                                     c("rerun_lambda",
-                                                       "lambda",
-                                                       "OT_edgeWeight")) {
+
+cpm2tm <- function(x, 
+                   names_weights_paths =
+                       c("rerun_lambda", ## CBN, from rerun
+                         "lambda", ## MCCBN
+                         "OT_edgeWeight", ## OT
+                         "Lambdas", ## HESBCN
+                         "Thetas" ## OncoBN
+                         )) {
     if(inherits(x, "try-error") || all(is.na(x)) || is.null(x)) {
         return(list(
             fgraph = "ERROR_CPM_ANALYSIS",
@@ -447,10 +445,43 @@ cpm_access_genots_paths_w_simplified <- function(x,
             trans_mat_genots = "ERROR_CPM_ANALYSIS"
         ))
     }
+
+    ## Logic of obtaining transition matrices and transition rate matrix
+    ##  (weighted fitness graph is trans. rate matrix for CBN and HESBCN)
+    ##  - obtain all accessible genotypes and fitness graph (unrestricted
+    ##      fitness graph) from CPM
+    ##  - from the lambdas/probs. of genes given genes obtain
+    ##       probabilities/lambdas of genotypes given genotypes. The call
+    ##       to "transition_fg" (where weights is the conditional
+    ##       prob./lambda) of descendant gene given parent gene
+    ##  - when using CBN, might not be probabilities. Make sure they are
+    ##    transition probabilities between genotypes: sweep
+
     
-    x <- x$edges
-    tmp <- try(df_2_access_genots_and_graph(x[, c("From", "To")]))
+    ## #############################
+    ## Only place in code where dealing with CBN and OT
+    ##       can differ from DBN from HESBCN
+    ##    If at all possible, always use the simplest processing possibe
+
     
+    ## OT, CBN, and OncoBN if using CBN, HESBCN only Single and AND
+    if(!exists("Relation", x$edges) ||
+       isTRUE(all(x$edges$Relation %in% c("AND", "Single")))) {
+        tmp <- try(DAG_2_access_genots(x[, c("From", "To")]))
+    } else if (all(x$edges$Relation %in% c("OR", "Single"))) { ## OncoBN with DBN model, HESBCN if only ORs
+        tmp <- try(DAG_2_access_genots_OR(x$edges[, c("From", "To")]))
+    } else { ## HESBCN
+        ## Use the "parent_set" component, which is returned
+        ## from HESBCN itself, not the "Relation" component
+        ## which we create from the paernt_set. "Relation" is shown
+        ## for a human to easily interpret the $edges data frame
+        tmp <-
+            try(DAG_2_access_genots_relationships(
+                x$edges[, c("From", "To")],
+                x$parent_set
+            ))
+    }
+
     if(inherits(tmp, "try-error")) {
         stop("Some error here")
     } else {
@@ -458,29 +489,15 @@ cpm_access_genots_paths_w_simplified <- function(x,
         fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
     }
 
-    ## Logic of obtaining weighted fitness graph
-    
-    ##  - obtain all accessible genotypes and fitness graph (unrestricted
-    ##      fitness graph) from CPM
-
-    ##  - from the lambdas/probs. of genes given genes obtain
-    ##       probabilities/lambdas of genotypes given genotypes. The call
-    ##       to "transition_fg" (where weights is the conditional
-    ##       prob./lambda) of descendant gene given parent gene
-
-    ##  - when using CBN, might not be probabilities. Make sure they are
-    ##    transition probabilities between genotypes: sweep
-
-    
-    which_col_weights <- which(colnames(x) %in% names_weights_paths)
-    if(length(which_col_weights) > 1) {
+    which_col_weights <- which(colnames(x$edges) %in% names_weights_paths)
+    if (length(which_col_weights) > 1) {
         stop("more than one column with weights")
     } else if (length(which_col_weights) == 1) {
-        stopifnot(colnames(x)[2] == "To")
-        weights <- unique(x[, c(2, which_col_weights)])
-        if(any(duplicated(weights[, "To"]))) {
+        stopifnot(colnames(x$edges)[2] == "To")
+        weights <- unique(x$edges[, c(2, which_col_weights)])
+        if (any(duplicated(weights[, "To"]))) {
             stop("Different lambda/weight for same destination gene.",
-                 " This is not allowed with conjunctive DAGs")
+                 " This is not allowed with DAGs")
         }
         rownames(weights) <- weights[, "To"]
         weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
@@ -488,122 +505,24 @@ cpm_access_genots_paths_w_simplified <- function(x,
         weighted_fgraph <- NA
     }
 
+    ## weighted_fgraph need not have each row sum to 1.  Not if they are lambdas
+    ## from CBN, neither do they sum to 1 from some OT models  (see example ex1
+    ## in test.trans-rates-f-graphs.R).
     if (length(which_col_weights) == 1) {
-        ## weighted_fgraph need not have each row sum to 1.
-        ## Obvious if they are lambdas
-        ## from CBN for instance.
-        ## Neither do they sum to 1 from some OT models.
-        ## (see example ex1 in test.trans-rates-f-graphs.R)
-        ## So make sure they are transition matrices
-        ## between genotypes.
         trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
     } else {
         trans_mat_genots <- NA
     }
     
     return(list(
-        fgraph = fgraph,
+        ## fgraph = fgraph,
         ## again: the weighted_fgraph is the transition rate matrix
-        ## for CBN and MCCBN. Not for OT.
+        ## for CBN and MCCBN. Not for OT or OncoBN.
         weighted_fgraph = weighted_fgraph,
         trans_mat_genots = trans_mat_genots
     ))
 }
 
-
-## output of CPM analysis ->
-##             fitness graph (fgraph): just the adj. matrix
-##             weighted fitness graph (weighted_fgraph)
-##             transition matrix (trans_mat_genots)
-## Like cpm_access_genots_paths_w_simplified but for OR relationships
-
-## To be used with output from DBN
-
-## DBN seems similar to OT: these are conditional probabilities, not transition
-## rates. Beware of interpretations. See comments in
-## cpm_access_genots_paths_w_simplified
-cpm_access_genots_paths_w_simplified_OR <- function(data,
-                                                    parameter_column_name = c("Thetas")) {
-    
-    tmp <-
-        try(df_2_access_genots_and_graph_OR(data$edges[, c("From", "To")]))
-
-    if (inherits(tmp, "try-error")) {
-        stop("Some error here")
-    } else {
-        accessible_genots <- tmp$accessible_genots
-        fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
-    }
-
-    which_col_weights <-
-        which(colnames(data$edges) %in% parameter_column_name)
-    
-    if (is.null(data$edges[,which_col_weights])){
-        stop("No such column")
-    }
-
-    weights <- unique(data$edges[, c(2, which_col_weights)])
-    rownames(weights) <- weights[, "To"]
-    weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
-    trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
-
-    return(list(
-        fgraph = fgraph,
-        ## Seems similar to OT. This ain't the transition rate matrix.
-        weighted_fgraph = weighted_fgraph,
-        trans_mat_genots = trans_mat_genots
-    ))
-}
-
-
-## output of CPM analysis ->
-##             fitness graph (fgraph): just the adj. matrix
-##             weighted fitness graph (weighted_fgraph)
-##             transition matrix (trans_mat_genots)
-## To be used with output from HESBCN
-
-## The weighted fitness graph is the same
-## as the transition rate matrix (with 0 in the diagonal)
-
-cpm_access_genots_paths_w_simplified_relationships <-
-    function(data,
-             parameter_column_name = c("Lambdas")) {             
-
-        ## Use the "parent_set" component, which is returned
-        ## from HESBCN itself, not the "Relation" component
-        ## which we create from the paernt_set. "Relation" is shown
-        ## for a human to easily interpret the $edges data frame
-        tmp <-
-            try(df_2_access_genots_and_graph_relationships(
-                data$edges[, c("From", "To")],
-                data$parent_set
-            ))
-
-        if (inherits(tmp, "try-error")) {
-            stop("Some error here")
-        } else {
-            accessible_genots <- tmp$accessible_genots
-            fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
-        }
-
-        which_col_weights <-
-            which(colnames(data$edges) %in% parameter_column_name)
-        if (is.null(data$edges[, which_col_weights])) {
-            stop("No such column")
-        }
-
-        weights <- unique(data$edges[, c(2, which_col_weights)])
-        rownames(weights) <- weights[, "To"]
-        weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
-        trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
-
-        return(list(
-            fgraph = fgraph,
-            ## weighted_fgraph is the transition rate matrix
-            weighted_fgraph = weighted_fgraph,
-            trans_mat_genots = trans_mat_genots
-        ))
-}
 
 
 ## adjacency matrix genotypes, row, column of that matrix,
@@ -792,22 +711,16 @@ evam <- function(x,
     ## ######################################################################
     ##   From CPM output, obtain weighted fitness graph and transition matrix
     ##   between genotypes.
-    ##
-    ##   Beware that HESBCN and OncoBN use a different function.
-    ##   This does not use lapply on purpose.
     ## ######################################################################
     
-    OT_fg_tm <- cpm_access_genots_paths_w_simplified(OT_out)
-    CBN_fg_tm <- cpm_access_genots_paths_w_simplified(CBN_out)
+    OT_fg_tm <- cpm2tm(OT_out)
+    CBN_fg_tm <- cpm2tm(CBN_out)
+    HESBCN_fg_tm <- cpm2tm(HESBCN_out)
     if(do_MCCBN)
-        MCCBN_fg_tm <- cpm_access_genots_paths_w_simplified(MCCBN_out)
-    HESBCN_fg_tm <- cpm_access_genots_paths_w_simplified_relationships(HESBCN_out)
-    if(do_OncoBN) {
-        if (OncoBN_out$model == "DBN")
-            OncoBN_fg_tm <- cpm_access_genots_paths_w_simplified_OR(OncoBN_out)
-        else if (OncoBN_out$model == "CBN")
-            OncoBN_fg_tm <- cpm_access_genots_paths_w_simplified(OncoBN_out)
-    }
+        MCCBN_fg_tm <- cpm2tm(MCCBN_out)
+    if(do_OncoBN) 
+        OncoBN_fg_tm <- cpm2tm(OncoBN_out)
+    
     
     ## ######################################################################
     ##    For methods for which it makes sense, obtain time discretized
@@ -845,7 +758,7 @@ evam <- function(x,
     ## Simply call do_weighted_paths_to_max on a list of
     ## transition matrices and a pre-created paths_to_max
     ## Make sure we are not repeating expensive operations
-    ## When testing, compare against cpm_access_genots_paths_w
+    ## When testing, compare against cpm2tm
     ## for OT and CBN
 
     ## f_graph: remember this is the transition rate matrix
@@ -983,3 +896,107 @@ evam <- function(x,
 ##                            return(all_methods_2_trans_mat(all_data[[i]]))
 ##                        }
 ##                        )
+
+
+
+
+
+
+
+
+
+
+
+## ## output of CPM analysis ->
+## ##             fitness graph (fgraph): just the adj. matrix
+## ##             weighted fitness graph (weighted_fgraph)
+## ##             transition matrix (trans_mat_genots)
+## ## Like cpm2tm but for OR relationships
+
+## ## To be used with output from DBN
+
+## ## DBN seems similar to OT: these are conditional probabilities, not transition
+## ## rates. Beware of interpretations. See comments in
+## ## cpm2tm
+## cpm2tm_OR <- function(data,
+##                                                     parameter_column_name = c("Thetas")) {
+    
+##     tmp <-
+##         try(DAG_2_access_genots_OR(data$edges[, c("From", "To")]))
+
+##     if (inherits(tmp, "try-error")) {
+##         stop("Some error here")
+##     } else {
+##         accessible_genots <- tmp$accessible_genots
+##         fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
+##     }
+
+##     which_col_weights <-
+##         which(colnames(data$edges) %in% parameter_column_name)
+    
+##     if (is.null(data$edges[,which_col_weights])){
+##         stop("No such column")
+##     }
+
+##     weights <- unique(data$edges[, c(2, which_col_weights)])
+##     rownames(weights) <- weights[, "To"]
+##     weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
+##     trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
+
+##     return(list(
+##         fgraph = fgraph,
+##         ## Seems similar to OT. This ain't the transition rate matrix.
+##         weighted_fgraph = weighted_fgraph,
+##         trans_mat_genots = trans_mat_genots
+##     ))
+## }
+
+
+## ## output of CPM analysis ->
+## ##             fitness graph (fgraph): just the adj. matrix
+## ##             weighted fitness graph (weighted_fgraph)
+## ##             transition matrix (trans_mat_genots)
+## ## To be used with output from HESBCN
+
+## ## The weighted fitness graph is the same
+## ## as the transition rate matrix (with 0 in the diagonal)
+
+## cpm2tm_relationships <-
+##     function(data,
+##              parameter_column_name = c("Lambdas")) {             
+
+##         ## Use the "parent_set" component, which is returned
+##         ## from HESBCN itself, not the "Relation" component
+##         ## which we create from the paernt_set. "Relation" is shown
+##         ## for a human to easily interpret the $edges data frame
+##         tmp <-
+##             try(DAG_2_access_genots_relationships(
+##                 data$edges[, c("From", "To")],
+##                 data$parent_set
+##             ))
+
+##         if (inherits(tmp, "try-error")) {
+##             stop("Some error here")
+##         } else {
+##             accessible_genots <- tmp$accessible_genots
+##             fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
+##         }
+
+##         which_col_weights <-
+##             which(colnames(data$edges) %in% parameter_column_name)
+##         if (is.null(data$edges[, which_col_weights])) {
+##             stop("No such column")
+##         }
+
+##         weights <- unique(data$edges[, c(2, which_col_weights)])
+##         rownames(weights) <- weights[, "To"]
+##         weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
+##         trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
+
+##         return(list(
+##             fgraph = fgraph,
+##             ## weighted_fgraph is the transition rate matrix
+##             weighted_fgraph = weighted_fgraph,
+##             trans_mat_genots = trans_mat_genots
+##         ))
+## }

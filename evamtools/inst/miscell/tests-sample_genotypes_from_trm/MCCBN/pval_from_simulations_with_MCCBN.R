@@ -37,7 +37,7 @@ mccbn_vs_comp <- function(ngenes, n_samples, B = 2000) {
     names(lambdas) <- colnames(true_p1)
     dfr$lambda <- lambdas[dfr$To]
 
-    trm <- cpm_access_genots_paths_w_simplified(list(edges = dfr))$weighted_fgraph
+    trm <- cpm2tm(list(edges = dfr))$weighted_fgraph
     
     # Simulations with our code
     spop <- suppressMessages(

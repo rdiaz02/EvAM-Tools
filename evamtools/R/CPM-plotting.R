@@ -516,7 +516,8 @@ plot_CPMs <- function(cpm_output, orientation = "horizontal",
 
         if ((mod %in% c("OT")) & (plot_type == "transitions")) {
             par(mar = rep(3, 4))
-            plot_sampled_genots(data)
+            ## plot_sampled_genots(data)
+            plot_sampled_data(cpm_output$analyzed_data)
         }
 
         if ((mod %in% c("OncoBN")) & (plot_type == "transitions")) {

@@ -897,7 +897,7 @@ server <- function(input, output, session) {
         progress$inc(1/2, detail = "Doing sampling")
         shinyjs::disable("resample_dag")
         tmp_data <- list(edges = dag_data(), parent_set = data$dag_parent_set)
-        trm <- evamtools:::cpm_access_genots_paths_w_simplified_relationships(tmp_data)$weighted_fgraph
+        trm <- evamtools:::cpm2tm(tmp_data)$weighted_fgraph
         samples <- evamtools:::population_sample_from_trm(trm, input$dag_samples)
         process_data <- evamtools:::process_samples(samples, input$gene_number, data$gene_names[1:input$gene_number])
         tmp_csd <- process_data$frequencies
@@ -1079,7 +1079,7 @@ server <- function(input, output, session) {
         
         if(input$input2build == "dag"){
             tmp_data <- list(edges = dag_data(), parent_set = data$dag_parent_set)
-            source_trm <- evamtools:::cpm_access_genots_paths_w_simplified_relationships(tmp_data)$weighted_fgraph
+            source_trm <- evamtools:::cpm2tm(tmp_data)$weighted_fgraph
         }else if(input$input2build == "matrix"){
             source_trm <- evamtools:::theta_to_trans_rate_3_SM(data$thetas[1:input$gene_number, 1:input$gene_number],
                                     inner_transition = evamtools:::inner_transitionRate_3_1)
