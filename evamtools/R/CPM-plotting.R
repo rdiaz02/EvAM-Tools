@@ -149,6 +149,7 @@ cpm_layout <- function(graph){
 #' @param freq2label Int>0. Laberl genotypes with a frequency larger taht freqs2label
 #' @param max_edge Int>0. Maximun width of edge. If NULL it will be infered from data.
 #' @param min_edge Int>0. Minimum width of edge. If NULL it will be infered from data.
+#' @param fixed_vertex_size Boolen. If TRUE, all nodes with all the same size and frequencies or observed data will not be used.
 #' @examples 
 #' \dontrun{
 #' dB_c2 <- matrix(
@@ -181,6 +182,7 @@ plot_genot_fg <- function(trans_mat
     , freq2label = NULL
     , max_edge = NULL
     , min_edge = NULL
+    , fixed_vertex_size = FALSE
     ){
     if(is.null(trans_mat)) return()
     unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
@@ -239,7 +241,10 @@ plot_genot_fg <- function(trans_mat
     min_size <- 2
     max_size <- 40
 
-    if(!is.null(freqs)){
+    if(fixed_vertex_size){
+        node_sizes <- vapply(igraph::V(graph)$name, 
+        function(gen) min_size, numeric(1.0))
+    } else if(!is.null(freqs)){
         node_sizes <- vapply(igraph::V(graph)$name, 
             function(gen){
                 if (sum(match(freqs$Genotype, gen, nomatch = 0)) == 1)
@@ -250,10 +255,10 @@ plot_genot_fg <- function(trans_mat
     } else if(!is.null(observations)){
         node_sizes <- vapply(igraph::V(graph)$name, 
             function(gen){
-                if (sum(match(observations$Genotype, gen, nomatch = 0)) == 1)
+                if (sum(match(observations$Genotype, gen, nomatch = 0)) == 1) # Observed
                     return(observations$Abs_Freq[which(observations$Genotype == gen)])
-                else 
-                    return(min_size)
+                else # Not Observed
+                    return(0)
             }, numeric(1.0))
     } else {
         node_sizes <- vapply(igraph::V(graph)$name, 
@@ -261,8 +266,11 @@ plot_genot_fg <- function(trans_mat
     }
 
     node_sizes[node_sizes <= 0.01] <- 0.01
-    node_sizes <- (node_sizes - min(node_sizes))/(max(node_sizes) - min(node_sizes)) * (max_size - min_size) + min_size
-    if(all(node_sizes == min_size)) node_sizes <- rep(15, length(node_sizes))
+    if(length(unique(node_sizes))>1){ #Not unique values
+        node_sizes <- (node_sizes - min(node_sizes))/(max(node_sizes) - min(node_sizes)) * (max_size - min_size) + min_size
+    } else {
+        node_sizes <- rep(15, length(node_sizes))
+    }
     igraph::V(graph)$size <- node_sizes
 
     igraph::V(graph)$label.family <- "Helvetica"
@@ -291,8 +299,8 @@ plot_genot_fg <- function(trans_mat
         , vertex.label = labels$vertex_labels
         , font.best = 2
         , vertex.frame.width = 0
-        , edge.color = rgb(0.5, 0.5, 0.5, transparent_w2)
-        # , edge.color = rgb(0.5, 0.5, 0.5, 1) 
+        # , edge.color = rgb(0.5, 0.5, 0.5, transparent_w2)
+        , edge.color = rgb(0.5, 0.5, 0.5, 1) 
         ## Some error in my latop because, I cannot add alpha channel
         , edge.arrow.size = 0
         , xlab = "Number of features acquired"
@@ -336,6 +344,14 @@ plot_genot_fg <- function(trans_mat
 process_data <- function(data, mod, plot_type, sample_data = NULL) {
     dag_tree <- NULL
 
+    if(is.null(data)){
+        stop("Data is undefinded")
+    }
+
+    if (!(plot_type %in% c("trm", "transitions", "probabilities"))){
+        stop(sprintf("Plot type %s is not supported", plot_type))
+    }
+
     all_data <- c(data, sample_data)
 
     tryCatch (expr = {
@@ -349,34 +365,9 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
         transitions = "genotype_transitions"
     )
 
-    # dag_trans_mat <- get(paste(mod, "_trans_mat", sep = ""), data)
-    # fg <- graph_from_adjacency_matrix(dag_trans_mat, weighted = TRUE)
-    # if(prune_edges == TRUE) {
-    #     dag_trans_mat[dag_trans_mat < 0.01] <- 0
-    # }
-
-    # td_trans_mat <- NULL
-    # td_fg <- NULL
-    # tryCatch(expr = {
-    #     td_trans_mat <- get(paste(mod, "_td_trans_mat", sep = ""), data)
-    #     td_fg <- graph_from_adjacency_matrix(td_trans_mat, weighted = TRUE)
-    #     if(prune_edges == TRUE) {
-    #         td_trans_mat[td_trans_mat < 0.01] <- 0
-    #     }
-    # }, error = function(e){ })
-
-    # theta <- NULL
-    # tryCatch(expr ={
-    #     theta <- get(paste(mod, "_theta", sep=""), data)
-    # }, error = function(e) { })
-
     return(list(
         dag_tree = dag_tree
         , data2plot = all_data[[sprintf("%s_%s", mod, output2plot_type[[plot_type]])]]
-        # , trans_mat = data[[sprintf("%s_trans_mat", mod)]]
-        # , f_graph = data[[sprintf("%s_f_graph", mod)]]
-        # , td_trans_mat = data[[sprintf("%s_trans_mat", mod)]]
-        # , transitions = data[[sprintf("%s_genotype_transitions", mod)]]
         , theta = all_data[[sprintf("%s_theta", mod)]]
         , parent_set = all_data[[sprintf("%s_parent_set", mod)]]
         , genotype_freqs = all_data[[sprintf("%s_genotype_freqs", mod)]]
@@ -389,13 +380,13 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
 #' or de transtionRateMatrix for MHN
 #' The bottom row has a custom plot for genotype transition
 #' @param cpm_output output from the cpm
+#' @param smaples sampling output from cpm_output data
 #' @param models Output of the CPMs to plot. Current support is for OT, CBN, DBN, MCCBN and MHN Optional.
 #' @param orientation String. If it not "vertical" will be displayed with an horizontal layout. Optional.
 #' @param plot_type String. You can choose between 3 options. Optional.
 #' transitions: shows the hypercubic genotype transitions 
 #'              running simulations is needed before this
-#' probabilities: HyperTraps-like representation of the conditional probabilities
-#' trm: HyperTraps-like representation of the transition rate matrix
+#' @param fixed_vertex_size Boolen. If TRUE, all nodes with all the same size and frequencies or observed data will not be used.
 #' @param top_paths Number of most relevant paths to plot. Default NULL 
 #' will plot all paths
 #' @examples
@@ -427,22 +418,27 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
 #' dev.off()
 #' }
 #' 
-plot_CPMs <- function(cpm_output, orientation = "horizontal", 
+plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal", 
                         models = c("OT", "CBN", "OncoBN", "MCCBN", "MHN", "HESBCN"),
-                        plot_type = "trm",
+                        plot_type = "probabilities",
+                        fixed_vertex_size = FALSE,
                         top_paths = NULL) {
     
     if (!(plot_type %in% c("trm", "transitions", "probabilities"))){
         stop(sprintf("Plot type %s is not supported", plot_type))
     }
 
+    if ((plot_type == "transitions") & is.null(samples)){
+        stop(sprintf("Plot type does not have the necessary data"))
+    }
+
     ## List of available models
-    available_models <- models[
+    available_models <- unique(models[
         vapply(models, function(mod) {
             attr_name <- ifelse(mod == "MHN", "theta", "model")
             return(any(!is.na(cpm_output[[sprintf("%s_%s", mod, attr_name)]])))
         }, logical(1))
-    ]
+    ])
     print(available_models)
 
     ## DAG relationships colors 
@@ -466,9 +462,8 @@ plot_CPMs <- function(cpm_output, orientation = "horizontal",
     ## 1. DAG or Matrix (for MHN)
     ## 2. Forward graph (HyperTRAPs style) of sampled transitions, transition matrix
     for(mod in available_models) {
-        print(mod)
         ## Processing data
-        model_data2plot <- process_data(cpm_output, mod, plot_type)
+        model_data2plot <- process_data(cpm_output, mod, plot_type, samples)
         g <- model_data2plot$dag_tree
         ## Plotting data
         if(!is.null(g)) { ## Potting DAGs
@@ -507,19 +502,19 @@ plot_CPMs <- function(cpm_output, orientation = "horizontal",
         }
         ## Fixme, there is a problem here: probabilities and trans_mat plot the same
         if (plot_type == "probabilities") {
-            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data, top_paths = top_paths)
+            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data, top_paths = top_paths, fixed_vertex_size=fixed_vertex_size)
         } else if (plot_type == "transitions") {
-            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data, model_data2plot$freqs, top_paths = top_paths)
+            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data, model_data2plot$genotype_freqs, top_paths = top_paths, fixed_vertex_size=fixed_vertex_size)
         }else if (plot_type == "trm"){
-            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data, top_paths = top_paths)
+            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data, top_paths = top_paths, fixed_vertex_size=fixed_vertex_size)
         }
 
-        if ((mod %in% c("OT")) & (plot_type == "transitions")) {
+        if ((mod %in% c("OT")) & (plot_type %in% c("trm", "transitions"))) {
             par(mar = rep(3, 4))
-            plot_sampled_genots(data)
+            plot_sampled_genots(cpm_output$analyzed_data)
         }
 
-        if ((mod %in% c("OncoBN")) & (plot_type == "transitions")) {
+        if ((mod %in% c("OncoBN")) & (plot_type %in% c("trm", "transitions"))) {
             par(mar = rep(3, 4))
             plot(0,type='n',axes=FALSE,ann=FALSE)
         }

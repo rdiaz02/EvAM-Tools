@@ -11,7 +11,8 @@ plot_genot_fg(
   top_paths = NULL,
   freq2label = NULL,
   max_edge = NULL,
-  min_edge = NULL
+  min_edge = NULL,
+  fixed_vertex_size = FALSE
 )
 }
 \arguments{
@@ -29,6 +30,8 @@ Entries will be normalized}
 \item{max_edge}{Int>0. Maximun width of edge. If NULL it will be infered from data.}
 
 \item{min_edge}{Int>0. Minimum width of edge. If NULL it will be infered from data.}
+
+\item{fixed_vertex_size}{Boolen. If TRUE, all nodes with all the same size and frequencies or observed data will not be used.}
 }
 \description{
 Plot hypercubic genotype transitions

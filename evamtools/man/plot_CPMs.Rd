@@ -6,29 +6,31 @@
 \usage{
 plot_CPMs(
   cpm_output,
-  data,
+  samples = NULL,
   orientation = "horizontal",
-  models = c("OT", "CBN", "DBN", "MCCBN", "MHN", "HESBCN"),
-  plot_type = "trans_mat",
+  models = c("OT", "CBN", "OncoBN", "MCCBN", "MHN", "HESBCN"),
+  plot_type = "probabilities",
+  fixed_vertex_size = FALSE,
   top_paths = NULL
 )
 }
 \arguments{
 \item{cpm_output}{output from the cpm}
 
-\item{data}{Original cross sectional data used to compute the model. Optional.}
-
 \item{orientation}{String. If it not "vertical" will be displayed with an horizontal layout. Optional.}
 
 \item{models}{Output of the CPMs to plot. Current support is for OT, CBN, DBN, MCCBN and MHN Optional.}
 
-\item{plot_type}{String. You can choose between 4 options. Optional.
+\item{plot_type}{String. You can choose between 3 options. Optional.
 transitions: shows the hypercubic genotype transitions 
-             running simulations is needed before this
-probabilities: HyperTraps-like representation of the transition matrix}
+             running simulations is needed before this}
+
+\item{fixed_vertex_size}{Boolen. If TRUE, all nodes with all the same size and frequencies or observed data will not be used.}
 
 \item{top_paths}{Number of most relevant paths to plot. Default NULL 
 will plot all paths}
+
+\item{smaples}{sampling output from cpm_output data}
 }
 \description{
 By default it creates a top row with the DAG of the CPM 

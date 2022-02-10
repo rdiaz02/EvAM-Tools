@@ -2,9 +2,11 @@
 
 test_that("Processing samples & Plotting of CPMs is correct", {
   sample_evam_output <- evam(examples_csd$csd$AND$data)
-
-
   models <- c("OT", "CBN", "OncoBN", "HESBCN", "MHN")
+
+  # Does not process
+  expect_error(evamtools:::process_data(NULL, "OT", "something_not_supported"))
+  expect_error(evamtools:::process_data(sample_evam_output, "OT", "something_not_supported"))
 
   # Checking without sampling
   for(model in models){
@@ -57,35 +59,11 @@ test_that("Processing samples & Plotting of CPMs is correct", {
       expect_equal(model_transitions[[i]], samples[[sprintf("%s_%s", model, i)]]) 
       expect_equal(model_probabilities[[i]], samples[[sprintf("%s_%s", model, i)]]) 
     }
-
   }
-
-  #Checking orientation
-  # plot_CPMs(sample_evam_output, orientation="horizontal")
-  # plot_CPMs(sample_evam_output, orientation="vertical")
-
-
-  #Checking models to plot
-  # plot_CPMs(sample_evam_output, models = c("OT", "CBN", "OncoBN"), orientation="horizontal")
-  # plot_CPMs(sample_evam_output, models = c("OT", "CBN", "OncoBN"),orientation="vertical")
-
-  # #Checking type of plot
-  # plot_CPMs(sample_evam_output, models = c("OT", "CBN", "OncoBN"), orientation="horizontal", plot_type="probabilities")
-  # plot_CPMs(sample_evam_output, models = c("OT", "CBN", "OncoBN"),orientation="vertical", plot_type="trm")
-  # plot_CPMs(sample_evam_output, models = c("OT", "CBN", "OncoBN"),orientation="vertical", plot_type="transitions")
-
-  # expected_not_null_outputs <- list(
-  #   OT = c("dag_tree", "")
-  # )
-  # processed_output <- evamtools:::process_data(sample_evam_output, "OT")
-  # processed_output <- evamtools:::process_data(sample_evam_output, "OncoBN")
-  # processed_output <- evamtools:::process_data(sample_evam_output, "MHN")
-  # processed_output <- evamtools:::process_data(sample_evam_output, "HyperTraps")
-
-  # processed_output <- evamtools:::process_data(sample_evam_output, "bad_name")
 })
 
-
-# test_that("CPM layout", {
-
-# })
+test_that("plot_CPMs handles argument correctly", {
+  sample_evam_output <- evam(examples_csd$csd$AND$data)
+  expect_error(plot_CPMs(sample_evam_output, orientation="horizontal", plot_type = "not_supported"))
+  expect_error(plot_CPMs(sample_evam_output, orientation="horizontal", plot_type = "transitions"))
+})
