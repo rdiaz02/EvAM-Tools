@@ -328,47 +328,58 @@ plot_genot_fg <- function(trans_mat
 #' Extracts the outpus concerning a single CPM
 #' 
 #' @param data Complete CPM output
+#' by calling sample_all_CPMs with the exact CPM output from data parameter
 #' @param mod String for the CPM to process.
-#' @param prune_edges Boolean. Wether to remove genotype relationships carrying less than 1\% of the flux
+#' @param plot_type String for the plot_type to process.
+#' @param sample_data Data form sampling, this must be generated 
 #' @returns List with processed output of the CPM
-process_data <- function(data, mod, prune_edges = TRUE) {
+process_data <- function(data, mod, plot_type, sample_data = NULL) {
     dag_tree <- NULL
+
+    all_data <- c(data, sample_data)
+
     tryCatch (expr = {
         dag_model <- get(paste(mod, "_model", sep = ""), data)
         dag_tree <- graph_from_data_frame(dag_model[, c(1, 2)])
     }, error = function(e){})
 
-    dag_trans_mat <- get(paste(mod, "_trans_mat", sep = ""), data)
-    fg <- graph_from_adjacency_matrix(dag_trans_mat, weighted = TRUE)
-    if(prune_edges == TRUE) {
-        dag_trans_mat[dag_trans_mat < 0.01] <- 0
-    }
+    output2plot_type <- list(
+        trm = "trans_rate_mat",
+        probabilities = "trans_mat",
+        transitions = "genotype_transitions"
+    )
 
-    td_trans_mat <- NULL
-    td_fg <- NULL
-    tryCatch(expr = {
-        td_trans_mat <- get(paste(mod, "_td_trans_mat", sep = ""), data)
-        td_fg <- graph_from_adjacency_matrix(td_trans_mat, weighted = TRUE)
-        if(prune_edges == TRUE) {
-            td_trans_mat[td_trans_mat < 0.01] <- 0
-        }
-    }, error = function(e){ })
+    # dag_trans_mat <- get(paste(mod, "_trans_mat", sep = ""), data)
+    # fg <- graph_from_adjacency_matrix(dag_trans_mat, weighted = TRUE)
+    # if(prune_edges == TRUE) {
+    #     dag_trans_mat[dag_trans_mat < 0.01] <- 0
+    # }
 
-    theta <- NULL
-    tryCatch(expr ={
-        theta <- get(paste(mod, "_theta", sep=""), data)
-    }, error = function(e) { })
+    # td_trans_mat <- NULL
+    # td_fg <- NULL
+    # tryCatch(expr = {
+    #     td_trans_mat <- get(paste(mod, "_td_trans_mat", sep = ""), data)
+    #     td_fg <- graph_from_adjacency_matrix(td_trans_mat, weighted = TRUE)
+    #     if(prune_edges == TRUE) {
+    #         td_trans_mat[td_trans_mat < 0.01] <- 0
+    #     }
+    # }, error = function(e){ })
 
-    return(list(dag_tree = dag_tree
-        , dag_trans_mat = dag_trans_mat
-        , fg = fg
-        , trans_mat = data[[sprintf("%s_trans_mat", mod)]]
-        , td_trans_mat = td_trans_mat
-        , td_fg = td_fg
-        , theta = theta
-        , parent_set = data[[sprintf("%s_parent_set", mod)]]
-        , transitions = data[[sprintf("%s_genotype_transitions", mod)]]
-        , freqs = data[[sprintf("%s_genotype_freqs", mod)]]
+    # theta <- NULL
+    # tryCatch(expr ={
+    #     theta <- get(paste(mod, "_theta", sep=""), data)
+    # }, error = function(e) { })
+
+    return(list(
+        dag_tree = dag_tree
+        , data2plot = all_data[[sprintf("%s_%s", mod, output2plot_type[[plot_type]])]]
+        # , trans_mat = data[[sprintf("%s_trans_mat", mod)]]
+        # , f_graph = data[[sprintf("%s_f_graph", mod)]]
+        # , td_trans_mat = data[[sprintf("%s_trans_mat", mod)]]
+        # , transitions = data[[sprintf("%s_genotype_transitions", mod)]]
+        , theta = all_data[[sprintf("%s_theta", mod)]]
+        , parent_set = all_data[[sprintf("%s_parent_set", mod)]]
+        , genotype_freqs = all_data[[sprintf("%s_genotype_freqs", mod)]]
         ))
 }
 
@@ -378,13 +389,13 @@ process_data <- function(data, mod, prune_edges = TRUE) {
 #' or de transtionRateMatrix for MHN
 #' The bottom row has a custom plot for genotype transition
 #' @param cpm_output output from the cpm
-#' @param data Original cross sectional data used to compute the model. Optional.
 #' @param models Output of the CPMs to plot. Current support is for OT, CBN, DBN, MCCBN and MHN Optional.
 #' @param orientation String. If it not "vertical" will be displayed with an horizontal layout. Optional.
-#' @param plot_type String. You can choose between 4 options. Optional.
+#' @param plot_type String. You can choose between 3 options. Optional.
 #' transitions: shows the hypercubic genotype transitions 
 #'              running simulations is needed before this
-#' probabilities: HyperTraps-like representation of the transition matrix
+#' probabilities: HyperTraps-like representation of the conditional probabilities
+#' trm: HyperTraps-like representation of the transition rate matrix
 #' @param top_paths Number of most relevant paths to plot. Default NULL 
 #' will plot all paths
 #' @examples
@@ -416,12 +427,12 @@ process_data <- function(data, mod, prune_edges = TRUE) {
 #' dev.off()
 #' }
 #' 
-plot_CPMs <- function(cpm_output, data, orientation = "horizontal", 
-                        models = c("OT", "CBN", "DBN", "MCCBN", "MHN", "HESBCN"),
-                        plot_type = "trans_mat",
+plot_CPMs <- function(cpm_output, orientation = "horizontal", 
+                        models = c("OT", "CBN", "OncoBN", "MCCBN", "MHN", "HESBCN"),
+                        plot_type = "trm",
                         top_paths = NULL) {
     
-    if (!(plot_type %in% c("transitions", "probabilities"))){
+    if (!(plot_type %in% c("trm", "transitions", "probabilities"))){
         stop(sprintf("Plot type %s is not supported", plot_type))
     }
 
@@ -494,13 +505,13 @@ plot_CPMs <- function(cpm_output, data, orientation = "horizontal",
                 , mgp = c(2, 1, 0))
             par(op)
         }
-
+        ## Fixme, there is a problem here: probabilities and trans_mat plot the same
         if (plot_type == "probabilities") {
-            plot_genot_fg(model_data2plot$trans_mat, top_paths = top_paths)
+            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data, top_paths = top_paths)
         } else if (plot_type == "transitions") {
-            plot_genot_fg(model_data2plot$transitions, data, model_data2plot$freqs, top_paths = top_paths)
-        }else if (plot_type == "trans_mat"){
-            plot_genot_fg(model_data2plot$trans_mat, data, top_paths = top_paths)
+            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data, model_data2plot$freqs, top_paths = top_paths)
+        }else if (plot_type == "trm"){
+            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data, top_paths = top_paths)
         }
 
         if ((mod %in% c("OT")) & (plot_type == "transitions")) {
@@ -508,7 +519,7 @@ plot_CPMs <- function(cpm_output, data, orientation = "horizontal",
             plot_sampled_genots(data)
         }
 
-        if ((mod %in% c("DBN")) & (plot_type == "transitions")) {
+        if ((mod %in% c("OncoBN")) & (plot_type == "transitions")) {
             par(mar = rep(3, 4))
             plot(0,type='n',axes=FALSE,ann=FALSE)
         }

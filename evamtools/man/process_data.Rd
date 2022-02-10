@@ -4,14 +4,17 @@
 \alias{process_data}
 \title{Process data of CPMs to make it easier to plot}
 \usage{
-process_data(data, mod, prune_edges = TRUE)
+process_data(data, mod, plot_type, sample_data = NULL)
 }
 \arguments{
-\item{data}{Complete CPM output}
+\item{data}{Complete CPM output
+by calling sample_all_CPMs with the exact CPM output from data parameter}
 
 \item{mod}{String for the CPM to process.}
 
-\item{prune_edges}{Boolean. Wether to remove genotype relationships carrying less than 1\% of the flux}
+\item{plot_type}{String for the plot_type to process.}
+
+\item{sample_data}{Data form sampling, this must be generated}
 }
 \value{
 List with processed output of the CPM
