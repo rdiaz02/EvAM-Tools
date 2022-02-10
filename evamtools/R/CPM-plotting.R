@@ -380,7 +380,7 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
 #' or de transtionRateMatrix for MHN
 #' The bottom row has a custom plot for genotype transition
 #' @param cpm_output output from the cpm
-#' @param smaples sampling output from cpm_output data
+#' @param samples sampling output from cpm_output data
 #' @param models Output of the CPMs to plot. Current support is for OT, CBN, DBN, MCCBN and MHN Optional.
 #' @param orientation String. If it not "vertical" will be displayed with an horizontal layout. Optional.
 #' @param plot_type String. You can choose between 3 options. Optional.

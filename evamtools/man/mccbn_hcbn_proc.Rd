@@ -6,12 +6,25 @@
 
 Using H-CBN2, as in example from https://github.com/cbg-ethz/MC-CBN}
 \usage{
-mccbn_hcbn_proc(x, max.iter.asa = 100, ncores = 1)
+mccbn_hcbn_proc(
+  x,
+  max.iter.asa = 100,
+  ncores = 1,
+  tmp_dir = NULL,
+  addname = NULL,
+  silent = TRUE
+)
 }
 \arguments{
 \item{max.iter.asa}{Int. Number of steps to run. Default: 100000}
 
-\item{ncores}{Int. Number of thread to use}
+\item{ncores}{Int. Number of threads to use}
+
+\item{tmp_dir}{Directory name where the oput is located.}
+
+\item{addname}{String to append to the temporary folder name. Default NULL}
+
+\item{silent}{Whether to run show message showing the folder name where MCCBN is run}
 
 \item{data}{Cross secitonal data. Matrix of genes (columns)
 and individuals (rows)}

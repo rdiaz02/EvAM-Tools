@@ -43,7 +43,6 @@ rm(.._EvamTools_test.hesbcn)
 #' and individuals (rows)
 #' @param n_steps Number of steps to run. Default: 100000
 #' @param tmp_dir Directory name where the oput is located. 
-#' It will be place under /tmp/HESBCN/tmp_folder
 #' @param seed Seed to run the experiment
 #' @param addname String to append to the temporary folder name. Default NULL
 #' @param silent Whether to run show message showing the folder name where HESBCN is run
