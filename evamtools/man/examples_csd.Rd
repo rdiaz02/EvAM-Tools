@@ -5,13 +5,14 @@
 \alias{examples_csd}
 \title{Cross sectional data sets}
 \format{
+A list of cross sectional data set to be used as example inputs.
+Each data set includes 1) the data and 2) a name. In some cases there is also dag, or the values of a matrix.
 A list with 3 items:
 \describe{
   \item{csd}{csd, with 17 different scenarios. They represents different relationships: AND, OR, and XOR, but there are also more complex set ups, like sign epitasis and reciprocal sign epistasis. }
   \item{dag}{dag, It has a simple example of an AND relationships}
   \item{matrix}{matrix, Simple random example}
-}
-}
+}}
 \usage{
 data(examples_csd)
 }

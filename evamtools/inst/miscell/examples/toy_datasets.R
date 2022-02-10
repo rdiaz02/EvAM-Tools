@@ -356,29 +356,29 @@ mhn_example_lambdas2[1:ncol(mhn_example_lambdas)
 rownames(mhn_example_lambdas2) <- colnames(mhn_example_lambdas2) <- c("A1", "B2", "C3", LETTERS[4:10])
 
 
-all_examples_csd_2 <- list(
+examples_csd <- list(
   "csd" = list(
     User = list(data = NULL, name = "User Data"),
-    Linear = list(id = 0, data = dB_linear,  name = "Linear", dag = dag_linear), 
-    AND = list(id = 1, data = dB_AND,  name = "AND", dag = dag_or, dag_parent_set = and_parent_set), 
-    OR = list(id = 2, data = dB_OR,  name = "OR", dag = dag_or, dag_parent_set = or_parent_set), 
-    XOR = list(id = 3, data = dB_XOR, name = "XOR", dag = dag_or, dag_parent_set = xor_parent_set), 
-    se = list(id = 4, data = dB_se,  name = "Sign epistasis", dag = dag_se), 
-    rse = list(id = 5, data = dB_rse,  name = "Reciprocal sign epistasis", dag = dag_se), 
-    c1 = list(id = 6, data = dB_c1, name = "A --> B ; C --> D; B XOR D for E", dag = dag_c1, dag_parent_set = c1_parent_set), 
-    c2 = list(id = 7, data = dB_c2,  name = "Missing: ((A AND B) or C) to reach D", dag = dag_c2), 
-    c2_2c2 = list(id = 8, data = dB_c2_2,  name = "All: ((A AND B) or C) to reach D", dag = dag_c2), 
-    c4c2 = list(id = 9, data = dB_c4,  name = "Parallel", dag = dag_c4), 
-    c3c2 = list(id = 10, data = dB_c3,  name = "Parallel XOR", dag = dag_c3), 
-    c5c2 = list(id = 11, data = dB_c5,  name = "WT --> (A AND B AND C) --> D", dag = dag_c2), 
-    c7c2 = list(id = 12, data = dB_c7,  name = "((A AND B) OR (C AND D) to reach E", dag = dag_c3), 
-    cv1c2 = list(id = 13, data = dB_cv1,  name = "CV#1 Representative", dag = dag_cv), 
-    cv2c2 = list(id = 14, data = dB_cv2,  name = "CV#2 Local Maxima", dag = dag_cv), 
-    cv3c2 = list(id = 15, data = dB_cv3,  name = "CV#3 RMF", dag = dag_cv)
+    Linear = list(data = dB_linear,  name = "Linear", dag = dag_linear), 
+    AND = list(data = dB_AND, name = "AND", dag = dag_or, dag_parent_set = and_parent_set), 
+    OR = list(data = dB_OR, name = "OR", dag = dag_or, dag_parent_set = or_parent_set), 
+    XOR = list(data = dB_XOR,name = "XOR", dag = dag_or, dag_parent_set = xor_parent_set), 
+    se = list(data = dB_se, name = "Sign epistasis", dag = dag_se), 
+    rse = list(data = dB_rse, name = "Reciprocal sign epistasis", dag = dag_se), 
+    c1 = list(data = dB_c1, name = "A --> B ; C --> D; B XOR D for E", dag = dag_c1, dag_parent_set = c1_parent_set), 
+    c2 = list(ata = dB_c2, name = "Missing: ((A AND B) or C) to reach D", dag = dag_c2), 
+    c2_2c2 = list(data = dB_c2_2, name = "All: ((A AND B) or C) to reach D", dag = dag_c2), 
+    c4c2 = list(data = dB_c4, name = "Parallel", dag = dag_c4), 
+    c3c2 = list(data = dB_c3, name = "Parallel XOR", dag = dag_c3), 
+    c5c2 = list(data = dB_c5, name = "WT --> (A AND B AND C) --> D", dag = dag_c2), 
+    c7c2 = list(data = dB_c7, name = "((A AND B) OR (C AND D) to reach E", dag = dag_c3), 
+    cv1c2 = list(data = dB_cv1, name = "CV#1 Representative", dag = dag_cv), 
+    cv2c2 = list(data = dB_cv2, name = "CV#2 Local Maxima", dag = dag_cv), 
+    cv3c2 = list(data = dB_cv3, name = "CV#3 RMF", dag = dag_cv)
   ),
   "dag" = list(
     User = list(dag = template_dag, name = "User Data"),
-    AND = list(id = 1, data = NULL,  name = "AND", dag = dag_or, dag_parent_set = and_parent_set, lambdas = and_lambdas) 
+    AND = list(data = NULL, name = "AND", dag = dag_or, dag_parent_set = and_parent_set, lambdas = and_lambdas) 
   ),
   "matrix" = list(
     User = list(thetas = template_thetas, name = "User Data"),
@@ -386,7 +386,7 @@ all_examples_csd_2 <- list(
   )
 )
 
-# save(all_examples_csd_2, file = "../../../data/all_examples_csd.RData")
+# save(examples_csd, file = "../../../data/examples_csd.RData")
 
 # cpm_output <- list()
 # for (i in names(all_examples_csd_2[["csd"]])[2:11]){
