@@ -205,7 +205,11 @@ docker build --tag evamtools .
 - Why not distribute a pre-built docker image?
 
 
-### How to update the Docker image if you change the code  
+### Creating the image fails because of no internet connection from the container
+Creating the above image requires installing R packages and that might fail because the Docker container cannot connect with the internet. The following might help: https://superuser.com/a/1582710 , https://superuser.com/a/1619378 . 
+
+
+## How to update the Docker image if you change the code  
 [FIXME: Pablo writes this](#) ###
 Just as above. But this time it should run much faster, because many steps will be skipped.
 
