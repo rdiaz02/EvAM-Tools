@@ -55,16 +55,42 @@ if(FALSE) {
 #' @param data Cross secitonal data. Matrix of genes (columns)
 #' and individuals (rows)
 #' @param max.iter.asa Int. Number of steps to run. Default: 100000
-#' @param ncores Int. Number of thread to use
+#' @param ncores Int. Number of threads to use
+#' @param tmp_dir Directory name where the oput is located. 
+#' @param addname String to append to the temporary folder name. Default NULL
+#' @param silent Whether to run show message showing the folder name where MCCBN is run
 #' 
 #' @return A list with the adjacency matrix, the lambdas, the parent set
 #' and a data.frame with From-To edges and associated lambdas.
-mccbn_hcbn_proc <- function(x, max.iter.asa=100, ncores=1) {
+mccbn_hcbn_proc <- function(x
+    , max.iter.asa = 100
+    , ncores = 1
+    , tmp_dir = NULL
+    , addname = NULL
+    , silent = TRUE) {
     if (!requireNamespace("mccbn", quietly = TRUE))
         stop("MC-CBN (mccbn) no installed")
     
     stopifnot(!is.null(colnames(x)))
-    stopifnot(max.iter.asa>100)
+    stopifnot(max.iter.asa >= 100)
+
+    # Setting tmp folder
+    # This create asa.txt and poset.txt
+    if (is.null(tmp_dir)) {
+        tmp_dir <- tempfile()
+        dirname0 <- NULL
+        if (!is.null(addname)) {
+            dirname0 <- tmp_dir
+            tmp_dir <- paste0(tmp_dir, "/",
+                              "_mccbn_", addname)
+        }
+        if (!silent)
+            message(paste("\n Using dir", tmp_dir))
+        if (dir.exists(tmp_dir)) {
+            stop("dirname ", tmp_dir, "exists")
+        }
+        dir.create(tmp_dir, recursive = TRUE)
+    }
 
     posets <- mccbn::candidate_posets(x, rep(1, nrow(x)), 0.9)
     poset0 <- posets[[length(posets)]]
