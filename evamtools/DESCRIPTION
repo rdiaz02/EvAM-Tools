@@ -31,4 +31,5 @@ Imports: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree
     , plot.matrix
     , DT, shinyjs, shiny
     , OncoBN
+    , mccbn
 Suggests: testthat (>= 3.0.0)

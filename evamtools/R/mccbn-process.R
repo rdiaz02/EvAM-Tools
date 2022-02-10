@@ -48,6 +48,51 @@ if(FALSE) {
     }
 }
 
+#' @title Run MCCBN with H-CBN2
+#' 
+#' Using H-CBN2, as in example from https://github.com/cbg-ethz/MC-CBN
+#' 
+#' @param data Cross secitonal data. Matrix of genes (columns)
+#' and individuals (rows)
+#' @param max.iter.asa Int. Number of steps to run. Default: 100000
+#' @param ncores Int. Number of thread to use
+#' 
+#' @return A list with the adjacency matrix, the lambdas, the parent set
+#' and a data.frame with From-To edges and associated lambdas.
+mccbn_hcbn_proc <- function(x, max.iter.asa=100, ncores=1) {
+    if (!requireNamespace("mccbn", quietly = TRUE))
+        stop("MC-CBN (mccbn) no installed")
+    
+    stopifnot(!is.null(colnames(x)))
+    stopifnot(max.iter.asa>100)
+
+    posets <- mccbn::candidate_posets(x, rep(1, nrow(x)), 0.9)
+    poset0 <- posets[[length(posets)]]
+    fit <- mccbn::adaptive.simulated.annealing(poset0, x, L=100, 
+        max.iter.asa=max.iter.asa, thrds = ncores)
+    ## Default iterations for asa is 10000 in original code, 100 for testing
+    ## L: number of samples to be drawn from the proposal in the E-step; they used 100, but I do not know if this is too low
+
+    am <- fit$poset
+    colnames(am) <- rownames(am) <- colnames(x)
+    df1 <- igraph::as_data_frame(graph_from_adjacency_matrix(am))
+    colnames(df1) <- c("From", "To")
+    no_parent <- setdiff(colnames(x), df1[, 2])
+    dfr <- rbind(
+        data.frame(From = "Root", To = no_parent,
+                    stringsAsFactors = FALSE),
+        df1)
+    dfr$edge = paste(dfr[, "From"],
+                        dfr[, "To"],
+                        sep = " -> ")
+    lambda <- fit$lambda
+
+    names(lambda) <- colnames(am)
+    dfr$lambda <- lambda[dfr$To]
+    return(list(edges = dfr))
+}
+
+
 ## ## Using the new functionality. Extremely slow.
 ## ## The only non-defaults are threads (thrds)
 ## ## and L.

@@ -43,3 +43,4 @@ importFrom("plot.matrix", "fmt")
 ##            "as.relation", "transitive_reduction",
 ##            "relation_incidence")
 importFrom("OncoBN", "fitCPN", "Lik.genotype")
+importFrom("mccbn", "candidate_posets", "adaptive.simulated.annealing")
