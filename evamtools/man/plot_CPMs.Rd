@@ -17,6 +17,8 @@ plot_CPMs(
 \arguments{
 \item{cpm_output}{output from the cpm}
 
+\item{samples}{sampling output from cpm_output data}
+
 \item{orientation}{String. If it not "vertical" will be displayed with an horizontal layout. Optional.}
 
 \item{models}{Output of the CPMs to plot. Current support is for OT, CBN, DBN, MCCBN and MHN Optional.}
@@ -29,8 +31,6 @@ transitions: shows the hypercubic genotype transitions
 
 \item{top_paths}{Number of most relevant paths to plot. Default NULL 
 will plot all paths}
-
-\item{smaples}{sampling output from cpm_output data}
 }
 \description{
 By default it creates a top row with the DAG of the CPM 
