@@ -14,17 +14,49 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
 
     data(examples_csd)
 
-    ex_dbn_and <- evamtools:::do_OncoBN(examples_csd$csd$AND$data, model = "DBN", algorithm = "DP")
-    ex_dbn_linear <- evamtools:::do_OncoBN(examples_csd$csd$Linear$data, model = "DBN", algorithm = "DP")
-    ex_dbn_or <- evamtools:::do_OncoBN(examples_csd$csd$OR$data, model = "DBN", algorithm = "DP")
-    ex_dbn_xor <- evamtools:::do_OncoBN(examples_csd$csd$XOR$data, model = "DBN", algorithm = "DP")
-    ex_dbn_c1 <- evamtools:::do_OncoBN(examples_csd$csd$c1$data, model = "DBN", algorithm = "DP")
-    ex_dbn_c3 <- evamtools:::do_OncoBN(examples_csd$csd$c3$data, model = "DBN", algorithm = "DP")
-    ex_dbn_c4c2 <- evamtools:::do_OncoBN(examples_csd$csd$c4c2$data, model = "DBN", algorithm = "DP")
+    ex_dbn_and <- evamtools:::do_OncoBN(examples_csd$csd$AND$data,
+                                        model = "DBN", algorithm = "DP")
+    ex_dbn_linear <- evamtools:::do_OncoBN(examples_csd$csd$Linear$data,
+                                           model = "DBN", algorithm = "DP")
+    ex_dbn_or <- evamtools:::do_OncoBN(examples_csd$csd$OR$data,
+                                       model = "DBN", algorithm = "DP")
+    ex_dbn_xor <- evamtools:::do_OncoBN(examples_csd$csd$XOR$data,
+                                        model = "DBN", algorithm = "DP")
+    ex_dbn_c1 <- evamtools:::do_OncoBN(examples_csd$csd$c1$data,
+                                       model = "DBN", algorithm = "DP")
+    ex_dbn_c3 <- evamtools:::do_OncoBN(examples_csd$csd$c3$data,
+                                       model = "DBN", algorithm = "DP")
+    ex_dbn_c4c2 <- evamtools:::do_OncoBN(examples_csd$csd$c4c2$data,
+                                         model = "DBN", algorithm = "DP")
+
+
+    ex_dbn_cbn_and <- evamtools:::do_OncoBN(examples_csd$csd$AND$data,
+                                        model = "CBN", algorithm = "DP")
+    ex_dbn_cbn_linear <- evamtools:::do_OncoBN(examples_csd$csd$Linear$data,
+                                           model = "CBN", algorithm = "DP")
+    ex_dbn_cbn_or <- evamtools:::do_OncoBN(examples_csd$csd$OR$data,
+                                       model = "CBN", algorithm = "DP")
+    ex_dbn_cbn_xor <- evamtools:::do_OncoBN(examples_csd$csd$XOR$data,
+                                        model = "CBN", algorithm = "DP")
+    ex_dbn_cbn_c1 <- evamtools:::do_OncoBN(examples_csd$csd$c1$data,
+                                       model = "CBN", algorithm = "DP")
+    ex_dbn_cbn_c3 <- evamtools:::do_OncoBN(examples_csd$csd$c3$data,
+                                       model = "CBN", algorithm = "DP")
+    ex_dbn_cbn_c4c2 <- evamtools:::do_OncoBN(examples_csd$csd$c4c2$data,
+                                         model = "CBN", algorithm = "DP")
     
 
-    all_examples <- list(ex_dbn_and, ex_dbn_linear, ex_dbn_or, ex_dbn_xor,
-        ex_dbn_c1, ex_dbn_c3, ex_dbn_c4c2)
+
+
+
+    
+    all_examples_OR <- list(ex_dbn_and, ex_dbn_linear, ex_dbn_or, ex_dbn_xor,
+                         ex_dbn_c1, ex_dbn_c3, ex_dbn_c4c2)
+
+    all_examples_AND <- list(ex_dbn_cbn_and, ex_dbn_cbn_linear, ex_dbn_cbn_or,
+                             ex_dbn_cbn_xor,
+                             ex_dbn_cbn_c1, ex_dbn_cbn_c3, ex_dbn_cbn_c4c2
+                         )
 
     ## For testing
     reorder_trans_mat <- function(x) {
@@ -32,7 +64,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
         return(as.matrix(x[gg, gg]))
     }
 
-    run_test_for_dataset <- function(data){
+    run_test_for_dataset_OR <- function(data){
         expect_equal(reorder_trans_mat(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
                     reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_OR(
                         data)$trans_mat_genots),
@@ -42,9 +74,49 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
                     as.matrix(evamtools:::cpm2tm(data$edges, max_f = maxff)$transition_matrix))
     }
 
-    for(i in all_examples){
-        run_test_for_dataset(i)
+
+    run_test_for_dataset_AND <- function(data){
+        expect_equal(reorder_trans_mat(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
+                    reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
+                        data)$trans_mat_genots),
+                    check.attributes = TRUE)
+        maxff <- sample(c(2, 3, 3.5, 3.8, 4, 5, 8), size = 1)
+        expect_equal(as.matrix(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
+                    as.matrix(evamtools:::cpm2tm(data$edges, max_f = maxff)$transition_matrix))
     }
+
+    run_test_for_dataset_Relations <- function(data){
+        expect_equal(reorder_trans_mat(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
+                    reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(
+                        data)$trans_mat_genots),
+                    check.attributes = TRUE)
+        maxff <- sample(c(2, 3, 3.5, 3.8, 4, 5, 8), size = 1)
+        expect_equal(as.matrix(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
+                    as.matrix(evamtools:::cpm2tm(data$edges, max_f = maxff)$transition_matrix))
+    }
+
+    
+    ## Three different checks:
+    ## The OR when it should, by decree: the DBN models
+    ## the AND when it should, by decree: the CBN models
+    ## OR or AND, choosing flexibly: figure it out from Relations
+    
+    for(i in seq_along(all_examples_OR)) {
+        run_test_for_dataset_OR(all_examples_OR[[i]])
+    }
+
+    for(i in seq_along(all_examples_AND)) {
+        run_test_for_dataset_AND(all_examples_AND[[i]])
+    }
+
+    all_ex <- c(all_examples_OR, all_examples_AND)
+    for(i in seq_along(all_ex)) {
+        run_test_for_dataset_Relations(all_ex[[i]])
+    }
+
+
+    
+
     
     ## Repeat with some examples from real data sets
     data(every_which_way_data)

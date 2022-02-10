@@ -81,6 +81,10 @@
 ##     Derived from the OT/CBN. Since HESBCN can have AND and XOR and OR, a vector
 ##     that specifies the relationship if multiple parents is needed.
 
+## Yes, they could be unified and use only a single one. But each individual
+## one is faster, when it can be used, and allows for checking (e.g.,
+## DBN models fit with relations compared to AND and OR)
+
 
 
 
@@ -260,10 +264,7 @@ df_2_access_genots_and_graph_relationships <- function(x,
                 parents_of_rel <-
                     adjacent_vertices(g, rel_idx, mode = c("in"))[[rel_idx]]$name
                 ## XOR relationship not futfilled
-                ## Wrong! Enough if two are present
-                ## if (relationship == "XOR" &&
-                ##     all(parents_of_rel %in% genotype)) return(FALSE)
-                 if (relationship == "XOR" &&
+                if (relationship == "XOR" &&
                     (sum(parents_of_rel %in% genotype) > 1)) return(FALSE)
                 ## AND relationship not futfilled
                 if (relationship == "AND" &&
@@ -521,40 +522,38 @@ cpm_access_genots_paths_w_simplified <- function(x,
 ## DBN seems similar to OT: these are conditional probabilities, not transition
 ## rates. Beware of interpretations. See comments in
 ## cpm_access_genots_paths_w_simplified
-cpm_access_genots_paths_w_simplified_OR <-
-    function(data,
-             parameter_column_name = c("Thetas")) {
-##             parameter_column_name = c("Thetas", "Probabilities")) {
+cpm_access_genots_paths_w_simplified_OR <- function(data,
+                                                    parameter_column_name = c("Thetas")) {
+    
+    tmp <-
+        try(df_2_access_genots_and_graph_OR(data$edges[, c("From", "To")]))
 
-        tmp <-
-            try(df_2_access_genots_and_graph_OR(data$edges[, c("From", "To")]))
-
-        if (inherits(tmp, "try-error")) {
-            stop("Some error here")
-        } else {
-            accessible_genots <- tmp$accessible_genots
-            fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
-        }
-
-        which_col_weights <-
-            which(colnames(data$edges) %in% parameter_column_name)
-        
-        if (is.null(data$edges[,which_col_weights])){
-            stop("No such column")
-        }
-
-        weights <- unique(data$edges[, c(2, which_col_weights)])
-        rownames(weights) <- weights[, "To"]
-        weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
-        trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
-
-        return(list(
-            fgraph = fgraph,
-            ## Seems similar to OT. This ain't the transition rate matrix.
-            weighted_fgraph = weighted_fgraph,
-            trans_mat_genots = trans_mat_genots
-        ))
+    if (inherits(tmp, "try-error")) {
+        stop("Some error here")
+    } else {
+        accessible_genots <- tmp$accessible_genots
+        fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
     }
+
+    which_col_weights <-
+        which(colnames(data$edges) %in% parameter_column_name)
+    
+    if (is.null(data$edges[,which_col_weights])){
+        stop("No such column")
+    }
+
+    weights <- unique(data$edges[, c(2, which_col_weights)])
+    rownames(weights) <- weights[, "To"]
+    weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
+    trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
+
+    return(list(
+        fgraph = fgraph,
+        ## Seems similar to OT. This ain't the transition rate matrix.
+        weighted_fgraph = weighted_fgraph,
+        trans_mat_genots = trans_mat_genots
+    ))
+}
 
 
 ## output of CPM analysis ->
@@ -569,7 +568,6 @@ cpm_access_genots_paths_w_simplified_OR <-
 cpm_access_genots_paths_w_simplified_relationships <-
     function(data,
              parameter_column_name = c("Lambdas")) {             
-        ## parameter_column_name = c("Thetas", "Probabilities", "Lambdas")) {
 
         ## Use the "parent_set" component, which is returned
         ## from HESBCN itself, not the "Relation" component
