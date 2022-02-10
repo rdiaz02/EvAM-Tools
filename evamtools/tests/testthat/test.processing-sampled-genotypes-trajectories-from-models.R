@@ -1,5 +1,3 @@
-
-
 test_that("Output are not generated with bad input", {
     trajectory <- list(
         c("WT", "C", "C, D"),
@@ -27,11 +25,11 @@ test_that("Output are not generated with bad input", {
 
     x <- sampling_output
     x$trajectory <- NULL
-    expect_error(evamtools:::process_samples(x, 5), 
+    expect_error(evamtools:::process_samples(x, 5, gene_names = LETTERS[1:5]), 
                  "trajectory is missing from your samples")
     x <- sampling_output
     x$obs_events <- NULL
-    expect_error(evamtools:::process_samples(x, 5), 
+    expect_error(evamtools:::process_samples(x, 5, gene_names = LETTERS[1:5]), 
                  "obs_events is missing from your samples")
 })
 
@@ -62,22 +60,36 @@ test_that("Output is returned only with the requested fields", {
     )
     
     out_params <- c("frequencies", "state_counts", "transitions")
-    out_sim <- evamtools:::process_samples(simGenotypes, 5, output = out_params[1])
+    out_sim <- evamtools:::process_samples(simGenotypes, 5,
+                                           gene_names = LETTERS[1:5],
+                                           output = out_params[1])
     expect_equal(sort(names(out_sim)), sort(out_params[1]))
     
-    out_sim <- evamtools:::process_samples(simGenotypes, 5, output = out_params[2:3])
+    out_sim <- evamtools:::process_samples(simGenotypes, 5,
+                                           gene_names = LETTERS[1:5],
+                                           output = out_params[2:3])
     expect_equal(sort(names(out_sim)), sort(out_params[2:3]))
 
-    out_sim <- evamtools:::process_samples(simGenotypes, 5, output = out_params)
+    out_sim <- evamtools:::process_samples(simGenotypes, 5,
+                                           gene_names = LETTERS[1:5],
+                                           output = out_params)
     expect_equal(sort(names(out_sim)), sort(out_params))
 
-    expect_error(evamtools:::process_samples(simGenotypes, 5, output = c()), "Specify valid output")
+    expect_error(evamtools:::process_samples(simGenotypes, 5,
+                                             gene_names = LETTERS[1:5],
+                                             output = c()), "Specify valid output")
 
-    expect_error(evamtools:::process_samples(simGenotypes, 5, output = c("bad request", "bad request 2")), "Specify valid output")
+    expect_error(evamtools:::process_samples(simGenotypes, 5,
+                                             gene_names = LETTERS[1:5],
+                                             output = c("bad request", "bad request 2")), "Specify valid output")
 
-    expect_warning(evamtools:::process_samples(simGenotypes, 5, output = c(out_params, "bad request")), "The following parameters cannot be returned: bad request")
+    expect_warning(evamtools:::process_samples(simGenotypes, 5,
+                                               gene_names = LETTERS[1:5],
+                                               output = c(out_params, "bad request")), "The following parameters cannot be returned: bad request")
 
-    expect_warning(evamtools:::process_samples(simGenotypes, 5, output = c(out_params, "bad request", "bad request 2")), "The following parameters cannot be returned: bad request, bad request 2")
+    expect_warning(evamtools:::process_samples(simGenotypes, 5,
+                                               gene_names = LETTERS[1:5],
+                                               output = c(out_params, "bad request", "bad request 2")), "The following parameters cannot be returned: bad request, bad request 2")
 })
 
 
@@ -108,7 +120,7 @@ test_that("Output is correct", {
     )
     
    
-    out <- evamtools:::process_samples(simGenotypes, 5)
+    out <- evamtools:::process_samples(simGenotypes, 5, gene_names = LETTERS[1:5])
     expect_equal(nrow(out$frequencies), 2**5)
     expect_equal(dim(out$transitions), c(2**5, 2**5))
     expect_equal(nrow(out$state_counts), 2**5)

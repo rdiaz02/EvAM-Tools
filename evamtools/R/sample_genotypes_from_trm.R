@@ -177,6 +177,10 @@ population_sample_from_trm <- function(trm, n_samples = 10,
         ))
 }
 
+## FIXME: this function will not scale
+## a lot of copying of potentially large objects (e.g., trajectories)
+## and no use of sparse matrices for potentially huge matrices
+
 #' @title Process samples
 #' 
 #' @description Generate trajectories from data simulated from a given model.
@@ -186,7 +190,7 @@ population_sample_from_trm <- function(trm, n_samples = 10,
 #' $T_sum_events time of events for the mutations of each gene
 #' $obs_events data.frame with mutated before the end of the sampling time
 #' @param n_genes number of genes observed
-#' @param gene_names List of gene names. If NULL, genes will be named alphabetically
+#' @param gene_names List of gene names. Required.
 #' @param output type of output that we want
 #' 
 #' @return List with a list of trajectories (the order in which gene mutations
@@ -196,7 +200,7 @@ process_samples <- function(sim, n_genes,
                             gene_names,
                             output = c("frequencies",
                                        "state_counts",
-                                       "transitions")){
+                                       "transitions")) {
 
     ## RDU: gene_names should never be null, as there is a sim
     ## with things in there
@@ -221,16 +225,12 @@ process_samples <- function(sim, n_genes,
         warning(sprintf("The following parameters cannot be returned: %s"
             , paste(not_valid_params, collapse = ", " )))
 
+    
     #Set up
     output <- list()
     n_states <- 2**n_genes
-    sorted_genotypes <- vapply(0:(n_states - 1), function(x) {
-        tmp_genotype <- paste(gene_names[int2binary(x, n_genes) == 1]
-            , collapse = ", ")
-        tmp_genotype <- ifelse(tmp_genotype == "", "WT", tmp_genotype)
-        return(tmp_genotype)
-    }, character(1))
-    
+    sorted_genotypes <- generate_sorted_genotypes(n_genes, gene_names)
+
     #Calculate frequencies
     if (out_params["frequencies"]) {
         counts_tmp <- sample_to_pD_order(sim$obs_events, n_genes, gene_names)
@@ -245,17 +245,16 @@ process_samples <- function(sim, n_genes,
     trajectories <- sim$trajectory
 
     ## FIXME: this does not scale. With 12 genes we have a 1.7e7 matrix!
-    
-    ## The logic is wrong. It assumes that genotypes, as given by
+    ## FIXME: and could this be made faster using a table
+    ## This assumes that genotypes, as given by
     ## sorted_genotypes, correspond to the genotypes as they exist
     ## in sim$trajectory (thus sim$obs_events).
+    ## sorted_genotypes uses sorting
+    ## of gene names. But the transition rate matrices might not unless
+    ## they have been computed that way.
     #Calculate transitions
     if (out_params["transitions"]) {
         tt <- matrix(0L, nrow = n_states, ncol = n_states)
-        ## FIXME: this is WRONG!
-        ## a trajectory, traj, can be
-        ## C, EZH_algo
-        ## but the rows/columns will be EZH_algo, C
         colnames(tt) <- rownames(tt) <- sorted_genotypes
         for(traj in trajectories){
             steps <- length(traj) - 1 
@@ -295,31 +294,30 @@ process_samples <- function(sim, n_genes,
 #' 
 #' @return modified cpm_outputd including a matrix with genotype transitions
 sample_all_CPMs <- function(cpm_output
-    , n_samples
-    ## , n_genes
-    ## , gene_names = NULL
-    , methods = c("Source", "CBN", "MCCBN", "OncoBN", "MHN", "HESBCN", "OT")) {
-    output <- cpm_output
+                          , n_samples
+                          , methods = c("Source", "CBN", "MCCBN",
+                                        "OncoBN", "MHN", "HESBCN", "OT")) {
     ## And I have "Source" for a source data type for the web server
-    ## if (is.null(gene_names)) gene_names <- LETTERS[seq_along(n_genes)]
+    output <- list()
 
     gene_names <- colnames(cpm_output$analyzed_data)
     n_genes <- length(gene_names)
     
     for (method in methods) {
         if (method %in% c("OT", "OncoBN")) {
-            if(method == "OT")
-                tmp_data <- output$OT_genots_predicted
-            else if(method == "OncoBN")
-                tmp_data <- output$OncoBN_genots_predicted
-            
-            genots <- tmp_data[2:(ncol(tmp_data) - 1)]
+            if(method == "OT") {
+                tmp_data <- cpm_output$OT_genots_predicted
+                genots <- tmp_data[2:(ncol(tmp_data) - 1)]
+            } else if(method == "OncoBN") {
+                tmp_data <- cpm_output$OncoBN_genots_predicted
+                genots <- tmp_data[1:(ncol(tmp_data) - 1)]
+            }
 
             genots_2 <- unlist(apply(genots, 1, 
                 function(x) paste(names(genots)[x == 1], collapse = ", ")))
             names(genots_2) <- NULL
             genots_2[genots_2 == ""] <- "WT"
-            ## RDU FIXME how do we know they are ordered in the same way!!??
+
             tmp_genotypes_sampled <- sample_to_pD_order(
                 sample(genots_2, n_samples, 
                     prob = tmp_data$Prob, replace = TRUE),
@@ -334,7 +332,7 @@ sample_all_CPMs <- function(cpm_output
             ##   see OT_transition_matrices.org
             output[[sprintf("%s_genotype_transitions", method)]] <- NULL
         } else {
-            trm <- output[[sprintf("%s_trans_rate_mat", method)]]
+            trm <- cpm_output[[sprintf("%s_trans_rate_mat", method)]]
             if (any(!is.na(trm))) {
                 print(sprintf("Running %s", method))
                 sims <- population_sample_from_trm(trm, n_samples = n_samples)
@@ -356,30 +354,37 @@ sample_all_CPMs <- function(cpm_output
     return(output)
 }
 
-#' @title Count genotypes 
-#' 
-#' Take a sample (a vector), with genotypes as "A, B", etc
-#' and return a vector of frequencies (counts) in the exact same
-#' order as used by MHN
-#' A much faster implementation
+## #' @title Count genotypes 
+## #' 
+## #' Take a sample (a vector), with genotypes as "A, B", etc
+## #' and return a vector of frequencies (counts) in the exact same
+## #' order as used by MHN
+## #' A much faster implementation
 
-#' @param x vector of genotypes
-#' @param ngenes total number of genes
-#' @param gene_names List of gene names. If NULL, genes will be named alphabetically
-#' 
-#' @return counts of all genotypes in same order as used by MHN
+## #' @param x vector of genotypes
+## #' @param ngenes total number of genes
+## #' @param gene_names List of gene names. If NULL, genes will be named alphabetically
+## #' 
+## #' @return counts of all genotypes in same order as used by MHN
+## #'         gene_names is always sorted inside the function to ensure
+## #'         results do not differ by gene_names order
 sample_to_pD_order <- function(x, ngenes, gene_names = NULL) {
-    if(is.null(gene_names)) gene_names <- LETTERS[1:ngenes]
+    if(is.null(gene_names)) gene_names <- LETTERS[seq_len(ngenes)]
+    stopifnot(ngenes == length(gene_names))
     x <- as.data.frame(table(x), stringsAsFactors = FALSE)
-    
+    gene_names <- sort(gene_names)
     genot_int <- x[, 1]
-    genot_int <- gsub("WT", "", genot_int)
+    genot_int <- gsub("^WT$", "", genot_int, fixed = "FALSE")
+
     genot_int <- vapply(genot_int,
                         function(z)
-                            State.to.Int(as.integer(gene_names %in%
-                                                    strsplit(z, ", ")[[1]])),
+                            State.to.Int(
+                                as.integer(gene_names %in%
+                                           strsplit(z, ", ", fixed = TRUE)[[1]])),
                         numeric(1))
 
     return(tabulate(rep(unname(genot_int), x[, 2]),
                    nbins = 2^ngenes))
 }
+
+
