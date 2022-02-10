@@ -75,7 +75,7 @@ mccbn_hcbn_proc <- function(x
     stopifnot(max.iter.asa >= 100)
 
     # Setting tmp folder
-    # This create asa.txt and poset.txt
+    # The functiona create asa.txt and poset.txt
     if (is.null(tmp_dir)) {
         tmp_dir <- tempfile()
         dirname0 <- NULL
@@ -95,7 +95,7 @@ mccbn_hcbn_proc <- function(x
     posets <- mccbn::candidate_posets(x, rep(1, nrow(x)), 0.9)
     poset0 <- posets[[length(posets)]]
     fit <- mccbn::adaptive.simulated.annealing(poset0, x, L=100, 
-        max.iter.asa=max.iter.asa, thrds = ncores)
+        max.iter.asa=max.iter.asa, thrds = ncores, outdir = tmp_dir)
     ## Default iterations for asa is 10000 in original code, 100 for testing
     ## L: number of samples to be drawn from the proposal in the E-step; they used 100, but I do not know if this is too low
 
