@@ -256,41 +256,41 @@ and identical results between algorithms with sparse matrices, CBN", {
     oex10_simplified <- cpm2tm(ex10)
     oex11_simplified <- cpm2tm(ex11)
     
-    expect_equal(oex0[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-                 lapply(oex0_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    expect_equal(oex0[c("weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex0_simplified[c("weighted_fgraph", "trans_mat_genots")], as.matrix))
     
-    expect_equal(oex1[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-                 lapply(oex1_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    expect_equal(oex1[c("weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex1_simplified[c("weighted_fgraph", "trans_mat_genots")], as.matrix))
     
-    expect_equal(oex2[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-                 lapply(oex2_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    expect_equal(oex2[c("weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex2_simplified[c("weighted_fgraph", "trans_mat_genots")], as.matrix))
     
-    expect_equal(oex3[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-                 lapply(oex3_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    expect_equal(oex3[c("weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex3_simplified[c("weighted_fgraph", "trans_mat_genots")], as.matrix))
     
-    expect_equal(oex4[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-                 lapply(oex4_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    expect_equal(oex4[c("weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex4_simplified[c("weighted_fgraph", "trans_mat_genots")], as.matrix))
     
-    expect_equal(oex5[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-                 lapply(oex5_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    expect_equal(oex5[c("weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex5_simplified[c("weighted_fgraph", "trans_mat_genots")], as.matrix))
     
-    expect_equal(oex6[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-                 lapply(oex6_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    expect_equal(oex6[c("weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex6_simplified[c("weighted_fgraph", "trans_mat_genots")], as.matrix))
     
-    expect_equal(oex7[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-                 lapply(oex7_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    expect_equal(oex7[c("weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex7_simplified[c("weighted_fgraph", "trans_mat_genots")], as.matrix))
     
-    expect_equal(oex8[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-                 lapply(oex8_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    expect_equal(oex8[c("weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex8_simplified[c("weighted_fgraph", "trans_mat_genots")], as.matrix))
     
-    expect_equal(oex9[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-                 lapply(oex9_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    expect_equal(oex9[c("weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex9_simplified[c("weighted_fgraph", "trans_mat_genots")], as.matrix))
     
-    expect_equal(oex10[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-                 lapply(oex10_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    expect_equal(oex10[c("weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex10_simplified[c("weighted_fgraph", "trans_mat_genots")], as.matrix))
     
-    expect_equal(oex11[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-                 lapply(oex11_simplified[c("fgraph", "weighted_fgraph", "trans_mat_genots")], as.matrix))
+    expect_equal(oex11[c("weighted_fgraph", "trans_mat_genots")],
+                 lapply(oex11_simplified[c("weighted_fgraph", "trans_mat_genots")], as.matrix))
     
 
 })
@@ -658,12 +658,13 @@ NA, NA, NA), OT_edgeWeight = c(0.525915054637741, 0.101508072999909,
   
   mm0  <- lapply(cpm_out_others1[mm],  cpm_access_genots_paths_w)
   mmSM <- lapply(cpm_out_others1[mm], cpm2tm)
-  
-  ## Identical unweighted transition matrices (fitness graphs)
-  uw0 <- lapply(mm0, function(x) rowScaleMatrix(x$fgraph))
-  uwSM <- lapply(mmSM, function(x) rowScaleMatrix(x$fgraph))
-  uwSMm <- lapply(uwSM, as.matrix)
-  expect_identical(uw0, uwSMm)
+
+  ## No longer returning fgraph
+  ## ## Identical unweighted transition matrices (fitness graphs)
+  ## uw0 <- lapply(mm0, function(x) rowScaleMatrix(x$fgraph))
+  ## uwSM <- lapply(mmSM, function(x) rowScaleMatrix(x$fgraph))
+  ## uwSMm <- lapply(uwSM, as.matrix)
+  ## expect_identical(uw0, uwSMm)
   
   ## Identical Weighted transition matrices
   wg0 <- lapply(mm0[c("OT", "MCCBN", "CBN_ot")],
@@ -752,24 +753,24 @@ and identical results between algorithms with sparse matrices, OT", {
 
     ## Same results with the simplified and sparse matrix implementation
     expect_equal(
-        ot_0[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-        lapply(ot_0s[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+        ot_0[c("weighted_fgraph", "trans_mat_genots")],
+        lapply(ot_0s[c("weighted_fgraph", "trans_mat_genots")],
                as.matrix))
 
     expect_equal(
-        ot_1[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-        lapply(ot_1s[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+        ot_1[c("weighted_fgraph", "trans_mat_genots")],
+        lapply(ot_1s[c("weighted_fgraph", "trans_mat_genots")],
                as.matrix))
     
     
     expect_equal(
-        ot_2[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-        lapply(ot_2s[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+        ot_2[c("weighted_fgraph", "trans_mat_genots")],
+        lapply(ot_2s[c("weighted_fgraph", "trans_mat_genots")],
                as.matrix))
     
     expect_equal(
-        ot_3[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
-        lapply(ot_3s[c("fgraph", "weighted_fgraph", "trans_mat_genots")],
+        ot_3[c("weighted_fgraph", "trans_mat_genots")],
+        lapply(ot_3s[c("weighted_fgraph", "trans_mat_genots")],
                as.matrix))
 
 

@@ -34,6 +34,7 @@ against hand-computed ones", {
     test1$parent_set <- c("Single", "Single", "Single", "AND", "Single", "XOR")
     names(test1$parent_set) <- LETTERS[1:length(test1$parent_set)]
 
+    
     accesible_genotypes_t1 <- c("WT", "A", "B", "C", "A, B", "A, C", "B, C", "C, E"
                               , "A, B, C", "A, B, D", "B, C, E", "C, E, F", "A, C, E", "A, B, C, D", "A, B, C, E"
                               , "A, B, D, F", "A, C, E, F", "B, C, E, F",  "A, B, C, D, E"
@@ -209,20 +210,22 @@ against hand-computed ones", {
         expect_equal(sum(computed_trm), sum(manual_trm))
     }
 
-    computed_trm1 <- cpm2tm(test1)$weighted_fgraph
-    computed_trm2 <- cpm2tm(test2)$weighted_fgraph
-    computed_trm3 <- cpm2tm(test3)$weighted_fgraph
-    computed_trm4 <- cpm2tm(test4)$weighted_fgraph
+    test1 <- add_relation(test1)
+    test2 <- add_relation(test2)
+    test3 <- add_relation(test3)
+    test4 <- add_relation(test4)
+
+    
+    computed_trm1 <- evamtools:::cpm2tm(test1)$weighted_fgraph
+    computed_trm2 <- evamtools:::cpm2tm(test2)$weighted_fgraph
+    computed_trm3 <- evamtools:::cpm2tm(test3)$weighted_fgraph
+    computed_trm4 <- evamtools:::cpm2tm(test4)$weighted_fgraph
 
     compare_hesbcn_trms(computed_trm1, trm1)
     compare_hesbcn_trms(computed_trm2, trm2)
     compare_hesbcn_trms(computed_trm3, trm3)
     compare_hesbcn_trms(computed_trm4, trm4)
-
-    test1 <- add_relation(test1)
-    test2 <- add_relation(test2)
-    test3 <- add_relation(test3)
-    
+   
     compare_OncoSimul(test1)
     compare_OncoSimul(test2)
     compare_OncoSimul(test3)

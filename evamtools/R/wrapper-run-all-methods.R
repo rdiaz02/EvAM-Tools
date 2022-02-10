@@ -463,11 +463,15 @@ cpm2tm <- function(x,
     ##       can differ from DBN from HESBCN
     ##    If at all possible, always use the simplest processing possibe
 
+    ## sanity check
+    if(exists(x$parent_set) && !(exists(x$edges$Relation)))
+        stop("x has parent_set but no Relation. Old format?")
+
     
     ## OT, CBN, and OncoBN if using CBN, HESBCN only Single and AND
     if(!exists("Relation", x$edges) ||
        isTRUE(all(x$edges$Relation %in% c("AND", "Single")))) {
-        tmp <- try(DAG_2_access_genots(x[, c("From", "To")]))
+        tmp <- try(DAG_2_access_genots(x$edges[, c("From", "To")]))
     } else if (all(x$edges$Relation %in% c("OR", "Single"))) { ## OncoBN with DBN model, HESBCN if only ORs
         tmp <- try(DAG_2_access_genots_OR(x$edges[, c("From", "To")]))
     } else { ## HESBCN
