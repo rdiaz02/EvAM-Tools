@@ -44,7 +44,9 @@ test_that("Processing samples & Plotting of CPMs is correct", {
       expect_equal(model_transitions$data2plot, NULL) 
       expect_equal(model_trm$data2plot,sample_evam_output[[sprintf("%s_trans_rate_mat", model)]])
     } else {
-      expect_equal(model_transitions$data2plot, samples[[sprintf("%s_genotype_transitions", model)]])
+      tmp <- model_transitions$data2plot$Counts
+      names(tmp) <- rownames(model_transitions$data2plot)
+      expect_equal(tmp, samples[[sprintf("%s_genotype_transitions", model)]])
       expect_equal(model_trm$data2plot, sample_evam_output[[sprintf("%s_trans_rate_mat", model)]]) 
     }
 

@@ -244,14 +244,6 @@ process_samples <- function(sim, n_genes,
 
     trajectories <- sim$trajectory
 
-    ## FIXME: this does not scale. With 12 genes we have a 1.7e7 matrix!
-    ## FIXME: and could this be made faster using a table
-    ## This assumes that genotypes, as given by
-    ## sorted_genotypes, correspond to the genotypes as they exist
-    ## in sim$trajectory (thus sim$obs_events).
-    ## sorted_genotypes uses sorting
-    ## of gene names. But the transition rate matrices might not unless
-    ## they have been computed that way.
     #Calculate transitions
     if (out_params["transitions"]) {
         transitions <- c()

@@ -365,6 +365,15 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
         transitions = "genotype_transitions"
     )
 
+    if (plot_type == "transitions" & !(mod %in% c("OT", "OncoBN")) & !(is.null(sample_data))){
+        tmp_transitions <- all_data[[sprintf("%s_%s", mod, output2plot_type[[plot_type]])]]
+        genots <- as.data.frame(vapply(names(tmp_transitions), function(x) strsplit(x, "->"), list(2)))
+        colnames(genots) <- NULL
+        t2 <- data.frame(From = unlist(genots[1, ]), To = unlist(genots[2, ]), Counts = tmp_transitions)
+        rownames(t2) <- names(tmp_transitions)
+        all_data[[sprintf("%s_%s", mod, output2plot_type[[plot_type]])]] <- t2
+    }
+
     return(list(
         dag_tree = dag_tree
         , data2plot = all_data[[sprintf("%s_%s", mod, output2plot_type[[plot_type]])]]
