@@ -185,11 +185,20 @@ plot_genot_fg <- function(trans_mat
     , fixed_vertex_size = FALSE
     ){
     if(is.null(trans_mat)) return()
-    unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
-    rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
+    browser()
+    if(typeof(trans_mat) == "list"){
+        all_genes <- c(trans_mat$From, trans_mat$To)
+        all_genes <- all_genes[all_genes != "WT"]
+        unique_genes_names <- sort(unique(unlist(str_split(all_genes, ", "))))
+        trans_mat$From <- str_replace_all(trans_mat$From, ", ", "")
+        trans_mat$To <- str_replace_all(trans_mat$To, ", ", "")
+    } else{
+        unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
+        rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
+        graph <- igraph::graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
+    }
 
     num_genes <- length(unique_genes_names)
-    graph <- igraph::graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
     graph <- igraph::decompose(graph)[[1]] ## We do not want disconnected nodes
         
     if (!is.null(observations)){
@@ -367,7 +376,7 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
 
     if (plot_type == "transitions" & !(mod %in% c("OT", "OncoBN")) & !(is.null(sample_data))){
         tmp_transitions <- all_data[[sprintf("%s_%s", mod, output2plot_type[[plot_type]])]]
-        genots <- as.data.frame(vapply(names(tmp_transitions), function(x) strsplit(x, "->"), list(2)))
+        genots <- as.data.frame(vapply(names(tmp_transitions), function(x) strsplit(x, " -> "), list(2)))
         colnames(genots) <- NULL
         t2 <- data.frame(From = unlist(genots[1, ]), To = unlist(genots[2, ]), Counts = tmp_transitions)
         rownames(t2) <- names(tmp_transitions)
