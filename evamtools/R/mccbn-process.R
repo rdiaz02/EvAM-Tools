@@ -74,7 +74,7 @@ mccbn_hcbn_proc <- function(x
         stop("MC-CBN (mccbn) no installed")
     
     stopifnot(!is.null(colnames(x)))
-    stopifnot(max.iter.asa >= 100)
+    stopifnot(max.iter.asa >= 5)
 
     # Setting tmp folder
     # The functiona create asa.txt and poset.txt
@@ -93,7 +93,6 @@ mccbn_hcbn_proc <- function(x
         }
         dir.create(tmp_dir, recursive = TRUE)
     }
-
     posets <- mccbn::candidate_posets(x, rep(1, nrow(x)), 0.9)
     poset0 <- posets[[length(posets)]]
     fit <- mccbn::adaptive.simulated.annealing(poset0, x, L=L, 

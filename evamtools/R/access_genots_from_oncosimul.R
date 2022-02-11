@@ -57,6 +57,9 @@ cpm_out_to_oncosimul <- function(x, sh = -Inf) {
     if ("rerun_lambda" %in% names(x)) { ## CBN
         s <- x$rerun_lambda
         typeDep <- "AND"
+    } else if ("lambda" %in% names(x)) { ## MCCBN-HCBN
+        s <- x$lambda
+        typeDep <- "AND"
     } else if ("Relation" %in% names(x)) { ## HESBCN (same thing as PMCE)
         ## Also using this for DBN, as it could return an AND
         if("Lambdas" %in% names(x) ) ## HESBCN
