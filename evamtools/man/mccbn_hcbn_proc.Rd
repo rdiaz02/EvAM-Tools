@@ -8,8 +8,9 @@ Using H-CBN2, as in example from https://github.com/cbg-ethz/MC-CBN}
 \usage{
 mccbn_hcbn_proc(
   x,
-  max.iter.asa = 100,
+  max.iter.asa = 10000,
   ncores = 1,
+  L = 100,
   tmp_dir = NULL,
   addname = NULL,
   silent = TRUE
@@ -19,6 +20,8 @@ mccbn_hcbn_proc(
 \item{max.iter.asa}{Int. Number of steps to run. Default: 100000}
 
 \item{ncores}{Int. Number of threads to use}
+
+\item{L}{Int. Number of samples to be drawn from the proposal in the E-step}
 
 \item{tmp_dir}{Directory name where the oput is located.}
 

@@ -1,4 +1,4 @@
-test_that("Output are not generated with bad input", {
+test_that("Output is not generated with bad input", {
     trajectory <- list(
         c("WT", "C", "C, D"),
         c("WT", "C", "C, E", "C, D, E", "A, C, D, E"),
@@ -17,7 +17,6 @@ test_that("Output are not generated with bad input", {
         "A, C, D, E", "C, D", "A, B, C, E", "C", "A, B, C, E"
     )
 
-    
     sampling_output <- list(
         trajectory = trajectory, 
         obs_events = obs_events
@@ -93,7 +92,6 @@ test_that("Output is returned only with the requested fields", {
 })
 
 
-
 test_that("Output is correct", {
      trajectory <- list(
         c("WT", "C", "C, D"),
@@ -161,4 +159,5 @@ test_that("Output is correct", {
     expect_equal(out$transitions["A, B, C", "A, B, C, E"], 3)
     expect_equal(out$transitions["C, D, E", "A, C, D, E"], 2)
 })
+
 cat("\n Done test.processing-sampled-genotypes-trajectories-from-models.R \n")

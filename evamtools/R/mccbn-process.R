@@ -16,7 +16,7 @@
 ## Not used now
 if(FALSE) {
     ## This is using OT-CBN, not H-CBN2
-    mccbn_proc <- function(x) {
+    mccbn_ot_proc <- function(x) {
         if (!requireNamespace("mccbn", quietly = TRUE))
             stop("MC-CBN (mccbn) no installed")
         
@@ -56,6 +56,7 @@ if(FALSE) {
 #' and individuals (rows)
 #' @param max.iter.asa Int. Number of steps to run. Default: 100000
 #' @param ncores Int. Number of threads to use
+#' @param L Int. Number of samples to be drawn from the proposal in the E-step
 #' @param tmp_dir Directory name where the oput is located. 
 #' @param addname String to append to the temporary folder name. Default NULL
 #' @param silent Whether to run show message showing the folder name where MCCBN is run
@@ -63,8 +64,9 @@ if(FALSE) {
 #' @return A list with the adjacency matrix, the lambdas, the parent set
 #' and a data.frame with From-To edges and associated lambdas.
 mccbn_hcbn_proc <- function(x
-    , max.iter.asa = 100
+    , max.iter.asa = 10000
     , ncores = 1
+    , L = 100
     , tmp_dir = NULL
     , addname = NULL
     , silent = TRUE) {
@@ -94,10 +96,10 @@ mccbn_hcbn_proc <- function(x
 
     posets <- mccbn::candidate_posets(x, rep(1, nrow(x)), 0.9)
     poset0 <- posets[[length(posets)]]
-    fit <- mccbn::adaptive.simulated.annealing(poset0, x, L=100, 
+    fit <- mccbn::adaptive.simulated.annealing(poset0, x, L=L, 
         max.iter.asa=max.iter.asa, thrds = ncores, outdir = tmp_dir)
     ## Default iterations for asa is 10000 in original code, 100 for testing
-    ## L: number of samples to be drawn from the proposal in the E-step; they used 100, but I do not know if this is too low
+    ## L: ; they used 100, but I do not know if this is too low
 
     am <- fit$poset
     colnames(am) <- rownames(am) <- colnames(x)
