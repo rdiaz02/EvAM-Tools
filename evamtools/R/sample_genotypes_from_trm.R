@@ -201,10 +201,6 @@ process_samples <- function(sim, n_genes,
                             output = c("frequencies",
                                        "state_counts",
                                        "transitions")) {
-
-    ## RDU: gene_names should never be null, as there is a sim
-    ## with things in there
-    ## if(is.null(gene_names)) stop("gene_names ")gene_names <- LETTERS[1:n_genes]
     
     #Checking input
     params <- c("trajectory", "obs_events")
@@ -226,12 +222,12 @@ process_samples <- function(sim, n_genes,
             , paste(not_valid_params, collapse = ", " )))
 
     
-    #Set up
+    ## Set up
     output <- list()
     n_states <- 2**n_genes
     sorted_genotypes <- generate_sorted_genotypes(n_genes, gene_names)
 
-    #Calculate frequencies
+    ## Calculate frequencies
     if (out_params["frequencies"]) {
         counts_tmp <- sample_to_pD_order(sim$obs_events, n_genes, gene_names)
         frequencies <- data.frame(
@@ -241,58 +237,58 @@ process_samples <- function(sim, n_genes,
         rownames(frequencies) <- NULL
         output$frequencies <- frequencies
     }
+   
+    ## Calculate transitions
 
-    trajectories <- sim$trajectory
-
-    ## FIXME: return as a sparse matrix?
-    ## FIXME: this does not scale. With 12 genes we have a 1.7e7 matrix!
-    ## FIXME: and could this be made faster using a table
     ## This assumes that genotypes, as given by
     ## sorted_genotypes, correspond to the genotypes as they exist
     ## in sim$trajectory (thus sim$obs_events).
     ## sorted_genotypes uses sorting
     ## of gene names. But the transition rate matrices might not unless
-    ## they have been computed that way.
-    #Calculate transitions
+    ## they have been computed that way. They are now, though.
+ 
     if (out_params["transitions"]) {
-        browser()
-        transitions <- c()
-        # data.frame(From=character(), To=character(), Counts=integer())
-        # browser()
-        # tt <- matrix(0L, nrow = n_states, ncol = n_states)
-        # colnames(tt) <- rownames(tt) <- sorted_genotypes
-        for(traj in trajectories){
-            steps <- length(traj) - 1 
-            if(steps > 0){
-                for(i in 1:steps){
-                    from <- traj[i]
-                    to <- traj[i + 1]
-                    current_trans <- paste0(from, " -> ", to)
-                    prev_counts <- transitions[current_trans]
-                    if (is.null(prev_counts) || is.na(prev_counts)){
-                        transitions[current_trans] <- 1
-                    } else {
-                        transitions[current_trans] <- prev_counts + 1
-                    }
+        unlisted_trajectories <- unlist(sim$trajectory)
+        tt <- sparse_transM_from_genotypes(unique(unlisted_trajectories))
+        for (traj in sim$trajectory) {
+            steps <- length(traj) - 1
+            if (steps > 0) {
+                for (i in seq_len(steps)) {
+                    tt[traj[i], traj[i + 1]] <- tt[traj[i], traj[i + 1]]  + 1
                 }
             }
-        } 
-        output$transitions <- transitions
+        }
+        output$transitions <- tt
     }
 
-    #Calculate state_counts
-    if(out_params["state_counts"]){
-        state_counts <- sample_to_pD_order(unlist(sim$trajectory),
+    ## Calculate state_counts
+    if (out_params["state_counts"]) {
+        if (!("transitions" %in% output))
+            unlisted_trajectories <- unlist(sim$trajectories)
+        state_counts <- sample_to_pD_order(unlisted_trajectories,
                                            n_genes, gene_names)
         state_counts <- data.frame(
             Genotype = sorted_genotypes,
             Counts = state_counts
         )
-
         output$state_counts <- state_counts
     }
-
     return(output)
+}
+
+## Create empty sparse matrix from vector of genotypes
+## with rows and columns ordered with WT first, and
+## then by increasing mutations and within number of mutations, sorted
+sparse_transM_from_genotypes <- function(genots) {
+    genots <- unique(genots)
+    muts <- stringi::stri_count_fixed(genots, ',')
+    names(muts) <- genots
+    muts["WT"] <- -1
+    genots <- genots[order(muts, genots)]
+    return(sparseMatrix(i = NULL, j = NULL,
+                        dims = c(length(genots), length(genots)),
+                        x = 0,
+                        dimnames = list(genots, genots)))
 }
 
 
