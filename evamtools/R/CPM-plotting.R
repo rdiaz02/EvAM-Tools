@@ -435,21 +435,30 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
 ## #' plot_CPMs(out2, dB_c1, plot_type = "transitions")
 ## #' dev.off()
 ## #' }
-## #' 
+## #'
+
 plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal", 
                         models = c("OT", "CBN", "OncoBN", "MCCBN", "MHN", "HESBCN"),
-                        plot_type = "probabilities",
+                        plot_type = "trans_mat",
                         fixed_vertex_size = FALSE,
                         top_paths = NULL) {
+
     
-    if (!(plot_type %in% c("trm", "transitions", "probabilities"))){
+        
+    if (!(plot_type %in% c("trans_mat", "trans_rate_mat", "obs_genotype_transitions"))){
         stop(sprintf("Plot type %s is not supported", plot_type))
     }
 
-    if ((plot_type == "transitions") & is.null(samples)){
-        stop(sprintf("Plot type does not have the necessary data"))
+    if ((plot_type == "obs_genotype_transitions") & is.null(samples)){
+        stop("obs_genotype_transitions needs you to pass the output ",
+             "of a call to sample_CPMs")
     }
 
+    ## To allow using in here the old naming
+    if(plot_type == "trans_mat") old_plot_type <- "probabilities"
+    if(plot_type == "trans_rate_mat") old_plot_type <- "trm"
+    if(plot_type == "obs_genotype_transitions") old_plot_type <- "transitions"
+    
     ## List of available models
     available_models <- unique(models[
         vapply(models, function(mod) {
@@ -457,16 +466,17 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
             return(any(!is.na(cpm_output[[sprintf("%s_%s", mod, attr_name)]])))
         }, logical(1))
     ])
-    print(available_models)
+    ## print(available_models)
 
     ## DAG relationships colors 
     standard_relationship <- "gray73"
-    colors_relationships <- c(standard_relationship, standard_relationship, "cornflowerblue", "coral2")
+    colors_relationships <- c(standard_relationship, standard_relationship,
+                              "cornflowerblue", "coral2")
     names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
     
     ## Shape of the plot
     l_models <- length(available_models)
-    n_rows <- ifelse(plot_type == "matrix", 3, 2)
+    n_rows <- ifelse(old_plot_type == "matrix", 3, 2)
 
     if(orientation == "vertical") {
         op1 <- par(mfrow = c(l_models, n_rows))
@@ -481,7 +491,7 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
     ## 2. Forward graph (HyperTRAPs style) of sampled transitions, transition matrix
     for(mod in available_models) {
         ## Processing data
-        model_data2plot <- process_data(cpm_output, mod, plot_type, samples)
+        model_data2plot <- process_data(cpm_output, mod, old_plot_type, samples)
         g <- model_data2plot$dag_tree
         ## Plotting data
         if(!is.null(g)) { ## Potting DAGs
@@ -508,7 +518,7 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
                 legend("topleft", legend = names(colors_relationships),
                     col = colors_relationships, lty = 1, lwd = 5, bty = "n")
             }
-        }else if(!is.null(model_data2plot$theta)) { ##Plotting matrix
+        } else if(!is.null(model_data2plot$theta)) { ##Plotting matrix
             op <- par(mar=c(3, 3, 5, 3), las = 1)
             plot(model_data2plot$theta, cex = 1.5, digits = 2, key = NULL
                 , axis.col = list(side = 3)
@@ -519,20 +529,27 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
             par(op)
         }
         ## Fixme, there is a problem here: probabilities and trans_mat plot the same
-        if (plot_type == "probabilities") {
-            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data, top_paths = top_paths, fixed_vertex_size=fixed_vertex_size)
-        } else if (plot_type == "transitions") {
-            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data, model_data2plot$genotype_freqs, top_paths = top_paths, fixed_vertex_size=fixed_vertex_size)
-        }else if (plot_type == "trm"){
-            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data, top_paths = top_paths, fixed_vertex_size=fixed_vertex_size)
+        if (old_plot_type == "probabilities") {
+            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data,
+                          top_paths = top_paths,
+                          fixed_vertex_size = fixed_vertex_size)
+        } else if (old_plot_type == "transitions") {
+            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data,
+                          model_data2plot$genotype_freqs,
+                          top_paths = top_paths,
+                          fixed_vertex_size = fixed_vertex_size)
+        } else if (old_plot_type == "trm"){
+            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data,
+                          top_paths = top_paths,
+                          fixed_vertex_size = fixed_vertex_size)
         }
 
-        if ((mod %in% c("OT")) & (plot_type %in% c("trm", "transitions"))) {
+        if ((mod %in% c("OT")) & (old_plot_type %in% c("trm", "transitions"))) {
             par(mar = rep(3, 4))
             plot_sampled_genots(cpm_output$analyzed_data)
         }
 
-        if ((mod %in% c("OncoBN")) & (plot_type %in% c("trm", "transitions"))) {
+        if ((mod %in% c("OncoBN")) & (old_plot_type %in% c("trm", "transitions"))) {
             par(mar = rep(3, 4))
             plot(0,type='n',axes=FALSE,ann=FALSE)
         }

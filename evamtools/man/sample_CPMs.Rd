@@ -7,7 +7,7 @@ sample_CPMs(cpm_output,  N,
                 methods = c("OT", "OncoBN",
                             "CBN", "MCCBN",
                             "MHN", "HESBCN"),
-                genotype_transitions = TRUE
+                obs_genotype_transitions = TRUE
 )
 }
 \arguments{
@@ -17,14 +17,21 @@ sample_CPMs(cpm_output,  N,
 
 \item{methods}{List of methods that we want to sample}
 
-\item{genotype_transitions}{If TRUE, return the number of transitions
-  between pairs of genotypes. Not available for OT and OncoBN.}
+\item{obs_genotype_transitions}{If TRUE, return the number of observed transitions between pairs of genotypes. Not available for OT and OncoBN.}
 }
 
 
 \value{
   List with observed frequencies of genotypes for the methods used. If
-  \code{genotype_transitions = TRUE}, vector of counts of genotype transitions.
+  \code{obs_genotype_transitions = TRUE}, vector of counts of observed
+  genotype transitions.
+
+  Observed genotype transitions are not to be use to obtain estimates of
+  transition probabilities. The transition probabilities given by each
+  method are already available from the output of evam itself. These
+  genotype transitions are the observed transitions during the
+  simulation of the sampling process.
+  
 }
 
 
@@ -36,7 +43,7 @@ sample_CPMs(cpm_output,  N,
  of size \code{N}, with probabilities of genotypes as given by the
  method. 
  
-  Genotype transitions, if requested, are obtained by counting the transitions between pairs of genotypes when simulating from the continuous-time Markov Chain.
+  Observed genotype transitions, if requested, are obtained by counting the transitions between pairs of genotypes when simulating from the continuous-time Markov Chain.
 }
 
 
@@ -48,5 +55,5 @@ sample_CPMs(cpm_output,  N,
                                              "MHN", "HESBCN", "MCCBN")))
     outs <- sample_CPMs(out, N = 1000)
     outs_no_transit <- sample_CPMs(out, N = 1000,
-                                       genotype_transitions = FALSE)
+                                       obs_genotype_transitions = FALSE)
 }

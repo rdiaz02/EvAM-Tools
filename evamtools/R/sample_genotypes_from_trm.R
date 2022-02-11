@@ -309,7 +309,7 @@ sample_CPMs <- function(cpm_output
                           , methods = c("OT", "OncoBN",
                                         "CBN", "MCCBN",
                                         "MHN", "HESBCN")
-                          , genotype_transitions = TRUE
+                          , obs_genotype_transitions = TRUE
                             ) {
     ## And I have "Source" for a source data type for the web server
     output <- list()
@@ -345,18 +345,18 @@ sample_CPMs <- function(cpm_output
                 )
             ## The next one is NOT implicitly available.
             ##   see OT_transition_matrices.org
-            output[[sprintf("%s_genotype_transitions", method)]] <- NULL
+            output[[sprintf("%s_obs_genotype_transitions", method)]] <- NULL
         } else {
             ## evam always returns the method_trans_rate_mat
             ## even if just with an NA
             trm <- cpm_output[[sprintf("%s_trans_rate_mat", method)]]
             if ((length(trm) == 1) && is.na(trm)) {
-                output[[sprintf("%s_genotype_transitions", method)]] <- NULL  
+                output[[sprintf("%s_obs_genotype_transitions", method)]] <- NULL  
                 output[[sprintf("%s_genotype_freqs", method)]] <- NULL  
             } else {
                 sims <- population_sample_from_trm(trm, n_samples = N)
                 whatout <- "frequencies"
-                if(genotype_transitions) whatout <- c(whatout, "transitions")
+                if(obs_genotype_transitions) whatout <- c(whatout, "transitions")
                 psamples <-
                     process_samples(sims,
                                     n_genes,
@@ -365,11 +365,11 @@ sample_CPMs <- function(cpm_output
                 output[[sprintf("%s_genotype_freqs", method)]] <-
                     psamples$frequencies
                 
-                if(genotype_transitions)
-                    output[[sprintf("%s_genotype_transitions", method)]] <-
+                if(obs_genotype_transitions)
+                    output[[sprintf("%s_obs_genotype_transitions", method)]] <-
                         psamples$transitions
                 else
-                    output[[sprintf("%s_genotype_transitions", method)]] <- NA
+                    output[[sprintf("%s_obs_genotype_transitions", method)]] <- NA
             }
         }
     }
