@@ -19,7 +19,7 @@ pv_one_comp <- function(ngenes, n_samples, B = 2000) {
     theta <- Random.Theta(n = ngenes, sparsity = runif(1, 0.2, 0.8))
     pTh <- Generate.pTh(theta)
 
-    trmx <- cpm_access_genots_paths_w_simplified(theta)
+    trmx <- cpm2tm(theta)
 
     spop <- suppressMessages(
         population_sample_from_trm(trmx, n_samples = n_samples, cores = 1))
