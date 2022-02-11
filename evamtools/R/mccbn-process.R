@@ -63,10 +63,11 @@ mccbn_hcbn_proc <- function(x
                             ## , max.iter.asa = 10000
                             ## , ncores = 1
                             ## , L = 100
+                           mccbn_hcbn2_opts = list(
                           , tmp_dir = NULL
                           , addname = NULL
                           , silent = TRUE
-                          ,  mccbn_hcbn2_opts = list(L = 100,
+                                , L = 100,
                                                     sampling = c("forward", "add-remove", "backward", "bernoulli", "pool"),
                                                     max.iter = 100L,
                                                     update.step.size = 20L,
@@ -92,15 +93,15 @@ mccbn_hcbn_proc <- function(x
 
     # Setting tmp folder
     # The functiona create asa.txt and poset.txt
-    if (is.null(tmp_dir)) {
+    if (is.null(mccbn_hcbn2_opts$tmp_dir)) {
         tmp_dir <- tempfile()
         dirname0 <- NULL
-        if (!is.null(addname)) {
+        if (!is.null(mccbn_hcbn2_opts$addname)) {
             dirname0 <- tmp_dir
             tmp_dir <- paste0(tmp_dir, "/",
                               "_mccbn_", addname)
         }
-        if (!silent)
+        if (!mccbn_hcbn2_opts$silent)
             message(paste("\n Using dir", tmp_dir))
         if (dir.exists(tmp_dir)) {
             stop("dirname ", tmp_dir, "exists")

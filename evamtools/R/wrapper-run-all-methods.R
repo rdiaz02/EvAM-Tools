@@ -569,7 +569,7 @@ transition_fg_sparseM <- function(x, weights) {
 
 ## Main function. data frame or matrix -> output
 evam <- function(x,
-                 methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN"),
+                 methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN"),
                  max_cols = 15,
                  cbn_cores = 1,
                  cbn_init_poset = "OT",
@@ -580,7 +580,28 @@ evam <- function(x,
                  oncobn_algorithm = "DP",
                  oncobn_epsilon = min(colMeans(x)/2),
                  oncobn_silent = TRUE,
-                 ot_with_errors_dist_ot = TRUE
+                 ot_with_errors_dist_ot = TRUE,
+                 mccbn_model = "OT-CBN",
+                 mccbn_hcbn2_opts = list(
+                     tmp_dir = NULL,
+                     addname = NULL,
+                     silent = TRUE,
+                     L = 100,
+       sampling = c("forward", "add-remove", "backward", "bernoulli", "pool"),
+       max.iter = 100L,
+       update.step.size = 20L,
+       tol = 0.001,
+       max.lambda.val = 1e+06,
+       T0 = 50,
+       adap.rate = 0.3,
+       acceptance.rate = NULL,
+       step.size = NULL,
+       max.iter.asa = 10000L,
+       neighborhood.dist = 1L,
+       adaptive = TRUE,
+       thrds = 1L,
+       verbose = FALSE,
+       seed = NULL)
                  ) {
 
     if(!(cbn_init_poset %in% c("OT", "linear")))
@@ -589,12 +610,14 @@ evam <- function(x,
     
     if ("MCCBN" %in% methods) {
         do_MCCBN <- TRUE
+        stopifnot(mccbn_model %in% c("OT-CBN", "H-CBN2"))
     } else {
         do_MCCBN <- FALSE
     }
 
     if ("OncoBN" %in% methods) {
         do_OncoBN <- TRUE
+        stopifnot(oncobn_model %in% c("DBN", "CBN"))
     } else {
         do_OncoBN <- FALSE
     }
@@ -697,16 +720,21 @@ evam <- function(x,
     } 
     
     if(do_MCCBN) {
-        stop("MC-CBN disabled")
-        ## if( !requireNamespace("mccbn", quietly = TRUE)) {
-        ##     warning("MC-CBN (mccbn) no installed. Not running MC-CBN")
-        ## } else {
-        ##     stop("MC-CBN disabled now")
-        ##     ## message("Doing MC-CBN")
-        ##     ## time_mccbn <-
-        ##     ##     system.time(MCCBN_out <- try(mccbn_proc(x)))["elapsed"]
-        ##     ## message("time MC-CBN = ", time_mccbn)
-        ## }
+        if( !requireNamespace("mccbn", quietly = TRUE)) {
+            warning("MC-CBN (mccbn) no installed. Not running MC-CBN")
+        } else {
+            message("Doing MC-CBN")
+            if(mccbn_model == "OT-CBN") 
+                time_mccbn <-
+                    system.time(MCCBN_out <- try(mccbn_ot_proc(x)))["elapsed"]
+            else if(mccbn_model == "H-CBN2")
+                time_mccbn <-
+                    system.time(MCCBN_out <- try(mccbn_hcbn2_proc(x,
+                                                                  mccbn_hcbn2_opts = mccbn_hcbn2_opts
+                                                                  )))["elapsed"]
+                
+            message("time MC-CBN = ", time_mccbn)
+        }
     }
 
     ## ######################################################################

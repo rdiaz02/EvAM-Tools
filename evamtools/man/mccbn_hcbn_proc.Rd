@@ -8,11 +8,12 @@ mccbn_hcbn_proc(
   %% max.iter.asa = 10000,
   %% ncores = 1,
   %% L = 100,
+  mccbn_hcbn2_opts = list(
   tmp_dir = NULL,
   addname = NULL,
   silent = TRUE,
-  mccbn_hcbn2_opts = list(L = 100,
- sampling = c("forward", "add-remove", "backward", "bernoulli", "pool"),
+L = 100,
+       sampling = c("forward", "add-remove", "backward", "bernoulli", "pool"),
        max.iter = 100L,
        update.step.size = 20L,
        tol = 0.001,
@@ -26,14 +27,19 @@ mccbn_hcbn_proc(
        adaptive = TRUE,
        thrds = 1L,
        verbose = FALSE,
-       seed = NULL
-)
+       seed = NULL)
 )
 }
 \arguments{
   \item{mccbn_hcbn2_opts}{Options passed to
     \code{\link[mccbn]{adaptive.simulated.annealing}}. See the help of
     \code{\link[mccbn]{adaptive.simulated.annealing}} for details.
+    In addition, the following options:
+    \itemize{
+ \item\code{tmp_dir}. Directory name where the oput is located. This is passed to \code{\link[mccbn]{adaptive.simulated.annealing}}, as argument \code{outdir}, with \code{addname} added, if provided.       
+\item\code{addname}. String to append to the temporary directory name. Default is NULL.
+\item\code{silent}.Whether to run show message showing the directory name  where MCCBN is run. This is different from  \code{mccbn_hcbn2_opts$verbose}.
+    }
      }
 %% \item{max.iter.asa}{Int. Number of steps to run. Default: 100000. See \code{\link[mccbn]{adaptive.simulated.annealing}}.}
 
@@ -41,15 +47,15 @@ mccbn_hcbn_proc(
 
 %% \item{L}{Int. Number of samples to be drawn from the proposal in the E-step. See \code{\link[mccbn]{adaptive.simulated.annealing}}.}
 
-\item{tmp_dir}{Directory name where the oput is located. (This is passed
-to \code{\link[mccbn]{adaptive.simulated.annealing}}, as argument \code{outdir}.)}
+%% \item{tmp_dir}{Directory name where the oput is located. (This is passed
+%% to \code{\link[mccbn]{adaptive.simulated.annealing}}, as argument \code{outdir}.)}
 
-\item{addname}{String to append to the temporary directory name. Default
-  is NULL.}
+%% \item{addname}{String to append to the temporary directory name. Default
+%%   is NULL.}
 
-\item{silent}{Whether to run show message showing the directory name
-  where MCCBN is run. This is different from
-  \code{mccbn_hcbn2_opts$verbose}.}
+%% \item{silent}{Whether to run show message showing the directory name
+%%   where MCCBN is run. This is different from
+%%   \code{mccbn_hcbn2_opts$verbose}.}
 
 \item{x}{Cross sectional data. Matrix of genes (columns)
 and individuals (rows)}
