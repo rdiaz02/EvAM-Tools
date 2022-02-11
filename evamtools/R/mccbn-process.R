@@ -59,37 +59,34 @@ do_MCCBN_OT_CBN <- function(x) {
 ## #' @return A list with the adjacency matrix, the lambdas, the parent set
 ## #' and a data.frame with From-To edges and associated lambdas.
 
-do_MCBBN_HCBN2 <- function(x
-                            ## , max.iter.asa = 10000
-                            ## , ncores = 1
-                            ## , L = 100
-                           mccbn_hcbn2_opts = list(
-                          , tmp_dir = NULL
-                          , addname = NULL
-                          , silent = TRUE
-                                , L = 100,
-                                                    sampling = c("forward", "add-remove", "backward", "bernoulli", "pool"),
-                                                    max.iter = 100L,
-                                                    update.step.size = 20L,
-                                                    tol = 0.001,
-                                                    max.lambda.val = 1e+06,
-                                                    T0 = 50,
-                                                    adap.rate = 0.3,
-                                                    acceptance.rate = NULL,
-                                                    step.size = NULL,
-                                                    max.iter.asa = 10000L,
-                                                    neighborhood.dist = 1L,
-                                                    adaptive = TRUE,
-                                                    thrds = 1L,
-                                                    verbose = FALSE,
-                                                    seed = NULL
-                                                    )
-                            ) {
+do_MCCBN_HCBN2 <- function(x 
+                          , mccbn_hcbn2_opts = list(
+                                tmp_dir = NULL,
+                                addname = NULL,
+                                silent = TRUE,
+                                L = 100,
+                                sampling = c("forward", "add-remove", "backward", "bernoulli", "pool"),
+                                max.iter = 100L,
+                                update.step.size = 20L,
+                                tol = 0.001,
+                                max.lambda.val = 1e+06,
+                                T0 = 50,
+                                adap.rate = 0.3,
+                                acceptance.rate = NULL,
+                                step.size = NULL,
+                                max.iter.asa = 10000L,
+                                neighborhood.dist = 1L,
+                                adaptive = TRUE,
+                                thrds = 1L,
+                                verbose = FALSE,
+                                seed = NULL
+                           )
+                           ) {
     if (!requireNamespace("mccbn", quietly = TRUE))
         stop("MC-CBN (mccbn) no installed")
     
     stopifnot(!is.null(colnames(x)))
-    stopifnot(max.iter.asa >= 5)
+    stopifnot(mccbn_hcbn2_opts$max.iter.asa >= 5)
 
     # Setting tmp folder
     # The functiona create asa.txt and poset.txt
@@ -99,7 +96,7 @@ do_MCBBN_HCBN2 <- function(x
         if (!is.null(mccbn_hcbn2_opts$addname)) {
             dirname0 <- tmp_dir
             tmp_dir <- paste0(tmp_dir, "/",
-                              "_mccbn_", addname)
+                              "_mccbn_", mccbn_hcbn2_opts$addname)
         }
         if (!mccbn_hcbn2_opts$silent)
             message(paste("\n Using dir", tmp_dir))
@@ -107,6 +104,8 @@ do_MCBBN_HCBN2 <- function(x
             stop("dirname ", tmp_dir, "exists")
         }
         dir.create(tmp_dir, recursive = TRUE)
+    } else {
+        tmp_dir <- mccbn_hcbn2_opts$tmp_dir
     }
     posets <- mccbn::candidate_posets(x, rep(1, nrow(x)), 0.9)
     poset0 <- posets[[length(posets)]]

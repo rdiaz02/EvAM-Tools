@@ -147,14 +147,15 @@ test_that("We can run evam with non-default arguments", {
                                   methods = c("CBN", "OT", "OncoBN",
                                               "MHN", "HESBCN"),
                                  max_cols = 4,
-                                 cbn_cores = 2,
-                                 cbn_init_poset = "linear",
-                                 hesbcn_steps = 20000,
-                                 hesbcn_seed = 4,
-                                 mhn_lambda = 1/10,
-                                 oncobn_model = "CBN",
-                                 oncobn_epsilon = 0.01,
-                                 ot_with_errors_dist_ot = FALSE
+                                 cbn_opts = list(cores = 2),
+                                 hesbcn_opts = list(steps = 20000, seed = 2),
+                                 mhn_opts = list(lambda = 1/10),
+                                 oncobn_opts = list(model = "CBN", epsilon = 0.01),
+                                 ot_opts = list(with_errors_dist_ot = FALSE),
+                                 mccbn_opts = list(model = "H-CBN2",
+                                                   max.iter = 10L,
+                                                   L = 6,
+                                                   max.iter.asa = 20L)
                                  ))
     expect_true(exists("OT_model", where = out))
 

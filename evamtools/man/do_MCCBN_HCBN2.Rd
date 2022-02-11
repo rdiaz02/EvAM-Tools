@@ -1,9 +1,9 @@
-\name{do_MCBBN_HCBN2}
-\alias{do_MCBBN_HCBN2}
+\name{do_MCCBN_HCBN2}
+\alias{do_MCCBN_HCBN2}
 \title{Run MCCBN with H-CBN2.
 Using H-CBN2, as in example from https://github.com/cbg-ethz/MC-CBN}
 \usage{
-do_MCBBN_HCBN2(
+do_MCCBN_HCBN2(
   x,
   %% max.iter.asa = 10000,
   %% ncores = 1,

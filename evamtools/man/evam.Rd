@@ -15,10 +15,10 @@ mhn_opts = list(lambda = 1/nrow(x)),
                      seed = NULL
                  ),
                  oncobn_opts = list(
-                     oncobn_model = "DBN",
-                     oncobn_algorithm = "DP",
-                     oncobn_epsilon = min(colMeans(x)/2),
-                     oncobn_silent = TRUE,
+                     model = "DBN",
+                     algorithm = "DP",
+                     epsilon = min(colMeans(x)/2),
+                     silent = TRUE
                  ),
                  mccbn_opts = list(
                      model = "OT-CBN",
@@ -44,11 +44,11 @@ mhn_opts = list(lambda = 1/nrow(x)),
 )
 }
 \arguments{
-  
-  
+
 \item{x}{cross sectional data}
 
 \item{methods}{Methods to use. For now, the only thing that matters is whether the vector includes the strings "MCCBN" and "OncoBN".}
+
 
 \item{max_cols}{Maximum number of columns to use in the analysis. If x has > max_cols, selected columns are those with the largest number of events.} 
 
@@ -61,22 +61,24 @@ mhn_opts = list(lambda = 1/nrow(x)),
 
 \item{ot_opts}{A list with the single named argument \code{with_errors_dist_ot}: value for option with \code{with.errors} in the call to \code{\link[Oncotree]{distribution.oncotree}}. A value of TRUE means to incorporate the false positive and negative errors when returning the probabilities of genotypes under OT. Note that for large models using a value of TRUE can result in very long computing times. Default is TRUE.} 
 
+
 \item{cbn_opts}{A named list with arguments passed to CBN. 
-\describe {
-\item{cores}{Cores to be used by CBN (set via the environment variable OMP\_NUM\_THREADS). Defaults to 1.}
-\item{cbn_init_poset}{Initial poset for CBN; one of "linear" or "OT" (default).}
+\itemize{
+\describe{cores}{Cores to be used by CBN (set via the environment variable OMP\_NUM\_THREADS). Defaults to 1.}
+\describe{cbn_init_poset}{Initial poset for CBN; one of "linear" or "OT" (default).}
+}
 }
 
- \item{oncobn_opts}{Named list of arguments used in the fit of OncoBN. See \code{\link{do_oncoBN}}. } 
+ \item{oncobn_opts}{Named list of arguments used in the fit of OncoBN. See \code{\link{do_OncoBN}}. } 
 
 
  \item{hesbcn_opts}{Named list of arguments used in the fit of H-ESBCN. See \code{\link{do_HESBCN}}. } 
 
-  \item{mccbn_opts}{Named list of arguments used in the fit of
+\item{mccbn_opts}{Named list of arguments used in the fit of
     MC-CBN. These are \code{model}, one of \code{OT-CBN} or
     \code{H-CBN2}; the
     rest are arguments passed to \code{mccbn_hcbn_proc} (i.e., used only
-    if fitting a \code{H-CBN2} model). See \code{\link{do_MCBBN_HCBN2}}.
+    if fitting a \code{H-CBN2} model). See \code{\link{do_MCCBN_HCBN2}}.
   }
 }
 

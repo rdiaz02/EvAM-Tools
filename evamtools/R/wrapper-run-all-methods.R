@@ -585,7 +585,7 @@ evam <- function(x,
                      model = "DBN",
                      algorithm = "DP",
                      epsilon = min(colMeans(x)/2),
-                     silent = TRUE,
+                     silent = TRUE
                  ),
                  mccbn_opts = list(
                      model = "OT-CBN",
@@ -593,37 +593,88 @@ evam <- function(x,
                      addname = NULL,
                      silent = TRUE,
                      L = 100,
-       sampling = c("forward", "add-remove", "backward", "bernoulli", "pool"),
-       max.iter = 100L,
-       update.step.size = 20L,
-       tol = 0.001,
-       max.lambda.val = 1e+06,
-       T0 = 50,
-       adap.rate = 0.3,
-       acceptance.rate = NULL,
-       step.size = NULL,
-       max.iter.asa = 10000L,
-       neighborhood.dist = 1L,
-       adaptive = TRUE,
-       thrds = 1L,
-       verbose = FALSE,
-       seed = NULL)
+                     sampling = c("forward", "add-remove", "backward", "bernoulli", "pool"),
+                     max.iter = 100L,
+                     update.step.size = 20L,
+                     tol = 0.001,
+                     max.lambda.val = 1e+06,
+                     T0 = 50,
+                     adap.rate = 0.3,
+                     acceptance.rate = NULL,
+                     step.size = NULL,
+                     max.iter.asa = 10000L,
+                     neighborhood.dist = 1L,
+                     adaptive = TRUE,
+                     thrds = 1L,
+                     verbose = FALSE,
+                     seed = NULL)
                  ) {
 
-    if(!(cbn_init_poset %in% c("OT", "linear")))
+    ## ############################################################
+    ##
+    ##   Dealing with default arguments
+    ##
+    ## ############################################################
+    d_cbn_opts <- list(
+                     cores = 1,
+                     init_poset = "OT"
+    )
+    d_hesbcn_opts <- list(
+                     steps = 100000,
+                     seed = NULL
+    )
+    d_oncobn_opts <- list(
+                     model = "DBN",
+                     algorithm = "DP",
+                     epsilon = min(colMeans(x)/2),
+                     silent = TRUE
+    )
+    d_mccbn_opts <- list(
+                     model = "OT-CBN",
+                     tmp_dir = NULL,
+                     addname = NULL,
+                     silent = TRUE,
+                     L = 100,
+                     sampling = c("forward", "add-remove", "backward", "bernoulli", "pool"),
+                     max.iter = 100L,
+                     update.step.size = 20L,
+                     tol = 0.001,
+                     max.lambda.val = 1e+06,
+                     T0 = 50,
+                     adap.rate = 0.3,
+                     acceptance.rate = NULL,
+                     step.size = NULL,
+                     max.iter.asa = 10000L,
+                     neighborhood.dist = 1L,
+                     adaptive = TRUE,
+                     thrds = 1L,
+                     verbose = FALSE,
+                     seed = NULL)
+
+    ## Not needed, but make sure we keep names distinct
+    cbn_opts_2 <- fill_args_default(cbn_opts, d_cbn_opts)
+    hesbcn_opts_2 <- fill_args_default(hesbcn_opts, d_hesbcn_opts)
+    oncobn_opts_2 <- fill_args_default(oncobn_opts, d_oncobn_opts)
+    mccbn_opts_2 <- fill_args_default(mccbn_opts, d_mccbn_opts)
+    ## rm to avoid confusion, though not needed
+    rm(cbn_opts, hesbcn_opts, oncobn_opts, mccbn_opts)
+    rm(d_cbn_opts, d_hesbcn_opts, d_oncobn_opts, d_mccbn_opts)
+    
+    
+    if(!(cbn_opts_2$init_poset %in% c("OT", "linear")))
         stop("cbn_init_poset must be one of OT or linear. ",
              " Custom not allowed in call from evam.")
     
     if ("MCCBN" %in% methods) {
         do_MCCBN <- TRUE
-        stopifnot(mccbn_opts$model %in% c("OT-CBN", "H-CBN2"))
+        stopifnot(mccbn_opts_2$model %in% c("OT-CBN", "H-CBN2"))
     } else {
         do_MCCBN <- FALSE
     }
 
     if ("OncoBN" %in% methods) {
         do_OncoBN <- TRUE
-        stopifnot(oncobn_opts$model %in% c("DBN", "CBN"))
+        stopifnot(oncobn_opts_2$model %in% c("DBN", "CBN"))
     } else {
         do_OncoBN <- FALSE
     }
@@ -687,8 +738,8 @@ evam <- function(x,
     message("Doing HESBCN")
     time_hesbcn <- system.time(
         HESBCN_out <- do_HESBCN(x,
-                                n_steps = hesbcn_opts$steps,
-                                seed = hesbcn_opts$seed))["elapsed"]
+                                n_steps = hesbcn_opts_2$steps,
+                                seed = hesbcn_opts_2$seed))["elapsed"]
     message("time HESBCN = ", time_hesbcn)
 
 
@@ -708,20 +759,20 @@ evam <- function(x,
     time_cbn_ot <- system.time(
            CBN_out <- try(cbn_proc(x,
                                    addname = "tmpo",
-                                   init.poset = cbn_init_poset,
+                                   init.poset = cbn_opts_2$init_poset,
                                    nboot = 0,
                                    parall = TRUE,
-                                   cores = cbn_cores)))["elapsed"]
+                                   cores = cbn_opts_2$cbn_cores)))["elapsed"]
     message("time CBN = ", time_cbn_ot)
 
     if(do_OncoBN) {
         message("Doing OncoBN\n\n")
         time_dbn <- system.time(
             OncoBN_out <- do_OncoBN(x,
-                                    model = oncbn_opts$model,
-                                    algorithm = oncobn_opts$algorithm,
-                                    epsilon = oncbn_opts$epsilon,
-                                    silent = oncobn_opts$silent))["elapsed"]
+                                    model = oncobn_opts_2$model,
+                                    algorithm = oncobn_opts_2$algorithm,
+                                    epsilon = oncobn_opts_2$epsilon,
+                                    silent = oncobn_opts_2$silent))["elapsed"]
         message("time OncoBN = ", time_dbn)
     } 
     
@@ -730,15 +781,15 @@ evam <- function(x,
             warning("MC-CBN (mccbn) no installed. Not running MC-CBN")
         } else {
             message("Doing MC-CBN")
-            if(mccbn_opts$model == "OT-CBN") 
+            if(mccbn_opts_2$model == "OT-CBN") 
                 time_mccbn <-
                     system.time(MCCBN_out <- try(do_MCCBN_OT_CBN(x)))["elapsed"]
-            else if(mccbn_model == "H-CBN2") {
-                mccbn_hcbn2_opts <- mccbn_hcbn_opts
-                mccbn_hcbn2_opts$model <- NULL
+            else if(mccbn_opts_2$model == "H-CBN2") {
+                mccbn_hcbn2_opts_2 <- mccbn_opts_2
+                mccbn_hcbn2_opts_2$model <- NULL
                 time_mccbn <-
                     system.time(MCCBN_out <- try(do_MCCBN_HCBN2(x,
-                                                                  mccbn_hcbn2_opts = mccbn_hcbn2_opts
+                                                                  mccbn_hcbn2_opts = mccbn_hcbn2_opts_2
                                                                   )))["elapsed"]
                 }
             message("time MC-CBN = ", time_mccbn)
