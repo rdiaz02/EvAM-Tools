@@ -167,7 +167,17 @@ test_that("Output is correct", {
     expect_equal(sum(out$transitions)
         , sum(vapply(simGenotypes$trajectory, length, numeric(1)) - 1))
 
-    expect_equal(out$transitions, expected_transitions)
+     ## Though this test has many identical entries. Not a strong one.
+     ## this expects a vector
+     ## expect_equal(out$transitions, expected_transitions)
+     tmp <- igraph::as_data_frame(igraph::graph_from_adjacency_matrix(out$transitions))
+     tmp2 <- paste0(tmp[, 1], " -> ", tmp[, 2])
+     ttmp2 <- table(tmp2)
+     tmp2v <- as.vector(ttmp2)
+     names(tmp2v) <- names(ttmp2)
+     expect_equal(expected_transitions,
+                  tmp2v[names(expected_transitions)])
+     
 })
 
 cat("\n Done test.processing-sampled-genotypes-trajectories-from-models.R \n")

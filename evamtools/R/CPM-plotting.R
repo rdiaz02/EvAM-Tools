@@ -185,7 +185,6 @@ plot_genot_fg <- function(trans_mat
     , fixed_vertex_size = FALSE
     ) {
     if(is.null(trans_mat)) return()
-<<<<<<< HEAD
 
     if(typeof(trans_mat) == "list"){
         all_genes <- c(trans_mat$From, trans_mat$To)
@@ -200,11 +199,6 @@ plot_genot_fg <- function(trans_mat
         rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
         graph <- igraph::graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
     }
-=======
-    browser()
-    unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
-    rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
->>>>>>> 9ee44d769ad9f9ba2b42671ee5f218db7d19bf9c
 
     num_genes <- length(unique_genes_names)
     graph <- igraph::decompose(graph)[[1]] ## We do not want disconnected nodes

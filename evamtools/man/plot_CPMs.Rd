@@ -7,7 +7,7 @@ plot_CPMs(
   samples = NULL,
   orientation = "horizontal",
   models = c("OT", "CBN", "OncoBN", "MCCBN", "MHN", "HESBCN"),
-  plot_type = "probabilities",
+  plot_type = "trans_mat",
   fixed_vertex_size = FALSE,
   top_paths = NULL
 )

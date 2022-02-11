@@ -264,7 +264,7 @@ process_samples <- function(sim, n_genes,
     ## Calculate state_counts
     if (out_params["state_counts"]) {
         if (!("transitions" %in% output))
-            unlisted_trajectories <- unlist(sim$trajectories)
+            unlisted_trajectories <- unlist(sim$trajectory)
         state_counts <- sample_to_pD_order(unlisted_trajectories,
                                            n_genes, gene_names)
         state_counts <- data.frame(
