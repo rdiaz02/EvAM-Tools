@@ -30,7 +30,7 @@ how2run <- function(opt){
         }
 
         out <- evam(csd, do_MCCBN = TRUE)
-        out_with_simulations <- sample_all_CPMs(out, 100, 5)
+        out_with_simulations <- sample_CPMs(out, 100, 5)
         saveRDS(out_with_simulations, "/app/outside/cpm_out_with_simulations.rds")
     }
 }

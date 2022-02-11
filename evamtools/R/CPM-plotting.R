@@ -336,7 +336,7 @@ plot_genot_fg <- function(trans_mat
 #' Extracts the outpus concerning a single CPM
 #' 
 #' @param data Complete CPM output
-#' by calling sample_all_CPMs with the exact CPM output from data parameter
+#' by calling sample_CPMs with the exact CPM output from data parameter
 #' @param mod String for the CPM to process.
 #' @param plot_type String for the plot_type to process.
 #' @param sample_data Data form sampling, this must be generated 
@@ -383,50 +383,50 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
         ))
 }
 
-#' Plot results from CPMs
-#' 
-#' By default it creates a top row with the DAG of the CPM 
-#' or de transtionRateMatrix for MHN
-#' The bottom row has a custom plot for genotype transition
-#' @param cpm_output output from the cpm
-#' @param samples sampling output from cpm_output data
-#' @param models Output of the CPMs to plot. Current support is for OT, CBN, DBN, MCCBN and MHN Optional.
-#' @param orientation String. If it not "vertical" will be displayed with an horizontal layout. Optional.
-#' @param plot_type String. You can choose between 3 options. Optional.
-#' transitions: shows the hypercubic genotype transitions 
-#'              running simulations is needed before this
-#' @param fixed_vertex_size Boolen. If TRUE, all nodes with all the same size and frequencies or observed data will not be used.
-#' @param top_paths Number of most relevant paths to plot. Default NULL 
-#' will plot all paths
-#' @examples
-#'\dontrun{
-#' dB_c1 <- matrix(
-#'  c(
-#'      rep(c(1, 0, 0, 0, 0), 300) #A
-#'    , rep(c(0, 0, 1, 0, 0), 300) #C
-#'    , rep(c(1, 1, 0, 0, 0), 200) #AB
-#'    , rep(c(0, 0, 1, 1, 0), 200) #CD
-#'    , rep(c(1, 1, 1, 0, 0), 100) #ABC
-#'    , rep(c(1, 0, 1, 1, 0), 100) #ACD
-#'    , rep(c(1, 1, 0, 0, 1), 100) #ABE
-#'    , rep(c(0, 0, 1, 1, 1), 100) #CDE
-#'    , rep(c(1, 1, 1, 0, 1), 100) #ABCE
-#'    , rep(c(1, 0, 1, 1, 1), 100) #ACDE
-#'    , rep(c(1, 1, 1, 1, 0), 50) # ABCD
-#'    , rep(c(0, 0, 0, 0, 0), 10) # WT
-#'  ), ncol = 5, byrow = TRUE
-#' )
-#' colnames(dB_c1) <- LETTERS[1:5]
-#' out <- evam(dB_c1, do_MCCBN = FALSE)
-#' png("trans_at.png", width = 1000, height = 600, units = "px")
-#' plot_CPMs(out, dB_c1, plot_type = "trans_mat")
-#' dev.off()
-#' out2 <- sample_all_CPMS(out, 100, n_genes = 5)
-#' png("graph.png", width = 1000, height = 600, units = "px")
-#' plot_CPMs(out2, dB_c1, plot_type = "transitions")
-#' dev.off()
-#' }
-#' 
+## #' Plot results from CPMs
+## #' 
+## #' By default it creates a top row with the DAG of the CPM 
+## #' or de transtionRateMatrix for MHN
+## #' The bottom row has a custom plot for genotype transition
+## #' @param cpm_output output from the cpm
+## #' @param samples sampling output from cpm_output data
+## #' @param models Output of the CPMs to plot. Current support is for OT, CBN, DBN, MCCBN and MHN Optional.
+## #' @param orientation String. If it not "vertical" will be displayed with an horizontal layout. Optional.
+## #' @param plot_type String. You can choose between 3 options. Optional.
+## #' transitions: shows the hypercubic genotype transitions 
+## #'              running simulations is needed before this
+## #' @param fixed_vertex_size Boolen. If TRUE, all nodes with all the same size and frequencies or observed data will not be used.
+## #' @param top_paths Number of most relevant paths to plot. Default NULL 
+## #' will plot all paths
+## #' @examples
+## #'\dontrun{
+## #' dB_c1 <- matrix(
+## #'  c(
+## #'      rep(c(1, 0, 0, 0, 0), 300) #A
+## #'    , rep(c(0, 0, 1, 0, 0), 300) #C
+## #'    , rep(c(1, 1, 0, 0, 0), 200) #AB
+## #'    , rep(c(0, 0, 1, 1, 0), 200) #CD
+## #'    , rep(c(1, 1, 1, 0, 0), 100) #ABC
+## #'    , rep(c(1, 0, 1, 1, 0), 100) #ACD
+## #'    , rep(c(1, 1, 0, 0, 1), 100) #ABE
+## #'    , rep(c(0, 0, 1, 1, 1), 100) #CDE
+## #'    , rep(c(1, 1, 1, 0, 1), 100) #ABCE
+## #'    , rep(c(1, 0, 1, 1, 1), 100) #ACDE
+## #'    , rep(c(1, 1, 1, 1, 0), 50) # ABCD
+## #'    , rep(c(0, 0, 0, 0, 0), 10) # WT
+## #'  ), ncol = 5, byrow = TRUE
+## #' )
+## #' colnames(dB_c1) <- LETTERS[1:5]
+## #' out <- evam(dB_c1, do_MCCBN = FALSE)
+## #' png("trans_at.png", width = 1000, height = 600, units = "px")
+## #' plot_CPMs(out, dB_c1, plot_type = "trans_mat")
+## #' dev.off()
+## #' out2 <- sample_all_CPMS(out, 100, n_genes = 5)
+## #' png("graph.png", width = 1000, height = 600, units = "px")
+## #' plot_CPMs(out2, dB_c1, plot_type = "transitions")
+## #' dev.off()
+## #' }
+## #' 
 plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal", 
                         models = c("OT", "CBN", "OncoBN", "MCCBN", "MHN", "HESBCN"),
                         plot_type = "probabilities",

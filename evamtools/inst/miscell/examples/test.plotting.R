@@ -35,7 +35,7 @@ png("2_4_some_horizontal_obs_trm.png", width = 1000, height = 600, units = "px")
 plot_CPMs(sample_evam_output, samples=samples, models=c("OT", "CBN", "CBN"), orientation="horizontal", plot_type = "transitions", fixed_vertex_size=FALSE)
 dev.off()
 
-samples <- evamtools:::sample_all_CPMs(sample_evam_output, 1000)
+samples <- evamtools:::sample_CPMs(sample_evam_output, 1000)
 
 png("3_1_all_horizontal_fixed_trans.png", width = 1000, height = 600, units = "px")
 plot_CPMs(sample_evam_output, samples=samples, orientation="horizontal", plot_type = "transitions", fixed_vertex_size=TRUE)

@@ -1,5 +1,3 @@
-
-
 test_that("Processing samples & Plotting of CPMs is correct", {
   sample_evam_output <- evam(examples_csd$csd$AND$data)
   models <- c("OT", "CBN", "OncoBN", "HESBCN", "MHN")
@@ -31,7 +29,7 @@ test_that("Processing samples & Plotting of CPMs is correct", {
   }
 
   # Checking with sampling
-  samples <- evamtools:::sample_all_CPMs(sample_evam_output, 100)
+  samples <- evamtools:::sample_CPMs(sample_evam_output, 100)
 
   for(model in models){
     model_transitions <- evamtools:::process_data(sample_evam_output, model, "transitions", samples)
