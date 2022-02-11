@@ -29,7 +29,7 @@ mccbn_hcbn_proc(
 
 \item{silent}{Whether to run show message showing the folder name where MCCBN is run}
 
-\item{data}{Cross secitonal data. Matrix of genes (columns)
+\item{x}{Cross secitonal data. Matrix of genes (columns)
 and individuals (rows)}
 }
 \value{
