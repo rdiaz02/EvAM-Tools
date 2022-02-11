@@ -2,55 +2,98 @@
 \alias{evam}
 \title{Runs the CPMs}
 \usage{
-evam(x, methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN"),
+evam(x, methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN"),
      max_cols = 15,
-     cbn_cores = 1,
-     cbn_init_poset = "OT",
-     hesbcn_steps = 100000,
-     hesbcn_seed = NULL,
-     mhn_lambda = 1/nrow(x),
-     oncobn_model = "DBN",
-     oncobn_algorithm = "DP",
-     oncobn_epsilon = min(colMeans(x)/2),
-     oncobn_silent = TRUE,
-     ot_with_errors_dist_ot = TRUE
+mhn_opts = list(lambda = 1/nrow(x)),
+                 ot_opts = list(with_errors_dist_ot = TRUE),
+                 cbn_opts = list(
+                     cores = 1,
+                     init_poset = "OT"
+                 ),
+                 hesbcn_opts = list(
+                     steps = 100000,
+                     seed = NULL
+                 ),
+                 oncobn_opts = list(
+                     oncobn_model = "DBN",
+                     oncobn_algorithm = "DP",
+                     oncobn_epsilon = min(colMeans(x)/2),
+                     oncobn_silent = TRUE,
+                 ),
+                 mccbn_opts = list(
+                     model = "OT-CBN",
+                     tmp_dir = NULL,
+                     addname = NULL,
+                     silent = TRUE,
+                     L = 100,
+       sampling = c("forward", "add-remove", "backward", "bernoulli", "pool"),
+       max.iter = 100L,
+       update.step.size = 20L,
+       tol = 0.001,
+       max.lambda.val = 1e+06,
+       T0 = 50,
+       adap.rate = 0.3,
+       acceptance.rate = NULL,
+       step.size = NULL,
+       max.iter.asa = 10000L,
+       neighborhood.dist = 1L,
+       adaptive = TRUE,
+       thrds = 1L,
+       verbose = FALSE,
+       seed = NULL)
 )
 }
 \arguments{
+  
+  
 \item{x}{cross sectional data}
 
-\item{methods}{Methods to use. For now, the only thing that matters is
-  whether the vector includes the strings "MCCBN" and "OncoBN". The default
-  is not to use MCCBN, so c("CBN", "OT", "HESBCN", "MHN", "OncoBN")}
+\item{methods}{Methods to use. For now, the only thing that matters is whether the vector includes the strings "MCCBN" and "OncoBN".}
 
-\item{max_cols}{Maximum number of columns to use in the analysis. If x
-  has > max_cols, selected columns are those with the largest number of events.}
+\item{max_cols}{Maximum number of columns to use in the analysis. If x has > max_cols, selected columns are those with the largest number of events.} 
 
-\item{cbn_cores}{Cores to be used by CBN (set via the environment
-  variable OMP\_NUM\_THREADS. Defaults to 1.}
-\item{cbn_init_poset}{Initial poset for CBN; one of "linear" or "OT"
-  (default).}
-\item{hesbcn_steps}{Number of steps for H-ESBCN; default is 100000}.
-\item{hesbcn_seed}{Seed used for H-ESBCN; default is NULL. If you need
-  reproducible results, fix it to some number, and note this differs
-  from the R seed.}
-\item{mhn_lambda}{Lambda (penalty) for MHN. Defaults to 1/nrow(data).}
 
-\item{oncobn_model}{One of "DBN" (default) or "CBN".}
+\item{mhn_opts}{A list with the single named argument \code{lambda}: the
+  penalty for MHN. Defaults to 1/nrow(data). (These are not the lambdas
+  as the estimated parameters for the rates of the continuous-time
+  Markov chains for MHN or CBN or HESBCN.)} 
 
-\item{oncobn_algorithm}{"DP" (default) or "GA". See \code{\link[OncoBN]{fitCPN}}.}
 
-\item{oncobn_epsilon}{Penalty term. See \code{\link[OncoBN]{fitCPN}}.}
+\item{ot_opts}{A list with the single named argument \code{with_errors_dist_ot}: value for option with \code{with.errors} in the call to \code{\link[Oncotree]{distribution.oncotree}}. A value of TRUE means to incorporate the false positive and negative errors when returning the probabilities of genotypes under OT. Note that for large models using a value of TRUE can result in very long computing times. Default is TRUE.} 
 
-\item{oncobn_silent}{Whether to show messages produced by OncoBN.}
-
-\item{ot_with_errors_dist_ot}{Value for option with \code{with.errors} in
-the call to \code{\link[Oncotree]{distribution.oncotree}}. A value of
-TRUE means to incorporate the false positive and negative errors when
-returning the probabilities of genotypes under OT. Note
-that for large models using a value of TRUE can result in very long
-computing times. Default is TRUE.}
+\item{cbn_opts}{A named list with arguments passed to CBN. 
+\describe {
+\item{cores}{Cores to be used by CBN (set via the environment variable OMP\_NUM\_THREADS). Defaults to 1.}
+\item{cbn_init_poset}{Initial poset for CBN; one of "linear" or "OT" (default).}
 }
+
+ \item{oncobn_opts}{Named list of arguments used in the fit of OncoBN. See \code{\link{do_oncoBN}}. } 
+
+
+ \item{hesbcn_opts}{Named list of arguments used in the fit of H-ESBCN. See \code{\link{do_HESBCN}}. } 
+
+  \item{mccbn_opts}{Named list of arguments used in the fit of
+    MC-CBN. These are \code{model}, one of \code{OT-CBN} or
+    \code{H-CBN2}; the
+    rest are arguments passed to \code{mccbn_hcbn_proc} (i.e., used only
+    if fitting a \code{H-CBN2} model). See \code{\link{do_MCBBN_HCBN2}}.
+  }
+}
+
+
+%% \item{hesbcn_steps}{Number of steps for H-ESBCN; default is 100000}.
+%% \item{hesbcn_seed}{Seed used for H-ESBCN; default is NULL. If you need
+%%   reproducible results, fix it to some number, and note this differs
+%%   from the R seed.}
+
+%% \item{oncobn_model}{One of "DBN" (default) or "CBN".}
+
+%% \item{oncobn_algorithm}{"DP" (default) or "GA". See \code{\link[OncoBN]{fitCPN}}.}
+
+%% \item{oncobn_epsilon}{Penalty term. See \code{\link[OncoBN]{fitCPN}}.}
+
+%% \item{oncobn_silent}{Whether to show messages produced by OncoBN.}
+
 
 \description{
 Executes all CPMS given a cross sectional data set

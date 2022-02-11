@@ -571,18 +571,24 @@ transition_fg_sparseM <- function(x, weights) {
 evam <- function(x,
                  methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN"),
                  max_cols = 15,
-                 cbn_cores = 1,
-                 cbn_init_poset = "OT",
-                 hesbcn_steps = 100000,
-                 hesbcn_seed = NULL,
-                 mhn_lambda = 1/nrow(x),
-                 oncobn_model = "DBN",
-                 oncobn_algorithm = "DP",
-                 oncobn_epsilon = min(colMeans(x)/2),
-                 oncobn_silent = TRUE,
-                 ot_with_errors_dist_ot = TRUE,
-                 mccbn_model = "OT-CBN",
-                 mccbn_hcbn2_opts = list(
+                 mhn_opts = list(lambda = 1/nrow(x)),
+                 ot_opts = list(with_errors_dist_ot = TRUE),
+                 cbn_opts = list(
+                     cores = 1,
+                     init_poset = "OT"
+                 ),
+                 hesbcn_opts = list(
+                     steps = 100000,
+                     seed = NULL
+                 ),
+                 oncobn_opts = list(
+                     model = "DBN",
+                     algorithm = "DP",
+                     epsilon = min(colMeans(x)/2),
+                     silent = TRUE,
+                 ),
+                 mccbn_opts = list(
+                     model = "OT-CBN",
                      tmp_dir = NULL,
                      addname = NULL,
                      silent = TRUE,
@@ -610,14 +616,14 @@ evam <- function(x,
     
     if ("MCCBN" %in% methods) {
         do_MCCBN <- TRUE
-        stopifnot(mccbn_model %in% c("OT-CBN", "H-CBN2"))
+        stopifnot(mccbn_opts$model %in% c("OT-CBN", "H-CBN2"))
     } else {
         do_MCCBN <- FALSE
     }
 
     if ("OncoBN" %in% methods) {
         do_OncoBN <- TRUE
-        stopifnot(oncobn_model %in% c("DBN", "CBN"))
+        stopifnot(oncobn_opts$model %in% c("DBN", "CBN"))
     } else {
         do_OncoBN <- FALSE
     }
@@ -670,7 +676,7 @@ evam <- function(x,
     
     message("Doing MHN")
     time_MHN <- system.time(
-        MHN_out <- do_MHN2(x, lambda = mhn_lambda))["elapsed"]
+        MHN_out <- do_MHN2(x, lambda = mhn_opts$lambda))["elapsed"]
     message("time MHN = ", time_MHN)
 
 
@@ -681,8 +687,8 @@ evam <- function(x,
     message("Doing HESBCN")
     time_hesbcn <- system.time(
         HESBCN_out <- do_HESBCN(x,
-                                n_steps = hesbcn_steps,
-                                seed = hesbcn_seed))["elapsed"]
+                                n_steps = hesbcn_opts$steps,
+                                seed = hesbcn_opts$seed))["elapsed"]
     message("time HESBCN = ", time_hesbcn)
 
 
@@ -695,7 +701,7 @@ evam <- function(x,
                     ot_proc(x,
                             nboot = 0,
                             distribution.oncotree = TRUE,
-                            with_errors_dist_ot = ot_with_errors_dist_ot))))["elapsed"]
+                            with_errors_dist_ot = ot_opts$with_errors_dist_ot))))["elapsed"]
     message("time OT = ", time_ot)
 
     message("Doing CBN")
@@ -712,10 +718,10 @@ evam <- function(x,
         message("Doing OncoBN\n\n")
         time_dbn <- system.time(
             OncoBN_out <- do_OncoBN(x,
-                                    model = oncobn_model,
-                                    algorithm = oncobn_algorithm,
-                                    epsilon = oncobn_epsilon,
-                                    silent = oncobn_silent))["elapsed"]
+                                    model = oncbn_opts$model,
+                                    algorithm = oncobn_opts$algorithm,
+                                    epsilon = oncbn_opts$epsilon,
+                                    silent = oncobn_opts$silent))["elapsed"]
         message("time OncoBN = ", time_dbn)
     } 
     
@@ -724,15 +730,17 @@ evam <- function(x,
             warning("MC-CBN (mccbn) no installed. Not running MC-CBN")
         } else {
             message("Doing MC-CBN")
-            if(mccbn_model == "OT-CBN") 
+            if(mccbn_opts$model == "OT-CBN") 
                 time_mccbn <-
-                    system.time(MCCBN_out <- try(mccbn_ot_proc(x)))["elapsed"]
-            else if(mccbn_model == "H-CBN2")
+                    system.time(MCCBN_out <- try(do_MCCBN_OT_CBN(x)))["elapsed"]
+            else if(mccbn_model == "H-CBN2") {
+                mccbn_hcbn2_opts <- mccbn_hcbn_opts
+                mccbn_hcbn2_opts$model <- NULL
                 time_mccbn <-
-                    system.time(MCCBN_out <- try(mccbn_hcbn2_proc(x,
+                    system.time(MCCBN_out <- try(do_MCCBN_HCBN2(x,
                                                                   mccbn_hcbn2_opts = mccbn_hcbn2_opts
                                                                   )))["elapsed"]
-                
+                }
             message("time MC-CBN = ", time_mccbn)
         }
     }

@@ -1,8 +1,8 @@
-\name{mccbn_ot_proc}
-\alias{mccbn_ot_proc}
+\name{do_MCCBN_OT_CBN}
+\alias{do_MCCBN_OT_CBN}
 \title{Run MCCBN's OT-CBN.}
 \usage{
-mccbn_hcbn_proc(
+do_MCCBN_OT_CBN(
   x
 )
 }

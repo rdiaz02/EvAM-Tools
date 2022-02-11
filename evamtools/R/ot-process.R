@@ -96,7 +96,6 @@ ot_proc <- function(datax, nboot = 1000,
                     distribution.oncotree = TRUE,
                     with_errors_dist_ot = TRUE) {
 
-    ## Like ot_proc, but gives frequency of original tree
     error.fun <- "std"
     message(" Starting ot.fit ", date())
     ot.fit <- try(oncotree.fit(datax))

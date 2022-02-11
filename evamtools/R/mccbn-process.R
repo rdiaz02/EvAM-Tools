@@ -15,7 +15,7 @@
 
 
 ## This is using OT-CBN, not H-CBN2
-mccbn_ot_proc <- function(x) {
+do_MCCBN_OT_CBN <- function(x) {
     if (!requireNamespace("mccbn", quietly = TRUE))
         stop("MC-CBN (mccbn) no installed")
     
@@ -59,7 +59,7 @@ mccbn_ot_proc <- function(x) {
 ## #' @return A list with the adjacency matrix, the lambdas, the parent set
 ## #' and a data.frame with From-To edges and associated lambdas.
 
-mccbn_hcbn_proc <- function(x
+do_MCBBN_HCBN2 <- function(x
                             ## , max.iter.asa = 10000
                             ## , ncores = 1
                             ## , L = 100
