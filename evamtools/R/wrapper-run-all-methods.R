@@ -86,8 +86,6 @@
 
 
 
-
-
 ## Some of this is coming from
 ## Cancer_Data_sets/CPM-weighted-paths-biol.R
 ## in the supplementary material for Diaz-Uriarte and Vasallo.
@@ -246,7 +244,7 @@ DAG_2_access_genots_OR <- function(x) {
 ##  Called from cpm2tm_relationships
 ##   which itself is used for HESBCN
 DAG_2_access_genots_relationships <- function(x,
-                                                       gene_relations = NULL) {
+                                              gene_relations = NULL) {
 
     ## check if genotype follows the XOR/AND relationship.
     genotype_follows_relationship <- function(genotype) {
@@ -413,15 +411,14 @@ unrestricted_fitness_graph_sparseM <- function(gacc) {
 ##             fitness graph (fgraph): just the adj. matrix
 ##             weighted fitness graph (weighted_fgraph)
 ##             transition matrix (trans_mat_genots)
-##  Assumes an AND relationship
 
-## To be used with output from CBN, MCCBN, OT
 
-## Based on cpm2tm  but only with necessary output
-##  for both speed and size and using sparse matrices.
+## Based on cpm_access_genots_paths_w  but only with necessary output
+##  for both speed and size and using sparse matrices,
+##  and allowing OR, XOR, and mixes of OR, AND, XOR.
 ##  No paths are computed, so multiple global max is a moot point
 
-## For CBN and MCCBN the weighted fitness graph is the same
+## For CBN and MCCBN and HESBCN the weighted fitness graph is the same
 ## as the transition rate matrix (with 0 in the diagonal)
 
 ## We use the same code for OT and CBN, but lambda and OT_edgeWeight are
