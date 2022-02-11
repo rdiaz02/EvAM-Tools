@@ -610,6 +610,13 @@ evam <- function(x,
                      seed = NULL)
                  ) {
 
+    ## Sanity check of gene names
+    gn_comma <- stringi::stri_count_fixed(colnames(x), ',')
+    if(any(gn_comma))
+        stop("At least one of your gene names has a comma. That is not allowed")
+    
+
+    
     ## ############################################################
     ##
     ##   Dealing with default arguments
