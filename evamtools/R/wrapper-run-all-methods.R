@@ -762,7 +762,7 @@ evam <- function(x,
                                    init.poset = cbn_opts_2$init_poset,
                                    nboot = 0,
                                    parall = TRUE,
-                                   cores = cbn_opts_2$cbn_cores)))["elapsed"]
+                                   cores = cbn_opts_2$cores)))["elapsed"]
     message("time CBN = ", time_cbn_ot)
 
     if(do_OncoBN) {

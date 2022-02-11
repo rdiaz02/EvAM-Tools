@@ -1,7 +1,7 @@
 useDynLib(evamtools, .registration = TRUE)
 
 export(
-    "sample_all_CPMs"
+    "sample_CPMs"
     , "evam"
      , "plot_CPMs"
      , "runShiny"

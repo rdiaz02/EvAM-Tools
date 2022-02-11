@@ -1119,7 +1119,7 @@ server <- function(input, output, session) {
         # n_samples <- 100 ## To be replaced by input$something
         n_samples <- 100 
         progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
-        new_data <- sample_all_CPMs(cpm_output, n_samples
+        new_data <- sample_CPMs(cpm_output, n_samples
             , input$gene_number, data$gene_names[1:input$gene_number])
         progress$inc(4/5, detail = "Post processing data")
         Sys.sleep(0.5)

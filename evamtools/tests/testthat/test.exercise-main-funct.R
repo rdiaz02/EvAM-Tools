@@ -8,9 +8,9 @@ test_that("Minimal test: we can run", {
 })
 
 
-exercise_sample_all_CPMs <- function(out) {
-    samp <- evamtools:::sample_all_CPMs(out, 1000)
-    samp2 <- evamtools:::sample_all_CPMs(out, 1000, genotype_transitions = FALSE)
+exercise_sample_CPMs <- function(out) {
+    samp <- evamtools:::sample_CPMs(out, 1000)
+    samp2 <- evamtools:::sample_CPMs(out, 1000, genotype_transitions = FALSE)
     se <- paste0(c("CBN", "OT", "OncoBN", "MHN", "HESBCN"),
                  "_genotype_freqs")
     expect_true(all(vapply(se, function(x) exists(x, samp), TRUE)))
@@ -55,11 +55,11 @@ test_that("We can deal with duplicated columns and columns without events and co
     expect_true(exists("OT_model", where = out5))
 
 
-    exercise_sample_all_CPMs(out1)
-    exercise_sample_all_CPMs(out2)
-    exercise_sample_all_CPMs(out3)
-    exercise_sample_all_CPMs(out4)
-    exercise_sample_all_CPMs(out5)
+    exercise_sample_CPMs(out1)
+    exercise_sample_CPMs(out2)
+    exercise_sample_CPMs(out3)
+    exercise_sample_CPMs(out4)
+    exercise_sample_CPMs(out5)
 
     ## Some examples with random, weird names
     ## Could probably bring to fewer
@@ -89,7 +89,7 @@ test_that("We can deal with duplicated columns and columns without events and co
                                               "MHN", "HESBCN"),
                                   max_cols = 4))
         expect_true(exists("OT_model", where = outdd))
-        exercise_sample_all_CPMs(outdd)
+        exercise_sample_CPMs(outdd)
     }
 })
 
@@ -135,9 +135,9 @@ test_that("Examples from initial-simple-examples", {
     expect_true(exists("OT_model", where = out5))
 
 
-    exercise_sample_all_CPMs(out3)
-    exercise_sample_all_CPMs(out4)
-    exercise_sample_all_CPMs(out5)    
+    exercise_sample_CPMs(out3)
+    exercise_sample_CPMs(out4)
+    exercise_sample_CPMs(out5)    
    
 })
 
@@ -160,7 +160,7 @@ test_that("We can run evam with non-default arguments", {
                                                    max.iter.asa = 20L)
                                  ))
     expect_true(exists("OT_model", where = out))
-    exercise_sample_all_CPMs(out)
+    exercise_sample_CPMs(out)
 
     out2 <- suppressMessages(evam(Dat1,
                                   methods = c("CBN", "OT", "OncoBN",
@@ -177,7 +177,7 @@ test_that("We can run evam with non-default arguments", {
                                                    max.iter.asa = 20L)
                                  ))
     expect_true(exists("OT_model", where = out2))
-    exercise_sample_all_CPMs(out2)
+    exercise_sample_CPMs(out2)
 
 
     

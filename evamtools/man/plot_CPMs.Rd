@@ -15,9 +15,10 @@ plot_CPMs(
 )
 }
 \arguments{
-\item{cpm_output}{output from the cpm}
+\item{cpm_output}{Output from the cpm}
 
-\item{samples}{sampling output from cpm_output data}
+\item{samples}{Output from a call to \link{sample_CPMs}. Necessary if
+  you request plot type \code{transitions}.}
 
 \item{orientation}{String. If it not "vertical" will be displayed with an horizontal layout. Optional.}
 
@@ -38,7 +39,6 @@ or de transtionRateMatrix for MHN
 The bottom row has a custom plot for genotype transition
 }
 \examples{
-\dontrun{
 dB_c1 <- matrix(
  c(
      rep(c(1, 0, 0, 0, 0), 300) #A
@@ -56,14 +56,15 @@ dB_c1 <- matrix(
  ), ncol = 5, byrow = TRUE
 )
 colnames(dB_c1) <- LETTERS[1:5]
-out <- evam(dB_c1, do_MCCBN = FALSE)
-png("trans_at.png", width = 1000, height = 600, units = "px")
-plot_CPMs(out, dB_c1, plot_type = "trans_mat")
-dev.off()
+out <- evam(dB_c1, methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN"))
+
+plot_CPMs(out, dB_c1, plot_type = "trm")
+
+
+
+
 out2 <- sample_all_CPMS(out, 100, n_genes = 5)
-png("graph.png", width = 1000, height = 600, units = "px")
+
 plot_CPMs(out2, dB_c1, plot_type = "transitions")
-dev.off()
-}
 
 }

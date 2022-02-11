@@ -8,7 +8,7 @@ process_data(data, mod, plot_type, sample_data = NULL)
 }
 \arguments{
 \item{data}{Complete CPM output
-by calling sample_all_CPMs with the exact CPM output from data parameter}
+by calling sample_CPMs with the exact CPM output from data parameter}
 
 \item{mod}{String for the CPM to process.}
 

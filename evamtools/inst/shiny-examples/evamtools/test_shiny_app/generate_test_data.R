@@ -1,7 +1,7 @@
 library(evamtools)
 
 and_cpm <- evam(examples_csd$csd$AND$data)
-and_cpm_with_simulations <- sample_all_CPMs(and_cpm, 10000, 5)
+and_cpm_with_simulations <- sample_CPMs(and_cpm, 10000, 5)
 orig_data <- list(data = examples_csd$csd$AND$data, name = "AND_new"
             , type = "csd", gene_names = colnames(examples_csd$csd$AND$data)
             , thetas = NULL, lambdas = NULL
