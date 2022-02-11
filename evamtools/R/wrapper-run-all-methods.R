@@ -371,6 +371,8 @@ DAG_2_access_genots_relationships <- function(x,
 ## function genots_2_fgraph_and_trans_mat
 ## only returns the truly accessible
 
+## In gacc, each genotype is a vector of genes, and the vector is already
+## sorted. This ensures that the naming of genotypes is consistent later.
 unrestricted_fitness_graph_sparseM <- function(gacc) {
     gs <- unlist(lapply(gacc, function(g) paste0(g, collapse = ", ")))
     gs <- c("WT", gs)
@@ -484,10 +486,9 @@ cpm2tm <- function(x,
     }
 
     if(inherits(tmp, "try-error")) {
-        stop("Some error here")
+        stop("Some error here: ", tmp)
     } else {
-        accessible_genots <- tmp$accessible_genots
-        fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
+        fgraph <- unrestricted_fitness_graph_sparseM(tmp$accessible_genots)
     }
 
     which_col_weights <- which(colnames(x$edges) %in% names_weights_paths)
@@ -889,6 +890,7 @@ evam <- function(x,
         OncoBN_genots_predicted = OncoBN_out$genots_predicted,
         OncoBN_fitted_model = OncoBN_out$model,
         OncoBN_epsilon = OncoBN_out$epsilon,
+        OncoBN_parent_set = OncoBN_out$parent_set,
 
         HESBCN_model = HESBCN_out$edges,
         HESBCN_parent_set = HESBCN_out$parent_set,

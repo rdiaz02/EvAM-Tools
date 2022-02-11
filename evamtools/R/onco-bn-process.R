@@ -40,13 +40,25 @@ do_OncoBN <- function(data,
     ## Allow double checking and running through HESBCN algorithm
     dbn_out$Relation <- ifelse(model == "DBN", "OR", "AND")
     dbn_out$Relation[dbn_out$From == "Root"] <- "Single"
+    
+    ## The parent set is used for plotting
+    ps <- aggregate(Relation ~ To,
+                    data = dbn_out,
+                    FUN = function(x){
+                        if(length(x) == 1) return("Single")
+                        else return(x[1])}
+                    )
+    ps_v <- ps[, "Relation"]
+    names(ps_v) <- ps[, "To"]
 
+    
     return(list(
         edges = dbn_out
       , thetas = thetas
       , likelihood = fit$score
       , epsilon = fit$epsilon
       , model = model
+      , parent_set = ps_v
       , genots_predicted = DBN_prob_genotypes(fit, colnames(data))
     ))
 }
