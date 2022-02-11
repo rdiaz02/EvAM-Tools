@@ -255,6 +255,7 @@ process_samples <- function(sim, n_genes,
     ## they have been computed that way.
     #Calculate transitions
     if (out_params["transitions"]) {
+        browser()
         transitions <- c()
         # data.frame(From=character(), To=character(), Counts=integer())
         # browser()
@@ -266,7 +267,7 @@ process_samples <- function(sim, n_genes,
                 for(i in 1:steps){
                     from <- traj[i]
                     to <- traj[i + 1]
-                    current_trans <- sprintf("%s -> %s", from, to)
+                    current_trans <- paste0(from, " -> ", to)
                     prev_counts <- transitions[current_trans]
                     if (is.null(prev_counts) || is.na(prev_counts)){
                         transitions[current_trans] <- 1
@@ -294,16 +295,7 @@ process_samples <- function(sim, n_genes,
     return(output)
 }
 
-## #' @title Run samples for all outputs of CPMs
-## #' 
-## #' OT already provides the predicted genotypes
-## #' though not from a transition rate matrix
-## #' 
-## #' @param cpm_output Output from calling all_methods2trans_mat
-## #' @param n_samples Number of samples to generate
-## #' @param methods List of methods that we want to sample
-## #' 
-## #' @return modified cpm_outputd including a matrix with genotype transitions
+
 sample_CPMs <- function(cpm_output
                           , N
                           , methods = c("OT", "OncoBN",

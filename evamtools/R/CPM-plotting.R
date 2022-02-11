@@ -183,8 +183,9 @@ plot_genot_fg <- function(trans_mat
     , max_edge = NULL
     , min_edge = NULL
     , fixed_vertex_size = FALSE
-    ){
+    ) {
     if(is.null(trans_mat)) return()
+<<<<<<< HEAD
 
     if(typeof(trans_mat) == "list"){
         all_genes <- c(trans_mat$From, trans_mat$To)
@@ -199,6 +200,11 @@ plot_genot_fg <- function(trans_mat
         rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
         graph <- igraph::graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
     }
+=======
+    browser()
+    unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
+    rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
+>>>>>>> 9ee44d769ad9f9ba2b42671ee5f218db7d19bf9c
 
     num_genes <- length(unique_genes_names)
     graph <- igraph::decompose(graph)[[1]] ## We do not want disconnected nodes
@@ -399,51 +405,7 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
         ))
 }
 
-## #' Plot results from CPMs
-## #' 
-## #' By default it creates a top row with the DAG of the CPM 
-## #' or de transtionRateMatrix for MHN
-## #' The bottom row has a custom plot for genotype transition
-## #' @param cpm_output output from the cpm
-## #' @param samples sampling output from cpm_output data
-## #' @param models Output of the CPMs to plot. Current support is for OT, CBN, DBN, MCCBN and MHN Optional.
-## #' @param orientation String. If it not "vertical" will be displayed with an horizontal layout. Optional.
-## #' @param plot_type String. You can choose between 3 options. Optional.
-## #' transitions: shows the hypercubic genotype transitions 
-## #'              running simulations is needed before this
-## #' @param fixed_vertex_size Boolen. If TRUE, all nodes with all the same size and frequencies or observed data will not be used.
-## #' @param top_paths Number of most relevant paths to plot. Default NULL 
-## #' will plot all paths
-## #' @examples
-## #'\dontrun{
-## #' dB_c1 <- matrix(
-## #'  c(
-## #'      rep(c(1, 0, 0, 0, 0), 300) #A
-## #'    , rep(c(0, 0, 1, 0, 0), 300) #C
-## #'    , rep(c(1, 1, 0, 0, 0), 200) #AB
-## #'    , rep(c(0, 0, 1, 1, 0), 200) #CD
-## #'    , rep(c(1, 1, 1, 0, 0), 100) #ABC
-## #'    , rep(c(1, 0, 1, 1, 0), 100) #ACD
-## #'    , rep(c(1, 1, 0, 0, 1), 100) #ABE
-## #'    , rep(c(0, 0, 1, 1, 1), 100) #CDE
-## #'    , rep(c(1, 1, 1, 0, 1), 100) #ABCE
-## #'    , rep(c(1, 0, 1, 1, 1), 100) #ACDE
-## #'    , rep(c(1, 1, 1, 1, 0), 50) # ABCD
-## #'    , rep(c(0, 0, 0, 0, 0), 10) # WT
-## #'  ), ncol = 5, byrow = TRUE
-## #' )
-## #' colnames(dB_c1) <- LETTERS[1:5]
-## #' out <- evam(dB_c1, do_MCCBN = FALSE)
-## #' png("trans_at.png", width = 1000, height = 600, units = "px")
-## #' plot_CPMs(out, dB_c1, plot_type = "trans_mat")
-## #' dev.off()
-## #' out2 <- sample_all_CPMS(out, 100, n_genes = 5)
-## #' png("graph.png", width = 1000, height = 600, units = "px")
-## #' plot_CPMs(out2, dB_c1, plot_type = "transitions")
-## #' dev.off()
-## #' }
-## #'
-
+## DO NOT use roxygen, has I have edited the help by hand.
 plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal", 
                         models = c("OT", "CBN", "OncoBN", "MCCBN", "MHN", "HESBCN"),
                         plot_type = "trans_mat",
@@ -505,25 +467,25 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
             if(!is.null(model_data2plot$parent_set)){
                 for(i in igraph::E(g)){
                     igraph::E(g)[i]$color <- colors_relationships[model_data2plot$parent_set[[igraph::head_of(g, igraph::E(g)[i])$name]]]
-
+                    
                 }
             } else igraph::E(g)$color <- standard_relationship
             plot(g
-                , layout = igraph::layout.reingold.tilford
-                , vertex.size = 50 
-                , vertex.label.color = "black"
-                , vertex.label.family = "Helvetica"
-                , font.best = 2
-                , vertex.frame.width = 0.5
-                , vertex.color = "white"
-                , vertex.frame.color = "black" 
-                , vertex.label.cex = 1
-                , edge.arrow.size = 0
-                , edge.width = 5
-                , main = mod)
+               , layout = igraph::layout.reingold.tilford
+               , vertex.size = 50 
+               , vertex.label.color = "black"
+               , vertex.label.family = "Helvetica"
+               , font.best = 2
+               , vertex.frame.width = 0.5
+               , vertex.color = "white"
+               , vertex.frame.color = "black" 
+               , vertex.label.cex = 1
+               , edge.arrow.size = 0
+               , edge.width = 5
+               , main = mod)
             if(!is.null(model_data2plot$parent_set)){
                 legend("topleft", legend = names(colors_relationships),
-                    col = colors_relationships, lty = 1, lwd = 5, bty = "n")
+                       col = colors_relationships, lty = 1, lwd = 5, bty = "n")
             }
         } else if(!is.null(model_data2plot$theta)) { ##Plotting matrix
             op <- par(mar=c(3, 3, 5, 3), las = 1)
@@ -536,17 +498,19 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
             par(op)
         }
         ## Fixme, there is a problem here: probabilities and trans_mat plot the same
-        if (old_plot_type == "probabilities") {
+        if (old_plot_type == "probabilities") { ## transition probabilities
             plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data,
                           top_paths = top_paths,
                           fixed_vertex_size = fixed_vertex_size)
-        } else if (old_plot_type == "transitions") {
-            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data,
+        } else if (old_plot_type == "transitions") { ## observed genotype trans.
+            plot_genot_fg(model_data2plot$data2plot,
+                          observations = cpm_output$analyzed_data,
                           model_data2plot$genotype_freqs,
                           top_paths = top_paths,
                           fixed_vertex_size = fixed_vertex_size)
-        } else if (old_plot_type == "trm"){
-            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data,
+        } else if (old_plot_type == "trm"){ ## transition rate matrix
+            plot_genot_fg(model_data2plot$data2plot,
+                          cpm_output$analyzed_data,
                           top_paths = top_paths,
                           fixed_vertex_size = fixed_vertex_size)
         }
