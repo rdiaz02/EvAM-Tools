@@ -2,45 +2,47 @@
 \alias{evam}
 \title{Runs the CPMs}
 \usage{
-evam(x, methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN"),
+evam(x,
+     methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN"),
      max_cols = 15,
-mhn_opts = list(lambda = 1/nrow(x)),
+     mhn_opts = list(lambda = 1/nrow(x)),
                  ot_opts = list(with_errors_dist_ot = TRUE),
                  cbn_opts = list(
                      cores = 1,
                      init_poset = "OT"
                  ),
-                 hesbcn_opts = list(
+     hesbcn_opts = list(
                      steps = 100000,
                      seed = NULL
                  ),
-                 oncobn_opts = list(
+     oncobn_opts = list(
                      model = "DBN",
                      algorithm = "DP",
                      epsilon = min(colMeans(x)/2),
                      silent = TRUE
                  ),
-                 mccbn_opts = list(
+     mccbn_opts = list(
                      model = "OT-CBN",
                      tmp_dir = NULL,
                      addname = NULL,
                      silent = TRUE,
                      L = 100,
-       sampling = c("forward", "add-remove", "backward", "bernoulli", "pool"),
-       max.iter = 100L,
-       update.step.size = 20L,
-       tol = 0.001,
-       max.lambda.val = 1e+06,
-       T0 = 50,
-       adap.rate = 0.3,
-       acceptance.rate = NULL,
-       step.size = NULL,
-       max.iter.asa = 10000L,
-       neighborhood.dist = 1L,
-       adaptive = TRUE,
-       thrds = 1L,
-       verbose = FALSE,
-       seed = NULL)
+                     sampling = c("forward", "add-remove",
+                               "backward", "bernoulli", "pool"),
+                     max.iter = 100L,
+                     update.step.size = 20L,
+                     tol = 0.001,
+                     max.lambda.val = 1e+06,
+                     T0 = 50,
+                     adap.rate = 0.3,
+                     acceptance.rate = NULL,
+                     step.size = NULL,
+                     max.iter.asa = 10000L,
+                     neighborhood.dist = 1L,
+                     adaptive = TRUE,
+                     thrds = 1L,
+                     verbose = FALSE,
+                     seed = NULL)
 )
 }
 \arguments{
@@ -64,8 +66,8 @@ mhn_opts = list(lambda = 1/nrow(x)),
 
 \item{cbn_opts}{A named list with arguments passed to CBN. 
 \itemize{
-\describe{cores}{Cores to be used by CBN (set via the environment variable OMP\_NUM\_THREADS). Defaults to 1.}
-\describe{cbn_init_poset}{Initial poset for CBN; one of "linear" or "OT" (default).}
+\item{cores:}{Cores to be used by CBN (set via the environment variable OMP\_NUM\_THREADS). Defaults to 1.}
+\item{cbn_init_poset:}{Initial poset for CBN; one of "linear" or "OT" (default).}
 }
 }
 
@@ -75,28 +77,22 @@ mhn_opts = list(lambda = 1/nrow(x)),
  \item{hesbcn_opts}{Named list of arguments used in the fit of H-ESBCN. See \code{\link{do_HESBCN}}. } 
 
 \item{mccbn_opts}{Named list of arguments used in the fit of
-    MC-CBN. These are \code{model}, one of \code{OT-CBN} or
-    \code{H-CBN2}; the
+    MC-CBN. These are \code{model} (one of \code{OT-CBN} or
+    \code{H-CBN2}); the
     rest are arguments passed to \code{mccbn_hcbn_proc} (i.e., used only
     if fitting a \code{H-CBN2} model). See \code{\link{do_MCCBN_HCBN2}}.
   }
 }
 
-
-%% \item{hesbcn_steps}{Number of steps for H-ESBCN; default is 100000}.
-%% \item{hesbcn_seed}{Seed used for H-ESBCN; default is NULL. If you need
-%%   reproducible results, fix it to some number, and note this differs
-%%   from the R seed.}
-
-%% \item{oncobn_model}{One of "DBN" (default) or "CBN".}
-
-%% \item{oncobn_algorithm}{"DP" (default) or "GA". See \code{\link[OncoBN]{fitCPN}}.}
-
-%% \item{oncobn_epsilon}{Penalty term. See \code{\link[OncoBN]{fitCPN}}.}
-
-%% \item{oncobn_silent}{Whether to show messages produced by OncoBN.}
-
-
 \description{
 Executes all CPMS given a cross sectional data set
+}
+
+
+\examples{
+    data(every_which_way_data)
+    Dat1 <- every_which_way_data[[16]][1:40, 2:6]
+    out <- suppressMessages(evam(Dat1,
+                                 methods = c("CBN", "OT", "OncoBN",
+                                             "MHN", "HESBCN", "MCCBN")))
 }

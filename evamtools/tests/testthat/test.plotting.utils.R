@@ -1,5 +1,3 @@
-
-
 test_that("Processing samples & Plotting of CPMs is correct", {
   sample_evam_output <- evam(examples_csd$csd$AND$data)
   models <- c("OT", "CBN", "OncoBN", "HESBCN", "MHN")
