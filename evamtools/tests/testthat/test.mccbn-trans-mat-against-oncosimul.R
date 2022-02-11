@@ -1,9 +1,9 @@
-## Testing that cpm_access_genots_paths_w_simplified gives same output as
+## Testing that cpm2tm gives same output as
 ## cpm_to_trans_mat_oncosimul, the function that uses OncoSimulR
 
-test_that("Testing evamtools:::cpm_access_genots_paths_w_simplified by comparing with
+test_that("Testing evamtools:::cpm2tm by comparing with
 OncoSimulR's based cpm_to_trans_mat_oncosimul.", {
-    ## Recall evamtools:::cpm2tm <- cpm_to_trans_mat_oncosimul
+    ## Recall evamtools:::cpm2F2tm <- cpm_to_trans_mat_oncosimul
 
     ## The first set of tests use pre-run analyses. So we would not catch
     ## changes in the code that gives the analysis itself. See below for
@@ -19,30 +19,30 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul.", {
     
     run_test_for_dataset1 <- function(data) {
         expect_equal(
-            reorder_trans_mat(evamtools:::cpm2tm(data, max_f = NULL)$transition_matrix),
-            reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
+            reorder_trans_mat(evamtools:::cpm2F2tm(data, max_f = NULL)$transition_matrix),
+            reorder_trans_mat(evamtools:::cpm2tm(
                                               list(edges = data))$trans_mat_genots),
             check.attributes = TRUE)
 
         ## Do not run next test if fitness is absurdly large as scaling will fail
         ## as it should.
-        max_fitness <- max(evamtools:::cpm2tm(data, max_f = NULL)$accessible_genotypes)
+        max_fitness <- max(evamtools:::cpm2F2tm(data, max_f = NULL)$accessible_genotypes)
         if(max_fitness < 1e10) {
             maxff <- sample(c(2, 3, 3.5, 3.8, 4, 5, 8), size = 1)
-            expect_equal(as.matrix(evamtools:::cpm2tm(data, max_f = NULL)$transition_matrix),
-                         as.matrix(evamtools:::cpm2tm(data, max_f = maxff)$transition_matrix))
+            expect_equal(as.matrix(evamtools:::cpm2F2tm(data, max_f = NULL)$transition_matrix),
+                         as.matrix(evamtools:::cpm2F2tm(data, max_f = maxff)$transition_matrix))
         }
     }
 
     ## this takes the object, not the object$edges
     run_test_for_dataset <- function(data){
-        expect_equal(reorder_trans_mat(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
-                    reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified(
+        expect_equal(reorder_trans_mat(evamtools:::cpm2F2tm(data$edges, max_f = NULL)$transition_matrix),
+                    reorder_trans_mat(evamtools:::cpm2tm(
                         data)$trans_mat_genots),
                     check.attributes = TRUE)
         maxff <- sample(c(2, 3, 3.5, 3.8, 4, 5, 8), size = 1)
-        expect_equal(as.matrix(evamtools:::cpm2tm(data$edges, max_f = NULL)$transition_matrix),
-                    as.matrix(evamtools:::cpm2tm(data$edges, max_f = maxff)$transition_matrix))
+        expect_equal(as.matrix(evamtools:::cpm2F2tm(data$edges, max_f = NULL)$transition_matrix),
+                    as.matrix(evamtools:::cpm2F2tm(data$edges, max_f = maxff)$transition_matrix))
     }
 
     ## First, load a bunch of data structures
@@ -114,7 +114,6 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul.", {
                              row.names = c("A", 
                                            "B", "C", "D", "E", "F"))
 
-    
     precomputed_datasets <- list(ex_mccbn_out1, ex_mccbn_out2, ex_mccbn_out3,
                      ex_mccbn_out4, ex_mccbn_out5, ex_mccbn_out6,
                      ex_mccbn_out7)
@@ -125,10 +124,13 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul.", {
 
     data(examples_csd)
 
+    mccbn_hcbn2_opts <- list()
+    mccbn_hcbn2_opts$thrds <- 4
+    mccbn_hcbn2_opts$max.iter.asa <- 10 #Just to run faster   
+    mccbn_hcbn2_opts$addname <- "tmpo"
+
     do_MCCBN_HCBN<- function(x) suppressMessages(evamtools:::mccbn_hcbn_proc(x,
-                                                                addname = "tmpo",
-                                                                max.iter.asa = 10, #Just to run faster                                  
-                                                                ncores = 4))
+                                                                mccbn_hcbn2_opts))
 
     print("Running do_MCCBN_HCBN: this may take a while")
     print("Completed: 0/7")
