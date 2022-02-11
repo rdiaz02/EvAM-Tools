@@ -1,4 +1,4 @@
-## Copyright 2021, 2022 Pablo Herrera Nieto
+## Copyright 2021, 2022 Pablo Herrera Nieto, Ramon Diaz-Uriarte
 
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -43,28 +43,47 @@ mccbn_ot_proc <- function(x) {
 }
 
 
-#' @title Run MCCBN with H-CBN2
-#' 
-#' Using H-CBN2, as in example from https://github.com/cbg-ethz/MC-CBN
-#' 
-#' @param x Cross secitonal data. Matrix of genes (columns)
-#' and individuals (rows)
-#' @param max.iter.asa Int. Number of steps to run. Default: 100000
-#' @param ncores Int. Number of threads to use
-#' @param L Int. Number of samples to be drawn from the proposal in the E-step
-#' @param tmp_dir Directory name where the oput is located. 
-#' @param addname String to append to the temporary folder name. Default NULL
-#' @param silent Whether to run show message showing the folder name where MCCBN is run
-#' 
-#' @return A list with the adjacency matrix, the lambdas, the parent set
-#' and a data.frame with From-To edges and associated lambdas.
+## #' @title Run MCCBN with H-CBN2
+## #' 
+## #' Using H-CBN2, as in example from https://github.com/cbg-ethz/MC-CBN
+## #' 
+## #' @param x Cross secitonal data. Matrix of genes (columns)
+## #' and individuals (rows)
+## #' @param max.iter.asa Int. Number of steps to run. Default: 100000
+## #' @param ncores Int. Number of threads to use
+## #' @param L Int. Number of samples to be drawn from the proposal in the E-step
+## #' @param tmp_dir Directory name where the oput is located. 
+## #' @param addname String to append to the temporary folder name. Default NULL
+## #' @param silent Whether to run show message showing the folder name where MCCBN is run
+## #' 
+## #' @return A list with the adjacency matrix, the lambdas, the parent set
+## #' and a data.frame with From-To edges and associated lambdas.
+
 mccbn_hcbn_proc <- function(x
-    , max.iter.asa = 10000
-    , ncores = 1
-    , L = 100
-    , tmp_dir = NULL
-    , addname = NULL
-    , silent = TRUE) {
+                            ## , max.iter.asa = 10000
+                            ## , ncores = 1
+                            ## , L = 100
+                          , tmp_dir = NULL
+                          , addname = NULL
+                          , silent = TRUE
+                          ,  mccbn_hcbn2_opts = list(L = 100,
+                                                    sampling = c("forward", "add-remove", "backward", "bernoulli", "pool"),
+                                                    max.iter = 100L,
+                                                    update.step.size = 20L,
+                                                    tol = 0.001,
+                                                    max.lambda.val = 1e+06,
+                                                    T0 = 50,
+                                                    adap.rate = 0.3,
+                                                    acceptance.rate = NULL,
+                                                    step.size = NULL,
+                                                    max.iter.asa = 10000L,
+                                                    neighborhood.dist = 1L,
+                                                    adaptive = TRUE,
+                                                    thrds = 1L,
+                                                    verbose = FALSE,
+                                                    seed = NULL
+                                                    )
+                            ) {
     if (!requireNamespace("mccbn", quietly = TRUE))
         stop("MC-CBN (mccbn) no installed")
     
@@ -91,8 +110,27 @@ mccbn_hcbn_proc <- function(x
 
     posets <- mccbn::candidate_posets(x, rep(1, nrow(x)), 0.9)
     poset0 <- posets[[length(posets)]]
-    fit <- mccbn::adaptive.simulated.annealing(poset0, x, L=L, 
-        max.iter.asa=max.iter.asa, thrds = ncores, outdir = tmp_dir)
+    fit <- mccbn::adaptive.simulated.annealing(poset = poset0,
+                                               obs = x,
+                                               outdir = tmp_dir,
+                                               L = mccbn_hcbn2_opts$L,
+                                               sampling = mccbn_hcbn2_opts$sampling,
+                                               max.iter = mccbn_hcbn2_opts$max.iter,
+                                               update.step.size = mccbn_hcbn2_opts$update.step.size,
+                                               tol = mccbn_hcbn2_opts$tol,
+                                               max.lambda.val = mccbn_hcbn2_opts$max.lambda.val,
+                                               T0 = mccbn_hcbn2_opts$T0,
+                                               adap.rate = mccbn_hcbn2_opts$adap.rate,
+                                               acceptance.rate = mccbn_hcbn2_opts$acceptance.rate,
+                                               step.size = mccbn_hcbn2_opts$step.size,
+                                               max.iter.asa = mccbn_hcbn2_opts$max.iter.asa,
+                                               neighborhood.dist = mccbn_hcbn2_opts$neighborhood.dist,
+                                               adaptive = mccbn_hcbn2_opts$adaptive,
+                                               thrds = mccbn_hcbn2_opts$thrds,
+                                               verbose = mccbn_hcbn2_opts$verbose,
+                                               seed = mccbn_hcbn2_opts$seed
+                                               )
+
     ## Default iterations for asa is 10000 in original code, 100 for testing
     ## L: ; they used 100, but I do not know if this is too low
 
@@ -115,17 +153,6 @@ mccbn_hcbn_proc <- function(x
     return(list(edges = dfr))
 }
 
-
-## ## Using the new functionality. Extremely slow.
-## ## The only non-defaults are threads (thrds)
-## ## and L.
-## posets <- mccbn::candidate_posets(db2, rep(1, nrow(db2)), 0.9)
-## poset0 <- posets[[length(posets)]]
-
-## fit <- mccbn::adaptive.simulated.annealing(poset0,
-##                                            db2, L = 100,
-##                                            max.iter.asa = 10000L,
-##                                            thrds = 8)
 
 
 
