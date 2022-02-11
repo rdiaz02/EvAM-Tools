@@ -4,6 +4,7 @@ test_that("Output is not generated with bad input", {
         c("WT", "C", "C, E", "C, D, E", "A, C, D, E"),
         c("WT", "A", "A, B"),
         c("WT", "C"),
+        c("WT"),
         c("WT", "A", "A, B", "A, B, C", "A, B, C, E"),
         c("WT", "C", "C, E", "C, D, E", "A, C, D, E"),
         c("WT", "C", "C, D"),
@@ -12,8 +13,14 @@ test_that("Output is not generated with bad input", {
         c("WT", "C", "A, C", "A, B, C", "A, B, C, E")
     )
 
+    expected_transitions <- c(8, 2, 2, 2, 2, 2, 2, 1, 3, 2, 2)
+    names(expected_transitions) <- c("WT -> C", "C -> C, D",
+        "C -> C, E", "C, E -> C, D, E", "C, D, E -> A, C, D, E", 
+        "WT -> A", "A -> A, B", "A, B -> A, B, C", "A, B, C -> A, B, C, E", 
+        "C -> A, C", "A, C -> A, B, C")
+
     obs_events <- c(
-        "C, D", "A, C, D, E", "A, B", "C", "A, B, C, E",
+        "C, D", "A, C, D, E", "A, B", "C", "WT", "A, B, C, E",
         "A, C, D, E", "C, D", "A, B, C, E", "C", "A, B, C, E"
     )
 
@@ -39,6 +46,7 @@ test_that("Output is returned only with the requested fields", {
         c("WT", "C", "C, E", "C, D, E", "A, C, D, E"),
         c("WT", "A", "A, B"),
         c("WT", "C"),
+        c("WT"),
         c("WT", "A", "A, B", "A, B, C", "A, B, C, E"),
         c("WT", "C", "C, E", "C, D, E", "A, C, D, E"),
         c("WT", "C", "C, D"),
@@ -46,6 +54,12 @@ test_that("Output is returned only with the requested fields", {
         c("WT", "C"), 
         c("WT", "C", "A, C", "A, B, C", "A, B, C, E")
     )
+
+    expected_transitions <- c(8, 2, 2, 2, 2, 2, 2, 1, 3, 2, 2)
+    names(expected_transitions) <- c("WT -> C", "C -> C, D",
+        "C -> C, E", "C, E -> C, D, E", "C, D, E -> A, C, D, E", 
+        "WT -> A", "A -> A, B", "A, B -> A, B, C", "A, B, C -> A, B, C, E", 
+        "C -> A, C", "A, C -> A, B, C")
 
     obs_events <- c(
         "C, D", "A, C, D, E", "A, B", "C", "A, B, C, E",
@@ -98,6 +112,7 @@ test_that("Output is correct", {
         c("WT", "C", "C, E", "C, D, E", "A, C, D, E"),
         c("WT", "A", "A, B"),
         c("WT", "C"),
+        c("WT"),
         c("WT", "A", "A, B", "A, B, C", "A, B, C, E"),
         c("WT", "C", "C, E", "C, D, E", "A, C, D, E"),
         c("WT", "C", "C, D"),
@@ -106,11 +121,16 @@ test_that("Output is correct", {
         c("WT", "C", "A, C", "A, B, C", "A, B, C, E")
     )
 
+    expected_transitions <- c(8, 2, 2, 2, 2, 2, 2, 1, 3, 2, 2)
+    names(expected_transitions) <- c("WT -> C", "C -> C, D",
+        "C -> C, E", "C, E -> C, D, E", "C, D, E -> A, C, D, E", 
+        "WT -> A", "A -> A, B", "A, B -> A, B, C", "A, B, C -> A, B, C, E", 
+        "C -> A, C", "A, C -> A, B, C")
+
     obs_events <- c(
         "C, D", "A, C, D, E", "A, B", "C", "A, B, C, E",
         "A, C, D, E", "C, D", "A, B, C, E", "C", "A, B, C, E"
     )
-
 
     simGenotypes <- list(
         trajectory = trajectory,
@@ -120,7 +140,6 @@ test_that("Output is correct", {
    
     out <- evamtools:::process_samples(simGenotypes, 5, gene_names = LETTERS[1:5])
     expect_equal(nrow(out$frequencies), 2**5)
-    expect_equal(dim(out$transitions), c(2**5, 2**5))
     expect_equal(nrow(out$state_counts), 2**5)
 
     sim_counts <- table(simGenotypes$obs_events)
@@ -148,16 +167,7 @@ test_that("Output is correct", {
     expect_equal(sum(out$transitions)
         , sum(vapply(simGenotypes$trajectory, length, numeric(1)) - 1))
 
-    expect_equal(out$transitions["WT", "A"], 2)
-    expect_equal(out$transitions["WT", "C"], 8)
-    expect_equal(out$transitions["C", "A, C"], 2)
-    expect_equal(out$transitions["A", "A, B"], 2)
-    expect_equal(out$transitions["C", "C, D"], 2)
-    expect_equal(out$transitions["C", "C, E"], 2)
-    expect_equal(out$transitions["C, E", "C, D, E"], 2)
-    expect_equal(out$transitions["A, B", "A, B, C"], 1)
-    expect_equal(out$transitions["A, B, C", "A, B, C, E"], 3)
-    expect_equal(out$transitions["C, D, E", "A, C, D, E"], 2)
+    expect_equal(out$transitions, expected_transitions)
 })
 
 cat("\n Done test.processing-sampled-genotypes-trajectories-from-models.R \n")

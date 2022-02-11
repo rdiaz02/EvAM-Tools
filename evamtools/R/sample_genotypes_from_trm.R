@@ -254,18 +254,28 @@ process_samples <- function(sim, n_genes,
     ## they have been computed that way.
     #Calculate transitions
     if (out_params["transitions"]) {
-        tt <- matrix(0L, nrow = n_states, ncol = n_states)
-        colnames(tt) <- rownames(tt) <- sorted_genotypes
+        transitions <- c()
+        # data.frame(From=character(), To=character(), Counts=integer())
+        # browser()
+        # tt <- matrix(0L, nrow = n_states, ncol = n_states)
+        # colnames(tt) <- rownames(tt) <- sorted_genotypes
         for(traj in trajectories){
             steps <- length(traj) - 1 
             if(steps > 0){
                 for(i in 1:steps){
-                    tt[traj[i], traj[i + 1]] <-
-                        tt[traj[i], traj[i + 1]] + 1
+                    from <- traj[i]
+                    to <- traj[i + 1]
+                    current_trans <- sprintf("%s -> %s", from, to)
+                    prev_counts <- transitions[current_trans]
+                    if (is.null(prev_counts) || is.na(prev_counts)){
+                        transitions[current_trans] <- 1
+                    } else {
+                        transitions[current_trans] <- prev_counts + 1
+                    }
                 }
             }
         } 
-        output$transitions <- tt
+        output$transitions <- transitions
     }
 
     #Calculate state_counts
