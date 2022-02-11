@@ -185,13 +185,15 @@ plot_genot_fg <- function(trans_mat
     , fixed_vertex_size = FALSE
     ){
     if(is.null(trans_mat)) return()
-    browser()
+
     if(typeof(trans_mat) == "list"){
         all_genes <- c(trans_mat$From, trans_mat$To)
         all_genes <- all_genes[all_genes != "WT"]
         unique_genes_names <- sort(unique(unlist(str_split(all_genes, ", "))))
         trans_mat$From <- str_replace_all(trans_mat$From, ", ", "")
         trans_mat$To <- str_replace_all(trans_mat$To, ", ", "")
+        colnames(trans_mat) <- c("from", "to", "weight")
+        graph <- igraph::graph_from_data_frame(trans_mat, directed = TRUE)
     } else{
         unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
         rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
@@ -294,9 +296,14 @@ plot_genot_fg <- function(trans_mat
     min_width <- 3
     max_width <- 13
 
-    w2 <- (w - min_edge)/(max_edge - min_edge) * (max_width - min_width) + min_width
-    if(all(w2 == 20)) w2 <- rep(1, length(w))
+    w2 <- NULL
+    if(length(unique(w))>1){ #Not unique values
+        w2 <- (w - min_edge)/(max_edge - min_edge) * (max_width - min_width) + min_width
+    } else {
+        w2 <- rep(min_width, length(node_sizes))
+    }
 
+    if(any(is.na(w2))) browser()
     transparent_w2 <-  w2/max(w2) * 0.9 + 0.1
     ## Actual plotting
     plot(graph
@@ -371,7 +378,7 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
     output2plot_type <- list(
         trm = "trans_rate_mat",
         probabilities = "trans_mat",
-        transitions = "genotype_transitions"
+        transitions = "obs_genotype_transitions"
     )
 
     if (plot_type == "transitions" & !(mod %in% c("OT", "OncoBN")) & !(is.null(sample_data))){
