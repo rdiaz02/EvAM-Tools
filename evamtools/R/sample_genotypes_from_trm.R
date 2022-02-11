@@ -244,6 +244,7 @@ process_samples <- function(sim, n_genes,
 
     trajectories <- sim$trajectory
 
+    ## FIXME: return as a sparse matrix?
     ## FIXME: this does not scale. With 12 genes we have a 1.7e7 matrix!
     ## FIXME: and could this be made faster using a table
     ## This assumes that genotypes, as given by
@@ -293,23 +294,26 @@ process_samples <- function(sim, n_genes,
     return(output)
 }
 
-#' @title Run samples for all outputs of CPMs
-#' 
-#' OT already provides the predicted genotypes
-#' though not from a transition rate matrix
-#' 
-#' @param cpm_output Output from calling all_methods2trans_mat
-#' @param n_samples Number of samples to generate
-#' @param methods List of methods that we want to sample
-#' 
-#' @return modified cpm_outputd including a matrix with genotype transitions
+## #' @title Run samples for all outputs of CPMs
+## #' 
+## #' OT already provides the predicted genotypes
+## #' though not from a transition rate matrix
+## #' 
+## #' @param cpm_output Output from calling all_methods2trans_mat
+## #' @param n_samples Number of samples to generate
+## #' @param methods List of methods that we want to sample
+## #' 
+## #' @return modified cpm_outputd including a matrix with genotype transitions
 sample_all_CPMs <- function(cpm_output
-                          , n_samples
-                          , methods = c("Source", "CBN", "MCCBN",
-                                        "OncoBN", "MHN", "HESBCN", "OT")) {
+                          , N
+                          , methods = c("OT", "OncoBN",
+                                        "CBN", "MCCBN",
+                                        "MHN", "HESBCN")
+                          , genotype_transitions = TRUE
+                            ) {
     ## And I have "Source" for a source data type for the web server
     output <- list()
-
+    
     gene_names <- colnames(cpm_output$analyzed_data)
     n_genes <- length(gene_names)
     
@@ -324,13 +328,14 @@ sample_all_CPMs <- function(cpm_output
             }
 
             genots_2 <- unlist(apply(genots, 1, 
-                function(x) paste(names(genots)[x == 1], collapse = ", ")))
+                                     function(x) paste(names(genots)[x == 1],
+                                                       collapse = ", ")))
             names(genots_2) <- NULL
             genots_2[genots_2 == ""] <- "WT"
 
             tmp_genotypes_sampled <- sample_to_pD_order(
-                sample(genots_2, n_samples, 
-                    prob = tmp_data$Prob, replace = TRUE),
+                sample(genots_2, N, 
+                       prob = tmp_data$Prob, replace = TRUE),
                 n_genes, gene_names)
             
             output[[sprintf("%s_genotype_freqs", method)]] <-
@@ -342,26 +347,33 @@ sample_all_CPMs <- function(cpm_output
             ##   see OT_transition_matrices.org
             output[[sprintf("%s_genotype_transitions", method)]] <- NULL
         } else {
+            ## evam always returns the method_trans_rate_mat
+            ## even if just with an NA
             trm <- cpm_output[[sprintf("%s_trans_rate_mat", method)]]
-            if (any(!is.na(trm))) {
-                print(sprintf("Running %s", method))
-                sims <- population_sample_from_trm(trm, n_samples = n_samples)
-                psamples <- process_samples(sims,
-                                            n_genes,
-                                            gene_names,
-                                            output = c("transitions",
-                                                       "frequencies")
-                                            )
-                output[[sprintf("%s_genotype_transitions", method)]] <-
-                    psamples$transitions
+            if ((length(trm) == 1) && is.na(trm)) {
+                output[[sprintf("%s_genotype_transitions", method)]] <- NULL  
+                output[[sprintf("%s_genotype_freqs", method)]] <- NULL  
+            } else {
+                sims <- population_sample_from_trm(trm, n_samples = N)
+                whatout <- "frequencies"
+                if(genotype_transitions) whatout <- c(whatout, "transitions")
+                psamples <-
+                    process_samples(sims,
+                                    n_genes,
+                                    gene_names,
+                                    output = whatout)
                 output[[sprintf("%s_genotype_freqs", method)]] <-
                     psamples$frequencies
-            } else {
-                output[[sprintf("%s_genotype_transitions", method)]] <- NULL
+                
+                if(genotype_transitions)
+                    output[[sprintf("%s_genotype_transitions", method)]] <-
+                        psamples$transitions
+                else
+                    output[[sprintf("%s_genotype_transitions", method)]] <- NA
             }
         }
-        }
-    return(output)
+    }
+        return(output)
 }
 
 ## #' @title Count genotypes 

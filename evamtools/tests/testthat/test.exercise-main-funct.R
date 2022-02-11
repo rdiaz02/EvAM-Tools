@@ -1,4 +1,3 @@
-## This test fails if you try to use MCCBN
 test_that("Minimal test: we can run", {
     data(every_which_way_data)
     Dat1 <- every_which_way_data[[16]][1:40, 2:6]
@@ -11,9 +10,12 @@ test_that("Minimal test: we can run", {
 
 exercise_sample_all_CPMs <- function(out) {
     samp <- evamtools:::sample_all_CPMs(out, 1000)
+    samp2 <- evamtools:::sample_all_CPMs(out, 1000, genotype_transitions = FALSE)
     se <- paste0(c("CBN", "OT", "OncoBN", "MHN", "HESBCN"),
                  "_genotype_freqs")
-    expect_true(all(vapply(se, function(x) exists(x, samp), TRUE)))  
+    expect_true(all(vapply(se, function(x) exists(x, samp), TRUE)))
+    expect_true(exists("CBN_genotype_transitions", samp))
+    expect_true(all(vapply(se, function(x) exists(x, samp2), TRUE)))
 }
 
 
@@ -145,7 +147,7 @@ test_that("We can run evam with non-default arguments", {
     Dat1 <- every_which_way_data[[16]][1:40, 2:8]
     out <- suppressMessages(evam(Dat1,
                                   methods = c("CBN", "OT", "OncoBN",
-                                              "MHN", "HESBCN"),
+                                              "MHN", "HESBCN", "MCCBN"),
                                  max_cols = 4,
                                  cbn_opts = list(cores = 2),
                                  hesbcn_opts = list(steps = 20000, seed = 2),
@@ -158,8 +160,27 @@ test_that("We can run evam with non-default arguments", {
                                                    max.iter.asa = 20L)
                                  ))
     expect_true(exists("OT_model", where = out))
-
     exercise_sample_all_CPMs(out)
+
+    out2 <- suppressMessages(evam(Dat1,
+                                  methods = c("CBN", "OT", "OncoBN",
+                                              "MHN", "HESBCN", "MCCBN"),
+                                 max_cols = 4,
+                                 cbn_opts = list(cores = 2),
+                                 hesbcn_opts = list(steps = 20000, seed = 2),
+                                 mhn_opts = list(lambda = 1/10),
+                                 oncobn_opts = list(model = "CBN", epsilon = 0.01),
+                                 ot_opts = list(with_errors_dist_ot = FALSE),
+                                 mccbn_opts = list(model = "OT-CBN",
+                                                   max.iter = 10L,
+                                                   L = 6,
+                                                   max.iter.asa = 20L)
+                                 ))
+    expect_true(exists("OT_model", where = out2))
+    exercise_sample_all_CPMs(out2)
+
+
+    
 })
 
 cat("\n Done test.exercise-main-funct.R \n")
