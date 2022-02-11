@@ -18,8 +18,8 @@ against hand-computed ones", {
     }
     compare_OncoSimul <- function(out) {
         expect_equal(
-            reorder_trans_mat(evamtools:::cpm2tm(out$edges, max_f = NULL)$transition_matrix),
-            reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(
+            reorder_trans_mat(evamtools:::cpm2F2tm(out$edges, max_f = NULL)$transition_matrix),
+            reorder_trans_mat(evamtools:::cpm2tm(
                                               out)$trans_mat_genots),
             check.attributes = TRUE)
     }
@@ -34,6 +34,7 @@ against hand-computed ones", {
     test1$parent_set <- c("Single", "Single", "Single", "AND", "Single", "XOR")
     names(test1$parent_set) <- LETTERS[1:length(test1$parent_set)]
 
+    
     accesible_genotypes_t1 <- c("WT", "A", "B", "C", "A, B", "A, C", "B, C", "C, E"
                               , "A, B, C", "A, B, D", "B, C, E", "C, E, F", "A, C, E", "A, B, C, D", "A, B, C, E"
                               , "A, B, D, F", "A, C, E, F", "B, C, E, F",  "A, B, C, D, E"
@@ -209,20 +210,22 @@ against hand-computed ones", {
         expect_equal(sum(computed_trm), sum(manual_trm))
     }
 
-    computed_trm1 <- cpm_access_genots_paths_w_simplified_relationships(test1)$weighted_fgraph
-    computed_trm2 <- cpm_access_genots_paths_w_simplified_relationships(test2)$weighted_fgraph
-    computed_trm3 <- cpm_access_genots_paths_w_simplified_relationships(test3)$weighted_fgraph
-    computed_trm4 <- cpm_access_genots_paths_w_simplified_relationships(test4)$weighted_fgraph
+    test1 <- add_relation(test1)
+    test2 <- add_relation(test2)
+    test3 <- add_relation(test3)
+    test4 <- add_relation(test4)
+
+    
+    computed_trm1 <- evamtools:::cpm2tm(test1)$weighted_fgraph
+    computed_trm2 <- evamtools:::cpm2tm(test2)$weighted_fgraph
+    computed_trm3 <- evamtools:::cpm2tm(test3)$weighted_fgraph
+    computed_trm4 <- evamtools:::cpm2tm(test4)$weighted_fgraph
 
     compare_hesbcn_trms(computed_trm1, trm1)
     compare_hesbcn_trms(computed_trm2, trm2)
     compare_hesbcn_trms(computed_trm3, trm3)
     compare_hesbcn_trms(computed_trm4, trm4)
-
-    test1 <- add_relation(test1)
-    test2 <- add_relation(test2)
-    test3 <- add_relation(test3)
-    
+   
     compare_OncoSimul(test1)
     compare_OncoSimul(test2)
     compare_OncoSimul(test3)
@@ -258,7 +261,7 @@ test_that("XOR: was broken. Fixed in commit 43ea25d", {
         "XOR", "XOR", "XOR", "Single", "Single", "Single")), row.names = c(NA, 
     -7L), class = "data.frame"))
 
-    oux3 <- evamtools:::cpm_access_genots_paths_w_simplified_relationships(
+    oux3 <- evamtools:::cpm2tm(
                             out_xor3)
 
 
@@ -285,8 +288,8 @@ test_that("XOR: was broken. Fixed in commit 43ea25d", {
     }
 
     expect_equal(
-        reorder_trans_mat(evamtools:::cpm2tm(out_xor3$edges, max_f = NULL)$transition_matrix),
-        reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(
+        reorder_trans_mat(evamtools:::cpm2F2tm(out_xor3$edges, max_f = NULL)$transition_matrix),
+        reorder_trans_mat(evamtools:::cpm2tm(
                                           out_xor3)$trans_mat_genots),
         check.attributes = TRUE)
     
@@ -316,14 +319,14 @@ test_that("Tests with three parents, just of the accessible, and comparing numbe
     }
     compare_OncoSimul <- function(out) {
         expect_equal(
-            reorder_trans_mat(evamtools:::cpm2tm(out$edges, max_f = NULL)$transition_matrix),
-            reorder_trans_mat(evamtools:::cpm_access_genots_paths_w_simplified_relationships(
+            reorder_trans_mat(evamtools:::cpm2F2tm(out$edges, max_f = NULL)$transition_matrix),
+            reorder_trans_mat(evamtools:::cpm2tm(
                                               out)$trans_mat_genots),
             check.attributes = TRUE)
     }
 
     compare_access_genots <- function(out, expected_accessible) {
-        agenots <- colnames(evamtools:::cpm_access_genots_paths_w_simplified_relationships(
+        agenots <- colnames(evamtools:::cpm2tm(
                                                  out)$trans_mat_genots)
         expect_equal(sort(agenots), sort(expected_accessible))
     }

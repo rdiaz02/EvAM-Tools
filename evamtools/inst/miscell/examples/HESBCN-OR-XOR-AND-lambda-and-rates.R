@@ -40,16 +40,16 @@ ex_hesbcn_or <- evamtools:::do_HESBCN(examples_csd$csd$OR$data, seed = 9)
 
 ## The transition rate matrix ("weighted_fgraph") and the transition matrix
 ## between genotypes (from the former, using competing exponentials)
-evamtools:::cpm_access_genots_paths_w_simplified_relationships(ex_hesbcn_or)
+evamtools:::cpm2tm(ex_hesbcn_or)
 
 ## Get it annotated with column names
 
 
 printSpMatrix(
-    evamtools:::cpm_access_genots_paths_w_simplified_relationships(ex_hesbcn_or)$weighted_fgraph, col.names = TRUE)
+    evamtools:::cpm2tm_relationships(ex_hesbcn_or)$weighted_fgraph, col.names = TRUE)
 
 ## Output from OncoSimulR
-oncosimul_out <- evamtools:::cpm2tm(ex_hesbcn_or$edges, max_f = NULL)
+oncosimul_out <- evamtools:::cpm2F2tm(ex_hesbcn_or$edges, max_f = NULL)
 
 ## 
 

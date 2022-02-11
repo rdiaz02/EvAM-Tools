@@ -250,16 +250,16 @@ cpm_to_trans_mat_oncosimul <- function(x, max_f = NULL, sh = -Inf,
 }
 
 ## shorter
-cpm2tm <- cpm_to_trans_mat_oncosimul
+cpm2F2tm <- cpm_to_trans_mat_oncosimul
 
 
 # #### Tiny OR and XOR
 
 # ex_or <- read.table("ex_pmce_or.txt", header = TRUE, sep = "\t")
-# out_or <- cpm2tm(ex_or)
+# out_or <- cpm2F2tm(ex_or)
 
 
 # ex_xor <- read.table("ex_pmce_xor.txt", header = TRUE, sep = "\t")
-# out_xor <- cpm2tm(ex_xor)
+# out_xor <- cpm2F2tm(ex_xor)
 
 
