@@ -183,8 +183,9 @@ plot_genot_fg <- function(trans_mat
     , max_edge = NULL
     , min_edge = NULL
     , fixed_vertex_size = FALSE
-    ){
+    ) {
     if(is.null(trans_mat)) return()
+    browser()
     unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
     rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
 
@@ -362,7 +363,7 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
     output2plot_type <- list(
         trm = "trans_rate_mat",
         probabilities = "trans_mat",
-        transitions = "genotype_transitions"
+        transitions = "obs_genotype_transitions"
     )
 
     if (plot_type == "transitions" & !(mod %in% c("OT", "OncoBN")) & !(is.null(sample_data))){
@@ -489,25 +490,25 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
             if(!is.null(model_data2plot$parent_set)){
                 for(i in igraph::E(g)){
                     igraph::E(g)[i]$color <- colors_relationships[model_data2plot$parent_set[[igraph::head_of(g, igraph::E(g)[i])$name]]]
-
+                    
                 }
             } else igraph::E(g)$color <- standard_relationship
             plot(g
-                , layout = igraph::layout.reingold.tilford
-                , vertex.size = 50 
-                , vertex.label.color = "black"
-                , vertex.label.family = "Helvetica"
-                , font.best = 2
-                , vertex.frame.width = 0.5
-                , vertex.color = "white"
-                , vertex.frame.color = "black" 
-                , vertex.label.cex = 1
-                , edge.arrow.size = 0
-                , edge.width = 5
-                , main = mod)
+               , layout = igraph::layout.reingold.tilford
+               , vertex.size = 50 
+               , vertex.label.color = "black"
+               , vertex.label.family = "Helvetica"
+               , font.best = 2
+               , vertex.frame.width = 0.5
+               , vertex.color = "white"
+               , vertex.frame.color = "black" 
+               , vertex.label.cex = 1
+               , edge.arrow.size = 0
+               , edge.width = 5
+               , main = mod)
             if(!is.null(model_data2plot$parent_set)){
                 legend("topleft", legend = names(colors_relationships),
-                    col = colors_relationships, lty = 1, lwd = 5, bty = "n")
+                       col = colors_relationships, lty = 1, lwd = 5, bty = "n")
             }
         } else if(!is.null(model_data2plot$theta)) { ##Plotting matrix
             op <- par(mar=c(3, 3, 5, 3), las = 1)
@@ -520,17 +521,19 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
             par(op)
         }
         ## Fixme, there is a problem here: probabilities and trans_mat plot the same
-        if (old_plot_type == "probabilities") {
+        if (old_plot_type == "probabilities") { ## transition probabilities
             plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data,
                           top_paths = top_paths,
                           fixed_vertex_size = fixed_vertex_size)
-        } else if (old_plot_type == "transitions") {
-            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data,
+        } else if (old_plot_type == "transitions") { ## observed genotype trans.
+            plot_genot_fg(model_data2plot$data2plot,
+                          observations = cpm_output$analyzed_data,
                           model_data2plot$genotype_freqs,
                           top_paths = top_paths,
                           fixed_vertex_size = fixed_vertex_size)
-        } else if (old_plot_type == "trm"){
-            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data,
+        } else if (old_plot_type == "trm"){ ## transition rate matrix
+            plot_genot_fg(model_data2plot$data2plot,
+                          cpm_output$analyzed_data,
                           top_paths = top_paths,
                           fixed_vertex_size = fixed_vertex_size)
         }
