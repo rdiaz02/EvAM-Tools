@@ -165,7 +165,7 @@ population_sample_from_trm <- function(trm, n_samples = 10,
                mc.cores = cores)
     }
     ## Structure output as Pablo's  simulate_population_2
-    ## Otherwise, we could just exist from the above
+    ## Otherwise, we could just exit from the above
     ## This will add time and increase RAM usage
 
     return(list(
@@ -177,9 +177,6 @@ population_sample_from_trm <- function(trm, n_samples = 10,
         ))
 }
 
-## FIXME: this function will not scale
-## a lot of copying of potentially large objects (e.g., trajectories)
-## and no use of sparse matrices for potentially huge matrices
 
 #' @title Process samples
 #' 
@@ -281,7 +278,7 @@ process_samples <- function(sim, n_genes,
 ## then by increasing mutations and within number of mutations, sorted
 sparse_transM_from_genotypes <- function(genots) {
     genots <- unique(genots)
-    muts <- stringi::stri_count_fixed(genots, ',')
+    muts <- stringi::stri_count_fixed(genots, ",")
     names(muts) <- genots
     muts["WT"] <- -1
     genots <- genots[order(muts, genots)]

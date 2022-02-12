@@ -167,8 +167,8 @@ test_that("Output is correct", {
     expect_equal(sum(out$transitions)
         , sum(vapply(simGenotypes$trajectory, length, numeric(1)) - 1))
 
-     ## Though this test has many identical entries. Not a strong one.
-     ## this expects a vector
+     ## Note: this test has many identical entries. Not a strong one.
+     ## This expects a vector
      ## expect_equal(out$transitions, expected_transitions)
      tmp <- igraph::as_data_frame(igraph::graph_from_adjacency_matrix(out$transitions))
      tmp2 <- paste0(tmp[, 1], " -> ", tmp[, 2])

@@ -47,6 +47,18 @@ By default it creates a top row with the DAG of the CPM
 or de transtionRateMatrix for MHN
 The bottom row has a custom plot for trans_mat, trans_rate_mat, or obs_genotype_transitions.
 }
+
+\note{The color and design of figures in the bottom row, depicting
+  transition matrices, transition rate matrices, and observed genotype
+  transitions are heavily inspired by (a blatant copy of) some of the
+  representations in Greenbury et al., 2020.}
+
+\references{
+  Greenbury, S. F., Barahona, M., & Johnston, I. G. (2020). HyperTraPS:
+  Inferring Probabilistic Patterns of Trait Acquisition in Evolutionary
+  and Disease Progression Pathways. Cell Systems, 10(1),
+  39–51–10. http://dx.doi.org/10.1016/j.cels.2019.10.009
+}
 \examples{
 dB_c1 <- matrix(
  c(
@@ -68,9 +80,9 @@ colnames(dB_c1) <- LETTERS[1:5]
 out <- evam(dB_c1,
             methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN"))
 
-plot_CPMs(out, dB_c1, plot_type = "trans_mat")
+plot_CPMs(out, plot_type = "trans_mat")
 
-plot_CPMs(out, dB_c1, plot_type = "trans_rate_mat")
+plot_CPMs(out, plot_type = "trans_rate_mat")
 
 out_samp <- sample_CPMs(out, 1000)
 

@@ -185,8 +185,11 @@ plot_genot_fg <- function(trans_mat
     , fixed_vertex_size = FALSE
     ) {
     if(is.null(trans_mat)) return()
-
-    if(typeof(trans_mat) == "list"){
+    ## FIXME: do we ever have this?
+    ## If we do, then trans_mat should be changed by "object" or "x"
+    ## in the arguments, and the two possibilities (x as data.frame, as
+    ## as transition (rate) matrix) explained
+    if(typeof(trans_mat) == "list") {
         all_genes <- c(trans_mat$From, trans_mat$To)
         all_genes <- all_genes[all_genes != "WT"]
         unique_genes_names <- sort(unique(unlist(str_split(all_genes, ", "))))
@@ -194,7 +197,7 @@ plot_genot_fg <- function(trans_mat
         trans_mat$To <- str_replace_all(trans_mat$To, ", ", "")
         colnames(trans_mat) <- c("from", "to", "weight")
         graph <- igraph::graph_from_data_frame(trans_mat, directed = TRUE)
-    } else{
+    } else {
         unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
         rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
         graph <- igraph::graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
@@ -303,7 +306,7 @@ plot_genot_fg <- function(trans_mat
         w2 <- rep(min_width, length(node_sizes))
     }
 
-    if(any(is.na(w2))) browser()
+    ## if(any(is.na(w2))) browser()
     transparent_w2 <-  w2/max(w2) * 0.9 + 0.1
     ## Actual plotting
     plot(graph
@@ -358,44 +361,35 @@ plot_genot_fg <- function(trans_mat
 #' @param sample_data Data form sampling, this must be generated 
 #' @returns List with processed output of the CPM
 process_data <- function(data, mod, plot_type, sample_data = NULL) {
+
     dag_tree <- NULL
 
-    if(is.null(data)){
-        stop("Data is undefinded")
+    if (is.null(data)) {
+        stop("data is NULL")
     }
 
-    if (!(plot_type %in% c("trm", "transitions", "probabilities"))){
-        stop(sprintf("Plot type %s is not supported", plot_type))
-    }
+    accepted_plot_types <- c("trans_mat",
+                             "obs_genotype_transitions", "trans_rate_mat")
+    
+    if (!(plot_type %in% accepted_plot_types))
+        stop("Incorrect plot_type. plot_type must be one of ",
+             paste(accepted_plot_types, sep = ", ", collapse = ", "))
+    
 
     all_data <- c(data, sample_data)
-
+    
     tryCatch (expr = {
         dag_model <- get(paste(mod, "_model", sep = ""), data)
         dag_tree <- graph_from_data_frame(dag_model[, c(1, 2)])
     }, error = function(e){})
 
-    output2plot_type <- list(
-        trm = "trans_rate_mat",
-        probabilities = "trans_mat",
-        transitions = "obs_genotype_transitions"
-    )
-
-    if (plot_type == "transitions" & !(mod %in% c("OT", "OncoBN")) & !(is.null(sample_data))){
-        tmp_transitions <- all_data[[sprintf("%s_%s", mod, output2plot_type[[plot_type]])]]
-        genots <- as.data.frame(vapply(names(tmp_transitions), function(x) strsplit(x, " -> "), list(2)))
-        colnames(genots) <- NULL
-        t2 <- data.frame(From = unlist(genots[1, ]), To = unlist(genots[2, ]), Counts = tmp_transitions)
-        rownames(t2) <- names(tmp_transitions)
-        all_data[[sprintf("%s_%s", mod, output2plot_type[[plot_type]])]] <- t2
-    }
-
     return(list(
         dag_tree = dag_tree
-        , data2plot = all_data[[sprintf("%s_%s", mod, output2plot_type[[plot_type]])]]
-        , theta = all_data[[sprintf("%s_theta", mod)]]
-        , parent_set = all_data[[sprintf("%s_parent_set", mod)]]
-        , genotype_freqs = all_data[[sprintf("%s_genotype_freqs", mod)]]
+        , data2plot = all_data[[paste0(mod, "_", plot_type)]]
+      , theta = all_data[[paste0(mod, "_theta")]]
+        ## where is the next used?
+        , parent_set = all_data[[paste0(mod, "_parent_set")]]
+        , genotype_freqs = all_data[[paste0(mod, "_genotype_freqs")]]
         ))
 }
 
@@ -417,10 +411,6 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
              "of a call to sample_CPMs")
     }
 
-    ## To allow using in here the old naming
-    if(plot_type == "trans_mat") old_plot_type <- "probabilities"
-    if(plot_type == "trans_rate_mat") old_plot_type <- "trm"
-    if(plot_type == "obs_genotype_transitions") old_plot_type <- "transitions"
     
     ## List of available models
     available_models <- unique(models[
@@ -429,18 +419,25 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
             return(any(!is.na(cpm_output[[sprintf("%s_%s", mod, attr_name)]])))
         }, logical(1))
     ])
-    ## print(available_models)
+   
 
     ## DAG relationships colors 
-    standard_relationship <- "gray73"
+    ## standard_relationship <- "gray73"
+    ## colors_relationships <- c(standard_relationship, standard_relationship,
+    ##                           "cornflowerblue", "coral2")
+    standard_relationship <- "cornflowerblue"
     colors_relationships <- c(standard_relationship, standard_relationship,
-                              "cornflowerblue", "coral2")
+                              "#E2D810", ##"#FBDE44FF",
+                              "coral2")
+
+
     names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
     
     ## Shape of the plot
     l_models <- length(available_models)
-    n_rows <- ifelse(old_plot_type == "matrix", 3, 2)
-
+    ## n_rows <- ifelse(old_plot_type == "matrix", 3, 2)
+    n_rows <- 2
+    
     if(orientation == "vertical") {
         op1 <- par(mfrow = c(l_models, n_rows))
     } else {
@@ -454,14 +451,15 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
     ## 2. Forward graph (HyperTRAPs style) of sampled transitions, transition matrix
     for(mod in available_models) {
         ## Processing data
-        model_data2plot <- process_data(cpm_output, mod, old_plot_type, samples)
+        model_data2plot <- process_data(cpm_output, mod, plot_type, samples)
         g <- model_data2plot$dag_tree
         ## Plotting data
-        if(!is.null(g)) { ## Potting DAGs
-            if(!is.null(model_data2plot$parent_set)){
-                for(i in igraph::E(g)){
-                    igraph::E(g)[i]$color <- colors_relationships[model_data2plot$parent_set[[igraph::head_of(g, igraph::E(g)[i])$name]]]
-                    
+        if (!is.null(g)) { ## Potting DAGs
+            if (!is.null(model_data2plot$parent_set)) {
+                for (i in igraph::E(g)) {
+                    igraph::E(g)[i]$color <-
+                        colors_relationships[
+                            model_data2plot$parent_set[[igraph::head_of(g, igraph::E(g)[i])$name]]]
                 }
             } else igraph::E(g)$color <- standard_relationship
             plot(g
@@ -491,32 +489,35 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
                 , mgp = c(2, 1, 0))
             par(op)
         }
+        ## FIXME: ?? trans_mat were called probabilites.
         ## Fixme, there is a problem here: probabilities and trans_mat plot the same
-        if (old_plot_type == "probabilities") { ## transition probabilities
+        if (plot_type == "trans_mat") {## transition probabilities; was "probabilities"
             plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data,
                           top_paths = top_paths,
                           fixed_vertex_size = fixed_vertex_size)
-        } else if (old_plot_type == "transitions") { ## observed genotype trans.
+        } else if (plot_type == "obs_genotype_transitions") { ## observed genotype trans. ; was "transitions"
             plot_genot_fg(model_data2plot$data2plot,
                           observations = cpm_output$analyzed_data,
                           model_data2plot$genotype_freqs,
                           top_paths = top_paths,
                           fixed_vertex_size = fixed_vertex_size)
-        } else if (old_plot_type == "trm"){ ## transition rate matrix
+        } else if (plot_type == "trans_rate_mat"){ ## transition rate matrix; was "trm"
             plot_genot_fg(model_data2plot$data2plot,
                           cpm_output$analyzed_data,
                           top_paths = top_paths,
                           fixed_vertex_size = fixed_vertex_size)
         }
 
-        if ((mod %in% c("OT")) & (old_plot_type %in% c("trm", "transitions"))) {
+        if ((mod %in% c("OT")) &&
+            (plot_type %in% c("trans_rate_mat", "obs_genotype_transitions"))) {
             par(mar = rep(3, 4))
             plot_sampled_genots(cpm_output$analyzed_data)
         }
 
-        if ((mod %in% c("OncoBN")) & (old_plot_type %in% c("trm", "transitions"))) {
+        if ((mod %in% c("OncoBN")) &&
+            (plot_type %in% c("trans_rate_mat", "obs_genotype_transitions"))) {
             par(mar = rep(3, 4))
-            plot(0,type='n',axes=FALSE,ann=FALSE)
+            plot(0, type = 'n', axes = FALSE, ann = FALSE)
         }
     }
     par(op1)
