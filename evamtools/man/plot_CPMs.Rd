@@ -62,23 +62,24 @@ The bottom row has a custom plot for trans_mat, trans_rate_mat, or obs_genotype_
 \examples{
 dB_c1 <- matrix(
  c(
-     rep(c(1, 0, 0, 0, 0), 300) #A
-   , rep(c(0, 0, 1, 0, 0), 300) #C
-   , rep(c(1, 1, 0, 0, 0), 200) #AB
-   , rep(c(0, 0, 1, 1, 0), 200) #CD
-   , rep(c(1, 1, 1, 0, 0), 100) #ABC
-   , rep(c(1, 0, 1, 1, 0), 100) #ACD
-   , rep(c(1, 1, 0, 0, 1), 100) #ABE
-   , rep(c(0, 0, 1, 1, 1), 100) #CDE
-   , rep(c(1, 1, 1, 0, 1), 100) #ABCE
-   , rep(c(1, 0, 1, 1, 1), 100) #ACDE
-   , rep(c(1, 1, 1, 1, 0), 50) # ABCD
-   , rep(c(0, 0, 0, 0, 0), 10) # WT
+     rep(c(1, 0, 0, 0, 0), 30) #A
+   , rep(c(0, 0, 1, 0, 0), 30) #C
+   , rep(c(1, 1, 0, 0, 0), 20) #AB
+   , rep(c(0, 0, 1, 1, 0), 20) #CD
+   , rep(c(1, 1, 1, 0, 0), 10) #ABC
+   , rep(c(1, 0, 1, 1, 0), 10) #ACD
+   , rep(c(1, 1, 0, 0, 1), 10) #ABE
+   , rep(c(0, 0, 1, 1, 1), 10) #CDE
+   , rep(c(1, 1, 1, 0, 1), 10) #ABCE
+   , rep(c(1, 0, 1, 1, 1), 10) #ACDE
+   , rep(c(1, 1, 1, 1, 0), 5) # ABCD
+   , rep(c(0, 0, 0, 0, 0), 1) # WT
  ), ncol = 5, byrow = TRUE
 )
 colnames(dB_c1) <- LETTERS[1:5]
+
 out <- evam(dB_c1,
-            methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN"))
+            methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN"))
 
 plot_CPMs(out, plot_type = "trans_mat")
 
