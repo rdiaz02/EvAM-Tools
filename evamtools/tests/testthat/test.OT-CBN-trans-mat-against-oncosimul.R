@@ -275,7 +275,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul.", {
                                                init.poset = "OT",
                                                nboot = 0,
                                                parall = TRUE,
-                                               cores = 1))
+                                               omp_threads = 1))
     ex_cbn_and <- do_CBN(examples_csd$csd$AND$data)
     ex_cbn_linear <- do_CBN(examples_csd$csd$Linear$data)
     ex_cbn_or <- do_CBN(examples_csd$csd$OR$data)

@@ -57,23 +57,23 @@ rm(.._OncoSimul_test.ctcbn)
 rm(.._OncoSimul_test.hcbn)
 
 
-## be very careful using cores > 1. I think OMP can actually
+## be very careful using omp_threads > 1. I think OMP can actually
 ## slow things down.
 cbn_proc <- function(x, addname, init.poset = "OT", nboot = 0,
-                     verbose = FALSE, cores = 1, silent = TRUE,
+                     verbose = FALSE, omp_threads = 1, silent = TRUE,
                      parall = FALSE, mc.cores = detectCores(),
                      rmfile = TRUE) {
     if(is.null(colnames(x))) stop("No colnames for input matrix")
     if(nboot == 0) {
         edges <- run.cbn(x, addname = addname, init.poset = init.poset,
-                         cores = cores, silent = silent, rmfile = rmfile)
+                         omp_threads = omp_threads, silent = silent, rmfile = rmfile)
         edges <- cbind(edges, CBN_edgeBootFreq = NA,
                        stringsAsFactors = FALSE)
     } else {
         if(!parall) { 
             ## Returns CBN and bootstrap freqs of edges
             edges <- run.cbn(x, addname = addname, init.poset = init.poset,
-                             cores = cores, silent = silent, rmfile = rmfile)
+                             omp_threads = omp_threads, silent = silent, rmfile = rmfile)
             CBN_edgeBootFreq <- rep(0, nrow(edges))
             names(CBN_edgeBootFreq) <- edges[, "edge"]
             nn <- names(CBN_edgeBootFreq)
@@ -84,7 +84,7 @@ cbn_proc <- function(x, addname, init.poset = "OT", nboot = 0,
                 bx <- x[ind, , drop = FALSE]
                 addnameb <- paste0(addname, "b", i, paste(sample(letters, 3), collapse=""))
                 bootedges <- run.cbn(bx, addname = addnameb, init.poset = init.poset,
-                                     cores = cores, silent = silent,
+                                     omp_threads = omp_threads, silent = silent,
                                      rmfile = rmfile)$edge
                 posadd <- na.omit(match(bootedges, nn))
                 if(length(posadd))
@@ -96,19 +96,19 @@ cbn_proc <- function(x, addname, init.poset = "OT", nboot = 0,
             ll <- c(0, seq.int(nboot))
             paralfunc <- function(index, odata = x,
                                   addname_ = addname,
-                                  init.poset_ = init.poset, cores_ = cores,
+                                  init.poset_ = init.poset, omp_threads_ = omp_threads,
                                   silent_ = silent) {
                 dd <- boot_data_index(odata, index)
                 
                 ## ## Save dd before cbn execution for debugging
                 ## save(dd,file=paste0("dds/other/dd_",strsplit(ff[dbgfile],"\\.rds"),"_seed",toString(rseed),"_index",toString(index),".Rdata"))
                 ## tmp <- run.cbn(dd, addname = "debug", init.poset = init.poset_,
-                ##                cores = cores_, silent = TRUE, rmfile = TRUE)
+                ##                omp_threads = omp_threads_, silent = TRUE, rmfile = TRUE)
                      
                 addnameb <- paste0(addname_, "b", index, paste(sample(letters, 3),
                                                               collapse=""))
                 tmp <- run.cbn(dd, addname = addnameb, init.poset = init.poset_,
-                               cores = cores_, silent = silent_,
+                               omp_threads = omp_threads_, silent = silent_,
                                rmfile = rmfile)
                 
                 if(index > 0) {
@@ -149,7 +149,7 @@ run.cbn <- function(x,
                     silent = TRUE,
                     eparam = 0.05, ## 0.05
                     rmfile = TRUE,
-                    cores = 1,
+                    omp_threads = 1,
                     custom.poset = NULL
                     ) {
 
@@ -180,7 +180,7 @@ run.cbn <- function(x,
                              dirname = dirname, eparam = eparam,
                              temp = temp, steps = steps,
                              silent = silent, init.poset = init.poset,
-                             cores = cores, custom.poset = custom.poset)
+                             omp_threads = omp_threads, custom.poset = custom.poset)
     cnames <- colnames(x)
     poset <- read.poset(dirname, ncol(x))
     rm(zzz)
@@ -266,7 +266,7 @@ call.external.cbn <- function(data,
                               createdir = FALSE,
                               dirname = "testcbn", eparam = 0.05,
                               temp = 1, steps = 200, silent = TRUE,
-                              init.poset = "linear", cores = 1,
+                              init.poset = "linear", omp_threads = 1,
                               custom.poset = NULL) {
     ## I assume h-cbn and ct-cbn are available
     data2 <- cbind(1, data)
@@ -286,10 +286,10 @@ call.external.cbn <- function(data,
     write(c("null", colnames(data)),
           file = paste(dirname, ".prf", sep = ""),
           sep = " ")
-    if(is.null(cores)) {
+    if(is.null(omp_threads)) {
         OMPthreads <- detectCores()
     } else{
-        OMPthreads <- cores
+        OMPthreads <- omp_threads
     }
     message("\n Exporting OMP_threads from call.external.cbn. OMP_NUM_THREADS = ", OMPthreads, "\n")
     ompt <- paste("export OMP_NUM_THREADS=", OMPthreads, "; ", sep = "")

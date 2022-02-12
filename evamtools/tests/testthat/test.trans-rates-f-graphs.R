@@ -855,7 +855,6 @@ test_that("OT and CBN: algorithm consistency with various data examples", {
                                n00 = "auto3", 
                                distribution_oncotree = TRUE,
                                min.freq = 0,
-                               cores_cbn = 1,
                                do_MCCBN = FALSE) { 
         
         message("\n     Doing OT")
@@ -879,7 +878,7 @@ test_that("OT and CBN: algorithm consistency with various data examples", {
                                        addname = "tmpo",
                                        init.poset = "OT",
                                        nboot = nboot_cbn, parall = TRUE,
-                                       cores = cores_cbn)))["elapsed"]
+                                       omp_threads = 1)))["elapsed"]
         } else {
             time_cbn_ot <- NA
             CBN_ot <- NA
