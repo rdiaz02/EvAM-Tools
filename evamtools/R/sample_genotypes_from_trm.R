@@ -1,4 +1,4 @@
-## Copyright 2022 Ramon Diaz-Uriarte, Pablo Herrera Nieto.
+# Copyright 2022 Ramon Diaz-Uriarte, Pablo Herrera Nieto.
 
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -13,6 +13,10 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+## ## timings
+## dates_for_timing <- function(x) {
+##     cat("\n At  ;", x, ";", date(), "\n")
+## }
 
 
 #' @title Sample an indivial from a transition rate matrix
@@ -137,7 +141,6 @@ population_sample_from_trm <- function(trm, n_samples = 10,
 
     ngenots <- ncol(trm)
     genot_names <- colnames(trm)
-
     if(pre_compute) {
         ## Like code in trans_rate_to_trans_mat
         sx <- rowSums(trm)
@@ -167,7 +170,6 @@ population_sample_from_trm <- function(trm, n_samples = 10,
     ## Structure output as Pablo's  simulate_population_2
     ## Otherwise, we could just exit from the above
     ## This will add time and increase RAM usage
-
     return(list(
         T_sampling = T_sampling
       , T_sum_events = unlist(lapply(out, function(x) x$t_accum))
@@ -197,8 +199,9 @@ process_samples <- function(sim, n_genes,
                             gene_names,
                             output = c("frequencies",
                                        "state_counts",
-                                       "transitions")) {
-    
+                                       "transitions"),
+                            cores = detectCores()) {
+
     #Checking input
     params <- c("trajectory", "obs_events")
     for (i in params){
@@ -206,35 +209,28 @@ process_samples <- function(sim, n_genes,
             stop(sprintf("%s is missing from your samples", i))
     }
 
-    #Checking output variables
+    ## Checking output variables
     valid_output <- c("frequencies", "state_counts", "transitions")
-    out_params <- valid_output %in% output
-    names(out_params) <- valid_output
 
-    if (sum(out_params) == 0) stop("Specify valid output")
-
-    not_valid_params <- output[which(!(output %in% valid_output))]
-    if (length(not_valid_params) > 0) 
-        warning(sprintf("The following parameters cannot be returned: %s"
-            , paste(not_valid_params, collapse = ", " )))
-
+    if (any(!(output %in% valid_output ))) stop("Incorrect output specified")
+    if (length(output) == 0) stop("No output specified")
     
     ## Set up
-    output <- list()
+    retval <- list()
     n_states <- 2**n_genes
     sorted_genotypes <- generate_sorted_genotypes(n_genes, gene_names)
 
-    ## Calculate frequencies
-    if (out_params["frequencies"]) {
+    ## Calculate frequencies: genotype frequencies
+    if ("frequencies" %in% output) {
         counts_tmp <- sample_to_pD_order(sim$obs_events, n_genes, gene_names)
         frequencies <- data.frame(
             Genotype = sorted_genotypes,
             Counts = counts_tmp
         )
         rownames(frequencies) <- NULL
-        output$frequencies <- frequencies
+        retval$frequencies <- frequencies
     }
-   
+
     ## Calculate transitions
 
     ## This assumes that genotypes, as given by
@@ -243,23 +239,70 @@ process_samples <- function(sim, n_genes,
     ## sorted_genotypes uses sorting
     ## of gene names. But the transition rate matrices might not unless
     ## they have been computed that way. They are now, though.
- 
-    if (out_params["transitions"]) {
+
+    ## This is the slowest part. Two implementations. The second
+    ## slightly slower for small N.
+    if ("transitions" %in% output) { ## observed genotype transitions
         unlisted_trajectories <- unlist(sim$trajectory)
-        tt <- sparse_transM_from_genotypes(unique(unlisted_trajectories))
-        for (traj in sim$trajectory) {
-            steps <- length(traj) - 1
-            if (steps > 0) {
-                for (i in seq_len(steps)) {
-                    tt[traj[i], traj[i + 1]] <- tt[traj[i], traj[i + 1]]  + 1
-                }
+        ## ## Implementation 1
+        ## tt <- sparse_transM_from_genotypes(unique(unlisted_trajectories))
+        ## for (traj in sim$trajectory) {
+        ##     steps <- length(traj) - 1
+        ##     if (steps > 0) {
+        ##         for (i in seq_len(steps)) {
+        ##             tt[traj[i], traj[i + 1]] <- tt[traj[i], traj[i + 1]]  + 1
+        ##         }
+        ##     }
+        ## }
+        ########      Implementation 2. Can be much faster
+        ##   Create a matrix of indexes first, then count cases
+        ##   and assign the entries in the sparse matrix
+        ##   Creating  matrix of indeces can use mclapply
+
+        tt2 <- sparse_transM_from_genotypes(unique(unlisted_trajectories))
+        tindex <-  seq_along(rownames(tt2))
+        names(tindex) <- rownames(tt2)
+        get_index_pairs <- function(v, thetindex = tindex) {
+            lv <- length(v) - 1
+            if (lv > 0) {
+                w <- unname(thetindex[v])
+                cbind(w[seq_len(lv)], w[2:(lv + 1)])
             }
         }
-        output$transitions <- tt
+        ## Get matrix of indeces of transitions
+        all_pairs2 <- mclapply(sim$trajectory,
+                               get_index_pairs,
+                               mc.cores = cores)
+        all_pairs_stacked <- do.call(rbind, all_pairs2)
+
+        ## Count the cases of each index. Sort. Then traverse and add.
+        ## When change in state, assign value to sparse matrix.
+        oo <- order(all_pairs_stacked[, 1], all_pairs_stacked[, 2])
+        apso <- all_pairs_stacked[oo, ]
+
+        last <- nrow(apso)
+        sum <- 1
+        for(k in seq_len(last - 1)) {
+            if (all(apso[k, ] == apso[k + 1, ])) {
+                sum <- sum + 1
+            } else {
+                tt2[apso[k, 1], apso[k, 2]] <- sum
+                sum <- 1
+            }
+        }
+        ## There is a single last one
+        if(!(all(apso[last - 1, ] == apso[last, ])))
+            tt2[apso[last, 1], apso[last, 2]] <- 1
+        else ## no change between last two ones
+            tt2[apso[last, 1], apso[last, 2]] <- sum
+        
+        ## stopifnot(identical(tt, tt2))
+        retval$transitions <- tt2
     }
 
+
     ## Calculate state_counts
-    if (out_params["state_counts"]) {
+    if ("state_counts" %in% output) { ## times each genotype visited
         if (!("transitions" %in% output))
             unlisted_trajectories <- unlist(sim$trajectory)
         state_counts <- sample_to_pD_order(unlisted_trajectories,
@@ -268,9 +311,20 @@ process_samples <- function(sim, n_genes,
             Genotype = sorted_genotypes,
             Counts = state_counts
         )
-        output$state_counts <- state_counts
+        retval$state_counts <- state_counts
+        ## FIXME: Paranoid check. Will remove later
+        if("transitions" %in% output) {
+            cstt2 <- colSums(tt2)[-1]
+            ## No WT
+            statecounts_vector <- state_counts[-1, "Counts"]
+            names(statecounts_vector) <- state_counts[-1, "Genotype"]
+            statecounts_vector <- statecounts_vector[statecounts_vector > 0]
+            cstt2 <- cstt2[order(names(cstt2))]
+            statecounts_vector <- statecounts_vector[order(names(statecounts_vector))]
+            stopifnot(isTRUE(all(cstt2 == statecounts_vector)))
+        }
     }
-    return(output)
+    return(retval)
 }
 
 ## Create empty sparse matrix from vector of genotypes
@@ -290,12 +344,12 @@ sparse_transM_from_genotypes <- function(genots) {
 
 
 sample_CPMs <- function(cpm_output
-                          , N
-                          , methods = c("OT", "OncoBN",
-                                        "CBN", "MCCBN",
-                                        "MHN", "HESBCN")
-                          , obs_genotype_transitions = TRUE
-                            ) {
+                      , N
+                      , methods = c("OT", "OncoBN",
+                                    "CBN", "MCCBN",
+                                    "MHN", "HESBCN")
+                      , obs_genotype_transitions = TRUE
+                        ) {
     ## And I have "Source" for a source data type for the web server
     output <- list()
     
@@ -340,8 +394,9 @@ sample_CPMs <- function(cpm_output
                 output[[sprintf("%s_genotype_freqs", method)]] <- NULL  
             } else {
                 sims <- population_sample_from_trm(trm, n_samples = N)
-                whatout <- "frequencies"
+                whatout <- c("frequencies", "state_counts")
                 if(obs_genotype_transitions) whatout <- c(whatout, "transitions")
+
                 psamples <-
                     process_samples(sims,
                                     n_genes,
@@ -349,6 +404,8 @@ sample_CPMs <- function(cpm_output
                                     output = whatout)
                 output[[sprintf("%s_genotype_freqs", method)]] <-
                     psamples$frequencies
+                output[[sprintf("%s_state_counts", method)]] <-
+                    psamples$state_counts
                 
                 if(obs_genotype_transitions)
                     output[[sprintf("%s_obs_genotype_transitions", method)]] <-
@@ -358,7 +415,7 @@ sample_CPMs <- function(cpm_output
             }
         }
     }
-        return(output)
+    return(output)
 }
 
 ## #' @title Count genotypes 
