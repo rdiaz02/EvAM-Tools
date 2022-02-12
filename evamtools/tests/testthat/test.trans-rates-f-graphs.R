@@ -163,11 +163,11 @@ and identical results between algorithms with sparse matrices, CBN", {
                         ))
     
     expect_equivalent(oex6$weighted_paths_to_max[, 2],
-                      c(1/6 * 2/5 * 3/8 * 1,
-                        1/6 * 2/5 * 5/8 * 1,
+                      c(1/6 * 2/5 * 5/8 * 1,
+                        1/6 * 2/5 * 3/8 * 1,
                         1/6 * 3/5 * 1 * 1,
-                        2/6 * 1/4 * 3/8 * 1,
                         2/6 * 1/4 * 5/8 * 1,
+                        2/6 * 1/4 * 3/8 * 1,
                         2/6 * 3/4 * 1 * 1,
                         3/6 * 1/3 * 1 * 1,
                         3/6 * 2/3 * 1 * 1
@@ -175,11 +175,11 @@ and identical results between algorithms with sparse matrices, CBN", {
     
     
     expect_equivalent(oex7$weighted_paths_to_max[, 2],
-                      c(1 * 2/9 * 3/7 * 4/9,
-                        1 * 2/9 * 3/7 * 5/9,
+                      c(1 * 2/9 * 3/7 * 5/9,
+                        1 * 2/9 * 3/7 * 4/9,
                         1 * 2/9 * 4/7 * 1,
-                        1 * 3/9 * 2/6 * 4/9,
                         1 * 3/9 * 2/6 * 5/9,
+                        1 * 3/9 * 2/6 * 4/9,
                         1 * 3/9 * 4/6 * 1,
                         1 * 4/9 * 2/5 * 1,
                         1 * 4/9 * 3/5 * 1

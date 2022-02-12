@@ -209,6 +209,7 @@ unrestricted_fitness_graph <- function(gacc) {
     gs <- unlist(lapply(gacc, function(g) paste0(g, collapse = ", ")))
     gs <- c("WT", gs)
     nmut <- c(0, vapply(gacc, length, 1))
+    gs <- gs[order(nmut, gs)]
     
     adjmat <- matrix(0L, nrow = length(gs), ncol = length(gs))
     rownames(adjmat) <- colnames(adjmat) <- gs
