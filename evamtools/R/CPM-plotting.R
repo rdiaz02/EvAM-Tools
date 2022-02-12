@@ -328,8 +328,13 @@ plot_genot_fg <- function(trans_mat
 
     margin <- -1.15
     lines(c(-1.2, 1.2), c(margin, margin), lwd = 2)
-    node_depth <- sapply(igraph::V(graph)$name
-        , function(x) distances <- igraph::distances(graph, algorithm = "unweighted", to = x)["WT",])
+    node_depth <- vapply(igraph::V(graph)$name
+                       , function(x)
+                           distances <- igraph::distances(graph,
+                                                          weights = NA,
+                                                          algorithm = "unweighted",
+                                                          to = x)["WT",],
+                         3)
     max_node_depth <- max(node_depth[is.finite(node_depth)])
     axis(1
         , at = seq(-1, 1, length.out = max_node_depth + 1)
