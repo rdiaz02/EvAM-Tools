@@ -72,8 +72,8 @@ rank_paths <- function(graph) {
 #' @param type String. Default genotype. Valid options are "genotypes" or "acquisition"
 #' "genotype" option returns the genotype of the vertex.
 #' "acquisition" option returns the genotype acquire along the path.
-compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL, type = "genotype"
-){
+compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
+                                  type = "genotype") {
     if(is.null(top_paths)) top_paths <- length(paths_from_graph)
     else if(is.numeric(top_paths)){
         if(top_paths > length(paths_from_graph)) top_paths <- length(paths_from_graph)
@@ -199,7 +199,7 @@ plot_genot_fg <- function(trans_mat
         graph <- igraph::graph_from_data_frame(trans_mat, directed = TRUE)
     } else {
         unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
-        rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", "")
+        rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", ",")
         graph <- igraph::graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
     }
 
