@@ -149,7 +149,7 @@ test_that("We can run evam with non-default arguments", {
                                   methods = c("CBN", "OT", "OncoBN",
                                               "MHN", "HESBCN", "MCCBN"),
                                  max_cols = 4,
-                                 cbn_opts = list(cores = 2),
+                                 cores = 1,
                                  hesbcn_opts = list(steps = 20000, seed = 2),
                                  mhn_opts = list(lambda = 1/10),
                                  oncobn_opts = list(model = "CBN", epsilon = 0.01),
@@ -166,7 +166,7 @@ test_that("We can run evam with non-default arguments", {
                                   methods = c("CBN", "OT", "OncoBN",
                                               "MHN", "HESBCN", "MCCBN"),
                                  max_cols = 4,
-                                 cbn_opts = list(cores = 2),
+                                 cbn_opts = list(omp_threads = 2),
                                  hesbcn_opts = list(steps = 20000, seed = 2),
                                  mhn_opts = list(lambda = 1/10),
                                  oncobn_opts = list(model = "CBN", epsilon = 0.01),
@@ -180,6 +180,22 @@ test_that("We can run evam with non-default arguments", {
     exercise_sample_CPMs(out2)
 
 
+    out3 <- suppressMessages(evam(Dat1,
+                                  methods = c("CBN", "OT", "OncoBN",
+                                              "MHN", "HESBCN", "MCCBN"),
+                                  max_cols = 4,
+                                  cores = 1, ## if >, will hang because of MCCBN thrds > 1
+                                 cbn_opts = list(omp_threads = 2),
+                                 hesbcn_opts = list(steps = 20000, seed = 2),
+                                 mhn_opts = list(lambda = 1/10),
+                                 oncobn_opts = list(model = "CBN", epsilon = 0.01),
+                                 ot_opts = list(with_errors_dist_ot = FALSE),
+                                 mccbn_opts = list(model = "H-CBN2",
+                                                      thrds = 8, max.iter = 20,
+                                                      max.iter.asa = 25)))
+                                 
+    expect_true(exists("OT_model", where = out3))
+    exercise_sample_CPMs(out3)
     
 })
 

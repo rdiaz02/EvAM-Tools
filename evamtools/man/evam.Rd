@@ -15,7 +15,8 @@ evam(x,
                  ),
      hesbcn_opts = list(
                      steps = 100000,
-                     seed = NULL
+                     seed = NULL,
+                     reg = c("bic", "aic", "loglik")
                  ),
      oncobn_opts = list(
                      model = "DBN",
@@ -57,8 +58,8 @@ evam(x,
 \item{max_cols}{Maximum number of columns to use in the analysis. If x has > max_cols, selected columns are those with the largest number of events.} 
 
 \item{cores}{If larger than 1, use mclapply to run all methods. This is
-  the default. If you use mclapply, MHN and CBN should not use OMP (or
-  the number of thread for OMP should be 1).}
+  the default. If you use mclapply, MHN and MCCBN should not use OMP
+  (i.e., the number of threads for OMP for MHN and MCCBN should be 1).}
 
 \item{mhn_opts}{A list with the named argument \code{lambda}: the
   penalty for MHN. Defaults to 1/nrow(data). (These are not the lambdas
@@ -72,7 +73,13 @@ evam(x,
 
 \item{cbn_opts}{A named list with arguments passed to CBN. 
 \itemize{
-\item{omp_threads:}{OMP threads to be used by CBN (set via the environment variable OMP\_NUM\_THREADS). Defaults to 1.}
+\item{omp_threads:}{OMP threads to be used by CBN (set via the
+  environment variable OMP\_NUM\_THREADS). Defaults to 1. In contrast to
+  MCCBN and MHN, you can set
+  this to a number larger than one even if you set \code{cores} to a
+  number larger than one (i.e., if we use
+  \code{\link[parallel]{mclapply}}). It is unclear, though, that it will
+speed things much or what is the best number of threads to use. }
 \item{cbn_init_poset:}{Initial poset for CBN; one of "linear" or "OT" (default).}
 }
 }
@@ -88,6 +95,10 @@ evam(x,
     \code{H-CBN2}); the
     rest are arguments passed to \code{mccbn_hcbn_proc} (i.e., used only
     if fitting a \code{H-CBN2} model). See \code{\link{do_MCCBN_HCBN2}}.
+
+    Note: do not pass \code{thrds} > 1 with \code{cores} > 1: as with
+  MHN, do not use OpenMP threads from forked process from 
+  \code{\link[parallel]{mclapply}}.
   }
 }
 
