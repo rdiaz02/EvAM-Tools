@@ -233,6 +233,10 @@ process_samples <- function(sim, n_genes,
 
     ## Calculate transitions
 
+    ## But really, why do we want this? The expected number of transitions is
+    ## already known. What does this give us? A way of testing, but that is
+    ## all. To see the sampling variability?
+    
     ## This assumes that genotypes, as given by
     ## sorted_genotypes, correspond to the genotypes as they exist
     ## in sim$trajectory (thus sim$obs_events).
@@ -240,8 +244,7 @@ process_samples <- function(sim, n_genes,
     ## of gene names. But the transition rate matrices might not unless
     ## they have been computed that way. They are now, though.
 
-    ## This is the slowest part. Two implementations. The second
-    ## slightly slower for small N.
+    ## This is the slowest part. Two implementations. 
     if ("transitions" %in% output) { ## observed genotype transitions
         unlisted_trajectories <- unlist(sim$trajectory)
         ## ## Implementation 1
