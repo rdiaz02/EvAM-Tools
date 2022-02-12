@@ -7,8 +7,9 @@
 do_HESBCN(
   data,
   n_steps = 1e+05,
-  tmp_dir = NULL,
+  reg = c("bic", "aic", "loglik"),
   seed = NULL,
+  tmp_dir = NULL,
   addname = NULL,
   silent = TRUE
 )
@@ -18,6 +19,9 @@ do_HESBCN(
 and individuals (rows)}
 
 \item{n_steps}{Number of steps to run. Default: 100000}
+
+\item{reg}{Regularization: one of \code{bic} (default), \code{aic},
+  \code{loglik}.} 
 
 \item{tmp_dir}{Directory name where the oput is located.}
 

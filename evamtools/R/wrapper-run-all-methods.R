@@ -582,7 +582,8 @@ evam <- function(x,
                  ),
                  hesbcn_opts = list(
                      steps = 100000,
-                     seed = NULL
+                     seed = NULL,
+                     reg = c("bic", "aic", "loglik")
                  ),
                  oncobn_opts = list(
                      model = "DBN",
@@ -632,7 +633,8 @@ evam <- function(x,
     )
     d_hesbcn_opts <- list(
         steps = 100000,
-        seed = NULL
+        seed = NULL,
+        reg = c("bic", "aic", "loglik")
     )
     d_oncobn_opts <- list(
         model = "DBN",
@@ -674,6 +676,8 @@ evam <- function(x,
     rm(cbn_opts, hesbcn_opts, oncobn_opts, mccbn_opts, mhn_opts)
     rm(d_cbn_opts, d_hesbcn_opts, d_oncobn_opts, d_mccbn_opts, d_mhn_opts)
     
+
+    
     if(!(cbn_opts_2$init_poset %in% c("OT", "linear")))
         stop("cbn_init_poset must be one of OT or linear. ",
              " Custom not allowed in call from evam.")
@@ -700,7 +704,7 @@ evam <- function(x,
         warning("Fewer than 2 columns in data set")
         return(NA)
     }
-
+    
     ## ######################################################################
     ##   Big function so we can parallelize the calls
     ## Run inside evam. Take all additional args from envir of evam
@@ -710,10 +714,12 @@ evam <- function(x,
             time_out <- system.time(
                 out <- do_MHN2(x, lambda = mhn_opts_2$lambda))["elapsed"]
         } else if (method == "HESBCN") {
+            
             time_out <- system.time(
                 out <- do_HESBCN(x,
                                  n_steps = hesbcn_opts_2$steps,
-                                 seed = hesbcn_opts_2$seed))["elapsed"]
+                                 seed = hesbcn_opts_2$seed,
+                                 reg = hesbcn_opts_2$reg))["elapsed"]
             out <- c(out, cpm2tm(out))
             out <- c(out, td_trans_mat = trans_rate_to_trans_mat(out[["weighted_fgraph"]],
                                                   method = "uniformization"))

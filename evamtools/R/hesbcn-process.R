@@ -37,25 +37,15 @@ if(.._EvamTools_test.hesbcn) {
 rm(.._EvamTools_test.hesbcn)
 
 
-#' @title Run HESBCN
-#' 
-#' @param data Cross secitonal data. Matrix of genes (columns)
-#' and individuals (rows)
-#' @param n_steps Number of steps to run. Default: 100000
-#' @param tmp_dir Directory name where the oput is located. 
-#' @param seed Seed to run the experiment
-#' @param addname String to append to the temporary folder name. Default NULL
-#' @param silent Whether to run show message showing the folder name where HESBCN is run
-#' 
-#' @return A list with the adjacency matrix, the lambdas, the parent set
-#' and a data.frame with From-To edges and associated lambdas.
 do_HESBCN <- function(data,
     n_steps = 100000,
-    tmp_dir = NULL,
+    reg = c("bic", "aic", "loglik"),
     seed = NULL,
+    tmp_dir = NULL,
     addname = NULL,
     silent = TRUE) {
 
+    reg <- match.arg(reg)
     # Setting tmp folder
     if (is.null(tmp_dir)) {
         tmp_dir <- tempfile()
@@ -84,13 +74,16 @@ do_HESBCN <- function(data,
     if (is.null(seed)) {
         command <- paste0("h-esbcn -d ",
                           tmp_dir, "/input.txt -o ",
-                          tmp_dir, "/output.txt -n ", n_steps)
+                          tmp_dir, "/output.txt -n ", n_steps,
+                          " --reg ", reg)
     } else if (is.numeric(seed) & seed > 0) {
         command <- paste0("h-esbcn -d ",
                           tmp_dir, "/input.txt -o ",
                           tmp_dir, "/output.txt -n ", n_steps,
-                          " -s ", seed)
+                          " -s ", seed,
+                          " --reg ", reg)
     }
+    if(!silent) message("HESBCN command: ", command)
     system(command, ignore.stdout = TRUE)
 
     # Reading output
