@@ -377,6 +377,7 @@ unrestricted_fitness_graph_sparseM <- function(gacc) {
     gs <- unlist(lapply(gacc, function(g) paste0(g, collapse = ", ")))
     gs <- c("WT", gs)
     nmut <- c(0, vapply(gacc, length, 1))
+    gs <- gs[order(nmut, gs)]
     
     jj <- match(gs[which(nmut == 1)], gs)
     ii <- rep.int(match("WT", gs), length(jj))
@@ -1003,97 +1004,3 @@ evam <- function(x,
 
 
 
-
-## ## output of CPM analysis ->
-## ##             fitness graph (fgraph): just the adj. matrix
-## ##             weighted fitness graph (weighted_fgraph)
-## ##             transition matrix (trans_mat_genots)
-## ## Like cpm2tm but for OR relationships
-
-## ## To be used with output from DBN
-
-## ## DBN seems similar to OT: these are conditional probabilities, not transition
-## ## rates. Beware of interpretations. See comments in
-## ## cpm2tm
-## cpm2tm_OR <- function(data,
-##                                                     parameter_column_name = c("Thetas")) {
-    
-##     tmp <-
-##         try(DAG_2_access_genots_OR(data$edges[, c("From", "To")]))
-
-##     if (inherits(tmp, "try-error")) {
-##         stop("Some error here")
-##     } else {
-##         accessible_genots <- tmp$accessible_genots
-##         fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
-##     }
-
-##     which_col_weights <-
-##         which(colnames(data$edges) %in% parameter_column_name)
-    
-##     if (is.null(data$edges[,which_col_weights])){
-##         stop("No such column")
-##     }
-
-##     weights <- unique(data$edges[, c(2, which_col_weights)])
-##     rownames(weights) <- weights[, "To"]
-##     weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
-##     trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
-
-##     return(list(
-##         fgraph = fgraph,
-##         ## Seems similar to OT. This ain't the transition rate matrix.
-##         weighted_fgraph = weighted_fgraph,
-##         trans_mat_genots = trans_mat_genots
-##     ))
-## }
-
-
-## ## output of CPM analysis ->
-## ##             fitness graph (fgraph): just the adj. matrix
-## ##             weighted fitness graph (weighted_fgraph)
-## ##             transition matrix (trans_mat_genots)
-## ## To be used with output from HESBCN
-
-## ## The weighted fitness graph is the same
-## ## as the transition rate matrix (with 0 in the diagonal)
-
-## cpm2tm_relationships <-
-##     function(data,
-##              parameter_column_name = c("Lambdas")) {             
-
-##         ## Use the "parent_set" component, which is returned
-##         ## from HESBCN itself, not the "Relation" component
-##         ## which we create from the paernt_set. "Relation" is shown
-##         ## for a human to easily interpret the $edges data frame
-##         tmp <-
-##             try(DAG_2_access_genots_relationships(
-##                 data$edges[, c("From", "To")],
-##                 data$parent_set
-##             ))
-
-##         if (inherits(tmp, "try-error")) {
-##             stop("Some error here")
-##         } else {
-##             accessible_genots <- tmp$accessible_genots
-##             fgraph <- unrestricted_fitness_graph_sparseM(accessible_genots)
-##         }
-
-##         which_col_weights <-
-##             which(colnames(data$edges) %in% parameter_column_name)
-##         if (is.null(data$edges[, which_col_weights])) {
-##             stop("No such column")
-##         }
-
-##         weights <- unique(data$edges[, c(2, which_col_weights)])
-##         rownames(weights) <- weights[, "To"]
-##         weighted_fgraph <- transition_fg_sparseM(fgraph, weights)
-##         trans_mat_genots <- rowScaleMatrix(weighted_fgraph)
-
-##         return(list(
-##             fgraph = fgraph,
-##             ## weighted_fgraph is the transition rate matrix
-##             weighted_fgraph = weighted_fgraph,
-##             trans_mat_genots = trans_mat_genots
-##         ))
-## }
