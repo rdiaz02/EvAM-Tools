@@ -88,21 +88,29 @@ test_that("Output is returned only with the requested fields", {
                                            output = out_params)
     expect_equal(sort(names(out_sim)), sort(out_params))
 
-    expect_error(evamtools:::process_samples(simGenotypes, 5,
-                                             gene_names = LETTERS[1:5],
-                                             output = c()), "Specify valid output")
 
     expect_error(evamtools:::process_samples(simGenotypes, 5,
                                              gene_names = LETTERS[1:5],
-                                             output = c("bad request", "bad request 2")), "Specify valid output")
+                                             output = c()),
+                 "No output specified", fixed = TRUE)
 
-    expect_warning(evamtools:::process_samples(simGenotypes, 5,
-                                               gene_names = LETTERS[1:5],
-                                               output = c(out_params, "bad request")), "The following parameters cannot be returned: bad request")
+    expect_error(evamtools:::process_samples(simGenotypes, 5,
+                                             gene_names = LETTERS[1:5],
+                                             output = c("bad request", "bad request 2")),
+                 "Incorrect output specified", fixed = TRUE)
 
-    expect_warning(evamtools:::process_samples(simGenotypes, 5,
+    expect_error(evamtools:::process_samples(simGenotypes, 5,
                                                gene_names = LETTERS[1:5],
-                                               output = c(out_params, "bad request", "bad request 2")), "The following parameters cannot be returned: bad request, bad request 2")
+                                               output = c(out_params, "bad request")),
+                    "Incorrect output specified", fixed = TRUE)
+
+
+    expect_error(evamtools:::process_samples(simGenotypes, 5,
+                                               gene_names = LETTERS[1:5],
+                                               output = c(out_params, "bad request",
+                                                          "bad request 2")),
+                    "Incorrect output specified", fixed = TRUE)
+    
 })
 
 
@@ -178,6 +186,79 @@ test_that("Output is correct", {
      expect_equal(expected_transitions,
                   tmp2v[names(expected_transitions)])
      
+})
+
+
+test_that("New algorithm for state transitions", {
+    sim1 <- list(trajectory = list(c("WT", "A"), c("WT", "A"), c("WT", "A")),
+                 obs_events = c("A", "A", "A"))
+
+    sim2 <- list(trajectory = list(c("WT", "A"), c("WT", "A"), c("WT", "A"), c("WT")),
+                 obs_events = c("A", "A", "A", "WT"))
+
+    sim3 <- list(trajectory = list(c("WT", "A"), c("WT", "A"), c("WT"),
+                                   c("WT", "A", "B")),
+                 obs_events = c("A", "A", "B", "WT"))
+
+    sim4 <- list(trajectory = list(c("WT", "A"), c("WT", "A"), c("WT"),
+                                   c("WT", "A", "B"), c("WT", "A", "B")),
+                 obs_events = c("A", "A", "B", "WT", "B"))
+
+    sim5 <- list(trajectory = list(c("WT", "A"), c("WT", "A"), c("WT"),
+                                   c("WT", "A", "B"), c("WT", "A", "B", "C")),
+                 obs_events = c("A", "A", "B", "WT", "C"))
+
+    sim6 <- list(trajectory = list(c("WT", "A"), c("WT", "A"), c("WT"),
+                                   c("WT", "A", "B", "C"), c("WT", "A", "B", "C")),
+                 obs_events = c("A", "A", "WT", "C", "C"))
+
+    t1 <- Matrix::sparseMatrix(i = NULL, j = NULL, dims = c(2, 2),
+                               x = 0, dimnames = list(c("WT", "A"), c("WT", "A")))
+    t1[1, 2] <- 3
+
+    t2 <- Matrix::sparseMatrix(i = NULL, j = NULL, dims = c(2, 2),
+                               x = 0, dimnames = list(c("WT", "A"), c("WT", "A")))
+    t2[1, 2] <- 3
+    
+    t3 <- Matrix::sparseMatrix(i = NULL, j = NULL, dims = c(3, 3),
+                               x = 0, dimnames = list(c("WT", "A", "B"),
+                                                      c("WT", "A", "B")))
+    t3[1, 2] <- 3
+    t3[2, 3] <- 1
+
+    t4 <- Matrix::sparseMatrix(i = NULL, j = NULL, dims = c(3, 3),
+                               x = 0, dimnames = list(c("WT", "A", "B"),
+                                                      c("WT", "A", "B")))
+    t4[1, 2] <- 4
+    t4[2, 3] <- 2
+
+    t5 <- Matrix::sparseMatrix(i = NULL, j = NULL, dims = c(4, 4),
+                               x = 0, dimnames = list(c("WT", "A", "B", "C"),
+                                                      c("WT", "A", "B", "C")))
+    t5[1, 2] <- 4
+    t5[2, 3] <- 2
+    t5[3, 4] <- 1
+
+    t6 <- Matrix::sparseMatrix(i = NULL, j = NULL, dims = c(4, 4),
+                               x = 0, dimnames = list(c("WT", "A", "B", "C"),
+                                                      c("WT", "A", "B", "C")))
+    t6[1, 2] <- 4
+    t6[2, 3] <- 2
+    t6[3, 4] <- 2
+    
+    os1 <- evamtools:::process_samples(sim1, 5, gene_names = LETTERS[1:5])
+    os2 <- evamtools:::process_samples(sim2, 5, gene_names = LETTERS[1:5])
+    os3 <- evamtools:::process_samples(sim3, 5, gene_names = LETTERS[1:5])
+    os4 <- evamtools:::process_samples(sim4, 5, gene_names = LETTERS[1:5])
+    os5 <- evamtools:::process_samples(sim5, 5, gene_names = LETTERS[1:5])
+    os6 <- evamtools:::process_samples(sim6, 5, gene_names = LETTERS[1:5])
+    
+    expect_equal(os1$transitions, t1)
+    expect_equal(os2$transitions, t2)
+    expect_equal(os3$transitions, t3)
+    expect_equal(os4$transitions, t4)
+    expect_equal(os5$transitions, t5)
+    expect_equal(os6$transitions, t6)
 })
 
 cat("\n Done test.processing-sampled-genotypes-trajectories-from-models.R \n")
