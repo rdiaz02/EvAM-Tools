@@ -8,7 +8,8 @@ process_samples(
   sim,
   n_genes,
   gene_names,
-  output = c("frequencies", "state_counts", "transitions")
+  output = c("frequencies", "state_counts", "transitions"),
+  cores = detectCores()
 )
 }
 \arguments{
@@ -17,17 +18,29 @@ fields are described below
 $T_sum_events time of events for the mutations of each gene
 $obs_events data.frame with mutated before the end of the sampling time}
 
-\item{n_genes}{number of genes observed}
+\item{n_genes}{Number of genes observed. (No problem if larger than
+  observed, but it will be slower than necessary).}
 
-\item{gene_names}{List of gene names. Required.}
+\item{gene_names}{List of gene names. Yes, required.}
 
-\item{output}{type of output that we want}
+\item{output}{Type of output that we want}
+
+\item{cores}{Number of cores to use in the calls to \code{\link[parallel]{mclapply}}.}
 }
 \value{
 List with a list of trajectories (the order in which gene mutations
 are acquired), genotype frequencies and genotypes transition matrix (with
-counts of how many transitions between each genotype have been observed)
+counts of how many transitions between each genotype have been
+observed). See details in \code{\link{sample_CPMs}}.
 }
 \description{
-Generate trajectories from data simulated from a given model.
+  A list with three elements:
+  \itemize{
+    \item{frequencies:}{frequencies of genotypes (final genotypes from
+      the transitions)}.
+    \item{transitions:}{Number of observed transitions between
+      genotypes (as a sparse matrix).}
+    \item{state_counts}{Number of times each genotype was visited during
+      the transitions. Column sums of observed transitions are equal to state counts.}
+  }
 }

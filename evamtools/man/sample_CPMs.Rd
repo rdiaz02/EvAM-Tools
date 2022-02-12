@@ -22,15 +22,26 @@ sample_CPMs(cpm_output,  N,
 
 
 \value{
-  List with observed frequencies of genotypes for the methods used. If
-  \code{obs_genotype_transitions = TRUE}, vector of counts of observed
-  genotype transitions.
+  A list, with a many entries as methods * number of components
+  requested. If all, then for each method among CBN, HESBCN, and MHN:
+   \itemize{
+    \item{genotype_freqs:}{frequencies of genotypes (final genotypes from      the transitions)}.
+    \item{obs_genotype_transitions:}{Number of observed transitions between
+      genotypes (as a sparse matrix).}
+    \item{state_counts}{Number of times each genotype was visited during
+      the transitions. Column sums of observed transitions are equal to state counts.}
+  }
+  
+  If \code{obs_genotype_transitions = FALSE},
+  \code{obs_genotype_transitions} will not be returned.
 
-  Observed genotype transitions are not to be use to obtain estimates of
-  transition probabilities. The transition probabilities given by each
-  method are already available from the output of evam itself. These
-  genotype transitions are the observed transitions during the
-  simulation of the sampling process.
+  Observed genotype transitions are not to best way to obtain estimates
+  of  transition probabilities. The transition probabilities given by
+  each   method are already available from the output of evam itself. These  genotype transitions are the observed transitions during the
+  simulation of the sampling process and, thus, have additional noise.
+
+  For OT and OncoBN, only the \code{genotype_freqs} component (the other
+  two are not available).
   
 }
 
@@ -43,7 +54,10 @@ sample_CPMs(cpm_output,  N,
  of size \code{N}, with probabilities of genotypes as given by the
  method. 
  
-  Observed genotype transitions, if requested, are obtained by counting the transitions between pairs of genotypes when simulating from the continuous-time Markov Chain.
+  Observed genotype transitions, if requested, are obtained by counting
+  the transitions between pairs of genotypes when simulating from the
+  continuous-time Markov Chain. State counts are also obtained by
+  counting from this process how many times a genotype was visited.
 }
 
 
