@@ -9,7 +9,7 @@ We provide an R package, evamtools, and a Shiny (https://shiny.rstudio.com/) app
   * Using the shiny app, easily visualize the effects of changes in genotype composition on the fitted models by entering user-defined cross-sectional data using a GUI.
 
 
-For easier use, we provide instructions on how to build a Docker image, as well as links to Docker images that you can download and run.
+For easier use, we provide links to Docker images that you can download and run, as well as instructions on how to build Docker images.
 
 
 <!-- Remember the long name of output, as seen in server.R, around line 1344 -->
@@ -172,7 +172,9 @@ Details about R with Docker and Rocker project here: https://www.rocker-project.
     - Please, give, explicitly, the *current version of R being used**	
 
 
-** Creating the image fails because of no internet connection from the container ** Creating the above image requires installing R packages and that might fail because the Docker container cannot connect with the internet. The following might help: https://superuser.com/a/1582710 , https://superuser.com/a/1619378 . 
+#### Creating the image fails because of no internet connection from the container ####
+Creating the above image requires installing R packages and that might fail because the Docker container cannot connect with the internet. The following might help: https://superuser.com/a/1582710 , https://superuser.com/a/1619378 . 
+
 
 
 ## How to update the Docker image if you change the code ###
