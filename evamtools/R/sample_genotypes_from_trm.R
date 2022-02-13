@@ -262,6 +262,7 @@ process_samples <- function(sim, n_genes,
         ##   and assign the entries in the sparse matrix
         ##   Creating  matrix of indeces can use mclapply
 
+        
         tt2 <- sparse_transM_from_genotypes(unique(unlisted_trajectories))
         tindex <-  seq_along(rownames(tt2))
         names(tindex) <- rownames(tt2)
@@ -278,8 +279,10 @@ process_samples <- function(sim, n_genes,
                                mc.cores = cores)
         all_pairs_stacked <- do.call(rbind, all_pairs2)
 
+
         ## Count the cases of each index. Sort. Then traverse and add.
         ## When change in state, assign value to sparse matrix.
+        ##   It could possibly be made faster using RLE on ordered pairs.
         oo <- order(all_pairs_stacked[, 1], all_pairs_stacked[, 2])
         apso <- all_pairs_stacked[oo, ]
 

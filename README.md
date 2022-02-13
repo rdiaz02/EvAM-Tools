@@ -1,6 +1,6 @@
 # EvAM Tools #
 <!-- Create talk with markdown-toc, from node. -->
-<!-- /markdown-toc ~/Proyectos/EvAM-Tools/README.md -i -->
+<!-- ./markdown-toc ~/Proyectos/EvAM-Tools/README.md -i -->
 
 <!-- toc -->
 
@@ -8,17 +8,18 @@
 - [Copyright and origin of files](#copyright-and-origin-of-files)
   * [Copyright and origin of files under evamtools/R](#copyright-and-origin-of-files-under-evamtoolsr)
   * [ct-cbn](#ct-cbn)
-- [How to install the R package](#how-to-install-the-r-package)
-- [How to run the shiny app locally](#how-to-run-the-shiny-app-locally)
-- [How to run from Docker images](#how-to-run-from-docker-images)
-  * [Using the downloaded Docker image to run the Shiny app](#using-the-downloaded-docker-image-to-run-the-shiny-app)
-  * [Using the downloaded Docker image to run the evamtools package from R](#using-the-downloaded-docker-image-to-run-the-evamtools-package-from-r)
-- [How to create a Docker image](#how-to-create-a-docker-image)
-        * [Creating the image fails because of no internet connection from the container](#creating-the-image-fails-because-of-no-internet-connection-from-the-container)
-  * [How to update the Docker image if you change the code](#how-to-update-the-docker-image-if-you-change-the-code)
-- [How to run the shiny app in a local intranet](#how-to-run-the-shiny-app-in-a-local-intranet)
-  * [From the Docker image](#from-the-docker-image)
-  * [How to run the Shiny app without the Docker image](#how-to-run-the-shiny-app-without-the-docker-image)
+- [Installing and running](#installing-and-running)
+  * [Overview](#overview)
+  * [How to install the R package](#how-to-install-the-r-package)
+  * [Docker images](#docker-images)
+  * [How to run the R package and the shiny app locally](#how-to-run-the-r-package-and-the-shiny-app-locally)
+  * [Run the R package from the Docker image](#run-the-r-package-from-the-docker-image)
+  * [Run the Shiny app from the Docker image](#run-the-shiny-app-from-the-docker-image)
+  * [Build your own Docker image](#build-your-own-docker-image)
+    + [How to update the Docker image if you change the code](#how-to-update-the-docker-image-if-you-change-the-code)
+  * [How to run the Shiny app in a local intranet](#how-to-run-the-shiny-app-in-a-local-intranet)
+    + [From the Docker image](#from-the-docker-image)
+    + [Without the Docker image](#without-the-docker-image)
 - [Main files and directories](#main-files-and-directories)
   * [Dockerfile](#dockerfile)
   * [docker](#docker)
@@ -36,11 +37,11 @@
 <!-- tocstop -->
 
 ## EvAM Tools: purpose
-Tools for evolutionary accumulation, or event accumulation, models. For now, this refers to "Cancer Progression Models" (CPM) but these are not limited to cancer.
+Tools for evolutionary accumulation, or event accumulation, models. We use code from what are usually referred to as "Cancer Progression Models" (CPM) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost).
 
 We provide an R package, evamtools, and a Shiny (https://shiny.rstudio.com/) app that allows to:
-  * Run state-of-the-art CPM methods, including Conjuntive Bayesian Networks (CBN ---and their MC-CBN version), Oncogenetic trees (OT), Mutual Hazard Networks (MHN), Hidden Extended Suppes-Bayes Causal Networks (H-ESBCNs ---PMCE---), and Disjunctive Bayesian Networks (DBN) with a single function call.
-  * From the fitted models, represent, graphically, the fitted models (DAGs of restrictions or matrix of hazards, as appropriate), the transition matrices and transition rate matrices (where appropriate) between genotypes.
+  * Run state-of-the-art CPM methods, including Conjuntive Bayesian Networks (CBN ---and their MC-CBN version---), Oncogenetic trees (OT), Mutual Hazard Networks (MHN), Hidden Extended Suppes-Bayes Causal Networks (H-ESBCNs ---PMCE---), and Disjunctive Bayesian Networks (DBN, from the OncoBN package) with a single function call.
+  * From the fitted models, represent, graphically, the fitted models (DAGs of restrictions or matrix of hazards, as appropriate), the transition matrices and transition rate matrices (where appropriate) between genotypes and show frequencies of genotypes sampled from the fitted models.
   * Using the shiny app, easily visualize the effects of changes in genotype composition on the fitted models by entering user-defined cross-sectional data using a GUI.
 
 
@@ -60,8 +61,8 @@ For easier use, we provide links to Docker images that you can download and run,
 - File HESBCN__import.hesbcn.R: 
    This file contains function import.hesbcn (with a minor modification to return "Best Lambdas").
    
-   Code from https://github.com/BIMIB-DISCo/PMCE/blob/main/Utilities/R/utils.R
-   Commit 5578c79 from 2021-09-29
+   Code from https://github.com/BIMIB-DISCo/PMCE/blob/main/Utilities/R/utils.R .
+   Commit 5578c79 from 2021-09-29.
 
    License: Apache License 2.0, which is compatible with the GPL 3 used by the rest of this project.
    
@@ -74,15 +75,14 @@ For easier use, we provide links to Docker images that you can download and run,
   evolution with high prognostic power. Bioinformatics, 38(3): 754-762. http://dx.doi.org/10.1093/bioinformatics/btab717
 
 
-- Files MHN__*.R: MHN__UtilityFunctions.R, MHN__RegularizedOptimization.R, MHN__ModelConstruction.R, MHN__Likelihood.R, MHN__InlineFunctions.R,,  MHN__ExampleApplications.R
+- Files MHN__*.R: MHN__UtilityFunctions.R, MHN__RegularizedOptimization.R, MHN__ModelConstruction.R, MHN__Likelihood.R, MHN__InlineFunctions.R,  MHN__ExampleApplications.R
 
-  Files obtained from https://github.com/RudiSchill/MHN
-  Commit 49a8cc0 from 2018-08-16
-  We have added the "MHN__" and made minor modifications to conform to usage within an R package. We have moved the inline C code to MHN.c and done the rest of the scaffolding for it to be used from the R package.
+  Files obtained from https://github.com/RudiSchill/MHN .
+  Commit 49a8cc0 from 2018-08-16. We have added the "MHN__" and made minor modifications to conform to usage within an R package. We have moved the inline C code to MHN.c and done the rest of the scaffolding for it to be used from the R package.
   
   License: no license information available in the repository nor the files.
   
-  Author of code: from commit history, most likely Rudolf Schill.
+  Author of code: Rudolf Schill (inferred from commit history).
   
   Authors of paper/project: Schill, R., Solbrig, S., Wettig, T., & Spang, R.
   
@@ -103,7 +103,7 @@ For easier use, we provide links to Docker images that you can download and run,
    https://bsse.ethz.ch/cbg/software/ct-cbn.html, whose authors are Niko Beerenwinkel, Moritz Gerstung, and Seth Sullivant. It is released under the GNU GPL.
    
    The code included in this repo is file ct-cbn-0.1.04b-RDU.tar.gz, a
-   modification by RDU of the above code that includes: a minor bug fix (which, however, could be related to non-identifiability); output with lambdas and likelihood from the initial run and each of the iterations.
+   modification by RDU of the above code that includes: a minor bug fix (which, however, could be related to non-identifiability) and output with lambdas and likelihood from the initial run and each of the iterations.
   
    (For references about CBN see [References](#references)). 
 
@@ -115,15 +115,15 @@ For easier use, we provide links to Docker images that you can download and run,
 ### Overview
 
 You can install:
-  * The [package and its dependencies] (#how-to-install-the-r-package)
-  * A Docker image
+  * The [package and its dependencies](#how-to-install-the-r-package)
+  * A [Docker image](#docker-images)
 	
 You can run:
-  * The package from R and, if you want, the shiny app 
-  * The package in an RStudio session from the Docker image
-  * The Shiny app from a Docker image
+  * The [package from R and the Shiny app](#how-to-run-the-r-package-and-the-shiny-app-locally)
+  * The [package in an RStudio session from the Docker image](#run-the-r-package-from-the-docker-image)
+  * The [Shiny app from a Docker image](#run-the-shiny-app-from-the-docker-image)
   
-You can also build your own Docker image
+You can also [build your own Docker image](#build-your-own-docker-image) and you might want to [run the Shiny app in a local intranet](#how-to-run-the-shiny-app-in-a-local-intranet).
 
 
 ### How to install the R package 
@@ -153,33 +153,32 @@ You can also build your own Docker image
      - Build (R CMD build evamtools) and install (R CMD INSTALL evamtools_x.y.z.tar.gz, with x.y.z replaced by the current version number). File `build-test.sh` builds, tests, and installs the package (and takes care of the version number).
       
 	  
+### Docker images 
+We provide two docker images, one for running the Shiny app, and another with  RStudio to run the evamtools package directly.  They are available from **FIXME**. Download the one you need.
 
-	  
 
-## How to run the shiny app locally ##
+### How to run the R package and the shiny app locally 
 
-Once the package is installed, to launch the shiny app open an R terminal and type
+Once the package is installed, if you want to run the Shiny app open an R terminal and type
 
 ```
 library(evamtools)
 runShiny()
 ```
+(If you do not want to run the Shiny app, do not issue `runShiny`).
 
 
-## How to run from Docker images ##
-We provide two docker images, one for running the Shiny app, and another with  RStudio to run the evamtools package directly.  They are available from **FIXME**.
 
-To use them:
-
-### Using the downloaded Docker image to run the Shiny app ###
+### Run the R package from the Docker image
 **FIXME**.
 
-### Using the downloaded Docker image to run the evamtools package from R ###
+### Run the Shiny app from the Docker image
 **FIXME**.
 
 
+---
 
-## How to create a Docker image ##
+### Build your own Docker image 
 
 From the `EvAM-Tools` directory run: 
 
@@ -189,6 +188,9 @@ docker build --tag evamtools .
 
 to build the docker image. Of course, you need to have Docker installed for that to work. (Details about Docker are available here: https://docs.docker.com/get-docker/ .
 Details about R with Docker and Rocker project here: https://www.rocker-project.org/ **
+
+If you want to modify anything, you can modify the `Dockerfile`.
+
 
 
 **FIXME: Pablo completes this**
@@ -204,16 +206,17 @@ Creating the above image requires installing R packages and that might fail beca
 
 
 
-### How to update the Docker image if you change the code ###
-Just as above. But this time it should run much faster, because many steps will be skipped.
+#### How to update the Docker image if you change the code 
+Build the Docker image as [above](#build-your-own-docker-image). But this time it should run much faster, because many steps will be skipped.
 
 
 ---
 
 
-## How to run the shiny app in a local intranet  ##
 
-### From the Docker image ###
+### How to run the Shiny app in a local intranet  
+
+#### From the Docker image
 
 Once you have the Docker image built run the following command to run the image connecting port 3000 of the computer with port 3000 of the container
 
@@ -228,10 +231,10 @@ docker run -p 3000:3000 evamtools ##
 
 
 
-### How to run the Shiny app without the Docker image ###
+####  Without the Docker image
 
-To run the shiny app you may want to change the port (right now it run in 3000). This can be done by modifying line 27 in `evamtools/R/runShiny.R`, the one with
-`shiny::runApp(appDir, port = 3000, host = "0.0.0.0", display.mode = "normal")`. Then, the app has to be launched as explained above and the corresponding port in the server has to be open to make it visible. 
+To run the shiny app you may want to change the port (right now it runs in 3000). This can be done by modifying line 27 in `evamtools/R/runShiny.R` (the one with
+`shiny::runApp(appDir, port = 3000, host = "0.0.0.0", display.mode = "normal")`). Then, the Shiny app has to be launched as explained [above](#how-to-run-the-r-package-and-the-shiny-app-locally) and the corresponding port in the server has to be opened to make it visible. 
 
 
 ---
@@ -345,7 +348,7 @@ Running all test takes around 8 minutes, writes considerable amount of temporary
 
    (About terminology: we will often refer to HESBCN, as that is the program we use, as shown here: https://github.com/danro9685/HESBCN. H-ESBCN is part of the PMCE procedure).
 
-### OncoBN, DBN ###
+### OncoBN (DBN) ###
 
 - Nicol, P. B., Coombes, K. R., Deaver, C., Chkrebtii, O., Paul, S., Toland,
   A. E., & Asiaee, A. (2021). Oncogenetic network estimation with disjunctive
@@ -357,13 +360,13 @@ Running all test takes around 8 minutes, writes considerable amount of temporary
 
 ### Conditional prediction of genotypes and probabilities of paths from CPMs ###
 
-- Diaz-Colunga}, J., & Diaz-Uriarte, Ramon (2021). Conditional prediction of
+- Diaz-Colunga, J., & Diaz-Uriarte, R. (2021). Conditional prediction of
   consecutive tumor evolution using cancer progression models: What genotype
   comes next? PLOS Computational Biology, 17(12),
   1009055. http://dx.doi.org/10.1371/journal.pcbi.1009055
 
 
-- Diaz-Uriarte}, R., & Vasallo, C. (2019). Every which way? On predicting tumor
+- Diaz-Uriarte, R., & Vasallo, C. (2019). Every which way? On predicting tumor
   evolution using cancer progression models. PLOS Computational Biology, 15(8),
   1007246. http://dx.doi.org/10.1371/journal.pcbi.1007246
 
