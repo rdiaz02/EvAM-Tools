@@ -3,10 +3,14 @@
 ## EvAM Tools: purpose
 Tools for evolutionary accumulation, or event accumulation, models. For now, this refers to "Cancer Progression Models" (CPM) but these are not limited to cancer.
 
-We provide an R package, evamtools, and a shiny (https://shiny.rstudio.com/) app that allows to:
+We provide an R package, evamtools, and a Shiny (https://shiny.rstudio.com/) app that allows to:
   * Run state-of-the-art CPM methods, including Conjuntive Bayesian Networks (CBN ---and their MC-CBN version), Oncogenetic trees (OT), Mutual Hazard Networks (MHN), Hidden Extended Suppes-Bayes Causal Networks (H-ESBCNs ---PMCE---), and Disjunctive Bayesian Networks (DBN) with a single function call.
   * From the fitted models, represent, graphically, the fitted models (DAGs of restrictions or matrix of hazards, as appropriate), the transition matrices and transition rate matrices (where appropriate) between genotypes.
   * Using the shiny app, easily visualize the effects of changes in genotype composition on the fitted models by entering user-defined cross-sectional data using a GUI.
+
+
+For easier use, we provide instructions on how to build a Docker image, as well as links to Docker images that you can download and run.
+
 
 <!-- Remember the long name of output, as seen in server.R, around line 1344 -->
 <!--  choiceNames =  c("Transition rates", -->
@@ -132,6 +136,22 @@ library(evamtools)
 runShiny()
 ```
 
+
+## How to run from Docker images ##
+We provide two docker images, one for running the Shiny app, and another with  RStudio to run the evamtools package directly.  They are available from **FIXME**.
+
+To use them:
+
+### Using the downloaded Docker image to run the Shiny app ###
+**FIXME**.
+
+### Using the downloaded Docker image to run the evamtools package from R ###
+**FIXME**.
+
+
+
+
+
 ## How to create a Docker image ##
 
 From the `EvAM-Tools` directory run: 
@@ -149,11 +169,10 @@ Details about R with Docker and Rocker project here: https://www.rocker-project.
 - Does that need to be run as root?
 - Are you sure this is using R-4.1.2? I think we might need something else:
     - https://github.com/rocker-org/rocker-versioned2
-    - Please, give, explicitly, the *current version of R being used*	
+    - Please, give, explicitly, the *current version of R being used**	
 
 
-### Creating the image fails because of no internet connection from the container
-Creating the above image requires installing R packages and that might fail because the Docker container cannot connect with the internet. The following might help: https://superuser.com/a/1582710 , https://superuser.com/a/1619378 . 
+** Creating the image fails because of no internet connection from the container ** Creating the above image requires installing R packages and that might fail because the Docker container cannot connect with the internet. The following might help: https://superuser.com/a/1582710 , https://superuser.com/a/1619378 . 
 
 
 ## How to update the Docker image if you change the code ###
