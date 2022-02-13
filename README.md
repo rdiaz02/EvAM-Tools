@@ -207,7 +207,7 @@ Creating the above image requires installing R packages and that might fail beca
 
 
 #### How to update the Docker image if you change the code 
-Just as above. But this time it should run much faster, because many steps will be skipped.
+Build the Docker image as [above](#build-your-own-docker-image). But this time it should run much faster, because many steps will be skipped.
 
 
 ---
@@ -233,8 +233,8 @@ docker run -p 3000:3000 evamtools ##
 
 ####  Without the Docker image
 
-To run the shiny app you may want to change the port (right now it run in 3000). This can be done by modifying line 27 in `evamtools/R/runShiny.R`, the one with
-`shiny::runApp(appDir, port = 3000, host = "0.0.0.0", display.mode = "normal")`. Then, the app has to be launched as explained above and the corresponding port in the server has to be open to make it visible. 
+To run the shiny app you may want to change the port (right now it runs in 3000). This can be done by modifying line 27 in `evamtools/R/runShiny.R` (the one with
+`shiny::runApp(appDir, port = 3000, host = "0.0.0.0", display.mode = "normal")`). Then, the Shiny app has to be launched as explained [above](#how-to-run-the-r-package-and-the-shiny-app-locally) and the corresponding port in the server has to be opened to make it visible. 
 
 
 ---
