@@ -1,4 +1,39 @@
-# EvAM Tools
+# EvAM Tools #
+<!-- Create talk with markdown-toc, from node. -->
+<!-- /markdown-toc ~/Proyectos/EvAM-Tools/README.md -i -->
+
+<!-- toc -->
+
+- [EvAM Tools: purpose](#evam-tools-purpose)
+- [Copyright and origin of files](#copyright-and-origin-of-files)
+  * [Copyright and origin of files under evamtools/R](#copyright-and-origin-of-files-under-evamtoolsr)
+  * [ct-cbn](#ct-cbn)
+- [How to install the R package](#how-to-install-the-r-package)
+- [How to run the shiny app locally](#how-to-run-the-shiny-app-locally)
+- [How to run from Docker images](#how-to-run-from-docker-images)
+  * [Using the downloaded Docker image to run the Shiny app](#using-the-downloaded-docker-image-to-run-the-shiny-app)
+  * [Using the downloaded Docker image to run the evamtools package from R](#using-the-downloaded-docker-image-to-run-the-evamtools-package-from-r)
+- [How to create a Docker image](#how-to-create-a-docker-image)
+        * [Creating the image fails because of no internet connection from the container](#creating-the-image-fails-because-of-no-internet-connection-from-the-container)
+  * [How to update the Docker image if you change the code](#how-to-update-the-docker-image-if-you-change-the-code)
+- [How to run the shiny app in a local intranet](#how-to-run-the-shiny-app-in-a-local-intranet)
+  * [From the Docker image](#from-the-docker-image)
+  * [How to run the Shiny app without the Docker image](#how-to-run-the-shiny-app-without-the-docker-image)
+- [Main files and directories](#main-files-and-directories)
+  * [Dockerfile](#dockerfile)
+  * [docker](#docker)
+  * [evamtools](#evamtools)
+  * [Selenium tests of the server](#selenium-tests-of-the-server)
+      - [Running the Selenium tests](#running-the-selenium-tests)
+- [References](#references)
+  * [OT](#ot)
+  * [CBN](#cbn)
+  * [MHN](#mhn)
+  * [HESBCN (PMCE)](#hesbcn-pmce)
+  * [OncoBN, DBN](#oncobn-dbn)
+  * [Conditional prediction of genotypes and probabilities of paths from CPMs](#conditional-prediction-of-genotypes-and-probabilities-of-paths-from-cpms)
+
+<!-- tocstop -->
 
 ## EvAM Tools: purpose
 Tools for evolutionary accumulation, or event accumulation, models. For now, this refers to "Cancer Progression Models" (CPM) but these are not limited to cancer.
@@ -12,24 +47,8 @@ We provide an R package, evamtools, and a Shiny (https://shiny.rstudio.com/) app
 For easier use, we provide links to Docker images that you can download and run, as well as instructions on how to build Docker images.
 
 
-<!-- Remember the long name of output, as seen in server.R, around line 1344 -->
-<!--  choiceNames =  c("Transition rates", -->
-<!--                                          "Genotype transitions counts", -->
-<!--                                          "Genotype frequencies", -->
-<!--                                          "Transition probabilities", -->
-<!--                                          "Lambdas/probabilities", -->
-<!--                                          "Time-discretized transition matrix"), -->
-<!--                         choiceValues =  c("trans_rate_mat", -->
-<!--                                           "genotype_transitions", -->
-<!--                                           "freqs", -->
-<!--                                           "trans_mat", -->
-<!--                                           "lambdas", -->
-<!--                                           "td_trans_mat"), -->
-
-
-
-
-
+---
+---
 
 
 ## Copyright and origin of files ##
@@ -78,7 +97,7 @@ For easier use, we provide links to Docker images that you can download and run,
 - Some of the code for transition rate matrices, input from different CPMs, tests, etc (authored by Ramon Diaz-Uriarte, released under the GPL-3) has been previously used in Diaz-Uriarte and Vasallo, 2019 (all code available from https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1007246#sec019, files S1 Dataset and S2 Dataset) and Diaz-Colunga and Diaz-Uriarte, 2021 (repository: https://github.com/rdiaz02/what_genotype_next).
 
     
-### ct-cbn: ###
+### ct-cbn ###
 
    This repository includes ct-​cbn-0.1.04b, from
    https://bsse.ethz.ch/cbg/software/ct-cbn.html, whose authors are Niko Beerenwinkel, Moritz Gerstung, and Seth Sullivant. It is released under the GNU GPL.
@@ -89,7 +108,10 @@ For easier use, we provide links to Docker images that you can download and run,
    (For references about CBN see [References](#references)). 
 
 
-## What to install to run the R package (and possibly the shiny app)? ##
+---
+---
+
+## How to install the R package ##
 
   * Install CBN
     - Use the file ct-cbn-0.1.04b-RDU.tar.gz.
@@ -116,17 +138,8 @@ For easier use, we provide links to Docker images that you can download and run,
      - Build (R CMD build evamtools) and install (R CMD INSTALL evamtools_x.y.z.tar.gz, with x.y.z replaced by the current version number). File `build-test.sh` builds, tests, and installs the package (and takes care of the version number).
       
 	  
-<!-- In order to run all CPMs you will need to clone their repositories: -->
-<!-- include github repo, and instructions to get them running -->
-<!-- * DBN: https://github.com/phillipnicol/OncoBN. -->
-<!-- FIXME: commit hash and date when we got the package. -->
-<!-- * HyperTraps: https://github.com/sgreenbury/HyperTraPS. Follow the instruction there to install the package through conda  -->
-<!-- and get a working enviroment with HyperTraPS installed. Add both the `bin` and the `src/python` to your `$PATH`. Also, add the `bin` folder to your $PATH. It is also convenient to run `echo "backend: Agg" > ~/.config/matplotlib/matplotlibrc`. -->
 
 	  
-## How to install to also run the Shiny app?  ##
-  * Install the evamtools R package as explained [above](#how-to-install-to-run-just-the-r-package). Nothing else needs to be installed.
-
 
 ## How to run the shiny app locally ##
 
@@ -150,8 +163,6 @@ To use them:
 
 
 
-
-
 ## How to create a Docker image ##
 
 From the `EvAM-Tools` directory run: 
@@ -161,10 +172,10 @@ docker build --tag evamtools .
 ``` 
 
 to build the docker image. Of course, you need to have Docker installed for that to work. (Details about Docker are available here: https://docs.docker.com/get-docker/ .
-Details about R with Docker and Rocker project here: https://www.rocker-project.org/ )
+Details about R with Docker and Rocker project here: https://www.rocker-project.org/ **
 
 
-[FIXME: Pablo completes this](#)
+**FIXME: Pablo completes this**
 
 - Does that need to be run as root?
 - Are you sure this is using R-4.1.2? I think we might need something else:
@@ -172,13 +183,17 @@ Details about R with Docker and Rocker project here: https://www.rocker-project.
     - Please, give, explicitly, the *current version of R being used**	
 
 
-#### Creating the image fails because of no internet connection from the container ####
+###### Creating the image fails because of no internet connection from the container #####
 Creating the above image requires installing R packages and that might fail because the Docker container cannot connect with the internet. The following might help: https://superuser.com/a/1582710 , https://superuser.com/a/1619378 . 
 
 
 
-## How to update the Docker image if you change the code ###
+### How to update the Docker image if you change the code ###
 Just as above. But this time it should run much faster, because many steps will be skipped.
+
+
+---
+
 
 ## How to run the shiny app in a local intranet  ##
 
@@ -187,10 +202,11 @@ Just as above. But this time it should run much faster, because many steps will 
 Once you have the Docker image built run the following command to run the image connecting port 3000 of the computer with port 3000 of the container
 
 ```
-docker run -p 3000:3000 evamtools #
+docker run -p 3000:3000 evamtools ##
 ```
 
-[FIXME: Pablo writes this](#)
+
+**FIXME: Pablo writes this**
 
 - Is this run as root or a user? Explain the pros and cons. If possible, set up to run as user, not root.
 
@@ -202,6 +218,10 @@ To run the shiny app you may want to change the port (right now it run in 3000).
 `shiny::runApp(appDir, port = 3000, host = "0.0.0.0", display.mode = "normal")`. Then, the app has to be launched as explained above and the corresponding port in the server has to be open to make it visible. 
 
 
+---
+---
+
+
 
 ## Main files and directories
 
@@ -209,24 +229,25 @@ To run the shiny app you may want to change the port (right now it run in 3000).
 
 The Dockerfile includes all the information to create a container with all dependencies. It first uses a default image that includes the latest R version. Then install all R dependencies. Finally it also deals with the installation of third party code. 
 
-### docker   [FIXME: Pablo writes this](#) 
+### docker ###
+**FIXME: Pablo writes this**
 
 
 ### evamtools
 The R package itself with standard organization. Directories and files under inst:
-  * shiny-examples: code for the shiny application. The application consists on two main files: `server.R` (that controls the logic) and `ui.R` (includes all the interface). There are two additional directories: assets (with files for the landing page) and test_shiny_app (with Selenium tests for the app and testing related files ---see [Selenium tests of the server](#selenium-tests-of-the-server)).
+  * shiny-examples: code for the shiny application. The application consists on two main files: `server.R` (that controls the logic) and `ui.R` (includes all the interface). There are two additional directories: `assets` (with files for the landing page) and `test_shiny_app` (with Selenium tests for the app and testing related files ---see [Selenium tests of the server](#selenium-tests-of-the-server)).
   * miscell/Using_OncoSimulR_to_get_accessible_genotypes_trans_mats.tex: explanation of using OncoSimulR to check transition matrices for OT, CBN, OncoBN, and HESBCN, the equivalence of lambdas to terms in fitness expressions, interpretation of the lambdas for HESBCN with OR and XOR.
   * miscell/examples: examples referred to from other files (for example, from the former tex file).
   * miscell/tests-sample_genotypes_from_trm: output of tests that were run to verify the code for sampling genotypes from the transition rate matrices. We compared the output of our code with that from the code of the original authors (MHN, MCCBN) for a large set of cases.
       
 	Note that the R package uses testthat to test our R code. Those tests will run automatically with the usual procedures from testthat or while doing `R CMD check`. For example, we check that transition rate matrices and transition probability matrices give identical results when compared to finding them via OncoSimulR (file test.OT-CBN-trans-mat-against-oncosimul.R and test.HESBCN-trans-mat-against-oncosimul.R) and against hand-computed examples (file test.trans-rates-f-graphs.R and test.HESBCN-transition-rate-matrices.R). The tests in evamtools/tests/testthat are separate from the tests under  inst/miscell/tests-sample_genotypes_from_trm  
 
-#### Selenium tests of the server ####
+### Selenium tests of the server ###
   
  The shiny web app also include its own set of tests that are run with Selenium. They are found under `inst/shiny_examples/evamtools/test_shiny_app/test.shiny.py.`
   There are test of the basic functionlity of the web page (navigation, loading files...), working with csd, DAG and matrix inputs (loading examples, modifying values, changes gene names and number), and checking interface behaviour in the results' tab.
 
-##### Running the Selenium tests #####
+##### Running the Selenium tests ####
 
 Before launching the test you have to install a web driver. For testing, I use Chrome. To download the Chrome web driver go to [https://chromedriver.chromium.org/downloads]/(https://chromedriver.chromium.org/downloads) and select the version supporting your browser. Once the web driver is downloaded, extract it and make it available from $PATH.
 
@@ -236,15 +257,21 @@ Then, in a separate console, go to
 `evamtools/inst/shiny-examples/evamtools/test_shiny_app` and type:
 
 ```bash
-python test.shiny.py ## To run all tests
-#or
-python test.shiny.py className.testName ## To run a particular test
+## To run all tests
+python test.shiny.py 
+## or
+## To run a particular test
+python test.shiny.py className.testName 
 ```
 
 If you change the server where the shiny app is running, then the driver has to be changed. This is done in line 14 of `evamtools/inst/shiny-examples/evamtools/test_shiny_app/test.shiny.py` (the one with  `self.driver.get("http://127.0.0.1:3000/")`). Testing the public server directly can also be considered once it is up.
 
 
 Running all test takes around 8 minutes, writes considerable amount of temporary files (more than 1Gb) and makes the terminal useless (windows will be continuously opening). Also, the tests are designed to run in a screen with 1377x768 resolution; they have adapted to bigger screens, but not fully tested in those settings. 
+
+
+---
+---
 
 
 
