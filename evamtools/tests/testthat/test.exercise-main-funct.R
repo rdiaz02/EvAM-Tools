@@ -222,7 +222,7 @@ test_that("Handling invalid methods and no single valid method", {
                    fixed = TRUE)
     expect_true(exists("OT_model", where = out3))
 
-    evamtools:::sample_CPMs(out, 1000)
+    evamtools:::sample_CPMs(out3, 1000)
     
     expect_error(out4 <- suppressWarnings(evam(Dat1,
                                   methods = c("coco", "cucu"),
