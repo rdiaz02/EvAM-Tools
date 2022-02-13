@@ -1,10 +1,26 @@
 
 ## list, list -> list
-## if any entry en defaults is not in inputl, add to inputl
-## I us it to add defaults (possibly not explicitly passed) to the
-##      list inputl, if the defaults have no value
+
+## If any entry en defaults is not in inputl, add to inputl
+## If inputl has an name component not in defaults, give warning.
+
+## I use it to add defaults (possibly not explicitly passed) to the
+##      list inputl, if the inputl has no value
+
+
 fill_args_default <- function(inputl, defaults) {
 
+    not_valid <- which(!(names(inputl) %in% names(defaults)))
+
+    if(length(not_valid)) {
+        name_input <- deparse(substitute(inputl))
+        not_valid_opt <- names(inputl)[not_valid]
+        warning("Option(s) ", paste(not_valid_opt, sep = ", ", collapse = ", "),
+                " in argument ", name_input, " is(are) invalid.",
+                " They will be ignored.")
+        inputl <- inputl[-not_valid]
+    }
+        
     not_passed <- vapply(names(defaults),
                          function(x) !exists(x, where = inputl),
                          TRUE)

@@ -52,7 +52,8 @@ evam(x,
 
 \item{x}{cross sectional data}
 
-\item{methods}{Methods to use. For now, the only thing that matters is whether the vector includes the strings "MCCBN" and "OncoBN".}
+\item{methods}{Methods to use. A vector with one or more of the
+  following strings, \dQuote{OT}, \dQuote{OncoBN}, \dQuote{CBN}, \dQuote{MCCBN}, \dQuote{MHN}, \dQuote{HESBCN}.}
 
 
 \item{max_cols}{Maximum number of columns to use in the analysis. If x has > max_cols, selected columns are those with the largest number of events.} 
@@ -103,7 +104,7 @@ speed things much or what is the best number of threads to use. }
 }
 
 \description{
-Executes all CPMS given a cross sectional data set
+Executes all CPMS given a cross sectional data set.
 }
 
 

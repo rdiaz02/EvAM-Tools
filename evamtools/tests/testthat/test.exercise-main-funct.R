@@ -180,23 +180,65 @@ test_that("We can run evam with non-default arguments", {
     exercise_sample_CPMs(out2)
 
 
-    out3 <- suppressMessages(evam(Dat1,
+    expect_warning(out3 <- suppressMessages(evam(Dat1,
                                   methods = c("CBN", "OT", "OncoBN",
                                               "MHN", "HESBCN", "MCCBN"),
                                   max_cols = 4,
                                   cores = 1, ## if >, will hang because of MCCBN thrds > 1
-                                 cbn_opts = list(omp_threads = 2),
+                                 cbn_opts = list(omp_threads = 2, cucu = 9),
                                  hesbcn_opts = list(steps = 20000, seed = 2),
                                  mhn_opts = list(lambda = 1/10),
                                  oncobn_opts = list(model = "CBN", epsilon = 0.01),
                                  ot_opts = list(with_errors_dist_ot = FALSE),
                                  mccbn_opts = list(model = "H-CBN2",
                                                       thrds = 8, max.iter = 20,
-                                                      max.iter.asa = 25)))
-                                 
+                                                   max.iter.asa = 25))),
+                   "Option(s) cucu",
+                   fixed = TRUE)
+
+    
     expect_true(exists("OT_model", where = out3))
     exercise_sample_CPMs(out3)
+
     
+})
+
+
+test_that("Handling invalid methods and no single valid method", {
+    data(every_which_way_data)
+    Dat1 <- every_which_way_data[[16]][1:25, 2:8]
+    expect_warning(out3 <- suppressMessages(evam(Dat1,
+                                  methods = c("OT", "OncoBN", "cucu", "OT"),
+                                  max_cols = 4,
+                                  cores = 1, ## if >, will hang because of MCCBN thrds > 1
+                                 hesbcn_opts = list(steps = 20000, seed = 2),
+                                 mhn_opts = list(lambda = 1/10),
+                                 oncobn_opts = list(model = "CBN", epsilon = 0.01),
+                                 ot_opts = list(with_errors_dist_ot = FALSE),
+                                 mccbn_opts = list(model = "H-CBN2",
+                                                      thrds = 8, max.iter = 20,
+                                                   max.iter.asa = 25))),
+                   "Method(s) cucu not among",
+                   fixed = TRUE)
+    expect_true(exists("OT_model", where = out3))
+
+    evamtools:::sample_CPMs(out, 1000)
+    
+    expect_error(out4 <- suppressWarnings(evam(Dat1,
+                                  methods = c("coco", "cucu"),
+                                  max_cols = 4,
+                                  cores = 1, ## if >, will hang because of MCCBN thrds > 1
+                                 hesbcn_opts = list(steps = 20000, seed = 2),
+                                 mhn_opts = list(lambda = 1/10),
+                                 oncobn_opts = list(model = "CBN", epsilon = 0.01),
+                                 ot_opts = list(with_errors_dist_ot = FALSE),
+                                 mccbn_opts = list(model = "H-CBN2",
+                                                      thrds = 8, max.iter = 20,
+                                                   max.iter.asa = 25))),
+                   "No valid methods given",
+                   fixed = TRUE)
+    
+
 })
 
 cat("\n Done test.exercise-main-funct.R \n")

@@ -618,11 +618,29 @@ evam <- function(x,
     gn_comma <- stringi::stri_count_fixed(colnames(x), ',')
     if(any(gn_comma))
         stop("At least one of your gene names has a comma. That is not allowed")
-   
+
+    ## Sanity checks of methods
+    methods <- unique(methods)
+    accepted_methods <- c("OT", "OncoBN", "CBN", "MCCBN", "MHN", "HESBCN")
+    not_valid_methods <- which(!(methods %in% accepted_methods))
+    if(length(not_valid_methods)) {
+        warning("Method(s) ",
+                paste(methods[not_valid_methods], sep = ", ", collapse = ", "),
+                " not among the available methods.",
+                " Ignoring the invalid method.")
+        methods <- methods[-not_valid_methods]
+    }
+    if(length(methods) == 0) stop("No valid methods given.")
+    
     ## ############################################################
     ##
-    ##   Dealing with default arguments
+    ##       Dealing with default arguments
     ##
+    ##  The "d_*" are the list of default arguments.
+    ##  The user can pass, in the call, just a subset of the
+    ##  options, and the rest will be taken from the "d_*" below.
+    ##  If the user passes something not in "d_*", give warning.
+    ##  
     ## ############################################################
     d_mhn_opts <- list(lambda = 1/nrow(x),
                        omp_threads = ifelse(cores > 1, 1, detectCores())
