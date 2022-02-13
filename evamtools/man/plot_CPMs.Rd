@@ -35,6 +35,13 @@ plot_CPMs(
   }
 }
 
+\item{label_type}{Type of label to show. One of:
+  \itemize{
+    \item{genotype:}{Displays all genes mutated}
+    \item{acquisition:}{Only displays the last gente mutated}
+  }
+}
+
 \item{fixed_vertex_size}{Boolean. If TRUE, all nodes with have the same
   size; otherwise, scale them proportional to frequencies or observed data.}
 

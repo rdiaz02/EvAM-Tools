@@ -39,6 +39,7 @@ plot_sampled_genots <- function(data) {
     op <- par(mar = c(3, 5, 5, 3), las = 1)
     plot(m1, cex = 1.5, digits = 0, key = NULL,
          axis.col = list(side = 3), xlab = "", ylab = "",
+         col = NULL,
          main  = "")
     par(op)
 }
@@ -91,7 +92,7 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
         function(x){
             if (x %in% nodes_in_top_paths){
                 if (type == "genotype") return(x)
-                else if (type == "acquisition") return(sprintf("+%s", strsplit(x, ", ")[[1]][[-1]]))
+                else if (type == "acquisition") return(sprintf("+%s", tail(strsplit(x, ",")[[1]], n = 1)))
             } 
             else return("")
         },
@@ -119,12 +120,10 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
 #' 
 #' @return dataframe the x and y position for each vertex in graph
 cpm_layout <- function(graph){
-    num_mutations <- vapply(igraph::V(graph)$name, function(x){
-        ifelse(x == "WT", 0, nchar(x)) ## Revise
-    }, numeric(1))
+    num_mutations <- igraph::distances(graph, v="WT", weights=NA)
     igraph::V(graph)$num_mutations <- num_mutations 
     lyt <- matrix(0, ncol = 2, nrow = length(V(graph)))
-    lyt[, 2] <-  num_mutations
+    lyt[, 2] <- num_mutations
 
     for (i in 0:max(num_mutations)) {
         level_idx <- which(num_mutations == i)
@@ -136,6 +135,9 @@ cpm_layout <- function(graph){
         level_elements <- level_elements + correction_rate/2
         lyt[, 1][level_idx[gnt_names$ix]] <- level_elements
     }
+
+    ## Avoiding layout in one line
+    if (all(lyt[, 1] == 0)) lyt[,1] <- rep(c(0,1,-1), ceiling(nrow(lyt)/3))[1:nrow(lyt)]
     return(lyt)
 }
 
@@ -183,25 +185,30 @@ plot_genot_fg <- function(trans_mat
     , max_edge = NULL
     , min_edge = NULL
     , fixed_vertex_size = FALSE
+    , label_type = "genotype"
     ) {
-    if(is.null(trans_mat)) return()
+    if(is.null(trans_mat)){
+        par(mar = rep(3, 4))
+        plot(0, type = 'n', axes = FALSE, ann = FALSE)
+        return()
+    }
     ## FIXME: do we ever have this?
     ## If we do, then trans_mat should be changed by "object" or "x"
     ## in the arguments, and the two possibilities (x as data.frame, as
     ## as transition (rate) matrix) explained
-    if(typeof(trans_mat) == "list") {
-        all_genes <- c(trans_mat$From, trans_mat$To)
-        all_genes <- all_genes[all_genes != "WT"]
-        unique_genes_names <- sort(unique(unlist(str_split(all_genes, ", "))))
-        trans_mat$From <- str_replace_all(trans_mat$From, ", ", "")
-        trans_mat$To <- str_replace_all(trans_mat$To, ", ", "")
-        colnames(trans_mat) <- c("from", "to", "weight")
-        graph <- igraph::graph_from_data_frame(trans_mat, directed = TRUE)
-    } else {
-        unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
-        rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", ",")
-        graph <- igraph::graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
-    }
+    # if(typeof(trans_mat) == "list") {
+    #     all_genes <- c(trans_mat$From, trans_mat$To)
+    #     all_genes <- all_genes[all_genes != "WT"]
+    #     unique_genes_names <- sort(unique(unlist(str_split(all_genes, ", "))))
+    #     trans_mat$From <- str_replace_all(trans_mat$From, ", ", "")
+    #     trans_mat$To <- str_replace_all(trans_mat$To, ", ", "")
+    #     colnames(trans_mat) <- c("from", "to", "weight")
+    #     graph <- igraph::graph_from_data_frame(trans_mat, directed = TRUE)
+    # } else {
+    unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
+    rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", ",")
+    graph <- igraph::graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
+    # }
 
     num_genes <- length(unique_genes_names)
     graph <- igraph::decompose(graph)[[1]] ## We do not want disconnected nodes
@@ -224,7 +231,7 @@ plot_genot_fg <- function(trans_mat
     ## Labels
     sorted_paths <- rank_paths(graph)
     if(is.null(freq2label)){
-        labels <- compute_vertex_labels(graph, sorted_paths, top_paths = top_paths)
+        labels <- compute_vertex_labels(graph, sorted_paths, top_paths = top_paths, type=label_type)
     } else {
         labels <- vapply(igraph::V(graph)$name,
             function(x){
@@ -398,10 +405,16 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
         ))
 }
 
+dag_layout <- function(graph){ ## Avoiding lines
+    lyt <- igraph::layout.reingold.tilford(graph)
+    if(all(lyt[,1] == 0)) lyt[,1] <- rep(c(0,0.5,0,-0.5), ceiling(nrow(lyt)/3))[1:nrow(lyt)]
+    return(lyt)
+}
+
 ## DO NOT use roxygen, has I have edited the help by hand.
 plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal", 
                         models = c("OT", "CBN", "OncoBN", "MCCBN", "MHN", "HESBCN"),
-                        plot_type = "trans_mat",
+                        plot_type = "trans_mat", label_type="genotype",
                         fixed_vertex_size = FALSE,
                         top_paths = NULL) {
 
@@ -468,7 +481,7 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
                 }
             } else igraph::E(g)$color <- standard_relationship
             plot(g
-               , layout = igraph::layout.reingold.tilford
+               , layout = dag_layout
                , vertex.size = 50 
                , vertex.label.color = "black"
                , vertex.label.family = "Helvetica"
@@ -496,33 +509,30 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
         }
         ## FIXME: ?? trans_mat were called probabilites.
         ## Fixme, there is a problem here: probabilities and trans_mat plot the same
-        if (plot_type == "trans_mat") {## transition probabilities; was "probabilities"
-            plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data,
-                          top_paths = top_paths,
-                          fixed_vertex_size = fixed_vertex_size)
-        } else if (plot_type == "obs_genotype_transitions") { ## observed genotype trans. ; was "transitions"
-            plot_genot_fg(model_data2plot$data2plot,
-                          observations = cpm_output$analyzed_data,
-                          model_data2plot$genotype_freqs,
-                          top_paths = top_paths,
-                          fixed_vertex_size = fixed_vertex_size)
-        } else if (plot_type == "trans_rate_mat"){ ## transition rate matrix; was "trm"
-            plot_genot_fg(model_data2plot$data2plot,
-                          cpm_output$analyzed_data,
-                          top_paths = top_paths,
-                          fixed_vertex_size = fixed_vertex_size)
-        }
-
         if ((mod %in% c("OT")) &&
             (plot_type %in% c("trans_rate_mat", "obs_genotype_transitions"))) {
             par(mar = rep(3, 4))
             plot_sampled_genots(cpm_output$analyzed_data)
-        }
-
-        if ((mod %in% c("OncoBN")) &&
-            (plot_type %in% c("trans_rate_mat", "obs_genotype_transitions"))) {
-            par(mar = rep(3, 4))
-            plot(0, type = 'n', axes = FALSE, ann = FALSE)
+        } else{
+            if (plot_type == "trans_mat") {## transition probabilities; was "probabilities"
+                plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data,
+                            top_paths = top_paths,
+                            label_type = label_type,
+                            fixed_vertex_size = fixed_vertex_size)
+            } else if (plot_type == "obs_genotype_transitions") { ## observed genotype trans. ; was "transitions"
+                plot_genot_fg(model_data2plot$data2plot,
+                            observations = cpm_output$analyzed_data,
+                            model_data2plot$genotype_freqs,
+                            top_paths = top_paths,
+                            label_type = label_type,
+                            fixed_vertex_size = fixed_vertex_size)
+            } else if (plot_type == "trans_rate_mat"){ ## transition rate matrix; was "trm"
+                plot_genot_fg(model_data2plot$data2plot,
+                            cpm_output$analyzed_data,
+                            top_paths = top_paths,
+                            label_type = label_type,
+                            fixed_vertex_size = fixed_vertex_size)
+            }
         }
     }
     par(op1)
