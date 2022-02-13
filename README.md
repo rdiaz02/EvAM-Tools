@@ -1,6 +1,6 @@
 # EvAM Tools #
 <!-- Create talk with markdown-toc, from node. -->
-<!-- /markdown-toc ~/Proyectos/EvAM-Tools/README.md -i -->
+<!-- ./markdown-toc ~/Proyectos/EvAM-Tools/README.md -i -->
 
 <!-- toc -->
 
@@ -61,8 +61,8 @@ For easier use, we provide links to Docker images that you can download and run,
 - File HESBCN__import.hesbcn.R: 
    This file contains function import.hesbcn (with a minor modification to return "Best Lambdas").
    
-   Code from https://github.com/BIMIB-DISCo/PMCE/blob/main/Utilities/R/utils.R
-   Commit 5578c79 from 2021-09-29
+   Code from https://github.com/BIMIB-DISCo/PMCE/blob/main/Utilities/R/utils.R .
+   Commit 5578c79 from 2021-09-29.
 
    License: Apache License 2.0, which is compatible with the GPL 3 used by the rest of this project.
    
@@ -75,15 +75,14 @@ For easier use, we provide links to Docker images that you can download and run,
   evolution with high prognostic power. Bioinformatics, 38(3): 754-762. http://dx.doi.org/10.1093/bioinformatics/btab717
 
 
-- Files MHN__*.R: MHN__UtilityFunctions.R, MHN__RegularizedOptimization.R, MHN__ModelConstruction.R, MHN__Likelihood.R, MHN__InlineFunctions.R,,  MHN__ExampleApplications.R
+- Files MHN__*.R: MHN__UtilityFunctions.R, MHN__RegularizedOptimization.R, MHN__ModelConstruction.R, MHN__Likelihood.R, MHN__InlineFunctions.R,  MHN__ExampleApplications.R
 
-  Files obtained from https://github.com/RudiSchill/MHN
-  Commit 49a8cc0 from 2018-08-16
-  We have added the "MHN__" and made minor modifications to conform to usage within an R package. We have moved the inline C code to MHN.c and done the rest of the scaffolding for it to be used from the R package.
+  Files obtained from https://github.com/RudiSchill/MHN .
+  Commit 49a8cc0 from 2018-08-16. We have added the "MHN__" and made minor modifications to conform to usage within an R package. We have moved the inline C code to MHN.c and done the rest of the scaffolding for it to be used from the R package.
   
   License: no license information available in the repository nor the files.
   
-  Author of code: from commit history, most likely Rudolf Schill.
+  Author of code: Rudolf Schill (inferred from commit history).
   
   Authors of paper/project: Schill, R., Solbrig, S., Wettig, T., & Spang, R.
   
@@ -104,7 +103,7 @@ For easier use, we provide links to Docker images that you can download and run,
    https://bsse.ethz.ch/cbg/software/ct-cbn.html, whose authors are Niko Beerenwinkel, Moritz Gerstung, and Seth Sullivant. It is released under the GNU GPL.
    
    The code included in this repo is file ct-cbn-0.1.04b-RDU.tar.gz, a
-   modification by RDU of the above code that includes: a minor bug fix (which, however, could be related to non-identifiability); output with lambdas and likelihood from the initial run and each of the iterations.
+   modification by RDU of the above code that includes: a minor bug fix (which, however, could be related to non-identifiability) and output with lambdas and likelihood from the initial run and each of the iterations.
   
    (For references about CBN see [References](#references)). 
 
