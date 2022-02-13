@@ -115,7 +115,7 @@ For easier use, we provide links to Docker images that you can download and run,
 ### Overview
 
 You can install:
-  * The package and its dependencies (#how-to-install-the-r-package)
+  * The [package and its dependencies] (#how-to-install-the-r-package)
   * A Docker image
 	
 You can run:
