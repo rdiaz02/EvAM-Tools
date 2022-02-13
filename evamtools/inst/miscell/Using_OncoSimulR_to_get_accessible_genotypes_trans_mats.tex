@@ -37,7 +37,7 @@
 
 \section{Introduction}
 \label{sec:org58f26ba}
-Here I explain how we can use OncoSimulR to get accessible genotypes and transition matrices for CBN, OT, and HESBCN. I also clarify how our code interprets the output of HESBCN (not only as it concerns using OncoSimulR). The code for using OncoSimulR is implemented in access\_genots\_from\_oncosimul.R. 
+Here I explain how we can use OncoSimulR to get accessible genotypes and transition matrices for CBN (and MCCBN), OT, HESBCN, and OncoBN. I also clarify how our code interprets the output of HESBCN (not only as it concerns using OncoSimulR). The code for using OncoSimulR is implemented in access\_genots\_from\_oncosimul.R. 
 
 \section{Using OncoSimulR to get accessible genotypes and transition matrices}
 \label{sec:org653c242}
@@ -59,7 +59,7 @@ genotype always increase fitness or at least do not decrease it.
 \end{itemize}
 \end{itemize}
 
-\subsection{Computing fitness of genotypes: for CBN and OT}
+\subsection{Computing fitness of genotypes: for CBN (and MCCBN) and OT}
 \label{sec:org65f3210}
 \begin{itemize}
 \item OncoSimulR, when using DAGs, uses a model of fitness (birth rate), for a  genotype with restrictions satisfied as \(\Pi (1 + s_i)\). 
@@ -443,12 +443,29 @@ WT &  & $\lambda_A$ & $\lambda_B$ & $\lambda_C$ &  &  &  &  &  &  &  &  &  &  & 
 Nothing changes. Use the rules for AND where there is an AND, XOR where there is a XOR, OR where there is an OR. Again, in the HESBCN model if a gene depends on a set of genes, it has the same type of dependency on all the genes of that set.
 
 
+\section{OncoBN}\label{oncobn}
+
+What about OncoBN, the method described in Nicol, P. B., Coombes, K. R., Deaver, C., Chkrebtii, O., Paul, S., Toland, A. E., \& Asiaee, A. (2021). Oncogenetic network estimation with disjunctive Bayesian networks. Computational and Systems Oncology, 1(2), 1027. \url{http://dx.doi.org/10.1002/cso2.1027}?
+
+OncoBN can fit both conjunctive (AND) and disjunctive (OR, not XOR) models; for the first you specify \texttt{model = ``CBN''} and for the second \texttt{model = ``DBN''}. So it resembles CBN and HESBCN. However, the $\theta$s returned by OncoBN are not rates, as in CBN, HESBCN, or MHN, but rather probabilities of seeing specific alterations at the time of observation as in OT. So probably a better way to think of OncoBN is as an extension of OT, where nodes can have multiple parents, and the relationship of dependence can be AND or OR (but not both).
+
+We deal with OT as we do with any other method, but as we do with OT, we do not interpret the parameters as rates. This also means that our transition matrices (again, transition matrices, not transition rate matrices: no transition rate matrices are returned for OT or OncoBN), as for OT, are really an abuse of the untimed oncogenetic model.
+
+When using OncoSimulR, there is nothing new. If OncoBN was fitted specifying  ``CBN'', we use ANDs, if it used ``DBN'' we use ORs when computing fitness. 
+
+
+
+\section{MHN}\label{MHN}
+
+MHN has been described in Schill, R., Solbrig, S., Wettig, T., \& Spang, R. (2020). Modelling cancer progression using Mutual Hazard Networks. Bioinformatics, 36(1), 241–249. \url{http://dx.doi.org/10.1093/bioinformatics/btz513}. We cannot use OncoSimulR directly, because the MHN model is rather peculiar if taken at face value as an evolutionary model (see Diaz-Colunga, J., \& Diaz-Uriarte, R (2021). Conditional prediction of consecutive tumor evolution using cancer progression models: What genotype comes next? PLOS Computational Biology, 17(12), 1009055. http://dx.doi.org/10.1371/journal.pcbi.1009055 ; in particular, see section 1.7 of the Supporting Information: \url{https://doi.org/10.1371/journal.pcbi.1009055.s001}).
+
+To express MHN in terms of fitness of genotypes, we would need to express it as a model where order of acquisition of mutations matters. This is possible with OncoSimulR, but it does not provide any additional intuition, and can lead to a huge number of fitnesses for a genotype (a genotype with $k$ mutated loci could possibly have $k!$ different fitnesses, one for each of its $k!$ different ways of mutation its $k$ loci).
 
 
 \section{Advantages of doing this with OncoSimulR}
 \label{sec:org4a55091}
 \begin{itemize}
-\item We make the fitness model explicit
+\item We make the fitness model explicit.
 \item We can double check the code for getting fitness graphs and transition
 probabilities as some critical computations are being done with very
 different code.
