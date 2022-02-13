@@ -348,7 +348,7 @@ Running all test takes around 8 minutes, writes considerable amount of temporary
 
    (About terminology: we will often refer to HESBCN, as that is the program we use, as shown here: https://github.com/danro9685/HESBCN. H-ESBCN is part of the PMCE procedure).
 
-### OncoBN, DBN ###
+### OncoBN (DBN) ###
 
 - Nicol, P. B., Coombes, K. R., Deaver, C., Chkrebtii, O., Paul, S., Toland,
   A. E., & Asiaee, A. (2021). Oncogenetic network estimation with disjunctive
@@ -360,13 +360,13 @@ Running all test takes around 8 minutes, writes considerable amount of temporary
 
 ### Conditional prediction of genotypes and probabilities of paths from CPMs ###
 
-- Diaz-Colunga}, J., & Diaz-Uriarte, Ramon (2021). Conditional prediction of
+- Diaz-Colunga, J., & Diaz-Uriarte, R. (2021). Conditional prediction of
   consecutive tumor evolution using cancer progression models: What genotype
   comes next? PLOS Computational Biology, 17(12),
   1009055. http://dx.doi.org/10.1371/journal.pcbi.1009055
 
 
-- Diaz-Uriarte}, R., & Vasallo, C. (2019). Every which way? On predicting tumor
+- Diaz-Uriarte, R., & Vasallo, C. (2019). Every which way? On predicting tumor
   evolution using cancer progression models. PLOS Computational Biology, 15(8),
   1007246. http://dx.doi.org/10.1371/journal.pcbi.1007246
 
