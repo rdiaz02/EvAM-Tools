@@ -110,8 +110,23 @@ For easier use, we provide links to Docker images that you can download and run,
 
 ---
 ---
+## Installing and running ##
 
-## How to install the R package ##
+### Overview
+
+You can install:
+  * The package and its dependencies (#how-to-install-the-r-package)
+  * A Docker image
+	
+You can run:
+  * The package from R and, if you want, the shiny app 
+  * The package in an RStudio session from the Docker image
+  * The Shiny app from a Docker image
+  
+You can also build your own Docker image
+
+
+### How to install the R package 
 
   * Install CBN
     - Use the file ct-cbn-0.1.04b-RDU.tar.gz.
@@ -143,7 +158,8 @@ For easier use, we provide links to Docker images that you can download and run,
 
 ## How to run the shiny app locally ##
 
-To launch the shiny app open an R terminal and type
+Once the package is installed, to launch the shiny app open an R terminal and type
+
 ```
 library(evamtools)
 runShiny()
@@ -180,10 +196,10 @@ Details about R with Docker and Rocker project here: https://www.rocker-project.
 - Does that need to be run as root?
 - Are you sure this is using R-4.1.2? I think we might need something else:
     - https://github.com/rocker-org/rocker-versioned2
-    - Please, give, explicitly, the *current version of R being used**	
+    - Please, give, explicitly, the *current version of R being used***	
 
 
-###### Creating the image fails because of no internet connection from the container #####
+** Creating the image fails because of no internet connection from the container**
 Creating the above image requires installing R packages and that might fail because the Docker container cannot connect with the internet. The following might help: https://superuser.com/a/1582710 , https://superuser.com/a/1619378 . 
 
 
