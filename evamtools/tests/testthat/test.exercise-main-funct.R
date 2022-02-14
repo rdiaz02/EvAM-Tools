@@ -3,7 +3,7 @@ test_that("Minimal test: we can run", {
     Dat1 <- every_which_way_data[[16]][1:40, 2:6]
     out <- suppressMessages(evam(Dat1,
                                  methods = c("CBN", "OT", "OncoBN",
-                                             "MHN", "HESBCN")))
+                                             "MHN", "HESBCN", "MCCBN")))
     expect_true(exists("OT_model", where = out))
 })
 
