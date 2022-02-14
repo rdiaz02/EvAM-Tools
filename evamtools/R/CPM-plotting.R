@@ -77,7 +77,8 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
                                   type = "genotype") {
     if(is.null(top_paths)) top_paths <- length(paths_from_graph)
     else if(is.numeric(top_paths)){
-        if(top_paths > length(paths_from_graph)) top_paths <- length(paths_from_graph)
+        if(top_paths > length(paths_from_graph))
+            top_paths <- length(paths_from_graph)
         else if(top_paths > 0) top_paths <- top_paths
     } else top_paths <- length(paths_from_graph)
 
@@ -92,7 +93,8 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
         function(x){
             if (x %in% nodes_in_top_paths){
                 if (type == "genotype") return(x)
-                else if (type == "acquisition") return(sprintf("+%s", tail(strsplit(x, ",")[[1]], n = 1)))
+                else if (type == "acquisition")
+                    return(sprintf("+%s", tail(strsplit(x, ",")[[1]], n = 1)))
             } 
             else return("")
         },
@@ -399,7 +401,8 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
 
 dag_layout <- function(graph){ ## Avoiding lines
     lyt <- igraph::layout.reingold.tilford(graph)
-    if(all(lyt[,1] == 0)) lyt[,1] <- rep(c(0,0.5,0,-0.5), ceiling(nrow(lyt)/3))[1:nrow(lyt)]
+    if(all(lyt[,1] == 0)) lyt[,1] <- rep(c(0,0.5,0,-0.5),
+                                         ceiling(nrow(lyt)/3))[1:nrow(lyt)]
     return(lyt)
 }
 

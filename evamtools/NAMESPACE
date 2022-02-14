@@ -10,9 +10,9 @@ export(
 importFrom("shiny", "runApp", "Progress")
 importFrom("shinyjs", "useShinyjs", "enable", "disable", "disabled")
 importFrom("grDevices", "rgb")
-importFrom("graphics", "axis", "legend", "lines", "par", "title")
+importFrom("graphics", "axis", "legend", "lines", "par", "title", "barplot", "grid")
 importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert",
-           "write.csv")
+           "write.csv", "tail")
 importFrom("Matrix", "diag", "rowSums", "colSums", "summary", "Matrix",
            "sparseMatrix", "bandSparse", "t")
 importFrom("OncoSimulR", "sampledGenotypes", "evalAllGenotypes",
@@ -42,3 +42,4 @@ importFrom("OncoBN", "fitCPN", "Lik.genotype")
 importFrom("mccbn", "candidate_posets", "adaptive.simulated.annealing")
 
 importFrom("RhpcBLASctl", "blas_set_num_threads", "omp_set_num_threads")
+
