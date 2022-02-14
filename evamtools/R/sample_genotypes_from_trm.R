@@ -501,7 +501,17 @@ canonicalize_genotype_names <- function(x) {
     return(pasted_sorted)
 }
 
-
+## Genotypes in what for me is their "standard, sensible, order"
+## By number of mutations, and within number of mutations, ordered
+## as given by order.
+genotypes_standard_order <- function(gene_names) {
+    gene_names <- sort(gene_names)
+    allgt <- allGenotypes_3(length(gene_names))$mutated
+    gtn <- vapply(allgt, function(v) paste(gene_names[v], collapse = ", "),
+                  "")
+    gtn[1] <- "WT"
+    return(gtn)
+}
 
 ## Obtain probabilities of genotypes from transition rate matrix
 ## under sampling time distributed as exponential rate 1.
@@ -513,8 +523,6 @@ canonicalize_genotype_names <- function(x) {
 ##    Assumptions:
 ##     - x is a sparse matrix
 ##     - First column/row of x is WT
-##     - Last column/row of x is WT with all loci mutated
-##     - x contains all genotypes (i.e., 2^number of genes)
 ##     - For now, the initial distribution is 100% are WT
 ##          (could change, ensuring genotype order matches)
 
@@ -523,24 +531,13 @@ canonicalize_genotype_names <- function(x) {
 
 ## Yes, this is much slower, like two orders of magnitude,
 ## than Schill's Generate.pTh. Still, about 0.3 to 0.4 seconds
-## for 11 genes, and most th1n 90% spent in the checks.
-probs_from_trm <- function(x, p0 = NULL, number_genes = NULL,
-                           tolerance = 10 * sqrt(.Machine$double.eps)) {
-    if(is.null(number_genes)) 
-        number_genes <- stringi::stri_count_fixed(colnames(x)[ncol(x)], ",") + 1
-    if(!is.null(p0))
-        stop("Not yet implemented. ",
-             " If you decide to allow for it ",
-             "make sure genotypes ordered identically.")
-    
-    if (is.null(p0)) p0 <-  c(1, rep(0, (2^number_genes) - 1))
-     
-    stopifnot(nrow(x) == 2^number_genes)
-    stopifnot(ncol(x) == 2^number_genes)
-    stopifnot(length(p0) == nrow(x))
-    stopifnot(isTRUE(all.equal(sum(p0), 1)))
-    
-    if(nnzero(tril(x)))
+## for 11 genes, and most than 90% spent in the checks.
+probs_from_trm <- function(x,
+                           tolerance = 10 * sqrt(.Machine$double.eps),
+                           all_genotypes = TRUE) {
+    p0 <-  c(1, rep(0, nrow(x) - 1))
+
+    if(Matrix::nnzero(tril(x)))
         stop("Lower triangular not 0. Is this transposed?")
     Q <- t(x)
     diag(Q) <- -1 * colSums(Q)
@@ -568,89 +565,24 @@ probs_from_trm <- function(x, p0 = NULL, number_genes = NULL,
         p <- as.vector(p)
         warning("sum(p) - 1  = ", sum(p) - 1)
         }
-    return(p)
+    
+    if(!all_genotypes) return(p)
+   
+    ## Get genes and from them number genotypes and identity genotypes
+    gene_names <- sort(setdiff(unique(unlist(strsplit(colnames(x), split = ", "))),
+                          "WT"))
+    number_genes <- length(gene_names)
+    num_genots <- 2^number_genes
+
+    if(length(p) == num_genots) return(p)
+    
+    allGts <- genotypes_standard_order(gene_names)
+    p_all <- rep(0.0, length = length(allGts))
+    names(p_all) <- allGts
+    p_all[names(p)] <- p
+    return(p_all)
 }
 
 
 
 
-
-
-
-
-
-
-
-## Obtain probabilities of genotypes from transition rate matrix
-## under sampling time distributed as exponential rate 1.
-## 
-## Using equation 4 (p. 243) in Schill et al., 2020, Bioinformatics, 36
-##    "Modelling cancer progression using Mutual Hazard Networks"
-##    and following their code (but using Jacobi from Rlinsolve).
-##
-##    Assumptions:
-##     - x is a sparse matrix
-##     - First column/row of x is WT
-##     - Last column/row of x is WT with all loci mutated
-##     - x contains all genotypes (i.e., 2^number of genes)
-##     - For now, the initial distribution is 100% are WT
-##          (could change, ensuring genotype order matches)
-
-##  The final all.equal uses a tolerance larger than that of
-##  the usual all.equal.
-
-## Yes, this is much slower, like two orders of magnitude,
-## than Schill's Generate.pTh. Still, about 0.3 to 0.4 seconds
-## for 11 genes, and most th1n 90% spent in the checks.
-
-probs_from_trm0 <- function(x, p0 = NULL, number_genes = NULL,
-                           tolerance = 10 * sqrt(.Machine$double.eps)) {
-    if(is.null(number_genes)) 
-        number_genes <- stringi::stri_count_fixed(colnames(x)[ncol(x)], ",") + 1
-    if(!is.null(p0))
-        stop("Not yet implemented. ",
-             " If you decide to allow for it ",
-             "make sure genotypes ordered identically.")
-    
-    if (is.null(p0)) p0 <-  c(1, rep(0, (2^number_genes) - 1))
-     
-    stopifnot(nrow(x) == 2^number_genes)
-    stopifnot(ncol(x) == 2^number_genes)
-    stopifnot(length(p0) == nrow(x))
-    stopifnot(isTRUE(all.equal(sum(p0), 1)))
-    
-    if(nnzero(tril(x)))
-        stop("Lower triangular not 0. Is this transposed?")
-    Q <- t(x)
-    diag(Q) <- -1 * colSums(Q)
-
-    ## Equation 4 in Schill et al. Thus
-    ## (I - Q) * p = p0
-    I_Q <- Matrix::Diagonal(nrow(Q)) - Q
-    p1 <- Rlinsolve::lsolve.jacobi(A = I_Q, B = p0, adjsym = FALSE,
-                                       reltol = 0.0001 * sqrt(.Machine$double.eps),
-                                       verbose = FALSE, weight = 1)
-    ## FIXME
-    ## Occasionally, small differences w.r.t sum. Rerun
-    ## But I should probably use a better method
-    p2 <- Rlinsolve::lsolve.jacobi(A = I_Q, B = p0,
-                                   weight = 1,
-                                   xinit = p1$x,
-                                   adjsym = FALSE,
-                                   reltol = 0.0001 * sqrt(.Machine$double.eps),
-                                   verbose = FALSE)
-    p <- p2$x
-    p <- as.vector(p)
-    names(p) <- colnames(x)
-    if(!isTRUE(all.equal(sum(p), 1, tolerance = tolerance))) {
-        p <- p2$x
-        p <- as.vector(p)
-        warning("sum(p) - 1  = ", sum(p) - 1)
-        }
-    return(p)
-}
-
-
-## For many methods, the transition rate matrix does not contain
-## all genotypes
-## to_full_trm <- 

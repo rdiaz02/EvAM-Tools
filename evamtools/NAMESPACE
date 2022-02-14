@@ -14,7 +14,7 @@ importFrom("graphics", "axis", "legend", "lines", "par", "title")
 importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert",
            "write.csv")
 importFrom("Matrix", "diag", "rowSums", "colSums", "summary", "Matrix",
-           "sparseMatrix", "bandSparse", "t", "tril")
+           "sparseMatrix", "bandSparse", "t", "tril", "nnzero")
 importFrom("OncoSimulR", "sampledGenotypes", "evalAllGenotypes",
            "allFitnessEffects", "rfitness")
 importFrom("stringr", "str_count", "str_replace", "str_split",
