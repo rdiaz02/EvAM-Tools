@@ -615,10 +615,20 @@ evam <- function(x,
                  ) {
 
     ## Sanity check of gene names
-    gn_comma <- stringi::stri_count_fixed(colnames(x), ',')
+    gn_comma <- stringi::stri_count_fixed(colnames(x), ",")
     if(any(gn_comma))
         stop("At least one of your gene names has a comma. That is not allowed")
 
+    gn_backslash <- stringi::stri_count_fixed(colnames(x), "\\") 
+    if(any(gn_backslash))
+        stop("At least one of your gene names has a backslash. That is not allowed")
+
+    gn_space <- stringi::stri_count_regex(colnames(x), "[\\s]") 
+    if(any(gn_space))
+        stop("At least one of your gene names has a space. That is not allowed")
+
+    
+    
     ## Sanity checks of methods
     methods <- unique(methods)
     accepted_methods <- c("OT", "OncoBN", "CBN", "MCCBN", "MHN", "HESBCN")
