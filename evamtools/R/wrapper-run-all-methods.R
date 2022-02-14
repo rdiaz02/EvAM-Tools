@@ -626,6 +626,9 @@ evam <- function(x,
     gn_space <- stringi::stri_count_regex(colnames(x), "[\\s]") 
     if(any(gn_space))
         stop("At least one of your gene names has a space. That is not allowed")
+    
+    if(any(colnames(x) == "WT"))
+        stop("One of your genes is called WT. That is not allowed")
 
     
     
