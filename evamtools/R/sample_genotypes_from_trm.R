@@ -19,18 +19,6 @@
 ## }
 
 
-#' @title Sample an indivial from a transition rate matrix
-#'
-#' @description This is a transition *rate* matrix, *not* a matrix
-#' of transition probabilities between genotypes. For example, this
-#' cannot be used with OT.
-#' 
-#' @param trm transition rate matrix
-#' @param T_sampling Time at which sampling happens.
-#' @param ngenots Number of genotypes
-#' @param genot_names String array with genotype names
-#' 
-#' @return sampled genotype, trajectory, and accumulated time
 indiv_sample_from_trm <- function(trm, T_sampling, ngenots = NULL,
                             genot_names = NULL) {
     if(is.null(ngenots)) ngenots <- ncol(trm)
@@ -110,20 +98,20 @@ indiv_sample_from_trm_pre <- function(trmstd,
 }
 
 
-#' @title Sample a population from a transition rate matrix.
-#' 
-#' @description Like indiv_sample_from_trm, but for multiple individuals.
-#' 
-#' @param trm transition rate matrix, number of samples or times of samples,
-#' @param n_samples Int with the number of samples to be computed
-#' @param T_sampling Time at wich each individual in sample. By default they 
-#' are randomly generated from an exponential distribution of rate 1.
-#' @param pre_compute whether or not to precompute entries of the trans rate matrix (for speed)
-#' @param cores number of cores (pass 1 is you do not want to parallelize)
-#' 
-#' @return List with precompunted sampling time of sampling, the actual time sampled
-#' observed for each sample (s), the complete trajectory of acquired mutations
-#' and the observed genotype
+## #' @title Sample a population from a transition rate matrix.
+## #' 
+## #' @description Like indiv_sample_from_trm, but for multiple individuals.
+## #' 
+## #' @param trm transition rate matrix, number of samples or times of samples,
+## #' @param n_samples Int with the number of samples to be computed
+## #' @param T_sampling Time at wich each individual in sample. By default they 
+## #' are randomly generated from an exponential distribution of rate 1.
+## #' @param pre_compute whether or not to precompute entries of the trans rate matrix (for speed)
+## #' @param cores number of cores (pass 1 is you do not want to parallelize)
+## #' 
+## #' @return List with precompunted sampling time of sampling, the actual time sampled
+## #' observed for each sample (s), the complete trajectory of acquired mutations
+## #' and the observed genotype
 
 population_sample_from_trm <- function(trm, n_samples = 10,
                                        T_sampling = NULL,
