@@ -192,23 +192,10 @@ plot_genot_fg <- function(trans_mat
         plot(0, type = 'n', axes = FALSE, ann = FALSE)
         return()
     }
-    ## FIXME: do we ever have this?
-    ## If we do, then trans_mat should be changed by "object" or "x"
-    ## in the arguments, and the two possibilities (x as data.frame, as
-    ## as transition (rate) matrix) explained
-    # if(typeof(trans_mat) == "list") {
-    #     all_genes <- c(trans_mat$From, trans_mat$To)
-    #     all_genes <- all_genes[all_genes != "WT"]
-    #     unique_genes_names <- sort(unique(unlist(str_split(all_genes, ", "))))
-    #     trans_mat$From <- str_replace_all(trans_mat$From, ", ", "")
-    #     trans_mat$To <- str_replace_all(trans_mat$To, ", ", "")
-    #     colnames(trans_mat) <- c("from", "to", "weight")
-    #     graph <- igraph::graph_from_data_frame(trans_mat, directed = TRUE)
-    # } else {
+
     unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
     rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", ",")
     graph <- igraph::graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
-    # }
 
     num_genes <- length(unique_genes_names)
     graph <- igraph::decompose(graph)[[1]] ## We do not want disconnected nodes
@@ -216,12 +203,12 @@ plot_genot_fg <- function(trans_mat
     if (!is.null(observations)){
         observations <- as.data.frame(sampledGenotypes(observations))
         observations$Abs_Freq <- observations$Freq / sum(observations$Freq)
-        observations$Genotype <- str_replace_all(observations$Genotype, ", ", "")
+        observations$Genotype <- str_replace_all(observations$Genotype, ", ", ",")
     }
 
     if (!is.null(freqs)){
         freqs$Abs_Freq <- freqs$Counts / sum(freqs$Counts)
-        freqs$Genotype <- str_replace_all(freqs$Genotype, ", ", "")
+        freqs$Genotype <- str_replace_all(freqs$Genotype, ", ", ",")
         rownames(freqs) <- freqs$Genotype
     }
 
@@ -255,6 +242,7 @@ plot_genot_fg <- function(trans_mat
             } 
             return(not_observed_color)
         })
+
     igraph::V(graph)$color <- colors
     igraph::V(graph)$frame.color <- colors
 
@@ -374,7 +362,6 @@ plot_genot_fg <- function(trans_mat
 #' @returns List with processed output of the CPM
 process_data <- function(data, mod, plot_type, sample_data = NULL) {
 
-    dag_tree <- NULL
 
     if (is.null(data)) {
         stop("data is NULL")
@@ -390,16 +377,21 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
 
     all_data <- c(data, sample_data)
     
+    dag_tree <- NULL
     tryCatch (expr = {
         dag_model <- get(paste(mod, "_model", sep = ""), data)
         dag_tree <- graph_from_data_frame(dag_model[, c(1, 2)])
     }, error = function(e){})
 
+    if(!is.null(dag_tree)){
+        model_info <- dag_tree
+    }else if(!is.null(all_data[[paste0(mod, "_theta")]])){
+        model_info <- all_data[[paste0(mod, "_theta")]]
+    }
+
     return(list(
-        dag_tree = dag_tree
+        model_info = model_info
         , data2plot = all_data[[paste0(mod, "_", plot_type)]]
-      , theta = all_data[[paste0(mod, "_theta")]]
-        ## where is the next used?
         , parent_set = all_data[[paste0(mod, "_parent_set")]]
         , genotype_freqs = all_data[[paste0(mod, "_genotype_freqs")]]
         ))
@@ -411,15 +403,60 @@ dag_layout <- function(graph){ ## Avoiding lines
     return(lyt)
 }
 
-## DO NOT use roxygen, has I have edited the help by hand.
+plot_model <- function(model_info, parent_set, mod){
+    if (typeof(model_info) == "list") { ## Potting DAGs
+        ## DAG relationships colors 
+        standard_relationship <- "cornflowerblue"
+        colors_relationships <- c(standard_relationship, standard_relationship,
+                                "#E2D810", ##"#FBDE44FF",
+                                "coral2")
+        names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
+        g <- model_info
+        if (!is.null(parent_set)) {
+            for (i in igraph::E(g)) {
+                igraph::E(g)[i]$color <-
+                    colors_relationships[
+                        parent_set[[igraph::head_of(g, igraph::E(g)[i])$name]]]
+            }
+        } else igraph::E(g)$color <- standard_relationship
+        plot(g
+            , layout = dag_layout
+            , vertex.size = 50 
+            , vertex.label.color = "black"
+            , vertex.label.family = "Helvetica"
+            , font.best = 2
+            , vertex.frame.width = 0.5
+            , vertex.color = "white"
+            , vertex.frame.color = "black" 
+            , vertex.label.cex = 1
+            , edge.arrow.size = 0
+            , edge.width = 5
+            , main = mod)
+        if(!is.null(parent_set)){
+            legend("topleft", legend = names(colors_relationships),
+                    col = colors_relationships, lty = 1, lwd = 5, bty = "n")
+        }
+    } else if(is.matrix(model_info)) { ##Plotting matrix
+        op <- par(mar=c(3, 3, 5, 3), las = 1)
+        plot(model_info, cex = 1.5, digits = 2, key = NULL
+            , axis.col = list(side = 3)
+            , xlab = "Effect of this (effector)"
+            , ylab = " on this (affected)"
+            , main = mod
+            , mgp = c(2, 1, 0))
+        par(op)
+    } else {
+        par(mar = rep(3, 4))
+        plot(0, type = 'n', axes = FALSE, ann = FALSE)
+    }
+}
+
 plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal", 
                         models = c("OT", "CBN", "OncoBN", "MCCBN", "MHN", "HESBCN"),
                         plot_type = "trans_mat", label_type="genotype",
                         fixed_vertex_size = FALSE,
                         top_paths = NULL) {
 
-    
-        
     if (!(plot_type %in% c("trans_mat", "trans_rate_mat", "obs_genotype_transitions"))){
         stop(sprintf("Plot type %s is not supported", plot_type))
     }
@@ -428,7 +465,6 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
         stop("obs_genotype_transitions needs you to pass the output ",
              "of a call to sample_CPMs")
     }
-
     
     ## List of available models
     available_models <- unique(models[
@@ -437,20 +473,7 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
             return(any(!is.na(cpm_output[[sprintf("%s_%s", mod, attr_name)]])))
         }, logical(1))
     ])
-   
 
-    ## DAG relationships colors 
-    ## standard_relationship <- "gray73"
-    ## colors_relationships <- c(standard_relationship, standard_relationship,
-    ##                           "cornflowerblue", "coral2")
-    standard_relationship <- "cornflowerblue"
-    colors_relationships <- c(standard_relationship, standard_relationship,
-                              "#E2D810", ##"#FBDE44FF",
-                              "coral2")
-
-
-    names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
-    
     ## Shape of the plot
     l_models <- length(available_models)
     ## n_rows <- ifelse(old_plot_type == "matrix", 3, 2)
@@ -470,70 +493,49 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
     for(mod in available_models) {
         ## Processing data
         model_data2plot <- process_data(cpm_output, mod, plot_type, samples)
-        g <- model_data2plot$dag_tree
-        ## Plotting data
-        if (!is.null(g)) { ## Potting DAGs
-            if (!is.null(model_data2plot$parent_set)) {
-                for (i in igraph::E(g)) {
-                    igraph::E(g)[i]$color <-
-                        colors_relationships[
-                            model_data2plot$parent_set[[igraph::head_of(g, igraph::E(g)[i])$name]]]
-                }
-            } else igraph::E(g)$color <- standard_relationship
-            plot(g
-               , layout = dag_layout
-               , vertex.size = 50 
-               , vertex.label.color = "black"
-               , vertex.label.family = "Helvetica"
-               , font.best = 2
-               , vertex.frame.width = 0.5
-               , vertex.color = "white"
-               , vertex.frame.color = "black" 
-               , vertex.label.cex = 1
-               , edge.arrow.size = 0
-               , edge.width = 5
-               , main = mod)
-            if(!is.null(model_data2plot$parent_set)){
-                legend("topleft", legend = names(colors_relationships),
-                       col = colors_relationships, lty = 1, lwd = 5, bty = "n")
-            }
-        } else if(!is.null(model_data2plot$theta)) { ##Plotting matrix
-            op <- par(mar=c(3, 3, 5, 3), las = 1)
-            plot(model_data2plot$theta, cex = 1.5, digits = 2, key = NULL
-                , axis.col = list(side = 3)
-                , xlab = "Effect of this (effector)"
-                , ylab = " on this (affected)"
-                , main = mod
-                , mgp = c(2, 1, 0))
-            par(op)
-        }
-        ## FIXME: ?? trans_mat were called probabilites.
-        ## Fixme, there is a problem here: probabilities and trans_mat plot the same
+        
+        ## Plotting model (DAG or MHN matrix)
+        plot_model(model_data2plot$model_info, model_data2plot$parent_set, mod)
+
+        ## Plotting forward graph
         if ((mod %in% c("OT")) &&
             (plot_type %in% c("trans_rate_mat", "obs_genotype_transitions"))) {
             par(mar = rep(3, 4))
             plot_sampled_genots(cpm_output$analyzed_data)
-        } else{
-            if (plot_type == "trans_mat") {## transition probabilities; was "probabilities"
-                plot_genot_fg(model_data2plot$data2plot, cpm_output$analyzed_data,
-                            top_paths = top_paths,
-                            label_type = label_type,
-                            fixed_vertex_size = fixed_vertex_size)
-            } else if (plot_type == "obs_genotype_transitions") { ## observed genotype trans. ; was "transitions"
-                plot_genot_fg(model_data2plot$data2plot,
-                            observations = cpm_output$analyzed_data,
-                            model_data2plot$genotype_freqs,
-                            top_paths = top_paths,
-                            label_type = label_type,
-                            fixed_vertex_size = fixed_vertex_size)
-            } else if (plot_type == "trans_rate_mat"){ ## transition rate matrix; was "trm"
-                plot_genot_fg(model_data2plot$data2plot,
-                            cpm_output$analyzed_data,
-                            top_paths = top_paths,
-                            label_type = label_type,
-                            fixed_vertex_size = fixed_vertex_size)
-            }
+        } else { ## TODO remove all this
+            # if (plot_type == "trans_mat") {## transition probabilities; was "probabilities"
+            #     plot_genot_fg(model_data2plot$data2plot, 
+            #                 cpm_output$analyzed_data,
+            #                 top_paths = top_paths,
+            #                 label_type = label_type,
+            #                 fixed_vertex_size = fixed_vertex_size)
+            # } else if (plot_type == "obs_genotype_transitions") { ## observed genotype trans. ; was "transitions"
+            plot_genot_fg(model_data2plot$data2plot,
+                        observations = cpm_output$analyzed_data,
+                        model_data2plot$genotype_freqs,
+                        top_paths = top_paths,
+                        label_type = label_type,
+                        fixed_vertex_size = fixed_vertex_size)
+            # } else if (plot_type == "trans_rate_mat"){ ## transition rate matrix; was "trm"
+            #     plot_genot_fg(model_data2plot$data2plot,
+            #                 cpm_output$analyzed_data,
+            #                 top_paths = top_paths,
+            #                 label_type = label_type,
+            #                 fixed_vertex_size = fixed_vertex_size)
+            # }
         }
     }
     par(op1)
+}
+
+plot_genotypes_freqs <- function(data){
+    if(nrow(data) == 0) return()
+    par(las = 2, cex.main=1.6, cex.lab=1.5, cex.axis=1.2)
+    barplot(data[, 2]
+        , names = data$Genotype
+        , ylab="Counts", main="Genotype Frequencies"
+        , horiz = FALSE
+        , panel.first=grid())
+    grid(nx = NA, ny = NULL, col='gray', lwd = 2)
+    ## TODO sort genotypes
 }
