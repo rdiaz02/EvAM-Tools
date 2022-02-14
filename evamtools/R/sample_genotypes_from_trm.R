@@ -19,6 +19,24 @@
 ## }
 
 
+
+
+
+
+## Sample an indivial from a transition rate matrix}
+## \item{trm}{transition rate matrix}
+## \item{T_sampling}{Time at which sampling happens.}
+## \item{ngenots}{Number of genotypes}
+## \item{genot_names}{String array with genotype names}
+## \value{
+## sampled genotype, trajectory, and accumulated time
+## }
+## \description{
+## This is a transition *rate* matrix, *not* a matrix
+## of transition probabilities between genotypes. For example, this
+## cannot be used with OT.
+## }
+
 indiv_sample_from_trm <- function(trm, T_sampling, ngenots = NULL,
                             genot_names = NULL) {
     if(is.null(ngenots)) ngenots <- ncol(trm)
@@ -48,26 +66,26 @@ indiv_sample_from_trm <- function(trm, T_sampling, ngenots = NULL,
                 t_accum = t_accum))
 }
 
-
-#' @title Sample an individual from a transition rate matrix with precomputed
-#' matrix diagonal (and number of genotypes and genotype names).
-#'
-#' @description If we sample many individuals from the same process, it is worth
-#'     passing some common, precomputed values. This is what I call
-#'     "transition matrix standardized": Diagonal is passed separately, and
-#'     entries in the matrix are probabilities.
-#' 
-#' This is all for a transition *rate* matrix, *not* a matrix
-#' of transition probabilities between genotypes. For example, this
-#' cannot be used with OT.
-#'
-#' @param trmstd transition rate matrix "standardized",
-#' @param diag diagonal of transition rate matrix, time of sampling of a case/individual
-#' @param T_sampling Time at which sampling happens.
-#' @param ngenots Number of genotypes
-#' @param genot_names String array with genotype names
-#' 
-#' @return sampled genotype, trajectory, and accumulated time
+##
+## @title Sample an individual from a transition rate matrix with precomputed
+## matrix diagonal (and number of genotypes and genotype names).
+##
+## @description If we sample many individuals from the same process, it is worth
+##     passing some common, precomputed values. This is what I call
+##     "transition matrix standardized": Diagonal is passed separately, and
+##     entries in the matrix are probabilities.
+## 
+## This is all for a transition *rate* matrix, *not* a matrix
+## of transition probabilities between genotypes. For example, this
+## cannot be used with OT.
+##
+## @param trmstd transition rate matrix "standardized",
+## @param diag diagonal of transition rate matrix, time of sampling of a case/individual
+## @param T_sampling Time at which sampling happens.
+## @param ngenots Number of genotypes
+## @param genot_names String array with genotype names
+## 
+## @return sampled genotype, trajectory, and accumulated time
 indiv_sample_from_trm_pre <- function(trmstd,
                                       diag,
                                       T_sampling,
@@ -97,21 +115,21 @@ indiv_sample_from_trm_pre <- function(trmstd,
                 t_accum = t_accum))
 }
 
-
-## #' @title Sample a population from a transition rate matrix.
-## #' 
-## #' @description Like indiv_sample_from_trm, but for multiple individuals.
-## #' 
-## #' @param trm transition rate matrix, number of samples or times of samples,
-## #' @param n_samples Int with the number of samples to be computed
-## #' @param T_sampling Time at wich each individual in sample. By default they 
-## #' are randomly generated from an exponential distribution of rate 1.
-## #' @param pre_compute whether or not to precompute entries of the trans rate matrix (for speed)
-## #' @param cores number of cores (pass 1 is you do not want to parallelize)
-## #' 
-## #' @return List with precompunted sampling time of sampling, the actual time sampled
-## #' observed for each sample (s), the complete trajectory of acquired mutations
-## #' and the observed genotype
+##
+## @title Sample a population from a transition rate matrix.
+## 
+## @description Like indiv_sample_from_trm, but for multiple individuals.
+## 
+## @param trm transition rate matrix, number of samples or times of samples,
+## @param n_samples Int with the number of samples to be computed
+## @param T_sampling Time at wich each individual in sample. By default they 
+## are randomly generated from an exponential distribution of rate 1.
+## @param pre_compute whether or not to precompute entries of the trans rate matrix (for speed)
+## @param cores number of cores (pass 1 is you do not want to parallelize)
+## 
+## @return List with precompunted sampling time of sampling, the actual time sampled
+## observed for each sample (s), the complete trajectory of acquired mutations
+## and the observed genotype
 
 population_sample_from_trm <- function(trm, n_samples = 10,
                                        T_sampling = NULL,
@@ -167,22 +185,22 @@ population_sample_from_trm <- function(trm, n_samples = 10,
         ))
 }
 
-
-#' @title Process samples
-#' 
-#' @description Generate trajectories from data simulated from a given model.
-#' 
-#' @param sim list generated with population_sample_from_trm. Relevant
-#' fields are described below
-#' $T_sum_events time of events for the mutations of each gene
-#' $obs_events data.frame with mutated before the end of the sampling time
-#' @param n_genes number of genes observed
-#' @param gene_names List of gene names. Required.
-#' @param output type of output that we want
-#' 
-#' @return List with a list of trajectories (the order in which gene mutations
-#' are acquired), genotype frequencies and genotypes transition matrix (with
-#' counts of how many transitions between each genotype have been observed) 
+## # @noRd
+## #' @title Process samples
+## #' 
+## #' @description Generate trajectories from data simulated from a given model.
+## #' 
+## #' @param sim list generated with population_sample_from_trm. Relevant
+## #' fields are described below
+## #' $T_sum_events time of events for the mutations of each gene
+## #' $obs_events data.frame with mutated before the end of the sampling time
+## #' @param n_genes number of genes observed
+## #' @param gene_names List of gene names. Required.
+## #' @param output type of output that we want
+## #' 
+## #' @return List with a list of trajectories (the order in which gene mutations
+## #' are acquired), genotype frequencies and genotypes transition matrix (with
+## #' counts of how many transitions between each genotype have been observed) 
 process_samples <- function(sim, n_genes,
                             gene_names,
                             output = c("frequencies",
@@ -412,20 +430,21 @@ sample_CPMs <- function(cpm_output
     return(output)
 }
 
-## #' @title Count genotypes 
-## #' 
-## #' Take a sample (a vector), with genotypes as "A, B", etc
-## #' and return a vector of frequencies (counts) in the exact same
-## #' order as used by MHN
-## #' A much faster implementation
+## @title Count genotypes 
+## 
+## Take a sample (a vector), with genotypes as "A, B", etc
+## and return a vector of frequencies (counts) in the exact same
+## order as used by MHN
+## A much faster implementation
 
-## #' @param x vector of genotypes
-## #' @param ngenes total number of genes
-## #' @param gene_names List of gene names. If NULL, genes will be named alphabetically
-## #' 
-## #' @return counts of all genotypes in same order as used by MHN
-## #'         gene_names is always sorted inside the function to ensure
-## #'         results do not differ by gene_names order
+## @param x vector of genotypes
+## @param ngenes total number of genes
+## @param gene_names List of gene names. If NULL, genes will be named alphabetically
+## 
+## @return counts of all genotypes in same order as used by MHN
+##         gene_names is always sorted inside the function to ensure
+##         results do not differ by gene_names order
+
 sample_to_pD_order <- function(x, ngenes, gene_names = NULL) {
     if(is.null(gene_names)) gene_names <- LETTERS[seq_len(ngenes)]
     stopifnot(ngenes == length(gene_names))

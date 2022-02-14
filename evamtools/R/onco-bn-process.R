@@ -13,6 +13,26 @@
 ## You should have received a copy of the GNU General Public License
 ## along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+
+## \arguments{
+## \item{data}{Cross secitonal data. Matrix of genes (columns)
+## and individuals (rows)}
+
+## \item{model}{One of "DBN" (default) or "CBN".}
+
+## \item{algorithm}{"DP" (default) or "GA". See \code{\link[OncoBN]{fitCPN}}.}
+
+## \item{epsilon}{Penalty term. See \code{\link[OncoBN]{fitCPN}}.}
+
+## \item{silent}{Whether to show messages produced by OncoBN.}
+## }
+## \value{
+## A list with  a data.frame with From-To edges and associated thetas, the
+## thetas, the likelihood and epsilon of the model, and the predicted
+## probabilities of genotypes.
+## }
+
 do_OncoBN <- function(data,
                       model = "DBN",
                       algorithm = "DP",
