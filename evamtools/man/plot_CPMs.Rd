@@ -8,6 +8,7 @@ plot_CPMs(
   orientation = "horizontal",
   models = c("OT", "CBN", "OncoBN", "MCCBN", "MHN", "HESBCN"),
   plot_type = "trans_mat",
+  label_type = "genotype",
   fixed_vertex_size = FALSE,
   top_paths = NULL
 )

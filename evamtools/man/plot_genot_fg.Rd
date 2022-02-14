@@ -12,26 +12,34 @@ plot_genot_fg(
   freq2label = NULL,
   max_edge = NULL,
   min_edge = NULL,
-  fixed_vertex_size = FALSE
+  fixed_vertex_size = FALSE,
+  label_type = "genotype"
 )
 }
 \arguments{
 \item{trans_mat}{transitions matrix to plot: can contain row counts, probabilities... 
 Entries will be normalized}
 
-\item{observations}{Original cross sectional data used to compute the model. Optional.}
+  \item{observations}{Original cross sectional data used to compute the model. Optional.}
 
-\item{freqs}{DataFrame with column $Genotype and $Freqs with their frequencies. Optional.}
+  \item{freqs}{DataFrame with column $Genotype and $Freqs with their frequencies. Optional.}
 
-\item{top_paths}{Int>0. Default NULL. Most transited paths to label}
+  \item{top_paths}{Int>0. Default NULL. Most transited paths to label}
 
-\item{freq2label}{Int>0. Laberl genotypes with a frequency larger taht freqs2label}
+  \item{freq2label}{Int>0. Laberl genotypes with a frequency larger taht freqs2label}
 
-\item{max_edge}{Int>0. Maximun width of edge. If NULL it will be infered from data.}
+  \item{max_edge}{Int>0. Maximun width of edge. If NULL it will be infered from data.}
 
-\item{min_edge}{Int>0. Minimum width of edge. If NULL it will be infered from data.}
+  \item{min_edge}{Int>0. Minimum width of edge. If NULL it will be infered from data.}
 
-\item{fixed_vertex_size}{Boolen. If TRUE, all nodes with all the same size and frequencies or observed data will not be used.}
+  \item{fixed_vertex_size}{Boolen. If TRUE, all nodes with all the same size and frequencies or observed data will not be used.}
+
+  \item{label_type}{Type of label to show. One of:
+    \itemize{
+      \item{genotype:}{Displays all genes mutated}
+      \item{acquisition:}{Only displays the last gente mutated}
+    }
+  }
 }
 \description{
 Plot hypercubic genotype transitions
