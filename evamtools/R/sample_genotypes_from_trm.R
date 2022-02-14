@@ -474,7 +474,7 @@ reorder_to_pD <- function(x) {
     ## Get gene names
     gene_n <- unique(stringi::stri_replace_all_fixed(
                                   unlist(
-                                      stringi::stri_split_fixed(names(uu), ",")),
+                                      stringi::stri_split_fixed(genots_n, ",")),
                                   " ", ""))
     gene_n <- setdiff(gene_n, "WT")
     sorted_genots <- generate_sorted_genotypes(length(gene_n),

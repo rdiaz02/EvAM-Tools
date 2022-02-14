@@ -29,3 +29,7 @@ evamtools_0.98.0.tar.gz
 evamtools_0.98.1.tar.gz
 evamtools_0.98.2.tar.gz
 evamtools_0.98.3.tar.gz
+evamtools/src/MHN.o
+evamtools/src/evamtools.so
+evamtools/src/init.o
+evamtools_0.98.10.tar.gz

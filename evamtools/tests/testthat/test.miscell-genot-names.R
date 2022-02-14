@@ -2,7 +2,7 @@
 ## and ordering vectors of genotypes
 
 test_that("canonicalize", {
-    uu <- c("B" = 8,
+    www <- c("B" = 8,
             "A,B,C" = 10,
             "WT" = 2,
             "A" = 3,
@@ -10,7 +10,7 @@ test_that("canonicalize", {
             "E,    D  ,  A   ,B" = 98,
             " U#/!=?¿%&8  ,  F_#$@  ,  A  " = 5)
 
-    expect_identical(canonicalize_genotype_names(names(uu)),
+    expect_identical(canonicalize_genotype_names(names(www)),
                      c("B", "A, B, C", "WT", "A", "A, B, C, E",
                        "A, B, D, E", "A, F_#$@, U#/!=?¿%&8")
                      )
@@ -20,7 +20,7 @@ test_that("canonicalize", {
 
 
 test_that("reorder_to_pD", {
-    uu <- c("B" = 8,
+    www <- c("B" = 8,
             "A,B,C" = 10,
             "WT" = 2,
             "A" = 3,
@@ -38,13 +38,13 @@ test_that("reorder_to_pD", {
     sguv <- rep(NA, length(sgu))
     names(sguv) <- sgu
     ## Yes, pass by position, not matching names on purpose for test
-    sguv[c(3, 8, 1, 2, 24, 28, 98)] <- unname(uu)
+    sguv[c(3, 8, 1, 2, 24, 28, 98)] <- unname(www)
     
-    expect_identical(reorder_to_pD(uu),
+    expect_identical(reorder_to_pD(www),
                      sguv)
 
 
-     uu2 <- c("B" = .8,
+     www2 <- c("B" = .8,
             "A,B,C" = .10,
             "WT" = .22,
             "A" = .33,
@@ -56,6 +56,6 @@ test_that("reorder_to_pD", {
 
     sguv2 <- rep(NA, length(sgu))
     names(sguv2) <- sgu
-    sguv2[c(3, 8, 1, 2, 24, 28, 98, 43)] <- unname(uu2)
+    sguv2[c(3, 8, 1, 2, 24, 28, 98, 43)] <- unname(www2)
     
 })
