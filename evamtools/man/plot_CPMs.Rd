@@ -52,7 +52,7 @@ will plot all paths}
 
 \description{
 By default it creates a top row with the DAG of the CPM 
-or de transtionRateMatrix for MHN
+or the transtionRateMatrix for MHN
 The bottom row has a custom plot for trans_mat, trans_rate_mat, or obs_genotype_transitions.
 }
 

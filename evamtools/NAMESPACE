@@ -14,7 +14,7 @@ importFrom("graphics", "axis", "legend", "lines", "par", "title", "barplot", "gr
 importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert",
            "write.csv", "tail")
 importFrom("Matrix", "diag", "rowSums", "colSums", "summary", "Matrix",
-           "sparseMatrix", "bandSparse", "t")
+           "sparseMatrix", "bandSparse", "t", "tril", "nnzero")
 importFrom("OncoSimulR", "sampledGenotypes", "evalAllGenotypes",
            "allFitnessEffects", "rfitness")
 importFrom("stringr", "str_count", "str_replace", "str_split",
@@ -42,4 +42,5 @@ importFrom("OncoBN", "fitCPN", "Lik.genotype")
 importFrom("mccbn", "candidate_posets", "adaptive.simulated.annealing")
 
 importFrom("RhpcBLASctl", "blas_set_num_threads", "omp_set_num_threads")
+importFrom("Rlinsolve", "lsolve.jacobi")
 
