@@ -143,42 +143,42 @@ cpm_layout <- function(graph){
     return(lyt)
 }
 
-#' Plot hypercubic genotype transitions
-#' 
-#' @param trans_mat transitions matrix to plot: can contain row counts, probabilities... 
-#' Entries will be normalized
-#' @param observations Original cross sectional data used to compute the model. Optional.
-#' @param freqs DataFrame with column $Genotype and $Freqs with their frequencies. Optional.
-#' @param top_paths Int>0. Default NULL. Most transited paths to label
-#' @param freq2label Int>0. Laberl genotypes with a frequency larger taht freqs2label
-#' @param max_edge Int>0. Maximun width of edge. If NULL it will be infered from data.
-#' @param min_edge Int>0. Minimum width of edge. If NULL it will be infered from data.
-#' @param fixed_vertex_size Boolen. If TRUE, all nodes with all the same size and frequencies or observed data will not be used.
-#' @examples 
-#' \dontrun{
-#' dB_c2 <- matrix(
-#' c(
-#'      rep(c(1, 0, 0, 0, 0), 300) #A
-#'    , rep(c(0, 0, 1, 0, 0), 300) #C
-#'    , rep(c(1, 1, 0, 0, 0), 200) #AB
-#'    , rep(c(0, 0, 1, 1, 0), 200) #CD
-#'    , rep(c(1, 1, 1, 0, 0), 100) #ABC
-#'    , rep(c(1, 0, 1, 1, 0), 100) #ACD
-#'    , rep(c(1, 1, 0, 0, 1), 100) #ABE
-#'    , rep(c(0, 0, 1, 1, 1), 100) #CDE
-#'    , rep(c(1, 1, 1, 0, 1), 100) #ABCE
-#'    , rep(c(1, 0, 1, 1, 1), 100) #ACDE
-#'    , rep(c(1, 1, 1, 1, 0), 50) # ABCD
-#'    , rep(c(0, 0, 0, 0, 0), 10) # WT
-#'  ), ncol = 5, byrow = TRUE
-#' )
-#' colnames(dB_c2) <- LETTERS[1:5]
-#' out <- evam(dB_c2)
-#' png("fluxes.png")
-#' par(mfrow = c(1, 1))
-#' plot_genot_fg(out$MHN_trans_mat, dB_c2)
-#' dev.off()
-#' }
+## #' Plot hypercubic genotype transitions
+## #' 
+## #' @param trans_mat transitions matrix to plot: can contain row counts, probabilities... 
+## #' Entries will be normalized
+## #' @param observations Original cross sectional data used to compute the model. Optional.
+## #' @param freqs DataFrame with column $Genotype and $Freqs with their frequencies. Optional.
+## #' @param top_paths Int>0. Default NULL. Most transited paths to label
+## #' @param freq2label Int>0. Laberl genotypes with a frequency larger taht freqs2label
+## #' @param max_edge Int>0. Maximun width of edge. If NULL it will be infered from data.
+## #' @param min_edge Int>0. Minimum width of edge. If NULL it will be infered from data.
+## #' @param fixed_vertex_size Boolen. If TRUE, all nodes with all the same size and frequencies or observed data will not be used.
+## #' @examples 
+## #' \dontrun{
+## #' dB_c2 <- matrix(
+## #' c(
+## #'      rep(c(1, 0, 0, 0, 0), 300) #A
+## #'    , rep(c(0, 0, 1, 0, 0), 300) #C
+## #'    , rep(c(1, 1, 0, 0, 0), 200) #AB
+## #'    , rep(c(0, 0, 1, 1, 0), 200) #CD
+## #'    , rep(c(1, 1, 1, 0, 0), 100) #ABC
+## #'    , rep(c(1, 0, 1, 1, 0), 100) #ACD
+## #'    , rep(c(1, 1, 0, 0, 1), 100) #ABE
+## #'    , rep(c(0, 0, 1, 1, 1), 100) #CDE
+## #'    , rep(c(1, 1, 1, 0, 1), 100) #ABCE
+## #'    , rep(c(1, 0, 1, 1, 1), 100) #ACDE
+## #'    , rep(c(1, 1, 1, 1, 0), 50) # ABCD
+## #'    , rep(c(0, 0, 0, 0, 0), 10) # WT
+## #'  ), ncol = 5, byrow = TRUE
+## #' )
+## #' colnames(dB_c2) <- LETTERS[1:5]
+## #' out <- evam(dB_c2)
+## #' png("fluxes.png")
+## #' par(mfrow = c(1, 1))
+## #' plot_genot_fg(out$MHN_trans_mat, dB_c2)
+## #' dev.off()
+## #' }
 plot_genot_fg <- function(trans_mat
     , observations = NULL
     , freqs = NULL
