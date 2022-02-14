@@ -2,14 +2,24 @@
 \alias{generate_sorted_genotypes}
 \title{List of sorted genotypes}
 \usage{
-generate_sorted_genotypes(n_genes, gene_names = NULL)
+generate_sorted_genotypes(n_genes, gene_names = NULL,
+                          sort_gene_names = TRUE)
 }
 \arguments{
 \item{n_genes}{Integer > 0}
 
 \item{gene_names}{Vector of strings
 If NULL, defaults gene_names will the firt n_genes letters of the alphabet}
+
+\item{sort_gene_names}{Sort the gene names before generating the
+  genotypes? Default is TRUE. Only rarely will you want it to be FALSE
+  (such as to replicate the output from MHN's functions when gene
+  names were not ordered).}
+
 }
+
+
+
 \value{
 Vector with the sorted genotypes
 }
