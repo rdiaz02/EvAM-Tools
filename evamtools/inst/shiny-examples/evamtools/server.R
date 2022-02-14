@@ -16,6 +16,193 @@ template_csd_freqs <- data.frame(Genotype = character(), Freq = integer())
 template_csd_data <- matrix(0, ncol=3, nrow=0)
 
 
+    return(freqs[selected_rows, ])
+}
+
+get_csd <- function(complete_csd){
+    if(is.null(complete_csd)) return(NULL)
+    csd <- data.frame(OncoSimulR::sampledGenotypes(complete_csd))
+    rownames(csd) <- csd$Genotype
+    return(csd)
+}
+
+available_cpms <- function(data){
+    data$csd_data <- NULL
+    cpm_names <- unique(sapply(names(data), function(x) str_split(x, "_")[[1]][[1]]))
+    return(cpm_names)
+}
+
+get_mhn_data <- function(n_genes, n_samples, gene_names, thetas = NULL){
+    if(is.null(thetas)) thetas <- evamtools:::Random.Theta(n=n_genes)
+    rownames(thetas) <- colnames(thetas) <- gene_names
+    oindex <- order(colnames(thetas))
+    thetas <- thetas[oindex, oindex]
+    rm(oindex)
+    samples <- floor(evamtools:::Finite.Sample(evamtools:::Generate.pTh(thetas), n_samples)*n_samples)
+    trm <- evamtools:::theta_to_trans_rate_3_SM(thetas,
+                                    inner_transition = evamtools:::inner_transitionRate_3_1)
+    state_names <- vapply(1:(ncol(trm)), function(x){
+        x <- x - 1
+        if(x == 0) state_name <- "WT"
+        else state_name <- paste(gene_names[which(evamtools:::int2binary(x, n_genes) == 1)], collapse = ", ")
+        return(state_name)
+    }, character(1))
+    rownames(trm) <- colnames(trm) <- state_names
+    samples <- data.frame("Genotype" = state_names, "Freq" = samples)
+    rownames(samples) <- samples$Genotype
+    return(list(thetas = thetas, trm = trm, samples = samples))
+}
+
+plot_model <- function(cpm_output, mod){
+    ## DAG relationships colors 
+    standard_relationship <- "gray73"
+    colors_relationships <- c(standard_relationship, standard_relationship, "cornflowerblue", "coral2")
+    names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
+    
+    model_data2plot <- evamtools:::process_data(cpm_output, mod)
+    ## Plotting data
+    if(!is.null(model_data2plot$dag_tree)) {
+
+        if(!is.null(model_data2plot$parent_set)){
+            for(i in names(model_data2plot$parent_set)){
+                igraph::E(model_data2plot$dag_tree)[.to(i)]$color <- colors_relationships[model_data2plot$parent_set[[i]]]
+            }
+        } else igraph::E(model_data2plot$dag_tree)$color <- standard_relationship
+        plot(model_data2plot$dag_tree
+            , layout = igraph::layout.reingold.tilford
+            , vertex.size = 55 
+            , vertex.label.color = "black"
+            , vertex.label.family = "Helvetica"
+            , vertex.label.cex = 1.5
+            , font.best = 2
+            , vertex.frame.width = 0.5
+            , vertex.color = "white"
+            , vertex.frame.color = "black" 
+            , vertex.label.cex = 1
+            , edge.arrow.size = 0
+            , edge.width = 5
+            )
+        # par(mar=c(0, 0, 0, 0))
+        if(!is.null(model_data2plot$parent_set)){
+            legend("topleft", legend = names(colors_relationships),
+                col = colors_relationships, lty = 1, lwd = 5, bty = "n")
+        }
+    }else if(!is.null(model_data2plot$theta)) {
+        op <- par(mar=c(3, 3, 5, 3), las = 1)
+        plot(model_data2plot$theta, cex = 1.4, digits = 2, key = NULL
+            , axis.col = list(side = 3)
+            , xlab = "Effect of this (effector)"
+            , ylab = " on this (affected)"
+            , main = ""
+            , mgp = c(2, 1, 0))
+        par(op)
+    }
+    title(mod, cex.main = 1.8)
+}
+
+create_tabular_data <- function(data, type){
+    available_methods <- c("Source", "OT", "CBN", "MHN", "HESBCN")
+    # , "DBN", "MCCBN")
+    if(type %in% c("freqs")){
+        all_counts <- data.frame(Genotype = data[["MHN_genotype_freqs"]]$Genotype)
+        for(name in names(data)){
+            if(grepl("_genotype_freqs", name)
+            #  & !grepl("^OT", name) ##Now we have genotypes frequencies for OT
+             ){
+                method_name <- strsplit(name, "_")[[1]][[1]]
+                all_counts[[method_name]] <- data[[name]]$Counts
+            } 
+        }
+        
+        order_by_counts <- sort(rowSums(all_counts[-1]), 
+        decreasing = TRUE, index.return = TRUE)$ix
+    
+        all_counts[order_by_counts, ]
+        return(all_counts[order_by_counts, ])
+
+    } else if(type %in% c("trans_rate_mat", "genotype_transitions", "trans_mat", "td_trans_mat")){
+        var2var <- c("trans_rate_mat", "genotype_transitions", "trans_mat", "td_trans_mat")
+        names(var2var) <- c("trans_rate_mat", "genotype_transitions", "trans_mat", "td_trans_mat")
+        
+        var2use <- var2var[type]
+        ## 1 Methods to compute
+        methods2compute <- vapply(available_methods, function(x){
+            if(!is.null(data[[sprintf("%s_%s", x, var2use)]])){
+                return(!any(is.na(data[[sprintf("%s_%s", x, var2use)]])))
+            }
+            return(FALSE)
+        }, logical(1))
+
+        methods2compute <- names(methods2compute)[methods2compute]
+        if(type == "genotype_transitions"){
+            methods2compute <- setdiff(methods2compute, "OT")
+        }
+            
+        ## 2 Fill the data frame
+        all_genotypes <- matrix(0, nrow = 0, ncol = 2)
+        all_methods <- matrix(0, nrow = 0, ncol = length(methods2compute))
+        n_methods2compute <- length(methods2compute)
+        base_vector <- rep(0, n_methods2compute)
+        names(base_vector) <- methods2compute
+        ## I use MHN because it has all the genotypes
+        for(i in rownames(data[[sprintf("MHN_%s", var2use)]])){
+            for(j in rownames(data[[sprintf("MHN_%s", var2use)]])){
+                row_data <- sapply(methods2compute, function(x){
+                    tryCatch({
+                        return(data[[sprintf("%s_%s", x, var2use)]][i, j])
+                    }, error = function(e){
+                        return(0)
+                    })
+                })
+
+                all_genotypes <- rbind(all_genotypes, c(i, j))
+                all_methods <- rbind(all_methods, unname(row_data))
+            }
+        }
+        
+        selected_rows <- rowSums(abs(all_methods))>0
+        all_methods <- round(all_methods[selected_rows, ], 2)
+        all_genotypes <- all_genotypes[selected_rows, ]
+
+        all_the_data <- data.frame(From = all_genotypes[, 1]
+            , To = all_genotypes[, 2])
+        for(i in 1:n_methods2compute){
+            all_the_data[[methods2compute[i]]] <- all_methods[, i]
+        }
+
+        colnames(all_the_data) <- c("From", "To", methods2compute)
+
+        order_by_counts <- sort(rowSums(all_methods), 
+        decreasing = TRUE, index.return = TRUE)$ix
+    
+        return(all_the_data[order_by_counts, ])
+
+    } else if(type %in% c("lambdas")){
+        lambda_field <- c("Lambdas", "OT_edgeWeight", "rerun_lambda", "Lambdas", "lambda", "Thetas")
+        names(lambda_field) <- c("Source", "OT", "CBN", "HESBCN", "MCCBN")
+
+        gene_names <- sort(unique(data$OT_model$To))
+        all_counts <- data.frame(Gene = gene_names)
+        for(name in names(data)){
+            if(grepl("_model", name)){
+                method_name <- strsplit(name, "_")[[1]][[1]]
+                if(!is.null(data[[name]]) & !is.na(data[[name]])){
+                    tmp_data <- data[[name]][[lambda_field[method_name]]]
+                    names(tmp_data) <- data[[name]]$To
+                    all_counts[[method_name]] <- round(tmp_data[all_counts$Gene], 2)
+                }
+            }
+        }
+
+        return(all_counts)
+    }
+
+    order_by_counts <- sort(rowSums(all_counts[-1]), 
+        decreasing = TRUE, index.return = TRUE)$ix
+    
+    all_counts[order_by_counts, ]
+    return(to_return)
+}
 
 dataModal <- function(error_message) {
       modalDialog(
