@@ -135,6 +135,9 @@ available_cpms <- function(data){
 get_mhn_data <- function(n_genes, n_samples, gene_names, thetas = NULL){
     if(is.null(thetas)) thetas <- evamtools:::Random.Theta(n=n_genes)
     rownames(thetas) <- colnames(thetas) <- gene_names
+    oindex <- order(colnames(thetas))
+    thetas <- thetas[oindex, oindex]
+    rm(oindex)
     samples <- floor(evamtools:::Finite.Sample(evamtools:::Generate.pTh(thetas), n_samples)*n_samples)
     trm <- evamtools:::theta_to_trans_rate_3_SM(thetas,
                                     inner_transition = evamtools:::inner_transitionRate_3_1)
