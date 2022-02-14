@@ -33,4 +33,5 @@ Imports: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree
     , OncoBN
     , mccbn
     , RhpcBLASctl
+    , Rlinsolve
 Suggests: testthat (>= 3.0.0)

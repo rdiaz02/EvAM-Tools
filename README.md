@@ -148,7 +148,7 @@ You can also [build your own Docker image](#build-your-own-docker-image) and you
     - If it fails, make sure to review the installation instructions and then install manually: https://github.com/cbg-ethz/MC-CBN#installation-from-source 
   
   * Install the evamtools package
-     - Make sure you have the require dependencies and imports, as listed in DESCRIPTION: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree , gtools , plot.matrix , DT, shinyjs, shiny, RhpcBLASctl.
+     - Make sure you have the require dependencies and imports, as listed in DESCRIPTION: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree , gtools , plot.matrix , DT, shinyjs, shiny, RhpcBLASctl, Rlinsolve.
          - Note that we list, as imports, OncoBN, mccbn. You need those (from above). 
      - Build (R CMD build evamtools) and install (R CMD INSTALL evamtools_x.y.z.tar.gz, with x.y.z replaced by the current version number). File `build-test.sh` builds, tests, and installs the package (and takes care of the version number).
       
