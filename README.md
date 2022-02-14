@@ -309,7 +309,7 @@ Running all test takes around 8 minutes, writes considerable amount of temporary
   genome hybridization data. J Comput Biol, 6(1), 37–51.
 
 
-### CBN ###
+### CBN and MCCBN ###
 
 - Beerenwinkel, N., & Sullivant, S. (2009). Markov models for accumulating
   mutations. Biometrika, 96(3), 645.
@@ -360,13 +360,15 @@ Running all test takes around 8 minutes, writes considerable amount of temporary
 
 ### Conditional prediction of genotypes and probabilities of paths from CPMs ###
 
-- Diaz-Colunga, J., & Diaz-Uriarte, R. (2021). Conditional prediction of
-  consecutive tumor evolution using cancer progression models: What genotype
-  comes next? PLOS Computational Biology, 17(12),
-  1009055. http://dx.doi.org/10.1371/journal.pcbi.1009055
-
+- Hosseini, S., Diaz-Uriarte, Ramon, Markowetz, F., & Beerenwinkel,
+  N. (2019). Estimating the predictability of cancer evolution. Bioinformatics,
+  35(14), 389–397. http://dx.doi.org/10.1093/bioinformatics/btz332
 
 - Diaz-Uriarte, R., & Vasallo, C. (2019). Every which way? On predicting tumor
   evolution using cancer progression models. PLOS Computational Biology, 15(8),
   1007246. http://dx.doi.org/10.1371/journal.pcbi.1007246
 
+- Diaz-Colunga, J., & Diaz-Uriarte, R. (2021). Conditional prediction of
+  consecutive tumor evolution using cancer progression models: What genotype
+  comes next? PLOS Computational Biology, 17(12),
+  1009055. http://dx.doi.org/10.1371/journal.pcbi.1009055

@@ -25,21 +25,21 @@ plot_CPMs(
 
 \item{plot_type}{One of:
   \itemize{
-    \item{trans_mat:}{Transition matrix between genotypes (see
+    \item{trans_mat: }{Transition matrix between genotypes (see
   supporting information for OT and OncoBN). This plots the object of
   name \code{trans_mat} from the output of \code{\link{evam}}.}
-    \item{trans_rate_mat:}{Transition rate matrix between genotypes;
+    \item{trans_rate_mat: }{Transition rate matrix between genotypes;
   unavailable for OT and OncoBN. This plots the object of
   name \code{trans_rate_mat} from the output of \code{\link{evam}}.}
-    \item{obs_genotype_transitions:}{Observed transitions during the
+    \item{obs_genotype_transitions: }{Observed transitions during the
   simulation of the sampling process. This plots the object called  \code{obs_genotype_transitions} from the output of \code{\link{sample_CPMs}}.}
   }
 }
 
 \item{label_type}{Type of label to show. One of:
   \itemize{
-    \item{genotype:}{Displays all genes mutated}
-    \item{acquisition:}{Only displays the last gente mutated}
+    \item{genotype: }{Displays all genes mutated}
+    \item{acquisition: }{Only displays the last gente mutated}
   }
 }
 
