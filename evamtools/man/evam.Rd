@@ -125,7 +125,7 @@ speed things much or what is the best number of threads to use. }
         by the CBN model (under a model where sampling times are
         distributed as an exponential of rate 1).}
       
-        \item{MCCBN_model}{As for CBN, only with one column of $\lambda$s.}
+        \item{MCCBN_model}{As for CBN, only with one column of \eqn{\lambda}s.}
         \item{MCCBN_trans_rate_mat}{As for CBN.}
         \item{MCCBN_trans_mat}{As for CBN.}
         \item{MCCBN_td_trans_mat}{As for CBN.}
@@ -136,7 +136,7 @@ speed things much or what is the best number of threads to use. }
         \item{MHN_trans_mat}{As for CBN.}
         \item{MHN_td_trans_mat}{As for CBN.}
         \item{MHN_exp_theta}{Matrix of the exponential of thetas; the
-        matrix $\Theta$ in Schill et al. (just
+        matrix \eqn{\Theta} in Schill et al. (just
         each theta, exponentiated; not the matrix exponential of the matrix of thetas).}
         \item{MHN_genots_predicted}{As for CBN.}
       
@@ -185,7 +185,7 @@ speed things much or what is the best number of threads to use. }
 
   \item{Merging identical columns}{Any identical columns are replaced by a single one (with a new identifier, the result of pasting the names of the fused columns separated by a _). 
 
-  \item{No more than max_cols}{If the \quote{max_cols} argument is not NULL, and if the data set has more columns that max_cols, we keep only max_cols columns of data, those with the largest number of mutations.}} 
+  \item{No more than max_cols}{If the \dQuote{max_cols} argument is not NULL, and if the data set has more columns that max_cols, we keep only max_cols columns of data, those with the largest number of mutations.}} 
  }
  
 }
