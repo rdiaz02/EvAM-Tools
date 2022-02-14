@@ -103,6 +103,95 @@ speed things much or what is the best number of threads to use. }
   }
 }
 
+\value{A list with named components (that should be self-explanatory). The pattern is method_component.
+  
+  \itemize{
+        \item{OT_model}{Data frame with parent and descendant edges,
+  edge weight, and observed and predicted frequencies of genes.}
+        \item{OT_f_graph}{The fitness graph, as a sparse matrix, with weights  obtained from the edge weights (this is not a transition rate  matrix). See full documentation for details.}
+        \item{OT_trans_mat}{Transition matrix between genotypes. This is
+  really an abuse of what an untimed OT provides. See full documentation for details.}
+        \item{OT_genots_predicted}{Probabilities of genotypes from the
+  OT model, as a data frame.}
+
+        \item{CBN_model}{Similar to the ouput from OT, but with
+        lambdas. The lambda to be used is "rerun_lambda".}
+        \item{CBN_trans_rate_mat}{Transition rate matrix as a sparse matrix.}
+        \item{CBN_trans_mat}{Transition matrix between genotypes,
+        obtained from the transition rate matrix using competing exponentials.}
+        \item{CBN_td_trans_mat}{Time-discretized transition matrix,
+        using the uniformization method; see full documentation for details.}
+      \item{CBN_genots_predicted}{Named vector of probabilities of genotypes predicted
+        by the CBN model (under a model where sampling times are
+        distributed as an exponential of rate 1).}
+      
+        \item{MCCBN_model}{As for CBN, only with one column of $\lambda$s.}
+        \item{MCCBN_trans_rate_mat}{As for CBN.}
+        \item{MCCBN_trans_mat}{As for CBN.}
+        \item{MCCBN_td_trans_mat}{As for CBN.}
+       \item{MCCBN_genots_predicted}{As for CBN.}
+      
+        \item{MHN_theta}{Matrix of estimated thetas2.}
+        \item{MHN_trans_rate_mat}{As for CBN.}
+        \item{MHN_trans_mat}{As for CBN.}
+        \item{MHN_td_trans_mat}{As for CBN.}
+        \item{MHN_exp_theta}{Matrix of the exponential of thetas; the
+        matrix $\Theta$ in Schill et al. (just
+        each theta, exponentiated; not the matrix exponential of the matrix of thetas).}
+        \item{MHN_genots_predicted}{As for CBN.}
+      
+        \item{OncoBN_model}{Similar to the ones above (but with a column
+        named Thetas, instead of lambdas or edge weights), with the
+        additional column dQuote{Relation}, that can take values OR (if
+        fitting model DBN) or AND (if fitting model CBN); Single
+        indicates nodes with a single ancestor (where OR or AND make no difference).}
+        \item{OncoBN_likelihood}{Likelihood of the OncoBN model.}
+        \item{OncoBN_f_graph}{As for OT.}
+	\item{OncoBN_trans_mat}{As for OT.}
+        \item{OncoBN_genots_predicted}{As for OT.}
+        \item{OncoBN_fitted_model}{DBN or CBN, depending on what you chose.}
+        \item{OncoBN_epsilon}{Epsilon (this is an argument of the call
+        to evam, but it is evaluated after possibly having modified the
+        input data; see below).}
+        \item{OncoBN_parent_set}{.}
+
+        \item{HESBCN_model}{As for CBN.}
+        \item{HESBCN_parent_set}{As for CBN.}
+        \item{HESBCN_trans_rate_mat}{As for CBN.}
+        \item{HESBCN_trans_mat}{As for CBN.}
+        \item{HESBCN_td_trans_mat}{As for CBN.}
+	\item{HESBCN_genots_predicted}{As for CBN.}
+	
+        \item{original_data}{The original data.}
+        \item{analyzed_data}{The data that were actually analyzed. Can
+        differ from the original data because of the data pre-processing
+        steps.}
+  }
+}
+
+
+\note{For some methods, such as MHN and OncoBN, some parameters tipically depend on the data (lambda and epsilon for MHN and OncoBN, respectively). Since we first examine and possibly modify the input data, the values might not be the ones you thought you entered, as the options should be evaluated after the data are processed.
+
+  The \strong{data pre-processing} involves, in sequence, these steps:
+
+
+  \itemize{ 
+
+  \item{Adding pseudosamples}{If any gene (column) is always observed
+    mutated (i.e, has a value of 1 for all observations), we add one
+    observation that has no gene mutated.} 
+  
+  \item{Removing genes with no mutations}{Any column that has value of 0 for all observations is removed.}
+
+  \item{Merging identical columns}{Any identical columns are replaced by a single one (with a new identifier, the result of pasting the names of the fused columns separated by a _). 
+
+  \item{No more than max_cols}{If the \quote{max_cols} argument is not NULL, and if the data set has more columns that max_cols, we keep only max_cols columns of data, those with the largest number of mutations.}} 
+ }
+ 
+}
+
+
+
 \description{
 Executes all CPMS given a cross sectional data set.
 }
