@@ -644,6 +644,23 @@ evam <- function(x,
         methods <- methods[-not_valid_methods]
     }
     if(length(methods) == 0) stop("No valid methods given.")
+
+
+    ## ########      Preprocessing: common to all methods
+    x <- df_2_mat_integer(x)
+    xoriginal <- x
+    
+    x <- add_pseudosamples(x, n00 = "auto3")
+    ## remove.constant makes no difference IFF we add pseudosamples, as
+    ## there can be no constant column when we add pseudosamples
+    x <- pre_process(x, remove.constant = FALSE,
+                     min.freq = 0, max.cols = max_cols)
+
+    if(ncol(x) < 2) {
+        warning("Fewer than 2 columns in data set")
+        return(NA)
+    }
+    
     
     ## ############################################################
     ##
@@ -702,7 +719,7 @@ evam <- function(x,
     mccbn_opts_2 <- fill_args_default(mccbn_opts, d_mccbn_opts)
     cbn_opts_2 <- fill_args_default(cbn_opts, d_cbn_opts)
     mhn_opts_2 <- fill_args_default(mhn_opts, d_mhn_opts)
-    
+
     ## rm to avoid confusion, though not needed
     rm(cbn_opts, hesbcn_opts, oncobn_opts, mccbn_opts, mhn_opts)
     rm(d_cbn_opts, d_hesbcn_opts, d_oncobn_opts, d_mccbn_opts, d_mhn_opts)
@@ -721,20 +738,6 @@ evam <- function(x,
         stopifnot(oncobn_opts_2$model %in% c("DBN", "CBN"))
     } 
 
-    ## ########      Preprocessing: common to all methods
-    x <- df_2_mat_integer(x)
-    xoriginal <- x
-    
-    x <- add_pseudosamples(x, n00 = "auto3")
-    ## remove.constant makes no difference IFF we add pseudosamples, as
-    ## there can be no constant column when we add pseudosamples
-    x <- pre_process(x, remove.constant = FALSE,
-                     min.freq = 0, max.cols = max_cols)
-
-    if(ncol(x) < 2) {
-        warning("Fewer than 2 columns in data set")
-        return(NA)
-    }
     
     ## ######################################################################
     ##   Big function so we can parallelize the calls
