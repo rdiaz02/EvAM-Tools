@@ -458,3 +458,47 @@ sample_to_pD_order <- function(x, ngenes, gene_names = NULL) {
 }
 
 
+## Given a named vector, where names are genotypes,
+## return the same vector sorted in the same order as sample_to_pD
+##  i.e., in the same order that MHN and generate_sorted_genotypes
+##  use.
+## Assumption: genes are ONLY those present in the set of genotypes
+##  no genes that always were absent.
+##  Missing genotypes left as NA
+reorder_to_pD <- function(x) {
+    genots_n <- names(x)
+    ## Ensure genotype names are canonical
+    genots_n <- canonicalize_genotype_names(genots_n)
+    names(x) <- genots_n
+    
+    ## Get gene names
+    gene_n <- unique(stringi::stri_replace_all_fixed(
+                                  unlist(
+                                      stringi::stri_split_fixed(names(uu), ",")),
+                                  " ", ""))
+    gene_n <- setdiff(gene_n, "WT")
+    sorted_genots <- generate_sorted_genotypes(length(gene_n),
+                                               gene_names = gene_n)
+
+    if(!all(genots_n %in% sorted_genots))
+        stop("At least one genotype name not in sorted_genots")
+    
+    ## Sort to original, return
+    x2 <- x[sorted_genots]
+    names(x2) <- sorted_genots
+    
+    return(x2)
+}
+
+## given a vector of genotype names
+##  - sort gene names
+##  - separate gene names by ", "
+canonicalize_genotype_names <- function(x) {
+    no_space <- stringi::stri_replace_all_regex(x, pattern = "[\\s]", "")
+
+    pasted_sorted <- unlist(lapply(strsplit(no_space, split = ",", fixed = TRUE),
+                  function(v) (paste(sort(v), collapse = ", "))))
+    return(pasted_sorted)
+}
+
+
