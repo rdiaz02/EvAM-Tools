@@ -9,7 +9,7 @@ export(
 
 importFrom("shiny", "runApp", "Progress")
 importFrom("shinyjs", "useShinyjs", "enable", "disable", "disabled")
-importFrom("grDevices", "rgb")
+importFrom("grDevices", "rgb", "colorRampPalette")
 importFrom("graphics", "axis", "legend", "lines", "par", "title", "barplot",
            "grid")
 importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert",

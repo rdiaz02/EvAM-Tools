@@ -441,11 +441,14 @@ plot_model <- function(model_info, parent_set, mod){
         }
     } else if(is.matrix(model_info)) { ##Plotting matrix
         op <- par(mar=c(3, 3, 5, 3), las = 1)
+        ## From library plot.matrix
+        rwb <- colorRampPalette(colors = c("red", "white", "blue"))
         plot(model_info, cex = 1.5, digits = 2, key = NULL
             , axis.col = list(side = 3)
             , xlab = "Effect of this (effector)"
             , ylab = " on this (affected)"
-            , main = mod
+           , main = mod
+           , col = rwb(9) ## FIXME: white should be centered in 0.
             , mgp = c(2, 1, 0))
         par(op)
     } else {
