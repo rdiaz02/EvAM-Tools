@@ -97,4 +97,23 @@ out_samp <- sample_CPMs(out, 1000)
 
 plot_CPMs(out, out_samp, plot_type = "obs_genotype_transitions")
 
+
+## Examples with mixed AND and OR and AND and XOR for HESBCN
+data("ex_mixed_and_or_xor")
+
+out_AND_OR <- evam(ex_mixed_and_or_xor,
+               methods = c("OT", "HESBCN", "MHN", "OncoBN"),
+               hesbcn_opts = list(seed = 26))
+
+out_AND_XOR <- evam(ex_mixed_and_or_xor,
+               methods = c("OT", "HESBCN", "MHN", "OncoBN"),
+               hesbcn_opts = list(seed = 31))
+
+plot_CPMs(out_AND_OR, plot_type = "trans_mat")
+plot_CPMs(out_AND_XOR, plot_type = "trans_mat")
+
+plot_CPMs(out_AND_OR, plot_type = "trans_mat", top_paths = .3)
+
+plot_CPMs(out_AND_OR, plot_type = "trans_mat", top_paths = 3)
+
 }
