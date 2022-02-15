@@ -71,8 +71,11 @@ test_that("Output is returned only with the requested fields", {
         trajectory = trajectory,
         obs_events = obs_events
     )
-    
-    out_params <- c("frequencies", "state_counts", "transitions")
+
+    out_params <- c("sampled_genotype_freqs",
+                    "state_counts",
+                    "obs_genotype_transitions")
+    ## out_params <- c("frequencies", "state_counts", "transitions")
     out_sim <- evamtools:::process_samples(simGenotypes, 5,
                                            gene_names = LETTERS[1:5],
                                            output = out_params[1])
@@ -147,12 +150,12 @@ test_that("Output is correct", {
     
    
     out <- evamtools:::process_samples(simGenotypes, 5, gene_names = LETTERS[1:5])
-    expect_equal(nrow(out$frequencies), 2**5)
+    expect_equal(nrow(out$sampled_genotype_freqs), 2**5)
     expect_equal(nrow(out$state_counts), 2**5)
 
     sim_counts <- table(simGenotypes$obs_events)
-    for (i in 1:length(out$frequencies$Genotype)){
-        r <- out$frequencies[i, ]
+    for (i in 1:length(out$sampled_genotype_freqs$Genotype)){
+        r <- out$sampled_genotype_freqs[i, ]
         if(r$Genotype %in% names(sim_counts)){
             expect_equal(r$Counts, as.numeric(sim_counts[r$Genotype]))
         }
@@ -160,11 +163,11 @@ test_that("Output is correct", {
 
     }
 
-    expect_equal(sum(out$frequencies$Counts), length(simGenotypes$obs_events))
+    expect_equal(sum(out$sampled_genotype_freqs$Counts), length(simGenotypes$obs_events))
 
     state_counts <- table(unlist(simGenotypes$trajectory))
     for (i in 1:length(out$state_counts$Genotype)){
-        r <- out$frequencies[i, ]
+        r <- out$sampled_genotype_freqs[i, ]
         if(r$Genotype %in% names(sim_counts)){
             expect_equal(r$Counts, as.numeric(sim_counts[r$Genotype]))
         }
@@ -172,13 +175,13 @@ test_that("Output is correct", {
 
     }
 
-    expect_equal(sum(out$transitions)
+    expect_equal(sum(out$obs_genotype_transitions)
         , sum(vapply(simGenotypes$trajectory, length, numeric(1)) - 1))
 
      ## Note: this test has many identical entries. Not a strong one.
      ## This expects a vector
      ## expect_equal(out$transitions, expected_transitions)
-     tmp <- igraph::as_data_frame(igraph::graph_from_adjacency_matrix(out$transitions))
+     tmp <- igraph::as_data_frame(igraph::graph_from_adjacency_matrix(out$obs_genotype_transitions))
      tmp2 <- paste0(tmp[, 1], " -> ", tmp[, 2])
      ttmp2 <- table(tmp2)
      tmp2v <- as.vector(ttmp2)
@@ -253,12 +256,12 @@ test_that("New algorithm for state transitions", {
     os5 <- evamtools:::process_samples(sim5, 5, gene_names = LETTERS[1:5])
     os6 <- evamtools:::process_samples(sim6, 5, gene_names = LETTERS[1:5])
     
-    expect_equal(os1$transitions, t1)
-    expect_equal(os2$transitions, t2)
-    expect_equal(os3$transitions, t3)
-    expect_equal(os4$transitions, t4)
-    expect_equal(os5$transitions, t5)
-    expect_equal(os6$transitions, t6)
+    expect_equal(os1$obs_genotype_transitions, t1)
+    expect_equal(os2$obs_genotype_transitions, t2)
+    expect_equal(os3$obs_genotype_transitions, t3)
+    expect_equal(os4$obs_genotype_transitions, t4)
+    expect_equal(os5$obs_genotype_transitions, t5)
+    expect_equal(os6$obs_genotype_transitions, t6)
 })
 
 cat("\n Done test.processing-sampled-genotypes-trajectories-from-models.R \n")

@@ -3,16 +3,18 @@ test_that("Minimal test: we can run", {
     Dat1 <- every_which_way_data[[16]][1:40, 2:6]
     out <- suppressMessages(evam(Dat1,
                                  methods = c("CBN", "OT", "OncoBN",
-                                             "MHN", "HESBCN")))
+                                             "MHN", "HESBCN", "MCCBN")))
     expect_true(exists("OT_model", where = out))
 })
 
 
 exercise_sample_CPMs <- function(out) {
-    samp <- evamtools:::sample_CPMs(out, 1000)
-    samp2 <- evamtools:::sample_CPMs(out, 1000, obs_genotype_transitions = FALSE)
+    samp <- evamtools:::sample_CPMs(out, 1000,
+                                    output = c("sampled_genotype_freqs",
+                                               "obs_genotype_transitions"))
+    samp2 <- evamtools:::sample_CPMs(out, 1000, output = "sampled_genotype_freqs")
     se <- paste0(c("CBN", "OT", "OncoBN", "MHN", "HESBCN"),
-                 "_genotype_freqs")
+                 "_sampled_genotype_freqs")
     expect_true(all(vapply(se, function(x) exists(x, samp), TRUE)))
     expect_true(exists("CBN_obs_genotype_transitions", samp))
     expect_true(all(vapply(se, function(x) exists(x, samp2), TRUE)))

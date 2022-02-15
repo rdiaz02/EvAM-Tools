@@ -43,21 +43,42 @@ do_MCCBN_OT_CBN <- function(x) {
 }
 
 
-## #' @title Run MCCBN with H-CBN2
-## #' 
-## #' Using H-CBN2, as in example from https://github.com/cbg-ethz/MC-CBN
-## #' 
-## #' @param x Cross secitonal data. Matrix of genes (columns)
-## #' and individuals (rows)
-## #' @param max.iter.asa Int. Number of steps to run. Default: 100000
-## #' @param ncores Int. Number of threads to use
-## #' @param L Int. Number of samples to be drawn from the proposal in the E-step
-## #' @param tmp_dir Directory name where the oput is located. 
-## #' @param addname String to append to the temporary folder name. Default NULL
-## #' @param silent Whether to run show message showing the folder name where MCCBN is run
-## #' 
-## #' @return A list with the adjacency matrix, the lambdas, the parent set
-## #' and a data.frame with From-To edges and associated lambdas.
+## title Run MCCBN with H-CBN2
+## 
+## Using H-CBN2, as in example from https://github.com/cbg-ethz/MC-CBN
+## 
+## return A list with the adjacency matrix, the lambdas, the parent set
+## and a data.frame with From-To edges and associated lambdas.
+
+## \arguments{ \item{mccbn_hcbn2_opts}{Options passed to
+##   \code{\link[mccbn]{adaptive.simulated.annealing}}. See the help of
+##   \code{\link[mccbn]{adaptive.simulated.annealing}} for details.  In addition,
+##   the following options:
+    
+##     \itemize{ \item\code{tmp_dir}. Directory name where the oput is
+##       located. This is passed to
+##       \code{\link[mccbn]{adaptive.simulated.annealing}}, as argument
+##       \code{outdir}, with \code{addname} added, if provided.
+ 
+##       \item\code{addname}. String to append to the temporary directory
+##       name. Default is NULL.
+
+##       \item\code{silent}.Whether to run show message showing the directory
+##     name where MCCBN is run. This is different from
+##     \code{mccbn_hcbn2_opts$verbose}.  } }
+  
+##   \item{x}{Cross sectional data. Matrix of genes (columns) and individuals
+## (rows)} }
+
+## \description{
+## Run MCCBN with H-CBN2
+
+## Using H-CBN2, as in example from \url{https://github.com/cbg-ethz/MC-CBN}.
+
+## L is not given a default value in the call; using here the one shown in
+## the web page example.
+## }
+
 
 do_MCCBN_HCBN2 <- function(x 
                           , mccbn_hcbn2_opts = list(
@@ -65,7 +86,8 @@ do_MCCBN_HCBN2 <- function(x
                                 addname = NULL,
                                 silent = TRUE,
                                 L = 100,
-                                sampling = c("forward", "add-remove", "backward", "bernoulli", "pool"),
+                                sampling = c("forward", "add-remove",
+                                             "backward", "bernoulli", "pool"),
                                 max.iter = 100L,
                                 update.step.size = 20L,
                                 tol = 0.001,

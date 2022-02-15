@@ -336,7 +336,7 @@ NA, NA, NA), OT_edgeWeight = c(0.525915054637741, 0.101508072999909,
 0.18, 0.14, 0.36), OT_predMarginal = c(0.56, 0.18, 0.139999436433903, 
 0.36)), class = "data.frame", row.names = c("A", "B", "C", "D"
 )), consensus = NA, OT_error.fun = "std", ot.boot.original = NA, 
-    genots_predicted = NA, genots_observed = NA, two_way_predicted = NA, 
+    predicted_genotype_freqs = NA, genots_observed = NA, two_way_predicted = NA, 
     two_way_observed = NA), CAPRESE = list(edges = structure(list(
     From = c("Root", "Root", "Root", "A"), To = c("A", "B", "D", 
     "C"), edge = c("Root -> A", "Root -> B", "Root -> D", "A -> C"

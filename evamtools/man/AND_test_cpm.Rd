@@ -14,7 +14,7 @@ A list with 31 items:
   \item{name}{string, Data set name}
   \item{csd_data}{data.frame, Binary data with cross sectional data}
   \item{*genotype_transitions}{data.frame, Observed umber of transitions between two genotypes}
-  \item{*genotype_freqs}{data.frame, Genotype frequencies of each genotype sampled by each CPM}
+  \item{*sampled_genotype_freqs}{data.frame, Genotype frequencies of each genotype sampled by each CPM}
 }
 }
 \usage{
