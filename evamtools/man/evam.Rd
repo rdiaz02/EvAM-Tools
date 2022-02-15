@@ -140,7 +140,7 @@ speed things much or what is the best number of threads to use. }
         \item{OT_f_graph}{The fitness graph, as a sparse matrix, with weights  obtained from the edge weights (this is not a transition rate  matrix). See full documentation for details.}
         \item{OT_trans_mat}{Transition matrix between genotypes. This is
   really an abuse of what an untimed OT provides. See full documentation for details.}
-        \item{OT_genots_predicted}{Probabilities of genotypes from the
+        \item{OT_predicted_genotype_freqs}{Probabilities of genotypes from the
   OT model, as a data frame.}
 
         \item{CBN_model}{Similar to the ouput from OT, but with
@@ -150,7 +150,7 @@ speed things much or what is the best number of threads to use. }
         obtained from the transition rate matrix using competing exponentials.}
         \item{CBN_td_trans_mat}{Time-discretized transition matrix,
         using the uniformization method; see full documentation for details.}
-      \item{CBN_genots_predicted}{Named vector of probabilities of genotypes predicted
+      \item{CBN_predicted_genotype_freqs}{Named vector of probabilities of genotypes predicted
         by the CBN model (under a model where sampling times are
         distributed as an exponential of rate 1).}
       
@@ -158,7 +158,7 @@ speed things much or what is the best number of threads to use. }
         \item{MCCBN_trans_rate_mat}{As for CBN.}
         \item{MCCBN_trans_mat}{As for CBN.}
         \item{MCCBN_td_trans_mat}{As for CBN.}
-       \item{MCCBN_genots_predicted}{As for CBN.}
+       \item{MCCBN_predicted_genotype_freqs}{As for CBN.}
       
         \item{MHN_theta}{Matrix of estimated thetas2.}
         \item{MHN_trans_rate_mat}{As for CBN.}
@@ -167,7 +167,7 @@ speed things much or what is the best number of threads to use. }
         \item{MHN_exp_theta}{Matrix of the exponential of thetas; the
         matrix \eqn{\Theta} in Schill et al. (just
         each theta, exponentiated; not the matrix exponential of the matrix of thetas).}
-        \item{MHN_genots_predicted}{As for CBN.}
+        \item{MHN_predicted_genotype_freqs}{As for CBN.}
       
         \item{OncoBN_model}{Similar to the ones above (but with a column
         named Thetas, instead of lambdas or edge weights), with the
@@ -177,7 +177,7 @@ speed things much or what is the best number of threads to use. }
         \item{OncoBN_likelihood}{Likelihood of the OncoBN model.}
         \item{OncoBN_f_graph}{As for OT.}
 	\item{OncoBN_trans_mat}{As for OT.}
-        \item{OncoBN_genots_predicted}{As for OT.}
+        \item{OncoBN_predicted_genotype_freqs}{As for OT.}
         \item{OncoBN_fitted_model}{DBN or CBN, depending on what you chose.}
         \item{OncoBN_epsilon}{Epsilon (this is an argument of the call
         to evam, but it is evaluated after possibly having modified the
@@ -189,7 +189,7 @@ speed things much or what is the best number of threads to use. }
         \item{HESBCN_trans_rate_mat}{As for CBN.}
         \item{HESBCN_trans_mat}{As for CBN.}
         \item{HESBCN_td_trans_mat}{As for CBN.}
-	\item{HESBCN_genots_predicted}{As for CBN.}
+	\item{HESBCN_predicted_genotype_freqs}{As for CBN.}
 	
         \item{original_data}{The original data.}
         \item{analyzed_data}{The data that were actually analyzed. Can

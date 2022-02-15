@@ -63,7 +63,7 @@ test_that("Processing samples & Plotting of CPMs is correct", {
       expect_equal(model_probabilities[[i]], sample_evam_output[[paste0(model, "_", i)]]) 
     }
 
-    for(i in c("genotype_freqs")){
+    for(i in c("sampled_genotype_freqs")){
       expect_equal(model_trm[[i]], samples[[paste0(model, "_", i)]]) 
       expect_equal(model_transitions[[i]], samples[[paste0(model, "_", i)]]) 
       expect_equal(model_probabilities[[i]], samples[[paste0(model, "_", i)]]) 

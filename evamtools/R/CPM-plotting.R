@@ -395,7 +395,7 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
         model_info = model_info
         , data2plot = all_data[[paste0(mod, "_", plot_type)]]
         , parent_set = all_data[[paste0(mod, "_parent_set")]]
-        , genotype_freqs = all_data[[paste0(mod, "_genotype_freqs")]]
+        , sampled_genotype_freqs = all_data[[paste0(mod, "_sampled_genotype_freqs")]]
         ))
 }
 
@@ -515,7 +515,7 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
             # } else if (plot_type == "obs_genotype_transitions") { ## observed genotype trans. ; was "transitions"
             plot_genot_fg(model_data2plot$data2plot,
                         observations = cpm_output$analyzed_data,
-                        model_data2plot$genotype_freqs,
+                        model_data2plot$sampled_genotype_freqs,
                         top_paths = top_paths,
                         label_type = label_type,
                         fixed_vertex_size = fixed_vertex_size)

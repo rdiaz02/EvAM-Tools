@@ -90,9 +90,9 @@
 #     available_methods <- c("Source", "OT", "CBN", "MHN", "HESBCN")
 #     # , "DBN", "MCCBN")
 #     if(type %in% c("freqs")){
-#         all_counts <- data.frame(Genotype = data[["MHN_genotype_freqs"]]$Genotype)
+#         all_counts <- data.frame(Genotype = data[["MHN_sampled_genotype_freqs"]]$Genotype)
 #         for(name in names(data)){
-#             if(grepl("_genotype_freqs", name)
+#             if(grepl("_sampled_genotype_freqs", name)
 #             #  & !grepl("^OT", name) ##Now we have genotypes frequencies for OT
 #              ){
 #                 method_name <- strsplit(name, "_")[[1]][[1]]

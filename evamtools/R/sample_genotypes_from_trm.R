@@ -203,7 +203,7 @@ population_sample_from_trm <- function(trm, n_samples = 10,
 ## #' counts of how many transitions between each genotype have been observed) 
 process_samples <- function(sim, n_genes,
                             gene_names,
-                            output = c("genotype_freqs",
+                            output = c("sampled_genotype_freqs",
                                        "state_counts",
                                        "obs_genotype_transitions"),
                             cores = detectCores()) {
@@ -216,7 +216,7 @@ process_samples <- function(sim, n_genes,
     }
 
     ## Checking output variables
-    valid_output <- c("genotype_freqs",
+    valid_output <- c("sampled_genotype_freqs",
                       "state_counts",
                       "obs_genotype_transitions")
 
@@ -229,14 +229,14 @@ process_samples <- function(sim, n_genes,
     sorted_genotypes <- generate_sorted_genotypes(n_genes, gene_names)
 
     ## Calculate frequencies: genotype frequencies
-    if ("genotype_freqs" %in% output) {
+    if ("sampled_genotype_freqs" %in% output) {
         counts_tmp <- sample_to_pD_order(sim$obs_events, n_genes, gene_names)
         frequencies <- data.frame(
             Genotype = sorted_genotypes,
             Counts = counts_tmp
         )
         rownames(frequencies) <- NULL
-        retval$genotype_freqs <- frequencies
+        retval$sampled_genotype_freqs <- frequencies
     }
 
     ## Calculate transitions
@@ -362,7 +362,7 @@ sample_CPMs <- function(cpm_output
                       , methods = c("OT", "OncoBN",
                                     "CBN", "MCCBN",
                                     "MHN", "HESBCN")
-                      , output = c("genotype_freqs")
+                      , output = c("sampled_genotype_freqs")
                         ## "obs_genotype_transitions",
                         ## "state_counts")
                         ## , obs_genotype_transitions = TRUE
@@ -371,7 +371,7 @@ sample_CPMs <- function(cpm_output
     retval <- list()
 
     output <- unique(output)
-    valid_output <- c("genotype_freqs",
+    valid_output <- c("sampled_genotype_freqs",
                       "obs_genotype_transitions",
                       "state_counts")
     not_valid_output <- which(!(output %in% valid_output))
@@ -394,10 +394,10 @@ sample_CPMs <- function(cpm_output
     for (method in methods) {
         if (method %in% c("OT", "OncoBN")) {
             if (method == "OT") {
-                tmp_data <- cpm_output$OT_genots_predicted
+                tmp_data <- cpm_output$OT_predicted_genotype_freqs
                 genots <- tmp_data[2:(ncol(tmp_data) - 1)]
             } else if (method == "OncoBN") {
-                tmp_data <- cpm_output$OncoBN_genots_predicted
+                tmp_data <- cpm_output$OncoBN_predicted_genotype_freqs
                 genots <- tmp_data[1:(ncol(tmp_data) - 1)]
             }
 
@@ -412,7 +412,7 @@ sample_CPMs <- function(cpm_output
                        prob = tmp_data$Prob, replace = TRUE),
                 ngenes = n_genes, gene_names = gene_names)
 
-            retval[[sprintf("%s_genotype_freqs", method)]] <-
+            retval[[sprintf("%s_sampled_genotype_freqs", method)]] <-
                 data.frame(
                     Genotype = generate_sorted_genotypes(n_genes, gene_names),
                     Counts = tmp_genotypes_sampled
@@ -429,18 +429,18 @@ sample_CPMs <- function(cpm_output
                 if ((length(trm) == 1) && is.na(trm)) {
                     retval[[sprintf("%s_obs_genotype_transitions", method)]] <- NULL
 
-                    ogt <- cpm_output[[sprintf("%s_genots_predicted", method)]]
+                    ogt <- cpm_output[[sprintf("%s_predicted_genotype_freqs", method)]]
                     if ((length(ogt) == 1) && is.na(ogt)) { 
-                        retval[[sprintf("%s_genotype_freqs", method)]] <- NULL
+                        retval[[sprintf("%s_sampled_genotype_freqs", method)]] <- NULL
                     } else {
                         ## Yes, we could sample. But this should never happen.
                         stop("No transition rate matrix in output ",
-                             "but genots_predicted")
+                             "but predicted_genotype_freqs")
                     }
                 } else { ## transition rate matrix present
                     sims <- population_sample_from_trm(trm, n_samples = N)
                     ## whatout <- c("frequencies", "state_counts", "transitions")
-                    ## names(whatout) <- c("genotype_freqs", )
+                    ## names(whatout) <- c("sampled_genotype_freqs", )
                     ## ## state_counts and frequencies are very cheap
                     ## whatout <- c("frequencies", "state_counts")
                     ## ## if ("obs_genotype_transitions" %in% output )
@@ -467,10 +467,10 @@ sample_CPMs <- function(cpm_output
             } else {
                 ## Multinomial sampling from the predicted genotypes
                 ## as for OT and OncoBN
-                genots_pred <- cpm_output[[sprintf("%s_genots_predicted",
+                genots_pred <- cpm_output[[sprintf("%s_predicted_genotype_freqs",
                                                    method)]]
                 if ((length(genots_pred) == 1) && is.na(genots_pred)) {
-                    retval[[sprintf("%s_genotype_freqs",
+                    retval[[sprintf("%s_sampled_genotype_freqs",
                                     method)]] <- NULL
                 } else {
                     tmp_genotypes_sampled <-
@@ -481,7 +481,7 @@ sample_CPMs <- function(cpm_output
                                            ngenes = n_genes,
                                            gene_names = gene_names)
 
-                    retval[[sprintf("%s_genotype_freqs", method)]] <-
+                    retval[[sprintf("%s_sampled_genotype_freqs", method)]] <-
                         data.frame(
                             Genotype = generate_sorted_genotypes(n_genes, gene_names),
                             Counts = tmp_genotypes_sampled)

@@ -748,7 +748,7 @@ evam <- function(x,
             time_out <- system.time(
                 out <- do_MHN2(x, lambda = mhn_opts_2$lambda))["elapsed"]
             out <- c(out,
-                     genots_predicted =
+                     predicted_genotype_freqs =
                          list(probs_from_trm(out$transitionRateMatrix)))
         } else if (method == "HESBCN") {
             
@@ -763,7 +763,7 @@ evam <- function(x,
                          trans_rate_to_trans_mat(out[["weighted_fgraph"]],
                                                  method = "uniformization"))
             out <- c(out,
-                     genots_predicted =
+                     predicted_genotype_freqs =
                          list(probs_from_trm(out$weighted_fgraph)))
         } else if (method == "CBN") {
             time_out <- system.time(
@@ -779,7 +779,7 @@ evam <- function(x,
                          trans_rate_to_trans_mat(out[["weighted_fgraph"]],
                                                  method = "uniformization"))
             out <- c(out,
-                     genots_predicted =
+                     predicted_genotype_freqs =
                          list(probs_from_trm(out$weighted_fgraph)))
         } else if (method == "MCCBN") {
             if(mccbn_opts_2$model == "OT-CBN") 
@@ -801,7 +801,7 @@ evam <- function(x,
                          trans_rate_to_trans_mat(out[["weighted_fgraph"]],
                                                  method = "uniformization"))
             out <- c(out,
-                     genots_predicted =
+                     predicted_genotype_freqs =
                          list(probs_from_trm(out$weighted_fgraph)))
         } else if (method == "OT") {
             time_out <- system.time(
@@ -851,32 +851,32 @@ evam <- function(x,
         OT_model = get_output("OT", "edges"),
         OT_f_graph = get_output("OT", "weighted_fgraph"),
         OT_trans_mat = get_output("OT", "trans_mat_genots"),
-        OT_genots_predicted = get_output("OT", "genots_predicted"),
+        OT_predicted_genotype_freqs = get_output("OT", "predicted_genotype_freqs"),
 
         CBN_model = get_output("CBN", "edges"),
         CBN_trans_rate_mat = get_output("CBN", "weighted_fgraph"),
         CBN_trans_mat = get_output("CBN", "trans_mat_genots"),
         CBN_td_trans_mat = get_output("CBN", "td_trans_mat"),
-        CBN_genots_predicted = get_output("CBN", "genots_predicted"),
+        CBN_predicted_genotype_freqs = get_output("CBN", "predicted_genotype_freqs"),
 
         MCCBN_model = get_output("MCCBN", "edges"),
         MCCBN_trans_rate_mat = get_output("MCCBN", "weighted_fgraph"),
         MCCBN_trans_mat = get_output("MCCBN", "trans_mat_genots"),
         MCCBN_td_trans_mat = get_output("CBN", "td_trans_mat"),
-        MCCBN_genots_predicted = get_output("MCCBN", "genots_predicted"),
+        MCCBN_predicted_genotype_freqs = get_output("MCCBN", "predicted_genotype_freqs"),
         
         MHN_theta = get_output("MHN", "theta"),
         MHN_trans_rate_mat = get_output("MHN", "transitionRateMatrix"),
         MHN_trans_mat = get_output("MHN", "transitionMatrixCompExp"),
         MHN_td_trans_mat = get_output("MHN", "transitionMatrixTimeDiscretized"),
         MHN_exp_theta = exp(get_output("MHN", "theta")),
-        MHN_genots_predicted = get_output("MHN", "genots_predicted"),
+        MHN_predicted_genotype_freqs = get_output("MHN", "predicted_genotype_freqs"),
 
         OncoBN_model = get_output("OncoBN", "edges"),
         OncoBN_likelihood = get_output("OncoBN", "likelihood"),
         OncoBN_f_graph = get_output("OncoBN", "weighted_fgraph"), 
         OncoBN_trans_mat = get_output("OncoBN", "trans_mat_genots"),
-        OncoBN_genots_predicted = get_output("OncoBN", "genots_predicted"),
+        OncoBN_predicted_genotype_freqs = get_output("OncoBN", "predicted_genotype_freqs"),
         OncoBN_fitted_model = get_output("OncoBN", "model"),
         OncoBN_epsilon = get_output("OncoBN", "epsilon"),
         OncoBN_parent_set = get_output("OncoBN", "parent_set"),
@@ -886,7 +886,7 @@ evam <- function(x,
         HESBCN_trans_rate_mat = get_output("HESBCN", "weighted_fgraph"),
         HESBCN_trans_mat = get_output("HESBCN", "trans_mat_genots"),
         HESBCN_td_trans_mat = get_output("HESBCN", "td_trans_mat"),
-        HESBCN_genots_predicted = get_output("HESBCN", "genots_predicted"),
+        HESBCN_predicted_genotype_freqs = get_output("HESBCN", "predicted_genotype_freqs"),
         
         original_data = xoriginal,
         analyzed_data = x
@@ -1193,7 +1193,7 @@ evam <- function(x,
 ##         OT_model = OT_out$edges,
 ##         OT_f_graph = OT_fg_tm$weighted_fgraph,
 ##         OT_trans_mat = OT_fg_tm$trans_mat_genots,
-##         OT_genots_predicted = OT_out$genots_predicted,
+##         OT_predicted_genotype_freqs = OT_out$predicted_genotype_freqs,
 
 ##         CBN_model = CBN_out$edges,
 ##         CBN_trans_rate_mat = CBN_fg_tm$weighted_fgraph,
@@ -1215,7 +1215,7 @@ evam <- function(x,
 ##         OncoBN_likelihood = OncoBN_out$likelihood, 
 ##         OncoBN_f_graph = OncoBN_fg_tm$weighted_fgraph, 
 ##         OncoBN_trans_mat = OncoBN_fg_tm$trans_mat_genots,
-##         OncoBN_genots_predicted = OncoBN_out$genots_predicted,
+##         OncoBN_predicted_genotype_freqs = OncoBN_out$predicted_genotype_freqs,
 ##         OncoBN_fitted_model = OncoBN_out$model,
 ##         OncoBN_epsilon = OncoBN_out$epsilon,
 ##         OncoBN_parent_set = OncoBN_out$parent_set,

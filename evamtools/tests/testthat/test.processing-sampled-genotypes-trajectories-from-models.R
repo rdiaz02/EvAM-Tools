@@ -72,7 +72,7 @@ test_that("Output is returned only with the requested fields", {
         obs_events = obs_events
     )
 
-    out_params <- c("genotype_freqs",
+    out_params <- c("sampled_genotype_freqs",
                     "state_counts",
                     "obs_genotype_transitions")
     ## out_params <- c("frequencies", "state_counts", "transitions")
@@ -150,12 +150,12 @@ test_that("Output is correct", {
     
    
     out <- evamtools:::process_samples(simGenotypes, 5, gene_names = LETTERS[1:5])
-    expect_equal(nrow(out$genotype_freqs), 2**5)
+    expect_equal(nrow(out$sampled_genotype_freqs), 2**5)
     expect_equal(nrow(out$state_counts), 2**5)
 
     sim_counts <- table(simGenotypes$obs_events)
-    for (i in 1:length(out$genotype_freqs$Genotype)){
-        r <- out$genotype_freqs[i, ]
+    for (i in 1:length(out$sampled_genotype_freqs$Genotype)){
+        r <- out$sampled_genotype_freqs[i, ]
         if(r$Genotype %in% names(sim_counts)){
             expect_equal(r$Counts, as.numeric(sim_counts[r$Genotype]))
         }
@@ -163,11 +163,11 @@ test_that("Output is correct", {
 
     }
 
-    expect_equal(sum(out$genotype_freqs$Counts), length(simGenotypes$obs_events))
+    expect_equal(sum(out$sampled_genotype_freqs$Counts), length(simGenotypes$obs_events))
 
     state_counts <- table(unlist(simGenotypes$trajectory))
     for (i in 1:length(out$state_counts$Genotype)){
-        r <- out$genotype_freqs[i, ]
+        r <- out$sampled_genotype_freqs[i, ]
         if(r$Genotype %in% names(sim_counts)){
             expect_equal(r$Counts, as.numeric(sim_counts[r$Genotype]))
         }

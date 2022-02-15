@@ -10,12 +10,12 @@ test_that("We get requested output, by the specified means", {
     outS1 <- sample_CPMs(out, N = 100)
 
     expect_true(all(
-        c("OT_genotype_freqs",
-          "OncoBN_genotype_freqs",
-          "CBN_genotype_freqs",
-          "MCCBN_genotype_freqs",
-          "MHN_genotype_freqs",
-          "HESBCN_genotype_freqs") %in% names(outS1)))
+        c("OT_sampled_genotype_freqs",
+          "OncoBN_sampled_genotype_freqs",
+          "CBN_sampled_genotype_freqs",
+          "MCCBN_sampled_genotype_freqs",
+          "MHN_sampled_genotype_freqs",
+          "HESBCN_sampled_genotype_freqs") %in% names(outS1)))
 
     expect_true(sum(is.na(unlist(outS1))) == 0)
         
@@ -27,10 +27,10 @@ test_that("We get requested output, by the specified means", {
                     "For the requested output we will need to simulate",
                    fixed = TRUE)
     ## true, but might want to rm the NA components
-    ## expect_true(is.na(outS2$CBN_genotype_freqs))
+    ## expect_true(is.na(outS2$CBN_sampled_genotype_freqs))
     ## expect_true(is.na(outS2$CBN_state_counts))
     expect_true(sum(is.na(outS2$CBN_obs_genotype_transitions)) == 0)
-    ## expect_identical(names(outS2), c("CBN_genotype_freqs",
+    ## expect_identical(names(outS2), c("CBN_sampled_genotype_freqs",
     ##                                  "CBN_obs_genotype_transitions",
     ##                                  "CBN_state_counts"))
     
@@ -44,14 +44,14 @@ test_that("We get requested output, by the specified means", {
                     fixed = TRUE)
 
     ## true, but might want to rm the NA components
-    ## expect_true(is.na(outS3$CBN_genotype_freqs))
+    ## expect_true(is.na(outS3$CBN_sampled_genotype_freqs))
     ## expect_true(is.na(outS3$CBN_state_counts))
     expect_true(sum(is.na(outS3$CBN_obs_genotype_transitions)) == 0)
     expect_true(sum(is.na(outS3$MHN_obs_genotype_transitions)) == 0)
     expect_true(sum(is.na(outS3$CBN_state_counts)) == 0)
     expect_true(sum(is.na(outS3$MHN_state_counts)) == 0)
 
-    ## expect_identical(names(outS3), c("CBN_genotype_freqs",
+    ## expect_identical(names(outS3), c("CBN_sampled_genotype_freqs",
     ##                                  "CBN_obs_genotype_transitions",
     ##                                  "CBN_state_counts"))
 
@@ -61,13 +61,13 @@ test_that("We get requested output, by the specified means", {
 
     expect_message(outS4 <- sample_CPMs(out, N = 100, methods = c("CBN", "OT", "MHN"), 
                          output = c("obs_genotype_transitions",
-                                    "genotype_freqs")),
+                                    "sampled_genotype_freqs")),
                    "For the requested output we will need to simulate",
                     fixed = TRUE)
 
     expect_true(sum(is.na(outS4$CBN_obs_genotype_transitions)) == 0)
     expect_true(sum(is.na(outS4$MHN_obs_genotype_transitions)) == 0)
-    expect_true(sum(is.na(outS4$CBN_genotype_freqs)) == 0)
-    expect_true(sum(is.na(outS4$MHN_genotype_freqs)) == 0)
-    expect_true(sum(is.na(outS4$OT_genotype_freqs)) == 0)
+    expect_true(sum(is.na(outS4$CBN_sampled_genotype_freqs)) == 0)
+    expect_true(sum(is.na(outS4$MHN_sampled_genotype_freqs)) == 0)
+    expect_true(sum(is.na(outS4$OT_sampled_genotype_freqs)) == 0)
 })

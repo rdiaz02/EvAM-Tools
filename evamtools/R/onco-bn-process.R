@@ -79,7 +79,7 @@ do_OncoBN <- function(data,
       , epsilon = fit$epsilon
       , model = model
       , parent_set = ps_v
-      , genots_predicted = DBN_prob_genotypes(fit, colnames(data))
+      , predicted_genotype_freqs = DBN_prob_genotypes(fit, colnames(data))
     ))
 }
 
