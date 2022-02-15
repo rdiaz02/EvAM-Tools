@@ -203,9 +203,9 @@ population_sample_from_trm <- function(trm, n_samples = 10,
 ## #' counts of how many transitions between each genotype have been observed) 
 process_samples <- function(sim, n_genes,
                             gene_names,
-                            output = c("frequencies",
+                            output = c("genotype_freqs",
                                        "state_counts",
-                                       "transitions"),
+                                       "obs_genotype_transitions"),
                             cores = detectCores()) {
 
     #Checking input
@@ -216,25 +216,27 @@ process_samples <- function(sim, n_genes,
     }
 
     ## Checking output variables
-    valid_output <- c("frequencies", "state_counts", "transitions")
+    valid_output <- c("genotype_freqs",
+                      "state_counts",
+                      "obs_genotype_transitions")
 
     if (any(!(output %in% valid_output ))) stop("Incorrect output specified")
     if (length(output) == 0) stop("No output specified")
     
     ## Set up
     retval <- list()
-    n_states <- 2**n_genes
+    n_states <- 2^n_genes
     sorted_genotypes <- generate_sorted_genotypes(n_genes, gene_names)
 
     ## Calculate frequencies: genotype frequencies
-    if ("frequencies" %in% output) {
+    if ("genotype_freqs" %in% output) {
         counts_tmp <- sample_to_pD_order(sim$obs_events, n_genes, gene_names)
         frequencies <- data.frame(
             Genotype = sorted_genotypes,
             Counts = counts_tmp
         )
         rownames(frequencies) <- NULL
-        retval$frequencies <- frequencies
+        retval$genotype_freqs <- frequencies
     }
 
     ## Calculate transitions
@@ -251,7 +253,7 @@ process_samples <- function(sim, n_genes,
     ## they have been computed that way. They are now, though.
 
     ## This is the slowest part. Two implementations. 
-    if ("transitions" %in% output) { ## observed genotype transitions
+    if ("obs_genotype_transitions" %in% output) { ## observed genotype transitions
         unlisted_trajectories <- unlist(sim$trajectory)
         ## ## Implementation 1
         ## tt <- sparse_transM_from_genotypes(unique(unlisted_trajectories))
@@ -309,13 +311,13 @@ process_samples <- function(sim, n_genes,
             tt2[apso[last, 1], apso[last, 2]] <- sum
         
         ## stopifnot(identical(tt, tt2))
-        retval$transitions <- tt2
+        retval$obs_genotype_transitions <- tt2
     }
 
 
     ## Calculate state_counts
     if ("state_counts" %in% output) { ## times each genotype visited
-        if (!("transitions" %in% output))
+        if (!("obs_genotype_transitions" %in% output))
             unlisted_trajectories <- unlist(sim$trajectory)
         state_counts <- sample_to_pD_order(unlisted_trajectories,
                                            n_genes, gene_names)
@@ -325,7 +327,7 @@ process_samples <- function(sim, n_genes,
         )
         retval$state_counts <- state_counts
         ## FIXME: Paranoid check. Will remove later
-        if("transitions" %in% output) {
+        if("obs_genotype_transitions" %in% output) {
             cstt2 <- colSums(tt2)[-1]
             ## No WT
             statecounts_vector <- state_counts[-1, "Counts"]
@@ -360,14 +362,35 @@ sample_CPMs <- function(cpm_output
                       , methods = c("OT", "OncoBN",
                                     "CBN", "MCCBN",
                                     "MHN", "HESBCN")
-                      , obs_genotype_transitions = TRUE
+                      , output = c("genotype_freqs")
+                        ## "obs_genotype_transitions",
+                        ## "state_counts")
+                        ## , obs_genotype_transitions = TRUE
                         ) {
     ## And I have "Source" for a source data type for the web server
-    output <- list()
+    retval <- list()
+
+    output <- unique(output)
+    valid_output <- c("genotype_freqs",
+                      "obs_genotype_transitions",
+                      "state_counts")
+    not_valid_output <- which(!(output %in% valid_output))
+    if (length(not_valid_output)) {
+        warning("Output(s) ",
+                paste(output[not_valid_output], sep = ", ", collapse = ", "),
+                " not among the available output.",
+                " Ignoring the invalid output.")
+        output <- methods[-not_valid_output]
+    }
+    if (length(output) == 0) stop("No valid output given.")
+    if (any(c("state_counts", "obs_genotype_transitions") %in% output)) {
+        message("For the requested output we will need to simulate ",
+                "from the transition rate matrix.")
+    }
     
     gene_names <- colnames(cpm_output$analyzed_data)
     n_genes <- length(gene_names)
-    
+
     for (method in methods) {
         if (method %in% c("OT", "OncoBN")) {
             if (method == "OT") {
@@ -378,56 +401,95 @@ sample_CPMs <- function(cpm_output
                 genots <- tmp_data[1:(ncol(tmp_data) - 1)]
             }
 
-            genots_2 <- unlist(apply(genots, 1, 
+            genots_2 <- unlist(apply(genots, 1,
                                      function(x) paste(names(genots)[x == 1],
                                                        collapse = ", ")))
             names(genots_2) <- NULL
             genots_2[genots_2 == ""] <- "WT"
 
             tmp_genotypes_sampled <- sample_to_pD_order(
-                sample(genots_2, N, 
+                sample(genots_2, size = N,
                        prob = tmp_data$Prob, replace = TRUE),
-                n_genes, gene_names)
-            
-            output[[sprintf("%s_genotype_freqs", method)]] <-
+                ngenes = n_genes, gene_names = gene_names)
+
+            retval[[sprintf("%s_genotype_freqs", method)]] <-
                 data.frame(
                     Genotype = generate_sorted_genotypes(n_genes, gene_names),
                     Counts = tmp_genotypes_sampled
                 )
             ## The next one is NOT implicitly available.
             ##   see OT_transition_matrices.org
-            output[[sprintf("%s_obs_genotype_transitions", method)]] <- NULL
+            retval[[sprintf("%s_obs_genotype_transitions", method)]] <- NULL
         } else {
             ## evam always returns the method_trans_rate_mat
             ## even if just with an NA
-            trm <- cpm_output[[sprintf("%s_trans_rate_mat", method)]]
-            if ((length(trm) == 1) && is.na(trm)) {
-                output[[sprintf("%s_obs_genotype_transitions", method)]] <- NULL  
-                output[[sprintf("%s_genotype_freqs", method)]] <- NULL  
-            } else {
-                sims <- population_sample_from_trm(trm, n_samples = N)
-                whatout <- c("frequencies", "state_counts")
-                if(obs_genotype_transitions) whatout <- c(whatout, "transitions")
+            if (any(c("state_counts", "obs_genotype_transitions") %in% output)) {
+                ## Need to simulate from trm
+                trm <- cpm_output[[sprintf("%s_trans_rate_mat", method)]]
+                if ((length(trm) == 1) && is.na(trm)) {
+                    retval[[sprintf("%s_obs_genotype_transitions", method)]] <- NULL
 
-                psamples <-
-                    process_samples(sims,
-                                    n_genes,
-                                    gene_names,
-                                    output = whatout)
-                output[[sprintf("%s_genotype_freqs", method)]] <-
-                    psamples$frequencies
-                output[[sprintf("%s_state_counts", method)]] <-
-                    psamples$state_counts
-                
-                if(obs_genotype_transitions)
-                    output[[sprintf("%s_obs_genotype_transitions", method)]] <-
-                        psamples$transitions
-                else
-                    output[[sprintf("%s_obs_genotype_transitions", method)]] <- NA
+                    ogt <- cpm_output[[sprintf("%s_genots_predicted", method)]]
+                    if ((length(ogt) == 1) && is.na(ogt)) { 
+                        retval[[sprintf("%s_genotype_freqs", method)]] <- NULL
+                    } else {
+                        ## Yes, we could sample. But this should never happen.
+                        stop("No transition rate matrix in output ",
+                             "but genots_predicted")
+                    }
+                } else { ## transition rate matrix present
+                    sims <- population_sample_from_trm(trm, n_samples = N)
+                    ## whatout <- c("frequencies", "state_counts", "transitions")
+                    ## names(whatout) <- c("genotype_freqs", )
+                    ## ## state_counts and frequencies are very cheap
+                    ## whatout <- c("frequencies", "state_counts")
+                    ## ## if ("obs_genotype_transitions" %in% output )
+                    ## ## if(obs_genotype_transitions) whatout <- c(whatout, "transitions")
+                    ## whatout <- unique(c(output,  c("frequencies",
+                    ##                                "state_counts")))
+                    ## whatout <- unique(c(output))
+
+                    psamples <-
+                        process_samples(sims,
+                                        n_genes,
+                                        gene_names,
+                                        output = output)
+                    
+                    for (reqout in valid_output) {
+                        if (reqout %in% output)
+                            retval[[paste0(method, "_", reqout)]] <-
+                                psamples[[reqout]]
+                        else
+                            retval[[paste0(method, "_", reqout)]] <- NA
+
+                    }
+                }
+            } else {
+                ## Multinomial sampling from the predicted genotypes
+                ## as for OT and OncoBN
+                genots_pred <- cpm_output[[sprintf("%s_genots_predicted",
+                                                   method)]]
+                if ((length(genots_pred) == 1) && is.na(genots_pred)) {
+                    retval[[sprintf("%s_genotype_freqs",
+                                    method)]] <- NULL
+                } else {
+                    tmp_genotypes_sampled <-
+                        sample_to_pD_order(sample(names(genots_pred),
+                                                  size = N,
+                                                  prob = genots_pred,
+                                                  replace = TRUE),
+                                           ngenes = n_genes,
+                                           gene_names = gene_names)
+
+                    retval[[sprintf("%s_genotype_freqs", method)]] <-
+                        data.frame(
+                            Genotype = generate_sorted_genotypes(n_genes, gene_names),
+                            Counts = tmp_genotypes_sampled)
+                }
             }
         }
     }
-    return(output)
+    return(retval)
 }
 
 ## @title Count genotypes 

@@ -9,8 +9,10 @@ test_that("Minimal test: we can run", {
 
 
 exercise_sample_CPMs <- function(out) {
-    samp <- evamtools:::sample_CPMs(out, 1000)
-    samp2 <- evamtools:::sample_CPMs(out, 1000, obs_genotype_transitions = FALSE)
+    samp <- evamtools:::sample_CPMs(out, 1000,
+                                    output = c("genotype_freqs",
+                                               "obs_genotype_transitions"))
+    samp2 <- evamtools:::sample_CPMs(out, 1000, output = "genotype_freqs")
     se <- paste0(c("CBN", "OT", "OncoBN", "MHN", "HESBCN"),
                  "_genotype_freqs")
     expect_true(all(vapply(se, function(x) exists(x, samp), TRUE)))
