@@ -561,11 +561,11 @@ probs_from_trm <- function(x,
     } else {
         p4 <- fastmatrix::seidel(a = as.matrix(I_Q), b = p0,
                                  tol = 1e-5 * sqrt(.Machine$double.eps),
+                                 maxiter = 1000,
                                  start = rep(0, nrow(Q)))
         p <- p4
     }
 
-    all.equal(sum(p), 1)
     names(p) <- colnames(x)
     if (!isTRUE(all.equal(sum(p), 1))) {
         warning("sum(p) - 1  = ", sum(p) - 1)
