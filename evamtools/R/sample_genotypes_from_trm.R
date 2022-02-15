@@ -370,10 +370,10 @@ sample_CPMs <- function(cpm_output
     
     for (method in methods) {
         if (method %in% c("OT", "OncoBN")) {
-            if(method == "OT") {
+            if (method == "OT") {
                 tmp_data <- cpm_output$OT_genots_predicted
                 genots <- tmp_data[2:(ncol(tmp_data) - 1)]
-            } else if(method == "OncoBN") {
+            } else if (method == "OncoBN") {
                 tmp_data <- cpm_output$OncoBN_genots_predicted
                 genots <- tmp_data[1:(ncol(tmp_data) - 1)]
             }
@@ -544,7 +544,7 @@ probs_from_trm <- function(x,
                            all_genotypes = TRUE) {
     p0 <-  c(1, rep(0, nrow(x) - 1))
 
-    if(Matrix::nnzero(tril(x)))
+    if (Matrix::nnzero(tril(x)))
         stop("Lower triangular not 0. Is this transposed?")
     Q <- t(x)
     diag(Q) <- -1 * colSums(Q)
@@ -552,44 +552,38 @@ probs_from_trm <- function(x,
     ## Equation 4 in Schill et al. Thus
     ## (I - Q) * p = p0
     I_Q <- Matrix::Diagonal(nrow(Q)) - Q
-    p1 <- Rlinsolve::lsolve.jacobi(A = I_Q, B = p0, adjsym = FALSE,
-                                       reltol = 0.0001 * sqrt(.Machine$double.eps),
-                                       verbose = FALSE, weight = 1)
-    ## FIXME
-    ## Occasionally, small differences w.r.t sum. Rerun
-    ## But I should probably use a better method
-    p2 <- Rlinsolve::lsolve.jacobi(A = I_Q, B = p0,
-                                   weight = 1,
-                                   xinit = p1$x,
-                                   adjsym = FALSE,
-                                   reltol = 0.0001 * sqrt(.Machine$double.eps),
-                                   verbose = FALSE)
-    p <- p2$x
-    p <- as.vector(p)
+
+    if (nrow(Q) >= 1024) {
+        p2 <- Rlinsolve::lsolve.jacobi(A = I_Q, B = p0, adjsym = FALSE,
+                                       reltol = 1e-5 * sqrt(.Machine$double.eps),
+                                       weight = 1, verbose = FALSE)
+        p <- as.vector(p2$x)
+    } else {
+        p4 <- fastmatrix::seidel(a = as.matrix(I_Q), b = p0,
+                                 tol = 1e-5 * sqrt(.Machine$double.eps),
+                                 start = rep(0, nrow(Q)))
+        p <- p4
+    }
+
+    all.equal(sum(p), 1)
     names(p) <- colnames(x)
-    if(!isTRUE(all.equal(sum(p), 1, tolerance = tolerance))) {
-        p <- p2$x
-        p <- as.vector(p)
+    if (!isTRUE(all.equal(sum(p), 1))) {
         warning("sum(p) - 1  = ", sum(p) - 1)
-        }
-    
-    if(!all_genotypes) return(p)
-   
+    }
+
+    if (!all_genotypes) return(p)
+
     ## Get genes and from them number genotypes and identity genotypes
     gene_names <- sort(setdiff(unique(unlist(strsplit(colnames(x), split = ", "))),
                           "WT"))
     number_genes <- length(gene_names)
     num_genots <- 2^number_genes
 
-    if(length(p) == num_genots) return(p)
-    
+    if (length(p) == num_genots) return(p)
+
     allGts <- genotypes_standard_order(gene_names)
     p_all <- rep(0.0, length = length(allGts))
     names(p_all) <- allGts
     p_all[names(p)] <- p
     return(p_all)
 }
-
-
-
-

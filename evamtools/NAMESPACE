@@ -43,4 +43,5 @@ importFrom("mccbn", "candidate_posets", "adaptive.simulated.annealing")
 
 importFrom("RhpcBLASctl", "blas_set_num_threads", "omp_set_num_threads")
 importFrom("Rlinsolve", "lsolve.jacobi")
+importFrom("fastmatrix", "seidel")
 

@@ -13,10 +13,10 @@ probs_from_Schill <- function(gene_names) {
     ## But do not order thetas by gene names, so as
     ## to also catch possible errors with sorting
     n <- length(gene_names)
-    thetas <- evamtools:::Random.Theta(n = n)
+    thetas <- Random.Theta(n = n)
     rownames(thetas) <- colnames(thetas) <- gene_names
-    timep <- system.time(p <- evamtools:::Generate.pTh(thetas))["elapsed"]
-    names(p) <- evamtools:::generate_sorted_genotypes(n, gene_names,
+    timep <- system.time(p <- Generate.pTh(thetas))["elapsed"]
+    names(p) <- generate_sorted_genotypes(n, gene_names,
                                                       sort_gene_names = FALSE)
 
     ## What if we had sorted?
@@ -25,8 +25,8 @@ probs_from_Schill <- function(gene_names) {
     oindex <- order(colnames(thetas2))
     thetas2 <- thetas2[oindex, oindex]
     rm(oindex)
-    p2 <- evamtools:::Generate.pTh(thetas2)
-    names(p2) <- evamtools:::generate_sorted_genotypes(n, gene_names,
+    p2 <- Generate.pTh(thetas2)
+    names(p2) <- generate_sorted_genotypes(n, gene_names,
                                                        sort_gene_names = TRUE)
 
     ## gn_p_can might be the same as names(p) if gene_names was ordered
@@ -60,7 +60,7 @@ probs_from_theta_evam <- function(theta) {
     ## The previous sorting ensures genes are sorted in genotypes;
     ## genotypes themselves not necessarily sorted
     ## as in pD
-    trm <- evamtools:::theta_to_trans_rate_3_SM(theta,
+    trm <- theta_to_trans_rate_3_SM(theta,
                                                 inner_transition = inner_transitionRate_3_1)
     tptm <- system.time(p <- probs_from_trm(trm))["elapsed"]
     ## message("time in probs_from_trm = ", tptm)
@@ -99,13 +99,13 @@ weird_gene_names <- function(ngenes) {
 
 
 test_that("Same results as original MHN code by Schill", {
-    for(i in 1:5) {
+    for(i in 1:10) {
         ng <- 5
         compare_schill_evam_probs(LETTERS[1:ng])
         compare_schill_evam_probs(sample(LETTERS[1:ng]))
     }
 
-    ## Overkill and slow
+    ## ## Overkill and slow
     ## for(i in 1:10) {
     ##     ng <- 11
     ##     compare_schill_evam_probs(LETTERS[1:ng])
@@ -113,7 +113,7 @@ test_that("Same results as original MHN code by Schill", {
     ## }
     
     for(i in 1:5) {
-        ng <- sample(2:5, 1)
+        ng <- sample(2:6, 1)
         wg <- weird_gene_names(ng)
         compare_schill_evam_probs(wg)
         compare_schill_evam_probs(wg)
@@ -134,18 +134,18 @@ if(FALSE) {
         out <- suppressMessages(evam(Dat1,
                                      methods = c("CBN", "MHN", "HESBCN")))
 
-        p_cpm <- evamtools:::probs_from_trm(out$CBN_trans_rate_mat, all_genotypes = TRUE)
-        p_cpm <- evamtools:::reorder_to_pD(p_cpm)
+        p_cpm <- probs_from_trm(out$CBN_trans_rate_mat, all_genotypes = TRUE)
+        p_cpm <- reorder_to_pD(p_cpm)
         
         ## slows down a lot with larger n
-        p_cpm_sampl <- evamtools:::population_sample_from_trm(out$CBN_trans_rate_mat,
+        p_cpm_sampl <- population_sample_from_trm(out$CBN_trans_rate_mat,
                                                               n_samples = 1e7)
         
-        v_sampl <- evamtools:::sample_to_pD_order(p_cpm_sampl$obs_events,
+        v_sampl <- sample_to_pD_order(p_cpm_sampl$obs_events,
                                                   ngenes = ncol(out$analyzed_data),
                                                   gene_names = colnames(out$analyzed_data))
         
-        names(v_sampl) <- evamtools:::generate_sorted_genotypes(n_genes = ncol(out$analyzed_data),
+        names(v_sampl) <- generate_sorted_genotypes(n_genes = ncol(out$analyzed_data),
                                                                 gene_names = colnames(out$analyzed_data))
         v_sampl <- v_sampl/sum(v_sampl)
 
@@ -180,23 +180,23 @@ if(FALSE) {
         d3$C[(d3$A == 1) & (d3$B == 1)] <- 1
 
         ## Examples that mix output
-        ## d3_2 <- evamtools:::do_HESBCN(d3, seed = 31)  ## AND, XOR, Single
+        ## d3_2 <- do_HESBCN(d3, seed = 31)  ## AND, XOR, Single
         set.seed(NULL)
 
         out2 <- evam(d3, methods = c("HESBCN"), hesbcn_opts = list(seed = 31))
         
-        p2_cpm <- evamtools:::probs_from_trm(out2$HESBCN_trans_rate_mat, all_genotypes = TRUE)
-        p2_cpm <- evamtools:::reorder_to_pD(p2_cpm)
+        p2_cpm <- probs_from_trm(out2$HESBCN_trans_rate_mat, all_genotypes = TRUE)
+        p2_cpm <- reorder_to_pD(p2_cpm)
         
         ## slows down a lot with larger n
-        p2_cpm_sampl <- evamtools:::population_sample_from_trm(out2$HESBCN_trans_rate_mat,
+        p2_cpm_sampl <- population_sample_from_trm(out2$HESBCN_trans_rate_mat,
                                                                n_samples = 1e6)
         
-        v2_sampl <- evamtools:::sample_to_pD_order(p2_cpm_sampl$obs_events,
+        v2_sampl <- sample_to_pD_order(p2_cpm_sampl$obs_events,
                                                    ngenes = ncol(out2$analyzed_data),
                                                    gene_names = colnames(out2$analyzed_data))
         
-        names(v2_sampl) <- evamtools:::generate_sorted_genotypes(n_genes = ncol(out2$analyzed_data),
+        names(v2_sampl) <- generate_sorted_genotypes(n_genes = ncol(out2$analyzed_data),
                                                                  gene_names = colnames(out2$analyzed_data))
 
         chisq.test(x = v2_sampl[p2_cpm > 0], p = p2_cpm[p2_cpm > 0], B = 2000)
@@ -211,14 +211,14 @@ if(FALSE) {
         summary(comps0)
 
         ## Run another, much smaller
-        p2b_cpm_sampl <- evamtools:::population_sample_from_trm(out2$HESBCN_trans_rate_mat,
+        p2b_cpm_sampl <- population_sample_from_trm(out2$HESBCN_trans_rate_mat,
                                                                 n_samples = 1e5)
         
-        v2b_sampl <- evamtools:::sample_to_pD_order(p2b_cpm_sampl$obs_events,
+        v2b_sampl <- sample_to_pD_order(p2b_cpm_sampl$obs_events,
                                                     ngenes = ncol(out2$analyzed_data),
                                                     gene_names = colnames(out2$analyzed_data))
         
-        names(v2b_sampl) <- evamtools:::generate_sorted_genotypes(n_genes = ncol(out2$analyzed_data),
+        names(v2b_sampl) <- generate_sorted_genotypes(n_genes = ncol(out2$analyzed_data),
                                                                   gene_names = colnames(out2$analyzed_data))
 
 
