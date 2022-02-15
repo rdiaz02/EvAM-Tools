@@ -68,10 +68,14 @@
 
 
 \examples{
-\dontrun{
 data(every_which_way_data)
 lapply(every_which_way_data, colnames)
 lapply(every_which_way_data, dim)
-}
+
+## Run on a piece of one of the above data sets
+Dat1 <- every_which_way_data[[16]][1:40, 2:6]
+out <- evam(Dat1,
+            methods = c("OT", "OncoBN",
+                        "MHN"))
 }
 \keyword{datasets}
