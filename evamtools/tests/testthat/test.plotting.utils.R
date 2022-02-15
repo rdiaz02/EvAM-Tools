@@ -3,16 +3,16 @@ test_that("Processing samples & Plotting of CPMs is correct", {
   models <- c("OT", "CBN", "OncoBN", "HESBCN", "MHN")
 
   # Does not process
-  expect_error(evamtools:::process_data(NULL, "OT", "something_not_supported"))
-  expect_error(evamtools:::process_data(sample_evam_output, "OT", "something_not_supported"))
+  expect_error(process_data(NULL, "OT", "something_not_supported"))
+  expect_error(process_data(sample_evam_output, "OT", "something_not_supported"))
 
   # Checking without sampling
   for(model in models){
-      model_transitions <- evamtools:::process_data(sample_evam_output, model,
+      model_transitions <- process_data(sample_evam_output, model,
                                                     "obs_genotype_transitions")
-      model_trm <- evamtools:::process_data(sample_evam_output, model,
+      model_trm <- process_data(sample_evam_output, model,
                                             "trans_rate_mat")
-      model_probabilities <- evamtools:::process_data(sample_evam_output, model,
+      model_probabilities <- process_data(sample_evam_output, model,
                                                       "trans_mat")
 
     expect_equal(model_transitions$data2plot, NULL) ## We have not sampled
@@ -32,15 +32,15 @@ test_that("Processing samples & Plotting of CPMs is correct", {
   }
 
   # Checking with sampling
-  samples <- evamtools:::sample_CPMs(sample_evam_output, 100)
+  samples <- sample_CPMs(sample_evam_output, 100)
 
   for(model in models) {
       cat("\n model ", model, "\n")
-      model_transitions <- evamtools:::process_data(sample_evam_output, model,
+      model_transitions <- process_data(sample_evam_output, model,
                                                     "obs_genotype_transitions", samples)
-      model_trm <- evamtools:::process_data(sample_evam_output, model,
+      model_trm <- process_data(sample_evam_output, model,
                                             "trans_rate_mat", samples)
-      model_probabilities <- evamtools:::process_data(sample_evam_output, model,
+      model_probabilities <- process_data(sample_evam_output, model,
                                                       "trans_mat", samples)
 
       expect_equal(model_probabilities$data2plot,

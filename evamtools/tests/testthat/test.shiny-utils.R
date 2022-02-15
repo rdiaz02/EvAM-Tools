@@ -1,6 +1,6 @@
 # test_that("Test standarize datasets", {
 #   check_fields <- function(orig_data, expected_data){
-#     standard_data <- evamtools:::standarize_dataset(orig_data)
+#     standard_data <- standarize_dataset(orig_data)
 
 #     expected_attr <- names(expected_data)
 #     for(i in expected_attr){

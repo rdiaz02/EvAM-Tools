@@ -18,8 +18,8 @@ against hand-computed ones", {
     }
     compare_OncoSimul <- function(out) {
         expect_equal(
-            reorder_trans_mat(evamtools:::cpm2F2tm(out$edges, max_f = NULL)$transition_matrix),
-            reorder_trans_mat(evamtools:::cpm2tm(
+            reorder_trans_mat(cpm2F2tm(out$edges, max_f = NULL)$transition_matrix),
+            reorder_trans_mat(cpm2tm(
                                               out)$trans_mat_genots),
             check.attributes = TRUE)
     }
@@ -216,10 +216,10 @@ against hand-computed ones", {
     test4 <- add_relation(test4)
 
     
-    computed_trm1 <- evamtools:::cpm2tm(test1)$weighted_fgraph
-    computed_trm2 <- evamtools:::cpm2tm(test2)$weighted_fgraph
-    computed_trm3 <- evamtools:::cpm2tm(test3)$weighted_fgraph
-    computed_trm4 <- evamtools:::cpm2tm(test4)$weighted_fgraph
+    computed_trm1 <- cpm2tm(test1)$weighted_fgraph
+    computed_trm2 <- cpm2tm(test2)$weighted_fgraph
+    computed_trm3 <- cpm2tm(test3)$weighted_fgraph
+    computed_trm4 <- cpm2tm(test4)$weighted_fgraph
 
     compare_hesbcn_trms(computed_trm1, trm1)
     compare_hesbcn_trms(computed_trm2, trm2)
@@ -241,7 +241,7 @@ test_that("XOR: was broken. Fixed in commit 43ea25d", {
     ## is FALSE just with 2 present.
     
     ## can be obtained, or could be obtained, doing
-    ## evamtools:::do_HESBCN(examples_csd$csd$c1$data, seed = 16)
+    ## do_HESBCN(examples_csd$csd$c1$data, seed = 16)
     out_xor3 <- list(adjacency_matrix = structure(c(0, 0, 0, 0, 0, 0, 1, 0, 0, 
 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 
 1, 0, 0, 0, 0, 0), .Dim = c(6L, 6L), .Dimnames = list(c("Root", 
@@ -261,7 +261,7 @@ test_that("XOR: was broken. Fixed in commit 43ea25d", {
         "XOR", "XOR", "XOR", "Single", "Single", "Single")), row.names = c(NA, 
     -7L), class = "data.frame"))
 
-    oux3 <- evamtools:::cpm2tm(
+    oux3 <- cpm2tm(
                             out_xor3)
 
 
@@ -288,8 +288,8 @@ test_that("XOR: was broken. Fixed in commit 43ea25d", {
     }
 
     expect_equal(
-        reorder_trans_mat(evamtools:::cpm2F2tm(out_xor3$edges, max_f = NULL)$transition_matrix),
-        reorder_trans_mat(evamtools:::cpm2tm(
+        reorder_trans_mat(cpm2F2tm(out_xor3$edges, max_f = NULL)$transition_matrix),
+        reorder_trans_mat(cpm2tm(
                                           out_xor3)$trans_mat_genots),
         check.attributes = TRUE)
     
@@ -319,14 +319,14 @@ test_that("Tests with three parents, just of the accessible, and comparing numbe
     }
     compare_OncoSimul <- function(out) {
         expect_equal(
-            reorder_trans_mat(evamtools:::cpm2F2tm(out$edges, max_f = NULL)$transition_matrix),
-            reorder_trans_mat(evamtools:::cpm2tm(
+            reorder_trans_mat(cpm2F2tm(out$edges, max_f = NULL)$transition_matrix),
+            reorder_trans_mat(cpm2tm(
                                               out)$trans_mat_genots),
             check.attributes = TRUE)
     }
 
     compare_access_genots <- function(out, expected_accessible) {
-        agenots <- colnames(evamtools:::cpm2tm(
+        agenots <- colnames(cpm2tm(
                                                  out)$trans_mat_genots)
         expect_equal(sort(agenots), sort(expected_accessible))
     }
