@@ -33,11 +33,9 @@
 ## additional code
 do_MHN2 <- function(x,  lambda = 1/nrow(x), sparse = TRUE) {
     ## lambda 0.01 is what they use by default in their bioRxiv, p. 7 paper.
-    ## In the paper it is 1/nrow(x). See paper and emails.
+    ## In the paper it is 1/nrow(x). 
     mhnd <- Data.to.pD(x)
-    message("\n      MHN: done Data.to.pD ", date(), "\n")
     theta <- Learn.MHN(mhnd, lambda = lambda)
-    message("\n      MHN: done Learn.MHN ", date(), "\n")
     colnames(theta) <- rownames(theta) <- colnames(x)
     ## Reorder, so genotype names and transition rate matrix
     ## have names ordered
@@ -46,11 +44,9 @@ do_MHN2 <- function(x,  lambda = 1/nrow(x), sparse = TRUE) {
     if(!sparse) {
         trm <- theta_to_trans_rate_3(theta,
                                      inner_transition = inner_transitionRate_3_1)
-        message("\n      MHN: done theta_to_trans_rate_3 ", date(), "\n")
     } else {
         trm <- theta_to_trans_rate_3_SM(theta,
                                         inner_transition = inner_transitionRate_3_1)
-        message("\n      MHN: done theta_to_trans_rate_3_SM ", date(), "\n")
     }
     
     return(list(

@@ -439,15 +439,6 @@ sample_CPMs <- function(cpm_output
                     }
                 } else { ## transition rate matrix present
                     sims <- population_sample_from_trm(trm, n_samples = N)
-                    ## whatout <- c("frequencies", "state_counts", "transitions")
-                    ## names(whatout) <- c("sampled_genotype_freqs", )
-                    ## ## state_counts and frequencies are very cheap
-                    ## whatout <- c("frequencies", "state_counts")
-                    ## ## if ("obs_genotype_transitions" %in% output )
-                    ## ## if(obs_genotype_transitions) whatout <- c(whatout, "transitions")
-                    ## whatout <- unique(c(output,  c("frequencies",
-                    ##                                "state_counts")))
-                    ## whatout <- unique(c(output))
 
                     psamples <-
                         process_samples(sims,
