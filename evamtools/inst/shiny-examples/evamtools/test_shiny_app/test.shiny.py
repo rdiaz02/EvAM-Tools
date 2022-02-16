@@ -175,43 +175,65 @@ class test_basic_functionality(evamtools_basics):
 
     def test_load_corrupt_csv_dataset(self):
         upload = self.driver.find_element_by_css_selector(".upload_file input[type=file]")
-        upload.send_keys(os.path.join(os.getcwd(), "bad_csd.csv"))
+        upload.send_keys(os.path.join(os.getcwd(), "corrupt_csd.csv"))
         error_message = self._get_error_message()
         assert(error_message, "Your csv data can not be loaded. Make sure it only contains 0 and 1.")
-    
+
     def test_load_CSD_dataset(self):
         upload = self.driver.find_element_by_css_selector(".upload_file input[type=file]")
-        upload.send_keys(os.path.join(os.getcwd(), "FREQ_csd.RDS"))
+        upload.send_keys(os.path.join(os.getcwd(), "csd_good.RDS"))
         sleep(2)
         status = self._get_status()
         assert(status["number_of_genes"] == 4)
-        assert(status["selected_dataset"] == "load_test")
+        assert(status["selected_dataset"] == "CSD_custom")
         assert(status["selected_input2build"] == "csd")
-        assert(status["gene_names"] == ["A", "B", "C", "D"])
+        assert(status["gene_names"] == ["A1", "B2", "C3", "D4"])
+
+    def test_load_corrupt_CSD_dataset(self):
+        upload = self.driver.find_element_by_css_selector(".upload_file input[type=file]")
+        upload.send_keys(os.path.join(os.getcwd(), "csd_bad.RDS"))
+        error_message = self._get_error_message()
+        assert(error_message, "Your csv data can not be loaded. Make sure it only contains 0 and 1.")
+    
 
     def test_load_DAG_dataset(self):
         upload = self.driver.find_element_by_css_selector(".upload_file input[type=file]")
-        upload.send_keys(os.path.join(os.getcwd(), "DAG_csd.RDS"))
+        upload.send_keys(os.path.join(os.getcwd(), "dag_good.RDS"))
         sleep(2)
         status = self._get_status("dag")
         assert(status["number_of_genes"] == 4)
-        assert(status["selected_dataset"] == "DAG")
+        assert(status["selected_dataset"] == "DAG_custom")
         assert(status["selected_input2build"] == "dag")
-        assert(status["gene_names"] == ["A", "B", "C", "D"])
+        assert(status["gene_names"] == ["A1", "B2", "C3", "D4"])
+    
+    def test_load_corrupt_DAG_dataset(self):
+        upload = self.driver.find_element_by_css_selector(".upload_file input[type=file]")
+        upload.send_keys(os.path.join(os.getcwd(), "dag_bad.RDS"))
+        sleep(2)
+        error_message = self._get_error_message()
+        assert(error_message, "There was a problem when checking your .rds file. Make sure it containis $type (either 'csd', 'dag', or 'matrix'), $data only with 0 and 1")
+    
 
     def test_load_MATRIX_dataset(self):
         upload = self.driver.find_element_by_css_selector(".upload_file input[type=file]")
-        upload.send_keys(os.path.join(os.getcwd(), "MHN_csd.RDS"))
+        upload.send_keys(os.path.join(os.getcwd(), "matrix_good.RDS"))
         sleep(2)
         status = self._get_status("matrix")
-        assert(status["number_of_genes"] == 3)
-        assert(status["selected_dataset"] == "MHN")
+        assert(status["number_of_genes"] == 4)
+        assert(status["selected_dataset"] == "MHN_custom")
         assert(status["selected_input2build"] == "matrix")
-        assert(status["gene_names"] == ["A", "B", "C"])
+        assert(status["gene_names"] == ["A1", "B2", "C3", "D4"])
+    
+    def test_load_corrupt_MATRIX_dataset(self):
+        upload = self.driver.find_element_by_css_selector(".upload_file input[type=file]")
+        upload.send_keys(os.path.join(os.getcwd(), "matrix_bad.RDS"))
+        sleep(2)
+        error_message = self._get_error_message()
+        assert(error_message, "There was a problem when checking your .rds file. Make sure it containis $type (either 'csd', 'dag', or 'matrix'), $data only with 0 and 1")
     
 ## TESTING CSD 
 class test_csd_input(evamtools_basics):
-    def test_modiying_genotype_with_buttons(self):
+    def test_modify_genotype_with_buttons(self):
         ## Initial status
         sleep(0.2)
         status = self._get_status()
@@ -451,7 +473,7 @@ class test_csd_input(evamtools_basics):
 
 # TESTING DAG
 class test_dag_input(evamtools_basics):
-    def test_modifying_dag(self):
+    def test_modify_dag(self):
         ## Increasing number of genes
         self.driver.set_window_size(1366, 768)
         sleep(0.2)
@@ -504,7 +526,7 @@ class test_dag_input(evamtools_basics):
         self.driver.find_element_by_css_selector(".modal-open .modal-footer button").click()
         assert(error_message == "This relationship breaks the DAG. Revise it.")
 
-    def test_more_dag_modifations(self):
+    def test_modify_dag_2(self):
         ## Increasing number of genes
         self.driver.set_window_size(1366, 768)
         sleep(0.2)
@@ -524,6 +546,7 @@ class test_dag_input(evamtools_basics):
         assert(current_dag == dag_info)
 
         ## Analysis button is enabled after sampling
+        self._scroll2top()
         analysis_button = self.driver.find_element_by_css_selector("#analysis")
         assert(analysis_button.is_enabled() == False)
         
@@ -531,7 +554,7 @@ class test_dag_input(evamtools_basics):
         sleep(3)
         assert(analysis_button.is_enabled())
 
-    def test_change_gene_names(self):
+    def test_modify_gene_names(self):
         ## Increasing number of genes
         self.driver.set_window_size(1366, 768)
         sleep(0.2)
@@ -559,7 +582,7 @@ class test_dag_input(evamtools_basics):
 
         assert(expected_dag == self._get_dag_info())
 
-    def test_modify_dag_value_from_table(self):
+    def test_modify_dag_from_table(self):
         ## Selecting dag AND dataset
         sleep(1)
         self._select_tab("dag", "AND")
@@ -593,7 +616,6 @@ class test_dag_input(evamtools_basics):
         for _ in range(0,3):
             actions.send_keys(Keys.TAB).perform()
         actions.send_keys("OR").perform()
-
         ## Saving
         actions.key_down(Keys.CONTROL).send_keys(Keys.ENTER).key_up(Keys.CONTROL).perform()
         sleep(2)
@@ -642,7 +664,7 @@ class test_dag_input(evamtools_basics):
         ]
         assert(dag_info == expected_dag_info)
 
-    def test_more_remove_node(self):
+    def test_remove_node_2(self):
     ## Selecting dag AND dataset
         sleep(0.2)
         self._select_tab("dag", "AND")
@@ -771,10 +793,10 @@ class test_matrix_input(evamtools_basics):
         sleep(1)
 
         expected_theta_table = [
-            ["A", "B", "C"],
-            ["A", "-0.4", "2", "4"],
-            ["B", "-1.04", "0", "-7"],
-            ["C", "-2.53", "-0.76", "0.23"],
+            ["A1", "B2", "C3"],
+            ["A1", "-0.4", "2", "4"],
+            ["B2", "-1.04", "0", "-7"],
+            ["C3", "-2.53", "-0.76", "0.23"],
         ]
 
         theta_table = self._get_theta_table()
@@ -800,7 +822,6 @@ class test_matrix_input(evamtools_basics):
             ["C3", "0", "0", "0", "0"],
             ["D", "0", "0", "0", "0"],
         ]
-
         assert(theta_table == expected_theta_table)
 
     def test_change_gene_number(self):
@@ -1200,4 +1221,4 @@ class test_results(evamtools_basics):
         # self._check_tabular_data(expected_data["tab"], expected_data["mccbn"])
 
 if __name__ == "__main__":
-    unittest.main(failfast=False)
+    unittest.main(failfast = True)
