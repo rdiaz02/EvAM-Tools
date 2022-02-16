@@ -26,9 +26,9 @@ sample_CPMs(cpm_output,  N,
   A list, with a many entries as methods * number of components
   requested. If all, then for each method among CBN, MCCBN, HESBCN, and MHN:
    \itemize{
-    \item{sampled_genotype_freqs:}{frequencies of genotypes (final genotypes from  the transitions)}.
-    \item{obs_genotype_transitions:}{Number of observed transitions between   genotypes (as a sparse matrix).}
-    \item{state_counts}{Number of times each genotype was visited during
+    \item{sampled_genotype_freqs: }{frequencies of genotypes (final genotypes from  the transitions)}.
+    \item{obs_genotype_transitions: }{Number of observed transitions between   genotypes (as a sparse matrix).}
+    \item{state_counts: }{Number of times each genotype was visited during
       the transitions. Column sums of observed transitions are equal to state counts.}
   }
   

@@ -105,10 +105,10 @@ create_MHN_test_data_for_trans_rate_MHN_test <- function() {
 ## Schill's Build.Q. Recall Schill's has diagonal
 ## and is transposed w.r.t. what we give
 compare_to_Build.Q <- function(x) {
-    bq <- evamtools:::Build.Q(x)
+    bq <- Build.Q(x)
     bq <- t(bq)
     diag(bq) <- 0
-    t3sm <- evamtools:::theta_to_trans_rate_3_SM(x)
+    t3sm <- theta_to_trans_rate_3_SM(x)
     expect_equal(t3sm, bq, check.attributes = FALSE)
 }
 

@@ -9,8 +9,9 @@ export(
 
 importFrom("shiny", "runApp", "Progress")
 importFrom("shinyjs", "useShinyjs", "enable", "disable", "disabled")
-importFrom("grDevices", "rgb")
-importFrom("graphics", "axis", "legend", "lines", "par", "title", "barplot", "grid")
+importFrom("grDevices", "rgb", "colorRampPalette")
+importFrom("graphics", "axis", "legend", "lines", "par", "title", "barplot",
+           "grid")
 importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert",
            "write.csv", "tail")
 importFrom("Matrix", "diag", "rowSums", "colSums", "summary", "Matrix",
@@ -28,7 +29,8 @@ importFrom("Oncotree", "oncotree.fit", "marginal.distr",
            "distribution.oncotree", "bootstrap.oncotree")    
 importFrom("gtools", "combinations")
 importFrom("igraph", "V", "E", "graph.data.frame", "layout.reingold.tilford"
-         , "get.adjacency", "all_simple_paths", "decompose", "is_dag", "distances"
+         , "get.adjacency", "all_simple_paths", "decompose", "is_dag",
+           "distances"
          , "subcomponent", "adjacent_vertices", "graph_from_adjacency_matrix"
          , "graph_from_data_frame", "head_of", "as_adjacency_matrix",
            "make_directed_graph", "incident", "ends", "as_data_frame")
@@ -44,4 +46,3 @@ importFrom("mccbn", "candidate_posets", "adaptive.simulated.annealing")
 importFrom("RhpcBLASctl", "blas_set_num_threads", "omp_set_num_threads")
 importFrom("Rlinsolve", "lsolve.jacobi")
 importFrom("fastmatrix", "seidel")
-

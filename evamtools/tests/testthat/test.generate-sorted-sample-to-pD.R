@@ -8,10 +8,10 @@ test_that("generate_sorted_genotypes and sample_to_pD_order same order", {
     expect_out_gg_counts <- c(6, 3, 0, 4, 5, 2, 0, 0)
     expect_out_gsg <- c("WT", "A", "C", "A, C", "D", "A, D", "C, D", "A, C, D")
     for(i in 1:50) {
-        out_pd <- evamtools:::sample_to_pD_order(sample(gg),
+        out_pd <- sample_to_pD_order(sample(gg),
                                                  3,
                                                  sample(c("A", "C", "D")))
-        out_gsg <- evamtools:::generate_sorted_genotypes(3,
+        out_gsg <- generate_sorted_genotypes(3,
                                                          sample(c("A", "C", "D")))
         expect_equal(out_pd, expect_out_gg_counts)
         expect_equal(out_gsg, expect_out_gsg)
@@ -29,10 +29,10 @@ test_that("generate_sorted_genotypes and sample_to_pD_order same order", {
     expect_out_gg2_counts <- c(1, 2, 3, 5, 4, 6, 7, 8)
     expect_out_gsg2 <- c("WT", "A", "B", "A, B", "C", "A, C", "B, C", "A, B, C")
     for(i in 1:50) {
-        out_pd2 <- evamtools:::sample_to_pD_order(sample(gg2),
+        out_pd2 <- sample_to_pD_order(sample(gg2),
                                                   3,
                                                   sample(c("A", "C", "B")))
-        out_gsg2 <- evamtools:::generate_sorted_genotypes(3,
+        out_gsg2 <- generate_sorted_genotypes(3,
                                                           sample(c("A", "C", "B")))
         expect_equal(out_pd2, expect_out_gg2_counts)
         expect_equal(out_gsg2, expect_out_gsg2)
@@ -199,10 +199,10 @@ test_that("generate_sorted_genotypes and sample_to_pD_order same order", {
     
     for(i in 1:50) {
         genes <- c("ZE", "b_mut", "F_NRAS", "colorin3", "no_ta", "colorin4")
-        out_pd3 <- evamtools:::sample_to_pD_order(sample(gg3),
+        out_pd3 <- sample_to_pD_order(sample(gg3),
                                                   6,
                                                   sample(genes))
-        out_gsg3 <- evamtools:::generate_sorted_genotypes(6,
+        out_gsg3 <- generate_sorted_genotypes(6,
                                                           sample(genes))
         expect_equal(out_pd3, expect_out_gg3_counts)
         expect_equal(out_gsg3, expect_out_gsg3)
@@ -411,8 +411,8 @@ test_that("Test with same order of genes", {
         
         sx <- sample(genotypes_resorted, N, prob = ag[, "Fitness"], replace = TRUE)
 
-        outgs <- evamtools:::generate_sorted_genotypes(ngenes, gn)
-        outgpd <-  evamtools:::sample_to_pD_order(sx, ngenes, gn)
+        outgs <- generate_sorted_genotypes(ngenes, gn)
+        outgpd <-  sample_to_pD_order(sx, ngenes, gn)
 
         ot <- table(sx)
         oto <- ot[outgs]

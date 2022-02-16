@@ -31,11 +31,11 @@ test_that("Output is not generated with bad input", {
 
     x <- sampling_output
     x$trajectory <- NULL
-    expect_error(evamtools:::process_samples(x, 5, gene_names = LETTERS[1:5]), 
+    expect_error(process_samples(x, 5, gene_names = LETTERS[1:5]), 
                  "trajectory is missing from your samples")
     x <- sampling_output
     x$obs_events <- NULL
-    expect_error(evamtools:::process_samples(x, 5, gene_names = LETTERS[1:5]), 
+    expect_error(process_samples(x, 5, gene_names = LETTERS[1:5]), 
                  "obs_events is missing from your samples")
 })
 
@@ -76,39 +76,39 @@ test_that("Output is returned only with the requested fields", {
                     "state_counts",
                     "obs_genotype_transitions")
     ## out_params <- c("frequencies", "state_counts", "transitions")
-    out_sim <- evamtools:::process_samples(simGenotypes, 5,
+    out_sim <- process_samples(simGenotypes, 5,
                                            gene_names = LETTERS[1:5],
                                            output = out_params[1])
     expect_equal(sort(names(out_sim)), sort(out_params[1]))
     
-    out_sim <- evamtools:::process_samples(simGenotypes, 5,
+    out_sim <- process_samples(simGenotypes, 5,
                                            gene_names = LETTERS[1:5],
                                            output = out_params[2:3])
     expect_equal(sort(names(out_sim)), sort(out_params[2:3]))
 
-    out_sim <- evamtools:::process_samples(simGenotypes, 5,
+    out_sim <- process_samples(simGenotypes, 5,
                                            gene_names = LETTERS[1:5],
                                            output = out_params)
     expect_equal(sort(names(out_sim)), sort(out_params))
 
 
-    expect_error(evamtools:::process_samples(simGenotypes, 5,
+    expect_error(process_samples(simGenotypes, 5,
                                              gene_names = LETTERS[1:5],
                                              output = c()),
                  "No output specified", fixed = TRUE)
 
-    expect_error(evamtools:::process_samples(simGenotypes, 5,
+    expect_error(process_samples(simGenotypes, 5,
                                              gene_names = LETTERS[1:5],
                                              output = c("bad request", "bad request 2")),
                  "Incorrect output specified", fixed = TRUE)
 
-    expect_error(evamtools:::process_samples(simGenotypes, 5,
+    expect_error(process_samples(simGenotypes, 5,
                                                gene_names = LETTERS[1:5],
                                                output = c(out_params, "bad request")),
                     "Incorrect output specified", fixed = TRUE)
 
 
-    expect_error(evamtools:::process_samples(simGenotypes, 5,
+    expect_error(process_samples(simGenotypes, 5,
                                                gene_names = LETTERS[1:5],
                                                output = c(out_params, "bad request",
                                                           "bad request 2")),
@@ -149,7 +149,7 @@ test_that("Output is correct", {
     )
     
    
-    out <- evamtools:::process_samples(simGenotypes, 5, gene_names = LETTERS[1:5])
+    out <- process_samples(simGenotypes, 5, gene_names = LETTERS[1:5])
     expect_equal(nrow(out$sampled_genotype_freqs), 2**5)
     expect_equal(nrow(out$state_counts), 2**5)
 
@@ -249,12 +249,12 @@ test_that("New algorithm for state transitions", {
     t6[2, 3] <- 2
     t6[3, 4] <- 2
     
-    os1 <- evamtools:::process_samples(sim1, 5, gene_names = LETTERS[1:5])
-    os2 <- evamtools:::process_samples(sim2, 5, gene_names = LETTERS[1:5])
-    os3 <- evamtools:::process_samples(sim3, 5, gene_names = LETTERS[1:5])
-    os4 <- evamtools:::process_samples(sim4, 5, gene_names = LETTERS[1:5])
-    os5 <- evamtools:::process_samples(sim5, 5, gene_names = LETTERS[1:5])
-    os6 <- evamtools:::process_samples(sim6, 5, gene_names = LETTERS[1:5])
+    os1 <- process_samples(sim1, 5, gene_names = LETTERS[1:5])
+    os2 <- process_samples(sim2, 5, gene_names = LETTERS[1:5])
+    os3 <- process_samples(sim3, 5, gene_names = LETTERS[1:5])
+    os4 <- process_samples(sim4, 5, gene_names = LETTERS[1:5])
+    os5 <- process_samples(sim5, 5, gene_names = LETTERS[1:5])
+    os6 <- process_samples(sim6, 5, gene_names = LETTERS[1:5])
     
     expect_equal(os1$obs_genotype_transitions, t1)
     expect_equal(os2$obs_genotype_transitions, t2)

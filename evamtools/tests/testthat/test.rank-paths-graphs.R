@@ -17,7 +17,7 @@ test_that("Returns the correct number and type of vertex labels", {
     g <- igraph::graph_from_adjacency_matrix(adj_matrix, mode = "directed", weighted = TRUE)
     
     all_genotypes <- c("WT", "A", "A, B", "A, C", "C", "C, D")
-    all_paths <- evamtools:::rank_paths(g)
+    all_paths <- rank_paths(g)
 
     l1 <- c("WT", "A", "A, B", "", "", "")
     names(l1) <- all_genotypes
@@ -33,12 +33,12 @@ test_that("Returns the correct number and type of vertex labels", {
 
 
 
-    labels_1 <- evamtools:::compute_vertex_labels(g, all_paths, top_paths = 1)$vertex_labels
-    labels_2 <- evamtools:::compute_vertex_labels(g, all_paths, top_paths = 2)$vertex_labels
-    labels_3 <- evamtools:::compute_vertex_labels(g, all_paths, top_paths = 3)$vertex_labels
-    labels_4 <- evamtools:::compute_vertex_labels(g, all_paths, top_paths = 4)$vertex_labels
-    labels_40 <- evamtools:::compute_vertex_labels(g, all_paths, top_paths = 40)$vertex_labels
-    labels_null <- evamtools:::compute_vertex_labels(g, all_paths, top_paths = NULL)$vertex_labels
+    labels_1 <- compute_vertex_labels(g, all_paths, top_paths = 1)$vertex_labels
+    labels_2 <- compute_vertex_labels(g, all_paths, top_paths = 2)$vertex_labels
+    labels_3 <- compute_vertex_labels(g, all_paths, top_paths = 3)$vertex_labels
+    labels_4 <- compute_vertex_labels(g, all_paths, top_paths = 4)$vertex_labels
+    labels_40 <- compute_vertex_labels(g, all_paths, top_paths = 40)$vertex_labels
+    labels_null <- compute_vertex_labels(g, all_paths, top_paths = NULL)$vertex_labels
     
     expect_equal(labels_1, l1)
     expect_equal(labels_2, l2)

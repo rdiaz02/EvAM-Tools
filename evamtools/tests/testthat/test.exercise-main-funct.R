@@ -9,10 +9,10 @@ test_that("Minimal test: we can run", {
 
 
 exercise_sample_CPMs <- function(out) {
-    samp <- evamtools:::sample_CPMs(out, 1000,
+    samp <- sample_CPMs(out, 1000,
                                     output = c("sampled_genotype_freqs",
                                                "obs_genotype_transitions"))
-    samp2 <- evamtools:::sample_CPMs(out, 1000, output = "sampled_genotype_freqs")
+    samp2 <- sample_CPMs(out, 1000, output = "sampled_genotype_freqs")
     se <- paste0(c("CBN", "OT", "OncoBN", "MHN", "HESBCN"),
                  "_sampled_genotype_freqs")
     expect_true(all(vapply(se, function(x) exists(x, samp), TRUE)))
@@ -115,9 +115,9 @@ test_that("Examples from initial-simple-examples", {
         ), ncol = 3, byrow = TRUE
     )
     colnames(dB) <- LETTERS[1:3]
-    db3 <- evamtools:::remove_WT(dB, 1)
-    db4 <- evamtools:::add_WT(db3, 10 * nrow(db3))
-    db5 <- evamtools:::add_WT(db3, 5 * nrow(db3))
+    db3 <- remove_WT(dB, 1)
+    db4 <- add_WT(db3, 10 * nrow(db3))
+    db5 <- add_WT(db3, 5 * nrow(db3))
 
     out3 <- suppressMessages(evam(db3,
                                   methods = c("CBN", "OT", "OncoBN",
@@ -224,7 +224,7 @@ test_that("Handling invalid methods and no single valid method", {
                    fixed = TRUE)
     expect_true(exists("OT_model", where = out3))
 
-    evamtools:::sample_CPMs(out3, 1000)
+    sample_CPMs(out3, 1000)
     
     expect_error(out4 <- suppressWarnings(evam(Dat1,
                                   methods = c("coco", "cucu"),

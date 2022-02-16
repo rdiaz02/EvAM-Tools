@@ -1,8 +1,8 @@
 ## Testing that cpm2tm gives same output as
 ## cpm_to_trans_mat_oncosimul, the function that uses OncoSimulR
-test_that("Testing evamtools:::cpm2tm by comparing with
+test_that("Testing cpm2tm by comparing with
 OncoSimulR's based cpm_to_trans_mat_oncosimul.", {
-    ## Recall evamtools:::cpm2F2tm <- cpm_to_trans_mat_oncosimul
+    ## Recall cpm2F2tm <- cpm_to_trans_mat_oncosimul
 
     ## The first set of tests use pre-run analyses. So we would not catch
     ## changes in the code that gives the analysis itself. See below for
@@ -16,30 +16,30 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul.", {
     
     run_test_for_dataset1 <- function(data) {
         expect_equal(
-            reorder_trans_mat(evamtools:::cpm2F2tm(data, max_f = NULL)$transition_matrix),
-            reorder_trans_mat(evamtools:::cpm2tm(
+            reorder_trans_mat(cpm2F2tm(data, max_f = NULL)$transition_matrix),
+            reorder_trans_mat(cpm2tm(
                                               list(edges = data))$trans_mat_genots),
             check.attributes = TRUE)
 
         ## Do not run next test if fitness is absurdly large as scaling will fail
         ## as it should.
-        max_fitness <- max(evamtools:::cpm2F2tm(data, max_f = NULL)$accessible_genotypes)
+        max_fitness <- max(cpm2F2tm(data, max_f = NULL)$accessible_genotypes)
         if(max_fitness < 1e10) {
             maxff <- sample(c(2, 3, 3.5, 3.8, 4, 5, 8), size = 1)
-            expect_equal(as.matrix(evamtools:::cpm2F2tm(data, max_f = NULL)$transition_matrix),
-                         as.matrix(evamtools:::cpm2F2tm(data, max_f = maxff)$transition_matrix))
+            expect_equal(as.matrix(cpm2F2tm(data, max_f = NULL)$transition_matrix),
+                         as.matrix(cpm2F2tm(data, max_f = maxff)$transition_matrix))
         }
     }
 
     ## this takes the object, not the object$edges
     run_test_for_dataset <- function(data){
-        expect_equal(reorder_trans_mat(evamtools:::cpm2F2tm(data$edges, max_f = NULL)$transition_matrix),
-                     reorder_trans_mat(evamtools:::cpm2tm(
+        expect_equal(reorder_trans_mat(cpm2F2tm(data$edges, max_f = NULL)$transition_matrix),
+                     reorder_trans_mat(cpm2tm(
                                                        data)$trans_mat_genots),
                      check.attributes = TRUE)
         maxff <- sample(c(2, 3, 3.5, 3.8, 4, 5, 8), size = 1)
-        expect_equal(as.matrix(evamtools:::cpm2F2tm(data$edges, max_f = NULL)$transition_matrix),
-                     as.matrix(evamtools:::cpm2F2tm(data$edges, max_f = maxff)$transition_matrix))
+        expect_equal(as.matrix(cpm2F2tm(data$edges, max_f = NULL)$transition_matrix),
+                     as.matrix(cpm2F2tm(data$edges, max_f = maxff)$transition_matrix))
     }
 
     ## First, load a bunch of data structures
@@ -142,7 +142,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul.", {
                              seed = NULL
                              )
     do_MCCBN_HCBN <- function(x)
-        suppressMessages(evamtools:::do_MCCBN_HCBN2(x,
+        suppressMessages(do_MCCBN_HCBN2(x,
                                                     mccbn_hcbn2_opts))
 
         ex_mccbn_and <- do_MCCBN_HCBN(examples_csd$csd$AND$data)
