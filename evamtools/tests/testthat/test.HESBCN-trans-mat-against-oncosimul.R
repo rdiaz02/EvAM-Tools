@@ -129,13 +129,11 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     d3$C[(d3$A == 1) & (d3$B == 1)] <- 1
 
     ## Examples that mix output
-    d3_1 <- do_HESBCN(d3, seed = 26) ## AND, OR, Single
-    d3_2 <- do_HESBCN(d3, seed = 31)  ## AND, XOR, Single
+    d3_1 <- do_HESBCN(d3, seed = 26) ## AND, OR, XOR, Single
     set.seed(NULL)
     d3_3 <- do_HESBCN(d3)
-    d3_4 <- do_HESBCN(d3)
 
-    all_mixed_examples <- list(d3_1, d3_2, d3_3, d3_4)
+    all_mixed_examples <- list(d3_1, d3_3)
     
     for(ex in all_examples){
         run_test_for_dataset(ex)

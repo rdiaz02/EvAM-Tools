@@ -338,8 +338,10 @@ call.external.cbn <- function(data,
                       ignore.stdout = silent)
         if(!silent) cat("\n\n")
         ## this call requires a lambda file
-        zzz <- system(paste(ompt, paste("h-cbn -f",  dirname, "-e", eparam,
-                                        "-w -m")), ignore.stdout = silent)
+        zzz <- system(paste(ompt,
+                            paste("h-cbn -f",  dirname,
+                                  "-e", format(eparam, scientific = FALSE),
+                                  "-w -m")), ignore.stdout = silent)
         rm(zzz)
         if(!silent) cat("\n\n")
     }
@@ -347,9 +349,11 @@ call.external.cbn <- function(data,
   ##    - we do not use it now
   ##    - it can lead to strange problems getting millions of ceros printed out
   
-  zzz <- system(paste(ompt, paste("h-cbn -f",  dirname, "-s", 
-                                  "-T", temp,  "-N", steps,
-                                  "-w")), ignore.stdout = silent)
+    zzz <- system(paste(ompt,
+                        paste("h-cbn -f",  dirname, "-s", 
+                              "-T", format(temp, scientific = FALSE),
+                              "-N", format(round(steps), scientific = FALSE),
+                              "-w")), ignore.stdout = silent)
     rm(zzz)
   if(!silent) cat("\n\n")
   ## the final poset in dirname/00000.poset

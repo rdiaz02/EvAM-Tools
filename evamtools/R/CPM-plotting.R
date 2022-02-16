@@ -441,15 +441,24 @@ plot_model <- function(model_info, parent_set, mod = ""){
         }
     } else if(is.matrix(model_info)) { ##Plotting matrix
         op <- par(mar=c(3, 3, 5, 3), las = 1)
-        ## From library plot.matrix
+        ##### From library plot.matrix
+        ##  Color scale, centered in white at 0
+        range_colors <- 7 ## if you change this, might need to change max.col
         rwb <- colorRampPalette(colors = c("red", "white", "blue"))
+        pmcolors <- rwb(range_colors)
+        mmi <- max(abs(model_info))
+        pmbreaks <- seq(from = -mmi, to = mmi, length.out = range_colors + 1)
+        
         plot(model_info, cex = 1.5, digits = 2, key = NULL
-            , axis.col = list(side = 3)
-            , xlab = "Effect of this (effector)"
-            , ylab = " on this (affected)"
+           , axis.col = list(side = 3)
+           , xlab = "Effect of this (effector)"
+           , ylab = " on this (affected)"
            , main = mod
-           , col = rwb(9) ## FIXME: white should be centered in 0.
-            , mgp = c(2, 1, 0))
+           , col = pmcolors
+           , breaks = pmbreaks
+           , text.cell = list(col = "black")
+           , max.col = 180 ## turn black to white in dark cells. 
+           , mgp = c(2, 1, 0))
         par(op)
     } else {
         par(mar = rep(3, 4))
