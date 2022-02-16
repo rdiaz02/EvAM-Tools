@@ -68,7 +68,7 @@ rank_paths <- function(graph) {
 #' Return the labels of most relevant paths starting from WT 
 #' 
 #' @param graph igraph object with genotype transitions
-#' @param paths_from_graph List of path from WT to ending genotype
+#' @param paths_from_graph List of paths from WT to ending genotype
 #' @param top_paths Int > 0. Include labels from vertex present in n top_paths
 #' @param type String. Default genotype. Valid options are "genotypes" or "acquisition"
 #' "genotype" option returns the genotype of the vertex.

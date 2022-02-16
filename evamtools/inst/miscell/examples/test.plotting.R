@@ -22,6 +22,10 @@ png("1_4_some_horizontal_obs_prob.png", width = 1000, height = 600, units = "px"
 plot_CPMs(sample_evam_output, samples=samples, models=c("OT", "MHN", "CBN"), orientation="horizontal", plot_type = "trans_mat", fixed_vertex_size=FALSE)
 dev.off()
 
+png("1_5_some_horizontal_obs_prob_topPaths.png", width = 1000, height = 600, units = "px")
+plot_CPMs(sample_evam_output, samples=samples, models=c("OT", "MHN", "CBN"), orientation="horizontal", plot_type = "trans_mat", fixed_vertex_size=FALSE, top_paths=1  )
+dev.off()
+
 png("2_1_all_horizontal_fixed_trm.png", width = 1000, height = 600, units = "px")
 plot_CPMs(sample_evam_output, orientation="horizontal", plot_type = "trans_rate_mat", fixed_vertex_size=TRUE)
 dev.off()
