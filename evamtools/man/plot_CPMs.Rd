@@ -106,8 +106,8 @@ out_AND_OR_XOR <- evam(ex_mixed_and_or_xor,
                        hesbcn_opts = list(seed = 26,
                                           silent = FALSE))
 
-plot_CPMs(out_AND_XOR, plot_type = "trans_mat")
+plot_CPMs(out_AND_OR_XOR, plot_type = "trans_mat")
 
-plot_CPMs(out_AND_XOR, plot_type = "trans_mat", top_paths = 3)
+plot_CPMs(out_AND_OR_XOR, plot_type = "trans_mat", top_paths = 3)
 
 }
