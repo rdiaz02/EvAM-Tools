@@ -422,6 +422,7 @@ plot_model <- function(model_info, parent_set, mod = ""){
                         parent_set[[igraph::head_of(g, igraph::E(g)[i])$name]]]
             }
         } else igraph::E(g)$color <- standard_relationship
+        browser()
         plot(g
             , layout = dag_layout
             , vertex.size = 50 
