@@ -742,7 +742,7 @@ evam <- function(x,
     ##   Big function so we can parallelize the calls
     ## Run inside evam. Take all additional args from envir of evam
     do_method <- function(method) {
-        if(method == "MHN") {
+        if (method == "MHN") {
             RhpcBLASctl::omp_set_num_threads(mhn_opts_2$omp_threads)
             time_out <- system.time({
                 out <- do_MHN2(x, lambda = mhn_opts_2$lambda)

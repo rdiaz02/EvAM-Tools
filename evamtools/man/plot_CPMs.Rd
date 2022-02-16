@@ -6,7 +6,7 @@ plot_CPMs(
   cpm_output,
   samples = NULL,
   orientation = "horizontal",
-  models = c("OT", "CBN", "OncoBN", "MCCBN", "MHN", "HESBCN"),
+  methods = c("OT", "CBN", "OncoBN", "MCCBN", "MHN", "HESBCN"),
   plot_type = "trans_mat",
   label_type = "genotype",
   fixed_vertex_size = FALSE,
@@ -21,7 +21,7 @@ plot_CPMs(
 
 \item{orientation}{String. If it is not "vertical" it will be displayed with an horizontal layout. Optional.}
 
-\item{models}{Models for which you want output.}
+\item{methods}{Methods for which you want output.}
 
 \item{plot_type}{One of:
   \itemize{
@@ -118,6 +118,19 @@ out_AND_OR_XOR <- evam(ex_mixed_and_or_xor,
 
 plot_CPMs(out_AND_OR_XOR, plot_type = "trans_mat")
 
+## Only two methods, but one not fitted
+plot_CPMs(out_AND_OR_XOR, methods = c("CBN", "HESBCN"),
+           plot_type = "trans_mat")
+
+## Only one method
+plot_CPMs(out_AND_OR_XOR, methods = c("MHN"),
+          plot_type = "trans_mat")
+
 plot_CPMs(out_AND_OR_XOR, plot_type = "trans_mat", top_paths = 3)
+
+
+
+plot_CPMs(out_AND_OR_XOR, methods = c("MHN", "HESBCN"),
+          plot_type = "trans_mat")
 
 }
