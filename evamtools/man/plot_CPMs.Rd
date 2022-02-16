@@ -56,11 +56,12 @@ or the transtionRateMatrix for MHN
 The bottom row has a custom plot for trans_mat, trans_rate_mat, or
 obs_genotype_transitions.
 
- In the bottom row plots, nless \code{fixed_vertex_size = TRUE}, the size of genotype nodes is proportional to
+ In the bottom row plots, unless \code{fixed_vertex_size = TRUE}, the size of genotype nodes is proportional to
 the observed frequency of genotypes for all plots except for
 \code{plot_type = 'obs_genotype_transitions'}, where it is
-proportional to the genotype frequency as predicted by each
-method. Thus, for all plots except \code{plot_type = 'obs_genotype_transitions'} the size of the genotype nodes is
+proportional to the genotype frequency as obtained by the sampling from
+the predictions of each method; if a node (genotype) has no observations,
+its size is of a fixed size. Thus, for all plots except \code{plot_type = 'obs_genotype_transitions'} the size of the genotype nodes is
 the same among methods, but the size of the genotype nodes can differ
 between methods for \code{plot_type = 'obs_genotype_transitions'}. 
 }
