@@ -201,8 +201,7 @@ test_that("We can run evam with non-default arguments", {
     
     expect_true(exists("OT_model", where = out3))
     exercise_sample_CPMs(out3)
-
-    
+   
 })
 
 
@@ -242,5 +241,46 @@ test_that("Handling invalid methods and no single valid method", {
     
 
 })
+
+
+test_that("Options are what they should when we change them", {
+    dB_c1 <- matrix(
+ c(
+     rep(c(1, 0, 0, 0, 0), 30) #A
+   , rep(c(0, 0, 1, 0, 0), 30) #C
+   , rep(c(1, 1, 0, 0, 0), 20) #AB
+   , rep(c(0, 0, 1, 1, 0), 20) #CD
+   , rep(c(1, 1, 1, 0, 0), 10) #ABC
+   , rep(c(1, 0, 1, 1, 0), 10) #ACD
+   , rep(c(1, 1, 0, 0, 1), 10) #ABE
+   , rep(c(0, 0, 1, 1, 1), 10) #CDE
+   , rep(c(1, 1, 1, 0, 1), 10) #ABCE
+   , rep(c(1, 0, 1, 1, 1), 10) #ACDE
+   , rep(c(1, 1, 1, 1, 0), 5) # ABCD
+   , rep(c(0, 0, 0, 0, 0), 1) # WT
+ ), ncol = 5, byrow = TRUE
+)
+    colnames(dB_c1) <- LETTERS[1:5]
+
+out3 <- suppressMessages(evam(dB_c1,
+                                  methods = c("OT", "OncoBN",
+                                              "MHN"),
+                                  max_cols = 4,
+                                  cores = 1, ## if >, will hang because of MCCBN thrds > 1
+                                 cbn_opts = list(omp_threads = 2),
+                                 hesbcn_opts = list(steps = 20000, seed = 2),
+                                 mhn_opts = list(lambda = 100/nrow(dB_c1)),
+                                 oncobn_opts = list(model = "CBN", epsilon = max(colMeans(dB_c1))),
+                                 ot_opts = list(with_errors_dist_ot = FALSE),
+                                 mccbn_opts = list(model = "H-CBN2",
+                                                      thrds = 8, max.iter = 20,
+                                                   max.iter.asa = 25)))
+    
+    expect_true(out3$all_options$mhn_opts$lambda == 100/nrow(dB_c1))
+    expect_true(out3$all_options$oncobn_opts$epsilon == max(colMeans(dB_c1)))
+    
+    
+})
+
 
 cat("\n Done test.exercise-main-funct.R \n")

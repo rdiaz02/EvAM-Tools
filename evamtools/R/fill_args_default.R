@@ -1,4 +1,3 @@
-
 ## list, list -> list
 
 ## If any entry en defaults is not in inputl, add to inputl
@@ -6,7 +5,6 @@
 
 ## I use it to add defaults (possibly not explicitly passed) to the
 ##      list inputl, if the inputl has no value
-
 
 fill_args_default <- function(inputl, defaults) {
 

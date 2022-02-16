@@ -195,6 +195,7 @@ speed things much or what is the best number of threads to use. }
         \item{analyzed_data: }{The data that were actually analyzed. Can
         differ from the original data because of the data pre-processing
         steps.}
+      \item{all_options: }{All of the options used, as a list of lists.}
   }
 }
 
@@ -306,5 +307,18 @@ data(every_which_way_data)
 Dat1 <- every_which_way_data[[16]][1:40, 2:6]
 out <- evam(Dat1,
             methods = c("CBN", "OT", "OncoBN",
-                        "MHN", "HESBCN", "MCCBN"))
+                        "MHN", "HESBCN"))
+
+
+## Running only some methods and changing some options
+## (this example is not necessarily sensible!)
+## Of course, we must use the name of the data in an option that is
+## data-dependent
+
+out <- evam(Dat1,
+            methods = c("CBN", "OT", "OncoBN",
+                        "MHN", "HESBCN", "MCCBN"),
+            mhn_opts = list(lambda = 5/nrow(Dat1)),
+            oncobn_opts = list(model = "CBN"))
+
 }

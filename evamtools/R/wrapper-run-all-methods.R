@@ -713,30 +713,27 @@ evam <- function(x,
         seed = NULL)
 
     ## Not needed, but make sure we keep names distinct
+    mhn_opts_2 <- fill_args_default(mhn_opts, d_mhn_opts)
     cbn_opts_2 <- fill_args_default(cbn_opts, d_cbn_opts)
     hesbcn_opts_2 <- fill_args_default(hesbcn_opts, d_hesbcn_opts)
     oncobn_opts_2 <- fill_args_default(oncobn_opts, d_oncobn_opts)
     mccbn_opts_2 <- fill_args_default(mccbn_opts, d_mccbn_opts)
-    cbn_opts_2 <- fill_args_default(cbn_opts, d_cbn_opts)
-    mhn_opts_2 <- fill_args_default(mhn_opts, d_mhn_opts)
 
     ## rm to avoid confusion, though not needed
     rm(cbn_opts, hesbcn_opts, oncobn_opts, mccbn_opts, mhn_opts)
     rm(d_cbn_opts, d_hesbcn_opts, d_oncobn_opts, d_mccbn_opts, d_mhn_opts)
-    
 
-    
-    if(!(cbn_opts_2$init_poset %in% c("OT", "linear")))
+    if (!(cbn_opts_2$init_poset %in% c("OT", "linear")))
         stop("cbn_init_poset must be one of OT or linear. ",
              " Custom not allowed in call from evam.")
-    
+
     if ("MCCBN" %in% methods) {
         stopifnot(mccbn_opts_2$model %in% c("OT-CBN", "H-CBN2"))
-    } 
+    }
 
     if ("OncoBN" %in% methods) {
         stopifnot(oncobn_opts_2$model %in% c("DBN", "CBN"))
-    } 
+    }
 
     
     ## ######################################################################
@@ -846,7 +843,7 @@ evam <- function(x,
         if(!exists(component, all_out[[method]])) return(NA)
         return(all_out[[method]][[component]])
     }
-    
+
     return(list(
         OT_model = get_output("OT", "edges"),
         OT_f_graph = get_output("OT", "weighted_fgraph"),
@@ -887,353 +884,20 @@ evam <- function(x,
         HESBCN_trans_mat = get_output("HESBCN", "trans_mat_genots"),
         HESBCN_td_trans_mat = get_output("HESBCN", "td_trans_mat"),
         HESBCN_predicted_genotype_freqs = get_output("HESBCN", "predicted_genotype_freqs"),
+        HESBCN_command = get_output("HESBCN", "command"),
         
         original_data = xoriginal,
-        analyzed_data = x
-    ))
+        analyzed_data = x,
+        all_options = list(
+            mhn_opts = mhn_opts_2,
+            ot_opts = ot_opts,
+            cbn_opts = cbn_opts_2,
+            hesbcn_opts = hesbcn_opts_2,
+            oncobn_opts = oncobn_opts_2,
+            mccbn_opts = mccbn_opts_2)
+    )
+    )
 }
-
-
-
-
-## ## Non-parallelized version
-## evam0 <- function(x,
-##                  methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN"),
-##                  max_cols = 15,
-##                  mhn_opts = list(lambda = 1/nrow(x)),
-##                  ot_opts = list(with_errors_dist_ot = TRUE),
-##                  cbn_opts = list(
-##                      cores = 1,
-##                      init_poset = "OT"
-##                  ),
-##                  hesbcn_opts = list(
-##                      steps = 100000,
-##                      seed = NULL
-##                  ),
-##                  oncobn_opts = list(
-##                      model = "DBN",
-##                      algorithm = "DP",
-##                      epsilon = min(colMeans(x)/2),
-##                      silent = TRUE
-##                  ),
-##                  mccbn_opts = list(
-##                      model = "OT-CBN",
-##                      tmp_dir = NULL,
-##                      addname = NULL,
-##                      silent = TRUE,
-##                      L = 100,
-##                      sampling = c("forward", "add-remove", "backward", "bernoulli", "pool"),
-##                      max.iter = 100L,
-##                      update.step.size = 20L,
-##                      tol = 0.001,
-##                      max.lambda.val = 1e+06,
-##                      T0 = 50,
-##                      adap.rate = 0.3,
-##                      acceptance.rate = NULL,
-##                      step.size = NULL,
-##                      max.iter.asa = 10000L,
-##                      neighborhood.dist = 1L,
-##                      adaptive = TRUE,
-##                      thrds = 1L,
-##                      verbose = FALSE,
-##                      seed = NULL)
-##                  ) {
-
-##     ## Sanity check of gene names
-##     gn_comma <- stringi::stri_count_fixed(colnames(x), ',')
-##     if(any(gn_comma))
-##         stop("At least one of your gene names has a comma. That is not allowed")
-    
-
-    
-##     ## ############################################################
-##     ##
-##     ##   Dealing with default arguments
-##     ##
-##     ## ############################################################
-##     d_cbn_opts <- list(
-##                      cores = 1,
-##                      init_poset = "OT"
-##     )
-##     d_hesbcn_opts <- list(
-##                      steps = 100000,
-##                      seed = NULL
-##     )
-##     d_oncobn_opts <- list(
-##                      model = "DBN",
-##                      algorithm = "DP",
-##                      epsilon = min(colMeans(x)/2),
-##                      silent = TRUE
-##     )
-##     d_mccbn_opts <- list(
-##                      model = "OT-CBN",
-##                      tmp_dir = NULL,
-##                      addname = NULL,
-##                      silent = TRUE,
-##                      L = 100,
-##                      sampling = c("forward", "add-remove", "backward", "bernoulli", "pool"),
-##                      max.iter = 100L,
-##                      update.step.size = 20L,
-##                      tol = 0.001,
-##                      max.lambda.val = 1e+06,
-##                      T0 = 50,
-##                      adap.rate = 0.3,
-##                      acceptance.rate = NULL,
-##                      step.size = NULL,
-##                      max.iter.asa = 10000L,
-##                      neighborhood.dist = 1L,
-##                      adaptive = TRUE,
-##                      thrds = 1L,
-##                      verbose = FALSE,
-##                      seed = NULL)
-
-##     ## Not needed, but make sure we keep names distinct
-##     cbn_opts_2 <- fill_args_default(cbn_opts, d_cbn_opts)
-##     hesbcn_opts_2 <- fill_args_default(hesbcn_opts, d_hesbcn_opts)
-##     oncobn_opts_2 <- fill_args_default(oncobn_opts, d_oncobn_opts)
-##     mccbn_opts_2 <- fill_args_default(mccbn_opts, d_mccbn_opts)
-##     ## rm to avoid confusion, though not needed
-##     rm(cbn_opts, hesbcn_opts, oncobn_opts, mccbn_opts)
-##     rm(d_cbn_opts, d_hesbcn_opts, d_oncobn_opts, d_mccbn_opts)
-    
-    
-##     if(!(cbn_opts_2$init_poset %in% c("OT", "linear")))
-##         stop("cbn_init_poset must be one of OT or linear. ",
-##              " Custom not allowed in call from evam.")
-    
-##     if ("MCCBN" %in% methods) {
-##         do_MCCBN <- TRUE
-##         stopifnot(mccbn_opts_2$model %in% c("OT-CBN", "H-CBN2"))
-##     } else {
-##         do_MCCBN <- FALSE
-##     }
-
-##     if ("OncoBN" %in% methods) {
-##         do_OncoBN <- TRUE
-##         stopifnot(oncobn_opts_2$model %in% c("DBN", "CBN"))
-##     } else {
-##         do_OncoBN <- FALSE
-##     }
-
-##     do_HyperTraPS <- FALSE
-
-
-##     ##########      Preprocessing: common to all methods
-##     x <- df_2_mat_integer(x)
-##     xoriginal <- x
-    
-##     x <- add_pseudosamples(x, n00 = "auto3")
-##     ## remove.constant makes no difference IFF we add pseudosamples, as
-##     ## there can be no constant column when we add pseudosamples
-##     x <- pre_process(x, remove.constant = FALSE,
-##                      min.freq = 0, max.cols = max_cols)
-
-##     if(ncol(x) < 2) {
-##         warning("Fewer than 2 columns in data set")
-##         return(NA)
-##     }
-
-    
-##     ## ## Not using HyperTraPS for now. A placeholder
-##     ## if(do_HyperTraPS) {
-##     ##     ##     message("Doing HyperTraps")
-##     ##     ##     message("By default we run it here with dry_run = TRUE.
-##     ##     ##     HyperTraPS takes a long time and I do no want to block the script.
-##     ##     ## ")
-##     ##     ## FIXME: HT_folder undefined
-##     ##     HT_folder <- NULL
-##     ##     time_HyperTraPS <- system.time(
-##     ##         out_HyperTraPS <-
-##     ##             do_HyperTraPS(x, tmp_folder = HT_folder,
-##     ##                           dry_run = TRUE, plot = FALSE))["elapsed"]
-##     ##     message("time HyperTraPS = ", time_HyperTraPS)
-##     ## } 
-##     ## if (do_HyperTraPS) {
-##     ##     ## FIXME: this will break, as pre_trans_mat_new_CPMS$HyperTraPS
-##     ##     ## has never been created
-##     ##     pre_trans_mat_others["HyperTraPS"] <-
-##     ##         list(pre_trans_mat_new_CPMS$HyperTraPS)
-##     ## } 
-
-
-##     ## ######################################################################
-##     ##      Run MHN
-##     ##      MHN is fully self-contained: CPM, transition matrix, etc.
-##     ## ######################################################################
-    
-##     message("Doing MHN")
-##     time_MHN <- system.time(
-##         MHN_out <- do_MHN2(x, lambda = mhn_opts$lambda))["elapsed"]
-##     message("time MHN = ", time_MHN)
-
-
-##     ## ####################################################################
-##     ##    Run each one of the remaining CPMs
-##     ## ####################################################################
-    
-##     message("Doing HESBCN")
-##     time_hesbcn <- system.time(
-##         HESBCN_out <- do_HESBCN(x,
-##                                 n_steps = hesbcn_opts_2$steps,
-##                                 seed = hesbcn_opts_2$seed))["elapsed"]
-##     message("time HESBCN = ", time_hesbcn)
-
-
-    
-##     message("Doing OT")
-##     time_ot <-
-##         system.time(
-##             OT_out <- try(
-##                 suppressMessages(
-##                     ot_proc(x,
-##                             nboot = 0,
-##                             distribution.oncotree = TRUE,
-##                             with_errors_dist_ot = ot_opts$with_errors_dist_ot))))["elapsed"]
-##     message("time OT = ", time_ot)
-
-##     message("Doing CBN")
-##     time_cbn_ot <- system.time(
-##            CBN_out <- try(cbn_proc(x,
-##                                    addname = "tmpo",
-##                                    init.poset = cbn_opts_2$init_poset,
-##                                    nboot = 0,
-##                                    parall = TRUE,
-##                                    cores = cbn_opts_2$cores)))["elapsed"]
-##     message("time CBN = ", time_cbn_ot)
-
-##     if(do_OncoBN) {
-##         message("Doing OncoBN\n\n")
-##         time_dbn <- system.time(
-##             OncoBN_out <- do_OncoBN(x,
-##                                     model = oncobn_opts_2$model,
-##                                     algorithm = oncobn_opts_2$algorithm,
-##                                     epsilon = oncobn_opts_2$epsilon,
-##                                     silent = oncobn_opts_2$silent))["elapsed"]
-##         message("time OncoBN = ", time_dbn)
-##     } 
-    
-##     if(do_MCCBN) {
-##         if( !requireNamespace("mccbn", quietly = TRUE)) {
-##             warning("MC-CBN (mccbn) no installed. Not running MC-CBN")
-##         } else {
-##             message("Doing MC-CBN")
-##             if(mccbn_opts_2$model == "OT-CBN") 
-##                 time_mccbn <-
-##                     system.time(MCCBN_out <- try(do_MCCBN_OT_CBN(x)))["elapsed"]
-##             else if(mccbn_opts_2$model == "H-CBN2") {
-##                 mccbn_hcbn2_opts_2 <- mccbn_opts_2
-##                 mccbn_hcbn2_opts_2$model <- NULL
-##                 time_mccbn <-
-##                     system.time(MCCBN_out <- try(do_MCCBN_HCBN2(x,
-##                                                                   mccbn_hcbn2_opts = mccbn_hcbn2_opts_2
-##                                                                   )))["elapsed"]
-##                 }
-##             message("time MC-CBN = ", time_mccbn)
-##         }
-##     }
-
-##     ## ######################################################################
-##     ##   From CPM output, obtain weighted fitness graph and transition matrix
-##     ##   between genotypes.
-##     ## ######################################################################
-    
-##     OT_fg_tm <- cpm2tm(OT_out)
-##     CBN_fg_tm <- cpm2tm(CBN_out)
-##     HESBCN_fg_tm <- cpm2tm(HESBCN_out)
-##     if(do_MCCBN)
-##         MCCBN_fg_tm <- cpm2tm(MCCBN_out)
-##     if(do_OncoBN) 
-##         OncoBN_fg_tm <- cpm2tm(OncoBN_out)
-    
-    
-##     ## ######################################################################
-##     ##    For methods for which it makes sense, obtain time discretized
-##     ##    transition rate matrix
-##     ##    We use the same function for all cases.
-##     ## ######################################################################
-    
-##     CBN_td_trans_mat <-  trans_rate_to_trans_mat(CBN_fg_tm$weighted_fgraph,
-##                                        method = "uniformization")
-##     if(do_MCCBN)
-##         MCCBN_td_trans_mat <-  trans_rate_to_trans_mat(MCCBN_fg_tm$weighted_fgraph,
-##                                        method = "uniformization")
-##     HESBCN_td_trans_mat <-  trans_rate_to_trans_mat(HESBCN_fg_tm$weighted_fgraph,
-##                                        method = "uniformization")
-    
-
-##     ## Return list always has the same elements
-##     ## Set to NA those for not run models.
-##     if (!do_MCCBN) {
-##         MCCBN_out <- list(edges = NA)
-##         MCCBN_fg_tm <- list(weighted_fgraph = NA, trans_mat_genots = NA)
-##         MCCBN_td_trans_mat <- NA
-##     }
-##     if (!do_OncoBN) {
-##         OncoBN_out <- list(edges = NA, likelihood = NA)
-##         OncoBN_fg_tm <- list(weighted_fgraph = NA, trans_mat_genots = NA)
-##     }
-
-##     HyperTraPS_model <- NA
-##     HyperTraPS_trans_rate_mat <- NA
-##     HyperTraPS_trans_mat <- NA
-##     HyperTraPS_td_trans_mat <- NA
-
-##     ## Future: Getting all paths to global maximum
-##     ## Simply call do_weighted_paths_to_max on a list of
-##     ## transition matrices and a pre-created paths_to_max
-##     ## Make sure we are not repeating expensive operations
-##     ## When testing, compare against cpm2tm
-##     ## for OT and CBN
-
-##     ## f_graph: remember this is the transition rate matrix
-##     ## for CBN, MCCBN, HESBCN
-##     ## For OT ... well, it is something else, but not really probabilities
-##     ## of anything.
-##     return(list(
-##         OT_model = OT_out$edges,
-##         OT_f_graph = OT_fg_tm$weighted_fgraph,
-##         OT_trans_mat = OT_fg_tm$trans_mat_genots,
-##         OT_predicted_genotype_freqs = OT_out$predicted_genotype_freqs,
-
-##         CBN_model = CBN_out$edges,
-##         CBN_trans_rate_mat = CBN_fg_tm$weighted_fgraph,
-##         CBN_trans_mat = CBN_fg_tm$trans_mat_genots,
-##         CBN_td_trans_mat = CBN_td_trans_mat,
-
-##         MCCBN_model = MCCBN_out$edges,
-##         MCCBN_trans_rate_mat = MCCBN_fg_tm$weighted_fgraph,
-##         MCCBN_trans_mat = MCCBN_fg_tm$trans_mat_genots,
-##         MCCBN_td_trans_mat = MCCBN_td_trans_mat,
-
-##         MHN_theta = MHN_out$theta,
-##         MHN_exp_theta = exp(MHN_out$theta),
-##         MHN_trans_rate_mat = MHN_out$transitionRateMatrix,
-##         MHN_trans_mat = MHN_out$transitionMatrixCompExp,
-##         MHN_td_trans_mat = MHN_out$transitionMatrixTimeDiscretized,
-
-##         OncoBN_model = OncoBN_out$edges,
-##         OncoBN_likelihood = OncoBN_out$likelihood, 
-##         OncoBN_f_graph = OncoBN_fg_tm$weighted_fgraph, 
-##         OncoBN_trans_mat = OncoBN_fg_tm$trans_mat_genots,
-##         OncoBN_predicted_genotype_freqs = OncoBN_out$predicted_genotype_freqs,
-##         OncoBN_fitted_model = OncoBN_out$model,
-##         OncoBN_epsilon = OncoBN_out$epsilon,
-##         OncoBN_parent_set = OncoBN_out$parent_set,
-
-##         HESBCN_model = HESBCN_out$edges,
-##         HESBCN_parent_set = HESBCN_out$parent_set,
-##         HESBCN_trans_rate_mat = HESBCN_fg_tm$weighted_fgraph,
-##         HESBCN_trans_mat = HESBCN_fg_tm$trans_mat_genots,
-##         HESBCN_td_trans_mat = HESBCN_td_trans_mat,
-
-##         HyperTraPS_model = HyperTraPS_model,
-##         HyperTraPS_trans_rate_mat = HyperTraPS_trans_rate_mat,
-##         HyperTraPS_trans_mat = HyperTraPS_trans_mat,
-##         HyperTraPS_td_trans_mat = HyperTraPS_td_trans_mat,
-##         original_data = xoriginal,
-##         analyzed_data = x
-##          ))
-## }
 
 
 
@@ -1322,6 +986,7 @@ evam <- function(x,
 ##                            return(all_methods_2_trans_mat(all_data[[i]]))
 ##                        }
 ##                        )
+
 
 
 
