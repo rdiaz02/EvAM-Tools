@@ -1,18 +1,4 @@
-check_if_csd <- function(data){
-    tmp_names <- c("data", "dag", "dag_parent_set", "gene_names", "name", "type", "thetas")
-    types <- c("csd", "dag", "matrix")
-    if(is.null(data)) return(FALSE)
-    if(all(tmp_names %in% names(data))){
-        if((data$type %in% types 
-        & all(unique(c(data$data)) %in% c(0, 1)))){
-            return(TRUE)
-        } else {return(FALSE)}
-    } else { ## We assume a data.frame
-        tmp_data <- unlist(data)
-        names(tmp_data) <- NULL
-        return(all(unique(tmp_data) %in% c(0, 1)))
-    }
-}
+
 
 freqs2csd <- function(freqs, gene_names){
     csd <- NULL
@@ -44,6 +30,7 @@ freqs2csd <- function(freqs, gene_names){
 }
 
 get_display_freqs <- function(freqs, n_genes, gene_names){
+    if(is.null(freqs)) return(SHINY_DEFAULTS$template_data$csd_freqs)
     if(nrow(freqs) == 0) return(SHINY_DEFAULTS$template_data$csd_freqs)
     valid_gene_names <- c("WT", gene_names[1:n_genes])
 
@@ -62,11 +49,6 @@ get_csd <- function(complete_csd){
     return(csd)
 }
 
-available_cpms <- function(data){
-    data$csd_data <- NULL
-    cpm_names <- unique(sapply(names(data), function(x) str_split(x, "_")[[1]][[1]]))
-    return(cpm_names)
-}
 
 get_mhn_data <- function(n_genes, n_samples, gene_names, thetas = NULL){
     if(is.null(thetas)) thetas <- evamtools:::Random.Theta(n=n_genes)
@@ -201,19 +183,20 @@ standarize_dataset <- function(data){
   
   new_data <- list()
 
-  if(!is.null(colnames(data$data))){
-    if(!all(unique(data$data) %in% c(0, 1)))
-        stop("Data should be binary: only 0 and 1")
+  if(!is.null(data$gene_names)){
+    tmp_names <- data$gene_names
+  } else if(!is.null(colnames(data$data))){
     tmp_names <- colnames(data$data)
   } else if(!is.null(colnames(data$dag))){
     tmp_names <- colnames(data$dag)[-1]
-  } else if(!is.null(names(data$thetas))){
-    tmp_names <- names(data$thetas)
+  } else if(!is.null(colnames(data$thetas))){
+    tmp_names <- colnames(data$thetas)
   } else {
     tmp_names <- c()
   }
+
   new_data$gene_names <- c(tmp_names 
-    , LETTERS[(length(tmp_names) + 1) : SHINY_DEFAULTS$max_genes ])
+    , LETTERS[(length(tmp_names) + 1) : SHINY_DEFAULTS$max_genes ])[1:SHINY_DEFAULTS$max_genes]
   
   new_data$name <- data$name  
 
@@ -225,9 +208,9 @@ standarize_dataset <- function(data){
     }
     new_lambdas <- SHINY_DEFAULTS$template_data$lambdas
     new_lambdas[1:length(data$lambdas)] <- data$lambdas
-    names(new_lambdas) <- new_data$gene_names
     new_data$lambdas <- new_lambdas
   }
+  names(new_data$lambdas) <- new_data$gene_names
 
   if(is.null(data$dag_parent_set)) {
     new_data$dag_parent_set <- SHINY_DEFAULTS$template_data$dag_parent_set
@@ -274,12 +257,14 @@ standarize_dataset <- function(data){
     new_thetas[1:n_genes, 1:n_genes] <- data$thetas
     new_data$thetas <- new_thetas
   }
-
   rownames(new_data$thetas) <- colnames(new_data$thetas) <- new_data$gene_names
 
   if(is.null(data$data)) {
     new_data$data <- SHINY_DEFAULTS$template_data$data
-  } else{
+  } else {
+    if(!all(unique(as.vector(data$data)) %in% c(0, 1))){
+      stop("Data should be binary: only 0 and 1")
+    }
     new_data$data <- data$data
     colnames(new_data$data) <- new_data$gene_names[1:ncol(new_data$data)]
   }
@@ -382,4 +367,28 @@ standarize_all_datasets <- function(datasets){
 #             col = colors_relationships, lty = 1, lwd = 5, bty = "n")
 #     }
 #     title("Direct acyclic graph", cex.main = 1.8)
+# }
+
+
+# check_if_csd <- function(data){
+#     tmp_names <- c("data", "dag", "dag_parent_set", "gene_names", "name", "type", "thetas")
+#     types <- c("csd", "dag", "matrix")
+#     if(is.null(data)) return(FALSE)
+#     if(all(tmp_names %in% names(data))){
+#         if((data$type %in% types 
+#         & all(unique(c(data$data)) %in% c(0, 1)))){
+#             return(TRUE)
+#         } else {return(FALSE)}
+#     } else { ## We assume a data.frame
+#         tmp_data <- unlist(data)
+#         names(tmp_data) <- NULL
+#         return(all(unique(tmp_data) %in% c(0, 1)))
+#     }
+# }
+
+
+# available_cpms <- function(data){
+#     data$csd_data <- NULL
+#     cpm_names <- unique(sapply(names(data), function(x) str_split(x, "_")[[1]][[1]]))
+#     return(cpm_names)
 # }
