@@ -583,7 +583,8 @@ evam <- function(x,
                  hesbcn_opts = list(
                      steps = 100000,
                      seed = NULL,
-                     reg = c("bic", "aic", "loglik")
+                     reg = c("bic", "aic", "loglik"),
+                     silent = TRUE                     
                  ),
                  oncobn_opts = list(
                      model = "DBN",
@@ -682,7 +683,8 @@ evam <- function(x,
     d_hesbcn_opts <- list(
         steps = 100000,
         seed = NULL,
-        reg = c("bic", "aic", "loglik")
+        reg = c("bic", "aic", "loglik"),
+        silent = TRUE
     )
     d_oncobn_opts <- list(
         model = "DBN",
@@ -742,34 +744,36 @@ evam <- function(x,
     do_method <- function(method) {
         if(method == "MHN") {
             RhpcBLASctl::omp_set_num_threads(mhn_opts_2$omp_threads)
-            time_out <- system.time(
-                out <- do_MHN2(x, lambda = mhn_opts_2$lambda))["elapsed"]
-            out <- c(out,
+            time_out <- system.time({
+                out <- do_MHN2(x, lambda = mhn_opts_2$lambda)
+                out <- c(out,
                      predicted_genotype_freqs =
                          list(probs_from_trm(out$transitionRateMatrix)))
+                })["elapsed"]
         } else if (method == "HESBCN") {
-            
-            time_out <- system.time(
+            time_out <- system.time({
                 out <- do_HESBCN(x,
                                  n_steps = hesbcn_opts_2$steps,
                                  seed = hesbcn_opts_2$seed,
-                                 reg = hesbcn_opts_2$reg))["elapsed"]
-            out <- c(out, cpm2tm(out))
-            out <- c(out,
-                     td_trans_mat =
-                         trans_rate_to_trans_mat(out[["weighted_fgraph"]],
-                                                 method = "uniformization"))
-            out <- c(out,
-                     predicted_genotype_freqs =
-                         list(probs_from_trm(out$weighted_fgraph)))
+                                 silent = hesbcn_opts_2$silent,
+                                 reg = hesbcn_opts_2$reg)
+                out <- c(out, cpm2tm(out))
+                out <- c(out,
+                         td_trans_mat =
+                             trans_rate_to_trans_mat(out[["weighted_fgraph"]],
+                                                     method = "uniformization"))
+                out <- c(out,
+                         predicted_genotype_freqs =
+                             list(probs_from_trm(out$weighted_fgraph)))
+            })["elapsed"]
         } else if (method == "CBN") {
-            time_out <- system.time(
+            time_out <- system.time({
                 out <- try(cbn_proc(x,
                                     addname = "tmpo",
                                     init.poset = cbn_opts_2$init_poset,
                                     nboot = 0,
                                     parall = TRUE,
-                                    omp_threads = cbn_opts_2$omp_threads)))["elapsed"]
+                                    omp_threads = cbn_opts_2$omp_threads))
             out <- c(out, cpm2tm(out))
             out <- c(out,
                      td_trans_mat =
@@ -778,6 +782,7 @@ evam <- function(x,
             out <- c(out,
                      predicted_genotype_freqs =
                          list(probs_from_trm(out$weighted_fgraph)))
+                })["elapsed"]
         } else if (method == "MCCBN") {
             if(mccbn_opts_2$model == "OT-CBN") 
                 time_out <-
@@ -792,6 +797,7 @@ evam <- function(x,
                                            mccbn_hcbn2_opts = mccbn_hcbn2_opts_2
                                            )))["elapsed"]
             }
+            time_out2 <- system.time({
             out <- c(out, cpm2tm(out))
             out <- c(out,
                      td_trans_mat =
@@ -800,25 +806,29 @@ evam <- function(x,
             out <- c(out,
                      predicted_genotype_freqs =
                          list(probs_from_trm(out$weighted_fgraph)))
+            })["elapsed"]
+            time_out <- time_out + time_out2
         } else if (method == "OT") {
-            time_out <- system.time(
+            time_out <- system.time({
                 out <- try(
                     suppressMessages(
                         ot_proc(x,
                                 nboot = 0,
                                 distribution.oncotree = TRUE,
-                                with_errors_dist_ot = ot_opts$with_errors_dist_ot))))["elapsed"]
-            out <- c(out, cpm2tm(out)) 
+                                with_errors_dist_ot = ot_opts$with_errors_dist_ot)))
+                out <- c(out, cpm2tm(out))
+                })["elapsed"]
         } else if (method == "OncoBN") {
-            time_out <- system.time(
+            time_out <- system.time({
                 out <- do_OncoBN(x,
                                  model = oncobn_opts_2$model,
                                  algorithm = oncobn_opts_2$algorithm,
                                  epsilon = oncobn_opts_2$epsilon,
-                                 silent = oncobn_opts_2$silent))["elapsed"]
-            out <- c(out, cpm2tm(out))  
+                                 silent = oncobn_opts_2$silent)
+                out <- c(out, cpm2tm(out))
+                })["elapsed"]
         }
-        message(paste0("time ", method, ": ", time_out))
+        message(paste0("time ", method, ": ", round(time_out, 3)))
         out
     }
 

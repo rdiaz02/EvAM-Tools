@@ -16,7 +16,8 @@ evam(x,
      hesbcn_opts = list(
                      steps = 100000,
                      seed = NULL,
-                     reg = c("bic", "aic", "loglik")
+                     reg = c("bic", "aic", "loglik"),
+                     silent = TRUE
                  ),
      oncobn_opts = list(
                      model = "DBN",
@@ -95,11 +96,11 @@ speed things much or what is the best number of threads to use. }
 \item{reg: }{Regularization: one of \code{bic} (default), \code{aic},
   \code{loglik}.} 
 
-\item{tmp_dir: }{Directory name where the oput is located.}
+%% \item{tmp_dir: }{Directory name where the oput is located.}
 
 \item{seed: }{Seed to run the experiment}
 
-\item{addname: }{String to append to the temporary folder name. Default NULL}
+%\item{addname: }{String to append to the temporary folder name. Default NULL}
 
 \item{silent: }{Whether to run show message showing the folder name where HESBCN is run}
   }
@@ -200,7 +201,7 @@ speed things much or what is the best number of threads to use. }
 }
 
 
-\note{For some methods, such as MHN and OncoBN, some parameters tipically depend on the data (lambda and epsilon for MHN and OncoBN, respectively). Since we first examine and possibly modify the input data, the values might not be the ones you thought you entered, as the options should be evaluated after the data are processed.
+\note{For some methods, such as MHN and OncoBN, some parameters tipically depend on the data (lambda and epsilon for MHN and OncoBN, respectively). Since we first examine and possibly modify the input data, the values might not be the ones you thought you entered, as the \strong{options should be evaluated after the data are pre-processed}.
 
   The \strong{data pre-processing} involves, in sequence, these steps:
 
@@ -217,6 +218,18 @@ speed things much or what is the best number of threads to use. }
 
   \item{No more than max_cols: }{If the \dQuote{max_cols} argument is not NULL, and if the data set has more columns that max_cols, we keep only max_cols columns of data, those with the largest number of mutations.}} 
  }
+
+\strong{Changing only some options:} Often, you will want to change only
+some of the options. You can enter, in the list, only the options you
+want changed (not the remaining ones). There is one example below.
+
+
+During the execution, and as messages, the elapsed time of each
+procedure is reported. This includes executing the model itself and
+possible additional operations, such as obtaining the transition rate
+matrix, etc. (So, for example, the time for estimating the
+matrix of thetas for MHN is much smaller than the reported time here,
+which also includes building the transition rate matrix).
  
 }
 
