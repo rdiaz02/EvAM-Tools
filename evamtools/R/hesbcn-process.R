@@ -70,20 +70,19 @@ do_HESBCN <- function(data,
               row.names = FALSE, quote = FALSE)
 
     # Launching
-    message("Running HESBCN")
-    if (is.null(seed)) {
-        command <- paste0("h-esbcn -d ",
-                          tmp_dir, "/input.txt -o ",
-                          tmp_dir, "/output.txt -n ", n_steps,
-                          " --reg ", reg)
-    } else if (is.numeric(seed) & seed > 0) {
-        command <- paste0("h-esbcn -d ",
-                          tmp_dir, "/input.txt -o ",
-                          tmp_dir, "/output.txt -n ", n_steps,
-                          " -s ", seed,
-                          " --reg ", reg)
-    }
-    if(!silent) message("HESBCN command: ", command)
+    ## message("Running HESBCN")
+    command <- paste0("h-esbcn -d ",
+                      tmp_dir, "/input.txt -o ",
+                      tmp_dir, "/output.txt -n ",
+                      format(round(n_steps), scientific = FALSE),
+                      " --reg ", reg)
+    if (!is.null(seed))
+        command <- paste0(command,
+                          " -s ",
+                          format(round(seed), scientific = FALSE)
+                          )
+    
+    if (!silent) message("HESBCN command: ", command)
     system(command, ignore.stdout = TRUE)
 
     # Reading output
@@ -126,6 +125,6 @@ do_HESBCN <- function(data,
         function(x) model_info$parent_set[x],
         "some_string"
     )
+    model_info["command"] <- command
     return(model_info)
 }
-
