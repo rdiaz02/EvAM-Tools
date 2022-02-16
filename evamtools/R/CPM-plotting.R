@@ -399,12 +399,50 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
         ))
 }
 
-dag_layout <- function(graph){ ## Avoiding lines
-    lyt <- igraph::layout.reingold.tilford(graph)
-    if(all(lyt[,1] == 0)) lyt[,1] <- rep(c(0,0.5,0,-0.5),
-                                         ceiling(nrow(lyt)/3))[1:nrow(lyt)]
-    return(lyt)
+## dag_layout <- function(graph){ ## Avoiding lines
+##     lyt <- igraph::layout.reingold.tilford(graph)
+##     if(all(lyt[,1] == 0)) lyt[,1] <- rep(c(0,0.5,0,-0.5),
+##                                          ceiling(nrow(lyt)/3))[1:nrow(lyt)]
+##     return(lyt)
+## }
+
+## The max depth of a node from Root
+##  used for layout_with_sugiyama
+node_depth <- function(g) {
+    node_names <- V(g)$name
+    children_names <- setdiff(node_names, "Root")
+    
+    children_node_depth <-
+        vapply(children_names,
+                      function(node)
+                          max(unlist(lapply(all_simple_paths(g,
+                                                             from = "Root",
+                                                             to = node),
+                                            length))),
+               1L
+               )
+    names(children_node_depth) <- children_names
+    ## Root is 1
+    all_nodes_depth <- rep(1, length(node_names))
+    names(all_nodes_depth) <- node_names
+    all_nodes_depth[names(children_node_depth)] <- children_node_depth
+    return(all_nodes_depth)
 }
+
+
+## FIXME: I am not sure we want to use igraph for the DAGs. I can't get
+## decent arrows, etc. In MC-CBN they use the following function, which
+## gives beautiful DAGs.
+
+## plot_poset <- function(robust_poset, size=12) {
+##   Names = colnames(robust_poset)
+##   colnames(robust_poset) <- Names
+##   rownames(robust_poset) <- Names
+##   am.graph <- new("graphAM", adjMat=robust_poset, edgemode="directed")
+##   plot(am.graph, attrs = list( node = list(color = "transparent", fontsize = size, fontcolor="dodgerblue4"), 
+##                                edge = list(arrowsize=0.5, color="antiquewhite4")))
+## }
+
 
 plot_model <- function(model_info, parent_set, mod = ""){
     if (typeof(model_info) == "list") { ## Potting DAGs
@@ -422,10 +460,15 @@ plot_model <- function(model_info, parent_set, mod = ""){
                         parent_set[[igraph::head_of(g, igraph::E(g)[i])$name]]]
             }
         } else igraph::E(g)$color <- standard_relationship
-        browser()
+        node_depths <- node_depth(g)
+        vertex.size <- ifelse(max(node_depths) >= 4, 25,
+                       ifelse(max(node_depths) == 3, 35,
+                              ifelse(max(node_depths <= 2), 40)))
         plot(g
-            , layout = dag_layout
-            , vertex.size = 50 
+           ## , layout = dag_layout
+           , layout = layout_with_sugiyama(g,
+                                           layers = node_depths)$layout
+            , vertex.size = vertex.size
             , vertex.label.color = "black"
             , vertex.label.family = "Helvetica"
             , font.best = 2
@@ -433,8 +476,9 @@ plot_model <- function(model_info, parent_set, mod = ""){
             , vertex.color = "white"
             , vertex.frame.color = "black" 
             , vertex.label.cex = 1
-            , edge.arrow.size = 0
-            , edge.width = 5
+           , edge.arrow.size = 1
+             ## , edge.arrow.width = 1
+            , edge.width = 1.5 #5
             , main = mod)
         if(!is.null(parent_set)){
             legend("topleft", legend = names(colors_relationships),
