@@ -79,7 +79,7 @@ trans_rate_to_trans_mat <- function(x,
         ## Conditional on there being a transition, thus diagonals are
         ## zero
         sx <- rowSums(x)
-        if( inherits(x, "dgCMatrix") ) { ## sparse matrices
+        if ( inherits(x, "dgCMatrix")) { ## sparse matrices
             tm <- x
             ii <- which(sx > 0)
             for(i in ii) {
@@ -106,9 +106,8 @@ trans_rate_to_trans_mat <- function(x,
         if(!isTRUE(all(dd == 0))) stop("Diagonal of x is not 0")
         ## In p. 243 they say
         ## "diagonal elements are defined as Qxx = -\sum y;x so that
-        ## columns sum to zero"
-        ## They talk of columns, because they transpose it relative
-        ## to what I do
+        ## columns sum to zero". They say columns, because
+        ## their Q is transposed relative to what I do
         diag(x) <- -1 * rowSums(x)
         gamma <- max(abs(diag(x)))
         tm <- diag(nrow(x)) + x/gamma
@@ -163,7 +162,6 @@ allGenotypes_3 <- function(k) {
 theta_to_trans_rate_3 <- function(theta,
                                 inner_transition = inner_transitionRate_3_1) {
 
-    ## t1 <- Sys.time()
     Theta <- exp(theta)
     geneNames <- colnames(theta)
     
@@ -179,7 +177,6 @@ theta_to_trans_rate_3 <- function(theta,
     genotNames[genotNames == ""] <- "WT"
 
     ## This single call is the one that takes most time
-    ## t2 <- Sys.time()
 
     TRM <- vapply(seq.int(numGenots),
            function(x)
@@ -263,7 +260,7 @@ transitionRateC3_SM <- function(i, genotypes,  Theta, maxmut,
 
     num_genots <- length(genotypes$num_mut)
     ## Last genotype
-    ## But this is silly
+    ## But this is silly. This code is never reached.
     if(i == num_genots) return(cbind(j = num_genots, x = 0))
 
     ## t11 <- Sys.time()
@@ -302,7 +299,6 @@ transitionRateC3 <- function(i, genotypes,  Theta, maxmut,
     ## Last genotype
     if(i == num_genots) return(rep(0, num_genots)) 
 
-    ## t11 <- Sys.time()
     ## All genotypes we are sure we cannot transition to
     nmuts <- genotypes$num_mut[i]
     ## Necessarily same of fewer mutations
@@ -317,22 +313,11 @@ transitionRateC3 <- function(i, genotypes,  Theta, maxmut,
         tmp3 <- double(0)
         upper_gg <- num_genots
     }
-    ## t13 <- Sys.time()
+
     ## All those with same number of mutations are also
     ## necessarily not reachable.
     mi1 <- match(nmuts + 1, genotypes$num_mut)
     tmp2 <- rep(0, length.out = mi1 - i)
-    ##  t14 <- Sys.time()
-    ## The rest
-    ## gg <- genotypes[c(i, mi1:upper_gg), ]
-
-    ## t15 <- Sys.time()
-
-    ## ff <- function(x) inner_transition(1, x, gg, Theta)
-    ## qs <- vapply(2:nrow(gg),
-    ##              ff,
-    ##              double(1)
-    ##              )
 
     ff <- function(x) inner_transition(i, x, genotypes, Theta)
     qs <- vapply(mi1:upper_gg,
