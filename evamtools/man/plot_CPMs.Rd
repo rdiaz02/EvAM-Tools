@@ -53,7 +53,16 @@ will plot all paths}
 \description{
 By default it creates a top row with the DAG of the CPM 
 or the transtionRateMatrix for MHN
-The bottom row has a custom plot for trans_mat, trans_rate_mat, or obs_genotype_transitions.
+The bottom row has a custom plot for trans_mat, trans_rate_mat, or
+obs_genotype_transitions.
+
+ In the bottom row plots, nless \code{fixed_vertex_size = TRUE}, the size of genotype nodes is proportional to
+the observed frequency of genotypes for all plots except for
+\code{plot_type = 'obs_genotype_transitions'}, where it is
+proportional to the genotype frequency as predicted by each
+method. Thus, for all plots except \code{plot_type = 'obs_genotype_transitions'} the size of the genotype nodes is
+the same among methods, but the size of the genotype nodes can differ
+between methods for \code{plot_type = 'obs_genotype_transitions'}. 
 }
 
 \note{The color and design of figures in the bottom row, depicting
