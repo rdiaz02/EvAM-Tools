@@ -452,34 +452,62 @@ plot_model <- function(model_info, parent_set, mod = ""){
                                 "#E2D810", ##"#FBDE44FF",
                                 "coral2")
         names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
-        g <- model_info
-        if (!is.null(parent_set)) {
-            for (i in igraph::E(g)) {
-                igraph::E(g)[i]$color <-
-                    colors_relationships[
-                        parent_set[[igraph::head_of(g, igraph::E(g)[i])$name]]]
+        # g <- model_info
+        # browser()
+
+        # if (!is.null(parent_set)) {
+        #     for (i in igraph::E(g)) {
+        #         igraph::E(g)[i]$color <-
+        #             colors_relationships[
+        #                 parent_set[[igraph::head_of(g, igraph::E(g)[i])$name]]]
+        #     }
+        # } else igraph::E(g)$color <- standard_relationship
+        # node_depths <- node_depth(g)
+        # vertex.size <- ifelse(max(node_depths) >= 4, 25,
+        #                ifelse(max(node_depths) == 3, 35,
+        #                       ifelse(max(node_depths <= 2), 40)))
+        adj_matrix <- as.matrix(igraph::as_adjacency_matrix(model_info))
+        adj_matrix2 <- matrix(as.integer(adj_matrix), ncol=ncol(adj_matrix), byrow=FALSE)
+        colnames(adj_matrix2) <- rownames(adj_matrix2) <- colnames(adj_matrix)
+
+        am.graph <- new("graphAM", adjMat=adj_matrix2, edgemode="directed")
+
+        attrs <- list(
+            node=list(shape="circle", fixedsize=FALSE, fontsize = 14)
+            , edge=list(arrowsize=0.75)
+        )
+
+        nAttr <- list() ## Placeholder if we want to add new stuff
+        edge_color <- c()
+        if(!is.null(parent_set)){
+            for(from_node in names(edges(am.graph))){
+                for(to_node in edges(am.graph)[[from_node]]){
+                    edge_color[paste0(from_node, "~", to_node)] <- colors_relationships[parent_set[to_node]]
+                }
             }
-        } else igraph::E(g)$color <- standard_relationship
-        node_depths <- node_depth(g)
-        vertex.size <- ifelse(max(node_depths) >= 4, 25,
-                       ifelse(max(node_depths) == 3, 35,
-                              ifelse(max(node_depths <= 2), 40)))
-        plot(g
-           ## , layout = dag_layout
-           , layout = layout_with_sugiyama(g,
-                                           layers = node_depths)$layout
-            , vertex.size = vertex.size
-            , vertex.label.color = "black"
-            , vertex.label.family = "Helvetica"
-            , font.best = 2
-            , vertex.frame.width = 0.5
-            , vertex.color = "white"
-            , vertex.frame.color = "black" 
-            , vertex.label.cex = 1
-           , edge.arrow.size = 1
-             ## , edge.arrow.width = 1
-            , edge.width = 1.5 #5
-            , main = mod)
+        }
+        if(!is.null(edge_color)) eAttr <- list(color=edge_color)
+
+        plot(am.graph
+        , attrs=attrs, nodeAttrs = nAttr
+        , edgeAttrs = eAttr
+        )
+        # plot(g
+        #    ## , layout = dag_layout
+        #    , layout = layout_with_sugiyama(g,
+        #                                    layers = node_depths)$layout
+        #     , vertex.size = vertex.size
+        #     , vertex.label.color = "black"
+        #     , vertex.label.family = "Helvetica"
+        #     , font.best = 2
+        #     , vertex.frame.width = 0.5
+        #     , vertex.color = "white"
+        #     , vertex.frame.color = "black" 
+        #     , vertex.label.cex = 1
+        #    , edge.arrow.size = 1
+        #      ## , edge.arrow.width = 1
+        #     , edge.width = 1.5 #5
+        #     , main = mod)
         if(!is.null(parent_set)){
             legend("topleft", legend = names(colors_relationships),
                     col = colors_relationships, lty = 1, lwd = 5, bty = "n")
