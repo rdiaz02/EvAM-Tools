@@ -529,26 +529,32 @@ plot_method <- function(method_info, parent_set, edges, method = "") {
             legend("topleft", legend = names(colors_relationships),
                    col = colors_relationships, lty = 1, lwd = 5, bty = "n")
         }
-    } else if (is.matrix(method_info)) { ##Plotting matrix
-        op <- par(mar=c(3, 3, 5, 3), las = 1)
-##### From library plot.matrix
+    } else if (is.matrix(method_info)) { ## Plotting matrix, for MHN
+        op <- par(mar=c(3, 3, 7, 3), las = 1)
+        ## ##### The plot is from library plot.matrix
         ##  Color scale, centered in white at 0
         range_colors <- 7 ## if you change this, might need to change max.col
         rwb <- colorRampPalette(colors = c("red", "white", "blue"))
         pmcolors <- rwb(range_colors)
         mmi <- max(abs(method_info))
         pmbreaks <- seq(from = -mmi, to = mmi, length.out = range_colors + 1)
-        
         plot(method_info, cex = 1.5, digits = 2, key = NULL
-           , axis.col = list(side = 3)
-           , xlab = "Effect of this (effector)"
-           , ylab = " on this (affected)"
-           , main = method
+           , axis.col = list(side = 1)
+           , axis.row = list(side = 2)
+           , xlab = "" # "Effect of this (effector)"
+           , ylab = "" # " on this (affected)"
+           , main = "" # method
            , col = pmcolors
            , breaks = pmbreaks
            , text.cell = list(col = "black")
            , max.col = 180 ## turn black to white in dark cells. 
-           , mgp = c(2, 1, 0))
+           , mgp = c(2, 3, 3)
+           , cex.axis = 1.5
+             , cex.lab = 1.5
+             )
+        mtext(side = 3, "Effect of this (effector)", line = 1)
+        mtext(side = 4, " on this (affected)", srt = 90, las = 0, line = 1)
+        title(method, line = 5)
         par(op)
     } else {
         par(mar = rep(3, 4))

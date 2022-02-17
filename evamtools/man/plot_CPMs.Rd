@@ -84,7 +84,13 @@ green, to differentiate them from the observed genotypes (shown in orange).
 \note{The color and design of figures in the bottom row, depicting
   transition matrices, transition rate matrices, and observed genotype
   transitions are heavily inspired by (a blatant copy of) some of the
-  representations in Greenbury et al., 2020.}
+  representations in Greenbury et al., 2020.
+
+  It is easy to get the plots to display poorly (overlapping names in
+  nodes, overlapping labels between plots, etc) if you use long gene
+  names. For best results, try to use short gene names.
+
+}
 
 \references{
   Greenbury, S. F., Barahona, M., & Johnston, I. G. (2020). HyperTraPS:
