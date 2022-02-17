@@ -378,23 +378,26 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
 
     all_data <- c(data, sample_data)
     
-    dag_tree <- NULL
+    edges_method <- NULL
     tryCatch (expr = {
-        dag_method <- get(paste(mod, "_model", sep = ""), data)
-        dag_tree <- graph_from_data_frame(dag_method[, c(1, 2)])
-    }, error = function(e){})
+        edges_method <- get(paste(mod, "_model", sep = ""), data)
+        igraph_method <- igraph::graph_from_data_frame(edges_method[, c(1, 2)])
+    }, error = function(e) {})
 
-    if(!is.null(dag_tree)){
-        method_info <- dag_tree
-    }else if(!is.null(all_data[[paste0(mod, "_theta")]])){
+    if (!is.null(edges_method)) {
+        method_info <- igraph_method
+        edges <- edges_method
+    } else if (!is.null(all_data[[paste0(mod, "_theta")]])) {
         method_info <- all_data[[paste0(mod, "_theta")]]
+        edges <- NA
     }
 
     return(list(
         method_info = method_info
-        , data2plot = all_data[[paste0(mod, "_", plot_type)]]
-        , parent_set = all_data[[paste0(mod, "_parent_set")]]
-        , sampled_genotype_freqs = all_data[[paste0(mod, "_sampled_genotype_freqs")]]
+      , data2plot = all_data[[paste0(mod, "_", plot_type)]]
+      , parent_set = all_data[[paste0(mod, "_parent_set")]]
+      , sampled_genotype_freqs = all_data[[paste0(mod, "_sampled_genotype_freqs")]]
+      , edges = edges
         ))
 }
 
@@ -428,64 +431,96 @@ node_depth <- function(g) {
     return(all_nodes_depth)
 }
 
+## Plot the DAG using graphAM objects, from graph package
+DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
+                             font_size = 12) {
+    
+    color_relat <- function(relation) {
+        if (is.null(relation))  return("cornflowerblue")
+        else if (relation == "AND") return("cornflowerblue")
+        else if (relation == "Single") return("cornflowerblue")
+        else if (relation == "OR") return("#E2D810")
+        else if (relation == "XOR") return("coral2")
+        else stop("What relation is this?")
+    }
 
-## FIXME: I am not sure we want to use igraph for the DAGs. I can't get
-## decent arrows, etc. In MC-CBN they use the following function, which
-## gives beautiful DAGs.
+    am <- igraph::get.adjacency(
+                      igraph::graph_from_data_frame(edges[, c("From", "To")]))
+    g1 <- graph::graphAM(as.matrix(am),
+                         edgemode = "directed")
+    
+    if(!(exists("Relation", edges))) edges$Relation <- "Single"
 
-## plot_poset <- function(robust_poset, size=12) {
-##   Names = colnames(robust_poset)
-##   colnames(robust_poset) <- Names
-##   rownames(robust_poset) <- Names
-##   am.graph <- new("graphAM", adjMat=robust_poset, edgemode="directed")
-##   plot(am.graph, attrs = list( node = list(color = "transparent", fontsize = size, fontcolor="dodgerblue4"), 
-##                                edge = list(arrowsize=0.5, color="antiquewhite4")))
-## }
+    colors_edges <- vapply(edges$Relation, color_relat, "")
+    names(colors_edges) <- paste0(edges$From, "~", edges$To)
+        
+    ## We need edgeAttrs, not edgeData, which is ignored when plotting
+    graph::plot(g1,
+                attrs = list(node = list(color = "transparent",
+                                         fontsize = font_size,
+                                         fontcolor = "black"), ## dodgerblue4
+                             edge = list(arrowsize = arrowsize,
+                                         lwd = edge_width)),
+                ## Last, if you pass edge in attrs
+                edgeAttrs = list(color = colors_edges),
+                main = main)
+}
 
 
-plot_method <- function(method_info, parent_set, mod = ""){
+
+
+
+plot_method <- function(method_info, parent_set, edges, method = "") {
     if (typeof(method_info) == "list") { ## Potting DAGs
+        
+        plotting <- "graphAM" ## graphAM or igraph
+
         ## DAG relationships colors 
         standard_relationship <- "cornflowerblue"
         colors_relationships <- c(standard_relationship, standard_relationship,
-                                "#E2D810", ##"#FBDE44FF",
-                                "coral2")
+                                  "#E2D810",
+                                  "coral2")
         names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
-        g <- method_info
-        if (!is.null(parent_set)) {
-            for (i in igraph::E(g)) {
-                igraph::E(g)[i]$color <-
-                    colors_relationships[
-                        parent_set[[igraph::head_of(g, igraph::E(g)[i])$name]]]
-            }
-        } else igraph::E(g)$color <- standard_relationship
-        node_depths <- node_depth(g)
-        vertex.size <- ifelse(max(node_depths) >= 4, 25,
-                       ifelse(max(node_depths) == 3, 35,
-                              ifelse(max(node_depths <= 2), 40)))
-        plot(g
-           ## , layout = dag_layout
-           , layout = layout_with_sugiyama(g,
-                                           layers = node_depths)$layout
-            , vertex.size = vertex.size
-            , vertex.label.color = "black"
-            , vertex.label.family = "Helvetica"
-            , font.best = 2
-            , vertex.frame.width = 0.5
-            , vertex.color = "white"
-            , vertex.frame.color = "black" 
-            , vertex.label.cex = 1
-           , edge.arrow.size = 1
-             ## , edge.arrow.width = 1
-            , edge.width = 1.5 #5
-            , main = mod)
+        if (plotting == "igraph") {       
+            g <- method_info
+            if (!is.null(parent_set)) {
+                for (i in igraph::E(g)) {
+                    igraph::E(g)[i]$color <-
+                        colors_relationships[
+                            parent_set[[igraph::head_of(g, igraph::E(g)[i])$name]]]
+                }
+            } else igraph::E(g)$color <- standard_relationship
+            node_depths <- node_depth(g)
+            vertex.size <- ifelse(max(node_depths) >= 4, 25,
+                           ifelse(max(node_depths) == 3, 35,
+                           ifelse(max(node_depths <= 2), 40)))
+            plot(g
+                 ## , layout = dag_layout
+               , layout = layout_with_sugiyama(g,
+                                               layers = node_depths)$layout
+               , vertex.size = vertex.size
+               , vertex.label.color = "black"
+               , vertex.label.family = "Helvetica"
+               , font.best = 2
+               , vertex.frame.width = 0.5
+               , vertex.color = "white"
+               , vertex.frame.color = "black" 
+               , vertex.label.cex = 1
+               , edge.arrow.size = 1
+                 ## , edge.arrow.width = 1
+               , edge.width = 1.5 #5
+               , main = method)
+        } else if (plotting == "graphAM") {
+            DAG_plot_graphAM(edges, method)  
+        }
+        
         if (!is.null(parent_set)) {
             legend("topleft", legend = names(colors_relationships),
-                    col = colors_relationships, lty = 1, lwd = 5, bty = "n")
+                   col = colors_relationships, lty = 1, lwd = 5, bty = "n")
         }
     } else if (is.matrix(method_info)) { ##Plotting matrix
         op <- par(mar=c(3, 3, 5, 3), las = 1)
-        ##### From library plot.matrix
+##### From library plot.matrix
         ##  Color scale, centered in white at 0
         range_colors <- 7 ## if you change this, might need to change max.col
         rwb <- colorRampPalette(colors = c("red", "white", "blue"))
@@ -497,7 +532,7 @@ plot_method <- function(method_info, parent_set, mod = ""){
            , axis.col = list(side = 3)
            , xlab = "Effect of this (effector)"
            , ylab = " on this (affected)"
-           , main = mod
+           , main = method
            , col = pmcolors
            , breaks = pmbreaks
            , text.cell = list(col = "black")
@@ -528,9 +563,9 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
     
     ## List of available methods
     available_methods <- unique(methods[
-        vapply(methods, function(mod) {
-            attr_name <- ifelse(mod == "MHN", "theta", "model")
-            return(any(!is.na(cpm_output[[sprintf("%s_%s", mod, attr_name)]])))
+        vapply(methods, function(method) {
+            attr_name <- ifelse(method == "MHN", "theta", "model")
+            return(any(!is.na(cpm_output[[sprintf("%s_%s", method, attr_name)]])))
         }, logical(1))
     ])
 
@@ -564,7 +599,10 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
         method_data2plot <- process_data(cpm_output, met, plot_type, samples)
         
         ## Plotting method (DAG or MHN matrix)
-        plot_method(method_data2plot$method_info, method_data2plot$parent_set, met)
+        plot_method(method_info = method_data2plot$method_info,
+                    parent_set = method_data2plot$parent_set,
+                    edges = method_data2plot$edges,
+                    method = met)
 
         ## Plotting forward graph
         if ((met %in% c("OT")) &&

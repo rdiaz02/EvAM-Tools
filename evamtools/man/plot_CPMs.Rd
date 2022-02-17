@@ -116,7 +116,9 @@ out_AND_OR_XOR <- evam(ex_mixed_and_or_xor,
                        hesbcn_opts = list(seed = 26,
                                           silent = FALSE))
 
-plot_CPMs(out_AND_OR_XOR, plot_type = "trans_mat")
+plot_CPMs(out_AND_OR_XOR,plot_type = "trans_mat")
+
+         
 
 ## Only two methods, but one not fitted
 plot_CPMs(out_AND_OR_XOR, methods = c("CBN", "HESBCN"),
