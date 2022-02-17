@@ -78,6 +78,14 @@ do_OncoBN <- function(data,
         function(x) ps_v[x],
         "some_string"
     )
+
+    est_genots <- DBN_prob_genotypes(fit, colnames(data))
+    ## Give a named vector for the estimated genotypes
+    ## There is no column called Root, unlike OT
+    gpnfr <- which(colnames(est_genots) == "Prob")
+    gpn_names <- genot_matrix_2_vector(est_genots[, -gpnfr])
+    est_genots <- as.vector(est_genots[, "Prob"])
+    names(est_genots) <- gpn_names
     
     return(list(
         edges = dbn_out
@@ -86,7 +94,7 @@ do_OncoBN <- function(data,
       , epsilon = fit$epsilon
       , model = model
       , parent_set = ps_v
-      , predicted_genotype_freqs = DBN_prob_genotypes(fit, colnames(data))
+      , predicted_genotype_freqs = reorder_to_standard_order(est_genots)
     ))
 }
 
