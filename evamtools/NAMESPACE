@@ -11,7 +11,7 @@ importFrom("shiny", "runApp", "Progress")
 importFrom("shinyjs", "useShinyjs", "enable", "disable", "disabled")
 importFrom("grDevices", "rgb", "colorRampPalette")
 importFrom("graphics", "axis", "legend", "lines", "par", "title", "barplot",
-           "grid")
+           "grid", "mtext")
 importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert",
            "write.csv", "tail")
 importFrom("Matrix", "diag", "rowSums", "colSums", "summary", "Matrix",
@@ -48,3 +48,5 @@ importFrom("mccbn", "candidate_posets", "adaptive.simulated.annealing")
 importFrom("RhpcBLASctl", "blas_set_num_threads", "omp_set_num_threads")
 importFrom("Rlinsolve", "lsolve.jacobi")
 importFrom("fastmatrix", "seidel")
+
+importFrom("graph", "plot", "graphAM")

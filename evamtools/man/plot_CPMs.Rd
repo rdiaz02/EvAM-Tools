@@ -6,7 +6,7 @@ plot_CPMs(
   cpm_output,
   samples = NULL,
   orientation = "horizontal",
-  models = c("OT", "CBN", "OncoBN", "MCCBN", "MHN", "HESBCN"),
+  methods = c("OT", "OncoBN", "CBN", "MCCBN", "HESBCN", "MHN"),
   plot_type = "trans_mat",
   label_type = "genotype",
   fixed_vertex_size = FALSE,
@@ -21,7 +21,7 @@ plot_CPMs(
 
 \item{orientation}{String. If it is not "vertical" it will be displayed with an horizontal layout. Optional.}
 
-\item{models}{Models for which you want output.}
+\item{methods}{Methods for which you want output.}
 
 \item{plot_type}{One of:
   \itemize{
@@ -64,12 +64,33 @@ the predictions of each method; if a node (genotype) has no observations,
 its size is of a fixed size. Thus, for all plots except \code{plot_type = 'obs_genotype_transitions'} the size of the genotype nodes is
 the same among methods, but the size of the genotype nodes can differ
 between methods for \code{plot_type = 'obs_genotype_transitions'}. 
+
+
+In the top plots, in the DAGs, when a node has two or more incoming
+edges, color depends on the type of relationship. (With a single
+incoming edge, there is no difference in model behavior with type of
+edge and, for consistency with OT and CBN, nodes with a Single parent
+have edges colored the same way as nodes with two or more parents and
+AND relationship).
+
+In the bottom row plots, non-observed genotypes are shown in light
+green, to differentiate them from the observed genotypes (shown in orange).
+
 }
+
+
+
 
 \note{The color and design of figures in the bottom row, depicting
   transition matrices, transition rate matrices, and observed genotype
   transitions are heavily inspired by (a blatant copy of) some of the
-  representations in Greenbury et al., 2020.}
+  representations in Greenbury et al., 2020.
+
+  It is easy to get the plots to display poorly (overlapping names in
+  nodes, overlapping labels between plots, etc) if you use long gene
+  names. For best results, try to use short gene names.
+
+}
 
 \references{
   Greenbury, S. F., Barahona, M., & Johnston, I. G. (2020). HyperTraPS:
@@ -116,8 +137,23 @@ out_AND_OR_XOR <- evam(ex_mixed_and_or_xor,
                        hesbcn_opts = list(seed = 26,
                                           silent = FALSE))
 
-plot_CPMs(out_AND_OR_XOR, plot_type = "trans_mat")
+plot_CPMs(out_AND_OR_XOR,plot_type = "trans_mat")
+
+         
+
+## Only two methods, but one not fitted
+plot_CPMs(out_AND_OR_XOR, methods = c("CBN", "HESBCN"),
+           plot_type = "trans_mat")
+
+## Only one method
+plot_CPMs(out_AND_OR_XOR, methods = c("MHN"),
+          plot_type = "trans_mat")
 
 plot_CPMs(out_AND_OR_XOR, plot_type = "trans_mat", top_paths = 3)
+
+
+
+plot_CPMs(out_AND_OR_XOR, methods = c("MHN", "HESBCN"),
+          plot_type = "trans_mat")
 
 }
