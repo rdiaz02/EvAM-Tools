@@ -166,11 +166,22 @@ ot_proc <- function(datax, nboot = 1000,
         est_genots <- distribution.oncotree(ot.fit,
                                             with.probs = TRUE,
                                             with.errors = with_errors_dist_ot)
-        tt <- as.data.frame(datax)
-        obs_genots <- aggregate(tt, by = tt, length)[1:(ncol(tt) + 1)]
-        colnames(obs_genots)[ncol(obs_genots)] <- "Counts"
+
+        browser()
+        ## tt <- as.data.frame(datax)
+        ## obs_genots <- aggregate(tt, by = tt, length)[1:(ncol(tt) + 1)]
+        ## colnames(obs_genots)[ncol(obs_genots)] <- "Counts"
+        obs_genots <- NA
         message(" Ending distribution.oncotree ", date())
 
+
+        ## Give a named vector for the estimated genotypes
+        gpnroot <- which(colnames(est_genots) == "Root")
+        gpnfr <- which(colnames(est_genots) == "Prob")
+        gpn_names <- genot_matrix_2_vector(est_genots[, -c(gpnroot, gpnf)])
+        est_genots <- as.vector(est_genots[, "Root"])
+        names(est_genots) <- gpn_names
+        
         ## Not using it now
         ## message(" Starting observed vs expected, oncotree ", date())
         ## ## Observed and expected, 2 events. From vignette
