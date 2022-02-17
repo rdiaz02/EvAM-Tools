@@ -435,6 +435,17 @@ node_depth <- function(g) {
 DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
                              font_size = 12) {
     
+    ## I find the documentation and general working of this
+    ## hideous. Documentation ifficult to locate, spread between Rgraphviz and
+    ## graph, no clear indication that some things have no effect on plots,
+    ## errors when issuing plot(object) (but not graph::plot(object)), etc,
+    ## etc. But for DAGs, I like the output better than igraph.
+
+    ## What things one can change in the graph, specifically for edges:
+    ## https://www.bioconductor.org/packages/release/bioc/manuals/Rgraphviz/man/Rgraphviz.pdf
+    ## go to where "GraphvizAttributes" are documented. We want "general edge attributes"
+    ## Or, after library(Rgraphviz), ?GraphvizAttributes
+    
     color_relat <- function(relation) {
         if (is.null(relation))  return("cornflowerblue")
         else if (relation == "AND") return("cornflowerblue")
