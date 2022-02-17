@@ -54,7 +54,7 @@ do_OncoBN <- function(data,
     dbn_out <- igraph::as_data_frame(fit$graph)
     colnames(dbn_out) <- c("From", "To")
     dbn_out$From[dbn_out$From == "WT"] <- "Root"
-    dbn_out$Edge <- mapply(function(x, y) {paste0(x, " -> ", y)},
+    dbn_out$Edge <- mapply(function(x, y) { paste0(x, " -> ", y) },
                             dbn_out$From, dbn_out$To)
     dbn_out$Thetas <- thetas[dbn_out$To]
 
@@ -62,10 +62,11 @@ do_OncoBN <- function(data,
     dbn_out$Relation[dbn_out$From == "Root"] <- "Single"
       
     ## The parent set is used for plotting
+    ## Simple with a table? Oh well
     ps <- aggregate(Relation ~ To,
                     data = dbn_out,
-                    FUN = function(x){
-                        if(length(x) == 1) return("Single")
+                    FUN = function(x) {
+                        if (length(x) == 1) return("Single")
                         else return(x[1])}
                     )
     ps_v <- ps[, "Relation"]
