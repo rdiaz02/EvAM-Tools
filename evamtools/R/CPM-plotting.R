@@ -233,7 +233,7 @@ plot_genot_fg <- function(trans_mat
 
     ## Vertex colors based on the presence/absence in the original data
     observed_color <- "#ff7b00"
-    not_observed_color <- "#0892d0" 
+    not_observed_color <- "lightgreen" ## "#0892d0" 
     if(is.null(observations)){
         not_observed_color <- "#ff7b00"
     } 
@@ -319,9 +319,8 @@ plot_genot_fg <- function(trans_mat
         , edge.color = rgb(0.5, 0.5, 0.5, 1) 
         ## Some error in my latop because, I cannot add alpha channel
         , edge.arrow.size = 0
-        , xlab = "Number of features acquired"
-        , edge.width = w2
-    )
+       , edge.width = w2
+     )
 
     margin <- -1.15
     lines(c(-1.2, 1.2), c(margin, margin), lwd = 2)
@@ -339,8 +338,8 @@ plot_genot_fg <- function(trans_mat
         , lwd = 2
         , cex = 2
         , pos = margin)
-    if(!(is.null(observations))){
-        legend(-1, 1.6, c("Observed", "Not observed") 
+    if (!(is.null(observations))) {
+        legend(-1, -1.3, c("Observed", "Not observed") 
             , box.lwd = 0, lty=c(NA, NA), lwd = c(NA, NA)
             , pch = c(21, 21), bty = "n"
             , col = c(observed_color, not_observed_color)
@@ -349,7 +348,8 @@ plot_genot_fg <- function(trans_mat
             , x.intersp = c(0, 0)
             )
     }
-    title(xlab = "Number of features acquired", line = 2)
+    mtext("Number of features acquired", side = 1, line = -1)
+    ## title(xlab = "Number of features acquired", line = 2)
 }
 
 ## #' Process data of CPMs to make it easier to plot
