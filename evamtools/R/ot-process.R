@@ -166,11 +166,22 @@ ot_proc <- function(datax, nboot = 1000,
         est_genots <- distribution.oncotree(ot.fit,
                                             with.probs = TRUE,
                                             with.errors = with_errors_dist_ot)
-        tt <- as.data.frame(datax)
-        obs_genots <- aggregate(tt, by = tt, length)[1:(ncol(tt) + 1)]
-        colnames(obs_genots)[ncol(obs_genots)] <- "Counts"
+
+        ## tt <- as.data.frame(datax)
+        ## obs_genots <- aggregate(tt, by = tt, length)[1:(ncol(tt) + 1)]
+        ## colnames(obs_genots)[ncol(obs_genots)] <- "Counts"
+        obs_genots <- NA
         message(" Ending distribution.oncotree ", date())
 
+
+        ## Give a named vector for the estimated genotypes
+        ## There is a column called Root, unlike OncoBN
+        gpnroot <- which(colnames(est_genots) == "Root")
+        gpnfr <- which(colnames(est_genots) == "Prob")
+        gpn_names <- genot_matrix_2_vector(est_genots[, -c(gpnroot, gpnfr)])
+        est_genots <- as.vector(est_genots[, "Prob"])
+        names(est_genots) <- gpn_names
+        
         ## Not using it now
         ## message(" Starting observed vs expected, oncotree ", date())
         ## ## Observed and expected, 2 events. From vignette
@@ -200,10 +211,10 @@ ot_proc <- function(datax, nboot = 1000,
                 consensus = consensus, 
                 OT_error.fun  = error.fun,
                 ot.boot.original = ot.boot.original, ## Frequency of original tree among boot
-                predicted_genotype_freqs = est_genots,
-                genots_observed = obs_genots,
-                two_way_predicted = est2way,
-                two_way_observed = obs2way
+                predicted_genotype_freqs =  reorder_to_standard_order(est_genots)
+                ## , genots_observed = obs_genots,
+                ## , two_way_predicted = est2way,
+                ## , two_way_observed = obs2way
                       ))
 }
 

@@ -817,7 +817,7 @@ evam <- function(x,
                                 distribution.oncotree = TRUE,
                                 with_errors_dist_ot = ot_opts$with_errors_dist_ot)))
                 out <- c(out, cpm2tm(out))
-                })["elapsed"]
+            })["elapsed"]
         } else if (method == "OncoBN") {
             time_out <- system.time({
                 out <- do_OncoBN(x,

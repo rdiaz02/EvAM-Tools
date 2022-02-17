@@ -573,6 +573,46 @@ genotypes_standard_order <- function(gene_names) {
     return(gtn)
 }
 
+## Given a named vector, where names are genotypes,
+## return the same vector sorted in the same order as genotypes_standard_order
+## Like reorder_to_pD, but in what for me is much more sensible
+reorder_to_standard_order <- function(x) {
+    genots_n <- names(x)
+    ## Ensure genotype names are canonical
+    genots_n <- canonicalize_genotype_names(genots_n)
+    names(x) <- genots_n
+    
+    ## Get gene names
+    gene_n <- unique(stringi::stri_replace_all_fixed(
+                                  unlist(
+                                      stringi::stri_split_fixed(genots_n, ",")),
+                                  " ", ""))
+    gene_n <- setdiff(gene_n, "WT")
+    sorted_genots <- genotypes_standard_order(gene_names = gene_n)
+
+    if(!all(genots_n %in% sorted_genots))
+        stop("At least one genotype name not in sorted_genots")
+    
+    ## Sort to original, return
+    x2 <- x[sorted_genots]
+    names(x2) <- sorted_genots
+    
+    return(x2)  
+}
+
+
+
+## Given a matrix of 0/1 return the genotypes in canonicalized way
+genot_matrix_2_vector <- function(x) {
+    gn <- colnames(x)
+    gt1 <- apply(x, 1, function(v) paste(sort(gn[v == 1]), collapse = ", "))
+    gt1[gt1 == ""] <- "WT"
+    return(gt1)
+}
+
+
+
+
 ## Obtain probabilities of genotypes from transition rate matrix
 ## under sampling time distributed as exponential rate 1.
 ## 
