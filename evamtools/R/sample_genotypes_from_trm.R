@@ -712,6 +712,7 @@ generate_random_evam <- function(ngenes = NULL, gene_names = NULL,
 
 
 
+
 ## Pablo: use this?
 ## Named matrix of thetas -> all of the model and predicted probs
 MHN_from_thetas <- function(thetas) {
