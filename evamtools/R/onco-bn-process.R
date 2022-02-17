@@ -85,7 +85,6 @@ do_OncoBN <- function(data,
     gpn_names <- genot_matrix_2_vector(est_genots[, -gpnfr])
     est_genots <- as.vector(est_genots[, "Prob"])
     names(est_genots) <- gpn_names
-    
     return(list(
         edges = dbn_out
       , thetas = thetas

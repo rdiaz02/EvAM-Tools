@@ -181,6 +181,10 @@ ot_proc <- function(datax, nboot = 1000,
         gpn_names <- genot_matrix_2_vector(est_genots[, -c(gpnroot, gpnfr)])
         est_genots <- as.vector(est_genots[, "Prob"])
         names(est_genots) <- gpn_names
+
+        ## If with.errors = FALSE, there can be missing genotypes
+        est_genots <- reorder_to_standard_order(est_genots)
+        est_genots[is.na(est_genots)] <- 0
         
         ## Not using it now
         ## message(" Starting observed vs expected, oncotree ", date())
@@ -211,7 +215,7 @@ ot_proc <- function(datax, nboot = 1000,
                 consensus = consensus, 
                 OT_error.fun  = error.fun,
                 ot.boot.original = ot.boot.original, ## Frequency of original tree among boot
-                predicted_genotype_freqs =  reorder_to_standard_order(est_genots)
+                predicted_genotype_freqs = est_genots
                 ## , genots_observed = obs_genots,
                 ## , two_way_predicted = est2way,
                 ## , two_way_observed = obs2way
