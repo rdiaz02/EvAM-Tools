@@ -57,10 +57,10 @@ do_OncoBN <- function(data,
     dbn_out$Edge <- mapply(function(x, y) {paste0(x, " -> ", y)},
                             dbn_out$From, dbn_out$To)
     dbn_out$Thetas <- thetas[dbn_out$To]
-    ## Allow double checking and running through HESBCN algorithm
+
     dbn_out$Relation <- ifelse(model == "DBN", "OR", "AND")
     dbn_out$Relation[dbn_out$From == "Root"] <- "Single"
-    
+      
     ## The parent set is used for plotting
     ps <- aggregate(Relation ~ To,
                     data = dbn_out,
@@ -71,6 +71,12 @@ do_OncoBN <- function(data,
     ps_v <- ps[, "Relation"]
     names(ps_v) <- ps[, "To"]
 
+    ## And single ORs are confusing
+    dbn_out$Relation <- vapply(
+        dbn_out$To,
+        function(x) ps_v[x],
+        "some_string"
+    )
     
     return(list(
         edges = dbn_out
