@@ -573,6 +573,17 @@ genotypes_standard_order <- function(gene_names) {
     return(gtn)
 }
 
+
+## Given a matrix of 0/1 return the genotypes in canonicalized way
+genot_matrix_2_vector <- function(x) {
+    gn <- colnames(x)
+    gt1 <- apply(x, 1, function(v) paste(sort(gn[v == 1]), collapse = ", "))
+    gt1[gt1 == ""] <- "WT"
+    return(gt1)
+}
+
+
+
 ## Obtain probabilities of genotypes from transition rate matrix
 ## under sampling time distributed as exponential rate 1.
 ## 
