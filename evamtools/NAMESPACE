@@ -37,7 +37,6 @@ importFrom("igraph", "V", "E", "graph.data.frame", "layout.reingold.tilford"
            "layout_with_sugiyama")
 importFrom("stats", "aggregate", "chisq.test", "na.omit", "rexp",
            "runif", "rnorm", "optim")
-importFrom("Rgraphviz", "plot")
 ## just something, so plot.matrix is available
 ## See https://stackoverflow.com/a/59667634
 importFrom("plot.matrix", "fmt")

@@ -34,9 +34,5 @@ Imports: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree
     , mccbn
     , RhpcBLASctl
     , Rlinsolve, fastmatrix
-<<<<<<< HEAD
-    , Rgraphviz
-=======
     , graph
->>>>>>> 9cc444f6cd089d90d562573279936560ec26a74a
 Suggests: testthat (>= 3.0.0)

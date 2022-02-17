@@ -181,7 +181,8 @@ cpm_layout <- function(graph){
 ## #' }
 plot_genot_fg <- function(trans_mat
     , observations = NULL
-    , freqs = NULL
+    , predicted_genotypes = NULL
+    , sampled_freqs = NULL
     , top_paths = NULL
     , freq2label = NULL
     , max_edge = NULL
@@ -197,21 +198,22 @@ plot_genot_fg <- function(trans_mat
 
     unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
     rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", ",")
+    names(predicted_genotypes) <- str_replace_all(names(predicted_genotypes), ", ", ",")
     graph <- igraph::graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
 
     num_genes <- length(unique_genes_names)
     graph <- igraph::decompose(graph)[[1]] ## We do not want disconnected nodes
-        
+    
     if (!is.null(observations)){
         observations <- as.data.frame(sampledGenotypes(observations))
         observations$Abs_Freq <- observations$Freq / sum(observations$Freq)
         observations$Genotype <- str_replace_all(observations$Genotype, ", ", ",")
     }
 
-    if (!is.null(freqs)){
-        freqs$Abs_Freq <- freqs$Counts / sum(freqs$Counts)
-        freqs$Genotype <- str_replace_all(freqs$Genotype, ", ", ",")
-        rownames(freqs) <- freqs$Genotype
+    if (!is.null(sampled_freqs)){
+        sampled_freqs$Abs_Freq <- sampled_freqs$Counts / sum(sampled_freqs$Counts)
+        sampled_freqs$Genotype <- str_replace_all(sampled_freqs$Genotype, ", ", ",")
+        rownames(sampled_freqs) <- sampled_freqs$Genotype
     }
 
     ## Layout
@@ -224,7 +226,7 @@ plot_genot_fg <- function(trans_mat
     } else {
         labels <- vapply(igraph::V(graph)$name,
             function(x){
-                if (freqs[x, ]$Abs_Freq >= freq2label) return(x)
+                if (sampled_freqs[x, ]$Abs_Freq >= freq2label) return(x)
                 else return("")
             },
             character(1))
@@ -255,22 +257,22 @@ plot_genot_fg <- function(trans_mat
     if(fixed_vertex_size){
         node_sizes <- vapply(igraph::V(graph)$name, 
         function(gen) min_size, numeric(1.0))
-    } else if(!is.null(freqs)){
+    } else if(!is.null(sampled_freqs)){
         node_sizes <- vapply(igraph::V(graph)$name, 
             function(gen){
-                if (sum(match(freqs$Genotype, gen, nomatch = 0)) == 1)
-                    return(freqs$Abs_Freq[which(freqs$Genotype == gen)])
+                if (sum(match(sampled_freqs$Genotype, gen, nomatch = 0)) == 1)
+                    return(sampled_freqs$Abs_Freq[which(sampled_freqs$Genotype == gen)])
                 else 
                     return(min_size)
             }, numeric(1.0))
-    } else if(!is.null(observations)){
+    } else if(!is.null(predicted_genotypes)){
         node_sizes <- vapply(igraph::V(graph)$name, 
-            function(gen){
-                if (sum(match(observations$Genotype, gen, nomatch = 0)) == 1) # Observed
-                    return(observations$Abs_Freq[which(observations$Genotype == gen)])
-                else # Not Observed
-                    return(0)
-            }, numeric(1.0))
+            function(gen) predicted_genotypes[gen], 1) ## This does not work for OT and OncoBN right now
+            #     if (sum(match(predicted_genotypes$Genotype, gen, nomatch = 0)) == 1) # Observed
+            #         return(predicted_genotypes$Abs_Freq[which(predicted_genotypes$Genotype == gen)])
+            #     else # Not Observed
+            #         return(0)
+            # }, numeric(1.0))
     } else {
         node_sizes <- vapply(igraph::V(graph)$name, 
         function(gen) min_size, numeric(1.0))
@@ -395,6 +397,7 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
     return(list(
         method_info = method_info
       , data2plot = all_data[[paste0(mod, "_", plot_type)]]
+      , predicted_genotype_freqs = all_data[[paste0(mod, "_predicted_genotype_freqs")]]
       , parent_set = all_data[[paste0(mod, "_parent_set")]]
       , sampled_genotype_freqs = all_data[[paste0(mod, "_sampled_genotype_freqs")]]
       , edges = edges
@@ -482,7 +485,7 @@ DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
 
 
 plot_method <- function(method_info, parent_set, edges, method = "") {
-    if (typeof(method_info) == "list") { ## Potting DAGs
+    if (typeof(method_info) == "list" & !is.null(edges)) { ## Potting DAGs
         
         plotting <- "graphAM" ## graphAM or igraph
 
@@ -492,65 +495,6 @@ plot_method <- function(method_info, parent_set, edges, method = "") {
                                   "#E2D810",
                                   "coral2")
         names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
-<<<<<<< HEAD
-        # g <- model_info
-        # browser()
-
-        # if (!is.null(parent_set)) {
-        #     for (i in igraph::E(g)) {
-        #         igraph::E(g)[i]$color <-
-        #             colors_relationships[
-        #                 parent_set[[igraph::head_of(g, igraph::E(g)[i])$name]]]
-        #     }
-        # } else igraph::E(g)$color <- standard_relationship
-        # node_depths <- node_depth(g)
-        # vertex.size <- ifelse(max(node_depths) >= 4, 25,
-        #                ifelse(max(node_depths) == 3, 35,
-        #                       ifelse(max(node_depths <= 2), 40)))
-        adj_matrix <- as.matrix(igraph::as_adjacency_matrix(model_info))
-        adj_matrix2 <- matrix(as.integer(adj_matrix), ncol=ncol(adj_matrix), byrow=FALSE)
-        colnames(adj_matrix2) <- rownames(adj_matrix2) <- colnames(adj_matrix)
-
-        am.graph <- new("graphAM", adjMat=adj_matrix2, edgemode="directed")
-
-        attrs <- list(
-            node=list(shape="circle", fixedsize=FALSE, fontsize = 14)
-            , edge=list(arrowsize=0.75)
-        )
-
-        nAttr <- list() ## Placeholder if we want to add new stuff
-        edge_color <- c()
-        if(!is.null(parent_set)){
-            for(from_node in names(edges(am.graph))){
-                for(to_node in edges(am.graph)[[from_node]]){
-                    edge_color[paste0(from_node, "~", to_node)] <- colors_relationships[parent_set[to_node]]
-                }
-            }
-        }
-        if(!is.null(edge_color)) eAttr <- list(color=edge_color)
-
-        plot(am.graph
-        , attrs=attrs, nodeAttrs = nAttr
-        , edgeAttrs = eAttr
-        )
-        # plot(g
-        #    ## , layout = dag_layout
-        #    , layout = layout_with_sugiyama(g,
-        #                                    layers = node_depths)$layout
-        #     , vertex.size = vertex.size
-        #     , vertex.label.color = "black"
-        #     , vertex.label.family = "Helvetica"
-        #     , font.best = 2
-        #     , vertex.frame.width = 0.5
-        #     , vertex.color = "white"
-        #     , vertex.frame.color = "black" 
-        #     , vertex.label.cex = 1
-        #    , edge.arrow.size = 1
-        #      ## , edge.arrow.width = 1
-        #     , edge.width = 1.5 #5
-        #     , main = mod)
-        if(!is.null(parent_set)){
-=======
         if (plotting == "igraph") {       
             g <- method_info
             if (!is.null(parent_set)) {
@@ -585,7 +529,6 @@ plot_method <- function(method_info, parent_set, edges, method = "") {
         }
         
         if (!is.null(parent_set)) {
->>>>>>> 9cc444f6cd089d90d562573279936560ec26a74a
             legend("topleft", legend = names(colors_relationships),
                    col = colors_relationships, lty = 1, lwd = 5, bty = "n")
         }
@@ -652,7 +595,7 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
     if (l_methods < 1) stop("No valid methods or ",
                           "no valid methods with analysis output.")
 
-    if (length(l_methods) < length(unique(methods))) {
+    if (l_methods < length(unique(methods))) {
         warning("At least one method you asked to be plotted ",
                 "did not have analysis output or was not ",
                 "a valid method.")
@@ -688,8 +631,9 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
             plot_sampled_genots(cpm_output$analyzed_data)
         } else {
             plot_genot_fg(method_data2plot$data2plot,
-                        observations = cpm_output$analyzed_data,
-                        method_data2plot$sampled_genotype_freqs,
+                        observations = cpm_output$analyzed_data, # We use it to define "Observed" and "Not Observed" genotypes
+                        predicted_genotypes = method_data2plot$predicted_genotype_freqs, # To compute node sizes if sampled_freqs is NULL
+                        sampled_freqs = method_data2plot$sampled_genotype_freqs,
                         top_paths = top_paths,
                         label_type = label_type,
                         fixed_vertex_size = fixed_vertex_size)
