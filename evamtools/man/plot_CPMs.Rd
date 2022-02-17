@@ -6,7 +6,7 @@ plot_CPMs(
   cpm_output,
   samples = NULL,
   orientation = "horizontal",
-  methods = c("OT", "CBN", "OncoBN", "MCCBN", "MHN", "HESBCN"),
+  methods = c("OT", "OncoBN", "CBN", "MCCBN", "HESBCN", "MHN"),
   plot_type = "trans_mat",
   label_type = "genotype",
   fixed_vertex_size = FALSE,
