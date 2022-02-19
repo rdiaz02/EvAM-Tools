@@ -1,0 +1,1 @@
+utils::globalVariables(c("SHINY_DEFAULTS"))
