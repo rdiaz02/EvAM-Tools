@@ -643,7 +643,7 @@ probs_from_trm <- function(x,
                                  tol = 1e-5 * sqrt(.Machine$double.eps),
                                  maxiter = 1000,
                                  start = rep(0, nrow(Q)))
-        p <- p4
+        p <- as.vector(p4)
     }
 
     names(p) <- colnames(x)
@@ -669,16 +669,17 @@ probs_from_trm <- function(x,
 }
 
 
-
-
-
+## FIXME: still missing OT and OncoBN
+## FIXME: think and include error model properly
 generate_random_evam <- function(ngenes = NULL, gene_names = NULL,
                                  model = c("OT", "CBN", "HESBCN", "MHN", "OncoBN")
                                  , mhn_sparsity = 0.50
-                               , cbn_graph_density = 0.15
-                               , cbn_lambda_min = 1/3
-                               , cbn_lambda_max = 3
-                               , hesbcn_probs = c(1/3, 1/3, 1/3)
+                               , cbn_hesbcn_graph_density = 0.35
+                               , cbn_hesbcn_lambda_min = 1/3
+                               , cbn_hesbcn_lambda_max = 3
+                               , hesbcn_probs = c("AND" = 1/3,
+                                                  "OR" = 1/3,
+                                                  "XOR" = 1/3)
                                  ) {
 
     if (!(xor(is.null(ngenes), is.null(gene_names))))
@@ -698,34 +699,25 @@ generate_random_evam <- function(ngenes = NULL, gene_names = NULL,
     if(is.null(gene_names)) gene_names <- LETTERS[seq_len(ngenes)]
     if(is.null(ngenes)) ngenes <- length(gene_names)
     gene_names <- sort(gene_names)
-
     output <- list()
     if (model == "MHN") {
         thetas <- Random.Theta(n = ngenes, sparsity = mhn_sparsity)
-        colnames(theta) <- rownames(theta) <- gene_names
+        colnames(thetas) <- rownames(thetas) <- gene_names
         output <- MHN_from_thetas(thetas)
     } else if (model == "CBN") {
-        poset <- mccbn::random_poset(ngenes, graph_density = graph_density)
-        lambdas <- runif(ngenes, cbn_lambda_min, cbn_lambda_max)
+        poset <- mccbn::random_poset(ngenes, graph_density = cbn_hesbcn_graph_density)
+        lambdas <- runif(ngenes, cbn_hesbcn_lambda_min, cbn_hesbcn_lambda_max)
         names(lambdas) <-  colnames(poset) <- rownames(poset) <- gene_names
         output <- CBN_from_poset_lambdas(poset, lambdas)
-        
-    } else if (model = "HESBCN") {
+    } else if (model == "HESBCN") {
         hesbcn_probs <- hesbcn_probs/sum(hesbcn_probs)
-        poset <- mccbn::random_poset(ngenes, graph_density = graph_density)
-        lambdas <- runif(ngenes, cbn_lambda_min, cbn_lambda_max)
+        poset <- mccbn::random_poset(ngenes, graph_density = cbn_hesbcn_graph_density)
+        lambdas <- runif(ngenes, cbn_hesbcn_lambda_min, cbn_hesbcn_lambda_max)
         names(lambdas) <-  colnames(poset) <- rownames(poset) <- gene_names
-        ## parent_set <- sample(c("AND", "OR", "XOR"),
-        ##                      size = lambdas,
-        ##                      probs = hesbcn_probs,
-        ##                      replace = TRUE)
-
-        ## output <- HESBCN_from_poset_lambdas_parent_set(poset, lambdas,
-        ##                                                parent_set)
         output <-
-            HESBCN_model_from_poset_lambdas_relation_probs(poset,
-                                                           lambdas,
-                                                           hesbcn_probs)
+            HESBCN_from_poset_lambdas_relation_probs(poset,
+                                                     lambdas,
+                                                     hesbcn_probs)
     }
 
     if (model %in% c("CBN", "MHN", "HESBCN")) {
@@ -733,7 +725,6 @@ generate_random_evam <- function(ngenes = NULL, gene_names = NULL,
         inname  <- paste0(model, "_trans_rate_mat")
         output[[outname]] <- probs_from_trm(output[[inname]])
     }
-
     return(output)
 }
 
@@ -744,7 +735,7 @@ generate_random_evam <- function(ngenes = NULL, gene_names = NULL,
 ## Named matrix of thetas -> all of the model and predicted probs
 MHN_from_thetas <- function(thetas) {
     oindex <- order(colnames(thetas))
-    thetas <- theta[oindex, oindex]
+    thetas <- thetas[oindex, oindex]
     output <- list()
     output[["MHN_theta"]] <- thetas
     output[["MHN_trans_rate_mat"]] <-
@@ -771,7 +762,7 @@ MHN_from_thetas <- function(thetas) {
 ## both named -> all of the cbn output
 CBN_from_poset_lambdas <- function(poset, lambdas) {
     poset_as_data_frame <- poset_2_data_frame(poset)
-    ouput <- list()
+    output <- list()
     stopifnot(identical(sort(colnames(poset)), sort(names(lambdas))))
     output[["CBN_model"]] <- CBN_model_from_edges_lambdas(poset_as_data_frame,
                                                        lambdas)
@@ -785,7 +776,8 @@ CBN_from_poset_lambdas <- function(poset, lambdas) {
 ## Pablo: or use this if you use a data frame
 ## data frame with "From", "To", "Edges" and lambdas -> all of the cbn output
 CBN_model_2_output <- function(model) {
-    tmpo <- cpm2tm(model)
+    ## extra level of nesting
+    tmpo <- cpm2tm(list(edges = model))
     output <- list()
     output[["CBN_trans_rate_mat"]] <- tmpo[["weighted_fgraph"]]
     output[["CBN_trans_mat"]] <- tmpo[["trans_mat_genots"]]
@@ -808,14 +800,14 @@ CBN_model_from_edges_lambdas <- function(edges, lambdas) {
 ## convert a poset matrix to a data frame with the "edges" structure
 poset_2_data_frame <- function(poset) {
     stopifnot(identical(colnames(poset), rownames(poset)))
-    if(!("WT" %in% colnames(poset))) {
+    if (!("Root" %in% colnames(poset))) {
         ## Add WT and WT connections
         not_connected <- which(colSums(poset) == 0)
         adjm2 <- cbind(rep(0, nrow(poset)), poset)
         adjm2 <- rbind(rep(0, ncol(adjm2)),
                        adjm2)
         adjm2[1, not_connected + 1] <- 1
-        colnames(adjm2) <- rownames(adjm2) <- c("WT", colnames(poset))
+        colnames(adjm2) <- rownames(adjm2) <- c("Root", colnames(poset))
         poset <- adjm2
     }
     elist <- igraph::get.edgelist(igraph::graph_from_adjacency_matrix(adjm2))
@@ -841,13 +833,14 @@ HESBCN_from_poset_lambdas_relation_probs <- function(poset, lambdas,
      ## Assign type of relationship randomly to nodes with >= 2 parents
      num_parents <- table(poset_as_data_frame[, "To"])
      singles <- names(which(num_parents == 1))
-     parent_set <- vector(mode = "character", length = ncol(poset) - 1)
+     parent_set <- vector(mode = "character", length = length(num_parents))
      names(parent_set) <- names(num_parents)
      parent_set[singles] <- "Single"
      lmultiple <- length(num_parents) - sum(num_parents == 1)
-     if(lmultiple > 0) {
-         ps_values <- sample(c("AND", "OR", "XOR"), size = lmultiple,
-                             probs = hesbcn_probs, replace = TRUE)
+     if (lmultiple > 0) {
+         stopifnot(identical(sort(names(hesbcn_probs)), c("AND", "OR", "XOR")))
+         ps_values <- sample(names(hesbcn_probs), size = lmultiple,
+                             prob = hesbcn_probs, replace = TRUE)
          parent_set[which(num_parents > 1)] <- ps_values
      }
      
@@ -855,7 +848,7 @@ HESBCN_from_poset_lambdas_relation_probs <- function(poset, lambdas,
                          sort(names(lambdas))))
     
      output <- list()
-     output[["HESBCN_parent_set"]] = parent_set
+     output[["HESBCN_parent_set"]] <- parent_set
      output[["HESBCN_model"]] <-
          HESBCN_model_from_edges_lambdas_parent_set(poset_as_data_frame,
                                                     lambdas,
@@ -872,7 +865,7 @@ HESBCN_from_poset_lambdas_relation_probs <- function(poset, lambdas,
 ## Pablo: or use this if you use a data frame and parent frame and parent set
 ## data frame with "From", "To", "Edges" and lambdas -> all of the cbn output
 HESBCN_model_2_output <- function(model, parent_set) {
-    tmpo <- cpm2tm(model)
+    tmpo <- cpm2tm(list(edges = model, parent_set = parent_set))
     output <- list()
     output[["HESBCN_trans_rate_mat"]] <- tmpo[["weighted_fgraph"]]
     output[["HESBCN_trans_mat"]] <- tmpo[["trans_mat_genots"]]
