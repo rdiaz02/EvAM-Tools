@@ -184,7 +184,8 @@ ot_proc <- function(datax, nboot = 1000,
 
         ## If with.errors = FALSE, there can be missing genotypes
         est_genots <- reorder_to_standard_order(est_genots)
-        est_genots[is.na(est_genots)] <- 0
+        if (length(is.na(est_genots)))
+            est_genots[is.na(est_genots)] <- 0
         
         ## Not using it now
         ## message(" Starting observed vs expected, oncotree ", date())
