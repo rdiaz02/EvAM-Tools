@@ -9,7 +9,7 @@
 \format{
 A list with 3 items:
 \describe{
-  \item{cpm_output}{Merged output of runnning evam and sample_CPMs. 52 itmes.}
+  \item{cpm_output}{Merged output of runnning evam and sample_CPMs. 52 itmes.
     \itemize{
       \item{*_model}{data.frame, DAG representation of the model.}
       \item{*_trans_mat}{matrix, Probability transition matrix.}
@@ -37,7 +37,7 @@ A list with 3 items:
     }
   }
 
-  \item{orig_data}{Original data handled as input for the shiny web app.}
+  \item{orig_data}{Original data handled as input for the shiny web app.
     \itemize{
       \item{data}{data.frame, Cross sectional data used for running evam.}
       \item{name}{string, Name of the data set.}
@@ -50,7 +50,7 @@ A list with 3 items:
     }
   }
 
-  \item{tabular_data}{Information of CPMs and samples in a tabular way to display in the shiny app.}
+  \item{tabular_data}{Information of CPMs and samples in a tabular way to display in the shiny app.
     \itemize{
       \item{trans_mat}{data.frame, Probabilities of transitions between two genotypes for all supported models.}
       \item{trans_rate_mat}{data.frame, Rate of transitions between two genotypes for all supported models.}
@@ -59,7 +59,7 @@ A list with 3 items:
       \item{sampled_genotype_freqs}{data.frame, Times a genotype has been observed when sampling.}
     }
   }
-}
+  }
 }
 \usage{
 sample_evam_output
