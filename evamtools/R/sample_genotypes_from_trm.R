@@ -394,34 +394,11 @@ sample_CPMs <- function(cpm_output
 
     for (method in methods) {
         if (method %in% c("OT", "OncoBN")) {
-<<<<<<< HEAD
-            # if (method == "OT") {
-            #     # tmp_data <- cpm_output$OT_predicted_genotype_freqs
-            #     # genots <- tmp_data[2:(ncol(tmp_data) - 1)]
-            #     genots <- cpm_output$OT_predicted_genotype_freqs
-            # } else if (method == "OncoBN") {
-            #     # tmp_data <- cpm_output$OncoBN_predicted_genotype_freqs
-            #     # genots <- tmp_data[1:(ncol(tmp_data) - 1)]
-            # }
-            # genots_2 <- unlist(apply(genots, 1,
-            #                          function(x) paste(names(genots)[x == 1],
-            #                                            collapse = ", ")))
-            # names(genots_2) <- NULL
-            genots <- cpm_output[[paste0(method, "_predicted_genotype_freqs")]]
-            genots_2 <- names(genots)
-            tmp_data <- genots
-            names(tmp_data) <- NULL
-
-            tmp_genotypes_sampled <- sample_to_pD_order(
-                sample(genots_2, size = N,
-                       prob = tmp_data, replace = TRUE),
-=======
             genots <- cpm_output[[paste0(method, "_predicted_genotype_freqs")]]
 
             tmp_genotypes_sampled <- sample_to_pD_order(
                 sample(names(genots), size = N,
                        prob = genots, replace = TRUE),
->>>>>>> 5e5a3dc310b5fb088d06bbbc7771179556a52b0c
                 ngenes = n_genes, gene_names = gene_names)
 
             retval[[sprintf("%s_sampled_genotype_freqs", method)]] <-
