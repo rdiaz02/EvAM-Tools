@@ -56,7 +56,7 @@ server <- function(input, output, session) {
         updateRadioButtons(session, "input2build", selected = "csd")
         updateRadioButtons(session, "select_csd", selected = dataset_name)
       }, error = function(e){
-        error_message <<- "Your csv data can not be loaded. Make sure it only contains 0 and 1."
+        error_message <- "Your csv data can not be loaded. Make sure it only contains 0 and 1."
         showModal(dataModal(error_message))
       })
     } else if(grepl(".rds", input$csd$datapath, ignore.case = TRUE)){
@@ -69,7 +69,7 @@ server <- function(input, output, session) {
           updateRadioButtons(session, "input2build", selected = tmp_data$type)
           updateRadioButtons(session, "select_csd", selected = tmp_data$name)
         }, error = function(e){
-          error_message <<- "There was a problem when checking your .rds file. Make sure it containis $type (either 'csd', 'dag', or 'matrix'), $data only with 0 and 1"
+          error_message <- "There was a problem when checking your .rds file. Make sure it containis $type (either 'csd', 'dag', or 'matrix'), $data only with 0 and 1"
           showModal(dataModal(error_message))
         })
     }
@@ -414,21 +414,21 @@ server <- function(input, output, session) {
     from_gene <- input$dag_from
     to_gene <- input$dag_to
     if(is.null(input$dag_from) | is.null(input$dag_to)){
-      error_message <<- "Both From and To options has to be defined and must be different"
+      error_message - "Both From and To options has to be defined and must be different"
       showModal(dataModal(error_message))
     } else if (input$dag_from == input$dag_to){
-      error_message <<- "Both From and To options must be different"
+      error_message <- "Both From and To options must be different"
       showModal(dataModal(error_message))
     } else if(data$dag["WT", to_gene] == 1){
-      error_message <<- "A direct children of Root cannot have multiple parents"
+      error_message <- "A direct children of Root cannot have multiple parents"
       showModal(dataModal(error_message))
     } else{
       from_node <- ifelse(input$dag_from == "Root", "WT", input$dag_from)
       if(data$dag[from_node, input$dag_to] == 1){
-        error_message <<- "That edge is already present"
+        error_message <- "That edge is already present"
         showModal(dataModal(error_message))
       } else if(data$dag[input$dag_to, from_node] == 1){
-        error_message <<- "Relationships cannot be bidirectional"
+        error_message <- "Relationships cannot be bidirectional"
         showModal(dataModal(error_message))
       } else{
         tmp_dag <- data$dag
@@ -437,7 +437,7 @@ server <- function(input, output, session) {
         if(igraph::is_dag(g)){
           data$dag <- tmp_dag
         } else {
-          error_message <<- "This relationship breaks the DAG. Revise it."
+          error_message <- "This relationship breaks the DAG. Revise it."
           showModal(dataModal(error_message))
         }
       }
@@ -522,13 +522,16 @@ server <- function(input, output, session) {
     progress$set(message = "Running evamtools", value = 0)
 
     progress$inc(1/2, detail = "Doing sampling")
+
+    ## FIXME all the following will be replaced
     shinyjs::disable("resample_dag")
     tmp_data <- list(edges = dag_data())
     trm <- evamtools:::cpm2tm(tmp_data)$weighted_fgraph
     samples <- evamtools:::population_sample_from_trm(trm, input$dag_samples)
     process_data <- evamtools:::process_samples(samples, input$gene_number, data$gene_names[1:input$gene_number])
-    tmp_csd <- process_data$sampled_genotype_freqs
-    tmp_csd <- tmp_csd[tmp_csd$Counts > 0, ]
+    tmp_samples <- process_data$sampled_genotype_freqs
+    tmp_samples <- tmp_samples[tmp_samples > 0]
+    tmp_csd <- data.frame(Genotype = names(tmp_samples), Counts = tmp_samples)
     rownames(tmp_csd) <- tmp_csd$Genotype
     data$csd_freqs <- tmp_csd
     data$data <- freqs2csd(tmp_csd,data$gene_names[1:input$gene_number])
@@ -586,6 +589,7 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$resample_mhn, {
+    ## FIXME this will be replaced by another function
     mhn_data <-get_mhn_data(input$gene_number, input$mhn_samples,
       data$gene_names[1:input$gene_number], thetas = data$thetas[1:input$gene_number, 1:input$gene_number])
     data$csd_freqs <- mhn_data$samples
@@ -666,19 +670,23 @@ server <- function(input, output, session) {
   ## Plot dag of dataset
   output$dag_plot <- renderPlot({
     data2plot <- NULL
+    edges <- NULL
     if(input$input2build %in% c("csd", "dag")
       && sum(data$dag)>0
       && !is.null(input$gene_number)
       ){
       data2plot <- igraph::graph_from_adjacency_matrix(data$dag)
       data2plot <- igraph::decompose(data2plot)[[1]]
+      edges <- igraph::as_data_frame(data2plot)
+      colnames(edges) <- c("From", "To")
+      if(!is.null(data$dag_parent_set)) edges$Relation <- data$dag_parent_set[edges$To]
     }else if(input$input2build %in% c("matrix") 
       && !is.null(data$thetas)
       && length(data$thetas[1:input$gene_number, 1:input$gene_number])>0
       ){
         data2plot <- data$thetas[1:input$gene_number, 1:input$gene_number]
     }
-    evamtools:::plot_model(data2plot, data$dag_parent_set)
+    evamtools:::plot_method(data2plot, data$dag_parent_set, edges)
   })
 
   # ## Run CPMs
@@ -687,6 +695,7 @@ server <- function(input, output, session) {
 
     source_trm <- NULL
 
+    ## FIXME the following has to be moved to R/
     if(input$input2build == "dag"){
       tmp_data <- list(edges = dag_data(), parent_set = data$dag_parent_set)
       source_trm <- evamtools:::cpm2tm(tmp_data)$weighted_fgraph
@@ -708,48 +717,67 @@ server <- function(input, output, session) {
     progress$inc(1/5, detail = "Setting up data")
     Sys.sleep(0.5)
     progress$inc(2/5, detail = "Running CPMs")
-    do_MCCBN <- "mccbn" %in% input$more_cpms
-    methods <- c("CBN", "OT", "HESBCN", "MHN")
+    # do_MCCBN <- "mccbn" %in% input$more_cpms
+    methods <- c("CBN", "OT", "OncoBN","HESBCN", "MHN", "MCCBN")
     # , "DBN"
     # if(do_MCCBN) methods <- c(methods, "MCCBN")
-    cpm_output <- evam(data2run, methods = methods)
+
+    tryCatch({
+      cpm_output <- evam(data2run, methods = methods)
+    }, error = function(e){
+      error_message <- "There was problem when running EvamTools"
+      showModal(dataModal(error_message))
+    })
+
     ## To see Source data in the results section
-    if(input$input2build != "csd"){
-      ## FIXME: rename f_graph to trans_rate_mat: ???
-      cpm_output$Source_trans_rate_mat <- source_trm
-      cpm_output$Source_trans_mat <- evamtools:::rowScaleMatrix(source_trm)
-    }
-    if(input$input2build == "dag"){
-      cpm_output$Source_model <- dag_data()
-      cpm_output$Source_parent_set <- data$dag_parent_set[1:input$gene_number]
-    } else if(input$input2build == "matrix"){
-      cpm_output$Source_theta <- data$thetas[1:input$gene_number
-        , 1:input$gene_number]
-    }
+    # if(input$input2build != "csd"){
+    #   ## FIXME: rename f_graph to trans_rate_mat: ???
+    #   cpm_output$Source_trans_rate_mat <- source_trm
+    #   cpm_output$Source_trans_mat <- evamtools:::rowScaleMatrix(source_trm)
+    # }
+    # if(input$input2build == "dag"){
+    #   cpm_output$Source_model <- dag_data()
+    #   cpm_output$Source_parent_set <- data$dag_parent_set[1:input$gene_number]
+    # } else if(input$input2build == "matrix"){
+    #   cpm_output$Source_theta <- data$thetas[1:input$gene_number
+    #     , 1:input$gene_number]
+    # }
+
     # n_samples <- 100 ## To be replaced by input$something
     n_samples <- 100
     progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
-    new_data <- sample_CPMs(cpm_output, n_samples
-      , input$gene_number, data$gene_names[1:input$gene_number])
+
+    tryCatch({
+      sampled_from_CPMs <- sample_CPMs(cpm_output, n_samples
+        , methods, c("sampled_genotype_freqs", "obs_genotype_transitions"))
+    }, error = function(e){
+      error_message <- "There was problem when sampling from output"
+      showModal(dataModal(error_message))
+    })
+
     progress$inc(4/5, detail = "Post processing data")
     Sys.sleep(0.5)
-    ## FIXME: rename f_graph to trans_rate_mat?
-    # new_data$MHN_f_graph <- new_data$MHN_trans_rate_mat
-    new_data$OT_f_graph <- NULL
+
     orig_data <- list(data = data2run, name = data$name
       , type = input$input2build, gene_names = data$gene_names
       , thetas = data$thetas, lambdas = data$lambdas
       , dag = data$dag, dag_parent_set = data$dag_parent_set)
-    new_data$name <- input$select_csd
-    new_data$source_data <- orig_data
+
+    ## Tabular data
+    tabular_data <- evamtools:::create_tabular_data(c(cpm_output, sampled_from_CPMs))
+
+    all_evam_output <- list("cpm_output" = c(cpm_output, sampled_from_CPMs)
+      , "orig_data" = orig_data
+      , "tabular_data" = tabular_data 
+    )
 
     ##CPM output name
-    result_index <- length(grep(sprintf("^%s", input$select_csd), names(all_cpm_out$output)))
+    result_index <- length(grep(sprintf("^%s", input$select_csd), names(all_cpm_out)))
     result_name <- ifelse(result_index == 0
       , input$select_csd
       , sprintf("%s__%s", input$select_csd, result_index))
 
-    all_cpm_out$output[[result_name]] <- new_data
+    all_cpm_out[[result_name]] <- all_evam_output
     last_visited_cpm <<- result_name
     updateRadioButtons(session, "select_cpm", selected = result_name)
     progress$inc(5/5, detail = "You can see your result by going to the Results tab")
@@ -761,7 +789,7 @@ server <- function(input, output, session) {
     updateRadioButtons(session, "select_cpm", selected = result_name)
 
     # selected <- ifelse(is.null(input$select_cpm), last_visited_cpm, input$select_cpm)
-    # if(is.null(all_cpm_out$output[[selected]]$Source_genotype_transitions)){
+    # if(is.null(all_cpm_out[[selected]]$Source_genotype_transitions)){
     #     updateCheckboxGroupInput(session, "cpm2show",
     #         selected = setdiff(c(input$cpm2show), "Source"))
     #     shinyjs::disable(selector = "#cpm2show input[value='Source']")
@@ -770,41 +798,33 @@ server <- function(input, output, session) {
     # }
   })
 
-  output$cpm_freqs <- DT::renderDT(genotype_freq_df(),
-    selection = 'none', server = TRUE
-    , rownames = FALSE
-    , options = list(
-      columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE)
-  )
-
-  # ## FIXME get sample data from namespace
-  cpm_out <- and_cpm_with_simulations
-  # ## FIXME: rename to trans_rate_mat??
-  # # cpm_out$MHN_f_graph <- cpm_out$MHN_trans_rate_mat
-
-  all_cpm_out <- reactiveValues(output = list(user = cpm_out))
-
-  # # all_cpm_out <- reactiveValues(output = list())
+  cpm_out <- sample_evam_output
+  all_cpm_out <- reactiveValues(user = cpm_out)
 
   output$sims <- renderUI({
-    if(length(all_cpm_out$output) > 0){
+    if(length(names(all_cpm_out)) > 0 & !is.null(input$select_cpm)){
+      tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
       column_models2show <- floor(12 / length(input$cpm2show))
 
-      lapply(input$cpm2show, function(mod){
-        output[[sprintf("plot_sims_%s", mod)]] <- renderPlot({
-          pl <- plot_model(all_cpm_out$output[[input$select_cpm]], mod)
+      lapply(input$cpm2show, function(met){
+        method_data <- evamtools:::process_data(tmp_data, met, plot_type = "trans_mat")
+        output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
+          pl <- evamtools::plot_method(method_data$method_info
+          , method_data$parent_set
+          , method_data$edges
+          , met)
         })
         return(
           column(3,
-            plotOutput(sprintf("plot_sims_%s", mod)))
+            plotOutput(sprintf("plot_sims_%s", met)))
         )
+        })
       }
-      )
-    }
   })
 
   output$sims2 <- renderUI({
-    if(length(all_cpm_out$output) > 0){
+    if(length(names(all_cpm_out)) > 0 & !is.null(input$select_cpm)){
+      tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
       ## Enabling donwload button
       shinyjs::enable(selector = "#download_cpm")
 
@@ -812,76 +832,35 @@ server <- function(input, output, session) {
       column_models2show <- floor(12 / length(input$cpm2show))
       selected_plot_type <- input$data2plot
 
-      ## To make all plots of the same type comparable
-      max_edge <- 0
-      min_edge <- 0
       if(!(is.null(selected_plot_type))){
-        if (selected_plot_type %in% c("trans_mat", "td_trans_mat")){
-          min_edge <- 0
-          max_edge <- 1
-        } else if (selected_plot_type == "genotype_transitions") {
-          for(i in input$cpm2show){
-            if (i != "OT"){
-              tmp_data <- all_cpm_out$output[[input$select_cpm]][[sprintf("%s_%s", i, selected_plot_type)]]
-
-              tmp_max_edge <- max(tmp_data)
-              max_edge <- ifelse(tmp_max_edge > max_edge
-                , tmp_max_edge
-                , max_edge)
-
-              tmp_min_edge <- min(tmp_data)
-              mom_edge <- ifelse(tmp_min_edge > min_edge
-                , tmp_min_edge
-                , min_edge)
-            }
-          }
-        } else if (selected_plot_type == "trans_rate_mat") {
-          max_edge <- min_edge <- NULL
-        }
-      } else {
-          max_edge <- min_edge <- NULL
-      }
-
-      lapply(input$cpm2show, function(mod){
-
-        data2plot <- all_cpm_out$output[[input$select_cpm]][[
-          sprintf("%s_%s", mod, selected_plot_type)]]
-
-        if(selected_plot_type == "td_trans_mat"){
-          diag(data2plot) <- 0
-          data2plot <- drop0(data2plot, 0)
-        }
-
-        if(is.null(data2plot)){
-          output[[sprintf("plot_sims2_%s", mod)]] <- renderPlot({})
-        } else{
-          output[[sprintf("plot_sims2_%s", mod)]] <- renderPlot({
-            pl <- evamtools:::plot_genot_fg(data2plot
-              , all_cpm_out$output[[input$select_cpm]]$csd_data
-              , all_cpm_out$output[[input$select_cpm]][[sprintf("%s_genotype_%s", mod, "freqs")]]
-              , freq2label = input$freq2label
-              , top_paths = 5
-              , max_edge = max_edge
-              , min_edge = min_edge)
+        lapply(input$cpm2show, function(met){
+          method_data <- evamtools:::process_data(tmp_data, met, plot_type = selected_plot_type)
+          output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
+          pl <- evamtools::plot_genot_fg(method_data$data2plot,
+                      observations = tmp_data$analyzed_data, # We use it to define "Observed" and "Not Observed" genotypes
+                      predicted_genotypes = method_data$predicted_genotype_freqs, # To compute node sizes if sampled_freqs is NULL
+                      sampled_freqs = method_data$sampled_genotype_freqs,
+                      top_paths = top_paths,
+                      freq2label = input$freq2label)
           })
-        }
-        return(
-          column(3,
-            plotOutput(sprintf("plot_sims2_%s", mod)))
-        )
-      })
+          return(
+            column(3,
+              plotOutput(sprintf("plot_sims2_%s", met)))
+          )
+        })
     } else {
       ## Disabling donwload button
       shinyjs::disable(selector = "#download_cpm")
 
       return(tags$h3("There are not results to show yet. Go to the input tab, select a dataset and hit the 'Run evamtools!' button"))
     }
+    }
   })
 
-  ## Go back to input to work again with the data
+  # ## Go back to input to work again with the data
   observeEvent(input$modify_data, {
-    if(length(all_cpm_out$output) > 0){
-      tmp_data <- all_cpm_out$output[[input$select_cpm]]$source_data
+    if(length(all_cpm_out) > 0){
+      tmp_data <- all_cpm_out[[input$select_cpm]]$orig_data
       dataset_name <- strsplit(input$select_cpm, "__")[[1]][[1]]
       dataset_type <- tmp_data$type
       last_visited_pages[[tmp_data$type]] <<- dataset_name
@@ -905,19 +884,17 @@ server <- function(input, output, session) {
       tags$div(class = "inline",
         checkboxGroupInput(inputId = "cpm2show",
           label = "CPMs to show",
-          choices = c("Source", "OT", "CBN", "MHN", "HESBCN"),
-        #   , "DBN")
-        # , "MCCBN"),
+          choices = c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
           selected = c("CBN", "MHN", "HESBCN")),
 
       tags$div(class = "inline",
         radioButtons(inputId = "data2plot",
           label = "Data to show",
-          choiceNames =  c("Transition rate matrix", "Transitions",
-                            "Transition matrix", "Time-discretized transition matrix"),
-          choiceValues = c("trans_rate_mat", "genotype_transitions",
-                            "trans_mat", "td_trans_mat"),
-          selected = "genotype_transitions"
+          choiceNames =  c("Probabilities", "Transitions",
+                            "Transition Rate Matrix"),
+          choiceValues = c("trans_mat", "obs_genotype_transitions",
+                            "trans_rate_mat"),
+          selected = "obs_genotype_transitions"
           )
         ),
       ),
@@ -930,31 +907,31 @@ server <- function(input, output, session) {
   })
 
   output$cpm_list <- renderUI({
-    all_names <- unname(sapply(all_cpm_out$output, function(dataset) dataset$name))
+    all_names <- unname(sapply(all_cpm_out, function(dataset) dataset$name))
 
     if(length(all_names) > 0){
       selected <- ifelse(is.null(input$select_csd), "user", input$select_csd)
-      selected <- ifelse(input$select_csd %in% names(all_cpm_out$output),input$select_csd, "user")
+      selected <- ifelse(input$select_csd %in% names(all_cpm_out),input$select_csd, "user")
 
       tagList(
         radioButtons(
           inputId = "select_cpm",
           label = "",
           selected = last_visited_cpm,
-          choiceNames = names(all_cpm_out$output),
-          choiceValues = names(all_cpm_out$output)
+          choiceNames = names(all_cpm_out),
+          choiceValues = names(all_cpm_out)
         )
       )
     }
   })
 
   output$csd <- renderPlot({
-    plot_genotypes_freqs(get_csd(all_cpm_out$output[[input$select_cpm]]$csd_data))
+    plot_genotypes_freqs(get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data))
   })
 
   output$original_data <- renderUI({
     ## To see if I disable original data
-    if(length(all_cpm_out$output) > 0){
+    if(length(all_cpm_out) > 0){
       tags$div(class="frame max_height",
         tags$h3("3. The original data"),
         plotOutput("csd"),
@@ -965,34 +942,32 @@ server <- function(input, output, session) {
     }
   })
 
-  ## Tabular data
-  genotype_freq_df <- reactive({
-    create_tabular_data(all_cpm_out$output[[
-      input$select_cpm]]
-      , input$data2table )
-    }
+  output$cpm_freqs <- DT::renderDT(all_cpm_out[[input$select_cpm]]$tabular_data[[input$tabular_data2show]],
+    selection = 'none', server = TRUE
+    , rownames = FALSE
+    , options = list(
+      columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE)
   )
 
   output$tabular_data <- renderUI({
-    if(length(all_cpm_out$output) > 0){
+    if(length(names(all_cpm_out)) > 0){
       tags$div(class="frame max_height",
         tags$h3("4. Tabular data"),
-        radioButtons(inputId = "data2table",
+        radioButtons(inputId = "tabular_data2show",
           label = "",
           inline = TRUE,
-          choiceNames =  c("Transition rates",
-                            "Genotype transitions counts",
-                            "Genotype frequencies",
-                            "Transition probabilities",
-                            "Lambdas/probabilities",
-                            "Time-discretized transition matrix"),
-          choiceValues =  c("trans_rate_mat",
-                            "genotype_transitions",
-                            "freqs",
-                            "trans_mat",
-                            "lambdas",
-                            "td_trans_mat"),
-          selected =  "freqs"
+          choiceNames =  c( "Transition probabilities",
+                            "Transition rates",
+                            "Predicted genotype frequencies",
+                            "Observed genotype frequencies",
+                            "Observed transitions counts"
+                            ),
+          choiceValues =  c("trans_mat",
+                            "trans_rate_mat",
+                            "predicted_genotype_freqs",
+                            "sampled_genotype_freqs",
+                            "obs_genotype_transitions"),
+          selected = "trans_mat"
           ),
         tags$div(
           DT::DTOutput("cpm_freqs")
@@ -1005,38 +980,38 @@ server <- function(input, output, session) {
   output$download_cpm <- downloadHandler(
     filename = function() sprintf("%s_cpm.RDS", input$select_cpm),
     content = function(file) {
-      saveRDS(all_cpm_out$output[[input$select_cpm]], file)
+      saveRDS(all_cpm_out[[input$select_cpm]], file)
     }
   )
 
-  ## We only want the "Source" option enable if we have the data to show it
-  observeEvent(input$select_cpm, {
-    selected <- ifelse(is.null(input$select_cpm), last_visited_cpm, input$select_cpm)
-    if(is.null(all_cpm_out$output[[selected]]$Source_genotype_transitions)){
-      updateCheckboxGroupInput(session, "cpm2show",
-        selected = setdiff(c(input$cpm2show), "Source"))
-      shinyjs::disable(selector = "#cpm2show input[value='Source']")
-    }else{
-      shinyjs::enable(selector = "#cpm2show input[value='Source']")
-    }
-    if(is.na(all_cpm_out$output[[selected]]$MCCBN_model)){
-      updateCheckboxGroupInput(session, "cpm2show",
-        selected = setdiff(c(input$cpm2show), "Source"))
-      shinyjs::disable(selector = "#cpm2show input[value='MCCBN']")
-    }else{
-      shinyjs::enable(selector = "#cpm2show input[value='MCCBN']")
-    }
-  })
+  # ## We only want the "Source" option enable if we have the data to show it
+  # observeEvent(input$select_cpm, {
+  #   selected <- ifelse(is.null(input$select_cpm), last_visited_cpm, input$select_cpm)
+  #   if(is.null(all_cpm_out[[selected]]$Source_genotype_transitions)){
+  #     updateCheckboxGroupInput(session, "cpm2show",
+  #       selected = setdiff(c(input$cpm2show), "Source"))
+  #     shinyjs::disable(selector = "#cpm2show input[value='Source']")
+  #   }else{
+  #     shinyjs::enable(selector = "#cpm2show input[value='Source']")
+  #   }
+  #   if(is.na(all_cpm_out[[selected]]$MCCBN_model)){
+  #     updateCheckboxGroupInput(session, "cpm2show",
+  #       selected = setdiff(c(input$cpm2show), "Source"))
+  #     shinyjs::disable(selector = "#cpm2show input[value='MCCBN']")
+  #   }else{
+  #     shinyjs::enable(selector = "#cpm2show input[value='MCCBN']")
+  #   }
+  # })
 
   ## Upload button
-  observeEvent(input$output_cpms, {
-    cpm_out <- readRDS(input$output_cpms$datapath)
-    ## FIXME: f_graph to trans_rate_mat?
-    # cpm_out$MHN_f_graph <- cpm_out$MHN_trans_rate_mat
-    if(is.null(cpm_out$name)) cpm_out$name <- "User_Data"
-    all_cpm_out$output[[cpm_out$name]] <- cpm_out
-    updateRadioButtons(session, "select_cpm", selected = cpm_out$name)
-    ## To see if I disable original data
-    shinyjs::disable(selector = "#variable input[value='cyl']")
-  })
+  # observeEvent(input$output_cpms, {
+  #   cpm_out <- readRDS(input$output_cpms$datapath)
+  #   ## FIXME: f_graph to trans_rate_mat?
+  #   # cpm_out$MHN_f_graph <- cpm_out$MHN_trans_rate_mat
+  #   if(is.null(cpm_out$name)) cpm_out$name <- "User_Data"
+  #   all_cpm_out[[cpm_out$name]] <- cpm_out
+  #   updateRadioButtons(session, "select_cpm", selected = cpm_out$name)
+  #   ## To see if I disable original data
+  #   shinyjs::disable(selector = "#variable input[value='cyl']")
+  # })
 }

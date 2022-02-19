@@ -174,12 +174,12 @@ results_simple <- function(){
           column(11,
             column(2,
               tags$div(class = "frame",
-                tags$h3("1. Load  & download"),
-                tags$div(id = "noprogress",
-                fileInput("output_cpms", "Load your results"
-                  , multiple = FALSE,
-                  accept = c(".Rdata", ".rds", ".RDS"))
-                ),
+                tags$h3("1. Download"),
+                # tags$div(id = "noprogress",
+                # fileInput("output_cpms", "Load your results"
+                #   , multiple = FALSE,
+                #   accept = c(".Rdata", ".rds", ".RDS"))
+                # ),
                 tags$div(class = "download_button",
                   downloadButton("download_cpm", "Download!")
                 )
@@ -540,8 +540,22 @@ user_input <- function(){
   )
 }
 ui <- 
-  navbarPage( id = "navbar",
+  navbarPage( 
+    id = "navbar",
     title = "evamtools",
+    header = tags$head(
+          tags$link(
+              rel = "icon",
+              href = "images/icon.png",
+              type = "image/png",
+              width = "1em",
+              height = "1em"
+          ),
+          tags$title("FastqCleaner"),
+          tags$link(rel = "stylesheet",
+              type = "text/css",
+              href = "styles/masterCss.css")
+      ),
     tabPanel("About EVAM-tools",
       cpm_info()
     ),
