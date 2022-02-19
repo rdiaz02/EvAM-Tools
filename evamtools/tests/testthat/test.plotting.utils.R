@@ -57,7 +57,7 @@ test_that("Processing samples & Plotting of CPMs is correct", {
                    sample_evam_output[[paste0(model, "_trans_rate_mat")]]) 
     }
 
-    for(i in c("parent_set")){
+    for(i in c("parent_set", "predicted_genotype_freqs")){
       expect_equal(model_trm[[i]], sample_evam_output[[paste0(model, "_", i)]]) 
       expect_equal(model_transitions[[i]], sample_evam_output[[paste0(model, "_", i)]]) 
       expect_equal(model_probabilities[[i]], sample_evam_output[[paste0(model, "_", i)]]) 
