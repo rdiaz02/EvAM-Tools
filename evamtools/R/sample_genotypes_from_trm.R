@@ -231,7 +231,7 @@ process_samples <- function(sim, n_genes,
     ## Calculate frequencies: genotype frequencies
     if ("sampled_genotype_freqs" %in% output) {
         counts_tmp <- sample_to_pD_order(sim$obs_events, n_genes, gene_names)
-        frequencies <- setNames(counts_tmp, sorted_genotypes)
+        frequencies <- stats::setNames(counts_tmp, sorted_genotypes)
         # frequencies <- data.frame(
         #     Genotype = sorted_genotypes,
         #     Counts = counts_tmp
@@ -402,7 +402,7 @@ sample_CPMs <- function(cpm_output
                 ngenes = n_genes, gene_names = gene_names)
 
             retval[[sprintf("%s_sampled_genotype_freqs", method)]] <-
-                setNames(tmp_genotypes_sampled, generate_sorted_genotypes(n_genes, gene_names))
+                stats::setNames(tmp_genotypes_sampled, generate_sorted_genotypes(n_genes, gene_names))
 
                 # data.frame(
                 #     Genotype = generate_sorted_genotypes(n_genes, gene_names),
@@ -463,7 +463,7 @@ sample_CPMs <- function(cpm_output
                                            ngenes = n_genes,
                                            gene_names = gene_names)
                     retval[[sprintf("%s_sampled_genotype_freqs", method)]] <-
-                        setNames(tmp_genotypes_sampled, generate_sorted_genotypes(n_genes, gene_names))
+                        stats::setNames(tmp_genotypes_sampled, generate_sorted_genotypes(n_genes, gene_names))
                         # data.frame(
                         #     Genotype = generate_sorted_genotypes(n_genes, gene_names),
                         #     Counts = tmp_genotypes_sampled)
