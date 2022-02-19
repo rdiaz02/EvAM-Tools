@@ -49,7 +49,7 @@ get_csd <- function(complete_csd){
     return(csd)
 }
 
-
+#TO BE REMOVED
 get_mhn_data <- function(n_genes, n_samples, gene_names, thetas = NULL){
     if(is.null(thetas)) thetas <- evamtools:::Random.Theta(n=n_genes)
     rownames(thetas) <- colnames(thetas) <- gene_names
@@ -68,108 +68,101 @@ get_mhn_data <- function(n_genes, n_samples, gene_names, thetas = NULL){
     return(list(thetas = thetas, trm = trm, samples = samples))
 }
 
-create_tabular_data <- function(data, type){
-    available_methods <- c("Source", "OT", "CBN", "MHN", "HESBCN")
-    # , "DBN", "MCCBN")
-    if(type %in% c("freqs")){
-        all_counts <- data.frame(Genotype = data[["MHN_genotype_freqs"]]$Genotype)
-        for(name in names(data)){
-            if(grepl("_genotype_freqs", name)
-            #  & !grepl("^OT", name) ##Now we have genotypes frequencies for OT
-             ){
-                method_name <- strsplit(name, "_")[[1]][[1]]
-                all_counts[[method_name]] <- data[[name]]$Counts
-            } 
+create_tabular_data <- function(data){
+    available_methods <- c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN")
+    attr_to_make_tabular <- c("trans_mat", "trans_rate_mat", "obs_genotype_transitions"
+      , "predicted_genotype_freqs", "sampled_genotype_freqs")
+    
+    tabular_data <- list()
+    for(attr in attr_to_make_tabular){
+      if(attr %in% c("sampled_genotype_freqs", "predicted_genotype_freqs")){
+        all_counts <- data.frame(Genotype = c(NULL))
+
+        for(method in available_methods){
+          tmp_data <- data[[paste0(method, "_", attr)]]
+          if(!is.null(tmp_data) && !is.na(tmp_data)){
+            if(is.null(all_counts$Genotype)){
+              all_counts <- data.frame(Genotype = names(tmp_data)) #They include all genotypes
+              rownames(all_counts) <- all_counts$Genotype
+            }
+            all_counts[, method] <- round(tmp_data, 3)
+          }
         }
-        
         order_by_counts <- sort(rowSums(all_counts[-1]), 
-        decreasing = TRUE, index.return = TRUE)$ix
+          decreasing = TRUE, index.return = TRUE)$ix
     
-        all_counts[order_by_counts, ]
-        return(all_counts[order_by_counts, ])
+        tabular_data[[attr]] <- all_counts[order_by_counts, ]
 
-    } else if(type %in% c("trans_rate_mat", "genotype_transitions", "trans_mat", "td_trans_mat")){
-        var2var <- c("trans_rate_mat", "genotype_transitions", "trans_mat", "td_trans_mat")
-        names(var2var) <- c("trans_rate_mat", "genotype_transitions", "trans_mat", "td_trans_mat")
-        
-        var2use <- var2var[type]
-        ## 1 Methods to compute
-        methods2compute <- vapply(available_methods, function(x){
-            if(!is.null(data[[sprintf("%s_%s", x, var2use)]])){
-                return(!any(is.na(data[[sprintf("%s_%s", x, var2use)]])))
-            }
-            return(FALSE)
-        }, logical(1))
+      }else if(attr %in% c("trans_rate_mat", "obs_genotype_transitions", "trans_mat")){
+         
+          df <- data.frame(From=character(),
+                 To=character(), 
+                 OT=numeric(), 
+                 OncoBN=numeric(), 
+                 CBN=numeric(), 
+                 HESBCN=numeric(), 
+                 MCCBN=numeric(), 
+                 MHN=numeric(), 
+                 stringsAsFactors=FALSE) 
 
-        methods2compute <- names(methods2compute)[methods2compute]
-        if(type == "genotype_transitions"){
-            methods2compute <- setdiff(methods2compute, "OT")
-        }
-            
-        ## 2 Fill the data frame
-        all_genotypes <- matrix(0, nrow = 0, ncol = 2)
-        all_methods <- matrix(0, nrow = 0, ncol = length(methods2compute))
-        n_methods2compute <- length(methods2compute)
-        base_vector <- rep(0, n_methods2compute)
-        names(base_vector) <- methods2compute
-        ## I use MHN because it has all the genotypes
-        for(i in rownames(data[[sprintf("MHN_%s", var2use)]])){
-            for(j in rownames(data[[sprintf("MHN_%s", var2use)]])){
-                row_data <- sapply(methods2compute, function(x){
-                    tryCatch({
-                        return(data[[sprintf("%s_%s", x, var2use)]][i, j])
-                    }, error = function(e){
-                        return(0)
-                    })
-                })
+          for(method in available_methods){
+            #1 Matrix to vector
+            tmp_data <- data[[paste0(method, "_", attr)]]
+            if(!is.null(tmp_data)){
+              indexes <- which(as.matrix(tmp_data)>0, arr.ind = TRUE)
+              genotypes <- colnames(tmp_data)
+              transitions <- mapply(function(x, y) paste0(x, "->", y)
+                , genotypes[indexes[, "row"]], genotypes[indexes[, "col"]])
+              counts <- tmp_data[tmp_data > 0]
+              names(counts) <- transitions
 
-                all_genotypes <- rbind(all_genotypes, c(i, j))
-                all_methods <- rbind(all_methods, unname(row_data))
-            }
-        }
-        
-        selected_rows <- rowSums(abs(all_methods))>0
-        all_methods <- round(all_methods[selected_rows, ], 2)
-        all_genotypes <- all_genotypes[selected_rows, ]
-
-        all_the_data <- data.frame(From = all_genotypes[, 1]
-            , To = all_genotypes[, 2])
-        for(i in 1:n_methods2compute){
-            all_the_data[[methods2compute[i]]] <- all_methods[, i]
-        }
-
-        colnames(all_the_data) <- c("From", "To", methods2compute)
-
-        order_by_counts <- sort(rowSums(all_methods), 
-        decreasing = TRUE, index.return = TRUE)$ix
-    
-        return(all_the_data[order_by_counts, ])
-
-    } else if(type %in% c("lambdas")){
-        lambda_field <- c("Lambdas", "OT_edgeWeight", "rerun_lambda", "Lambdas", "lambda", "Thetas")
-        names(lambda_field) <- c("Source", "OT", "CBN", "HESBCN", "MCCBN")
-
-        gene_names <- sort(unique(data$OT_model$To))
-        all_counts <- data.frame(Gene = gene_names)
-        for(name in names(data)){
-            if(grepl("_model", name)){
-                method_name <- strsplit(name, "_")[[1]][[1]]
-                if(!is.null(data[[name]]) & !is.na(data[[name]])){
-                    tmp_data <- data[[name]][[lambda_field[method_name]]]
-                    names(tmp_data) <- data[[name]]$To
-                    all_counts[[method_name]] <- round(tmp_data[all_counts$Gene], 2)
+              #2 Adding empty row for each transitions
+              for(transition in transitions){
+                ## New row
+                if(all(is.na(df[transition, ]))){
+                  genes <- strsplit(transition, "->")[[1]]
+                  df[transition, ] <- c(genes[[1]], genes[[2]], rep(0, length(available_methods)))
+                  df[transition, method] <- counts[[transition]]
+                } else {
+                  df[transition, method] <- counts[[transition]]
                 }
+              }
             }
-        }
+          }
 
-        return(all_counts)
+          ## Dropping empty columns
+          for(method in available_methods){
+            tmp_col <- as.numeric(df[[method]])
+            if(sum(abs(tmp_col)) == 0) df[[method]] <- NULL
+            else df[[method]] <- round(tmp_col, 3)
+          }
+
+          ## Sorting 
+          order_by_counts <- sort(rowSums(df[,3:ncol(df)]), decreasing=TRUE, index.return=TRUE)$ix
+
+          tabular_data[[attr]] <- df[order_by_counts, ]
+      } 
+      # else if(type %in% c("lambdas")){
+      #     lambda_field <- c("Lambdas", "OT_edgeWeight", "rerun_lambda", "Lambdas", "lambda", "Thetas")
+      #     names(lambda_field) <- c("Source", "OT", "CBN", "HESBCN", "MCCBN")
+
+      #     gene_names <- sort(unique(data$OT_model$To))
+      #     all_counts <- data.frame(Gene = gene_names)
+      #     for(name in names(data)){
+      #         if(grepl("_model", name)){
+      #             method_name <- strsplit(name, "_")[[1]][[1]]
+      #             if(!is.null(data[[name]]) & !is.na(data[[name]])){
+      #                 tmp_data <- data[[name]][[lambda_field[method_name]]]
+      #                 names(tmp_data) <- data[[name]]$To
+      #                 all_counts[[method_name]] <- round(tmp_data[all_counts$Gene], 2)
+      #             }
+      #         }
+      #     }
+
+      #     return(all_counts)
+      # }
     }
-
-    order_by_counts <- sort(rowSums(all_counts[-1]), 
-        decreasing = TRUE, index.return = TRUE)$ix
-    
-    all_counts[order_by_counts, ]
-    return(to_return)
+    return(tabular_data)
 }
 
 
@@ -262,7 +255,7 @@ standarize_dataset <- function(data){
   if(is.null(data$data)) {
     new_data$data <- SHINY_DEFAULTS$template_data$data
   } else {
-    if(!all(unique(as.vector(data$data)) %in% c(0, 1))){
+    if(!all(unique(unlist(data$data)) %in% c(0, 1))){
       stop("Data should be binary: only 0 and 1")
     }
     new_data$data <- data$data

@@ -252,4 +252,138 @@ test_that("Standarize does not work with bad data", {
   , "Theta matrix should only contain numbers")
 })
 
+test_that("Create tabular data from CPM output works correctly", {
+  ## Toy dataset is a combination of the output of evam and sample_all_CPMs
+  ## We only define those attr that are going to be processed and we work only with 3 CPMs
+  
+  attr_to_make_tabular <- c("trans_mat", "trans_rate_mat", "obs_genotype_transitions"
+      , "predicted_genotype_freqs", "sampled_genotype_freqs")
+  methods2test <- c("OT", "CBN", "MHN")
+  cpm_out <- list()
+  
+  # pm <- function(mat,varname="out"){
+  #   mat <- round(as.matrix(mat), 3)
+  #   genots <- colnames(mat)
+  #   genots <- toString(sapply(genots, function(x) paste0("'", x, "'")))
+  #   command <- paste0(varname, " <- sparseMatrix(c(", toString(which(mat>0, arr.ind=TRUE)[,"row"]), "), c(",
+  #     toString(which(mat>0, arr.ind=TRUE)[,"col"]), "), ",
+  #     "x=c(", toString(mat[which(mat>0)]), "), dims=c(", toString(dim(mat)), "));colnames(", varname,") <- rownames(", varname, ") <- c("
+  #     , genots, ")")
+  #   print(command)
+  # }
+
+  # cpm_output <- sample_evam_output$cpm_output
+  # for(i in c("MHN", "OT", "CBN")){
+  #   for(attr in c("trans_mat", "trans_rate_mat", "obs_genotype_transitions")){
+  #     varname <- paste0(i, "_", attr)
+  #     mat <- cpm_output[[varname]]
+  #     print(varname)
+  #     if(!is.null(mat)) pm(mat, varname)
+  #   }
+  # }
+  
+
+  MHN_trans_mat <- sparseMatrix(c(1, 1, 1, 2, 3, 2, 4, 3, 4, 5, 6, 7), 
+    c(2, 3, 4, 5, 5, 6, 6, 7, 7, 8, 8, 8), 
+    x=c(0.464, 0.534, 0.001, 0.928, 0.223, 0.072, 0.072, 0.777, 0.928, 1, 1, 1), dims=c(8, 8))
+  colnames(MHN_trans_mat) <- rownames(MHN_trans_mat) <- c('WT', 'A', 'B', 'C', 'A, B', 'A, C', 'B, C', 'A, B, C')
+  cpm_out$MHN_trans_mat <-MHN_trans_mat
+
+  MHN_trans_rate_mat <- sparseMatrix(c(1, 1, 1, 2, 3, 2, 4, 3, 4, 5, 6, 7), 
+    c(2, 3, 4, 5, 5, 6, 6, 7, 7, 8, 8, 8), 
+    x=c(25.28, 29.079, 0.08, 0.497, 0.164, 0.038, 25.28, 0.571, 327.013, 0.273, 5.585, 0.164), dims=c(8, 8))
+  colnames(MHN_trans_rate_mat) <- rownames(MHN_trans_rate_mat) <- c('WT', 'A', 'B', 'C', 'A, B', 'A, C', 'B, C', 'A, B, C')
+  cpm_out$MHN_trans_rate_mat <- MHN_trans_rate_mat
+
+  MHN_obs_genotype_transitions <- sparseMatrix(c(1, 1, 1, 2, 3, 2, 4, 3, 4, 5, 6, 7), 
+    c(2, 3, 4, 5, 5, 6, 6, 7, 7, 8, 8, 8), 
+    x=c(4546, 5235, 19, 1506, 481, 125, 1, 1688, 18, 418, 102, 239), dims=c(8, 8))
+  colnames(MHN_obs_genotype_transitions) <- rownames(MHN_obs_genotype_transitions) <- c('WT', 'A', 'B', 'C', 'A, B', 'A, C', 'B, C', 'A, B, C')
+  cpm_out$MHN_obs_genotype_transitions <- MHN_obs_genotype_transitions
+  MHN_predicted_genotype_freqs <- c(0.018, 0.297, 0.302, 0, 0.155, 0.002, 0.15, 0.076)
+  names(MHN_predicted_genotype_freqs) <- c('WT', 'A', 'B', 'C', 'A, B', 'A, C', 'B, C', 'A, B, C')
+  cpm_out$MHN_predicted_genotype_freqs <- MHN_predicted_genotype_freqs
+  MHN_sampled_genotype_freqs <- c(182, 2993, 2928, 1551, 0, 14, 1522, 810)
+  names(MHN_sampled_genotype_freqs) <- c('WT', 'A', 'B', 'A, B', 'C', 'A, C', 'B, C', 'A, B, C')
+  cpm_out$MHN_sampled_genotype_freqs <- MHN_sampled_genotype_freqs
+
+  CBN_trans_mat <- sparseMatrix(c(1, 1, 2, 3, 3, 4, 5), 
+    c(2, 3, 4, 4, 5, 6, 6), 
+    x=c(0.002, 0.998, 1, 0.999, 0.001, 1, 1), dims=c(6, 6))
+  colnames(CBN_trans_mat) <- rownames(CBN_trans_mat) <- c('WT', 'A', 'B', 'A, B', 'B, C', 'A, B, C')
+  cpm_out$CBN_trans_mat <- CBN_trans_mat
+
+  CBN_trans_rate_mat <- sparseMatrix(c(1, 1, 2, 3, 3, 4, 5), 
+    c(2, 3, 4, 4, 5, 6, 6), 
+    x=c(1.303, 765.333, 765.333, 1.303, 0.002, 0.002, 1.303), dims=c(6, 6))
+  colnames(CBN_trans_rate_mat) <- rownames(CBN_trans_rate_mat) <- c('WT', 'A', 'B', 'A, B', 'B, C', 'A, B, C')
+  cpm_out$CBN_trans_rate_mat <- CBN_trans_rate_mat
+  CBN_obs_genotype_transitions <- sparseMatrix(c(1, 1, 2, 3, 3, 4, 5), 
+    c(2, 3, 4, 4, 5, 6, 6), 
+    x=c(22, 9964, 22, 5631, 8, 9, 3), dims=c(6, 6))
+  colnames(CBN_obs_genotype_transitions) <- rownames(CBN_obs_genotype_transitions) <- c('WT', 'A', 'B', 'A, B', 'B, C', 'A, B, C')
+  cpm_out$CBN_obs_genotype_transitions <- CBN_obs_genotype_transitions
+  CBN_predicted_genotype_freqs <- c(0.001, 0, 0.432, 0, 0.564, 0, 0, 0.001)
+  names(CBN_predicted_genotype_freqs) <- c('WT', 'A', 'B', 'C', 'A, B', 'A, C', 'B, C', 'A, B, C')
+  cpm_out$CBN_predicted_genotype_freqs <- CBN_predicted_genotype_freqs
+
+  CBN_sampled_genotype_freqs <- c(17, 0, 4354, 5613, 0, 0, 2, 14)
+  names(CBN_sampled_genotype_freqs) <- c('WT', 'A', 'B', 'A, B', 'C', 'A, C', 'B, C', 'A, B, C')
+  cpm_out$CBN_sampled_genotype_freqs <- CBN_sampled_genotype_freqs
+
+  OT_trans_mat <- sparseMatrix(c(1, 1, 2, 3, 3, 4, 5), 
+    c(2, 3, 4, 4, 5, 6, 6), 
+    x=c(0.438, 0.562, 1, 0.614, 0.386, 1, 1), dims=c(6, 6))
+  colnames(OT_trans_mat) <- rownames(OT_trans_mat) <- c('WT', 'A', 'B', 'A, B', 'B, C', 'A, B, C')
+  cpm_out$OT_trans_mat <- OT_trans_mat 
+  cpm_out$OT_trans_rate_mat <- NULL
+  cpm_out$OT_obs_genotype_transitions <- NULL
+  OT_predicted_genotype_freqs <- c(0.149, 0.169, 0.213, 0, 0.241, 0, 0.107, 0.121)
+  names(OT_predicted_genotype_freqs) <- c('WT', 'A', 'B', 'C', 'A, B', 'A, C', 'B, C', 'A, B, C')
+  cpm_out$OT_predicted_genotype_freqs <- OT_predicted_genotype_freqs
+  cpm_out$OT_sampled_genotype_freqs <- NULL
+
+
+  tabular_data <- evamtools:::create_tabular_data(cpm_out)
+
+  expect_equal(1, length(unique(colSums(tabular_data$sampled_genotype_freqs[-1]))))
+
+  for(method in methods2test){
+    if(method == "OT"){
+      expect_equal("OT" %in% colnames(tabular_data$sampled_genotype_freqs), FALSE)
+      expect_equal("OT" %in% colnames(tabular_data$obs_genotype_freqs), FALSE)
+      expect_equal("OT" %in% colnames(tabular_data$trans_rate_mat), FALSE)
+    }else{
+      for(genotype in tabular_data$sampled_genotype_freqs$Genotype){
+        expect_equal(tabular_data$sampled_genotype_freqs[genotype, method]
+          , as.numeric(cpm_out[[paste0(method, "_sampled_genotype_freqs")]][genotype]))
+      }
+
+      for(genotype in tabular_data$tran_rate_mat$Genotype){
+        expect_equal(tabular_data$trans_rate_mat[genotype, method]
+          , as.numeric(cpm_out[[paste0(method, "_trans_rate_mat")]][genotype]))
+      }
+
+      for(transition in rownames(tabular_data$obs_genotype_transitions)){
+        trans <- strsplit(transition, "->")[[1]]
+        value <- tabular_data$obs_genotype_transitions[transition, method]
+        if(value > 0){
+          expect_equal(value
+            , as.numeric(cpm_out[[paste0(method, "_obs_genotype_transitions")]][trans[[1]], trans[[2]]]))
+        }
+      }
+    }
+
+    for(genotype in tabular_data$trans_mat$Genotype){
+        expect_equal(tabular_data$trans_mat[genotype, method]
+          , as.numeric(cpm_out[[paste0(method, "_trans_mat")]][genotype]))
+      }
+    
+    for(genotype in tabular_data$predicted_genotype_freqs$Genotype){
+        expect_equal(tabular_data$predicted_genotype_freqs[genotype, method]
+          , as.numeric(cpm_out[[paste0(method, "_predicted_genotype_freqs")]][genotype]))
+      }
+  }
+})
+
 cat("\n Done test.shiny-utils.R \n")
