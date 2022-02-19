@@ -211,11 +211,12 @@ plot_genot_fg <- function(trans_mat
     }
 
     if (!is.null(sampled_freqs)){
-        sampled_freqs$Abs_Freq <- sampled_freqs$Counts / sum(sampled_freqs$Counts)
-        sampled_freqs$Genotype <- str_replace_all(sampled_freqs$Genotype, ", ", ",")
+        sampled_freqs <- as.data.frame(sampled_freqs)
+        colnames(sampled_freqs) <- c("Counts")
+        sampled_freqs$Genotype <- str_replace_all(rownames(sampled_freqs), ", ", ",")
         rownames(sampled_freqs) <- sampled_freqs$Genotype
+        sampled_freqs$Abs_Freq <- sampled_freqs$Counts / sum(sampled_freqs$Counts)
     }
-
     ## Layout
     lyt <- cpm_layout(graph)
 
@@ -267,7 +268,7 @@ plot_genot_fg <- function(trans_mat
             }, numeric(1.0))
     } else if(!is.null(predicted_genotypes)){
         node_sizes <- vapply(igraph::V(graph)$name, 
-            function(gen) predicted_genotypes[gen], 1) ## This does not work for OT and OncoBN right now
+            function(gen) predicted_genotypes[gen], 1) 
             #     if (sum(match(predicted_genotypes$Genotype, gen, nomatch = 0)) == 1) # Observed
             #         return(predicted_genotypes$Abs_Freq[which(predicted_genotypes$Genotype == gen)])
             #     else # Not Observed
@@ -305,7 +306,6 @@ plot_genot_fg <- function(trans_mat
         w2 <- rep(min_width, length(node_sizes))
     }
 
-    ## if(any(is.na(w2))) browser()
     transparent_w2 <-  w2/max(w2) * 0.9 + 0.1
     ## Actual plotting
     plot(graph

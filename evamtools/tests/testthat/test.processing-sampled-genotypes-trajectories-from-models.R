@@ -150,29 +150,30 @@ test_that("Output is correct", {
     
    
     out <- process_samples(simGenotypes, 5, gene_names = LETTERS[1:5])
-    expect_equal(nrow(out$sampled_genotype_freqs), 2**5)
+    expect_equal(length(out$sampled_genotype_freqs), 2**5)
     expect_equal(nrow(out$state_counts), 2**5)
 
     sim_counts <- table(simGenotypes$obs_events)
-    for (i in 1:length(out$sampled_genotype_freqs$Genotype)){
-        r <- out$sampled_genotype_freqs[i, ]
-        if(r$Genotype %in% names(sim_counts)){
-            expect_equal(r$Counts, as.numeric(sim_counts[r$Genotype]))
+    r <- out$sampled_genotype_freqs
+    for (i in names(r)){
+        if(i %in% names(sim_counts)){
+            expect_equal(r[i], sim_counts[i])
         }
-        else expect_equal(r$Counts, 0)
-
+        else{
+            expect_equal(as.numeric(r[i]), 0)
+        }
     }
 
-    expect_equal(sum(out$sampled_genotype_freqs$Counts), length(simGenotypes$obs_events))
+    expect_equal(sum(out$sampled_genotype_freqs), length(simGenotypes$obs_events))
 
     state_counts <- table(unlist(simGenotypes$trajectory))
-    for (i in 1:length(out$state_counts$Genotype)){
-        r <- out$sampled_genotype_freqs[i, ]
-        if(r$Genotype %in% names(sim_counts)){
-            expect_equal(r$Counts, as.numeric(sim_counts[r$Genotype]))
+    rownames(out$state_counts) <- out$state_counts$Genotype 
+    for (i in out$state_counts$Genotype){
+        tmp_row <- out$state_counts[i, ]
+        if(tmp_row$Genotype %in% names(state_counts)){
+            expect_equal(tmp_row$Counts, as.numeric(state_counts[tmp_row$Genotype]))
         }
-        else expect_equal(r$Counts, 0)
-
+        else expect_equal(tmp_row$Counts, 0)
     }
 
     expect_equal(sum(out$obs_genotype_transitions)

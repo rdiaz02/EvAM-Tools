@@ -231,11 +231,12 @@ process_samples <- function(sim, n_genes,
     ## Calculate frequencies: genotype frequencies
     if ("sampled_genotype_freqs" %in% output) {
         counts_tmp <- sample_to_pD_order(sim$obs_events, n_genes, gene_names)
-        frequencies <- data.frame(
-            Genotype = sorted_genotypes,
-            Counts = counts_tmp
-        )
-        rownames(frequencies) <- NULL
+        frequencies <- setNames(counts_tmp, sorted_genotypes)
+        # frequencies <- data.frame(
+        #     Genotype = sorted_genotypes,
+        #     Counts = counts_tmp
+        # )
+        # rownames(frequencies) <- NULL
         retval$sampled_genotype_freqs <- frequencies
     }
 
@@ -393,30 +394,35 @@ sample_CPMs <- function(cpm_output
 
     for (method in methods) {
         if (method %in% c("OT", "OncoBN")) {
-            if (method == "OT") {
-                tmp_data <- cpm_output$OT_predicted_genotype_freqs
-                genots <- tmp_data[2:(ncol(tmp_data) - 1)]
-            } else if (method == "OncoBN") {
-                tmp_data <- cpm_output$OncoBN_predicted_genotype_freqs
-                genots <- tmp_data[1:(ncol(tmp_data) - 1)]
-            }
-
-            genots_2 <- unlist(apply(genots, 1,
-                                     function(x) paste(names(genots)[x == 1],
-                                                       collapse = ", ")))
-            names(genots_2) <- NULL
-            genots_2[genots_2 == ""] <- "WT"
+            # if (method == "OT") {
+            #     # tmp_data <- cpm_output$OT_predicted_genotype_freqs
+            #     # genots <- tmp_data[2:(ncol(tmp_data) - 1)]
+            #     genots <- cpm_output$OT_predicted_genotype_freqs
+            # } else if (method == "OncoBN") {
+            #     # tmp_data <- cpm_output$OncoBN_predicted_genotype_freqs
+            #     # genots <- tmp_data[1:(ncol(tmp_data) - 1)]
+            # }
+            # genots_2 <- unlist(apply(genots, 1,
+            #                          function(x) paste(names(genots)[x == 1],
+            #                                            collapse = ", ")))
+            # names(genots_2) <- NULL
+            genots <- cpm_output[[paste0(method, "_predicted_genotype_freqs")]]
+            genots_2 <- names(genots)
+            tmp_data <- genots
+            names(tmp_data) <- NULL
 
             tmp_genotypes_sampled <- sample_to_pD_order(
                 sample(genots_2, size = N,
-                       prob = tmp_data$Prob, replace = TRUE),
+                       prob = tmp_data, replace = TRUE),
                 ngenes = n_genes, gene_names = gene_names)
 
             retval[[sprintf("%s_sampled_genotype_freqs", method)]] <-
-                data.frame(
-                    Genotype = generate_sorted_genotypes(n_genes, gene_names),
-                    Counts = tmp_genotypes_sampled
-                )
+                setNames(tmp_genotypes_sampled, generate_sorted_genotypes(n_genes, gene_names))
+
+                # data.frame(
+                #     Genotype = generate_sorted_genotypes(n_genes, gene_names),
+                #     Counts = tmp_genotypes_sampled
+                # )
             ## The next one is NOT implicitly available.
             ##   see OT_transition_matrices.org
             retval[[sprintf("%s_obs_genotype_transitions", method)]] <- NULL
@@ -471,11 +477,11 @@ sample_CPMs <- function(cpm_output
                                                   replace = TRUE),
                                            ngenes = n_genes,
                                            gene_names = gene_names)
-
                     retval[[sprintf("%s_sampled_genotype_freqs", method)]] <-
-                        data.frame(
-                            Genotype = generate_sorted_genotypes(n_genes, gene_names),
-                            Counts = tmp_genotypes_sampled)
+                        setNames(tmp_genotypes_sampled, generate_sorted_genotypes(n_genes, gene_names))
+                        # data.frame(
+                        #     Genotype = generate_sorted_genotypes(n_genes, gene_names),
+                        #     Counts = tmp_genotypes_sampled)
                 }
             }
         }
