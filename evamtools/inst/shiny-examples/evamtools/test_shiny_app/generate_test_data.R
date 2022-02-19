@@ -79,16 +79,48 @@ bad_matrix2save$thetas["A1", "B2"] <- "abc"
 saveRDS(bad_matrix2save, file="matrix_bad.RDS")
 
 ## EvAM - output
-# and_cpm <- evam(examples_csd$csd$AND$data)
-# and_cpm_with_simulations <- sample_CPMs(and_cpm, 10000, 5)
+methods <- c("OT", "CBN", "MCCBN", "HESBCN", "OncoBN", "MHN")
+and_cpm <- evam(examples_csd$csd$AND$data, methods = methods)
+and_cpm_with_simulations <- sample_CPMs(and_cpm, 10000, methods, c("sampled_genotype_freqs", "obs_genotype_transitions"))
 # browser()
+orig_data <- list(data = examples_csd$csd$AND$data, name = "AND_new"
+            , type = "csd", gene_names = colnames(examples_csd$csd$AND$data)
+            , thetas = NULL, lambdas = NULL
+            , dag = NULL, dag_parent_set = NULL)
+tabular_data <- evamtools:::create_tabular_data(c(and_cpm, and_cpm_with_simulations))
+sample_evam_output <- list("cpm_output" = c(and_cpm, and_cpm_with_simulations)
+      , "orig_data" = orig_data, "tabular_data" = tabular_data
+    )
+# and_cpm_with_simulations$source_data <- orig_data
+# and_cpm_with_simulations$name <- "AND_new"
+save(sample_evam_output, file = "../../../../data/sample_evam_output.RData")
+
+
+# methods <- c("OT", "CBN", "MCCBN", "HESBCN", "OncoBN", "MHN")
+# dB_AND <- matrix(
+#   c(
+#       rep(c(1, 0, 0), 200) #A
+#     ,  rep(c(0, 1, 0), 200) #B
+#     , rep(c(1, 1, 0), 100) #AB
+#     , rep(c(0, 1, 1), 100) #BC
+#     , rep(c(1, 1, 1), 50) #ABC
+#     , rep(c(0, 0, 0), 10) #WT
+#   ), ncol = 3, byrow = TRUE
+# )
+# colnames(dB_AND) <- LETTERS[1:3]
+
+# and_cpm <- evam(dB_AND, methods = methods)
+# and_cpm_with_simulations <- sample_CPMs(and_cpm, 10000, methods, c("sampled_genotype_freqs", "obs_genotype_transitions"))
 # orig_data <- list(data = examples_csd$csd$AND$data, name = "AND_new"
 #             , type = "csd", gene_names = colnames(examples_csd$csd$AND$data)
 #             , thetas = NULL, lambdas = NULL
 #             , dag = NULL, dag_parent_set = NULL)
-
+# cpm_output <- c(and_cpm, and_cpm_with_simulations)
+# sample_evam_output <- list("cpm_output" = c(and_cpm, and_cpm_with_simulations)
+#       , "orig_data" = orig_data
+#     )
 # and_cpm_with_simulations$source_data <- orig_data
 # and_cpm_with_simulations$name <- "AND_new"
-# save(and_cpm_with_simulations, file = "AND_test_cpm.RData")
-# saveRDS(and_cpm_with_simulations, file = "AND_test_cpm.RDS")
-
+# save(sample_evam_output, file = "AND_test_cpm.RData")
+# save(sample_evam_output, file = "../../../../data/AND_test_cpm.RData")
+# saveRDS(sample_evam_output, file = "AND_test_cpm.RDS")
