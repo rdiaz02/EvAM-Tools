@@ -13,7 +13,7 @@ importFrom("grDevices", "rgb", "colorRampPalette")
 importFrom("graphics", "axis", "legend", "lines", "par", "title", "barplot",
            "grid", "mtext")
 importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert",
-           "write.csv", "tail")
+           "write.csv", "tail", "globalVariables")
 importFrom("Matrix", "diag", "rowSums", "colSums", "summary", "Matrix",
            "sparseMatrix", "bandSparse", "t", "tril", "nnzero")
 importFrom("OncoSimulR", "sampledGenotypes", "evalAllGenotypes",
@@ -36,7 +36,7 @@ importFrom("igraph", "V", "E", "graph.data.frame", "layout.reingold.tilford"
            "make_directed_graph", "incident", "ends", "as_data_frame",
            "layout_with_sugiyama")
 importFrom("stats", "aggregate", "chisq.test", "na.omit", "rexp",
-           "runif", "rnorm", "optim")
+           "runif", "rnorm", "optim", "setNames")
 ## just something, so plot.matrix is available
 ## See https://stackoverflow.com/a/59667634
 importFrom("plot.matrix", "fmt")
