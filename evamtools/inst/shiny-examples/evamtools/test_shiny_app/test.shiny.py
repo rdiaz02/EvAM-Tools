@@ -932,49 +932,24 @@ class test_matrix_input(evamtools_basics):
 
 ## TESTING RESULTS
 class test_results(evamtools_basics):
-    def _check_tabular_data(self, input2build, do_mccbn = False):
+    def _check_tabular_data(self):
+        ## REWRITE THIS
         available_cpms = self.driver.find_elements_by_css_selector("#cpm2show .checkbox input")
         available_cpms = [i.get_attribute("value") for i in available_cpms]
-        available_cpms.remove("Source")
-        # if not do_mccbn: 
-        #     available_cpms.remove("MCCBN")
-
-        not_ot = available_cpms.copy()
-        not_ot.remove("OT")
-        # not_ot.remove("DBN")
-
-        expected_tabular = not_ot.copy()
-
-        if input2build != "csd":
-            expected_tabular.append("Source")
-        expected_tabular_from_sims = ["From", "To", *expected_tabular]
-
-        expected_lambdas = available_cpms.copy()
-        if input2build == "dag":
-            expected_lambdas.append("Source")
-        expected_lambdas.remove("MHN")
-        expected_lambdas = ["Gene", *expected_lambdas]
-
-        expected_td_trans_mat = expected_tabular_from_sims.copy()
-        if input2build != "csd":
-            expected_td_trans_mat.remove("Source")
-            ## FIXME : check next
 
         tabular_types = {
-            # "f_graph": expected_tabular_from_sims,
-            "trans_rate_mat": expected_tabular_from_sims,            
-            "genotype_transitions": expected_tabular_from_sims,
-            "freqs": ["Genotype", "OT", *expected_tabular],
-            "trans_mat": ["From", "To", "OT", *expected_tabular],
-            "lambdas": expected_lambdas,
-            "td_trans_mat": expected_td_trans_mat,
+            "trans_rate_mat": ['From', 'To', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
+            "trans_mat": ['From', 'To', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
+            "predicted_genotype_freqs": ['Genotype', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
+            "sampled_genotype_freqs": ['Genotype', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
+            "obs_genotype_transitions": ['From', 'To', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
         }
 
         for k in tabular_types.keys():
-            self.driver.find_element_by_css_selector(f"#data2table input[value='{k}']").click()
+            print(k)
+            self.driver.find_element_by_css_selector(f"#tabular_data2show input[value='{k}']").click()
             sleep(0.4)
             table_info = self._get_cpm_table()
-            print(k)
             print("what I want", tabular_types[k])
             print("what I see ", table_info[0])
             assert(set(table_info[0]) == set(tabular_types[k]))
@@ -999,8 +974,8 @@ class test_results(evamtools_basics):
         os.remove(last_created_file)
         
         ## Check wether "source" should be dissabled
-        source_option = self.driver.find_element_by_css_selector("#cpm2show input[value=Source]")
-        assert(source_option.is_enabled() == (data["tab"] != "csd" ))
+        # source_option = self.driver.find_element_by_css_selector("#cpm2show input[value=Source]")
+        # assert(source_option.is_enabled() == (data["tab"] != "csd" ))
 
         ## Check wether "MCCBN" should be dissabled
         # source_option = self.driver.find_element_by_css_selector("#cpm2show input[value=MCCBN]")
@@ -1022,35 +997,37 @@ class test_results(evamtools_basics):
         row_text = [ i.text.replace(", ", ",").split(" ") for i in row_table ]
         return row_text
 
-    def test_results_on_load(self):
-        ## Switch to results tab
-        self._go_to("result_viewer")
+    # def test_results_on_load(self):
+    #     ## Switch to results tab
+    #     self._go_to("result_viewer")
         
-        ## Placeholder text to ask for running something
-        # sleep(1)
-        # placeholder_text = self.driver.find_element_by_css_selector("#sims2 h3").text
-        # assert(placeholder_text == "There are not results to show yet. Go to the input tab, select a dataset and hit the 'Run evamtools!' button")
+    #     ## Placeholder text to ask for running something
+    #     # sleep(1)
+    #     # placeholder_text = self.driver.find_element_by_css_selector("#sims2 h3").text
+    #     # assert(placeholder_text == "There are not results to show yet. Go to the input tab, select a dataset and hit the 'Run evamtools!' button")
 
-        # download_button = self.driver.find_elements_by_css_selector("#download_cpm[disabled=disabled]")
-        # assert(len(download_button) == 1)
-        # assert(download_button[0].text == 'Download!')
+    #     # download_button = self.driver.find_elements_by_css_selector("#download_cpm[disabled=disabled]")
+    #     # assert(len(download_button) == 1)
+    #     # assert(download_button[0].text == 'Download!')
 
-        ## Uploading data
-        upload = self.driver.find_element_by_css_selector("input#output_cpms[type=file]")
-        upload.send_keys(os.path.join(os.getcwd(), "AND_test_cpm.RDS")) 
-        sleep(1)
+    #     ## Uploading data
+    #     upload = self.driver.find_element_by_css_selector("input#output_cpms[type=file]")
+    #     upload.send_keys(os.path.join(os.getcwd(), "AND_test_cpm.RDS")) 
+    #     sleep(1)
 
-        ## Status changes after uploading some data
+    #     ## Status changes after uploading some data
 
-        download_button = self.driver.find_elements_by_css_selector("#download_cpm")
-        assert(len(download_button) == 1)
-        assert(download_button[0].text == 'Download!')
-        download_button = self.driver.find_elements_by_css_selector("#download_cpm[disabled=disabled]")
-        assert(len(download_button) == 0)
+    #     download_button = self.driver.find_elements_by_css_selector("#download_cpm")
+    #     assert(len(download_button) == 1)
+    #     assert(download_button[0].text == 'Download!')
+    #     download_button = self.driver.find_elements_by_css_selector("#download_cpm[disabled=disabled]")
+    #     assert(len(download_button) == 0)
 
-        expected_data = {"tab": "csd", "gene_names": ["A", "B", "C", "D"],
-            "name": "AND_new", "number_of_genes": 4, "mccbn": False}
-        self._basic_results_test(expected_data)     
+    #     expected_data = {"tab": "csd", "gene_names": ["A", "B", "C", "D"],
+    #         "name": "User_Data", "number_of_genes": 4}
+    #     self._basic_results_test(expected_data) 
+    #     self._go_to("result_viewer")
+    #     self._check_tabular_data(expected_data["tab"])    
 
     def test_results_on_CSD(self):
         ## Load data
@@ -1074,9 +1051,9 @@ class test_results(evamtools_basics):
         ## Run analysis
         self._scroll2top()
         self.driver.find_element_by_css_selector("#analysis").click()
-        sleep(1)
-        self._select_tab("csd", "User")
-        sleep(10)
+        sleep(100)
+        # self._select_tab("csd", "User")
+        # sleep(10)
 
         ## Check new status
         self._go_to("result_viewer")
@@ -1087,7 +1064,7 @@ class test_results(evamtools_basics):
 
         self._basic_results_test(expected_data) 
         self._go_to("result_viewer")
-        self._check_tabular_data(expected_data["tab"])
+        self._check_tabular_data()
 
     def test_results_on_DAG(self):
         ## Load data
@@ -1122,9 +1099,9 @@ class test_results(evamtools_basics):
         ## Run analysis
         self._scroll2top()
         self.driver.find_element_by_css_selector("#analysis").click()
-        sleep(1)
-        self._select_tab("csd", "User")
-        sleep(10)
+        sleep(100)
+        # self._select_tab("csd", "User")
+        # sleep(10)
 
         ## Check new status
         self._go_to("result_viewer")
@@ -1134,7 +1111,7 @@ class test_results(evamtools_basics):
             "name": new_dataset_name, "number_of_genes": 4, "mccbn": False}
         self._basic_results_test(expected_data) 
         self._go_to("result_viewer")
-        self._check_tabular_data(expected_data["tab"], expected_data["mccbn"])
+        self._check_tabular_data()
 
     def test_results_on_matrix(self):
         ## Load data
@@ -1158,19 +1135,19 @@ class test_results(evamtools_basics):
         ## Run analysis
         self._scroll2top()
         self.driver.find_element_by_css_selector("#analysis").click()
-        sleep(1)
-        self._select_tab("csd", "User")
-        sleep(10)
+        sleep(100)
+        # self._select_tab("csd", "User")
+        # sleep(10)
 
         ## Check new status
         self._go_to("result_viewer")
         self._select_result(new_dataset_name)
         
-        expected_data = {"tab": "matrix", "gene_names": ["A", "B", "C"],
+        expected_data = {"tab": "matrix", "gene_names": ["A1", "B2", "C3"],
             "name": new_dataset_name, "number_of_genes": 3, "mccbn": False}
         self._basic_results_test(expected_data) ## Sometimes fails for no apparent reason
         self._go_to("result_viewer")
-        self._check_tabular_data(expected_data["tab"], expected_data["mccbn"])
+        self._check_tabular_data()
     
     # def test_running_MCCBN(self):
     #     pdb.set_trace()
