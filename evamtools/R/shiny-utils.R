@@ -51,15 +51,15 @@ get_csd <- function(complete_csd){
 
 #TO BE REMOVED
 get_mhn_data <- function(n_genes, n_samples, gene_names, thetas = NULL){
-    if(is.null(thetas)) thetas <- evamtools:::Random.Theta(n=n_genes)
+    if(is.null(thetas)) thetas <- Random.Theta(n=n_genes)
     rownames(thetas) <- colnames(thetas) <- gene_names
-    samples <- floor(evamtools:::Finite.Sample(evamtools:::Generate.pTh(thetas), n_samples)*n_samples)
-    trm <- evamtools:::theta_to_trans_rate_3_SM(thetas,
-                                    inner_transition = evamtools:::inner_transitionRate_3_1)
+    samples <- floor(Finite.Sample(Generate.pTh(thetas), n_samples)*n_samples)
+    trm <- theta_to_trans_rate_3_SM(thetas,
+                                    inner_transition = inner_transitionRate_3_1)
     state_names <- vapply(1:(ncol(trm)), function(x){
         x <- x - 1
         if(x == 0) state_name <- "WT"
-        else state_name <- paste(gene_names[which(evamtools:::int2binary(x, n_genes) == 1)], collapse = ", ")
+        else state_name <- paste(gene_names[which(int2binary(x, n_genes) == 1)], collapse = ", ")
         return(state_name)
     }, character(1))
     rownames(trm) <- colnames(trm) <- state_names
@@ -283,7 +283,7 @@ standarize_all_datasets <- function(datasets){
 #     colors_relationships <- c(standard_relationship, standard_relationship, "cornflowerblue", "coral2")
 #     names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
     
-#     model_data2plot <- evamtools:::process_data(cpm_output, mod)
+#     model_data2plot <- process_data(cpm_output, mod)
 #     ## Plotting data
 #     if(!is.null(model_data2plot$dag_tree)) {
 
