@@ -363,13 +363,31 @@ sample_CPMs <- function(cpm_output
                                     "CBN", "MCCBN",
                                     "MHN", "HESBCN")
                       , output = c("sampled_genotype_freqs")
-                        ## "obs_genotype_transitions",
-                        ## "state_counts")
-                        ## , obs_genotype_transitions = TRUE
                         ) {
+    browser()
     ## And I have "Source" for a source data type for the web server
     retval <- list()
 
+    ## Anything that is passed as "cpm_output" must have
+    ## a something_predicted_genotype_freqs
+
+    methods <- unique(methods)
+    available_methods <- vapply(methods,
+                                function(m) {
+                                    outn <- paste0(m, "_predicted_genotype_freqs")
+                                    return(!(is.null(cpm_output[[outn]])) &&
+                                           !(is.na(cpm_output[outn])))
+                                }, logical(1)
+                                )
+    available_methods <- names(which(available_methods))
+    
+    l_methods <- length(available_methods)
+    if (l_methods < length(methods)) {
+        warning("At least one method you asked to be sampled ",
+                "did not have output.")
+    }
+    methods <- available_methods
+    
     output <- unique(output)
     valid_output <- c("sampled_genotype_freqs",
                       "obs_genotype_transitions",
@@ -380,15 +398,20 @@ sample_CPMs <- function(cpm_output
                 paste(output[not_valid_output], sep = ", ", collapse = ", "),
                 " not among the available output.",
                 " Ignoring the invalid output.")
-        output <- methods[-not_valid_output]
+        output <- output[-not_valid_output]
     }
     if (length(output) == 0) stop("No valid output given.")
     if (any(c("state_counts", "obs_genotype_transitions") %in% output)) {
         message("For the requested output we will need to simulate ",
                 "from the transition rate matrix.")
     }
-    
-    gene_names <- colnames(cpm_output$analyzed_data)
+
+    ## FIXME: deal with output not from evam but from generate_random_evam
+    ## gene_names <- colnames(cpm_output$analyzed_data)
+    some_pred <- cpm_output[[paste0(methods[1], "_predicted_genotype_freqs")]]
+    gene_names <- sort(setdiff(unique(unlist(strsplit(names(some_pred),
+                                                      split = ", "))),
+                          "WT"))
     n_genes <- length(gene_names)
 
     for (method in methods) {

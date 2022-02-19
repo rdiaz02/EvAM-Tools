@@ -37,5 +37,9 @@ test_that("Exercise random_evam with different options", {
                                ),
                  'identical(sort(names(hesbcn_probs)), c("AND", "OR", "XOR")) is not TRUE',
                  fixed = TRUE)
+
+
+
+
     
 })
