@@ -145,9 +145,9 @@ ot_proc <- function(datax, nboot = 1000,
         ot.boot.original <- ot.boot$tree.list$Freq[boot.idx]/nboot
 
         ## Two paranoid checks
-        if(! all(edges.matrix[, 1, drop = FALSE] %in% colnames(ot.boot.freqs)))
+        if (!all(edges.matrix[, 1, drop = FALSE] %in% colnames(ot.boot.freqs)))
             stop("colnames ot.boot.freqs weird")
-        if(! all(edges.matrix[, 2, drop = FALSE] %in% rownames(ot.boot.freqs)))
+        if (!all(edges.matrix[, 2, drop = FALSE] %in% rownames(ot.boot.freqs)))
             stop("rownames ot.boot.freqs weird")
         boot.freq <- ot.boot.freqs[edges.matrix]/nboot
         consensus <- try(ot_consensus(ot.boot))
