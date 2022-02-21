@@ -49,6 +49,146 @@ get_csd <- function(complete_csd){
     return(csd)
 }
 
+modify_dag <- function(dag, from_node, to_node, operation, parent_set){
+  value_from_operation <- c(1, 0)
+  names(value_from_operation) <- c("add", "remove")
+
+  if(operation == "clear") {
+    return(list(dag=SHINY_DEFAULTS$template_data$dag
+      ,dag_parent_set=SHINY_DEFAULTS$template_data$dag_parent_set))
+  }
+
+  if(is.null(from_node) | is.null(to_node) | is.null(dag)){
+    stop("From and To options and DAG have to be defined")
+  } 
+
+
+  if(!all(names(parent_set) == colnames(dag)[-1])){
+    stop("Dag and parent set should have information of the same genes")
+  }
+
+  from_node <- ifelse(from_node == "Root", "WT", from_node)
+  if(!(from_node %in% colnames(dag)) | !(to_node %in% colnames(dag))){
+    stop("Both From and To options have to be valid gene names")
+  } else if(!all(unique(as.vector(dag)) %in% c(0, 1))){
+    stop("The adjacency matrix should only contain 0 and 1")
+  } else if (from_node == to_node){
+    stop("Both From and To options must be different")
+  } else if(dag[to_node, from_node] == 1 && operation == "add"){
+    stop("Relationships cannot be bidirectional")
+  } else if (dag[from_node, to_node] == 1 && operation == "add"){
+    stop("That edge is already present")
+  } else if(dag["WT", to_node] == 1 && operation == "add"){
+    stop("A direct children of Root cannot have multiple parents")
+  } 
+  
+  tmp_dag <- dag
+  tmp_dag[from_node, to_node] = value_from_operation[operation]
+
+   ##Taking subcomponent starting from WT
+  g1 <- igraph::graph_from_adjacency_matrix(tmp_dag, mode = "directed")
+  # browser()
+  for(tmp_g in igraph::decompose(g1)){
+    if("WT" %in% V(tmp_g)$name){
+      tmp_vertices <- igraph::as_data_frame(tmp_g)
+    }
+  }
+  
+  tmp_dag2 <- SHINY_DEFAULTS$template_data$dag
+  colnames(tmp_dag2) <- rownames(tmp_dag2) <- colnames(dag) 
+  if(nrow(tmp_vertices>0)){
+    for(i in 1:nrow(tmp_vertices)){
+      tmp_row <- tmp_vertices[i, ]
+      tmp_dag2[tmp_row$from, tmp_row$to] <- 1
+    }
+  }
+
+  ## Restructure the DAG
+  number_of_parents <- colSums(tmp_dag2)
+  number_of_children <- rowSums(tmp_dag2)
+  for(i in colnames(tmp_dag2)[-1]){
+    if(number_of_children[i] > 0 & number_of_parents[i] == 0){
+      ## We add link to WT
+      tmp_dag2["WT", i] <- 1
+    }
+  }
+
+  if(all(dag == tmp_dag2)){
+    stop("This operation had no effect.")
+  }
+  g2 <- igraph::graph_from_adjacency_matrix(tmp_dag2, mode = "directed")
+  if(!igraph::is_dag(g2)){
+    stop("This relationship breaks the DAG. Revise it.")
+  }
+  ## Recompute parent set
+  number_of_parents <- colSums(tmp_dag2)[-1]
+  tmp_parent_set <- parent_set
+  tmp_parent_set[number_of_parents > 1] <- "AND" ##Default is AND
+  tmp_parent_set[number_of_parents <= 1] <- "Single" ##Default is AND
+  tmp_parent_set[number_of_parents > 1 & !(parent_set %in% c("AND", "OR", "XOR"))] <- "AND" ##Recapture previous relationships
+  return(list(dag = tmp_dag2, parent_set = tmp_parent_set))
+}
+
+modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, dag, parent_set){
+  if(!all(names(lambdas) == names(parent_set))){
+    stop("Lambdas and parent set should have information about the same genes")
+  }
+  if(!all(names(lambdas) == colnames(dag)[-1])){
+    stop("DAG should have information about the same genes as parent set")
+  }
+
+  ## Different lambdas
+  new_lambdas <- as.numeric(info[info["col"] == 3,"value"])
+  if(any(is.na(new_lambdas))){
+    stop("There are missing lambdas")
+  }
+  old_lambdas <- dag_data$Lambdas
+  all_genes <- dag_data$To
+  changed_genes <- all_genes[new_lambdas != old_lambdas
+    & new_lambdas > 0]
+  info_from <- info[info["col"] == 0,"value"]
+  info_to <- info[info["col"] == 1,"value"]
+  if(!(all(c(info_from, info_to, dag_data$To, dag_data$From) %in% c("Root", names(lambdas))))){
+    stop("There are unkown genes")
+  }
+  changed_lambdas <- new_lambdas[new_lambdas != old_lambdas
+    & new_lambdas > 0]
+
+  tmp_lambdas <- lambdas
+  tmp_lambdas[changed_genes] <- changed_lambdas
+
+  ##Relationships
+  number_of_parents <- colSums(dag)[-1]
+  tmp_parent_set <- parent_set
+  new_relationships <- info[info["col"] == 2,"value"]
+  names(new_relationships) <- info[info["col"] == 1,"value"]
+  
+  #Cleaning unwanted value
+  genes_in_relationships <- names(new_relationships)
+  freq_genes_in_relationships <- table(genes_in_relationships)
+
+  new_relationships[!(new_relationships %in% c("Single", "AND", "OR", "XOR"))] <- "AND"
+  new_relationships[number_of_parents < 2] <- "Single"
+  new_relationships[setdiff(unique(genes_in_relationships), 
+    names(freq_genes_in_relationships[freq_genes_in_relationships > 1]))] <- "Single"
+  
+  multiple_parents <- names(number_of_parents[number_of_parents > 1])
+
+  for(i in multiple_parents){
+    tmp_parent_set[i] <- setdiff(new_relationships[genes_in_relationships == i], c(parent_set[i]))[[1]]
+  }
+  # for(idx in c(1:length(new_relationships))){
+  #   tmp_parent_set[names(new_relationships[idx])] <- new_relationships[idx]
+  # }
+  # if(is.null(new_relationships)  && !is.null(data$dag_parent_set)){
+  #   tmp_parent_set <- data$dag_parent_set
+  # } else {
+  #   tmp_parent_set[!(tmp_parent_set %in% c("Single", "AND", "OR", "XOR"))] <- "AND"
+  #   tmp_parent_set[number_of_parents <= 1] <- "Single"
+  # }
+  return(list(lambdas = tmp_lambdas, parent_set = tmp_parent_set))
+}
+
 #TO BE REMOVED
 get_mhn_data <- function(n_genes, n_samples, gene_names, thetas = NULL){
     if(is.null(thetas)) thetas <- Random.Theta(n=n_genes)
