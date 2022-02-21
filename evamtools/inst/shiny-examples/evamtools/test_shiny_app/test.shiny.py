@@ -99,8 +99,6 @@ class evamtools_basics(unittest.TestCase):
         return self._process_genotype_table(self._get_table_info())
 
     def _change_gene_names(self, new_names):
-        
-
         self.driver.find_element_by_css_selector("#change_gene_names").click()
         input_new_gene_names = self.driver.find_element_by_css_selector("#new_gene_names")
         input_new_gene_names.clear()
@@ -120,6 +118,22 @@ class evamtools_basics(unittest.TestCase):
             sleep(0.5)
         
         self.driver.find_element_by_css_selector("#add_edge").click()
+        sleep(0.5)
+    
+    def _remove_edge(self, from_gene = None, to_gene = None):
+        if(from_gene):
+            self.driver.find_element_by_css_selector(f"#dag_from input[value={from_gene}]").click()
+            sleep(0.5)
+        
+        if(to_gene):
+            self.driver.find_element_by_css_selector(f"#dag_to input[value={to_gene}]").click()
+            sleep(0.5)
+        
+        self.driver.find_element_by_css_selector("#remove_edge").click()
+        sleep(0.5)
+    
+    def _clear_dag(self):
+        self.driver.find_element_by_css_selector("#clear_dag").click()
         sleep(0.5)
 
     def _get_dag_info(self):
@@ -512,6 +526,12 @@ class test_dag_input(evamtools_basics):
         self.driver.find_element_by_css_selector(".modal-open .modal-footer button").click()
         assert(error_message == "That edge is already present")
 
+        # Adding relationship from unlinked node
+        self._add_edge("D", "E")
+        error_message = self._get_error_message()
+        self.driver.find_element_by_css_selector(".modal-open .modal-footer button").click()
+        assert(error_message == "This operation had no effect.")
+
         # Adding bidirectional relathionship
         self._add_edge("C", "D")
         self._add_edge("D", "C")
@@ -525,7 +545,7 @@ class test_dag_input(evamtools_basics):
         error_message = self._get_error_message()
         self.driver.find_element_by_css_selector(".modal-open .modal-footer button").click()
         assert(error_message == "This relationship breaks the DAG. Revise it.")
-
+        
     def test_modify_dag_2(self):
         ## Increasing number of genes
         self.driver.set_window_size(1366, 768)
@@ -534,13 +554,15 @@ class test_dag_input(evamtools_basics):
         slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
         move = ActionChains(self.driver)
         move.click_and_hold(slider_input).move_by_offset(100, 0).release().perform()
-        
+        sleep(0.5)
         # Adding relationship from unlinked node
-        self._add_edge("D", "E")
+        self._add_edge("A", "B")
+        self._add_edge("E", "B")
         current_dag = [
             ["Root", "A", "Single", "1"],
-            ["Root", "D", "Single", "1"],
-            ["D", "E", "Single", "1"],
+            ["A", "B", "AND", "1"],
+            ["E", "B", "AND", "1"],
+            ["Root", "E", "Single", "1"],
         ]
         dag_info = self._get_dag_info()
         assert(current_dag == dag_info)
@@ -566,6 +588,7 @@ class test_dag_input(evamtools_basics):
 
         # Adding edges & checking changes
         self._add_edge("Root", "B")
+        self._add_edge("Root", "D")
         self._add_edge("B", "C")
         self._add_edge("D", "E")
         
@@ -625,93 +648,120 @@ class test_dag_input(evamtools_basics):
             ["Root", "A", "Single", "4"],
             ["A", "B", "Single", "2"],
             ["A", "C", "Single", "3"],
-            ["B", "D", "OR", "1"],
-            ["C", "D", "OR", "1"],
+            ["B", "D", "XOR", "1"],
+            ["C", "D", "XOR", "1"],
         ]
         assert(dag_info == expected_dag_info)
 
-    def test_remove_node(self):
+    def test_add_remove_clear(self):
     ## Selecting dag AND dataset
         sleep(0.2)
-        self._select_tab("dag", "AND")
+        self._select_tab("dag")
         sleep(1)
-        initial_dag = self._get_dag_info()
-    
-    ## Modify dataset
-        actions = ActionChains(self.driver)
-        first_cell = self.driver.find_elements_by_css_selector("#dag_table tbody td")[11]
-
-        actions.double_click(first_cell).perform()
-        actions.key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(Keys.LEFT).key_up(Keys.CONTROL).key_up(Keys.SHIFT).send_keys(0).perform()
-        actions.send_keys(Keys.TAB).perform()
-        
-        for _ in range(0,3):
-            actions.send_keys(Keys.TAB).perform()
-        actions.send_keys(0).perform()
-
-        for _ in range(0,4):
-            actions.send_keys(Keys.TAB).perform()
-        actions.send_keys(0).perform()
-
-        ## Saving
-        actions.key_down(Keys.CONTROL).send_keys(Keys.ENTER).key_up(Keys.CONTROL).perform()
-        sleep(0.2)
-        ## Checking
-        dag_info = self._get_dag_info()
-        expected_dag_info = [
-            ["Root", "A", "Single", "1"],
-            ["A", "B", "Single", "2"],
-        ]
-        assert(dag_info == expected_dag_info)
-
-    def test_remove_node_2(self):
-    ## Selecting dag AND dataset
-        sleep(0.2)
-        self._select_tab("dag", "AND")
-        sleep(1)
-        initial_dag = self._get_dag_info()
-    
-    ## Modify dataset
-        actions = ActionChains(self.driver)
-        first_cell = self.driver.find_elements_by_css_selector("#dag_table tbody td")[11]
-
-        actions.double_click(first_cell)
-        actions.perform()
-        actions.key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(Keys.LEFT).key_up(Keys.CONTROL).key_up(Keys.SHIFT).send_keys(0).perform()
-        actions.key_down(Keys.CONTROL).send_keys(Keys.ENTER).key_up(Keys.CONTROL).perform()
-        sleep(1.5)
-        ## Checking
-        dag_info = self._get_dag_info()
-        expected_dag_info = [
-            ["Root", "A", "Single", "1"],
-            ["A", "B", "Single", "2"],
-            ["Root", "C", "Single", "3"],
-            ["B", "D", "AND", "4"],
-            ["C", "D", "AND", "4"],
-        ]
-        assert(dag_info == expected_dag_info)
-
-        first_cell = self.driver.find_elements_by_css_selector("#dag_table tbody td")[15]
-        actions = ActionChains(self.driver)
-        actions.double_click(first_cell)
-        actions.perform()
-        actions.key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(Keys.LEFT).key_up(Keys.CONTROL).key_up(Keys.SHIFT).send_keys(0).perform()
-
-        for _ in range(0,4):
-            actions.send_keys(Keys.TAB).perform()
-        actions.send_keys(0).perform()
-
-        ## Saving
-        actions.key_down(Keys.CONTROL).send_keys(Keys.ENTER).key_up(Keys.CONTROL).perform()
+        slider_input = self.driver.find_element_by_css_selector("#genes_number span.irs-handle")
+        move = ActionChains(self.driver)
+        move.click_and_hold(slider_input).move_by_offset(100, 0).release().perform()
         sleep(0.5)
-        ## Checking
+    
+    ## Modify dataset
+        self._add_edge("A", "B")
+        self._add_edge("C", "B")
+        sleep(0.5)
+        dag1 = self._get_dag_info()
+        sleep(0.5)
+        expected_dag_info1 = [
+            ["Root", "A", "Single", "1"],
+            ["A", "B", "AND", "1"],
+            ["C", "B", "AND", "1"],
+            ["Root", "C", "Single", "1"],
+        ] 
+        assert(dag1 == expected_dag_info1)
+
+        self._add_edge("B", "D")
+        self._remove_edge("C", "B")
+
+        new_gene_names = ["Z", "X", "WY", "R2"]
+        self._change_gene_names(new_gene_names)
+        sleep(0.5)
+        dag2 = self._get_dag_info()
+        sleep(0.5)
+        expected_dag_info2 = [
+            ["Root", "Z", "Single", "1"],
+            ["Z", "X", "Single", "1"],
+            ["Root", "WY", "Single", "1"],
+            ["X", "R2", "Single", "1"],
+        ] 
+        assert(dag2 == expected_dag_info2)
+
+        ## Analysis button is enabled after sampling
+        self._scroll2top()
+        analysis_button = self.driver.find_element_by_css_selector("#analysis")
+        assert(analysis_button.is_enabled() == False)
+        
+        self.driver.find_element_by_css_selector("#resample_dag").click()
+        sleep(3)
+        assert(analysis_button.is_enabled())
+
+        ## Analysis button is disabled after clearing
+        self._clear_dag()
         dag_info = self._get_dag_info()
         expected_dag_info = [
-            ["Root", "A", "Single", "1"],
-            ["A", "B", "Single", "2"],
-            ["Root", "C", "Single", "3"],
+            ["Root", "Z", "Single", "1"]
         ]
         assert(dag_info == expected_dag_info)
+        self.driver.find_element_by_css_selector("#resample_dag").click()
+        sleep(0.5)
+        assert(analysis_button.is_enabled() == False)
+
+
+    # def test_remove_node_2(self):
+    ## Selecting dag AND dataset
+    #     sleep(0.2)
+    #     self._select_tab("dag", "AND")
+    #     sleep(1)
+    #     initial_dag = self._get_dag_info()
+    
+    # ## Modify dataset
+    #     actions = ActionChains(self.driver)
+    #     first_cell = self.driver.find_elements_by_css_selector("#dag_table tbody td")[11]
+
+    #     actions.double_click(first_cell)
+    #     actions.perform()
+    #     actions.key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(Keys.LEFT).key_up(Keys.CONTROL).key_up(Keys.SHIFT).send_keys(0).perform()
+    #     actions.key_down(Keys.CONTROL).send_keys(Keys.ENTER).key_up(Keys.CONTROL).perform()
+    #     sleep(1.5)
+    #     ## Checking
+    #     dag_info = self._get_dag_info()
+    #     expected_dag_info = [
+    #         ["Root", "A", "Single", "1"],
+    #         ["A", "B", "Single", "2"],
+    #         ["Root", "C", "Single", "3"],
+    #         ["B", "D", "AND", "4"],
+    #         ["C", "D", "AND", "4"],
+    #     ]
+    #     assert(dag_info == expected_dag_info)
+
+    #     first_cell = self.driver.find_elements_by_css_selector("#dag_table tbody td")[15]
+    #     actions = ActionChains(self.driver)
+    #     actions.double_click(first_cell)
+    #     actions.perform()
+    #     actions.key_down(Keys.CONTROL).key_down(Keys.SHIFT).send_keys(Keys.LEFT).key_up(Keys.CONTROL).key_up(Keys.SHIFT).send_keys(0).perform()
+
+    #     for _ in range(0,4):
+    #         actions.send_keys(Keys.TAB).perform()
+    #     actions.send_keys(0).perform()
+
+    #     ## Saving
+    #     actions.key_down(Keys.CONTROL).send_keys(Keys.ENTER).key_up(Keys.CONTROL).perform()
+    #     sleep(0.5)
+    #     ## Checking
+    #     dag_info = self._get_dag_info()
+    #     expected_dag_info = [
+    #         ["Root", "A", "Single", "1"],
+    #         ["A", "B", "Single", "2"],
+    #         ["Root", "C", "Single", "3"],
+    #     ]
+    #     assert(dag_info == expected_dag_info)
 
     def test_save_data_set(self):
         ## Increasing number of genes
@@ -726,6 +776,7 @@ class test_dag_input(evamtools_basics):
 
         # Adding edges & checking changes
         self._add_edge("Root", "B")
+        self._add_edge("Root", "D")
         self._add_edge("B", "C")
         self._add_edge("D", "E")
 
