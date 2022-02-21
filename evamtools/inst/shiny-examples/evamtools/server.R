@@ -19,7 +19,6 @@ server <- function(input, output, session) {
   default_mhn_samples <- SHINY_DEFAULTS$mhn_samples
   keep_dataset_name <- FALSE
 
-  error_message <- NULL
   last_visited_pages <- list(csd = "User", dag = "User", matrix = "User")
   last_visited_cpm <- "user"
 
@@ -56,8 +55,7 @@ server <- function(input, output, session) {
         updateRadioButtons(session, "input2build", selected = "csd")
         updateRadioButtons(session, "select_csd", selected = dataset_name)
       }, error = function(e){
-        error_message <- "Your csv data can not be loaded. Make sure it only contains 0 and 1."
-        showModal(dataModal(error_message))
+        showModal(dataModal(e[[1]]))
       })
     } else if(grepl(".rds", input$csd$datapath, ignore.case = TRUE)){
         tmp_data <- readRDS(input$csd$datapath)
@@ -69,8 +67,7 @@ server <- function(input, output, session) {
           updateRadioButtons(session, "input2build", selected = tmp_data$type)
           updateRadioButtons(session, "select_csd", selected = tmp_data$name)
         }, error = function(e){
-          error_message <- "There was a problem when checking your .rds file. Make sure it containis $type (either 'csd', 'dag', or 'matrix'), $data only with 0 and 1"
-          showModal(dataModal(error_message))
+          showModal(dataModal(e[[1]]))
         })
     }
   })
@@ -345,6 +342,8 @@ server <- function(input, output, session) {
               choices =  options)
             ),
             actionButton("add_edge", "Add edge"),
+            actionButton("remove_edge", "Remove edge"),
+            actionButton("clear_dag", "Clear dag"),
             tags$h3("DAG table"),
             DT::DTOutput("dag_table"),
             numericInput("dag_samples", "Total genotypes to sample", value = default_mhn_samples, min= 100, max = 10000, step = 100, width = "50%"),
@@ -413,104 +412,54 @@ server <- function(input, output, session) {
   observeEvent(input$add_edge, {
     from_gene <- input$dag_from
     to_gene <- input$dag_to
-    if(is.null(input$dag_from) | is.null(input$dag_to)){
-      error_message - "Both From and To options has to be defined and must be different"
-      showModal(dataModal(error_message))
-    } else if (input$dag_from == input$dag_to){
-      error_message <- "Both From and To options must be different"
-      showModal(dataModal(error_message))
-    } else if(data$dag["WT", to_gene] == 1){
-      error_message <- "A direct children of Root cannot have multiple parents"
-      showModal(dataModal(error_message))
-    } else{
-      from_node <- ifelse(input$dag_from == "Root", "WT", input$dag_from)
-      if(data$dag[from_node, input$dag_to] == 1){
-        error_message <- "That edge is already present"
-        showModal(dataModal(error_message))
-      } else if(data$dag[input$dag_to, from_node] == 1){
-        error_message <- "Relationships cannot be bidirectional"
-        showModal(dataModal(error_message))
-      } else{
-        tmp_dag <- data$dag
-        tmp_dag [from_node, input$dag_to] = 1
-        g <- igraph::graph_from_adjacency_matrix(tmp_dag, mode = "directed")
-        if(igraph::is_dag(g)){
-          data$dag <- tmp_dag
-        } else {
-          error_message <- "This relationship breaks the DAG. Revise it."
-          showModal(dataModal(error_message))
-        }
-      }
-    }
+    tryCatch({
+      tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene, operation = "add", parent_set = data$dag_parent_set)
+      data$dag <- tmp_data$dag
+      data$dag_parent_set <- tmp_data$parent_set
+    },error=function(e){
+      showModal(dataModal(e[[1]]))
+    })
+  })
+
+  ## Remove edge
+  observeEvent(input$remove_edge, {
+    from_gene <- input$dag_from
+    to_gene <- input$dag_to
+    tryCatch({
+      tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene, operation = "remove", parent_set = data$dag_parent_set)
+      data$dag <- tmp_data$dag
+      data$dag_parent_set <- tmp_data$parent_set
+    },error=function(e){
+      showModal(dataModal(e[[1]]))
+    })
+  })
+
+  ## Clear DAG
+  observeEvent(input$clear_dag, {
+    tryCatch({
+      tmp_data <- evamtools:::modify_dag(data$dag, NULL, NULL, operation = "clear")
+      tmp_dag <- tmp_data$dag
+      colnames(tmp_dag) <- rownames(tmp_dag) <- c("WT", data$gene_names)
+      tmp_dag["WT", data$gene_names[1]] <- 1
+      data$dag <- tmp_dag
+      data$csd_freqs <- SHINY_DEFAULTS$template_data$csd_freqs
+      data$data <- SHINY_DEFAULTS$template_data$data
+      data$dag_parent_set <- tmp_data$dag_parent_set
+      data$lambdas <- SHINY_DEFAULTS$template_data$lambdas
+      names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
+      shinyjs::disable("analysis")
+    }, error=function(e){
+      showModal(dataModal(e[[1]]))
+    })
   })
 
   observeEvent(input$dag_table_cell_edit, {
     names(data$dag_parent_set) <- data$gene_names[1:length(data$dag_parent_set)]
     names(data$lambdas) <- data$gene_names[1:length(data$dag_parent_set)]
     info <- input$dag_table_cell_edit
-    all_genes <- dag_data()$To
-
-    ## Different lambdas
-    new_lambdas <- as.integer(info[info["col"] == 3,"value"])
-    old_lambdas <- dag_data()$Lambdas
-    changed_genes <- all_genes[new_lambdas != old_lambdas
-      & new_lambdas > 0]
-    changed_lambdas <- new_lambdas[new_lambdas != old_lambdas
-      & new_lambdas > 0]
-
-    tmp_lambdas <- data$lambdas
-    tmp_lambdas[changed_genes] <- changed_lambdas
-    data$lambdas <- tmp_lambdas
-
-    ## Remove relationships when lambda == 0
-    new_relationships <- info[info["col"] == 3,]
-    rels2remove <- new_relationships[new_relationships$value == 0, ]
-    orig_data <- dag_data()
-    if(nrow(rels2remove)){
-      for(i in 1:nrow(rels2remove)){
-        from2remove <- orig_data$From[rels2remove[i,]$row]
-        to2remove <- orig_data$To[rels2remove[i,]$row]
-        data$dag[from2remove, to2remove] <- 0
-      }
-    }
-  })
-
-  listen2dag_change <- reactive({
-    list(input$dag_table_cell_edit, input$add_edge)
-  })
-
-  observeEvent(listen2dag_change(), {
-    info <- input$dag_table_cell_edit
-    orig_data <- dag_data()
-    all_genes <- dag_data()$To
-
-    ## Restructure the DAG
-    number_of_parents <- colSums(data$dag)
-    number_of_children <- rowSums(data$dag)
-    for(i in colnames(data$dag)[-1]){
-      if(number_of_children[i] > 0 & number_of_parents[i] == 0){
-        ## We add link to WT
-        data$dag["WT", i] <- 1
-      }
-    }
-
-    ## Different relationships
-    ## Genes with only one parent: "Single" relationship
-    ## Default relationship for several parents is OR
-    number_of_parents <- colSums(data$dag)[-1]
-    tmp_parent_set <- number_of_parents
-    new_relationships <- info[info["col"] == 2,"value"]
-    names(new_relationships) <- info[info["col"] == 1,"value"]
-    for(idx in c(1:length(new_relationships))){
-      tmp_parent_set[names(new_relationships[idx])] <- new_relationships[idx]
-    }
-    if(is.null(new_relationships)  && !is.null(data$dag_parent_set)){
-      tmp_parent_set <- data$dag_parent_set
-    } else {
-      tmp_parent_set[!(tmp_parent_set %in% c("Single", "AND", "OR", "XOR"))] <- "OR"
-      tmp_parent_set[number_of_parents <= 1] <- "Single"
-    }
-    data$dag_parent_set <- tmp_parent_set
+    tmp_data <- evamtools:::modify_lambdas_and_parent_set_from_table(dag_data(), info, data$lambdas, data$dag, data$dag_parent_set)
+    data$lambdas <- tmp_data$lambdas
+    data$dag_parent_set <- tmp_data$parent_set
   })
 
   ## Building trm from dag
@@ -540,7 +489,7 @@ server <- function(input, output, session) {
 
     datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- data$data
     datasets$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$dag
-    datasets$all_csd[[input$input2build]][[input$select_csd]]$trm <- trm
+    # datasets$all_csd[[input$input2build]][[input$select_csd]]$trm <- trm
     datasets$all_csd[[input$input2build]][[input$select_csd]]$lambdas <- data$lambdas
     datasets$all_csd[[input$input2build]][[input$select_csd]]$dag_parent_set <- data$dag_parent_set
 
@@ -553,7 +502,7 @@ server <- function(input, output, session) {
       easyClose = TRUE,
       title = tags$h3("How to build a DAG"),
       tags$div(
-        tags$p("Select a parent node and child node and hit 'Add edge'."),
+        tags$p("Select a parent node and child node and hit 'Add edge' or 'Remove edge'."),
         tags$p("But, TAKE CARE"),
         tags$p("Some edge wont be allowed if: "),
         tags$li("That edge is already present"),
@@ -725,8 +674,7 @@ server <- function(input, output, session) {
     tryCatch({
       cpm_output <- evam(data2run, methods = methods)
     }, error = function(e){
-      error_message <- "There was problem when running EvamTools"
-      showModal(dataModal(error_message))
+      showModal(dataModal(e[[1]]))
     })
 
     ## To see Source data in the results section
@@ -751,8 +699,7 @@ server <- function(input, output, session) {
       sampled_from_CPMs <- sample_CPMs(cpm_output, n_samples
         , methods, c("sampled_genotype_freqs", "obs_genotype_transitions"))
     }, error = function(e){
-      error_message <- "There was problem when sampling from output"
-      showModal(dataModal(error_message))
+      showModal(dataModal(e[[1]]))
     })
 
     progress$inc(4/5, detail = "Post processing data")
