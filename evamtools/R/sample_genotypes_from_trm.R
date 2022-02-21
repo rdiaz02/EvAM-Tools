@@ -911,3 +911,77 @@ HESBCN_model_from_edges_lambdas_parent_set <- function(edges, lambdas,
                                   function(x) parent_set[x], "")
     return(edges)
 }
+
+
+ot_random_poset <- function(ngenes, graph_density, gene_names) {
+    poset0 <- mccbn::random_poset(ngenes, graph_density = graph_density)
+    ## FIXME only one parent
+    ## FIXME add Root
+}
+
+
+oncotree_fit_parent_from_dag <- function(dag, weights) {
+    child <- rep("ERROR", times = ncol(dag))
+    parent <- rep("ERROR", times = ncol(dag))
+    parent.num <- rep(-99, times = ncol(dag))
+    for (p in seq_len(ncol(dag))) {
+        child[p] <- colnames(dag)[p]
+        tmp <- which(dag[, p] == 1)
+        if (length(tmp) == 0) {
+            parent.num[p] <- 0
+            parent[p] <- ""
+        } else if (length(tmp) == 1) {
+            parent.num[p] <- unname(tmp)
+            parent[p] <- names(tmp)
+        } else {
+            stop("More than one parent")
+        }
+    }
+    return(list(child = child,
+                parent = parent,
+                parent.num = parent.num,
+                obs.weight = NA,
+                est.weight = c(1, weights)
+                ))
+}
+
+
+oncotree_fit_from_dag_weights_epos <- function(dag, weights, epos) {
+    otf <- list()
+    otf$data <- NA
+    otf$nmut <- ncol(dag) 
+    otf$parent <- oncotree_fit_parent_from_dag(dag, weights)
+    otf$eps <- c(epos = epos, eneg = 0)
+    return(otf)
+}
+
+o1 <- oncotree_fit_from_dag_weights_epos(ab, runif(5), 0.1)
+
+
+## this is the right call
+o1p <- distribution.oncotree(o1, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
+
+## And note these are identical
+o2 <- o1
+o2$parent$obs.weight <- runif(length(o1$parent$est.weight))
+o2p <- distribution.oncotree(o2, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
+stopifnot(all.equal(o1p$Prob, o2p$Prob))
+
+
+distribution.oncotree(o1, with.probs = TRUE, with.errors = FALSE, edge.weights = "estimated")
+
+
+distribution.oncotree(otf, with.probs = TRUE, with.errors = FALSE, edge.weights = "estimated")
+distribution.oncotree(otf, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
+
+
+
+oncotree_fit_from_edges <- function(edges, eplus) {
+    parent <- edges$From
+    child <- edges$To
+    parent.num <- 
+
+}
+
+
+
