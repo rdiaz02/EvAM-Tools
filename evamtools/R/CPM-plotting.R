@@ -190,7 +190,7 @@ plot_genot_fg <- function(trans_mat
     , fixed_vertex_size = FALSE
     , label_type = "genotype"
     ) {
-    if(is.null(trans_mat)){
+    if(is.null(trans_mat) | any(is.na(trans_mat))){
         par(mar = rep(3, 4))
         plot(0, type = 'n', axes = FALSE, ann = FALSE)
         return()
@@ -381,11 +381,13 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
     all_data <- c(data, sample_data)
     
     edges_method <- NULL
+    igraph_method <- NULL
     tryCatch (expr = {
         edges_method <- get(paste(mod, "_model", sep = ""), data)
         igraph_method <- igraph::graph_from_data_frame(edges_method[, c(1, 2)])
     }, error = function(e) {})
 
+    edges <- NA ##It was broken when undefined method
     if (!is.null(edges_method)) {
         method_info <- igraph_method
         edges <- edges_method
@@ -479,8 +481,6 @@ DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
                 edgeAttrs = list(color = colors_edges),
                 main = main)
 }
-
-
 
 
 

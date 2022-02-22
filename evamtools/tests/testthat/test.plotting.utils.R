@@ -71,6 +71,27 @@ test_that("Processing samples & Plotting of CPMs is correct", {
   }
 })
 
+test_that("how it handles processing missing data", {
+  methods <- c("OT", "CBN", "HESBCN", "MHN")
+  
+  sample_evam_output <- evam(examples_csd$csd$AND$data, methods = methods)
+  out <- process_data(sample_evam_output, "OncoBN", "trans_mat", NULL)
+  expect_equal(out$method_info, NULL)
+  expect_equal(out$data2plot, NA)
+  expect_equal(out$predicted_genotype_freqs, NA)
+  expect_equal(out$parent_set, NA)
+  expect_equal(out$sampled_genotype_freqs, NULL)
+  expect_equal(out$edges, NA)
+  
+  out <- process_data(sample_evam_output, "MCCBN", "trans_mat", NULL)
+  expect_equal(out$method_info, NULL)
+  expect_equal(out$data2plot, NA)
+  expect_equal(out$predicted_genotype_freqs, NA)
+  expect_equal(out$parent_set, NULL)
+  expect_equal(out$sampled_genotype_freqs, NULL)
+  expect_equal(out$edges, NA)
+})
+
 test_that("plot_CPMs handles argument correctly", {
   sample_evam_output <- evam(examples_csd$csd$AND$data)
   expect_error(plot_CPMs(sample_evam_output, orientation="horizontal",
