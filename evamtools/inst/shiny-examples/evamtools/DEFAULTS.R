@@ -15,8 +15,9 @@ template_csd_data <- matrix(0, ncol=3, nrow=0)
 SHINY_DEFAULTS <- list(
   max_genes = 10,
   min_genes = 2,
+  cpm_samples = 10000,
   ngenes = 3,
-  mhn_samples = 5000,
+  csd_samples = 1000,
   all_cpms = c("OT", "CBN", "OncoBN", "MHN", "MCCBN", "HESBCN"),
   cpms2run = c("OT", "CBN", "OncoBN", "MHN", "HESBCN"),
   template_data = list(
