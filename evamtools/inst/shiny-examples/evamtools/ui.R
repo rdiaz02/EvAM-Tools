@@ -526,9 +526,9 @@ user_input <- function(){
             tags$div(class = "download_button submit_button",
               actionButton("analysis", "Run evamtools!")
             ),
-            # tags$div(class = "download_button",
-            #   actionButton("advanced_options", "Advanced Options")
-            # ),
+            tags$div(class = "download_button",
+              actionButton("advanced_options", "Advanced Options")
+            ),
             plotOutput("plot")
             ,
             plotOutput("dag_plot")

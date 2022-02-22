@@ -149,6 +149,20 @@ class evamtools_basics(unittest.TestCase):
     def _scroll2top(self):
         self.driver.execute_script("window.scrollBy(0,-document.body.scrollHeight)")
 
+    def _set_advanced_options(self, samples = 100, mccbn = False):
+        self.driver.find_element_by_css_selector("#advanced_options").click()
+        
+        samples_input = self.driver.find_element_by_css_selector("#num_steps")
+        samples_input.clear()
+        samples_input.send_keys(samples)
+
+        if mccbn:
+            mccbn_input = self.driver.find_element_by_css_selector("#more_cpms input[value='MCCBN']")
+            mccbn_input.find_element_by_xpath('..').click()
+
+        self.driver.find_element_by_css_selector(".modal-open .modal-footer button").click()
+        sleep(1)
+
 ## TESTING BASIC FUNCTIONALITY
 class test_basic_functionality(evamtools_basics):
     # Testing basic input navigation
@@ -983,18 +997,27 @@ class test_matrix_input(evamtools_basics):
 
 ## TESTING RESULTS
 class test_results(evamtools_basics):
-    def _check_tabular_data(self):
+    def _check_tabular_data(self, mccbn = False):
         ## REWRITE THIS
         available_cpms = self.driver.find_elements_by_css_selector("#cpm2show .checkbox input")
         available_cpms = [i.get_attribute("value") for i in available_cpms]
 
-        tabular_types = {
-            "trans_rate_mat": ['From', 'To', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
-            "trans_mat": ['From', 'To', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
-            "predicted_genotype_freqs": ['Genotype', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
-            "sampled_genotype_freqs": ['Genotype', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
-            "obs_genotype_transitions": ['From', 'To', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
-        }
+        if(mccbn):
+            tabular_types = {
+                "trans_rate_mat": ['From', 'To', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
+                "trans_mat": ['From', 'To', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
+                "predicted_genotype_freqs": ['Genotype', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
+                "sampled_genotype_freqs": ['Genotype', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
+                "obs_genotype_transitions": ['From', 'To', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
+            }
+        else:
+            tabular_types = {
+                "trans_rate_mat": ['From', 'To', 'CBN', 'MHN', 'HESBCN'],            
+                "trans_mat": ['From', 'To', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN'],            
+                "predicted_genotype_freqs": ['Genotype', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN'],            
+                "sampled_genotype_freqs": ['Genotype', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN'],            
+                "obs_genotype_transitions": ['From', 'To', 'CBN', 'MHN', 'HESBCN'],            
+            }
 
         for k in tabular_types.keys():
             print(k)
@@ -1012,11 +1035,11 @@ class test_results(evamtools_basics):
         for i in active_cpms:
             plot_sims_1 = self.driver.find_elements_by_css_selector(f"#plot_sims_{i}")
             assert(len(plot_sims_1) == 1)
-            plot_sims_2 = self.driver.find_elements_by_css_selector(f"#plot_sims_{i}")
+            plot_sims_2 = self.driver.find_elements_by_css_selector(f"#plot_sims2_{i}")
             assert(len(plot_sims_2) == 1)
         
         ## Check name of downloaded file
-        download_button = self.driver.find_element_by_css_selector("#download_cpm").click()
+        self.driver.find_element_by_css_selector("#download_cpm").click()
         sleep(1)
         base_folder = os.getcwd()
         os.chdir(os.path.join(os.path.expanduser("~"), "Downloads"))
@@ -1200,53 +1223,90 @@ class test_results(evamtools_basics):
         self._go_to("result_viewer")
         self._check_tabular_data()
     
-    # def test_running_MCCBN(self):
-    #     pdb.set_trace()
-    #     self.driver.find_element_by_css_selector("#advanced_options").click()
-    #     sleep(1)
-    #     self.driver.find_element_by_css_selector("#more_cpms input[value='mccbn']").click()
-        # ## Load data
-        # self._select_tab("matrix", "test1")
-        # sleep(0.5)
+    def test_running_MCCBN(self):
+        ## Load data
+        self._select_tab("matrix", "test1")
+        sleep(0.5)
 
-        # ## Sampling
-        # self.driver.find_element_by_css_selector("#resample_mhn").click()
-        # sleep(1)
+        ## Sampling
+        self.driver.find_element_by_css_selector("#resample_mhn").click()
+        sleep(1)
+        ## Save data 
+        new_dataset_name = "MHN_new"
+        dataset_name = self.driver.find_element_by_css_selector("input#dataset_name")
+        dataset_name.clear()
+        dataset_name.send_keys(new_dataset_name)
+        sleep(0.5)
+        save_button = self.driver.find_element_by_id("save_csd_data")
+        save_button.click()
+        sleep(1)
 
-        # ## Save data 
-        # new_dataset_name = "MHN_new"
-        # dataset_name = self.driver.find_element_by_css_selector("input#dataset_name")
-        # dataset_name.clear()
-        # dataset_name.send_keys(new_dataset_name)
-        # sleep(0.5)
-        # save_button = self.driver.find_element_by_id("save_csd_data")
-        # save_button.click()
-        # sleep(1)
+        self.driver.find_element_by_tag_name('body').send_keys(Keys.CONTROL + Keys.HOME)
+        ## Run MCCBN
+        self._scroll2top()
+        self._set_advanced_options(samples = 100, mccbn = True)
+        sleep(1)
+        ## Run analysis
+        self.driver.find_element_by_css_selector("#analysis").click()
+        sleep(30)
 
-        # self.driver.find_element_by_tag_name('body').send_keys(Keys.CONTROL + Keys.HOME)
-        # ## Run MCCBN
-        # self.driver.find_element_by_css_selector("#advanced_options").click()
-        # sleep(1)
-        # self.driver.find_element_by_css_selector("#more_cpms input[value='mccbn']").click()
-        # sleep(0.5)
-        # self.driver.find_element_by_css_selector(".modal-open .modal-footer button").click()
-
-        # ## Run analysis
-        # self.driver.find_element_by_css_selector("#analysis").click()
-        # sleep(1)
-        # self._select_tab("csd", "User")
-        # sleep(10)
-
-        # ## Check new status
-        # self._go_to("result_viewer")
-        # self._select_result(new_dataset_name)
+        ## Check new status
+        self._go_to("result_viewer")
+        sleep(0.5)
+        self._select_result(new_dataset_name)
         
-        # expected_data = {"tab": "matrix", "gene_names": ["A", "B", "C"],
-        #     "name": new_dataset_name, "number_of_genes": 3, "mccbn": True}
+        expected_data = {"tab": "matrix", "gene_names": ["A1", "B2", "C3"],           
+         "name": new_dataset_name, "number_of_genes": 3, "mccbn": True}
 
-        # self._basic_results_test(expected_data) 
-        # self._go_to("result_viewer")
-        # self._check_tabular_data(expected_data["tab"], expected_data["mccbn"])
+        self._basic_results_test(expected_data) 
+        self._go_to("result_viewer")
+        self._check_tabular_data(mccbn = True)
 
+    def test_number_of_plots(self):
+        #Load data
+        self._select_tab("matrix", "test1")
+
+        ## Sampling
+        self.driver.find_element_by_css_selector("#resample_mhn").click()
+        sleep(1)
+        
+        ## Set analysis
+        self._scroll2top()
+        self._set_advanced_options(samples = 100, mccbn = False)
+
+        ## Run analysis
+        self.driver.find_element_by_css_selector("#analysis").click()
+        sleep(10)
+
+        ## Check new status
+        self._go_to("result_viewer")
+        
+        ##Unchecking everything
+        active_cpms = self.driver.find_elements_by_css_selector("#cpm2show .checkbox input[checked=checked]")
+        for i in active_cpms:
+            i.find_element_by_xpath('..').click()
+        
+        all_cpms = self.driver.find_elements_by_css_selector("#cpm2show .checkbox input")
+        all_cpms_names = [i.get_attribute("value") for i in all_cpms]
+
+        ##Check different plot types
+        plot_types = ["trans_mat", "trans_rate_mat", "obs_genotype_transitions"]
+        for pt in plot_types:
+            plot_type_button = self.driver.find_element_by_css_selector(f"#data2plot input[value='{pt}']")
+            plot_type_button.click()
+            sleep(2)
+            for (i, z) in zip(all_cpms, all_cpms_names):
+                # pdb.set_trace()
+                i.find_element_by_xpath('..').click()
+                sleep(0.7)
+                plot_sims_1 = self.driver.find_elements_by_css_selector(f"#plot_sims_{z}")
+                plot_sims_2 = self.driver.find_elements_by_css_selector(f"#plot_sims2_{z}") 
+                assert(len(plot_sims_1) == 1)
+                assert(len(plot_sims_2) == 1)
+            
+            for i in all_cpms:
+                i.find_element_by_xpath('..').click()
+                sleep(0.7)
+            
 if __name__ == "__main__":
     unittest.main(failfast = True)

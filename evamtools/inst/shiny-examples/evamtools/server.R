@@ -16,7 +16,9 @@ server <- function(input, output, session) {
   all_csd_data <- evamtools:::standarize_all_datasets(examples_csd)
   min_genes <- SHINY_DEFAULTS$min_genes
   max_genes <- SHINY_DEFAULTS$max_genes
-  default_mhn_samples <- SHINY_DEFAULTS$mhn_samples
+  default_csd_samples <- SHINY_DEFAULTS$csd_samples
+  default_cpm_samples <- SHINY_DEFAULTS$cpm_samples
+  more_cpms <- NULL
   keep_dataset_name <- FALSE
 
   last_visited_pages <- list(csd = "User", dag = "User", matrix = "User")
@@ -24,6 +26,11 @@ server <- function(input, output, session) {
 
   datasets <- reactiveValues(
     all_csd = all_csd_data
+  )
+
+  adv_options <- reactiveValues(
+    do_MCCBN = FALSE,
+    cpm_samples = default_cpm_samples
   )
 
   data <- reactiveValues(
@@ -43,6 +50,7 @@ server <- function(input, output, session) {
 
   ## Upload data
   observeEvent(input$csd, {
+    
     if(grepl(".csv", input$csd$datapath)){
       dataset_name <- strsplit(strsplit(input$csd$name, ".csv")[[1]], "_")[[1]][[1]]
       tmp_data <- list()
@@ -94,55 +102,64 @@ server <- function(input, output, session) {
 
   ## Saving dataset
   observeEvent(input$save_csd_data,{
-    ## 1 save dataset to list after user data
-    if(!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))){
-      datasets$all_csd[[input$input2build]][[input$dataset_name]]$name <- input$dataset_name
+    tryCatch({
+      ## 1 save dataset to list after user data
+      if(!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))){
+        datasets$all_csd[[input$input2build]][[input$dataset_name]]$name <- input$dataset_name
 
-      if(nrow(data$csd_freqs) > 0){
-        datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <- evamtools:::freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
+        if(nrow(data$csd_freqs) > 0){
+          datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <- evamtools:::freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
+        }
+
+        tmp_data <- list(
+          data = data$data
+          , dag = data$dag
+          , gene_names = data$gene_names
+          , dag_parent_set = data$dag_parent_set
+          , lambdas = data$lambdas
+          , thetas = data$thetas
+          , trm = data$trm
+          , name = input$dataset_name)
+        datasets$all_csd[[input$input2build]][[input$dataset_name]] <- tmp_data
+
+        tmp_data_2 <- datasets$all_csd[[input$input2build]]
+        datasets$all_csd[[input$input2build]] <-
+          c(tmp_data_2["User"]
+          , tmp_data_2[input$dataset_name]
+          , tmp_data_2[which(!(names(tmp_data_2) %in% c("User",
+            input$dataset_name, names(all_csd_data))))]
+          , tmp_data_2[which(names(datasets$all_csd[[input$input2build]]) %in% names(all_csd_data))]
+        )
+
+        ## 2 restore default values
+        try({
+          datasets$all_csd[[input$input2build]][[input$select_csd]] <- all_csd_data[[input$input2build]][[input$select_csd]]
+        })
+
+        ## 3 update selected entry
+        updateRadioButtons(session, "select_csd", selected = input$dataset_name)
+
+        shinyjs::disable("save_csd_data")
       }
-
-      tmp_data <- list(
-        data = data$data
-        , dag = data$dag
-        , gene_names = data$gene_names
-        , dag_parent_set = data$dag_parent_set
-        , lambdas = data$lambdas
-        , thetas = data$thetas
-        , trm = data$trm
-        , name = input$dataset_name)
-      datasets$all_csd[[input$input2build]][[input$dataset_name]] <- tmp_data
-
-      tmp_data_2 <- datasets$all_csd[[input$input2build]]
-      datasets$all_csd[[input$input2build]] <-
-        c(tmp_data_2["User"]
-        , tmp_data_2[input$dataset_name]
-        , tmp_data_2[which(!(names(tmp_data_2) %in% c("User",
-          input$dataset_name, names(all_csd_data))))]
-        , tmp_data_2[which(names(datasets$all_csd[[input$input2build]]) %in% names(all_csd_data))]
-      )
-
-      ## 2 restore default values
-      try({
-        datasets$all_csd[[input$input2build]][[input$select_csd]] <- all_csd_data[[input$input2build]][[input$select_csd]]
+      }, error=function(e){
+        showModal(dataModal(e[[1]]))
       })
-
-      ## 3 update selected entry
-      updateRadioButtons(session, "select_csd", selected = input$dataset_name)
-
-      shinyjs::disable("save_csd_data")
-    }
   })
 
   # observeEvent(listen2dataset_name(), {
   observeEvent(input$dataset_name, {
-    dataset_name <- ifelse(is.null(input$dataset_name), "", input$dataset_name)
-    if(dataset_name != "" &
-      !(dataset_name %in% names(datasets$all_csd[[input$input2build]]))) {
-      shinyjs::enable("save_csd_data")
-    }else if(dataset_name %in% names(datasets$all_csd[[input$input2build]])){
-      shinyjs::disable("save_csd_data")
-    }
+    
+    tryCatch({
+      dataset_name <- ifelse(is.null(input$dataset_name), "", input$dataset_name)
+      if(dataset_name != "" &
+        !(dataset_name %in% names(datasets$all_csd[[input$input2build]]))) {
+        shinyjs::enable("save_csd_data")
+      }else if(dataset_name %in% names(datasets$all_csd[[input$input2build]])){
+        shinyjs::disable("save_csd_data")
+      }
+    }, error = function(e){
+      showModal(dataModal(e[[1]]))
+    })
   })
 
   ## Download csd button
@@ -156,7 +173,11 @@ server <- function(input, output, session) {
   )
 
   observeEvent(input$select_csd, {
-    last_visited_pages[[input$input2build]] <<- input$select_csd
+    tryCatch({
+      last_visited_pages[[input$input2build]] <<- input$select_csd
+    }, error = function(e){
+      showModal(dataModal(e[[1]]))
+    })
   })
 
   # ## Display List of availabe CSD
@@ -185,43 +206,48 @@ server <- function(input, output, session) {
   })
 
   observeEvent(toListen(), {
-    ## Cleaning stuf
-    selected <- last_visited_pages[[input$input2build]]
-    tmp_data <- datasets$all_csd[[input$input2build]][[selected]]
-    data$gene_names <- tmp_data$gene_names
-    data$data <- tmp_data$data
+    tryCatch({
 
-    shinyjs::disable("analysis")
-    if(!is.null(data$data)){
-      data$csd_freqs <- get_csd(data$data)
-      shinyjs::enable("analysis")
-    } else{
-      data$csd_freqs <- SHINY_DEFAULTS$template_data$csd_freqs
-    }
+      ## Cleaning stuf
+      selected <- last_visited_pages[[input$input2build]]
+      tmp_data <- datasets$all_csd[[input$input2build]][[selected]]
+      data$gene_names <- tmp_data$gene_names
+      data$data <- tmp_data$data
 
-    data$dag <- tmp_data$dag
-    data$dag_parent_set <- tmp_data$dag_parent_set
-    data$lambdas <- tmp_data$lambdas
-    data$thetas <- tmp_data$thetas
-    data$name <- tmp_data$name
+      shinyjs::disable("analysis")
+      if(!is.null(data$data)){
+        data$csd_freqs <- get_csd(data$data)
+        shinyjs::enable("analysis")
+      } else{
+        data$csd_freqs <- SHINY_DEFAULTS$template_data$csd_freqs
+      }
 
-    if(input$input2build == "dag"){
-      to_keep <- length(which(colSums(data$dag)>0 | rowSums(data$dag)>0)) - 1
-      n_genes <- ifelse(to_keep < 1 , ngenes, to_keep)
-    } else if(input$input2build == "matrix"){
-      n_genes <- length(which(colSums(abs(data$thetas))>0
-      | rowSums(abs(data$thetas))>0))
-      n_genes <- ifelse(n_genes <= 0, 3, n_genes)
-    } else if (input$input2build == "csd" & !is.null(data$data)){
-      n_genes <- ncol(data$data)
-    } else if (input$input2build == "csd" & is.null(data$data)){
-      n_genes <- SHINY_DEFAULTS$ngenes
-    }
+      data$dag <- tmp_data$dag
+      data$dag_parent_set <- tmp_data$dag_parent_set
+      data$lambdas <- tmp_data$lambdas
+      data$thetas <- tmp_data$thetas
+      data$name <- tmp_data$name
 
-    updateNumericInput(session, "gene_number", value = n_genes)
-    updateNumericInput(session, "genotype_freq", value = NA)
-    updateCheckboxGroupInput(session, "genotype", label = "Mutations",
-      choices = lapply(1:n_genes, function(i)data$gene_names[i]), selected = NULL)
+      if(input$input2build == "dag"){
+        to_keep <- length(which(colSums(data$dag)>0 | rowSums(data$dag)>0)) - 1
+        n_genes <- ifelse(to_keep < 1 , ngenes, to_keep)
+      } else if(input$input2build == "matrix"){
+        n_genes <- length(which(colSums(abs(data$thetas))>0
+        | rowSums(abs(data$thetas))>0))
+        n_genes <- ifelse(n_genes <= 0, 3, n_genes)
+      } else if (input$input2build == "csd" & !is.null(data$data)){
+        n_genes <- ncol(data$data)
+      } else if (input$input2build == "csd" & is.null(data$data)){
+        n_genes <- SHINY_DEFAULTS$ngenes
+      }
+
+      updateNumericInput(session, "gene_number", value = n_genes)
+      updateNumericInput(session, "genotype_freq", value = NA)
+      updateCheckboxGroupInput(session, "genotype", label = "Mutations",
+        choices = lapply(1:n_genes, function(i)data$gene_names[i]), selected = NULL)
+    }, error = function(e){
+      showModal(dataModal(e[[1]]))
+    })
   })
 
   observeEvent(input$change_gene_names, {
@@ -243,21 +269,25 @@ server <- function(input, output, session) {
 
   ## Updating gene names
   observeEvent(input$action_gene_names,{
-    new_gene_names <- unique(strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]])
-    data$gene_names <- c(
-      new_gene_names
-      , LETTERS[(length(new_gene_names) + 1):max_genes]
-    )
-    ## Rename stuff
-    new_data <- evamtools:::standarize_dataset(data)
-    data$data <- new_data$data
-    data$dag <- new_data$dag
-    data$dag_parent_set <- new_data$dag_parent_set
-    data$thetas <- new_data$thetas
-    data$lambdas <- new_data$lambdas
-    data$csd_freqs <- new_data$csd_freqs
+    tryCatch({
+      new_gene_names <- unique(strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]])
+      data$gene_names <- c(
+        new_gene_names
+        , LETTERS[(length(new_gene_names) + 1):max_genes]
+      )
+      ## Rename stuff
+      new_data <- evamtools:::standarize_dataset(data)
+      data$data <- new_data$data
+      data$dag <- new_data$dag
+      data$dag_parent_set <- new_data$dag_parent_set
+      data$thetas <- new_data$thetas
+      data$lambdas <- new_data$lambdas
+      data$csd_freqs <- new_data$csd_freqs
 
-    datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
+      datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
+    }, error = function(e){
+      showModal(dataModal(e[[1]]))
+    })
   })
 
   observeEvent(input$display_help, {
@@ -280,12 +310,12 @@ server <- function(input, output, session) {
     showModal(modalDialog(
       size = "l",
       easyClose = TRUE,
-      title = tags$h3("Advanced options?"),
+      title = tags$h3("Advanced options"),
       tags$div(
-        numericInput("num_steps", "Sampling steps", 10000
-          , min = 0, max = 1000000, step = 1000, width="100%"),
+        numericInput("num_steps", "Sampling steps", adv_options$cpm_samples
+          , min = 0, max = 100000, step = 100, width="100%"),
         # checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("HyperTRAPS", "MCCBN"), choiceValues = c("hypertraps", "mccbn")),
-        checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("MCCBN"), choiceValues = c("mccbn")),
+        checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("MCCBN"), choiceValues = c("MCCBN"), selected=c(adv_options$do_MCCBN)),
         tags$h4("DISCLAIMER: MCCBN may take hours to run")
         # tags$h4("DISCLAIMER: Both HyperTraps and MCCBN may take hours to run")
         )
@@ -293,6 +323,18 @@ server <- function(input, output, session) {
     )
     ## TODO this has no effect so far
   })
+
+  observeEvent(input$num_steps, {
+    adv_options$cpm_samples <- input$num_steps
+  })
+
+  observeEvent(input$more_cpms, {
+    if("MCCBN" %in% input$more_cpms) {
+      adv_options$do_MCCBN <- "MCCBN"
+    } else {
+      adv_options$do_MCCBN <- FALSE
+    }
+  }, ignoreNULL = FALSE)
 
   # ## Define number of genes
   output$genes_number <- renderUI({
@@ -346,7 +388,7 @@ server <- function(input, output, session) {
             actionButton("clear_dag", "Clear dag"),
             tags$h3("DAG table"),
             DT::DTOutput("dag_table"),
-            numericInput("dag_samples", "Total genotypes to sample", value = default_mhn_samples, min= 100, max = 10000, step = 100, width = "50%"),
+            numericInput("dag_samples", "Total genotypes to sample", value = default_csd_samples, min= 100, max = 10000, step = 100, width = "50%"),
             actionButton("resample_dag", "Sample from DAG")
             )
           }
@@ -361,7 +403,7 @@ server <- function(input, output, session) {
             tags$div(
               tags$h3("Thetas table"),
               DT::DTOutput("thetas_table"),
-              numericInput("mhn_samples", "Total genotypes to sample", value = default_mhn_samples, min= 100, max= 10000, step = 100, width = "50%"),
+              numericInput("mhn_samples", "Total genotypes to sample", value = default_csd_samples, min= 100, max= 10000, step = 100, width = "50%"),
               actionButton("resample_mhn", "Sample from MHN")
             )
           }
@@ -454,46 +496,54 @@ server <- function(input, output, session) {
   })
 
   observeEvent(input$dag_table_cell_edit, {
-    names(data$dag_parent_set) <- data$gene_names[1:length(data$dag_parent_set)]
-    names(data$lambdas) <- data$gene_names[1:length(data$dag_parent_set)]
-    info <- input$dag_table_cell_edit
-    tmp_data <- evamtools:::modify_lambdas_and_parent_set_from_table(dag_data(), info, data$lambdas, data$dag, data$dag_parent_set)
-    data$lambdas <- tmp_data$lambdas
-    data$dag_parent_set <- tmp_data$parent_set
+    tryCatch({
+      names(data$dag_parent_set) <- data$gene_names[1:length(data$dag_parent_set)]
+      names(data$lambdas) <- data$gene_names[1:length(data$dag_parent_set)]
+      info <- input$dag_table_cell_edit
+      tmp_data <- evamtools:::modify_lambdas_and_parent_set_from_table(dag_data(), info, data$lambdas, data$dag, data$dag_parent_set)
+      data$lambdas <- tmp_data$lambdas
+      data$dag_parent_set <- tmp_data$parent_set
+    }, error = function(e){
+      showModal(dataModal(e[[1]]))
+    })
   })
 
   ## Building trm from dag
   observeEvent(input$resample_dag, {
-    progress <- shiny::Progress$new()
-    # Make sure it closes when we exit this reactive, even if there's an error
-    on.exit(progress$close())
+    tryCatch({
+      progress <- shiny::Progress$new()
+      # Make sure it closes when we exit this reactive, even if there's an error
+      on.exit(progress$close())
 
-    progress$set(message = "Running evamtools", value = 0)
+      progress$set(message = "Running evamtools", value = 0)
 
-    progress$inc(1/2, detail = "Doing sampling")
+      progress$inc(1/2, detail = "Doing sampling")
 
-    ## FIXME all the following will be replaced
-    shinyjs::disable("resample_dag")
-    tmp_data <- list(edges = dag_data())
-    trm <- evamtools:::cpm2tm(tmp_data)$weighted_fgraph
-    samples <- evamtools:::population_sample_from_trm(trm, input$dag_samples)
-    process_data <- evamtools:::process_samples(samples, input$gene_number, data$gene_names[1:input$gene_number])
-    tmp_samples <- process_data$sampled_genotype_freqs
-    tmp_samples <- tmp_samples[tmp_samples > 0]
-    tmp_csd <- data.frame(Genotype = names(tmp_samples), Counts = tmp_samples)
-    rownames(tmp_csd) <- tmp_csd$Genotype
-    data$csd_freqs <- tmp_csd
-    data$data <- freqs2csd(tmp_csd,data$gene_names[1:input$gene_number])
-    shinyjs::enable("resample_dag")
-    progress$inc(1/2, detail = "Sampling Finished")
+      ## FIXME all the following will be replaced
+      shinyjs::disable("resample_dag")
+      tmp_data <- list(edges = dag_data())
+      trm <- evamtools:::cpm2tm(tmp_data)$weighted_fgraph
+      samples <- evamtools:::population_sample_from_trm(trm, input$dag_samples)
+      process_data <- evamtools:::process_samples(samples, input$gene_number, data$gene_names[1:input$gene_number])
+      tmp_samples <- process_data$sampled_genotype_freqs
+      tmp_samples <- tmp_samples[tmp_samples > 0]
+      tmp_csd <- data.frame(Genotype = names(tmp_samples), Counts = tmp_samples)
+      rownames(tmp_csd) <- tmp_csd$Genotype
+      data$csd_freqs <- tmp_csd
+      data$data <- freqs2csd(tmp_csd,data$gene_names[1:input$gene_number])
+      shinyjs::enable("resample_dag")
+      progress$inc(1/2, detail = "Sampling Finished")
 
-    datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- data$data
-    datasets$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$dag
-    # datasets$all_csd[[input$input2build]][[input$select_csd]]$trm <- trm
-    datasets$all_csd[[input$input2build]][[input$select_csd]]$lambdas <- data$lambdas
-    datasets$all_csd[[input$input2build]][[input$select_csd]]$dag_parent_set <- data$dag_parent_set
+      datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- data$data
+      datasets$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$dag
+      # datasets$all_csd[[input$input2build]][[input$select_csd]]$trm <- trm
+      datasets$all_csd[[input$input2build]][[input$select_csd]]$lambdas <- data$lambdas
+      datasets$all_csd[[input$input2build]][[input$select_csd]]$dag_parent_set <- data$dag_parent_set
 
-    shinyjs::enable("analysis")
+      shinyjs::enable("analysis")
+    }, error = function(e){
+      showModal(dataModal(e[[1]]))
+    })
   })
 
   ## Help for DAG building
@@ -528,25 +578,33 @@ server <- function(input, output, session) {
   )
 
   observeEvent(input$thetas_table_cell_edit, {
-    info <-input$thetas_table_cell_edit
-    data$thetas[1:input$gene_number, 1:input$gene_number] <-
-      DT::editData(data$thetas[1:input$gene_number, 1:input$gene_number], info, "thetas")
+    tryCatch({
+      info <-input$thetas_table_cell_edit
+      data$thetas[1:input$gene_number, 1:input$gene_number] <-
+        DT::editData(data$thetas[1:input$gene_number, 1:input$gene_number], info, "thetas")
 
-    datasets$all_csd[[input$input2build]][[input$select_csd]]$thetas <- data$thetas
-    ## Resample based on changes
-    shinyjs::click("resample_mhn")
+      datasets$all_csd[[input$input2build]][[input$select_csd]]$thetas <- data$thetas
+      ## Resample based on changes
+      shinyjs::click("resample_mhn")
+    }, error = function(e){
+      showModal(dataModal(e[[1]]))
+    })
   })
 
   observeEvent(input$resample_mhn, {
-    ## FIXME this will be replaced by another function
-    mhn_data <-get_mhn_data(input$gene_number, input$mhn_samples,
-      data$gene_names[1:input$gene_number], thetas = data$thetas[1:input$gene_number, 1:input$gene_number])
-    data$csd_freqs <- mhn_data$samples
-    data$data <- freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
+    tryCatch({
+      ## FIXME this will be replaced by another function
+      mhn_data <-get_mhn_data(input$gene_number, input$mhn_samples,
+        data$gene_names[1:input$gene_number], thetas = data$thetas[1:input$gene_number, 1:input$gene_number])
+      data$csd_freqs <- mhn_data$samples
+      data$data <- freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
 
-    datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- data$data
-    datasets$all_csd[[input$input2build]][[input$select_csd]]$trm <- data$trm
-    shinyjs::enable("analysis")
+      datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- data$data
+      datasets$all_csd[[input$input2build]][[input$select_csd]]$trm <- data$trm
+      shinyjs::enable("analysis")
+    }, error = function(e){
+      showModal(dataModal(e[[1]]))
+    })
   })
 
   observeEvent(input$how2build_matrix, {
@@ -571,28 +629,37 @@ server <- function(input, output, session) {
 
   ## Working with raw CSD
   observeEvent(input$genotype, {
-    genotype <- paste(input$genotype, collapse = ", ")
-    genot_freq <- data$csd_freqs[, 2][data$csd_freqs[, 1] == genotype]
-    updateNumericInput(session, "genotype_freq", value = genot_freq)
+    tryCatch({
+      genotype <- paste(input$genotype, collapse = ", ")
+      genot_freq <- data$csd_freqs[, 2][data$csd_freqs[, 1] == genotype]
+      updateNumericInput(session, "genotype_freq", value = genot_freq)
+
+    }, error = function(e){
+      showModal(dataModal(e[[1]]))
+    })
   }, ignoreNULL = FALSE)
 
   observeEvent(input$add_genotype, {
-    genotype <- paste(input$genotype, collapse = ", ")
-    genotype <- ifelse(genotype == "", "WT", genotype)
-    genot_freq <- ifelse(is.na(input$genotype_freq), -1, input$genotype_freq)
+    tryCatch({
+      genotype <- paste(input$genotype, collapse = ", ")
+      genotype <- ifelse(genotype == "", "WT", genotype)
+      genot_freq <- ifelse(is.na(input$genotype_freq), -1, input$genotype_freq)
 
-    if(genot_freq >= 0){
-      data$csd_freqs[genotype, ] <- c(genotype, genot_freq)
-      rownames(data$csd_freqs) <- data$csd_freqs$Genotype
-      data$csd_freqs[, 2] <- as.numeric(data$csd_freqs[, 2])
-      ## Filtering out non-positive counts
-      data$csd_freqs <- data$csd_freqs[data$csd_freqs[,2] > 0,]
-      data$data <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
-      shinyjs::enable("analysis")
-    }
-    updateNumericInput(session, "genotype_freq", value = NA)
-    updateCheckboxGroupInput(session, "genotype", label = "Mutations",
-      choices = lapply(1:input$gene_number, function(i)data$gene_names[i]), selected = NULL)
+      if(genot_freq >= 0){
+        data$csd_freqs[genotype, ] <- c(genotype, genot_freq)
+        rownames(data$csd_freqs) <- data$csd_freqs$Genotype
+        data$csd_freqs[, 2] <- as.numeric(data$csd_freqs[, 2])
+        ## Filtering out non-positive counts
+        data$csd_freqs <- data$csd_freqs[data$csd_freqs[,2] > 0,]
+        data$data <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
+        shinyjs::enable("analysis")
+      }
+      updateNumericInput(session, "genotype_freq", value = NA)
+      updateCheckboxGroupInput(session, "genotype", label = "Mutations",
+        choices = lapply(1:input$gene_number, function(i)data$gene_names[i]), selected = NULL)
+    }, error = function(e){
+      showModal(dataModal(e[[1]]))
+    })
   })
 
   ## Genotypes table
@@ -603,17 +670,23 @@ server <- function(input, output, session) {
   )
 
   observeEvent(input$csd_freqs_cell_edit, {
-    info <- input$csd_freqs_cell_edit
-    info[ , "col"] <- 2
-    data$csd_freqs <- DT::editData(data$csd_freqs, info, "csd_freqs")
-    ## Filtering out non-positive counts
-    data$csd_freqs <- data$csd_freqs[data$csd_freqs[,2] > 0,]
-    data$data <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- evamtools:::freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
+    tryCatch({
+      info <- input$csd_freqs_cell_edit
+      info[ , "col"] <- 2
+      data$csd_freqs <- DT::editData(data$csd_freqs, info, "csd_freqs")
+      ## Filtering out non-positive counts
+      data$csd_freqs <- data$csd_freqs[data$csd_freqs[,2] > 0,]
+      data$data <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- evamtools:::freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
+    }, error = function(e){
+      showModal(dataModal(e[[1]]))
+    })
   })
 
   ## Plot histogram of genotypes
   output$plot <- renderPlot({
-    evamtools:::plot_genotypes_freqs(display_freqs())
+    tryCatch({
+      evamtools:::plot_genotypes_freqs(display_freqs())
+    }, error = function(e){})
   })
 
   ## Plot dag of dataset
@@ -642,107 +715,103 @@ server <- function(input, output, session) {
   observeEvent(input$analysis, {
     ## Calculate TRM for DAG and for matrices
 
-    source_trm <- NULL
-
+    # source_trm <- NULL
     ## FIXME the following has to be moved to R/
-    if(input$input2build == "dag"){
-      tmp_data <- list(edges = dag_data(), parent_set = data$dag_parent_set)
-      source_trm <- evamtools:::cpm2tm(tmp_data)$weighted_fgraph
-    }else if(input$input2build == "matrix"){
-      source_trm <- evamtools:::theta_to_trans_rate_3_SM(data$thetas[1:input$gene_number, 1:input$gene_number],
-                          inner_transition = evamtools:::inner_transitionRate_3_1)
-    }
-
-    ## TODO: Put everything with a try and display a modal if I have an error
-    shinyjs::disable("analysis")
-    # Create a Progress object
-    progress <- shiny::Progress$new()
-    # Make sure it closes when we exit this reactive, even if there's an error
-    on.exit(progress$close())
-
-    progress$set(message = "Running evamtools", value = 0)
-
-    data2run <- evamtools:::freqs2csd(display_freqs(), data$gene_names[1:input$gene_number])
-    progress$inc(1/5, detail = "Setting up data")
-    Sys.sleep(0.5)
-    progress$inc(2/5, detail = "Running CPMs")
-    # do_MCCBN <- "mccbn" %in% input$more_cpms
-    methods <- c("CBN", "OT", "OncoBN","HESBCN", "MHN", "MCCBN")
-    # , "DBN"
-    # if(do_MCCBN) methods <- c(methods, "MCCBN")
-
-    tryCatch({
-      cpm_output <- evam(data2run, methods = methods)
-    }, error = function(e){
-      showModal(dataModal(e[[1]]))
-    })
-
-    ## To see Source data in the results section
-    # if(input$input2build != "csd"){
-    #   ## FIXME: rename f_graph to trans_rate_mat: ???
-    #   cpm_output$Source_trans_rate_mat <- source_trm
-    #   cpm_output$Source_trans_mat <- evamtools:::rowScaleMatrix(source_trm)
-    # }
     # if(input$input2build == "dag"){
-    #   cpm_output$Source_model <- dag_data()
-    #   cpm_output$Source_parent_set <- data$dag_parent_set[1:input$gene_number]
-    # } else if(input$input2build == "matrix"){
-    #   cpm_output$Source_theta <- data$thetas[1:input$gene_number
-    #     , 1:input$gene_number]
+    #   tmp_data <- list(edges = dag_data(), parent_set = data$dag_parent_set)
+    #   source_trm <- evamtools:::cpm2tm(tmp_data)$weighted_fgraph
+    # }else if(input$input2build == "matrix"){
+    #   source_trm <- evamtools:::theta_to_trans_rate_3_SM(data$thetas[1:input$gene_number, 1:input$gene_number],
+    #                       inner_transition = evamtools:::inner_transitionRate_3_1)
     # }
 
-    # n_samples <- 100 ## To be replaced by input$something
-    n_samples <- 100
-    progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
-
     tryCatch({
+      shinyjs::disable("analysis")
+      # Create a Progress object
+      progress <- shiny::Progress$new()
+      # Make sure it closes when we exit this reactive, even if there's an error
+      on.exit(progress$close())
+
+      progress$set(message = "Running evamtools", value = 0)
+
+      data2run <- evamtools:::freqs2csd(display_freqs(), data$gene_names[1:input$gene_number])
+      progress$inc(1/5, detail = "Setting up data")
+      Sys.sleep(0.5)
+      progress$inc(2/5, detail = "Running CPMs")
+
+      methods <- SHINY_DEFAULTS$cpms2run
+      if(!is.null(input$more_cpms)){
+        methods <- unique(c(methods, input$more_cpms[input$more_cpms %in% SHINY_DEFAULTS$all_cpms]))
+      }
+      cpm_output <- evam(data2run, methods = methods)
+   
+      ## To see Source data in the results section
+      # if(input$input2build != "csd"){
+      #   ## FIXME: rename f_graph to trans_rate_mat: ???
+      #   cpm_output$Source_trans_rate_mat <- source_trm
+      #   cpm_output$Source_trans_mat <- evamtools:::rowScaleMatrix(source_trm)
+      # }
+      # if(input$input2build == "dag"){
+      #   cpm_output$Source_model <- dag_data()
+      #   cpm_output$Source_parent_set <- data$dag_parent_set[1:input$gene_number]
+      # } else if(input$input2build == "matrix"){
+      #   cpm_output$Source_theta <- data$thetas[1:input$gene_number
+      #     , 1:input$gene_number]
+      # }
+
+      n_samples <- adv_options$cpm_samples
+      if(is.null(n_samples) | !is.numeric(n_samples) | n_samples < 100){
+        n_samples <- SHINY_DEFAULTS$cpm_samples
+      }
+      progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
+      n_sample <- 100
       sampled_from_CPMs <- sample_CPMs(cpm_output, n_samples
         , methods, c("sampled_genotype_freqs", "obs_genotype_transitions"))
-    }, error = function(e){
+
+      progress$inc(4/5, detail = "Post processing data")
+      Sys.sleep(0.5)
+
+      orig_data <- list(data = data2run, name = data$name
+        , type = input$input2build, gene_names = data$gene_names
+        , thetas = data$thetas, lambdas = data$lambdas
+        , dag = data$dag, dag_parent_set = data$dag_parent_set)
+
+      ## Tabular data
+      tabular_data <- evamtools:::create_tabular_data(c(cpm_output, sampled_from_CPMs))
+
+      all_evam_output <- list("cpm_output" = c(cpm_output, sampled_from_CPMs)
+        , "orig_data" = orig_data
+        , "tabular_data" = tabular_data 
+      )
+
+      ##CPM output name
+      result_index <- length(grep(sprintf("^%s", input$select_csd), names(all_cpm_out)))
+      result_name <- ifelse(result_index == 0
+        , input$select_csd
+        , sprintf("%s__%s", input$select_csd, result_index))
+
+      all_cpm_out[[result_name]] <- all_evam_output
+      last_visited_cpm <<- result_name
+      updateRadioButtons(session, "select_cpm", selected = result_name)
+      progress$inc(5/5, detail = "You can see your result by going to the Results tab")
+      Sys.sleep(1)
+      shinyjs::enable("analysis")
+
+      ## Maybe I do no want this
+      updateTabsetPanel(session, "navbar", selected = "result_viewer")
+      updateRadioButtons(session, "select_cpm", selected = result_name)
+
+      # selected <- ifelse(is.null(input$select_cpm), last_visited_cpm, input$select_cpm)
+      # if(is.null(all_cpm_out[[selected]]$Source_genotype_transitions)){
+      #     updateCheckboxGroupInput(session, "cpm2show",
+      #         selected = setdiff(c(input$cpm2show), "Source"))
+      #     shinyjs::disable(selector = "#cpm2show input[value='Source']")
+      # }else{
+      #     shinyjs::enable(selector = "#cpm2show input[value='Source']")
+      # }
+     }, error = function(e){
       showModal(dataModal(e[[1]]))
     })
-
-    progress$inc(4/5, detail = "Post processing data")
-    Sys.sleep(0.5)
-
-    orig_data <- list(data = data2run, name = data$name
-      , type = input$input2build, gene_names = data$gene_names
-      , thetas = data$thetas, lambdas = data$lambdas
-      , dag = data$dag, dag_parent_set = data$dag_parent_set)
-
-    ## Tabular data
-    tabular_data <- evamtools:::create_tabular_data(c(cpm_output, sampled_from_CPMs))
-
-    all_evam_output <- list("cpm_output" = c(cpm_output, sampled_from_CPMs)
-      , "orig_data" = orig_data
-      , "tabular_data" = tabular_data 
-    )
-
-    ##CPM output name
-    result_index <- length(grep(sprintf("^%s", input$select_csd), names(all_cpm_out)))
-    result_name <- ifelse(result_index == 0
-      , input$select_csd
-      , sprintf("%s__%s", input$select_csd, result_index))
-
-    all_cpm_out[[result_name]] <- all_evam_output
-    last_visited_cpm <<- result_name
-    updateRadioButtons(session, "select_cpm", selected = result_name)
-    progress$inc(5/5, detail = "You can see your result by going to the Results tab")
-    Sys.sleep(1)
-    shinyjs::enable("analysis")
-
-    ## Maybe I do no want this
-    updateTabsetPanel(session, "navbar", selected = "result_viewer")
-    updateRadioButtons(session, "select_cpm", selected = result_name)
-
-    # selected <- ifelse(is.null(input$select_cpm), last_visited_cpm, input$select_cpm)
-    # if(is.null(all_cpm_out[[selected]]$Source_genotype_transitions)){
-    #     updateCheckboxGroupInput(session, "cpm2show",
-    #         selected = setdiff(c(input$cpm2show), "Source"))
-    #     shinyjs::disable(selector = "#cpm2show input[value='Source']")
-    # }else{
-    #     shinyjs::enable(selector = "#cpm2show input[value='Source']")
-    # }
   })
 
   cpm_out <- sample_evam_output
@@ -806,23 +875,27 @@ server <- function(input, output, session) {
 
   # ## Go back to input to work again with the data
   observeEvent(input$modify_data, {
-    if(length(all_cpm_out) > 0){
-      tmp_data <- all_cpm_out[[input$select_cpm]]$orig_data
-      dataset_name <- strsplit(input$select_cpm, "__")[[1]][[1]]
-      dataset_type <- tmp_data$type
-      last_visited_pages[[tmp_data$type]] <<- dataset_name
-      tmp_data <- datasets$all_csd[[tmp_data$type]][[dataset_name]] <- standarize_dataset(tmp_data)
+    tryCatch({
+      if(length(all_cpm_out) > 0){
+        tmp_data <- all_cpm_out[[input$select_cpm]]$orig_data
+        dataset_name <- strsplit(input$select_cpm, "__")[[1]][[1]]
+        dataset_type <- tmp_data$type
+        last_visited_pages[[tmp_data$type]] <<- dataset_name
+        tmp_data <- datasets$all_csd[[tmp_data$type]][[dataset_name]] <- standarize_dataset(tmp_data)
 
-      data <- tmp_data
-      data$csd_freqs <- get_csd(tmp_data$data)
-      data$n_genes <- ncol(data$data)
+        data <- tmp_data
+        data$csd_freqs <- get_csd(tmp_data$data)
+        data$n_genes <- ncol(data$data)
 
-      updateNumericInput(session, "gene_number", value = data$n_genes)
-      updateTabsetPanel(session, "navbar",
-          selected = "csd_builder")
-      updateRadioButtons(session, "input2build", selected = dataset_type)
-      updateRadioButtons(session, "select_csd", selected = dataset_name)
-    }
+        updateNumericInput(session, "gene_number", value = data$n_genes)
+        updateTabsetPanel(session, "navbar",
+            selected = "csd_builder")
+        updateRadioButtons(session, "input2build", selected = dataset_type)
+        updateRadioButtons(session, "select_csd", selected = dataset_name)
+      }
+    }, error = function(e){
+      showModal(dataModal(e[[1]]))
+    })
   })
 
   output$customize <- renderUI({
