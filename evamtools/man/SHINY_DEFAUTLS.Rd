@@ -12,9 +12,11 @@ Defaults values of the shiny app
   
   \item{ngenes}{Integer of default number of genes to use when building}
   
-  \item{mhn_samples}{Number of patients to samples to generate csd data from a matrix using MHN functionality}
+  \item{cpm_samples}{Number of patients to samples to generate csd data from a matrix using with CPM outputs}
 
   \item{all_cpms}{All CPMs in evamtools}
+  
+  \item{csd_samples}{Number of patients to samples to generate csd data from a matrix or a dag}
 
   \item{cpms2run}{Which CPMs to run in the shiny server by defaults}
 
