@@ -639,17 +639,19 @@ genot_matrix_2_vector <- function(x) {
 ##  The final all.equal uses a tolerance larger than that of
 ##  the usual all.equal.
 
-## Yes, this is much slower, like two orders of magnitude,
-## than Schill's Generate.pTh. Still, about 0.3 to 0.4 seconds
-## for 11 genes, and most than 90% spent in the checks.
+## Yes, this is much slower, like up to one order of magnitude,
+## than Schill's Generate.pTh. Still, it takes generally < 0.04 seconds
+## for 4 to 8 genes, and most of it is spent in the checks.
 probs_from_trm <- function(x,
                            tolerance = 10 * sqrt(.Machine$double.eps),
                            all_genotypes = TRUE) {
     p0 <-  c(1, rep(0, nrow(x) - 1))
 
+    ## Recall our trans. rate matrix are. rows: from; columns: to.
+    ## But in Schill they are transposed.
     if (Matrix::nnzero(tril(x)))
         stop("Lower triangular not 0. Is this transposed?")
-    Q <- t(x)
+     Q <- t(x)
     diag(Q) <- -1 * colSums(Q)
 
     ## Equation 4 in Schill et al. Thus
@@ -743,6 +745,16 @@ generate_random_evam <- function(ngenes = NULL, gene_names = NULL,
                                                      hesbcn_probs)
     }
 
+    else if (model == "OT") {
+        poset <- OT_random_poset(ngenes,
+                                 graph_density = ot_cbn_hesbcn_graph_density)
+        weights <- runif(ngenes, ot_p_min, ot_p_max)
+        names(weights) <-  colnames(poset) <- rownames(poset) <- gene_names
+        output <- OT_from_poset_weights_epos(poset, weights, epos)
+
+    }
+    
+
     if (model %in% c("CBN", "MHN", "HESBCN")) {
         outname <- paste0(model, "_predicted_genotype_freqs")
         inname  <- paste0(model, "_trans_rate_mat")
@@ -784,9 +796,9 @@ MHN_from_thetas <- function(thetas) {
 ## poset as adjacency matrix and vector of lambdas
 ## both named -> all of the cbn output
 CBN_from_poset_lambdas <- function(poset, lambdas) {
+    stopifnot(identical(sort(colnames(poset)), sort(names(lambdas))))
     poset_as_data_frame <- poset_2_data_frame(poset)
     output <- list()
-    stopifnot(identical(sort(colnames(poset)), sort(names(lambdas))))
     output[["CBN_model"]] <- CBN_model_from_edges_lambdas(poset_as_data_frame,
                                                        lambdas)
     output <- c(output,
@@ -807,8 +819,6 @@ CBN_model_2_output <- function(model) {
     output[["CBN_td_trans_mat"]] <-
         trans_rate_to_trans_mat(tmpo[["weighted_fgraph"]],
                                 method = "uniformization")
-    ## output[["CBN_predicted_genotype_freqs"]] <-
-    ##     probs_from_trm(tmpo[["weighted_fgraph"]])
     return(output)
 }
 
@@ -820,7 +830,8 @@ CBN_model_from_edges_lambdas <- function(edges, lambdas) {
 }
 
 
-## convert a poset matrix to a data frame with the "edges" structure
+## Convert a poset matrix to a data frame with the "edges" structure
+##   Adds the "Root" component, if not present
 poset_2_data_frame <- function(poset) {
     stopifnot(identical(colnames(poset), rownames(poset)))
     if (!("Root" %in% colnames(poset))) {
@@ -850,35 +861,35 @@ poset_2_data_frame <- function(poset) {
 ## poset as adjac. matrix, vector of lambdas, parent_set -> full HESBCN output
 HESBCN_from_poset_lambdas_relation_probs <- function(poset, lambdas,
                                                      hesbcn_probs) {
-     poset_as_data_frame <- poset_2_data_frame(poset)
-     stopifnot(identical(sort(colnames(poset)), sort(names(lambdas))))
+    stopifnot(identical(sort(colnames(poset)), sort(names(lambdas))))
+    poset_as_data_frame <- poset_2_data_frame(poset)
 
-     ## Assign type of relationship randomly to nodes with >= 2 parents
-     num_parents <- table(poset_as_data_frame[, "To"])
-     singles <- names(which(num_parents == 1))
-     parent_set <- vector(mode = "character", length = length(num_parents))
-     names(parent_set) <- names(num_parents)
-     parent_set[singles] <- "Single"
-     lmultiple <- length(num_parents) - sum(num_parents == 1)
-     if (lmultiple > 0) {
-         stopifnot(identical(sort(names(hesbcn_probs)), c("AND", "OR", "XOR")))
-         ps_values <- sample(names(hesbcn_probs), size = lmultiple,
-                             prob = hesbcn_probs, replace = TRUE)
-         parent_set[which(num_parents > 1)] <- ps_values
-     }
-     
-     stopifnot(identical(sort(names(parent_set)),
-                         sort(names(lambdas))))
+    ## Assign type of relationship randomly to nodes with >= 2 parents
+    num_parents <- table(poset_as_data_frame[, "To"])
+    singles <- names(which(num_parents == 1))
+    parent_set <- vector(mode = "character", length = length(num_parents))
+    names(parent_set) <- names(num_parents)
+    parent_set[singles] <- "Single"
+    lmultiple <- length(num_parents) - sum(num_parents == 1)
+    if (lmultiple > 0) {
+        stopifnot(identical(sort(names(hesbcn_probs)), c("AND", "OR", "XOR")))
+        ps_values <- sample(names(hesbcn_probs), size = lmultiple,
+                            prob = hesbcn_probs, replace = TRUE)
+        parent_set[which(num_parents > 1)] <- ps_values
+    }
     
-     output <- list()
-     output[["HESBCN_parent_set"]] <- parent_set
-     output[["HESBCN_model"]] <-
-         HESBCN_model_from_edges_lambdas_parent_set(poset_as_data_frame,
-                                                    lambdas,
-                                                    parent_set)
-     output <- c(output, HESBCN_model_2_output(output[["HESBCN_model"]],
-                                               output[["HESBCN_parent_set"]]))
-     return(output)
+    stopifnot(identical(sort(names(parent_set)),
+                        sort(names(lambdas))))
+    
+    output <- list()
+    output[["HESBCN_parent_set"]] <- parent_set
+    output[["HESBCN_model"]] <-
+        HESBCN_model_from_edges_lambdas_parent_set(poset_as_data_frame,
+                                                   lambdas,
+                                                   parent_set)
+    output <- c(output, HESBCN_model_2_output(output[["HESBCN_model"]],
+                                              output[["HESBCN_parent_set"]]))
+    return(output)
 }
 
 
@@ -912,21 +923,112 @@ HESBCN_model_from_edges_lambdas_parent_set <- function(edges, lambdas,
     return(edges)
 }
 
-
-ot_random_poset <- function(ngenes, graph_density, gene_names) {
+## A random poset where each gene depends on at most one parent
+OT_random_poset <- function(ngenes, graph_density) {
     poset0 <- mccbn::random_poset(ngenes, graph_density = graph_density)
-    ## FIXME only one parent
-    ## FIXME add Root
+    ## Leave only one parent
+    cosum <- colSums(poset0)
+    if (all(cosum <= 1)) return(poset0)
+    for (co in which(cosum > 1)) {
+        ones <- which(poset0[, co] == 1)
+        the_one <- sample(ones, size = 1)
+        poset0[, co] <- 0L
+        poset0[the_one, co] <- 1L
+    }
+    return(poset0)
 }
 
 
-oncotree_fit_parent_from_dag <- function(dag, weights) {
-    child <- rep("ERROR", times = ncol(dag))
-    parent <- rep("ERROR", times = ncol(dag))
-    parent.num <- rep(-99, times = ncol(dag))
-    for (p in seq_len(ncol(dag))) {
-        child[p] <- colnames(dag)[p]
-        tmp <- which(dag[, p] == 1)
+## Pablo call this
+## poset as adjacency matrix, weights, epos -> full output, as from evam
+##   weights: do not have Root
+##   poset: one for OT, so no column with two or more parents
+OT_from_poset_weights_epos <- function(poset, weights, epos) {
+    stopifnot(identical(sort(colnames(poset)), sort(names(weights))))
+    stopifnot(colSums(poset) <= 1)
+    poset_as_data_frame <- poset_2_data_frame(poset)
+    output <- list()
+    output[["OT_model"]] <- OT_model_from_edges_lambdas(poset_as_data_frame,
+                                                        weights)
+    output <- c(output, OT_model_2_output(output[["OT_model"]],
+                                          epos))
+    return(output)
+}
+
+
+OT_model_from_edges_lambdas <- function(edges, weights) {
+    edges[["OT_edgeWeight"]] <- vapply(edges[, "To"],
+                                       function(x) weights[x], 0.0)
+    return(edges)
+}
+
+
+## Pablo call this
+## OT model and epos -> full output, as from evam
+OT_model_2_output <- function(model, epos) {
+    ## We need to go back to the DAG representation
+    ## Different from CBN: we obtain the probs. of genotypes
+    ## using a call in Oncotree, that expects and oncotree.fit object.
+
+    tmpo <- cpm2tm(list(edges = model))
+    output <- list()
+    output[["OT_f_graph"]] <- tmpo[["weighted_fgraph"]]
+    output[["OT_trans_mat"]] <- tmpo[["trans_mat_genots"]]
+    output[["OT_eps"]] <- c(epos = epos, eneg = 0)
+    output[["OT_predicted_genotype_freqs"]] <- OT_model_2_predict_genots(model,
+                                                                         epos)
+    return(output)
+}
+
+OT_model_2_predict_genots <- function(model, epos) {
+    ## Obtain the adjacency matrix and ensure adjacency matrix
+    ## and weights have genes in same order
+    adjm <- igraph::as_adjacency_matrix(
+                       igraph::graph_from_data_frame(model[, c("From", "To")]))
+    stopifnot(colnames(adjm)[1] == "Root")
+    stopifnot(colnames(adjm) == rownames(adjm))
+    ## Sort column names
+    cnadjm_nor <- sort(setdiff(colnames(adjm), "Root"))
+    adjm <- adjm[c("Root", cnadjm_nor), c("Root", cnadjm_nor)]
+    weights <- model$OT_edgeWeight
+    names(weights) <- model$To
+    weights <- weights[cnadjm_nor]
+    stopifnot(colnames(adjm)[-1] == names(weights))
+
+    otfit <- oncotree_fit_from_adjm_weights_epos(adjm = as.matrix(adjm),
+                                                 weights = weights,
+                                                 epos = epos)
+    preds <- distribution.oncotree(otfit,
+                                   with.probs = TRUE,
+                                   with.errors = TRUE,
+                                   edge.weights = "estimated")
+    preds <- dist_oncotree_output_2_named_genotypes(preds)
+    stopifnot(isTRUE(all.equal(sum(preds), 1)))
+    return(preds)
+}
+
+
+## Adjacency matrix, weights, epos error -> list like that from oncotree.fit
+## Adjacency matrix contains Root, weights do not.
+oncotree_fit_from_adjm_weights_epos <- function(adjm, weights, epos) {
+    otf <- list()
+    otf$data <- NA
+    otf$nmut <- ncol(adjm) 
+    otf$parent <- oncotree_fit_parent_from_dag(adjm, weights)
+    otf$eps <- c(epos = epos, eneg = 0)
+    return(otf)
+}
+
+## Adjacency matrix and weights -> list like that from parent component of
+## oncotree.fit
+##      Adjacency matrix contains Root, weights do not.
+oncotree_fit_parent_from_adjm_weights <- function(adjm, weights) {
+    child <- rep("ERROR", times = ncol(adjm))
+    parent <- rep("ERROR", times = ncol(adjm))
+    parent.num <- rep(-99, times = ncol(adjm))
+    for (p in seq_len(ncol(adjm))) {
+        child[p] <- colnames(adjm)[p]
+        tmp <- which(adjm[, p] == 1)
         if (length(tmp) == 0) {
             parent.num[p] <- 0
             parent[p] <- ""
@@ -946,14 +1048,6 @@ oncotree_fit_parent_from_dag <- function(dag, weights) {
 }
 
 
-oncotree_fit_from_dag_weights_epos <- function(dag, weights, epos) {
-    otf <- list()
-    otf$data <- NA
-    otf$nmut <- ncol(dag) 
-    otf$parent <- oncotree_fit_parent_from_dag(dag, weights)
-    otf$eps <- c(epos = epos, eneg = 0)
-    return(otf)
-}
 
 o1 <- oncotree_fit_from_dag_weights_epos(ab, runif(5), 0.1)
 
