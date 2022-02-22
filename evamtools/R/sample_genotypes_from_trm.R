@@ -698,15 +698,18 @@ probs_from_trm <- function(x,
 ## FIXME: think and include error model properly
 generate_random_evam <- function(ngenes = NULL, gene_names = NULL,
                                  model = c("OT", "CBN", "HESBCN", "MHN", "OncoBN")
-                                 , mhn_sparsity = 0.50
-                               , cbn_hesbcn_graph_density = 0.35
+                               , graph_density = 0.35
                                , cbn_hesbcn_lambda_min = 1/3
                                , cbn_hesbcn_lambda_max = 3
                                , hesbcn_probs = c("AND" = 1/3,
                                                   "OR" = 1/3,
                                                   "XOR" = 1/3)
+                               , ot_oncobn_weight_min = 0
+                               , ot_oncobn_weight_max = 1
+                               , ot_oncobn_epos = 0.1
+                               , oncobn_model = "DBN"
                                  ) {
-
+    stopifnot((graph_density <= 1) && (graph_density >= 0))
     if (!(xor(is.null(ngenes), is.null(gene_names))))
         stop("Give exactly one of ngenes XOR gene_names")
 
@@ -726,31 +729,40 @@ generate_random_evam <- function(ngenes = NULL, gene_names = NULL,
     gene_names <- sort(gene_names)
     output <- list()
     if (model == "MHN") {
+        mhn_sparsity <- 1 - graph_density
         thetas <- Random.Theta(n = ngenes, sparsity = mhn_sparsity)
         colnames(thetas) <- rownames(thetas) <- gene_names
         output <- MHN_from_thetas(thetas)
     } else if (model == "CBN") {
-        poset <- mccbn::random_poset(ngenes, graph_density = cbn_hesbcn_graph_density)
+        poset <- mccbn::random_poset(ngenes, graph_density = graph_density)
         lambdas <- runif(ngenes, cbn_hesbcn_lambda_min, cbn_hesbcn_lambda_max)
         names(lambdas) <-  colnames(poset) <- rownames(poset) <- gene_names
         output <- CBN_from_poset_lambdas(poset, lambdas)
     } else if (model == "HESBCN") {
         hesbcn_probs <- hesbcn_probs/sum(hesbcn_probs)
-        poset <- mccbn::random_poset(ngenes, graph_density = cbn_hesbcn_graph_density)
+        poset <- mccbn::random_poset(ngenes, graph_density = graph_density)
         lambdas <- runif(ngenes, cbn_hesbcn_lambda_min, cbn_hesbcn_lambda_max)
         names(lambdas) <-  colnames(poset) <- rownames(poset) <- gene_names
+        stopifnot(identical(sort(names(hesbcn_probs)), c("AND", "OR", "XOR")))
         output <-
             HESBCN_from_poset_lambdas_relation_probs(poset,
                                                      lambdas,
                                                      hesbcn_probs)
-    }
-
-    else if (model == "OT") {
+    } else if (model == "OT") {
         poset <- OT_random_poset(ngenes,
-                                 graph_density = ot_cbn_hesbcn_graph_density)
-        weights <- runif(ngenes, ot_p_min, ot_p_max)
+                                 graph_density = graph_density)
+        weights <- runif(ngenes, ot_oncobn_weight_min, ot_oncobn_weight_max)
         names(weights) <-  colnames(poset) <- rownames(poset) <- gene_names
-        output <- OT_from_poset_weights_epos(poset, weights, epos)
+        output <- OT_from_poset_weights_epos(poset, weights, ot_oncobn_epos)
+
+    } else if (model == "OncoBN") {
+        poset <- mccbn::random_poset(ngenes,
+                                     graph_density = graph_density)
+        thetas <- runif(ngenes, ot_oncobn_weight_min, ot_oncobn_weight_max)
+        names(thetas) <-  colnames(poset) <- rownames(poset) <- gene_names
+        output <- OncoBN_from_poset_thetas_epos_model(poset, thetas,
+                                                       ot_oncobn_epos,
+                                                       oncobn_model)
 
     }
     
@@ -872,7 +884,6 @@ HESBCN_from_poset_lambdas_relation_probs <- function(poset, lambdas,
     parent_set[singles] <- "Single"
     lmultiple <- length(num_parents) - sum(num_parents == 1)
     if (lmultiple > 0) {
-        stopifnot(identical(sort(names(hesbcn_probs)), c("AND", "OR", "XOR")))
         ps_values <- sample(names(hesbcn_probs), size = lmultiple,
                             prob = hesbcn_probs, replace = TRUE)
         parent_set[which(num_parents > 1)] <- ps_values
@@ -998,6 +1009,11 @@ OT_model_2_predict_genots <- function(model, epos) {
     otfit <- oncotree_fit_from_adjm_weights_epos(adjm = as.matrix(adjm),
                                                  weights = weights,
                                                  epos = epos)
+    ## We allow for errors from the model, not observational errors
+    ##   epos >= 0, but eneg = 0
+    ##  We set edge.weights to estimated. Observed ones are set to NA
+    ##  As we use with.errors = TRUE, argument to edge.weights is not needed
+    ##  but used to be explicit.
     preds <- distribution.oncotree(otfit,
                                    with.probs = TRUE,
                                    with.errors = TRUE,
@@ -1049,33 +1065,119 @@ oncotree_fit_parent_from_adjm_weights <- function(adjm, weights) {
 
 
 
-o1 <- oncotree_fit_from_dag_weights_epos(ab, runif(5), 0.1)
+## o1 <- oncotree_fit_from_dag_weights_epos(ab, runif(5), 0.1)
 
 
-## this is the right call
-o1p <- distribution.oncotree(o1, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
+## ## this is the right call
+## o1p <- distribution.oncotree(o1, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
 
-## And note these are identical
-o2 <- o1
-o2$parent$obs.weight <- runif(length(o1$parent$est.weight))
-o2p <- distribution.oncotree(o2, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
-stopifnot(all.equal(o1p$Prob, o2p$Prob))
-
-
-distribution.oncotree(o1, with.probs = TRUE, with.errors = FALSE, edge.weights = "estimated")
+## ## And note these are identical
+## o2 <- o1
+## o2$parent$obs.weight <- runif(length(o1$parent$est.weight))
+## o2p <- distribution.oncotree(o2, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
+## stopifnot(all.equal(o1p$Prob, o2p$Prob))
 
 
-distribution.oncotree(otf, with.probs = TRUE, with.errors = FALSE, edge.weights = "estimated")
-distribution.oncotree(otf, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
+## distribution.oncotree(o1, with.probs = TRUE, with.errors = FALSE, edge.weights = "estimated")
+
+
+## distribution.oncotree(otf, with.probs = TRUE, with.errors = FALSE, edge.weights = "estimated")
+## distribution.oncotree(otf, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
 
 
 
-oncotree_fit_from_edges <- function(edges, eplus) {
-    parent <- edges$From
-    child <- edges$To
-    parent.num <- 
+OncoBN_from_poset_thetas_epos_model <- function(poset,
+                                                thetas, epos,
+                                                model) {
+    stopifnot(identical(sort(colnames(poset)), sort(names(thetas))))
+    poset_as_data_frame <- poset_2_data_frame(poset)
 
+    ## Assign type of relationship to nodes with >= 2 parents
+    num_parents <- table(poset_as_data_frame[, "To"])
+    singles <- names(which(num_parents == 1))
+    parent_set <- vector(mode = "character",
+                         length = length(num_parents))
+    names(parent_set) <- names(num_parents)
+    parent_set[singles] <- "Single"
+    lmultiple <- length(num_parents) - sum(num_parents == 1)
+    if (lmultiple > 0) {
+        if (model == "CBN") {
+            ps_value <- "AND"
+        } else if (model == "DBN") {
+            ps_value <- "OR"
+        } else {
+            stop("No valid model")
+        }
+        parent_set[which(num_parents > 1)] <- ps_value
+    }
+    
+    stopifnot(identical(sort(names(parent_set)),
+                        sort(names(thetas))))
+
+
+    output <- list()
+    output[["OncoBN_model"]] <-
+        OncoBN_model_from_edges_thetas_parent_set(poset_as_data_frame,
+                                                   thetas,
+                                                   parent_set)
+    browser()
+    
+    output <- c(output, OncoBN_model_2_output(output[["OncoBN_model"]],
+                                              epos, FIXME ))
+    return(output)
 }
 
 
 
+OncoBN_model_from_edges_thetas_parent_set <- function(edges,
+                                                       thetas, parent_set) {
+    edges[["Thetas"]] <- vapply(edges[, "To"],
+                                       function(x) thetas[x], 0.0)
+    edges[["Relation"]] <- vapply(edges[, "To"],
+                                  function(x) parent_set[x], "")
+    return(edges)
+}
+
+
+
+OncoBN_model_2_output <- function(model, epos) {
+    ## We need to go back to the DAG representation
+    ## Different from CBN: we obtain the probs. of genotypes
+    ## using a call in Oncotree, that expects and oncotree.fit object.
+
+    tmpo <- cpm2tm(list(edges = model))
+    output <- list()
+    output[["OT_f_graph"]] <- tmpo[["weighted_fgraph"]]
+    output[["OT_trans_mat"]] <- tmpo[["trans_mat_genots"]]
+    output[["OT_eps"]] <- c(epos = epos, eneg = 0)
+    output[["OT_predicted_genotype_freqs"]] <- OncoBN_model_2_predict_genots(model,
+                                                                             epos)
+    return(output)
+}
+
+OncoBN_model_2_predict_genots <- function(model, epos) {
+    ## Create a representation as used by OncoBN
+    ## We need components: graph, theta, model, epsilon
+    ## edgelist and score set to NA  
+
+    obnfit <- list()
+    obnfit[["graph"]] <- igraph::graph_from_data_frame(model[, c("From", "To")])
+    
+
+
+}
+
+
+## FIXME: add observational error
+
+
+
+f1 <- function(x, y) {
+    if (x ==  "a") {
+        return("a")
+    } else if (x == "b") {
+        return("b")
+    } else if (y == 8) {
+        return(8)
+    } else stop("nope")
+}

@@ -54,7 +54,7 @@ do_OncoBN <- function(data,
     dbn_out <- igraph::as_data_frame(fit$graph)
     colnames(dbn_out) <- c("From", "To")
     dbn_out$From[dbn_out$From == "WT"] <- "Root"
-    dbn_out$Edge <- mapply(function(x, y) { paste0(x, " -> ", y) },
+    dbn_out$edge <- mapply(function(x, y) { paste0(x, " -> ", y) },
                             dbn_out$From, dbn_out$To)
     dbn_out$Thetas <- thetas[dbn_out$To]
 
@@ -80,12 +80,9 @@ do_OncoBN <- function(data,
     )
 
     est_genots <- DBN_prob_genotypes(fit, colnames(data))
-    ## Give a named vector for the estimated genotypes
-    ## There is no column called Root, unlike OT
-    gpnfr <- which(colnames(est_genots) == "Prob")
-    gpn_names <- genot_matrix_2_vector(est_genots[, -gpnfr])
-    est_genots <- as.vector(est_genots[, "Prob"])
-    names(est_genots) <- gpn_names
+    ## Give a named vector for the predicted freqs of genotypes
+    est_genots <- DBN_est_genots_2_named_genotyps(est_genots)
+    
     return(list(
         edges = dbn_out
       , thetas = thetas
@@ -93,7 +90,7 @@ do_OncoBN <- function(data,
       , epsilon = fit$epsilon
       , model = model
       , parent_set = ps_v
-      , predicted_genotype_freqs = reorder_to_standard_order(est_genots)
+      , predicted_genotype_freqs = est_genots
     ))
 }
 
@@ -109,4 +106,13 @@ DBN_prob_genotypes <- function(fit, gene_names) {
     return(genotypes)
 }
 
-
+## Give a named vector for the predicted freqs of genotypes
+DBN_est_genots_2_named_genotypes <- function(odt) {
+    ## There is no column called Root, unlike OT
+    gpnfr <- which(colnames(odt) == "Prob")
+    gpn_names <- genot_matrix_2_vector(odt[, -gpnfr])
+    odt <- as.vector(odt[, "Prob"])
+    names(odt) <- gpn_names
+    reorder_to_standard_order(odt)
+    return(odt)
+}
