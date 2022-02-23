@@ -74,7 +74,7 @@ Random model, with the same structure as returned by function \code{\link{evam}}
 
 \examples{
 rmhn <- generate_random_evam(model = "MHN", ngenes = 5)
-rcbn <- generate_random_evam(model = "MHN", ngenes = 5,
+rcbn <- generate_random_evam(model = "CBN", ngenes = 5,
                              graph_density = 0.5)
 
 ## Now, obtain some data

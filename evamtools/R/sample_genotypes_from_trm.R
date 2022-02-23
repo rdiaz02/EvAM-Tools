@@ -425,14 +425,10 @@ sample_CPMs <- function(cpm_output
                 ngenes = n_genes, gene_names = gene_names)
 
             retval[[sprintf("%s_sampled_genotype_freqs", method)]] <-
-                stats::setNames(tmp_genotypes_sampled, generate_sorted_genotypes(n_genes, gene_names))
+                stats::setNames(tmp_genotypes_sampled,
+                                generate_sorted_genotypes(n_genes, gene_names))
 
-                # data.frame(
-                #     Genotype = generate_sorted_genotypes(n_genes, gene_names),
-                #     Counts = tmp_genotypes_sampled
-                # )
-            ## The next one is NOT implicitly available.
-            ##   see OT_transition_matrices.org
+             
             retval[[sprintf("%s_obs_genotype_transitions", method)]] <- NULL
         } else {
             ## evam always returns the method_trans_rate_mat
@@ -486,10 +482,8 @@ sample_CPMs <- function(cpm_output
                                            ngenes = n_genes,
                                            gene_names = gene_names)
                     retval[[sprintf("%s_sampled_genotype_freqs", method)]] <-
-                        stats::setNames(tmp_genotypes_sampled, generate_sorted_genotypes(n_genes, gene_names))
-                        # data.frame(
-                        #     Genotype = generate_sorted_genotypes(n_genes, gene_names),
-                        #     Counts = tmp_genotypes_sampled)
+                        stats::setNames(tmp_genotypes_sampled,
+                                        generate_sorted_genotypes(n_genes, gene_names))
                 }
             }
         }
@@ -1203,11 +1197,11 @@ OncoBN_model_2_predict_genots <- function(model, epsilon) {
 ## return a data set subjects as rows and columns as genes,
 ## with 0/1
 counts_to_data_no_e <- function(x) {
-    genes <- setdiff(unique(unlist(strsplit(x$Genotype, ", "))),
+    genes <- setdiff(unique(unlist(strsplit(names(x), ", "))),
                      "WT")
     
     ## Just in case
-    genotypes <- canonicalize_genotype_names(x$Genotype)
+    genotypes <- canonicalize_genotype_names(names(x))
 
     ngenes <- length(genes)
     genotbin <- lapply(strsplit(genotypes, ", "),
@@ -1219,7 +1213,7 @@ counts_to_data_no_e <- function(x) {
     
     genotbin <- do.call(rbind, genotbin)
     colnames(genotbin) <- genes
-    rr <- rep(1:nrow(genotbin), x$Counts)
+    rr <- rep(1:nrow(genotbin), x)
     return(genotbin[rr, ])
 }
 

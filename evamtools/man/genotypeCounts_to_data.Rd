@@ -1,16 +1,14 @@
 \name{genotypeCounts_to_data}
 \alias{genotypeCounts_to_data}
 \title{Obtain a matrix of 0/1 with subjects as rows and genes as columns
-  from a data frame with genotype frequencies. Optionally, add
+  from a named vector with genotype frequencies. Optionally, add
   observation error.}
 \usage{
 genotypeCounts_to_data(x, e = 0.01)
 
 }
 \arguments{
-\item{x}{Data frame with two columns, named \code{Genotype} and
-  \code{Counts} that contain the counts of each Genotype. This data
-  frame is obtained, for example, from \code{\link{sample_CPMs}}.}
+\item{x}{Named vector that contains the counts of each genotype. This vector is obtained, for example, from \code{\link{sample_CPMs}}.}
 \item{e}{The proportion of observations with error (for
     instance, genotyping error). If larger than 0, this proportion of
     entries in the sampled matrix will be flipped (i.e., 0s turned

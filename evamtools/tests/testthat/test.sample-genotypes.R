@@ -71,3 +71,26 @@ test_that("We get requested output, by the specified means", {
     expect_true(sum(is.na(outS4$MHN_sampled_genotype_freqs)) == 0)
     expect_true(sum(is.na(outS4$OT_sampled_genotype_freqs)) == 0)
 })
+
+
+test_that("Exercise generate_random_evam and sampling", {
+    for(i in 1:5) {
+    rmhn <- generate_random_evam(model = "MHN", ngenes = 5)
+    rcbn <- generate_random_evam(model = "CBN", ngenes = 5,
+                             graph_density = 0.5)
+    
+    sample_mhn <- sample_CPMs(rmhn, N = 1000)
+    sample_cbn <- sample_CPMs(rcbn, N = 40)
+    
+    d1 <- genotypeCounts_to_data(sample_mhn$MHN_sampled_genotype_freqs, 0)
+    d2 <- genotypeCounts_to_data(sample_cbn$CBN_sampled_genotype_freqs, 0)
+}
+})
+
+cat("\n Done test.sample-genotypes.R \n")
+
+
+
+
+
+
