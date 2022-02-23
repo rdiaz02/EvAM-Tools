@@ -364,13 +364,31 @@ sample_CPMs <- function(cpm_output
                                     "CBN", "MCCBN",
                                     "MHN", "HESBCN")
                       , output = c("sampled_genotype_freqs")
-                        ## "obs_genotype_transitions",
-                        ## "state_counts")
-                        ## , obs_genotype_transitions = TRUE
                         ) {
+
     ## And I have "Source" for a source data type for the web server
     retval <- list()
 
+    ## Anything that is passed as "cpm_output" must have
+    ## a something_predicted_genotype_freqs
+
+    methods <- unique(methods)
+    available_methods <- vapply(methods,
+                                function(m) {
+                                    outn <- paste0(m, "_predicted_genotype_freqs")
+                                    return(!(is.null(cpm_output[[outn]])) &&
+                                           !(is.na(cpm_output[outn])))
+                                }, logical(1)
+                                )
+    available_methods <- names(which(available_methods))
+    
+    l_methods <- length(available_methods)
+    if (l_methods < length(methods)) {
+        warning("At least one method you asked to be sampled ",
+                "did not have output.")
+    }
+    methods <- available_methods
+    
     output <- unique(output)
     valid_output <- c("sampled_genotype_freqs",
                       "obs_genotype_transitions",
@@ -381,15 +399,20 @@ sample_CPMs <- function(cpm_output
                 paste(output[not_valid_output], sep = ", ", collapse = ", "),
                 " not among the available output.",
                 " Ignoring the invalid output.")
-        output <- methods[-not_valid_output]
+        output <- output[-not_valid_output]
     }
     if (length(output) == 0) stop("No valid output given.")
     if (any(c("state_counts", "obs_genotype_transitions") %in% output)) {
         message("For the requested output we will need to simulate ",
                 "from the transition rate matrix.")
     }
-    
-    gene_names <- colnames(cpm_output$analyzed_data)
+
+    ## FIXME: deal with output not from evam but from generate_random_evam
+    ## gene_names <- colnames(cpm_output$analyzed_data)
+    some_pred <- cpm_output[[paste0(methods[1], "_predicted_genotype_freqs")]]
+    gene_names <- sort(setdiff(unique(unlist(strsplit(names(some_pred),
+                                                      split = ", "))),
+                          "WT"))
     n_genes <- length(gene_names)
 
     for (method in methods) {
@@ -602,8 +625,6 @@ genot_matrix_2_vector <- function(x) {
 }
 
 
-
-
 ## Obtain probabilities of genotypes from transition rate matrix
 ## under sampling time distributed as exponential rate 1.
 ## 
@@ -620,23 +641,31 @@ genot_matrix_2_vector <- function(x) {
 ##  The final all.equal uses a tolerance larger than that of
 ##  the usual all.equal.
 
-## Yes, this is much slower, like two orders of magnitude,
-## than Schill's Generate.pTh. Still, about 0.3 to 0.4 seconds
-## for 11 genes, and most than 90% spent in the checks.
+## Yes, this is much slower, like up to one order of magnitude,
+## than Schill's Generate.pTh. Still, it takes generally < 0.04 seconds
+## for 4 to 8 genes, and most of it is spent in the checks.
 probs_from_trm <- function(x,
                            tolerance = 10 * sqrt(.Machine$double.eps),
                            all_genotypes = TRUE) {
     p0 <-  c(1, rep(0, nrow(x) - 1))
 
+    ## Recall our trans. rate matrix are. rows: from; columns: to.
+    ## But in Schill they are transposed.
     if (Matrix::nnzero(tril(x)))
         stop("Lower triangular not 0. Is this transposed?")
-    Q <- t(x)
+     Q <- t(x)
     diag(Q) <- -1 * colSums(Q)
 
     ## Equation 4 in Schill et al. Thus
     ## (I - Q) * p = p0
     I_Q <- Matrix::Diagonal(nrow(Q)) - Q
 
+    ## Limited experiments showed that for nrow(Q) < 1024
+    ## fastmatris's Gauss-Seidel was a lot faster, and consistently so.
+    ## For larger, I guess Rlinsolve's usage of sparse matrices
+    ## gives an edge. Why is Jacobi faster? No idea; parallel updates?
+    ## (and Gauss-Seidel, from Rlinsolve, was sometimes faster but sometimes
+    ##  much slower)
     if (nrow(Q) >= 1024) {
         p2 <- Rlinsolve::lsolve.jacobi(A = I_Q, B = p0, adjsym = FALSE,
                                        reltol = 1e-5 * sqrt(.Machine$double.eps),
@@ -647,7 +676,7 @@ probs_from_trm <- function(x,
                                  tol = 1e-5 * sqrt(.Machine$double.eps),
                                  maxiter = 1000,
                                  start = rep(0, nrow(Q)))
-        p <- p4
+        p <- as.vector(p4)
     }
 
     names(p) <- colnames(x)
@@ -670,4 +699,551 @@ probs_from_trm <- function(x,
     names(p_all) <- allGts
     p_all[names(p)] <- p
     return(p_all)
+}
+
+
+generate_random_evam <- function(ngenes = NULL, gene_names = NULL,
+                                 model = c("OT", "CBN", "HESBCN", "MHN",
+                                           "OncoBN")
+                               , graph_density = 0.35
+                               , cbn_hesbcn_lambda_min = 1/3
+                               , cbn_hesbcn_lambda_max = 3
+                               , hesbcn_probs = c("AND" = 1/3,
+                                                  "OR" = 1/3,
+                                                  "XOR" = 1/3)
+                               , ot_oncobn_weight_min = 0
+                               , ot_oncobn_weight_max = 1
+                               , ot_oncobn_epos = 0.1
+                               , oncobn_model = "DBN"
+                                 ) {
+    stopifnot((graph_density <= 1) && (graph_density >= 0))
+    if (!(xor(is.null(ngenes), is.null(gene_names))))
+        stop("Give exactly one of ngenes XOR gene_names")
+
+    if (length(model) > 1) {
+        warning("Only one model should be specified. Using the first")
+        model <- model[1]
+    }
+
+    if (model == "MCCBN") {
+        message("Generating a random MCCBN model is the same ",
+                "as generating a random CBN model. We'll do that.")
+        model <- "CBN"
+    }
+
+    if (is.null(gene_names)) gene_names <- LETTERS[seq_len(ngenes)]
+    if (is.null(ngenes)) ngenes <- length(gene_names)
+    gene_names <- sort(gene_names)
+    output <- list()
+    if (model == "MHN") {
+        mhn_sparsity <- 1 - graph_density
+        thetas <- Random.Theta(n = ngenes, sparsity = mhn_sparsity)
+        colnames(thetas) <- rownames(thetas) <- gene_names
+        output <- MHN_from_thetas(thetas)
+    } else if (model == "CBN") {
+        poset <- mccbn::random_poset(ngenes, graph_density = graph_density)
+        lambdas <- runif(ngenes, cbn_hesbcn_lambda_min, cbn_hesbcn_lambda_max)
+        names(lambdas) <-  colnames(poset) <- rownames(poset) <- gene_names
+        output <- CBN_from_poset_lambdas(poset, lambdas)
+    } else if (model == "HESBCN") {
+        hesbcn_probs <- hesbcn_probs/sum(hesbcn_probs)
+        poset <- mccbn::random_poset(ngenes, graph_density = graph_density)
+        lambdas <- runif(ngenes, cbn_hesbcn_lambda_min, cbn_hesbcn_lambda_max)
+        names(lambdas) <-  colnames(poset) <- rownames(poset) <- gene_names
+        stopifnot(identical(sort(names(hesbcn_probs)), c("AND", "OR", "XOR")))
+        output <-
+            HESBCN_from_poset_lambdas_relation_probs(poset,
+                                                     lambdas,
+                                                     hesbcn_probs)
+    } else if (model == "OT") {
+        poset <- OT_random_poset(ngenes,
+                                 graph_density = graph_density)
+        weights <- runif(ngenes, ot_oncobn_weight_min, ot_oncobn_weight_max)
+        names(weights) <-  colnames(poset) <- rownames(poset) <- gene_names
+        output <- OT_from_poset_weights_epos(poset, weights, ot_oncobn_epos)
+
+    } else if (model == "OncoBN") {
+        poset <- mccbn::random_poset(ngenes,
+                                     graph_density = graph_density)
+        thetas <- runif(ngenes, ot_oncobn_weight_min, ot_oncobn_weight_max)
+        names(thetas) <-  colnames(poset) <- rownames(poset) <- gene_names
+        output <- OncoBN_from_poset_thetas_epsilon_model(poset, thetas,
+                                                       ot_oncobn_epos,
+                                                       oncobn_model)
+
+    }
+
+    if (model %in% c("CBN", "MHN", "HESBCN")) {
+        outname <- paste0(model, "_predicted_genotype_freqs")
+        inname  <- paste0(model, "_trans_rate_mat")
+        output[[outname]] <- probs_from_trm(output[[inname]])
+    }
+    return(output)
+}
+
+
+
+
+## Pablo: use this?
+## Named matrix of thetas -> all of the model and predicted probs
+MHN_from_thetas <- function(thetas) {
+    oindex <- order(colnames(thetas))
+    thetas <- thetas[oindex, oindex]
+    output <- list()
+    output[["MHN_theta"]] <- thetas
+    output[["MHN_trans_rate_mat"]] <-
+        theta_to_trans_rate_3_SM(thetas,
+                                 inner_transition = inner_transitionRate_3_1)
+    output[["MHN_trans_mat"]] <-
+        trans_rate_to_trans_mat(output[["MHN_trans_rate_mat"]],
+                                method = "competingExponentials",
+                                paranoidCheck = TRUE)
+    output[["MHN_td_trans_mat"]] <-
+        trans_rate_to_trans_mat(output[["MHN_trans_rate_mat"]],
+                                method = "uniformization",
+                                paranoidCheck = TRUE)
+    output[["MHN_exp_theta"]] <- exp(thetas)
+    output[["MHN_exp_theta"]] <- exp(thetas)
+    return(output)
+}
+
+
+
+
+## Pablo: use this?
+## poset as adjacency matrix and vector of lambdas
+## both named -> all of the cbn output
+CBN_from_poset_lambdas <- function(poset, lambdas) {
+    stopifnot(identical(sort(colnames(poset)), sort(names(lambdas))))
+    poset_as_data_frame <- poset_2_data_frame(poset)
+    output <- list()
+    output[["CBN_model"]] <- CBN_model_from_edges_lambdas(poset_as_data_frame,
+                                                       lambdas)
+    output <- c(output,
+                CBN_model_2_output(output[["CBN_model"]]))
+    
+    return(output)
+}
+
+
+## Pablo: or use this if you use a data frame
+## data frame with "From", "To", "Edges" and lambdas -> all of the cbn output
+CBN_model_2_output <- function(model) {
+    ## extra level of nesting
+    tmpo <- cpm2tm(list(edges = model))
+    output <- list()
+    output[["CBN_trans_rate_mat"]] <- tmpo[["weighted_fgraph"]]
+    output[["CBN_trans_mat"]] <- tmpo[["trans_mat_genots"]]
+    output[["CBN_td_trans_mat"]] <-
+        trans_rate_to_trans_mat(tmpo[["weighted_fgraph"]],
+                                method = "uniformization")
+    return(output)
+}
+
+## Attach the lambdas to the edges data frame
+CBN_model_from_edges_lambdas <- function(edges, lambdas) {
+    edges[["rerun_lambda"]] <- vapply(edges[, "To"],
+                                      function(x) lambdas[x], 0.0)
+    return(edges)
+}
+
+
+## Convert a poset matrix to a data frame with the "edges" structure
+##   Adds the "Root" component, if not present
+poset_2_data_frame <- function(poset) {
+    stopifnot(identical(colnames(poset), rownames(poset)))
+    if (!("Root" %in% colnames(poset))) {
+        ## Add WT and WT connections
+        not_connected <- which(colSums(poset) == 0)
+        adjm2 <- cbind(rep(0, nrow(poset)), poset)
+        adjm2 <- rbind(rep(0, ncol(adjm2)),
+                       adjm2)
+        adjm2[1, not_connected + 1] <- 1
+        colnames(adjm2) <- rownames(adjm2) <- c("Root", colnames(poset))
+        poset <- adjm2
+    }
+    elist <- igraph::get.edgelist(igraph::graph_from_adjacency_matrix(adjm2))
+
+    edges <- data.frame(From = elist[, 1],
+                        To = elist[, 2],
+                        edge = paste0(elist[, 1], " -> ", elist[, 2]))
+    return(edges)
+}
+
+
+
+
+
+
+## Pablo: use this one?
+## poset as adjac. matrix, vector of lambdas, parent_set -> full HESBCN output
+HESBCN_from_poset_lambdas_relation_probs <- function(poset, lambdas,
+                                                     hesbcn_probs) {
+    stopifnot(identical(sort(colnames(poset)), sort(names(lambdas))))
+    poset_as_data_frame <- poset_2_data_frame(poset)
+
+    ## Assign type of relationship randomly to nodes with >= 2 parents
+    num_parents <- table(poset_as_data_frame[, "To"])
+    singles <- names(which(num_parents == 1))
+    parent_set <- vector(mode = "character", length = length(num_parents))
+    names(parent_set) <- names(num_parents)
+    parent_set[singles] <- "Single"
+    lmultiple <- length(num_parents) - sum(num_parents == 1)
+    if (lmultiple > 0) {
+        ps_values <- sample(names(hesbcn_probs), size = lmultiple,
+                            prob = hesbcn_probs, replace = TRUE)
+        parent_set[which(num_parents > 1)] <- ps_values
+    }
+    
+    stopifnot(identical(sort(names(parent_set)),
+                        sort(names(lambdas))))
+    
+    output <- list()
+    output[["HESBCN_parent_set"]] <- parent_set
+    output[["HESBCN_model"]] <-
+        HESBCN_model_from_edges_lambdas_parent_set(poset_as_data_frame,
+                                                   lambdas,
+                                                   parent_set)
+    output <- c(output, HESBCN_model_2_output(output[["HESBCN_model"]],
+                                              output[["HESBCN_parent_set"]]))
+    return(output)
+}
+
+
+
+
+
+## Pablo: or use this if you use a data frame and parent frame and parent set
+## data frame with "From", "To", "Edges" and lambdas -> all of the cbn output
+HESBCN_model_2_output <- function(model, parent_set) {
+    tmpo <- cpm2tm(list(edges = model, parent_set = parent_set))
+    output <- list()
+    output[["HESBCN_trans_rate_mat"]] <- tmpo[["weighted_fgraph"]]
+    output[["HESBCN_trans_mat"]] <- tmpo[["trans_mat_genots"]]
+    output[["HESBCN_td_trans_mat"]] <-
+        trans_rate_to_trans_mat(tmpo[["weighted_fgraph"]],
+                                method = "uniformization")
+    ## output[["HESBCN_predicted_genotype_freqs"]] <- 
+    ##     probs_from_trm(tmpo[["weighted_fgraph"]])
+    return(output)
+}
+
+## Attach the lambdas to the edges data frame
+## Same for Relation.
+HESBCN_model_from_edges_lambdas_parent_set <- function(edges, lambdas,
+                                                       parent_set) {
+    edges[["Lambdas"]] <- vapply(edges[, "To"],
+                                 function(x) lambdas[x], 0.0)
+        
+    edges[["Relation"]] <- vapply(edges[, "To"],
+                                  function(x) parent_set[x], "")
+    return(edges)
+}
+
+## A random poset where each gene depends on at most one parent
+OT_random_poset <- function(ngenes, graph_density) {
+    poset0 <- mccbn::random_poset(ngenes, graph_density = graph_density)
+    ## Leave only one parent
+    cosum <- colSums(poset0)
+    if (all(cosum <= 1)) return(poset0)
+    for (co in which(cosum > 1)) {
+        ones <- which(poset0[, co] == 1)
+        the_one <- sample(ones, size = 1)
+        poset0[, co] <- 0L
+        poset0[the_one, co] <- 1L
+    }
+    return(poset0)
+}
+
+
+## Pablo call this?
+## poset as adjacency matrix, weights, epos -> full output, as from evam
+##   weights: do not have Root
+##   poset: one for OT, so no column with two or more parents
+OT_from_poset_weights_epos <- function(poset, weights, epos) {
+    stopifnot(identical(sort(colnames(poset)), sort(names(weights))))
+    stopifnot(colSums(poset) <= 1)
+    poset_as_data_frame <- poset_2_data_frame(poset)
+    output <- list()
+    output[["OT_model"]] <- OT_model_from_edges_lambdas(poset_as_data_frame,
+                                                        weights)
+    output <- c(output, OT_model_2_output(output[["OT_model"]],
+                                          epos))
+    return(output)
+}
+
+
+OT_model_from_edges_lambdas <- function(edges, weights) {
+    edges[["OT_edgeWeight"]] <- vapply(edges[, "To"],
+                                       function(x) weights[x], 0.0)
+    return(edges)
+}
+
+
+## Pablo call this?
+## OT model and epos -> full output, as from evam
+OT_model_2_output <- function(model, epos) {
+    ## We need to go back to the DAG representation
+    ## Different from CBN: we obtain the probs. of genotypes
+    ## using a call in Oncotree, that expects and oncotree.fit object.
+
+    tmpo <- cpm2tm(list(edges = model))
+    output <- list()
+    output[["OT_f_graph"]] <- tmpo[["weighted_fgraph"]]
+    output[["OT_trans_mat"]] <- tmpo[["trans_mat_genots"]]
+    output[["OT_eps"]] <- c(epos = epos, eneg = 0)
+    output[["OT_predicted_genotype_freqs"]] <- OT_model_2_predict_genots(model,
+                                                                         epos)
+    return(output)
+}
+
+OT_model_2_predict_genots <- function(model, epos) {
+    ## Obtain the adjacency matrix and ensure adjacency matrix
+    ## and weights have genes in same order
+    adjm <- igraph::as_adjacency_matrix(
+                       igraph::graph_from_data_frame(model[, c("From", "To")]))
+    stopifnot(colnames(adjm)[1] == "Root")
+    stopifnot(colnames(adjm) == rownames(adjm))
+    ## Sort column names
+    cnadjm_nor <- sort(setdiff(colnames(adjm), "Root"))
+    adjm <- adjm[c("Root", cnadjm_nor), c("Root", cnadjm_nor)]
+    weights <- model$OT_edgeWeight
+    names(weights) <- model$To
+    weights <- weights[cnadjm_nor]
+    stopifnot(colnames(adjm)[-1] == names(weights))
+
+    otfit <- oncotree_fit_from_adjm_weights_epos(adjm = as.matrix(adjm),
+                                                 weights = weights,
+                                                 epos = epos)
+    ## We allow for errors from the model, not observational errors
+    ##   epos >= 0, but eneg = 0
+    ##  We set edge.weights to estimated. Observed ones are set to NA
+    ##  As we use with.errors = TRUE, argument to edge.weights is not needed
+    ##  but used to be explicit.
+    preds <- distribution.oncotree(otfit,
+                                   with.probs = TRUE,
+                                   with.errors = TRUE,
+                                   edge.weights = "estimated")
+    preds <- dist_oncotree_output_2_named_genotypes(preds)
+    stopifnot(isTRUE(all.equal(sum(preds), 1)))
+    return(preds)
+}
+
+
+## Adjacency matrix, weights, epos error -> list like that from oncotree.fit
+## Adjacency matrix contains Root, weights do not.
+oncotree_fit_from_adjm_weights_epos <- function(adjm, weights, epos) {
+    otf <- list()
+    otf$data <- NA
+    otf$nmut <- ncol(adjm) 
+    otf$parent <- oncotree_fit_parent_from_adjm_weights(adjm, weights)
+    otf$eps <- c(epos = epos, eneg = 0)
+    return(otf)
+}
+
+## Adjacency matrix and weights -> list like that from parent component of
+## oncotree.fit
+##      Adjacency matrix contains Root, weights do not.
+oncotree_fit_parent_from_adjm_weights <- function(adjm, weights) {
+    child <- rep("ERROR", times = ncol(adjm))
+    parent <- rep("ERROR", times = ncol(adjm))
+    parent.num <- rep(-99, times = ncol(adjm))
+    for (p in seq_len(ncol(adjm))) {
+        child[p] <- colnames(adjm)[p]
+        tmp <- which(adjm[, p] == 1)
+        if (length(tmp) == 0) {
+            parent.num[p] <- 0
+            parent[p] <- ""
+        } else if (length(tmp) == 1) {
+            parent.num[p] <- unname(tmp)
+            parent[p] <- names(tmp)
+        } else {
+            stop("More than one parent")
+        }
+    }
+    return(list(child = child,
+                parent = parent,
+                parent.num = parent.num,
+                obs.weight = NA,
+                est.weight = c(1, weights)
+                ))
+}
+
+
+
+## o1 <- oncotree_fit_from_dag_weights_epos(ab, runif(5), 0.1)
+
+
+## ## this is the right call
+## o1p <- distribution.oncotree(o1, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
+
+## ## And note these are identical
+## o2 <- o1
+## o2$parent$obs.weight <- runif(length(o1$parent$est.weight))
+## o2p <- distribution.oncotree(o2, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
+## stopifnot(all.equal(o1p$Prob, o2p$Prob))
+
+
+## distribution.oncotree(o1, with.probs = TRUE, with.errors = FALSE, edge.weights = "estimated")
+
+
+## distribution.oncotree(otf, with.probs = TRUE, with.errors = FALSE, edge.weights = "estimated")
+## distribution.oncotree(otf, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
+
+
+## Pablo calls this?
+OncoBN_from_poset_thetas_epsilon_model <- function(poset,
+                                                thetas,
+                                                epsilon,
+                                                model) {
+    stopifnot(identical(sort(colnames(poset)), sort(names(thetas))))
+    poset_as_data_frame <- poset_2_data_frame(poset)
+
+    ## Assign type of relationship to nodes with >= 2 parents
+    num_parents <- table(poset_as_data_frame[, "To"])
+    singles <- names(which(num_parents == 1))
+    parent_set <- vector(mode = "character",
+                         length = length(num_parents))
+    names(parent_set) <- names(num_parents)
+    parent_set[singles] <- "Single"
+    lmultiple <- length(num_parents) - sum(num_parents == 1)
+    if (lmultiple > 0) {
+        if (model == "CBN") {
+            ps_value <- "AND"
+        } else if (model == "DBN") {
+            ps_value <- "OR"
+        } else {
+            stop("No valid model")
+        }
+        parent_set[which(num_parents > 1)] <- ps_value
+    }
+    
+    stopifnot(identical(sort(names(parent_set)),
+                        sort(names(thetas))))
+
+    output <- list()
+    output[["OncoBN_parent_set"]] <- parent_set
+    output[["OncoBN_fitted_model"]] <- model
+    output[["OncoBN_likelihood"]] <- NA
+    output[["OncoBN_model"]] <-
+        OncoBN_model_from_edges_thetas_parent_set(poset_as_data_frame,
+                                                   thetas,
+                                                   parent_set)
+
+    output <- c(output, OncoBN_model_2_output(output[["OncoBN_model"]],
+                                              epsilon))
+    return(output)
+}
+
+
+
+OncoBN_model_from_edges_thetas_parent_set <- function(edges,
+                                                       thetas, parent_set) {
+    edges[["Thetas"]] <- vapply(edges[, "To"],
+                                       function(x) thetas[x], 0.0)
+    edges[["Relation"]] <- vapply(edges[, "To"],
+                                  function(x) parent_set[x], "")
+    return(edges)
+}
+
+
+## Pablo
+OncoBN_model_2_output <- function(model, epsilon) {
+    ## We need to go back to the DAG representation
+    ## Different from CBN: we obtain the probs. of genotypes
+    ## using a call in Oncotree, that expects and oncotree.fit object.
+
+    tmpo <- cpm2tm(list(edges = model))
+    output <- list()
+    output[["OncoBN_f_graph"]] <- tmpo[["weighted_fgraph"]]
+    output[["OncoBN_trans_mat"]] <- tmpo[["trans_mat_genots"]]
+    output[["OncoBN_epsilon"]] <- epsilon
+    output[["OncoBN_predicted_genotype_freqs"]] <-
+        OncoBN_model_2_predict_genots(model,
+                                      epsilon = epsilon)
+    return(output)
+}
+
+
+
+OncoBN_model_2_predict_genots <- function(model, epsilon) {
+    ## Create a representation as used by OncoBN
+    ## We need components: graph, theta, model, epsilon
+    ## edgelist and score not added.
+
+    obnfit <- list()
+    ## In OncoBN what we call Root is called WT
+    model$From[model$From == "Root"] <- "WT"
+
+    thetadf <- aggregate(Thetas ~ To, data = model, FUN = unique)
+    thetav <- thetadf$Thetas
+    names(thetav) <- thetadf$To
+    theta <- thetav[sort(names(thetav))]
+    names_g <- names(theta)
+    obnfit[["theta"]] <- theta
+    
+    ## Make sure we have a graph
+    ## that is always consistently ordered to prevent
+    ## https://github.com/phillipnicol/OncoBN/issues/3#issuecomment-1048814030
+    am <- igraph::as_adjacency_matrix(
+                      igraph::graph_from_data_frame(model[, c("From", "To")]))
+    am <- am[c("WT", names_g), c("WT", names_g)]
+    obnfit[["graph"]] <- igraph::graph_from_adjacency_matrix(am)
+    
+    obnfit[["model"]] <- ifelse(any(model$Relation == "AND"), "CBN", "DBN")
+    obnfit[["epsilon"]] <- epsilon
+    pred_genots <- DBN_prob_genotypes(obnfit, sort(names(thetav)))
+    pred_genots <- DBN_est_genots_2_named_genotypes(pred_genots)
+
+    return(pred_genots)
+}
+
+
+## Given a data frame with columns Genotype (as string) and Counts
+## return a data set subjects as rows and columns as genes,
+## with 0/1
+counts_to_data_no_e <- function(x) {
+    genes <- setdiff(unique(unlist(strsplit(x$Genotype, ", "))),
+                     "WT")
+    
+    ## Just in case
+    genotypes <- canonicalize_genotype_names(x$Genotype)
+
+    ngenes <- length(genes)
+    genotbin <- lapply(strsplit(genotypes, ", "),
+                       function(u) {
+                           wg <- which(genes %in% u)
+                           v <- rep(0, ngenes)
+                           v[wg] <- 1
+                           return(v)})
+    
+    genotbin <- do.call(rbind, genotbin)
+    colnames(genotbin) <- genes
+    rr <- rep(1:nrow(genotbin), x$Counts)
+    return(genotbin[rr, ])
+}
+
+
+
+## From the identically named function in OncoSimulR
+add_noise <- function(x, properr) {
+    if(properr <= 0) {
+        return(x)
+    }
+    else {
+        if(properr > 1)
+            stop("Proportion with error cannot be > 1")
+        nn <- prod(dim(x))
+        flipped <- sample(nn, round(nn * properr))
+        x[flipped] <- as.integer(!x[flipped])
+        return(x)
+    }
+}
+
+## return a data set subjects as rows and columns as genes,
+## with 0/1
+genotypeCounts_to_data <- function(x, e = 0.01) {
+    d <- counts_to_data_no_e(x)
+    if(e > 0) d <- add_noise(d, e)
+    return(d)
 }

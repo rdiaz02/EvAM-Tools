@@ -24,7 +24,7 @@
 #' @param n Integer. Number of digits to return
 #' 
 #' @return vector with 0 and 1 with the binary coding
-int2binary <- function(int_state, n = NULL){
+int2binary <- function(int_state, n = NULL) {
     int_state <- as.integer(int_state)
 
     if (is.na(int_state)){
@@ -64,7 +64,7 @@ int2binary <- function(int_state, n = NULL){
 #' 
 #' @return string with mutated genes
 int2str <- function(int_state, sep = ", ", wt = "WT"){
-    if(int_state < 0){
+    if (int_state < 0) {
         stop("Only integers >= 0 are valid")
     }
 

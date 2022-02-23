@@ -53,10 +53,23 @@ do_OncoBN <- function(data,
                       epsilon = epsilon)
     thetas <- fit$theta
     names(thetas) <- colnames(data)
+    ## Possible issues with the way the graph is returned
+    ## Fixing it temporarily
+    ## See https://github.com/phillipnicol/OncoBN/issues/3#issuecomment-1049074644
+    adjm <- igraph::as_adjacency_matrix(
+                        igraph::make_directed_graph(fit$edgelist))
+
+    ## gn <- setdiff(colnames(df), "WT")
+    gn <- colnames(data)
+    adjm <- adjm[c("WT", gn), c("WT", gn)]
+    new_graph <- igraph::graph_from_adjacency_matrix(adjm)
+    fit$graph <- new_graph
+
+    
     dbn_out <- igraph::as_data_frame(fit$graph)
     colnames(dbn_out) <- c("From", "To")
     dbn_out$From[dbn_out$From == "WT"] <- "Root"
-    dbn_out$Edge <- mapply(function(x, y) {paste0(x, " -> ", y)},
+    dbn_out$edge <- mapply(function(x, y) { paste0(x, " -> ", y) },
                             dbn_out$From, dbn_out$To)
     dbn_out$Thetas <- thetas[dbn_out$To]
 
@@ -64,10 +77,11 @@ do_OncoBN <- function(data,
     dbn_out$Relation[dbn_out$From == "Root"] <- "Single"
       
     ## The parent set is used for plotting
+    ## Simple with a table? Oh well
     ps <- aggregate(Relation ~ To,
                     data = dbn_out,
-                    FUN = function(x){
-                        if(length(x) == 1) return("Single")
+                    FUN = function(x) {
+                        if (length(x) == 1) return("Single")
                         else return(x[1])}
                     )
     ps_v <- ps[, "Relation"]
@@ -81,12 +95,9 @@ do_OncoBN <- function(data,
     )
 
     est_genots <- DBN_prob_genotypes(fit, colnames(data))
-    ## Give a named vector for the estimated genotypes
-    ## There is no column called Root, unlike OT
-    gpnfr <- which(colnames(est_genots) == "Prob")
-    gpn_names <- genot_matrix_2_vector(est_genots[, -gpnfr])
-    est_genots <- as.vector(est_genots[, "Prob"])
-    names(est_genots) <- gpn_names
+    ## Give a named vector for the predicted freqs of genotypes
+    est_genots <- DBN_est_genots_2_named_genotypes(est_genots)
+
     return(list(
         edges = dbn_out
       , thetas = thetas
@@ -94,7 +105,7 @@ do_OncoBN <- function(data,
       , epsilon = fit$epsilon
       , model = model
       , parent_set = ps_v
-      , predicted_genotype_freqs = reorder_to_standard_order(est_genots)
+      , predicted_genotype_freqs = est_genots
     ))
 }
 
@@ -105,9 +116,25 @@ DBN_prob_genotypes <- function(fit, gene_names) {
     n <- length(gene_names)
     genotypes <- expand.grid(replicate(n, 0:1, simplify = FALSE))
     colnames(genotypes) <- gene_names
+    ## Pre-check same order and proper naming
+    ## See https://github.com/phillipnicol/OncoBN/issues/3#issuecomment-1048814030
+    G <- t(as.matrix(as_adjacency_matrix(fit$graph)))
+    stopifnot(colnames(genotypes) == colnames(G)[-1])
+    stopifnot(colnames(G)[1] == "WT")
     genotypes$Prob <- apply(genotypes, 1,
                             function(x) Lik.genotype(fit, x))
     return(genotypes)
+}
+
+## Give a named vector for the predicted freqs of genotypes
+DBN_est_genots_2_named_genotypes <- function(odt) {
+    ## There is no column called Root, unlike OT
+    gpnfr <- which(colnames(odt) == "Prob")
+    gpn_names <- genot_matrix_2_vector(odt[, -gpnfr])
+    odt <- as.vector(odt[, "Prob"])
+    names(odt) <- gpn_names
+    reorder_to_standard_order(odt)
+    return(odt)
 }
 
 

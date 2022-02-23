@@ -145,9 +145,9 @@ ot_proc <- function(datax, nboot = 1000,
         ot.boot.original <- ot.boot$tree.list$Freq[boot.idx]/nboot
 
         ## Two paranoid checks
-        if(! all(edges.matrix[, 1, drop = FALSE] %in% colnames(ot.boot.freqs)))
+        if (!all(edges.matrix[, 1, drop = FALSE] %in% colnames(ot.boot.freqs)))
             stop("colnames ot.boot.freqs weird")
-        if(! all(edges.matrix[, 2, drop = FALSE] %in% rownames(ot.boot.freqs)))
+        if (!all(edges.matrix[, 2, drop = FALSE] %in% rownames(ot.boot.freqs)))
             stop("rownames ot.boot.freqs weird")
         boot.freq <- ot.boot.freqs[edges.matrix]/nboot
         consensus <- try(ot_consensus(ot.boot))
@@ -156,7 +156,7 @@ ot_proc <- function(datax, nboot = 1000,
     }
         
     
-    if(distribution.oncotree) {
+    if (distribution.oncotree) {
         ## with many genotypes and/or large trees can lead to unexpectedly
         ## very long computing times. Removed for now.
         ## Well, I think that only happens if with.errors = TRUE
@@ -174,17 +174,20 @@ ot_proc <- function(datax, nboot = 1000,
         message(" Ending distribution.oncotree ", date())
 
 
-        ## Give a named vector for the estimated genotypes
-        ## There is a column called Root, unlike OncoBN
-        gpnroot <- which(colnames(est_genots) == "Root")
-        gpnfr <- which(colnames(est_genots) == "Prob")
-        gpn_names <- genot_matrix_2_vector(est_genots[, -c(gpnroot, gpnfr)])
-        est_genots <- as.vector(est_genots[, "Prob"])
-        names(est_genots) <- gpn_names
+        est_genots <- dist_oncotree_output_2_named_genotypes(est_genots)
 
-        ## If with.errors = FALSE, there can be missing genotypes
-        est_genots <- reorder_to_standard_order(est_genots)
-        est_genots[is.na(est_genots)] <- 0
+        ## ## Give a named vector for the estimated genotypes
+        ## ## There is a column called Root, unlike OncoBN
+        ## gpnroot <- which(colnames(est_genots) == "Root")
+        ## gpnfr <- which(colnames(est_genots) == "Prob")
+        ## gpn_names <- genot_matrix_2_vector(est_genots[, -c(gpnroot, gpnfr)])
+        ## est_genots <- as.vector(est_genots[, "Prob"])
+        ## names(est_genots) <- gpn_names
+
+        ## ## If with.errors = FALSE, there can be missing genotypes
+        ## est_genots <- reorder_to_standard_order(est_genots)
+        ## if (length(is.na(est_genots)))
+        ##     est_genots[is.na(est_genots)] <- 0
         
         ## Not using it now
         ## message(" Starting observed vs expected, oncotree ", date())
@@ -212,7 +215,8 @@ ot_proc <- function(datax, nboot = 1000,
                       OT_obsMarginal = obs_marginal[edges.matrix[, "child"]],
                       OT_predMarginal = pred_marginal[edges.matrix[, "child"]],
                       stringsAsFactors = FALSE),
-                consensus = consensus, 
+                eps = ot.fit$eps,
+                consensus = consensus,
                 OT_error.fun  = error.fun,
                 ot.boot.original = ot.boot.original, ## Frequency of original tree among boot
                 predicted_genotype_freqs = est_genots
@@ -224,3 +228,21 @@ ot_proc <- function(datax, nboot = 1000,
 
 # library(codetools)
 # checkUsageEnv(env = .GlobalEnv)
+
+## Give a named vector for the predicted freqs of genotypes
+dist_oncotree_output_2_named_genotypes <- function(odt) {
+    ## In the output of distribution.oncotree there
+    ## is a column called Root, unlike OncoBN
+    gpnroot <- which(colnames(odt) == "Root")
+    gpnfr <- which(colnames(odt) == "Prob")
+    gpn_names <- genot_matrix_2_vector(odt[, -c(gpnroot, gpnfr)])
+    odt <- as.vector(odt[, "Prob"])
+    names(odt) <- gpn_names
+
+    ## If with.errors = FALSE, there can be missing genotypes
+    odt <- reorder_to_standard_order(odt)
+    if (length(is.na(odt)))
+        odt[is.na(odt)] <- 0
+    return(odt)
+}
+

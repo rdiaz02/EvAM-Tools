@@ -2,9 +2,11 @@ useDynLib(evamtools, .registration = TRUE)
 
 export(
     "sample_CPMs"
-    , "evam"
-     , "plot_CPMs"
-     , "runShiny"
+  , "evam"
+  , "plot_CPMs"
+  , "runShiny"
+  , "generate_random_evam"
+  , "genotypeCounts_to_data"
      )
 
 importFrom("shiny", "runApp", "Progress")
@@ -34,7 +36,7 @@ importFrom("igraph", "V", "E", "graph.data.frame", "layout.reingold.tilford"
          , "subcomponent", "adjacent_vertices", "graph_from_adjacency_matrix"
          , "graph_from_data_frame", "head_of", "as_adjacency_matrix",
            "make_directed_graph", "incident", "ends", "as_data_frame",
-           "layout_with_sugiyama")
+           "layout_with_sugiyama", "get.edgelist")
 importFrom("stats", "aggregate", "chisq.test", "na.omit", "rexp",
            "runif", "rnorm", "optim", "setNames")
 ## just something, so plot.matrix is available
@@ -42,7 +44,8 @@ importFrom("stats", "aggregate", "chisq.test", "na.omit", "rexp",
 importFrom("plot.matrix", "fmt")
 
 importFrom("OncoBN", "fitCPN", "Lik.genotype")
-importFrom("mccbn", "candidate_posets", "adaptive.simulated.annealing")
+importFrom("mccbn", "candidate_posets", "adaptive.simulated.annealing",
+           "random_poset")
 
 importFrom("RhpcBLASctl", "blas_set_num_threads", "omp_set_num_threads")
 importFrom("Rlinsolve", "lsolve.jacobi")
