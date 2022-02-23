@@ -658,6 +658,12 @@ probs_from_trm <- function(x,
     ## (I - Q) * p = p0
     I_Q <- Matrix::Diagonal(nrow(Q)) - Q
 
+    ## Limited experiments showed that for nrow(Q) < 1024
+    ## fastmatris's Gauss-Seidel was a lot faster, and consistently so.
+    ## For larger, I guess Rlinsolve's usage of sparse matrices
+    ## gives an edge. Why is Jacobi faster? No idea; parallel updates?
+    ## (and Gauss-Seidel, from Rlinsolve, was sometimes faster but sometimes
+    ##  much slower)
     if (nrow(Q) >= 1024) {
         p2 <- Rlinsolve::lsolve.jacobi(A = I_Q, B = p0, adjsym = FALSE,
                                        reltol = 1e-5 * sqrt(.Machine$double.eps),
@@ -760,7 +766,7 @@ generate_random_evam <- function(ngenes = NULL, gene_names = NULL,
                                      graph_density = graph_density)
         thetas <- runif(ngenes, ot_oncobn_weight_min, ot_oncobn_weight_max)
         names(thetas) <-  colnames(poset) <- rownames(poset) <- gene_names
-        output <- OncoBN_from_poset_thetas_epos_model(poset, thetas,
+        output <- OncoBN_from_poset_thetas_epsilon_model(poset, thetas,
                                                        ot_oncobn_epos,
                                                        oncobn_model)
 
@@ -1085,9 +1091,10 @@ oncotree_fit_parent_from_adjm_weights <- function(adjm, weights) {
 ## distribution.oncotree(otf, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
 
 
-
-OncoBN_from_poset_thetas_epos_model <- function(poset,
-                                                thetas, epos,
+## Pablo?
+OncoBN_from_poset_thetas_epsilon_model <- function(poset,
+                                                thetas,
+                                                epsilon,
                                                 model) {
     stopifnot(identical(sort(colnames(poset)), sort(names(thetas))))
     poset_as_data_frame <- poset_2_data_frame(poset)
@@ -1114,16 +1121,17 @@ OncoBN_from_poset_thetas_epos_model <- function(poset,
     stopifnot(identical(sort(names(parent_set)),
                         sort(names(thetas))))
 
-
     output <- list()
+    output[["OncoBN_parent_set"]] <- parent_set
+    output[["OncoBN_fitted_model"]] <- model
+    output[["OncoBN_likelihood"]] <- NA
     output[["OncoBN_model"]] <-
         OncoBN_model_from_edges_thetas_parent_set(poset_as_data_frame,
                                                    thetas,
                                                    parent_set)
-    browser()
-    
+
     output <- c(output, OncoBN_model_2_output(output[["OncoBN_model"]],
-                                              epos, FIXME ))
+                                              epsilon))
     return(output)
 }
 
@@ -1139,45 +1147,62 @@ OncoBN_model_from_edges_thetas_parent_set <- function(edges,
 }
 
 
-
-OncoBN_model_2_output <- function(model, epos) {
+## Pablo
+OncoBN_model_2_output <- function(model, epsilon) {
     ## We need to go back to the DAG representation
     ## Different from CBN: we obtain the probs. of genotypes
     ## using a call in Oncotree, that expects and oncotree.fit object.
 
     tmpo <- cpm2tm(list(edges = model))
     output <- list()
-    output[["OT_f_graph"]] <- tmpo[["weighted_fgraph"]]
-    output[["OT_trans_mat"]] <- tmpo[["trans_mat_genots"]]
-    output[["OT_eps"]] <- c(epos = epos, eneg = 0)
-    output[["OT_predicted_genotype_freqs"]] <- OncoBN_model_2_predict_genots(model,
-                                                                             epos)
+    output[["OncoBN_f_graph"]] <- tmpo[["weighted_fgraph"]]
+    output[["OncoBN_trans_mat"]] <- tmpo[["trans_mat_genots"]]
+    output[["OncoBN_epsilon"]] <- epsilon
+    output[["OncoBN_predicted_genotype_freqs"]] <-
+        OncoBN_model_2_predict_genots(model,
+                                      epsilon = epsilon)
     return(output)
 }
 
-OncoBN_model_2_predict_genots <- function(model, epos) {
+
+
+OncoBN_model_2_predict_genots <- function(model, epsilon) {
     ## Create a representation as used by OncoBN
     ## We need components: graph, theta, model, epsilon
-    ## edgelist and score set to NA  
+    ## edgelist and score not added.
 
     obnfit <- list()
-    obnfit[["graph"]] <- igraph::graph_from_data_frame(model[, c("From", "To")])
+    ## In OncoBN what we call Root is called WT
+    model$From[model$From == "Root"] <- "WT"
+
+    thetadf <- aggregate(Thetas ~ To, data = model, FUN = unique)
+    thetav <- thetadf$Thetas
+    names(thetav) <- thetadf$To
+    theta <- thetav[sort(names(thetav))]
+    names_g <- names(theta)
+    obnfit[["theta"]] <- theta
     
+    ## Make sure we have a graph
+    ## that is always consistently ordered to prevent
+    ## https://github.com/phillipnicol/OncoBN/issues/3#issuecomment-1048814030
+    am <- igraph::as_adjacency_matrix(
+                      igraph::graph_from_data_frame(model[, c("From", "To")]))
+    am <- am[c("WT", names_g), c("WT", names_g)]
+    obnfit[["graph"]] <- igraph::graph_from_adjacency_matrix(am)
+    
+    obnfit[["model"]] <- ifelse(any(model$Relation == "AND"), "CBN", "DBN")
+    obnfit[["epsilon"]] <- epsilon
+    pred_genots <- DBN_prob_genotypes(obnfit, sort(names(thetav)))
+    pred_genots <- DBN_est_genots_2_named_genotypes(pred_genots)
 
-
+    return(pred_genots)
 }
 
 
 ## FIXME: add observational error
+## FIXME: create data as for analysis from the sampled one
+## e.g., from
+## n <- length(gene_names)
+##     genotypes <- expand.grid(replicate(n, 0:1, simplify = FALSE))
+## Or similar on oncotree.fit, generate.data or similar
 
-
-
-f1 <- function(x, y) {
-    if (x ==  "a") {
-        return("a")
-    } else if (x == "b") {
-        return("b")
-    } else if (y == 8) {
-        return(8)
-    } else stop("nope")
-}

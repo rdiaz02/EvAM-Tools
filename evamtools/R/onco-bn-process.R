@@ -81,7 +81,7 @@ do_OncoBN <- function(data,
 
     est_genots <- DBN_prob_genotypes(fit, colnames(data))
     ## Give a named vector for the predicted freqs of genotypes
-    est_genots <- DBN_est_genots_2_named_genotyps(est_genots)
+    est_genots <- DBN_est_genots_2_named_genotypes(est_genots)
     
     return(list(
         edges = dbn_out
@@ -101,6 +101,11 @@ DBN_prob_genotypes <- function(fit, gene_names) {
     n <- length(gene_names)
     genotypes <- expand.grid(replicate(n, 0:1, simplify = FALSE))
     colnames(genotypes) <- gene_names
+    ## Pre-check same order and proper naming
+    ## See https://github.com/phillipnicol/OncoBN/issues/3#issuecomment-1048814030
+    G <- t(as.matrix(as_adjacency_matrix(fit$graph)))
+    stopifnot(colnames(genotypes) == colnames(G)[-1])
+    stopifnot(colnames(G)[1] == "WT")
     genotypes$Prob <- apply(genotypes, 1,
                             function(x) Lik.genotype(fit, x))
     return(genotypes)
@@ -116,3 +121,5 @@ DBN_est_genots_2_named_genotypes <- function(odt) {
     reorder_to_standard_order(odt)
     return(odt)
 }
+
+
