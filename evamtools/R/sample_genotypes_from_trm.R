@@ -700,8 +700,6 @@ probs_from_trm <- function(x,
 }
 
 
-## FIXME: still missing OT and OncoBN
-## FIXME: think and include error model properly
 generate_random_evam <- function(ngenes = NULL, gene_names = NULL,
                                  model = c("OT", "CBN", "HESBCN", "MHN",
                                            "OncoBN")
@@ -1036,7 +1034,7 @@ oncotree_fit_from_adjm_weights_epos <- function(adjm, weights, epos) {
     otf <- list()
     otf$data <- NA
     otf$nmut <- ncol(adjm) 
-    otf$parent <- oncotree_fit_parent_from_dag(adjm, weights)
+    otf$parent <- oncotree_fit_parent_from_adjm_weights(adjm, weights)
     otf$eps <- c(epos = epos, eneg = 0)
     return(otf)
 }

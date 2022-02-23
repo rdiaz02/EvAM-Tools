@@ -28,6 +28,10 @@ genotypeCounts_to_data(x, e = 0.01)
  
 }
 
+\description{Obtain a matrix of 0/1 with subjects as rows and genes as columns
+  from a data frame with genotype frequencies. Optionally, add
+  observation error.}
+
 \examples{
 rmhn <- generate_random_evam(model = "MHN", ngenes = 5)
 sample_mhn <- sample_CPMs(rmhn, N = 12)
