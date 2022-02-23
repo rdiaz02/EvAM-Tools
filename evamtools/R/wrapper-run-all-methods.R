@@ -589,6 +589,7 @@ evam <- function(x,
                  oncobn_opts = list(
                      model = "DBN",
                      algorithm = "DP",
+                     k = 3,
                      epsilon = min(colMeans(x)/2),
                      silent = TRUE
                  ),
@@ -689,6 +690,7 @@ evam <- function(x,
     d_oncobn_opts <- list(
         model = "DBN",
         algorithm = "DP",
+        k = 3,
         epsilon = min(colMeans(x)/2),
         silent = TRUE
     )
@@ -823,6 +825,7 @@ evam <- function(x,
                 out <- do_OncoBN(x,
                                  model = oncobn_opts_2$model,
                                  algorithm = oncobn_opts_2$algorithm,
+                                 k = oncobn_opts_2$k,
                                  epsilon = oncobn_opts_2$epsilon,
                                  silent = oncobn_opts_2$silent)
                 out <- c(out, cpm2tm(out))
