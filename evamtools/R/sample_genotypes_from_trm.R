@@ -364,7 +364,7 @@ sample_CPMs <- function(cpm_output
                                     "MHN", "HESBCN")
                       , output = c("sampled_genotype_freqs")
                         ) {
-    browser()
+
     ## And I have "Source" for a source data type for the web server
     retval <- list()
 
@@ -724,14 +724,14 @@ generate_random_evam <- function(ngenes = NULL, gene_names = NULL,
         model <- model[1]
     }
 
-    if(model == "MCCBN") {
+    if (model == "MCCBN") {
         message("Generating a random MCCBN model is the same ",
                 "as generating a random CBN model. We'll do that.")
         model <- "CBN"
     }
 
-    if(is.null(gene_names)) gene_names <- LETTERS[seq_len(ngenes)]
-    if(is.null(ngenes)) ngenes <- length(gene_names)
+    if (is.null(gene_names)) gene_names <- LETTERS[seq_len(ngenes)]
+    if (is.null(ngenes)) ngenes <- length(gene_names)
     gene_names <- sort(gene_names)
     output <- list()
     if (model == "MHN") {
@@ -771,7 +771,6 @@ generate_random_evam <- function(ngenes = NULL, gene_names = NULL,
                                                        oncobn_model)
 
     }
-    
 
     if (model %in% c("CBN", "MHN", "HESBCN")) {
         outname <- paste0(model, "_predicted_genotype_freqs")
@@ -1199,10 +1198,51 @@ OncoBN_model_2_predict_genots <- function(model, epsilon) {
 }
 
 
-## FIXME: add observational error
-## FIXME: create data as for analysis from the sampled one
-## e.g., from
-## n <- length(gene_names)
-##     genotypes <- expand.grid(replicate(n, 0:1, simplify = FALSE))
-## Or similar on oncotree.fit, generate.data or similar
+## Given a data frame with columns Genotype (as string) and Counts
+## return a data set subjects as rows and columns as genes,
+## with 0/1
+counts_to_data_no_e <- function(x) {
+    genes <- setdiff(unique(unlist(strsplit(x$Genotype, ", "))),
+                     "WT")
+    
+    ## Just in case
+    genotypes <- canonicalize_genotype_names(x$Genotype)
 
+    ngenes <- length(genes)
+    genotbin <- lapply(strsplit(genotypes, ", "),
+                       function(u) {
+                           wg <- which(genes %in% u)
+                           v <- rep(0, ngenes)
+                           v[wg] <- 1
+                           return(v)})
+    
+    genotbin <- do.call(rbind, genotbin)
+    colnames(genotbin) <- genes
+    rr <- rep(1:nrow(genotbin), x$Counts)
+    return(genotbin[rr, ])
+}
+
+
+
+## From the identically named function in OncoSimulR
+add_noise <- function(x, properr) {
+    if(properr <= 0) {
+        return(x)
+    }
+    else {
+        if(properr > 1)
+            stop("Proportion with error cannot be > 1")
+        nn <- prod(dim(x))
+        flipped <- sample(nn, round(nn * properr))
+        x[flipped] <- as.integer(!x[flipped])
+        return(x)
+    }
+}
+
+## return a data set subjects as rows and columns as genes,
+## with 0/1
+genotypeCounts_to_data <- function(x, e = 0.01) {
+    d <- counts_to_data_no_e(x)
+    if(e > 0) d <- add_noise(d, e)
+    return(d)
+}
