@@ -633,7 +633,6 @@ evam <- function(x,
         stop("One of your genes is called WT. That is not allowed")
 
     
-    
     ## Sanity checks of methods
     methods <- unique(methods)
     accepted_methods <- c("OT", "OncoBN", "CBN", "MCCBN", "MHN", "HESBCN")
@@ -737,8 +736,13 @@ evam <- function(x,
 
     if ("OncoBN" %in% methods) {
         stopifnot(oncobn_opts_2$model %in% c("DBN", "CBN"))
+        ## Until it gets solved
+        if (oncobn_opts_2$model == "CBN")
+            warning("Computation of probabilities of genotypes is ",
+                    "reported to be wrong with OncoBN using CBN model: ",
+                    "https://github.com/phillipnicol/OncoBN/issues/4")
     }
-
+    
     
     ## ######################################################################
     ##   Big function so we can parallelize the calls
