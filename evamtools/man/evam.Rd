@@ -22,6 +22,7 @@ evam(x,
      oncobn_opts = list(
                      model = "DBN",
                      algorithm = "DP",
+                     k = 3,
                      epsilon = min(colMeans(x)/2),
                      silent = TRUE
                  ),

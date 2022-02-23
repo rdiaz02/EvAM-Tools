@@ -36,6 +36,7 @@
 do_OncoBN <- function(data,
                       model = "DBN",
                       algorithm = "DP",
+                      k = 3,
                       epsilon = min(colMeans(data)/2),
                       silent = TRUE) {
 
@@ -43,6 +44,7 @@ do_OncoBN <- function(data,
         invisible(capture.output(fit <- fitCPN(data,
                                                model = model,
                                                algorithm = algorithm,
+                                               k = k,
                                                epsilon = epsilon)))
     else
         fit <- fitCPN(data,
