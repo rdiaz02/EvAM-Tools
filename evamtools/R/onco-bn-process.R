@@ -53,6 +53,19 @@ do_OncoBN <- function(data,
                       epsilon = epsilon)
     thetas <- fit$theta
     names(thetas) <- colnames(data)
+    ## Possible issues with the way the graph is returned
+    ## Fixing it temporarily
+    ## See https://github.com/phillipnicol/OncoBN/issues/3#issuecomment-1049074644
+    adjm <- igraph::as_adjacency_matrix(
+                        igraph::make_directed_graph(fit$edgelist))
+
+    ## gn <- setdiff(colnames(df), "WT")
+    gn <- colnames(data)
+    adjm <- adjm[c("WT", gn), c("WT", gn)]
+    new_graph <- igraph::graph_from_adjacency_matrix(adjm)
+    fit$graph <- new_graph
+
+    
     dbn_out <- igraph::as_data_frame(fit$graph)
     colnames(dbn_out) <- c("From", "To")
     dbn_out$From[dbn_out$From == "WT"] <- "Root"
@@ -80,7 +93,7 @@ do_OncoBN <- function(data,
         function(x) ps_v[x],
         "some_string"
     )
-
+    browser()
     est_genots <- DBN_prob_genotypes(fit, colnames(data))
     ## Give a named vector for the predicted freqs of genotypes
     est_genots <- DBN_est_genots_2_named_genotypes(est_genots)
@@ -100,6 +113,7 @@ do_OncoBN <- function(data,
 
 ## From https://github.com/phillipnicol/OncoBN/issues/3#issuecomment-1033260046
 DBN_prob_genotypes <- function(fit, gene_names) {
+    browser()
     n <- length(gene_names)
     genotypes <- expand.grid(replicate(n, 0:1, simplify = FALSE))
     colnames(genotypes) <- gene_names

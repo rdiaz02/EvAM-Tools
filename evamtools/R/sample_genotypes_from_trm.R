@@ -703,7 +703,8 @@ probs_from_trm <- function(x,
 ## FIXME: still missing OT and OncoBN
 ## FIXME: think and include error model properly
 generate_random_evam <- function(ngenes = NULL, gene_names = NULL,
-                                 model = c("OT", "CBN", "HESBCN", "MHN", "OncoBN")
+                                 model = c("OT", "CBN", "HESBCN", "MHN",
+                                           "OncoBN")
                                , graph_density = 0.35
                                , cbn_hesbcn_lambda_min = 1/3
                                , cbn_hesbcn_lambda_max = 3
@@ -874,7 +875,7 @@ poset_2_data_frame <- function(poset) {
 
 
 
-## Pablo: this one?
+## Pablo: use this one?
 ## poset as adjac. matrix, vector of lambdas, parent_set -> full HESBCN output
 HESBCN_from_poset_lambdas_relation_probs <- function(poset, lambdas,
                                                      hesbcn_probs) {
@@ -955,7 +956,7 @@ OT_random_poset <- function(ngenes, graph_density) {
 }
 
 
-## Pablo call this
+## Pablo call this?
 ## poset as adjacency matrix, weights, epos -> full output, as from evam
 ##   weights: do not have Root
 ##   poset: one for OT, so no column with two or more parents
@@ -979,7 +980,7 @@ OT_model_from_edges_lambdas <- function(edges, weights) {
 }
 
 
-## Pablo call this
+## Pablo call this?
 ## OT model and epos -> full output, as from evam
 OT_model_2_output <- function(model, epos) {
     ## We need to go back to the DAG representation
@@ -1090,7 +1091,7 @@ oncotree_fit_parent_from_adjm_weights <- function(adjm, weights) {
 ## distribution.oncotree(otf, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
 
 
-## Pablo?
+## Pablo calls this?
 OncoBN_from_poset_thetas_epsilon_model <- function(poset,
                                                 thetas,
                                                 epsilon,
