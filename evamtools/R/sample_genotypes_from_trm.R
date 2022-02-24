@@ -96,10 +96,10 @@ indiv_sample_from_trm_pre <- function(trmstd,
     genotype <- "WT" 
     trajectory <- "WT"
     
-    while(TRUE) {
+    while (TRUE) {
         ## qii <- diag[row] ## Or qs in Gotovos et al terminology
         ## Special case of genotype that does not transition to anything
-        if(diag[row] == 0.0) break 
+        if (diag[row] == 0.0) break 
         t_transition <- rexp(n = 1, rate = diag[row])
         t_accum <- t_accum + t_transition
         if(t_accum >= T_sampling ) break
@@ -162,9 +162,9 @@ population_sample_from_trm <- function(trm, n_samples = 10,
                                              T_sampling = x,
                                              ngenots = ngenots,
                                              genot_names = genot_names),
-               mc.cores = cores)   
+               mc.cores = cores)  
         
-    } else {    
+    } else {
         out <- mclapply(T_sampling,
                function(x)
                    indiv_sample_from_trm(trm = trm,
@@ -179,7 +179,6 @@ population_sample_from_trm <- function(trm, n_samples = 10,
     return(list(
         T_sampling = T_sampling
       , T_sum_events = unlist(lapply(out, function(x) x$t_accum))
-    #   , trans_table = NA ## I do not know what this is for
       , trajectory = lapply(out, function(x) x$trajectory)
       , obs_events = unlist(lapply(out, function(x) x$genotype))
         ))
@@ -306,7 +305,7 @@ process_samples <- function(sim, n_genes,
             }
         }
         ## There is a single last one
-        if(!(all(apso[last - 1, ] == apso[last, ])))
+        if (!(all(apso[last - 1, ] == apso[last, ])))
             tt2[apso[last, 1], apso[last, 2]] <- 1
         else ## no change between last two ones
             tt2[apso[last, 1], apso[last, 2]] <- sum
@@ -407,8 +406,6 @@ sample_CPMs <- function(cpm_output
                 "from the transition rate matrix.")
     }
 
-    ## FIXME: deal with output not from evam but from generate_random_evam
-    ## gene_names <- colnames(cpm_output$analyzed_data)
     some_pred <- cpm_output[[paste0(methods[1], "_predicted_genotype_freqs")]]
     gene_names <- sort(setdiff(unique(unlist(strsplit(names(some_pred),
                                                       split = ", "))),
@@ -655,7 +652,7 @@ probs_from_trm <- function(x,
     I_Q <- Matrix::Diagonal(nrow(Q)) - Q
 
     ## Limited experiments showed that for nrow(Q) < 1024
-    ## fastmatris's Gauss-Seidel was a lot faster, and consistently so.
+    ## fastmatrix's Gauss-Seidel was a lot faster, and consistently so.
     ## For larger, I guess Rlinsolve's usage of sparse matrices
     ## gives an edge. Why is Jacobi faster? No idea; parallel updates?
     ## (and Gauss-Seidel, from Rlinsolve, was sometimes faster but sometimes

@@ -59,32 +59,51 @@ test_that("Test OncoBN thetas in right order", {
     expect_equal(unname(m1bo$OncoBN_predicted_genotype_freqs["A, C"]),
                  .3 * .6 * (1 - .4))
 
+    
+    m2 <- data.frame(From = c("Root", "Root", "A", "B"),
+                     To = c("A", "B", "C", "C"),
+                     Thetas = c(0.3, 0.4, 0.6, 0.6),
+                     Relation = c("Single", "Single", "AND", "AND"))
+    
+    m2o <- OncoBN_model_2_output(m2, 0)
+    expect_true(m2o$OncoBN_predicted_genotype_freqs["C"] == 0)
+    expect_equal(unname(m2o$OncoBN_predicted_genotype_freqs["A, C"]),
+                 0)
+    expect_equal(unname(m2o$OncoBN_predicted_genotype_freqs["A, B"]),
+                 .3 * .4 * (1 - 0.6))
+    expect_equal(unname(m2o$OncoBN_predicted_genotype_freqs["A, B, C"]),
+                 .3 * .6 * .4)
+    expect_equal(unname(m2o$OncoBN_predicted_genotype_freqs["A"]),
+                 .3 * (1 - .4))
+    expect_equal(unname(m2o$OncoBN_predicted_genotype_freqs["B"]),
+                 .4 * (1 - .3))
+    expect_equal(unname(m2o$OncoBN_predicted_genotype_freqs["C"]),
+                 0)
+    expect_equal(unname(m2o$OncoBN_predicted_genotype_freqs["B, C"]),
+                 0)
+    expect_equal(unname(m2o$OncoBN_predicted_genotype_freqs["WT"]),
+                 (1 - .3) * (1 - .4))
 
-    ## There is a bug in OncoBN with CBN
-    ## https://github.com/phillipnicol/OncoBN/issues/4
     
-    ## m2 <- data.frame(From = c("Root", "Root", "A", "B"),
-    ##                  To = c("A", "B", "C", "C"),
-    ##                  Thetas = c(0.3, 0.4, 0.6, 0.6),
-    ##                  Relation = c("Single", "Single", "AND", "AND"))
-    
-    ## m2o <- OncoBN_model_2_output(m2, 0)
-    ## expect_true(m2o$OncoBN_predicted_genotype_freqs["C"] == 0)
-    ## expect_equal(unname(m2o$OncoBN_predicted_genotype_freqs["A, C"]),
-    ##              0)
-    ## expect_equal(unname(m2o$OncoBN_predicted_genotype_freqs["A, B"]),
-    ##              .3 * .4)
-    
-    ## expect_equal(unname(m2o$OncoBN_predicted_genotype_freqs["A, B, C"]),
-    ##              .3 * .6 * .4)
-   
-
-    ## m2b <- m2[c(4, 2, 3, 1), ]
-    ## m2bo <- OncoBN_model_2_output(m2b, 0)
-    ## expect_true(m2bo$OncoBN_predicted_genotype_freqs["C"] == 0)
-    ## expect_equal(unname(m2bo$OncoBN_predicted_genotype_freqs["A, C"]),
-    ##              0)
-    ## expect_equal(unname(m2bo$OncoBN_predicted_genotype_freqs["A, B, C"]),
-    ##              .3 * .6 * .4)
-    
+    ## Reorder the model data frame, to check we reorder it internally
+    ## as it should
+    m2b <- m2[c(4, 2, 3, 1), ]
+    m2bo <- OncoBN_model_2_output(m2b, 0)
+    expect_true(m2bo$OncoBN_predicted_genotype_freqs["C"] == 0)
+    expect_equal(unname(m2bo$OncoBN_predicted_genotype_freqs["A, C"]),
+                 0)
+    expect_equal(unname(m2bo$OncoBN_predicted_genotype_freqs["A, B"]),
+                 .3 * .4 * (1 - 0.6))
+    expect_equal(unname(m2bo$OncoBN_predicted_genotype_freqs["A, B, C"]),
+                 .3 * .6 * .4)
+    expect_equal(unname(m2bo$OncoBN_predicted_genotype_freqs["A"]),
+                 .3 * (1 - .4))
+    expect_equal(unname(m2bo$OncoBN_predicted_genotype_freqs["B"]),
+                 .4 * (1 - .3))
+    expect_equal(unname(m2bo$OncoBN_predicted_genotype_freqs["C"]),
+                 0)
+    expect_equal(unname(m2bo$OncoBN_predicted_genotype_freqs["B, C"]),
+                 0)
+    expect_equal(unname(m2bo$OncoBN_predicted_genotype_freqs["WT"]),
+                 (1 - .3) * (1 - .4))
 })
