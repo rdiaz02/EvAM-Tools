@@ -6,7 +6,6 @@ export(
   , "plot_CPMs"
   , "runShiny"
   , "generate_random_evam"
-  , "genotypeCounts_to_data"
      )
 
 importFrom("shiny", "runApp", "Progress")
