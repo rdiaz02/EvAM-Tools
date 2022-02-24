@@ -1,6 +1,6 @@
 test_that("Test standarize datasets works correctly", {
   check_fields <- function(orig_data, expected_data){
-    standard_data <- evamtools:::standarize_dataset(orig_data)
+    standard_data <- standarize_dataset(orig_data)
     expected_attr <- names(expected_data)
     for(i in expected_attr){
       expect_equal(standard_data[[i]], expected_data[[i]])
@@ -17,7 +17,8 @@ test_that("Test standarize datasets works correctly", {
     expect_equal(standard_data$gene_names, names(standard_data$dag_parent_set))
     expect_equal(standard_data$gene_names, names(standard_data$lambdas))
     if(!is.null(standard_data$data)){
-      expect_equal(standard_data$gene_names[1: ncol(standard_data$data)], colnames(standard_data$data))
+      expect_equal(standard_data$gene_names[1: ncol(standard_data$data)], 
+        colnames(standard_data$data))
     }
   }
 
@@ -183,7 +184,7 @@ test_that("Test standarize datasets works correctly", {
 
 test_that("Standarize does not work with bad data", {
 
-  expect_error(evamtools:::standarize_dataset("asd")
+  expect_error(standarize_dataset("asd")
   , "Input data should be a list")
 
   test_data <- examples_csd$csd$AND$data
@@ -191,7 +192,7 @@ test_that("Standarize does not work with bad data", {
   # Try with a CSD
   data1 <- list(data = test_data)
 
-  expect_error(evamtools:::standarize_dataset(data1)
+  expect_error(standarize_dataset(data1)
     , "Data should be binary: only 0 and 1")
 
   # Try with a DAG
@@ -208,33 +209,33 @@ test_that("Standarize does not work with bad data", {
   dag_1 <- test_dag
   dag_1["D4", "A1"] <- 1 #Breaks DAG
   test_dag_1 <- list(dag = dag_1)
-  expect_error(evamtools:::standarize_dataset(test_dag_1), "The graph is not a DAG")
+  expect_error(standarize_dataset(test_dag_1), "The graph is not a DAG")
   
   dag_2 <- test_dag
   dag_2["A1", "A1"] <- 1 #Breaks DAG
   test_dag_2 <- list(dag = dag_2)
-  expect_error(evamtools:::standarize_dataset(test_dag_2), "The graph is not a DAG")
+  expect_error(standarize_dataset(test_dag_2), "The graph is not a DAG")
 
   dag_3 <- test_dag
   dag_3["A1", "B2"] <- 2 #Bad input
   test_dag_3 <- list(dag = dag_3)
-  expect_error(evamtools:::standarize_dataset(test_dag_3)
+  expect_error(standarize_dataset(test_dag_3)
     , "Adjacency matrix should be binary: only 0 and 1")
 
   dag_4 <- test_dag
   dag_4["A1", "B2"] <- "abc" #Bad input
   test_dag_4 <- list(dag = dag_4)
-  expect_error(evamtools:::standarize_dataset(test_dag_4)
+  expect_error(standarize_dataset(test_dag_4)
     , "Adjacency matrix should be binary: only 0 and 1")
   
   parent_set <- c("Single", "OR", "AND2", "AND") #Bad data relationships
   test_parent_set <- list(dag_parent_set = parent_set)
-  expect_error(evamtools:::standarize_dataset(test_parent_set)
+  expect_error(standarize_dataset(test_parent_set)
     , "Parent set must include only 'Single', 'AND', 'OR' or 'XOR'")
 
   lambdas <- c(1, "AB", 4)
   test_lambdas <- list(lambdas = lambdas)
-  expect_error(evamtools:::standarize_dataset(test_lambdas)
+  expect_error(standarize_dataset(test_lambdas)
   , "Lambdas should only contain numbers")
 
   ## Try with a Matrix
@@ -248,7 +249,7 @@ test_that("Standarize does not work with bad data", {
   colnames(thetas) <- rownames(thetas) <- c("A1", "B2", "C3", "D4")
 
   test_thetas <- list(thetas = thetas)
-  expect_error(evamtools:::standarize_dataset(test_thetas)
+  expect_error(standarize_dataset(test_thetas)
   , "Theta matrix should only contain numbers")
 })
 
@@ -344,7 +345,7 @@ test_that("Create tabular data from CPM output works correctly", {
   cpm_out$OT_sampled_genotype_freqs <- NULL
 
 
-  tabular_data <- evamtools:::create_tabular_data(cpm_out)
+  tabular_data <- create_tabular_data(cpm_out)
 
   expect_equal(1, length(unique(colSums(tabular_data$sampled_genotype_freqs[-1]))))
 
@@ -356,7 +357,8 @@ test_that("Create tabular data from CPM output works correctly", {
     }else{
       for(genotype in tabular_data$sampled_genotype_freqs$Genotype){
         expect_equal(tabular_data$sampled_genotype_freqs[genotype, method]
-          , as.numeric(cpm_out[[paste0(method, "_sampled_genotype_freqs")]][genotype]))
+          , as.numeric(cpm_out[[paste0(method, 
+            "_sampled_genotype_freqs")]][genotype]))
       }
 
       for(genotype in tabular_data$tran_rate_mat$Genotype){
@@ -369,7 +371,8 @@ test_that("Create tabular data from CPM output works correctly", {
         value <- tabular_data$obs_genotype_transitions[transition, method]
         if(value > 0){
           expect_equal(value
-            , as.numeric(cpm_out[[paste0(method, "_obs_genotype_transitions")]][trans[[1]], trans[[2]]]))
+            , as.numeric(cpm_out[[paste0(method, 
+              "_obs_genotype_transitions")]][trans[[1]], trans[[2]]]))
         }
       }
     }
@@ -381,7 +384,8 @@ test_that("Create tabular data from CPM output works correctly", {
     
     for(genotype in tabular_data$predicted_genotype_freqs$Genotype){
         expect_equal(tabular_data$predicted_genotype_freqs[genotype, method]
-          , as.numeric(cpm_out[[paste0(method, "_predicted_genotype_freqs")]][genotype]))
+          , as.numeric(cpm_out[[paste0(method, 
+            "_predicted_genotype_freqs")]][genotype]))
       }
   }
 })

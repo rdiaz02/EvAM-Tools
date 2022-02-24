@@ -220,8 +220,8 @@ create_tabular_data <- function(data){
 
         for(method in available_methods){
           tmp_data <- data[[paste0(method, "_", attr)]]
-          if(!is.null(tmp_data) && !is.na(tmp_data)){
-            if(is.null(all_counts$Genotype)){
+          if(!any(is.null(tmp_data)) && !any(is.na(tmp_data))){
+            if(any(is.null(all_counts$Genotype))){
               all_counts <- data.frame(Genotype = names(tmp_data)) #They include all genotypes
               rownames(all_counts) <- all_counts$Genotype
             }
