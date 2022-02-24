@@ -231,11 +231,6 @@ process_samples <- function(sim, n_genes,
     if ("sampled_genotype_freqs" %in% output) {
         counts_tmp <- sample_to_pD_order(sim$obs_events, n_genes, gene_names)
         frequencies <- stats::setNames(counts_tmp, sorted_genotypes)
-        # frequencies <- data.frame(
-        #     Genotype = sorted_genotypes,
-        #     Counts = counts_tmp
-        # )
-        # rownames(frequencies) <- NULL
         retval$sampled_genotype_freqs <- frequencies
     }
 
@@ -363,14 +358,13 @@ sample_CPMs <- function(cpm_output
                                     "CBN", "MCCBN",
                                     "MHN", "HESBCN")
                       , output = c("sampled_genotype_freqs")
+                      , obs_noise = 0
+                      , genotype_freqs_as_data = TRUE
                         ) {
-
-    ## And I have "Source" for a source data type for the web server
     retval <- list()
 
     ## Anything that is passed as "cpm_output" must have
-    ## a something_predicted_genotype_freqs
-
+    ## something_predicted_genotype_freqs
     methods <- unique(methods)
     available_methods <- vapply(methods,
                                 function(m) {
@@ -424,7 +418,6 @@ sample_CPMs <- function(cpm_output
             retval[[sprintf("%s_sampled_genotype_freqs", method)]] <-
                 stats::setNames(tmp_genotypes_sampled,
                                 generate_sorted_genotypes(n_genes, gene_names))
-
              
             retval[[sprintf("%s_obs_genotype_transitions", method)]] <- NULL
         } else {
@@ -433,10 +426,12 @@ sample_CPMs <- function(cpm_output
             if (any(c("state_counts", "obs_genotype_transitions") %in% output)) {
                 ## Need to simulate from trm
                 trm <- cpm_output[[sprintf("%s_trans_rate_mat", method)]]
+                ## Do we have the necessary output to simulate?
                 if ((length(trm) == 1) && is.na(trm)) {
                     retval[[sprintf("%s_obs_genotype_transitions", method)]] <- NULL
 
-                    ogt <- cpm_output[[sprintf("%s_predicted_genotype_freqs", method)]]
+                    ogt <- cpm_output[[sprintf("%s_predicted_genotype_freqs",
+                                               method)]]
                     if ((length(ogt) == 1) && is.na(ogt)) {
                         retval[[sprintf("%s_sampled_genotype_freqs", method)]] <- NULL
                     } else {
@@ -459,7 +454,6 @@ sample_CPMs <- function(cpm_output
                                 psamples[[reqout]]
                         else
                             retval[[paste0(method, "_", reqout)]] <- NA
-
                     }
                 }
             } else {
@@ -480,7 +474,41 @@ sample_CPMs <- function(cpm_output
                                            gene_names = gene_names)
                     retval[[sprintf("%s_sampled_genotype_freqs", method)]] <-
                         stats::setNames(tmp_genotypes_sampled,
-                                        generate_sorted_genotypes(n_genes, gene_names))
+                                        generate_sorted_genotypes(n_genes,
+                                                                  gene_names))
+                }
+            }
+        }
+        if ("sampled_genotype_freqs" %in% output) {
+            ## #######################################
+            ##
+            ## Noise and genotype frequencies as data
+            ##
+            ## #######################################
+
+            ## obs_noise == 0  && !genotype_freqs_as_data : do nothing
+            ## obs_noise == 0  && genotype_freqs_as_data  : return also the data
+            ## obs_noise >  0  && !genotype_freqs_as_data :
+            ##                           - generate data
+            ##                           - add noise to data
+            ##                           - data as freqs and overwrite the object
+            ##                           - rm data
+            
+            ## obs_noise >  0  && genotype_freqs_as_data : as former,
+            ##                                             returning data
+
+            data_name <- paste0(method, "_sampled_genotype_freqs_as_data")
+            gf_name   <- paste0(method, "_sampled_genotype_freqs")
+            if ((obs_noise == 0) && (genotype_freqs_as_data)) {
+                retval[[data_name]] <-
+                    genotypeCounts_to_data(retval[[gf_name]], e = 0)
+            } else if (obs_noise > 0) {
+                data_noised <- genotypeCounts_to_data(retval[[gf_name]],
+                                                      e = obs_noise)
+                retval[[gf_name]] <- reorder_to_pD(data_to_counts(data_noised))
+
+                if (genotype_freqs_as_data) {
+                   retval[[data_name]] <- data_noised
                 }
             }
         }
@@ -535,7 +563,7 @@ reorder_to_pD <- function(x) {
     ## Ensure genotype names are canonical
     genots_n <- canonicalize_genotype_names(genots_n)
     names(x) <- genots_n
-    
+
     ## Get gene names
     gene_n <- unique(stringi::stri_replace_all_fixed(
                                   unlist(
@@ -545,13 +573,12 @@ reorder_to_pD <- function(x) {
     sorted_genots <- generate_sorted_genotypes(length(gene_n),
                                                gene_names = gene_n)
 
-    if(!all(genots_n %in% sorted_genots))
+    if (!all(genots_n %in% sorted_genots))
         stop("At least one genotype name not in sorted_genots")
-    
+
     ## Sort to original, return
     x2 <- x[sorted_genots]
     names(x2) <- sorted_genots
-    
     return(x2)
 }
 
@@ -1237,4 +1264,20 @@ genotypeCounts_to_data <- function(x, e = 0.01) {
     d <- counts_to_data_no_e(x)
     if(e > 0) d <- add_noise(d, e)
     return(d)
+}
+
+## The revert of counts to data. Return as standard order
+## Similar to OncoSimulR's sampledGenotypes
+## but using genot_matrix_2_vector.
+data_to_counts <- function(data) {
+    t_genots_string <- table(genot_matrix_2_vector(data))
+    v_genots_string <- as.vector(t_genots_string)
+    names(v_genots_string) <- names(t_genots_string)
+    
+    o_genots_string <- reorder_to_standard_order(v_genots_string)
+    o_genots_string[is.na(o_genots_string)] <- 0
+
+    stopifnot(nrow(data) == sum(o_genots_string))
+
+    return(o_genots_string)
 }

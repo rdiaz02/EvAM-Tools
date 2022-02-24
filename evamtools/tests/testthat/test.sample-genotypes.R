@@ -81,9 +81,13 @@ test_that("Exercise generate_random_evam and sampling", {
     
     sample_mhn <- sample_CPMs(rmhn, N = 1000)
     sample_cbn <- sample_CPMs(rcbn, N = 40)
-    
-    d1 <- genotypeCounts_to_data(sample_mhn$MHN_sampled_genotype_freqs, 0)
-    d2 <- genotypeCounts_to_data(sample_cbn$CBN_sampled_genotype_freqs, 0)
+
+    sample_mhne <- sample_CPMs(rmhn, N = 1000, obs_noise = 0.2)
+    sample_cbne <- sample_CPMs(rcbn, N = 40, obs_noise = 0.1)
+
+    ## d1 <- genotypeCounts_to_data(sample_mhn$MHN_sampled_genotype_freqs, 0)
+    ## d2 <- genotypeCounts_to_data(sample_cbn$CBN_sampled_genotype_freqs, 0)
+
 }
 })
 
