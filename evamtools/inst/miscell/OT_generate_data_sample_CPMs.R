@@ -62,8 +62,8 @@ compare_sample_generate <- function(ot_oncobn_epos, obs_noise,
     
     ## Sample using generate.data
     otfit0 <- rx$OT_fit
-    new_epos <- unname(rx$OT_fit$eps["epos"] + obs_noise -
-                       2 * (rx$OT_fit$eps["epos"] * obs_noise))
+    new_epos <- rx$OT_fit$eps[["epos"]] + obs_noise -
+                       2 * (rx$OT_fit$eps[["epos"]] * obs_noise)
     otfit0$eps <- c(epos = new_epos, eneg = obs_noise)
 
     gd_otfit0 <- generate.data(N, otfit0,
@@ -156,8 +156,6 @@ dot_noise_gd_2 <- function(of, N = 1e4) {
     stopifnot(identical(names(freq_noised_sample_odf2),
                         names(freq_gd_of3)))
 
-
-
     ## Compare the internal error adding procedure of D2 and my noise procedure
     ## But we start from the distribution.oncotree as in D1: using with.errors
     ## So this is not D2
@@ -201,7 +199,7 @@ dot_noise_gd_2 <- function(of, N = 1e4) {
     m3 <- mycbind(freq_gd_of3, dxt)
     m4 <- mycbind(dxt, dr2) ## comparing noise adding: same thing
     m5 <- mycbind(freq_noised_sample_odf2, dr2) ## obvious; basically same thing
-    
+
     return(list(## m1,
         ## m2,
         ## m3,
@@ -221,7 +219,7 @@ dot_noise_gd_2 <- function(of, N = 1e4) {
         chisq.test(m4, simulate.p.value = TRUE),
         ## Like repeating the same procedure twice
         dist_onc_eneg_0_plus_my_noise_vs_same_thing =
-        chisq.test(m5, simulate.p.value = TRUE)
+            chisq.test(m5, simulate.p.value = TRUE),
     ))
 }
 
@@ -246,3 +244,141 @@ dot_noise_gd_2(ex_c1)
 dot_noise_gd_2(ex_c3)
 dot_noise_gd_2(ex_c4c2)
 
+
+
+
+######################################################################
+##
+##     For a given fitted object, show that
+##     generate.data same as
+##     distribution oncotree on modified epos and eneg = 0
+##     plus noise addition
+##
+######################################################################
+
+
+dot_noise_gd_4 <- function(of, N = 1e4) {
+
+    ## Plain generate data on original object
+    oogd <- generate.data(N = N, of,
+                          with.errors = TRUE, method = "D1",
+                          edge.weights = "estimated")
+    freq_oogd <-
+        evamtools:::reorder_to_pD(evamtools:::data_to_counts(oogd))
+
+    ## Change epos and eneg and sample with asymmetrical noise
+    of3 <- of
+    of3$eps <- c(epos = (1/2) * of$eps[["epos"]],
+                 eneg = 0)
+
+    ## First sample from distribution oncotree, then add asymmetrical error.
+
+    distr <- distribution.oncotree(of3, with.probs = TRUE,
+                                   with.errors = TRUE,
+                                   edge.weights = "estimated")
+
+    ran.idx <- sample(1:nrow(distr), size = N, prob = distr$Prob,
+                      replace = TRUE)
+    ran.data0 <- distr[ran.idx, 2:of3$nmut]
+    rownames(ran.data0) <- 1:N
+    epos2 <- (1/2) * of$eps[["epos"]]
+    eneg2 <- of$eps[["eneg"]]
+
+    ran.data <- matrix(rbinom(prod(dim(ran.data0)), size = 1, 
+                              prob = ifelse(ran.data0 == 0, epos2, 1 - eneg2)),
+                       nrow = nrow(ran.data0),
+                       ncol = ncol(ran.data0),
+                       dimnames = dimnames(ran.data0))
+
+    dxt <- evamtools:::reorder_to_pD(evamtools:::data_to_counts(ran.data))
+
+    mycbind <- function(x, y) {
+        x1 <- cbind(x, y)
+        rr <- which(rowSums(x1) == 0)
+        if (length(rr)) x1 <- x1[-rr, ]
+        return(x1)
+    }
+    m1 <- mycbind(freq_oogd, dxt)
+    return(list(m1,
+        dist_onc_eneg_0_plus_my_noise_vs_gen_data_oring =
+                chisq.test(m1, simulate.p.value = TRUE)))
+}
+
+
+dot_noise_gd_4(ovf)
+dot_noise_gd_4(ex_linear)
+dot_noise_gd_4(ex_or)
+dot_noise_gd_4(ex_xor)
+dot_noise_gd_4(ex_c1)
+dot_noise_gd_4(ex_c3)
+dot_noise_gd_4(ex_c4c2)
+
+
+
+
+######################################################################
+##
+##     For a given fitted object, if epos > eneg show that
+##     generate.data same as
+##     distribution oncotree on modified epos and eneg = 0
+##     plus symmetrized noise addition
+##    
+##     But this will not work as it requires
+##     that original epos and eneg satisfy
+##     0 < 2 * (epos -eneg)/eneg < 1
+##     so eneg < epos < (3/2) eneg
+######################################################################
+
+
+dot_noise_gd_3 <- function(of, N = 1e4) {
+    if (of$eps[["epos"]] <= of$eps[["eneg"]])
+        stop("eneg >= epos")
+
+    ## Plain generate data on original object
+    oogd <- generate.data(N = N, of,
+                          with.errors = TRUE, method = "D1",
+                          edge.weights = "estimated")
+    freq_oogd <-
+        evamtools:::reorder_to_pD(evamtools:::data_to_counts(oogd))
+    
+    browser()
+    ## Change epos and eneg and sample with symmetrical noise
+
+    of2 <- of
+    of2$eps <- c(
+        epos = (2 * (of$eps[["epos"]] - of$eps[["eneg"]]))/of$eps[["eneg"]],
+        eneg = 0)
+    dof2 <- distribution.oncotree(of2,
+                                  with.probs = TRUE,
+                                  with.errors = TRUE,
+                                  edge.weights = "estimated")
+    r_sample_odf2 <- sample(1:nrow(dof2), size = N, replace = TRUE,
+                            prob = dof2$Prob)
+    sample_odf2 <- dof2[r_sample_odf2, -c(1, ncol(dof2))]
+    noised_sample_odf2 <- evamtools:::add_noise(as.matrix(sample_odf2),
+                                                properr = of$eps[["eneg"]])
+    freq_noised_sample_odf2 <-
+        evamtools:::reorder_to_pD(evamtools:::data_to_counts(noised_sample_odf2))
+    
+    mycbind <- function(x, y) {
+        x1 <- cbind(x, y)
+        rr <- which(rowSums(x1) == 0)
+        if (length(rr)) x1 <- x1[-rr, ]
+        return(x1)
+    }
+    m1 <- mycbind(freq_noised_sample_odf2, freq_oogd)
+    return(list(m1,
+        dist_onc_eneg_0_plus_my_noise_vs_gen_data_oring =
+                chisq.test(m1, simulate.p.value = TRUE)))
+}
+
+
+
+
+dot_noise_gd_3(ovf)
+dot_noise_gd_3(ex_linear)
+dot_noise_gd_3(ex_or)
+dot_noise_gd_3(ex_xor)
+dot_noise_gd_3(ex_c1)
+dot_noise_gd_3(ex_c3)
+dot_noise_gd_3(ex_c4c2)
