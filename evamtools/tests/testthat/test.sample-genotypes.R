@@ -73,10 +73,10 @@ test_that("We get requested output, by the specified means", {
 })
 
 
-test_that("Exercise generate_random_evam and sampling", {
+test_that("Exercise random_evam and sampling", {
     for(i in 1:5) {
-    rmhn <- generate_random_evam(model = "MHN", ngenes = 5)
-    rcbn <- generate_random_evam(model = "CBN", ngenes = 5,
+    rmhn <- random_evam(model = "MHN", ngenes = 5)
+    rcbn <- random_evam(model = "CBN", ngenes = 5,
                              graph_density = 0.5)
     
     sample_mhn <- sample_CPMs(rmhn, N = 1000)

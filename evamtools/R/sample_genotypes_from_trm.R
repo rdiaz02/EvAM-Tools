@@ -720,7 +720,7 @@ probs_from_trm <- function(x,
 }
 
 
-generate_random_evam <- function(ngenes = NULL, gene_names = NULL,
+random_evam <- function(ngenes = NULL, gene_names = NULL,
                                  model = c("OT", "CBN", "HESBCN", "MHN",
                                            "OncoBN")
                                , graph_density = 0.35

@@ -57,7 +57,7 @@ sample_CPMs(cpm_output,  N,
 }
 
 \seealso{
-  \code{\link{generate_random_evam}}
+  \code{\link{random_evam}}
  
 }
 
