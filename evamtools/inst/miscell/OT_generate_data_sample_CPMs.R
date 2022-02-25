@@ -253,11 +253,15 @@ dot_noise_gd_2(ex_c4c2)
 ##     generate.data same as
 ##     distribution oncotree on modified epos and eneg = 0
 ##     plus noise addition
-##
+##     If possible, we use symmetric noise addition
+##     (when epos > eneg)
+## 
 ######################################################################
 
+## prop: how much of the original epos is taken to be noise, when we cannot
+## use symmetric noise
 
-dot_noise_gd_4 <- function(of, N = 1e4) {
+dot_noise_gd_4 <- function(of, N = 1e4, prop = 0.5) {
 
     ## Plain generate data on original object
     oogd <- generate.data(N = N, of,
@@ -268,8 +272,17 @@ dot_noise_gd_4 <- function(of, N = 1e4) {
 
     ## Change epos and eneg and sample with asymmetrical noise
     of3 <- of
-    of3$eps <- c(epos = (1/2) * of$eps[["epos"]],
-                 eneg = 0)
+    if(of$eps[["epos"]] > of$eps[["eneg"]]) {
+        message("Using symmetric noise")
+        of3$eps <- c(epos = of$eps[["epos"]] ,
+                     eneg = 0)
+        noise_p <- noise_n <- of$eps[["eneg"]]
+    } else {
+        of3$eps <- c(epos = prop * of$eps[["epos"]],
+                     eneg = 0)
+        noise_p <- (1 - prop) * of$eps[["epos"]]
+        noise_n <- of$eps[["eneg"]]
+    }
 
     ## First sample from distribution oncotree, then add asymmetrical error.
 
@@ -281,14 +294,14 @@ dot_noise_gd_4 <- function(of, N = 1e4) {
                       replace = TRUE)
     ran.data0 <- distr[ran.idx, 2:of3$nmut]
     rownames(ran.data0) <- 1:N
-    epos2 <- (1/2) * of$eps[["epos"]]
-    eneg2 <- of$eps[["eneg"]]
+   
 
-    ran.data <- matrix(rbinom(prod(dim(ran.data0)), size = 1, 
-                              prob = ifelse(ran.data0 == 0, epos2, 1 - eneg2)),
-                       nrow = nrow(ran.data0),
-                       ncol = ncol(ran.data0),
-                       dimnames = dimnames(ran.data0))
+    ran.data <- matrix(
+        rbinom(prod(dim(ran.data0)), size = 1, 
+               prob = ifelse(ran.data0 == 0, noise_p, 1 - noise_n)),
+        nrow = nrow(ran.data0),
+        ncol = ncol(ran.data0),
+        dimnames = dimnames(ran.data0))
 
     dxt <- evamtools:::reorder_to_pD(evamtools:::data_to_counts(ran.data))
 
@@ -306,11 +319,12 @@ dot_noise_gd_4 <- function(of, N = 1e4) {
 
 
 dot_noise_gd_4(ovf)
-dot_noise_gd_4(ex_linear)
+dot_noise_gd_4(ex_linear, prop = 1/3)
 dot_noise_gd_4(ex_or)
-dot_noise_gd_4(ex_xor)
+dot_noise_gd_4(ex_xor, prop = 0.9)
+dot_noise_gd_4(ex_xor, prop = 0.1)
 dot_noise_gd_4(ex_c1)
-dot_noise_gd_4(ex_c3)
+dot_noise_gd_4(ex_c3, prop = 0.22)
 dot_noise_gd_4(ex_c4c2)
 
 
