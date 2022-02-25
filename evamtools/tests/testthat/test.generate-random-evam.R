@@ -42,7 +42,10 @@ test_that("Exercise random_evam with different options", {
 
 
 test_that("Test OncoBN thetas in right order", {
-
+    ## Both a test that I am doing it right and that OncoBN is doing it right.
+    ## The m2b are about the procedures in evam, but they cannot work
+    ## unless m2 do, which is testing OncoBN itself.
+    ## And that is how I found a bug in OncoBN
     m1 <- data.frame(From = c("Root", "Root", "A", "B"),
                      To = c("A", "B", "C", "C"),
                      Thetas = c(0.3, 0.4, 0.6, 0.6),
