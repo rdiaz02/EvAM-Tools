@@ -868,7 +868,7 @@ evam <- function(x,
         OT_predicted_genotype_freqs = get_output("OT",
                                                  "predicted_genotype_freqs"),
         OT_eps = get_output("OT", "eps"),
-        OT_fit = get_output("OT", "ot_fit")
+        OT_fit = get_output("OT", "ot_fit"),
 
         CBN_model = get_output("CBN", "edges"),
         CBN_trans_rate_mat = get_output("CBN", "weighted_fgraph"),

@@ -1,21 +1,22 @@
-## Playing around with Oncotree. 
+## Showing the behavior of Oncotree::generate.data
+## sample_CPMs, and generate_random_evam to illustrate error model
 
 ######################################################################
 ##
 ##     Show how D1 and D2 give same results with estimated
 ##
 ######################################################################
-
+library(evamtools)
 library(Oncotree)
 data(ov.cgh)
 ov.tree <- oncotree.fit(ov.cgh)
 
-d1 <- generate.data(3e5, ov.tree, with.errors = TRUE, method = "D1",
+d1 <- generate.data(1e4, ov.tree, with.errors = TRUE, method = "D1",
                     edge.weights = "estimated")
 d1t <- evamtools:::data_to_counts(d1)
 d1tp <- d1t/nrow(d1)
 
-d2 <- generate.data(3e5, ov.tree, with.errors = TRUE, method = "D2",
+d2 <- generate.data(1e4, ov.tree, with.errors = TRUE, method = "D2",
                     edge.weights = "observed")
 d2t <- evamtools:::data_to_counts(d2)
 d2tp <- d2t/nrow(d1)
@@ -25,8 +26,9 @@ d3 <- generate.data(3e5, ov.tree, with.errors = TRUE, method = "D2",
 d3t <- evamtools:::data_to_counts(d3)
 d3tp <- d3t/nrow(d1)
 
-chisq.test(cbind(d1t, d2t)) ## different
-chisq.test(cbind(d1t, d3t)) ## similar
+chisq.test(cbind(d1t, d2t), simulate.p.value = TRUE) ## different
+chisq.test(cbind(d1t, d3t), simulate.p.value = TRUE) ## similar
+
 
 
 
@@ -86,7 +88,7 @@ compare_sample_generate <- function(ot_oncobn_epos, obs_noise,
                            simulate.p.value = TRUE)))
 }
 
-
+## Remember: under Ho a 5% prob of p-value <= 0.05, etc.
 compare_sample_generate(0.12, .07)
 compare_sample_generate(0.02, .13)
 compare_sample_generate(0.2, .05)
