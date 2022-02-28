@@ -30,16 +30,16 @@ freqs2csd <- function(freqs, gene_names){
 }
 
 get_display_freqs <- function(freqs, n_genes, gene_names){
-    if(is.null(freqs)) return(SHINY_DEFAULTS$template_data$csd_freqs)
-    if(nrow(freqs) == 0) return(SHINY_DEFAULTS$template_data$csd_freqs)
-    valid_gene_names <- c("WT", gene_names[1:n_genes])
+  if(is.null(freqs)) return(SHINY_DEFAULTS$template_data$csd_freqs)
+  if(nrow(freqs) == 0) return(SHINY_DEFAULTS$template_data$csd_freqs)
+  valid_gene_names <- c("WT", gene_names[1:n_genes])
 
-    selected_rows <- sapply(freqs$Genotype, function(x){
-        genes <- strsplit(x, ", ")[[1]]
-        return(all(genes %in% valid_gene_names))
-    })
+  selected_rows <- sapply(freqs$Genotype, function(x){
+    genes <- strsplit(x, ", ")[[1]]
+    return(all(genes %in% valid_gene_names))
+  })
 
-    return(freqs[selected_rows, ])
+  return(freqs[selected_rows, ])
 }
 
 get_csd <- function(complete_csd){
@@ -55,7 +55,7 @@ modify_dag <- function(dag, from_node, to_node, operation, parent_set){
 
   if(operation == "clear") {
     return(list(dag=SHINY_DEFAULTS$template_data$dag
-      ,dag_parent_set=SHINY_DEFAULTS$template_data$dag_parent_set))
+      , dag_parent_set=SHINY_DEFAULTS$template_data$dag_parent_set))
   }
 
   if(is.null(from_node) | is.null(to_node) | is.null(dag)){
