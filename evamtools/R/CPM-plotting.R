@@ -103,8 +103,9 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
             else return("")
         })
     
-    adj_matrix <- igraph:::as_adjacency_matrix(graph)
-    adj_matrix2 <- igraph:::as_adjacency_matrix(graph, attr = "weight")
+    adj_matrix <- igraph::as_adjacency_matrix(graph)
+    adj_matrix[adj_matrix == 1] <- 0
+    adj_matrix2 <- igraph::as_adjacency_matrix(graph, attr = "weight")
 
     for (path in paths_from_graph){
         for (idx in 2:length(path)){
