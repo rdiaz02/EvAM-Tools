@@ -720,7 +720,7 @@ probs_from_trm <- function(x,
 }
 
 
-generate_random_evam <- function(ngenes = NULL, gene_names = NULL,
+random_evam <- function(ngenes = NULL, gene_names = NULL,
                                  model = c("OT", "CBN", "HESBCN", "MHN",
                                            "OncoBN")
                                , graph_density = 0.35
@@ -1010,8 +1010,10 @@ OT_model_2_output <- function(model, epos) {
     output[["OT_f_graph"]] <- tmpo[["weighted_fgraph"]]
     output[["OT_trans_mat"]] <- tmpo[["trans_mat_genots"]]
     output[["OT_eps"]] <- c(epos = epos, eneg = 0)
-    output[["OT_predicted_genotype_freqs"]] <- OT_model_2_predict_genots(model,
-                                                                         epos)
+    otm <- OT_model_2_predict_genots(model,
+                                     epos)
+    output[["OT_predicted_genotype_freqs"]] <- otm[["predicted_genotype_freqs"]]
+    output[["OT_fit"]] <- otm[["fit"]]
     return(output)
 }
 
@@ -1044,7 +1046,8 @@ OT_model_2_predict_genots <- function(model, epos) {
                                    edge.weights = "estimated")
     preds <- dist_oncotree_output_2_named_genotypes(preds)
     stopifnot(isTRUE(all.equal(sum(preds), 1)))
-    return(preds)
+    return(list(predicted_genotype_freqs = preds,
+                fit = otfit))
 }
 
 
@@ -1245,11 +1248,12 @@ counts_to_data_no_e <- function(x) {
 
 ## From the identically named function in OncoSimulR
 add_noise <- function(x, properr) {
-    if(properr <= 0) {
+    stopifnot(is.matrix(x))
+    if (properr <= 0) {
         return(x)
     }
     else {
-        if(properr > 1)
+        if (properr > 1)
             stop("Proportion with error cannot be > 1")
         nn <- prod(dim(x))
         flipped <- sample(nn, round(nn * properr))

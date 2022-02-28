@@ -2,7 +2,7 @@ test_that("Exercise random_evam with different options", {
 
     for (mm in c("MHN", "CBN", "HESBCN", "OT", "OncoBN")) {
         ou <- paste0(mm, "_predicted_genotype_freqs")
-        o1 <- generate_random_evam(ngenes = 5, model = mm)
+        o1 <- random_evam(ngenes = 5, model = mm)
         expect_true(!any(is.na(o1[[ou]])))
         expect_true(!is.null(o1[[ou]]))
         }
@@ -11,7 +11,7 @@ test_that("Exercise random_evam with different options", {
         ng <- sample(2:6, 1)
         gnam <- sample(LETTERS, size = ng)
         ou <- paste0(mm, "_predicted_genotype_freqs")
-        o1 <- generate_random_evam(gene_names = gnam, model = mm,
+        o1 <- random_evam(gene_names = gnam, model = mm,
                                    graph_density = 0.7,
                                    cbn_hesbcn_lambda_min = 1/4,
                                    cbn_hesbcn_lambda_max = 6,
@@ -31,7 +31,7 @@ test_that("Exercise random_evam with different options", {
     ng <- sample(2:6, 1)
     gnam <- sample(LETTERS, size = ng)
     ou <- paste0("HESBCN", "_predicted_genotype_freqs")
-    expect_error(o1 <- generate_random_evam(gene_names = gnam, model = "HESBCN",
+    expect_error(o1 <- random_evam(gene_names = gnam, model = "HESBCN",
                                             hesbcn_probs = c(AND = 0.1,
                                                 UR = 0.6,
                                                 XOR = 0.3)
@@ -42,7 +42,10 @@ test_that("Exercise random_evam with different options", {
 
 
 test_that("Test OncoBN thetas in right order", {
-
+    ## Both a test that I am doing it right and that OncoBN is doing it right.
+    ## The m2b are about the procedures in evam, but they cannot work
+    ## unless m2 do, which is testing OncoBN itself.
+    ## And that is how I found a bug in OncoBN
     m1 <- data.frame(From = c("Root", "Root", "A", "B"),
                      To = c("A", "B", "C", "C"),
                      Thetas = c(0.3, 0.4, 0.6, 0.6),

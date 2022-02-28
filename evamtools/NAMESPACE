@@ -5,7 +5,7 @@ export(
   , "evam"
   , "plot_CPMs"
   , "runShiny"
-  , "generate_random_evam"
+  , "random_evam"
      )
 
 importFrom("shiny", "runApp", "Progress")

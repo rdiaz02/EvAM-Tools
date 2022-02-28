@@ -44,7 +44,7 @@ plot_CPMs(
 }
 
 \item{fixed_vertex_size}{Boolean. If TRUE, all nodes with have the same
-  size; otherwise, scale them proportional to frequencies or observed data.}
+  size; otherwise, scale them proportional to frequencies of observed data.}
 
 \item{top_paths}{Number of most relevant paths to plot. Default NULL 
 will plot all paths}

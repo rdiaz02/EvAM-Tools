@@ -1,8 +1,8 @@
-\name{generate_random_evam}
-\alias{generate_random_evam}
-\title{Obtain a random EvAM model.}
+\name{random_evam}
+\alias{random_evam}
+\title{Generate a random EvAM model.}
 \usage{
-generate_random_evam(ngenes = NULL,
+random_evam(ngenes = NULL,
                      gene_names = NULL,
                      model = c("OT", "CBN", "HESBCN",
                                 "MHN", "OncoBN"),
@@ -78,8 +78,8 @@ Random model, with the same structure as returned by function \code{\link{evam}}
 
 
 \examples{
-rmhn <- generate_random_evam(model = "MHN", ngenes = 5)
-rcbn <- generate_random_evam(model = "CBN", ngenes = 5,
+rmhn <- random_evam(model = "MHN", ngenes = 5)
+rcbn <- random_evam(model = "CBN", ngenes = 5,
                              graph_density = 0.5)
 
 ## Now, obtain some data
