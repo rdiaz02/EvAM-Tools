@@ -25,22 +25,22 @@ test_that("Returns the correct number and type of vertex labels", {
     names(l1) <- all_genotypes
     adj1 <- base_adj_matrix
     adj1["WT", "A"] <- 1000
-    adj1["WT", "C"] <- 1
+    # adj1["WT", "C"] <- 1
     adj1["A", "A, B"] <- 500
-    adj1["A", "A, C"] <- 1
-    adj1["C", "A, C"] <- 1
-    adj1["C", "C, D"] <- 1
+    # adj1["A", "A, C"] <- 1
+    # adj1["C", "A, C"] <- 1
+    # adj1["C", "C, D"] <- 1
     adj1 <- Matrix(adj1, sparse = TRUE)
 
     l2 <- c("WT", "A", "A, B", "A, C", "", "")
     names(l2) <- all_genotypes
     adj2 <- base_adj_matrix
     adj2["WT", "A"] <- 1000
-    adj2["WT", "C"] <- 1
+    # adj2["WT", "C"] <- 1
     adj2["A", "A, B"] <- 500
     adj2["A", "A, C"] <- 200
-    adj2["C", "A, C"] <- 1
-    adj2["C", "C, D"] <- 1
+    # adj2["C", "A, C"] <- 1
+    # adj2["C", "C, D"] <- 1
     adj2 <- Matrix(adj2, sparse = TRUE)
 
     l3 <- c("WT", "A", "A, B", "A, C", "C", "C, D")
@@ -50,7 +50,7 @@ test_that("Returns the correct number and type of vertex labels", {
     adj3["WT", "C"] <- 500
     adj3["A", "A, B"] <- 500
     adj3["A", "A, C"] <- 200
-    adj3["C", "A, C"] <- 1
+    # adj3["C", "A, C"] <- 1
     adj3["C", "C, D"] <- 200
     adj3 <- Matrix(adj3, sparse = TRUE)
 
@@ -81,13 +81,13 @@ test_that("Returns the correct number and type of vertex labels", {
     expect_equal(labels_4$vertex_labels, labels_null$vertex_labels)
     expect_equal(labels_4$vertex_labels, labels_0$vertex_labels)
 
-    expect_equal(labels_1$adj_matrix, adj1)
-    expect_equal(labels_2$adj_matrix, adj2)
-    expect_equal(labels_3$adj_matrix, adj3)
-    expect_equal(labels_4$adj_matrix, adj4)
-    expect_equal(labels_40$adj_matrix, adj4)
-    expect_equal(labels_null$adj_matrix, adj4)
-    expect_equal(labels_0$adj_matrix, adj4)
+    expect_equal(labels_1$adj_matrix, adj1, check.attributes=FALSE)
+    expect_equal(labels_2$adj_matrix, adj2, check.attributes=FALSE)
+    expect_equal(labels_3$adj_matrix, adj3, check.attributes=FALSE)
+    expect_equal(labels_4$adj_matrix, adj4, check.attributes=FALSE)
+    expect_equal(labels_40$adj_matrix, adj4, check.attributes=FALSE)
+    expect_equal(labels_null$adj_matrix, adj4, check.attributes=FALSE)
+    expect_equal(labels_0$adj_matrix, adj4, check.attributes=FALSE)
 })
 
 cat("\n Done test.rank-paths-graphs.R \n")
