@@ -89,7 +89,8 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
     nodes_in_top_paths <- unique(unlist(sapply(paths_from_graph,
         function(x) x$name
     )))
-    vertex_labels <- vapply(V(graph)$name,
+
+    vertex_labels <- sapply(V(graph)$name,
         function(x){
             if (x %in% nodes_in_top_paths){
                 if (type == "genotype") return(x)
@@ -97,16 +98,27 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
                     return(sprintf("+%s", tail(strsplit(x, ",")[[1]], n = 1)))
             } 
             else return("")
-        },
-        character(1))
+        })
+    
+    adj_matrix <- igraph:::as_adjacency_matrix(graph)
+    adj_matrix2 <- igraph:::as_adjacency_matrix(graph, attr = "weight")
+
+    for (path in paths_from_graph){
+        for (idx in 2:length(path)){
+            adj_matrix[path[[idx - 1]]$name
+                , path[[idx]]$name] <- adj_matrix2[path[[idx - 1]]$name, 
+                                                   path[[idx]]$name]
+        }
+    }
+
     # } else vertex_labels <- NULL
 
     # if(edge_labels){
         ## TODO in each vertex say +NEW_GENE
     # }
 
-
     return(list(
+        adj_matrix = adj_matrix,
         vertex_labels = vertex_labels,
         edge_labels = edge_labels
     ))
@@ -223,7 +235,11 @@ plot_genot_fg <- function(trans_mat
     ## Labels
     sorted_paths <- rank_paths(graph)
     if(is.null(freq2label)){
-        labels <- compute_vertex_labels(graph, sorted_paths, top_paths = top_paths, type=label_type)
+        new_graph_info <- compute_vertex_labels(graph, sorted_paths
+            , top_paths = top_paths, type=label_type)
+        labels <- list(vertex_labels = new_graph_info$vertex_labels)
+        graph <- igraph::graph_from_adjacency_matrix(new_graph_info$adj_matrix
+            , weighted = TRUE)
     } else {
         labels <- vapply(igraph::V(graph)$name,
             function(x){
@@ -307,6 +323,28 @@ plot_genot_fg <- function(trans_mat
     }
 
     transparent_w2 <-  w2/max(w2) * 0.9 + 0.1
+
+    y_distribution <- lyt[,1]
+    label_dists <- rep(0, length(y_distribution))
+    val <- -3
+    for (idx in nrow(lyt):2){
+        y_pos <- lyt[idx,][1]
+        x_pos <- lyt[idx,][2]
+        
+        is_inline <- which(lyt[,1][lyt[,2] == (x_pos - 1)] == y_pos)
+        if(length(is_inline) > 0){
+            label_dists[idx] <- val
+            val <- val * -1
+        }
+    }
+    # for (idx in 1:(length(y_distribution) - 1)){
+    #     if (y_distribution[idx] == y_distribution[idx +1]){
+    #         labels_dists[idx] <- val
+    #         # val <- val*-1 ## So we alternate +1 and -1
+    #         labels_dists[idx + 1] <- val * -1
+    #         # val <- val*-1 ## So we alternate +1 and -1
+    #     }
+    # }
     ## Actual plotting
     plot(graph
         , layout = lyt[, 2:1]
@@ -317,11 +355,13 @@ plot_genot_fg <- function(trans_mat
         , vertex.label = labels$vertex_labels
         , font.best = 2
         , vertex.frame.width = 0
+        # , vertex.label.degree=c(rep(c(3.14, -3.14/2), ceiling(nrow(lyt)/2)))[1:nrow(lyt)]
+        , vertex.label.dist = label_dists
         # , edge.color = rgb(0.5, 0.5, 0.5, transparent_w2)
         , edge.color = rgb(0.5, 0.5, 0.5, 1) 
         ## Some error in my latop because, I cannot add alpha channel
         , edge.arrow.size = 0
-       , edge.width = w2
+        , edge.width = w2
      )
 
     margin <- -1.15

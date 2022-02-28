@@ -821,7 +821,7 @@ MHN_from_thetas <- function(thetas) {
                                 method = "uniformization",
                                 paranoidCheck = TRUE)
     output[["MHN_exp_theta"]] <- exp(thetas)
-    output[["MHN_exp_theta"]] <- exp(thetas)
+    # output[["MHN_exp_theta"]] <- exp(thetas)
     return(output)
 }
 

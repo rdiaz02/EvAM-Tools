@@ -189,23 +189,42 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, da
   return(list(lambdas = tmp_lambdas, parent_set = tmp_parent_set))
 }
 
-#TO BE REMOVED
-get_mhn_data <- function(n_genes, n_samples, gene_names, thetas = NULL){
-    if(is.null(thetas)) thetas <- Random.Theta(n=n_genes)
-    rownames(thetas) <- colnames(thetas) <- gene_names
-    samples <- floor(Finite.Sample(Generate.pTh(thetas), n_samples)*n_samples)
-    trm <- theta_to_trans_rate_3_SM(thetas,
-                                    inner_transition = inner_transitionRate_3_1)
-    state_names <- vapply(1:(ncol(trm)), function(x){
-        x <- x - 1
-        if(x == 0) state_name <- "WT"
-        else state_name <- paste(gene_names[which(int2binary(x, n_genes) == 1)], collapse = ", ")
-        return(state_name)
-    }, character(1))
-    rownames(trm) <- colnames(trm) <- state_names
-    samples <- data.frame("Genotype" = state_names, "Freq" = samples)
-    rownames(samples) <- samples$Genotype
-    return(list(thetas = thetas, trm = trm, samples = samples))
+get_mhn_data <- function(thetas, N = 10000){
+  if (any(is.null(thetas))) stop("Thetas should be defined")
+  n_genes <- ncol(thetas)
+  gene_names <- colnames(thetas)
+
+  mhn_trm <- MHN_from_thetas(thetas)$MHN_trans_rate_mat
+  mhn_probs <- probs_from_trm(mhn_trm)
+  tmp_genotypes_sampled <- sample_to_pD_order(
+                sample(names(mhn_probs), size = N,
+                       prob = mhn_probs, replace = TRUE),
+                ngenes = n_genes, gene_names = gene_names)
+  tmp_samples <- setNames(tmp_genotypes_sampled,
+            generate_sorted_genotypes(n_genes, gene_names))
+  tmp_samples_as_df <- data.frame(Genotype=names(tmp_samples), Counts=tmp_samples)
+  tmp_samples <- tmp_samples[tmp_samples > 0]
+  return(list(csdfreqs = tmp_samples_as_df,
+              data = freqs2csd(tmp_samples_as_df, gene_names)))
+}
+
+get_dag_data <- function(data, parent_set, N = 10000){
+  if (any(is.null(data))) stop("Data should be defined")
+  gene_names <- names(parent_set)
+  n_genes <- length(parent_set)
+
+  dag_trm <- HESBCN_model_2_output(data, parent_set)$HESBCN_trans_rate_mat
+  dag_probs <- probs_from_trm(dag_trm)
+  tmp_genotypes_sampled <- sample_to_pD_order(
+                sample(names(dag_probs), size = N,
+                       prob = dag_probs, replace = TRUE),
+                ngenes = n_genes, gene_names = gene_names)
+  tmp_samples <- setNames(tmp_genotypes_sampled,
+            generate_sorted_genotypes(n_genes, gene_names))
+  tmp_samples <- tmp_samples[tmp_samples > 0]
+  tmp_samples_as_df <- data.frame(Genotype=names(tmp_samples), Counts=tmp_samples)
+  return(list(csd_freqs = tmp_samples_as_df,
+              data = freqs2csd(tmp_samples_as_df, gene_names)))
 }
 
 create_tabular_data <- function(data){
