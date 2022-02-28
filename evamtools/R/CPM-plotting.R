@@ -77,11 +77,14 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
                                   type = "genotype") {
     if(is.null(top_paths)) top_paths <- length(paths_from_graph)
     else if(is.numeric(top_paths)){
-        if(top_paths > length(paths_from_graph))
+        if(top_paths <= 0 || top_paths > length(paths_from_graph))
             top_paths <- length(paths_from_graph)
-        else if(top_paths > 0) top_paths <- top_paths
+        else if(top_paths > 0) top_paths <- as.integer(top_paths)
     } else top_paths <- length(paths_from_graph)
 
+    if(!is.numeric(top_paths)){
+        stop("You should provide a positive integer for top_paths")
+    }
     paths_from_graph <- paths_from_graph[1:top_paths]
     edge_labels <- NULL
     
