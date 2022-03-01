@@ -790,6 +790,7 @@ server <- function(input, output, session) {
       # }else{
       #     shinyjs::enable(selector = "#cpm2show input[value='Source']")
       # }
+
      }, error = function(e){
       showModal(dataModal(e[[1]]))
     })
@@ -837,7 +838,8 @@ server <- function(input, output, session) {
                       observations = tmp_data$analyzed_data, # We use it to define "Observed" and "Not Observed" genotypes
                       predicted_genotypes = method_data$predicted_genotype_freqs, # To compute node sizes if sampled_freqs is NULL
                       sampled_freqs = method_data$sampled_genotype_freqs,
-                      top_paths = input$freq2label)
+                      top_paths = input$freq2label,
+                      label_type = input$label2plot)
                       # , freq2label = input$freq2label)
           })
           return(
@@ -898,7 +900,16 @@ server <- function(input, output, session) {
           selected = "obs_genotype_transitions"
           )
         ),
+      tags$div(class = "inline",
+        radioButtons(inputId = "label2plot",
+          label = "Type of label",
+          choiceNames =  c("Genotype", "Last gene mutated"),
+          choiceValues = c("genotype", "acquisition"),
+          selected = "genotype"
+          )
+        ),
       ),
+
     tags$p("Number of most relevant paths to show:"),
     tags$div(id="freq2label-wrap",
       sliderInput("freq2label", "", width = "500px",
@@ -908,7 +919,10 @@ server <- function(input, output, session) {
   })
 
   output$cpm_list <- renderUI({
-    all_names <- unname(sapply(all_cpm_out, function(dataset) dataset$name))
+    all_names <- c()
+    for (i in names(all_cpm_out)){
+      all_names <- c(all_names, all_cpm_out[[i]]$orig_data$name)
+    }
 
     if(length(all_names) > 0){
       selected <- ifelse(is.null(input$select_csd), "user", input$select_csd)
