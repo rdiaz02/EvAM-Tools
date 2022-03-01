@@ -4,7 +4,11 @@
 \alias{runShiny}
 \title{Run the web application of evamtools}
 \usage{
-runShiny()
+runShiny(host="0.0.0.0", port=3000)
+}
+\arguments{
+\item{host}{Host where the app will be listening}
+\item{port}{Port where the app will be listening}
 }
 \description{
 Launch the server with the web based app

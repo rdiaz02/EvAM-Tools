@@ -84,12 +84,14 @@ is the following:
 depends on the plot_type: for trans_mat it will be probabilities, 
 for trans_rate_mat it will be rates, and for obs_genotype_transitions it will be
 raw counts.  
-}
 
 Plots can be more readable with a combination of top_paths and
 label_type. If \code{label_type = 'acquisition'} node labels will dissapear
 and edge label will be shown instead. They will display the information of
 the last gene mutated.
+
+}
+
 
 
 \note{The color and design of figures in the bottom row, depicting
@@ -146,6 +148,9 @@ plot_CPMs(out, out_samp, plot_type = "obs_genotype_transitions")
 ## Only showing new gene mutated respect with its parent
 plot_CPMs(out, out_samp, plot_type = "obs_genotype_transitions", 
   label_type = "acquisition")
+
+plot_CPMs(out, out_samp, plot_type = "obs_genotype_transitions", 
+  label_type = "acquisition", top_paths = 3)
 
 
 ## Examples with mixed AND and OR and AND and XOR for HESBCN
