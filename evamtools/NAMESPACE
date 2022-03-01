@@ -24,7 +24,6 @@ importFrom("stringr", "str_count", "str_replace", "str_split",
 importFrom("stringi", "stri_count", "stri_count_fixed", "stri_count_regex",
            "stri_replace_all_regex", "stri_replace_all_fixed")
 importFrom("parallel", "detectCores", "mclapply")
-importFrom("shinyjs", "enable", "disable")
 importFrom("DT", "renderDT", "DTOutput", "editData")
 importFrom("Oncotree", "oncotree.fit", "marginal.distr",
            "distribution.oncotree", "bootstrap.oncotree")    
