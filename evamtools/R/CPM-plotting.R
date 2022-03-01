@@ -117,9 +117,23 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
 
     # } else vertex_labels <- NULL
 
-    # if(edge_labels){
-        ## TODO in each vertex say +NEW_GENE
-    # }
+    # browser()
+    # all_paths <- sapply(paths_from_graph,
+    #     function(x) x$name
+    # )
+
+    # from_to <- igraph::ends(graph, E(graph))
+
+    # edge_labels <- sapply(E(graph),
+    #     function(x){
+    #         igraph::get.edge.ids(graph, )
+    #         if (x %in% nodes_in_top_paths){
+    #             if (type == "genotype") return("")
+    #             else if (type == "acquisition")
+    #                 return(sprintf("+%s", tail(strsplit(x, ",")[[1]], n = 1)))
+    #         } 
+    #         else return("")
+    # })
 
     return(list(
         adj_matrix = adj_matrix,
@@ -207,6 +221,8 @@ plot_genot_fg <- function(trans_mat
     , label_type = "genotype"
     ) {
     if(is.null(trans_mat) | any(is.na(trans_mat))){
+        warning("There is no data to plot ",
+                "a blank plot will be produced.")
         par(mar = rep(3, 4))
         plot(0, type = 'n', axes = FALSE, ann = FALSE)
         return()
@@ -288,7 +304,14 @@ plot_genot_fg <- function(trans_mat
             }, numeric(1.0))
     } else if(!is.null(predicted_genotypes)){
         node_sizes <- vapply(igraph::V(graph)$name, 
-            function(gen) predicted_genotypes[gen], 1) 
+            function(gen){
+                if (sum(match(observations$Genotype, gen, nomatch = 0)) == 1)
+                    return(observations$Abs_Freq[which(observations$Genotype == gen)])
+                else 
+                    return(0.001)
+            }, numeric(1.0))
+        # node_sizes <- vapply(igraph::V(graph)$name, 
+        #     function(gen) predicted_genotypes[gen], 1) 
             #     if (sum(match(predicted_genotypes$Genotype, gen, nomatch = 0)) == 1) # Observed
             #         return(predicted_genotypes$Abs_Freq[which(predicted_genotypes$Genotype == gen)])
             #     else # Not Observed
@@ -439,7 +462,6 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
         method_info <- all_data[[paste0(mod, "_theta")]]
         edges <- NA
     }
-
     return(list(
         method_info = method_info
       , data2plot = all_data[[paste0(mod, "_", plot_type)]]
