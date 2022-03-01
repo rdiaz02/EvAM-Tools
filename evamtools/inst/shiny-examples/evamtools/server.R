@@ -959,8 +959,8 @@ server <- function(input, output, session) {
           inline = TRUE,
           choiceNames =  c( "Transition probabilities",
                             "Transition rates",
-                            "Predicted genotype frequencies",
-                            "Observed genotype frequencies",
+                            "Predicted relative genotype frequencies",
+                            "Sampled absolute genotype frequencies",
                             "Observed transitions counts"
                             ),
           choiceValues =  c("trans_mat",

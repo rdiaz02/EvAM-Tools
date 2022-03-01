@@ -691,7 +691,7 @@ plot_genotypes_freqs <- function(data) {
     par(las = 2, cex.main=1.6, cex.lab=1.5, cex.axis=1.2)
     barplot(data[, 2]
         , names = data$Genotype
-        , ylab="Counts", main="Genotype Frequencies"
+        , ylab="Counts", main="Absolute\n Genotype Frequencies"
         , horiz = FALSE
         , panel.first=grid())
     grid(nx = NA, ny = NULL, col='gray', lwd = 2)
