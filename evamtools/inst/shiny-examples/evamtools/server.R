@@ -299,7 +299,7 @@ server <- function(input, output, session) {
       tags$div(
         tags$p("1. Double click in a Frequency cell to edit it"),
         tags$p("2. Press Tab to move to the next row"),
-        tags$p("3. Use Shift + Enter to save changes"),
+        tags$p("3. Use Ctrl + Enter to save changes"),
         tags$p("4. Set a frequency to 0 to remove a genotype"),
         tags$p("5. Type in the Search bar to filter genotypes")
         )
@@ -601,7 +601,7 @@ server <- function(input, output, session) {
         tags$h3("How to modify the table"),
         tags$p("1. Double click in a Frequency cell to edit it"),
         tags$p("2. Press Tab to move to the next row"),
-        tags$p("3. Use Shift + Enter to save changes"),
+        tags$p("3. Use Ctrl + Enter to save changes"),
         tags$p("4. Set a frequency to 0 to remove a genotype"),
         tags$p("5. Type in the Search bar to filter genotypes")
         )
@@ -934,7 +934,7 @@ server <- function(input, output, session) {
     ## To see if I disable original data
     if(length(all_cpm_out) > 0){
       tags$div(class="frame max_height",
-        tags$h3("3. The original data"),
+        tags$h3("3. Original data"),
         plotOutput("csd"),
         tags$div(class = "download_button",
           actionButton("modify_data", "Modify data")
