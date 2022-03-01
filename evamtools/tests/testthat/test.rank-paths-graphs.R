@@ -1,9 +1,7 @@
 #' Test the procedure of node labeling for the plot_genot_fg function
 #' It labels nodes as those involved in the most transited paths
 #' that star in the root of the tree and that lead to any leave 
-
-test_that("Returns the correct number and type of vertex labels", {
-
+test_that("Modifying matrix with top_paths",{
     base_adj_matrix <- matrix(0, nrow = 6, ncol = 6)
     rownames(base_adj_matrix) <- colnames(base_adj_matrix) <- c("WT", "A", "A, B",
                                                       "A, C", "C", "C, D")
@@ -65,14 +63,87 @@ test_that("Returns the correct number and type of vertex labels", {
     adj4["C", "C, D"] <- 200
     adj4 <- Matrix(adj4, sparse = TRUE)
 
-    labels_0 <- compute_vertex_labels(g, all_paths, top_paths = 0)
-    labels_1 <- compute_vertex_labels(g, all_paths, top_paths = 1)
-    labels_2 <- compute_vertex_labels(g, all_paths, top_paths = 2)
-    labels_3 <- compute_vertex_labels(g, all_paths, top_paths = 3)
-    labels_4 <- compute_vertex_labels(g, all_paths, top_paths = 4)
-    labels_40 <- compute_vertex_labels(g, all_paths, top_paths = 40)
-    labels_null <- compute_vertex_labels(g, all_paths, top_paths = NULL)
+    new_matrix_0 <-    compute_matrix_from_top_paths(g, all_paths, top_paths = 0)
+    new_matrix_1 <-    compute_matrix_from_top_paths(g, all_paths, top_paths = 1)
+    new_matrix_2 <-    compute_matrix_from_top_paths(g, all_paths, top_paths = 2)
+    new_matrix_3 <-    compute_matrix_from_top_paths(g, all_paths, top_paths = 3)
+    new_matrix_4 <-    compute_matrix_from_top_paths(g, all_paths, top_paths = 4)
+    new_matrix_40 <-   compute_matrix_from_top_paths(g, all_paths, top_paths = 40)
+    new_matrix_null <- compute_matrix_from_top_paths(g, all_paths, top_paths = NULL)
+
+    expect_equal(new_matrix_1, adj1, check.attributes=FALSE)
+    expect_equal(new_matrix_2, adj2, check.attributes=FALSE)
+    expect_equal(new_matrix_3, adj3, check.attributes=FALSE)
+    expect_equal(new_matrix_4, adj4, check.attributes=FALSE)
+    expect_equal(new_matrix_40, adj4, check.attributes=FALSE)
+    expect_equal(new_matrix_null, adj4, check.attributes=FALSE)
+    expect_equal(new_matrix_0, adj4, check.attributes=FALSE)
+})
+
+test_that("Returns the correct number and type of vertex labels", {
+
+    base_adj_matrix <- matrix(0, nrow = 6, ncol = 6)
+    rownames(base_adj_matrix) <- colnames(base_adj_matrix) <- c("WT", "A", "A, B",
+                                                      "A, C", "C", "C, D")
+    adj_matrix <- base_adj_matrix
+
+    adj_matrix["WT", "A"] <- 1000
+    adj_matrix["WT", "C"] <- 500
+    adj_matrix["A", "A, B"] <- 500
+    adj_matrix["A", "A, C"] <- 200
+    adj_matrix["C", "A, C"] <- 100
+    adj_matrix["C", "C, D"] <- 200
+
+    g <- igraph::graph_from_adjacency_matrix(adj_matrix, mode = "directed", weighted = TRUE)
     
+    all_genotypes <- c("WT", "A", "A, B", "A, C", "C", "C, D")
+    all_paths <- rank_paths(g)
+
+    l1 <- c("WT", "A", "A, B", "", "", "")
+    names(l1) <- all_genotypes
+    l2 <- c("WT", "A", "A, B", "A, C", "", "")
+    names(l2) <- all_genotypes
+    l3 <- c("WT", "A", "A, B", "A, C", "C", "C, D")
+    names(l3) <- all_genotypes
+    l4 <- c("WT", "A", "A, B", "A, C", "C", "C, D")
+    names(l4) <- all_genotypes
+
+    adj_0 <- compute_matrix_from_top_paths(g, all_paths, top_paths = 0)
+    g0 <- igraph::graph_from_adjacency_matrix(adj_0
+            , weighted = TRUE)
+
+    adj_1 <- compute_matrix_from_top_paths(g, all_paths, top_paths = 1)
+    g1 <- igraph::graph_from_adjacency_matrix(adj_1
+            , weighted = TRUE)
+    
+    adj_2 <- compute_matrix_from_top_paths(g, all_paths, top_paths = 2)
+    g2 <- igraph::graph_from_adjacency_matrix(adj_2
+            , weighted = TRUE)
+    
+    adj_3 <- compute_matrix_from_top_paths(g, all_paths, top_paths = 3)
+    g3 <- igraph::graph_from_adjacency_matrix(adj_3
+            , weighted = TRUE)
+
+    adj_4 <- compute_matrix_from_top_paths(g, all_paths, top_paths = 4)
+    g4 <- igraph::graph_from_adjacency_matrix(adj_4
+            , weighted = TRUE)
+
+    adj_40 <- compute_matrix_from_top_paths(g, all_paths, top_paths = 40)
+    g40 <- igraph::graph_from_adjacency_matrix(adj_40
+            , weighted = TRUE)
+    
+    adj_null <- compute_matrix_from_top_paths(g, all_paths, top_paths = NULL)
+    g_null <- igraph::graph_from_adjacency_matrix(adj_null
+            , weighted = TRUE)
+
+    labels_0 <- compute_vertex_labels(g0, all_paths, top_paths = 0)
+    labels_1 <- compute_vertex_labels(g1, all_paths, top_paths = 1)
+    labels_2 <- compute_vertex_labels(g2, all_paths, top_paths = 2)
+    labels_3 <- compute_vertex_labels(g3, all_paths, top_paths = 3)
+    labels_4 <- compute_vertex_labels(g4, all_paths, top_paths = 4)
+    labels_40 <- compute_vertex_labels(g40, all_paths, top_paths = 40)
+    labels_null <- compute_vertex_labels(g_null, all_paths, top_paths = NULL)
+
     expect_equal(labels_1$vertex_labels, l1)
     expect_equal(labels_2$vertex_labels, l2)
     expect_equal(labels_3$vertex_labels, l3)
@@ -81,13 +152,97 @@ test_that("Returns the correct number and type of vertex labels", {
     expect_equal(labels_4$vertex_labels, labels_null$vertex_labels)
     expect_equal(labels_4$vertex_labels, labels_0$vertex_labels)
 
-    expect_equal(labels_1$adj_matrix, adj1, check.attributes=FALSE)
-    expect_equal(labels_2$adj_matrix, adj2, check.attributes=FALSE)
-    expect_equal(labels_3$adj_matrix, adj3, check.attributes=FALSE)
-    expect_equal(labels_4$adj_matrix, adj4, check.attributes=FALSE)
-    expect_equal(labels_40$adj_matrix, adj4, check.attributes=FALSE)
-    expect_equal(labels_null$adj_matrix, adj4, check.attributes=FALSE)
-    expect_equal(labels_0$adj_matrix, adj4, check.attributes=FALSE)
+    expect_equal(all(labels_1$edge_labels == ""), TRUE)
+    expect_equal(all(labels_2$edge_labels == ""), TRUE)
+    expect_equal(all(labels_3$edge_labels == ""), TRUE)
+    expect_equal(all(labels_4$edge_labels == ""), TRUE)
+    expect_equal(all(labels_40$edge_labels == ""), TRUE)
+    expect_equal(all(labels_null$edge_labels == ""), TRUE)
+})
+
+test_that("Returns the correct number and type of edges labels", {
+
+    base_adj_matrix <- matrix(0, nrow = 6, ncol = 6)
+    rownames(base_adj_matrix) <- colnames(base_adj_matrix) <- c("WT", "A", "A, B",
+                                                      "A, C", "C", "C, D")
+    adj_matrix <- base_adj_matrix
+
+    adj_matrix["WT", "A"] <- 1000
+    adj_matrix["WT", "C"] <- 500
+    adj_matrix["A", "A, B"] <- 500
+    adj_matrix["A", "A, C"] <- 200
+    adj_matrix["C", "A, C"] <- 100
+    adj_matrix["C", "C, D"] <- 200
+
+    g <- igraph::graph_from_adjacency_matrix(adj_matrix, mode = "directed", weighted = TRUE)
+    
+    all_genotypes <- c("WT", "A", "A, B", "A, C", "C", "C, D")
+    all_paths <- rank_paths(g)
+
+    l1 <- c("+A", "+B")
+    l2 <- c("+A", "+B", "+C")
+    l3 <- c("+A", "+B", "+C", "+C", "+D")
+    l4 <- c("+A", "+B", "+C", "+A", "+C", "+D")
+
+    adj_0 <- compute_matrix_from_top_paths(g, all_paths, top_paths = 0)
+    g0 <- igraph::graph_from_adjacency_matrix(adj_0
+            , weighted = TRUE)
+
+    adj_1 <- compute_matrix_from_top_paths(g, all_paths, top_paths = 1)
+    g1 <- igraph::graph_from_adjacency_matrix(adj_1
+            , weighted = TRUE)
+    
+    adj_2 <- compute_matrix_from_top_paths(g, all_paths, top_paths = 2)
+    g2 <- igraph::graph_from_adjacency_matrix(adj_2
+            , weighted = TRUE)
+    
+    adj_3 <- compute_matrix_from_top_paths(g, all_paths, top_paths = 3)
+    g3 <- igraph::graph_from_adjacency_matrix(adj_3
+            , weighted = TRUE)
+
+    adj_4 <- compute_matrix_from_top_paths(g, all_paths, top_paths = 4)
+    g4 <- igraph::graph_from_adjacency_matrix(adj_4
+            , weighted = TRUE)
+
+    adj_40 <- compute_matrix_from_top_paths(g, all_paths, top_paths = 40)
+    g40 <- igraph::graph_from_adjacency_matrix(adj_40
+            , weighted = TRUE)
+    
+    adj_null <- compute_matrix_from_top_paths(g, all_paths, top_paths = NULL)
+    g_null <- igraph::graph_from_adjacency_matrix(adj_null
+            , weighted = TRUE)
+
+    labels_0 <- compute_vertex_labels(g0, all_paths, top_paths = 0
+        , type="acquisition")
+    labels_1 <- compute_vertex_labels(g1, all_paths, top_paths = 1
+        , type="acquisition")
+    labels_2 <- compute_vertex_labels(g2, all_paths, top_paths = 2
+        , type="acquisition")
+    labels_3 <- compute_vertex_labels(g3, all_paths, top_paths = 3
+        , type="acquisition")
+    labels_4 <- compute_vertex_labels(g4, all_paths, top_paths = 4
+        , type="acquisition")
+    labels_40 <- compute_vertex_labels(g40, all_paths, top_paths = 40
+        , type="acquisition")
+    labels_null <- compute_vertex_labels(g_null, all_paths, top_paths = NULL
+        , type="acquisition")
+
+    expect_equal(labels_1$edge_labels, l1)
+    expect_equal(labels_2$edge_labels, l2)
+    expect_equal(labels_3$edge_labels, l3)
+    expect_equal(labels_4$edge_labels, l4)
+    expect_equal(labels_4$edge_labels, labels_40$edge_labels)
+    expect_equal(labels_4$edge_labels, labels_null$edge_labels)
+    expect_equal(labels_4$edge_labels, labels_0$edge_labels)
+
+    base_vertex <- rep("", length(all_genotypes))
+    expect_equal(labels_1$vertex_labels, base_vertex)
+    expect_equal(labels_2$vertex_labels, base_vertex)
+    expect_equal(labels_3$vertex_labels, base_vertex)
+    expect_equal(labels_4$vertex_labels, base_vertex)
+    expect_equal(labels_4$vertex_labels, base_vertex)
+    expect_equal(labels_4$vertex_labels, base_vertex)
+    expect_equal(labels_4$vertex_labels, base_vertex)
 })
 
 cat("\n Done test.rank-paths-graphs.R \n")
