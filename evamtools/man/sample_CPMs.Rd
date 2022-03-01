@@ -35,7 +35,9 @@ sample_CPMs(cpm_output,  N,
 \value{
   A list, with a many entries as methods times number of components requested. If all, then for each method among CBN, MCCBN, HESBCN, and MHN:
    \itemize{
-    \item{sampled_genotype_freqs: }{frequencies of genotypes (final genotypes from  the transitions)}.
+    \item{sampled_genotype_freqs: }{Absolute genotype frequencies,
+  obtained by sampling from the predicted frequencies. See also
+  Description, below}.
     \item{obs_genotype_transitions: }{Number of observed transitions between   genotypes (as a sparse matrix).}
     \item{state_counts: }{Number of times each genotype was visited during the transitions. Column sums of observed transitions are equal to state counts.}
     \item{sampled_genotype_freqs_as_data: }{The genotypes in a matrix of 0/1. This can directly be passed as an argument for \code{\link{evam}}, as the input data.}
@@ -51,7 +53,18 @@ sample_CPMs(cpm_output,  N,
 \description{
   Obtain samples of genotypes from the CPM models and, optionally, counts of genotype transitions.
 
-  If you request only sampled_genotype_freqs, obtain samples (of size \code{N}) for each method using the predicted genotype frequencies. If you request also obs_genotype_transitions and state_counts, for OT and OncoBN you still only get samples (of size \code{N}) for each method using the predicted genotype frequencies. For the remaining methods, as they return the transition rate of a continuous-time Markov Chain, we sample from the transition rate matrix, assuming that sampling times come from an exponential  distribution of rate 1. 
+  For OT and OncoBN we always obtain the absolute genotype frequencies
+  by drawing samples of size \code{N}, with replacement, using as
+  probabilities the predicted genotype frequencies.
+
+  For the remaining methods, that is also what we do, unless you request
+  also obs_genotype_transitions and state_counts. In this case, since we
+  need to simulate sampling from the continuous-time Markov Chain (with
+  transition rates given by the transition rate matrix) to obtain
+  state counts and observed genotype transitions, we use this same
+  sampling to obtain the absolute genotype frequencies. (The results
+  are, of course, equivalent, but sampling directly from the predicted
+  frequencies is much faster).
  
   Observed genotype transitions, if requested, are obtained by counting the transitions between pairs of genotypes when simulating from the continuous-time Markov Chain. State counts are also obtained by counting from this process how many times a genotype was visited.
 }
