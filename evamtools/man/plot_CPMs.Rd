@@ -86,6 +86,11 @@ for trans_rate_mat it will be rates, and for obs_genotype_transitions it will be
 raw counts.  
 }
 
+Plots can be more readable with a combination of top_paths and
+label_type. If \code{label_type = 'acquisition'} node labels will dissapear
+and edge label will be shown instead. They will display the information of
+the last gene mutated.
+
 
 \note{The color and design of figures in the bottom row, depicting
   transition matrices, transition rate matrices, and observed genotype
@@ -131,6 +136,8 @@ plot_CPMs(out, plot_type = "trans_mat")
 plot_CPMs(out, plot_type = "trans_rate_mat")
 
 plot_CPMs(out, plot_type = "trans_rate_mat", top_paths=2)
+plot_CPMs(out, plot_type = "trans_rate_mat", top_paths=2
+  , label_type ="acquisition")
 
 out_samp <- sample_CPMs(out, 1000, output = c("sampled_genotype_freqs", "obs_genotype_transitions"))
 
@@ -168,4 +175,10 @@ plot_CPMs(out_AND_OR_XOR, plot_type = "trans_mat", top_paths = 3)
 plot_CPMs(out_AND_OR_XOR, methods = c("MHN", "HESBCN"),
           plot_type = "trans_mat")
 
+plot_CPMs(out_AND_OR_XOR, methods = c("MHN", "HESBCN"),
+          plot_type = "trans_mat", label_type="acquisition"
+          , top_paths=3)
+plot_CPMs(out_AND_OR_XOR, methods = c("MHN", "HESBCN"),
+          plot_type = "trans_mat", label_type="genotype"
+          , top_paths=3)
 }
