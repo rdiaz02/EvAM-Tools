@@ -181,7 +181,7 @@ results_simple <- function(){
                 #   accept = c(".Rdata", ".rds", ".RDS"))
                 # ),
                 tags$div(class = "download_button",
-                  downloadButton("download_cpm", "Download!")
+                  downloadButton("download_cpm", "Download")
                 )
               ),
               uiOutput("customize")
@@ -498,6 +498,27 @@ user_input <- function(){
             uiOutput("change_freqs"),
 
             tags$div(class = "frame",
+                     tags$h3("Upload your own data"),
+                     tags$h4(paste0("Format: csv ---comma separated values---,",
+                                    " with first row with gene names."
+                                    )),
+                     tags$h5(paste0("Use only alphanumeric characters ",
+                                    "for gene names, and do not start ",
+                                    "a gene name with a number; ",
+                                    "keep gene names short (for figures). ",
+                                    "Use 0 or 1 for ",
+                                    "altered/not-altered (mutated/not-mutated)."
+                                    )),
+                     tags$div(class = "upload_file",
+                              fileInput("csd", "Load Data",
+                                        multiple = FALSE,
+                                        accept = c(
+                                            ## ".rds", ".RDS",
+                                            "text/csv",
+                                            ".csv")) 
+            )),
+
+            tags$div(class = "frame",
               tags$h3("Save & Download data"),
               uiOutput("dataset_name"),
               tags$div(
@@ -508,17 +529,7 @@ user_input <- function(){
                   downloadButton("download_csd", "Download your data")
                 )
               )
-            ),
-            tags$div(class = "frame",
-              tags$h3("... or load your own data"),
-              tags$div(class = "upload_file",
-                  fileInput("csd", "Load Data",
-                    multiple = FALSE,
-                    accept = c(
-                      ".rds", ".RDS",
-                      "text/csv",
-                      ".csv")) 
-            ))
+            )
             )
           ),
           column(width = 6,

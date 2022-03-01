@@ -16,7 +16,7 @@
 
 #' @title Run the web application of evamtools
 #' 
-#' @description  Transform a genotype from integer nomenclature to binary coding Launchs the server with the web based app
+#' @description  Launch the server with the web based app
 runShiny <- function() {
   appDir <- system.file("shiny-examples", "evamtools", package = "evamtools")
   if (appDir == "") {

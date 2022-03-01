@@ -414,7 +414,7 @@ standarize_dataset <- function(data){
   if(is.null(data$data)) {
     new_data$data <- SHINY_DEFAULTS$template_data$data
   } else {
-    if(!all(unique(unlist(data$data)) %in% c(0, 1))){
+      if(!all(unique(unlist(data$data)) %in% c(0, 1))){
       stop("Data should be binary: only 0 and 1")
     }
     new_data$data <- data$data

@@ -7,5 +7,5 @@
 runShiny()
 }
 \description{
-Transform a genotype from integer nomenclature to binary coding Launchs the server with the web based app
+Launch the server with the web based app
 }

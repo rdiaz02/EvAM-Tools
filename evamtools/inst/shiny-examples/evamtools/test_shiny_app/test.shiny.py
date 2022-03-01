@@ -1086,7 +1086,7 @@ class test_results(evamtools_basics):
 
     #     # download_button = self.driver.find_elements_by_css_selector("#download_cpm[disabled=disabled]")
     #     # assert(len(download_button) == 1)
-    #     # assert(download_button[0].text == 'Download!')
+    #     # assert(download_button[0].text == 'Download')
 
     #     ## Uploading data
     #     upload = self.driver.find_element_by_css_selector("input#output_cpms[type=file]")
@@ -1097,7 +1097,7 @@ class test_results(evamtools_basics):
 
     #     download_button = self.driver.find_elements_by_css_selector("#download_cpm")
     #     assert(len(download_button) == 1)
-    #     assert(download_button[0].text == 'Download!')
+    #     assert(download_button[0].text == 'Download')
     #     download_button = self.driver.find_elements_by_css_selector("#download_cpm[disabled=disabled]")
     #     assert(len(download_button) == 0)
 
