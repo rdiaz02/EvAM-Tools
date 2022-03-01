@@ -43,7 +43,7 @@ get_display_freqs <- function(freqs, n_genes, gene_names){
 }
 
 get_csd <- function(complete_csd){
-    if(is.null(complete_csd)) return(NULL)
+    if(is.null(complete_csd)) return(SHINY_DEFAULTS$template_data$csd_freqs)
     csd <- data.frame(OncoSimulR::sampledGenotypes(complete_csd))
     rownames(csd) <- csd$Genotype
     return(csd)
@@ -253,7 +253,6 @@ create_tabular_data <- function(data){
         tabular_data[[attr]] <- all_counts[order_by_counts, ]
 
       }else if(attr %in% c("trans_rate_mat", "obs_genotype_transitions", "trans_mat")){
-         
           df <- data.frame(From=character(),
                  To=character(), 
                  OT=numeric(), 
@@ -272,7 +271,9 @@ create_tabular_data <- function(data){
               genotypes <- colnames(tmp_data)
               transitions <- mapply(function(x, y) paste0(x, "->", y)
                 , genotypes[indexes[, "row"]], genotypes[indexes[, "col"]])
-              counts <- tmp_data[tmp_data > 0]
+              # counts <- tmp_data[tmp_data > 0]
+              counts <- mapply(function(x, y) tmp_data[x, y]
+                , genotypes[indexes[, "row"]], genotypes[indexes[, "col"]])
               names(counts) <- transitions
 
               #2 Adding empty row for each transitions
@@ -288,7 +289,6 @@ create_tabular_data <- function(data){
               }
             }
           }
-
           ## Dropping empty columns
           for(method in available_methods){
             tmp_col <- as.numeric(df[[method]])
