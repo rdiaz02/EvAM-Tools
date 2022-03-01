@@ -552,33 +552,9 @@ user_input <- function(){
 }
 ui <- 
   navbarPage( 
+    "Evamtools",
     id = "navbar",
-    title = "evamtools",
     header = tags$head(
-          tags$link(
-              rel = "icon",
-              href = "images/icon.png",
-              type = "image/png",
-              width = "1em",
-              height = "1em"
-          ),
-          tags$title("FastqCleaner"),
-          tags$link(rel = "stylesheet",
-              type = "text/css",
-              href = "styles/masterCss.css")
-      ),
-    tabPanel("About EVAM-tools",
-      cpm_info()
-    ),
-    tabPanel("User input", 
-      value = "csd_builder",
-      user_input()
-    ),
-    tabPanel("Results",
-      value = "result_viewer",
-      results_simple()
-    ),
-    tags$head(
       tags$style(
         HTML(
           "
@@ -603,6 +579,17 @@ ui <-
           margin-top: 50px;
         }
         "
-      )))
+      ))),
+    tabPanel("About EVAM-tools",
+      cpm_info()
+    ),
+    tabPanel("User input", 
+      value = "csd_builder",
+      user_input()
+    ),
+    tabPanel("Results",
+      value = "result_viewer",
+      results_simple()
+    )
 )
 
