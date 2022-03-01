@@ -75,68 +75,75 @@ rank_paths <- function(graph) {
 ## #' "acquisition" option returns the genotype acquire along the path.
 compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
                                   type = "genotype") {
-    if(is.null(top_paths)) top_paths <- length(paths_from_graph)
-    else if(is.numeric(top_paths)){
-        if(top_paths <= 0 || top_paths > length(paths_from_graph))
-            top_paths <- length(paths_from_graph)
-        else if(top_paths > 0) top_paths <- as.integer(top_paths)
-    } else top_paths <- length(paths_from_graph)
+    # if(is.null(top_paths)) top_paths <- length(paths_from_graph)
+    # else if(is.numeric(top_paths)){
+    #     if(top_paths <= 0 || top_paths > length(paths_from_graph))
+    #         top_paths <- length(paths_from_graph)
+    #     else if(top_paths > 0) top_paths <- as.integer(top_paths)
+    # } else top_paths <- length(paths_from_graph)
 
-    if(!is.numeric(top_paths)){
-        stop("You should provide a positive integer for top_paths")
-    }
-    paths_from_graph <- paths_from_graph[1:top_paths]
-    edge_labels <- NULL
+    # if(!is.numeric(top_paths)){
+    #     stop("You should provide a positive integer for top_paths")
+    # }
+    # paths_from_graph <- paths_from_graph[1:top_paths]
     
-    # if(vertex_labels){
-    nodes_in_top_paths <- unique(unlist(sapply(paths_from_graph,
+    nodes_in_top_paths <- unique(as.vector(sapply(paths_from_graph,
         function(x) x$name
     )))
 
-    vertex_labels <- sapply(V(graph)$name,
-        function(x){
-            if (x %in% nodes_in_top_paths){
-                if (type == "genotype") return(x)
-                else if (type == "acquisition")
-                    return(sprintf("+%s", tail(strsplit(x, ",")[[1]], n = 1)))
-            } 
-            else return("")
-        })
-    
-    adj_matrix <- igraph::as_adjacency_matrix(graph)
-    adj_matrix[adj_matrix == 1] <- 0
-    adj_matrix2 <- igraph::as_adjacency_matrix(graph, attr = "weight")
+    # adj_matrix <- igraph::as_adjacency_matrix(graph)
+    # adj_matrix[adj_matrix == 1] <- 0
+    # adj_matrix2 <- igraph::as_adjacency_matrix(graph, attr = "weight")
+    # for (path in paths_from_graph){
+    #     for (idx in 2:length(path)){
+    #         adj_matrix[path[[idx - 1]]$name
+    #             , path[[idx]]$name] <- adj_matrix2[path[[idx - 1]]$name, 
+    #                                                path[[idx]]$name]
+    #     }
+    # }
 
-    for (path in paths_from_graph){
-        for (idx in 2:length(path)){
-            adj_matrix[path[[idx - 1]]$name
-                , path[[idx]]$name] <- adj_matrix2[path[[idx - 1]]$name, 
-                                                   path[[idx]]$name]
-        }
+    if(type == "genotype"){
+        vertex_labels <- sapply(igraph::V(graph)$name,
+            function(x){
+                if (x %in% nodes_in_top_paths){
+                    # if (type == "genotype") 
+                    return(x)
+                    # else if (type == "acquisition")
+                        # return(sprintf("+%s", tail(strsplit(x, ",")[[1]], n = 1)))
+                } 
+                else return("")
+            })
+        # edge_labels <- sapply(E(graph), "")
+        edge_labels <- rep("", length(igraph::E(graph)))
+    } else if(type == "acquisition") {
+        vertex_labels <- rep("", length(igraph::V(graph)))
+        # vertex_labels <- NULL
+
+        ## All paths as a single string
+        paths_as_string <- paste(lapply(paths_from_graph, function(x){
+            paste(igraph::V(graph)$name[as.vector(x)], collapse="->")
+        }), collapse = " ")
+
+        edge_labels <- unlist(lapply(igraph::E(graph),
+            function(x){
+                edge_ends <- igraph::ends(graph, x)
+                from_node <- edge_ends[[1]]
+                to_node <- edge_ends[[2]]
+                vertices_as_str <- paste0(from_node, "->", to_node)
+                edge_in_paths <- length(grep(vertices_as_str, paths_as_string)) > 0
+                if(edge_in_paths){
+                    if(from_node == "WT") from_node = ""
+
+                    return(paste0("+", 
+                        setdiff(strsplit(to_node, ",")[[1]], 
+                        strsplit(from_node,",")[[1]])))
+                } else{
+                    return("")
+                }
+        }))
     }
-
-    # } else vertex_labels <- NULL
-
-    # browser()
-    # all_paths <- sapply(paths_from_graph,
-    #     function(x) x$name
-    # )
-
-    # from_to <- igraph::ends(graph, E(graph))
-
-    # edge_labels <- sapply(E(graph),
-    #     function(x){
-    #         igraph::get.edge.ids(graph, )
-    #         if (x %in% nodes_in_top_paths){
-    #             if (type == "genotype") return("")
-    #             else if (type == "acquisition")
-    #                 return(sprintf("+%s", tail(strsplit(x, ",")[[1]], n = 1)))
-    #         } 
-    #         else return("")
-    # })
-
     return(list(
-        adj_matrix = adj_matrix,
+        # adj_matrix = adj_matrix,
         vertex_labels = vertex_labels,
         edge_labels = edge_labels
     ))
@@ -253,21 +260,54 @@ plot_genot_fg <- function(trans_mat
     lyt <- cpm_layout(graph)
 
     ## Labels
-    sorted_paths <- rank_paths(graph)
     if(is.null(freq2label)){
-        new_graph_info <- compute_vertex_labels(graph, sorted_paths
-            , top_paths = top_paths, type=label_type)
-        labels <- list(vertex_labels = new_graph_info$vertex_labels)
-        graph <- igraph::graph_from_adjacency_matrix(new_graph_info$adj_matrix
+        paths_from_graph <- rank_paths(graph)
+        ## Reworking graph based on top_paths
+        if(is.null(top_paths)) top_paths <- length(paths_from_graph)
+        else if(is.numeric(top_paths)){
+            if(top_paths <= 0 || top_paths > length(paths_from_graph))
+                top_paths <- length(paths_from_graph)
+            else if(top_paths > 0) top_paths <- as.integer(top_paths)
+        } else top_paths <- length(paths_from_graph)
+
+        if(!is.numeric(top_paths)){
+            stop("You should provide a positive integer for top_paths")
+        }
+        paths_from_graph <- paths_from_graph[1:top_paths]
+
+        adj_matrix <- igraph::as_adjacency_matrix(graph)
+        adj_matrix[adj_matrix == 1] <- 0
+        adj_matrix2 <- igraph::as_adjacency_matrix(graph, attr = "weight")
+            
+        for (path in paths_from_graph){
+            for (idx in 2:length(path)){
+                adj_matrix[path[[idx - 1]]$name
+                    , path[[idx]]$name] <- adj_matrix2[path[[idx - 1]]$name, 
+                                                    path[[idx]]$name]
+            }
+        }
+        
+        graph <- igraph::graph_from_adjacency_matrix(adj_matrix
             , weighted = TRUE)
+        
+        # new_graph_info <- compute_vertex_labels(graph, paths_from_graph
+            # , top_paths = top_paths, type=label_type)
+        labels <- compute_vertex_labels(graph, paths_from_graph
+            , top_paths = top_paths, type=label_type)
+        # graph <- igraph::graph_from_adjacency_matrix(new_graph_info$adj_matrix
+            # , weighted = TRUE)
     } else {
-        labels <- vapply(igraph::V(graph)$name,
+        vertex_labels <- vapply(igraph::V(graph)$name,
             function(x){
                 if (sampled_freqs[x, ]$Abs_Freq >= freq2label) return(x)
                 else return("")
             },
             character(1))
-        labels <- list(vertex_labels = labels)
+        vertex_labels <- vapply(igraph::E(graph),
+            "",
+            character(1))
+        labels <- list(vertex_labels = vertex_labels
+            , edge_labels = edge_labels)
     }
 
     ## Vertex colors based on the presence/absence in the original data
@@ -287,7 +327,7 @@ plot_genot_fg <- function(trans_mat
     igraph::V(graph)$color <- colors
     igraph::V(graph)$frame.color <- colors
 
-    ## Sizes based of frequency
+    ##  Calculating node sizes
     min_size <- 2
     max_size <- 40
 
@@ -322,6 +362,7 @@ plot_genot_fg <- function(trans_mat
         function(gen) min_size, numeric(1.0))
     }
 
+    # Normalizing node sizes
     node_sizes[node_sizes <= 0.01] <- 0.01
     if(length(unique(node_sizes))>1){ #Not unique values
         node_sizes <- (node_sizes - min(node_sizes))/(max(node_sizes) - min(node_sizes)) * (max_size - min_size) + min_size
@@ -334,7 +375,7 @@ plot_genot_fg <- function(trans_mat
 
     opx <- par(mar = c(3, 0, 3, 0))
     
-    ## Weights proportional to the time they are transited
+    ## Weights proportional to the number of times they are transited
     w <- igraph::E(graph)$weight
     max_edge <- ifelse(is.null(max_edge), max(w), max_edge)
     min_edge <- ifelse(is.null(min_edge), min(w), min_edge)
@@ -387,9 +428,13 @@ plot_genot_fg <- function(trans_mat
         # , edge.color = rgb(0.5, 0.5, 0.5, transparent_w2)
         , edge.color = rgb(0.5, 0.5, 0.5, 1) 
         ## Some error in my latop because, I cannot add alpha channel
+        , edge.label = labels$edge_labels
+        , edge.label.font = 2
+        , edge.label.cex = 1.4
+        , edge.label.dist = 3
         , edge.arrow.size = 0
         , edge.width = w2
-     )
+    )
 
     margin <- -1.15
     lines(c(-1.2, 1.2), c(margin, margin), lwd = 2)
@@ -469,7 +514,7 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
       , parent_set = all_data[[paste0(mod, "_parent_set")]]
       , sampled_genotype_freqs = all_data[[paste0(mod, "_sampled_genotype_freqs")]]
       , edges = edges
-        ))
+    ))
 }
 
 ## dag_layout <- function(graph){ ## Avoiding lines
