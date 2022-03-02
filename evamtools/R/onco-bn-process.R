@@ -133,8 +133,7 @@ DBN_est_genots_2_named_genotypes <- function(odt) {
     gpn_names <- genot_matrix_2_vector(odt[, -gpnfr])
     odt <- as.vector(odt[, "Prob"])
     names(odt) <- gpn_names
-    reorder_to_standard_order(odt)
-    return(odt)
+    return(reorder_to_standard_order(odt))
 }
 
 
