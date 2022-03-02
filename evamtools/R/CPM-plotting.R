@@ -761,8 +761,11 @@ plot_genotypes_freqs <- function(data) {
     bottom_mar <- min(25, max(5, (2/3) * largest_genot_name))
     op <- par(las = 2, cex.main=1.6, cex.lab=1.5, cex.axis=1.2,
               mar = c(bottom_mar, 5, 5, 1))
-
-    data2 <- stats::setNames(data[, "Freq"], nm = data[, "Genotype"])
+    if("Freq" %in% colnames(data)){
+        data2 <- stats::setNames(data[, "Freq"], nm = data[, "Genotype"])
+    }else if("Counts" %in% colnames(data)){
+        data2 <- stats::setNames(data[, "Counts"], nm = data[, "Genotype"])
+    }
     data2 <- na.omit(reorder_to_standard_order(data2))
 
     barplot(height = as.vector(data2)
