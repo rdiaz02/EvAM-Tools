@@ -99,7 +99,7 @@ test_that("Returns the correct number and type of vertex labels", {
     g <- igraph::graph_from_adjacency_matrix(adj_matrix, mode = "directed", weighted = TRUE)
     
     all_genotypes <- c("WT", "A", "A, B", "A, C", "C", "C, D")
-    all_paths <- rank_paths(g)
+    all_paths <- rank_paths(g, log_weights = FALSE)$paths
 
     l1 <- c("WT", "A", "A, B", "", "", "")
     names(l1) <- all_genotypes
@@ -179,7 +179,7 @@ test_that("Returns the correct number and type of edges labels", {
     g <- igraph::graph_from_adjacency_matrix(adj_matrix, mode = "directed", weighted = TRUE)
     
     all_genotypes <- c("WT", "A", "A, B", "A, C", "C", "C, D")
-    all_paths <- rank_paths(g)
+    all_paths <- rank_paths(g, log_weights = FALSE)$paths
 
     l1 <- c("+A", "+B")
     l2 <- c("+A", "+B", "+C")
@@ -249,7 +249,6 @@ test_that("Returns the correct number and type of edges labels", {
 
 
 test_that("Simple test that we recover correct rank of paths and their prob", {
-    ## This would have failed in older code
     m1 <- matrix(0, nrow = 7, ncol = 7)
     rownames(m1) <- colnames(m1) <- c("WT", "A", "B", "A, B",
                                       "B, D", "B, E", "A, B, C")
@@ -260,7 +259,7 @@ test_that("Simple test that we recover correct rank of paths and their prob", {
     m1["B", "B, D"] <- 0.6
     m1["B", "B, E"] <- 0.4
     m1 <- Matrix(m1, sparse = TRUE)
-    m1
+    ## m1
     ## So three paths, with these probabilities,
     ## WT -> A -> AB -> ABC : 0.1
     ## WT -> B -> BD        : 0.9 * 0.6
@@ -271,12 +270,11 @@ test_that("Simple test that we recover correct rank of paths and their prob", {
                                                mode = "directed")
     rp <- rank_paths(m1g, log_weights = TRUE)
 
-    ## This is correct. Note former behavior, with sum was not.
     expect_identical(lapply(rp$paths, igraph::as_ids),
                      list(c("WT", "B", "B, D"),
                           c("WT", "B", "B, E"),
                           c("WT", "A", "A, B", "A, B, C")))
-    expect_equal(exp(rp$prob), c(0.9 * 0.6, 0.9 * 0.4, 0.1))         
+    expect_equal(exp(rp$weights), c(0.9 * 0.6, 0.9 * 0.4, 0.1))         
 })
 
 

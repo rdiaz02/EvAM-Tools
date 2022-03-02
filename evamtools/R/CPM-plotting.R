@@ -71,7 +71,7 @@ rank_paths <- function(graph, log_weights) {
     oi <- order(cum_weights, decreasing = TRUE)
 
     return(list(paths = all_paths[oi],
-                prob  = cum_weights[oi]))
+                weights  = cum_weights[oi]))
 }
 
 ## #' Return the labels of most relevant paths starting from WT 
@@ -282,12 +282,10 @@ plot_genot_fg <- function(trans_mat
     lyt <- cpm_layout(graph)
 
     ## Labels
-    if (is.na(plot_type)) stop("plot_type is NA")
-    log_weights <- ifelse(plot_type == "trans_mat", TRUE, FALSE)
-    sorted_paths <- rank_paths(graph, log_weights)$paths
-
-    if(is.null(freq2label)){
-        paths_from_graph <- rank_paths(graph)
+    if (is.null(freq2label)){
+        if (is.na(plot_type)) stop("plot_type is NA")
+        log_weights <- ifelse(plot_type == "trans_mat", TRUE, FALSE)
+        paths_from_graph <- rank_paths(graph, log_weights)$paths
         new_adj_matrix <- compute_matrix_from_top_paths(graph
             , paths_from_graph, top_paths)
         ## Reworking graph based on top_paths
@@ -762,7 +760,7 @@ plot_genotypes_freqs <- function(data) {
     largest_genot_name <- max(vapply(data$Genotype, nchar, 1))
     bottom_mar <- min(25, max(5, (2/3) * largest_genot_name))
     op <- par(las = 2, cex.main=1.6, cex.lab=1.5, cex.axis=1.2,
-              mar = c(bottom_mar, 4, 5, 1))
+              mar = c(bottom_mar, 5, 5, 1))
     barplot(data[, 2]
         , names = data$Genotype
         , ylab="Counts", main="Absolute\n Genotype Frequencies"
