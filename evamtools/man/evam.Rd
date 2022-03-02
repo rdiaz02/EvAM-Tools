@@ -337,6 +337,11 @@ Executes all CPMS given a cross sectional data set.
  
 }
 
+\seealso{
+  \code{\link{paths_probs_2_df}}, \code{\link{sample_CPMs}},
+   \code{\link{plot_CPMs}}
+  
+}
 
 \examples{
 data(every_which_way_data)
@@ -368,16 +373,8 @@ out3 <- evam(Dat1,
 
 ## Convert probabilities of paths into a data frame,
 ## with strings and the probs. of the paths.
-## Same code as in evamtools:::paths_and_probs_to_df
 
-f_prob_paths <- function(path_prob) {
-    return(data.frame(Path = vapply(path_prob$paths,
-                             function(x) paste(igraph::as_ids(x),
-                                                collapse = " -> "), ""),
-                      Prob = exp(path_prob$weights)))
-}
-
-f_prob_paths(out3$HESBCN_paths_max)
+paths_probs_2_df(out3$HESBCN_paths_max)
 
 
 }

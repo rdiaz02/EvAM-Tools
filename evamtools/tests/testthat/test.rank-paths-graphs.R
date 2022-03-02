@@ -276,7 +276,7 @@ test_that("Simple test that we recover correct rank of paths and their prob", {
                           c("WT", "A", "A, B", "A, B, C")))
     expect_equal(exp(rp$weights), c(0.9 * 0.6, 0.9 * 0.4, 0.1))
 
-    expect_equivalent(paths_and_probs_to_df(trans_mat_2_paths_probs(m1),
+    expect_equivalent(paths_probs_2_df(trans_mat_2_paths_probs(m1),
                                        order = "path")[, "Prob"],
                  c(0.1, 0.54, 0.36))
                  
@@ -297,7 +297,7 @@ test_that("Simple test that we recover correct rank of paths and their prob", {
     m2["B, D", "B, D, F"] <- 0.6
     m2 <- Matrix(m2, sparse = TRUE)
 
-    expect_equivalent(paths_and_probs_to_df(trans_mat_2_paths_probs(m2),
+    expect_equivalent(paths_probs_2_df(trans_mat_2_paths_probs(m2),
                                        order = "path")[, "Prob"],
                  c(0.3, 0.7 * 0.2, 0.7 * 0.8 * 0.4, 0.7 * 0.8 * 0.6))
 })

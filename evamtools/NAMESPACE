@@ -6,6 +6,7 @@ export(
   , "plot_CPMs"
   , "runShiny"
   , "random_evam"
+  , "paths_probs_2_df"
      )
 
 importFrom("shiny", "runApp", "Progress")

@@ -737,11 +737,6 @@ evam <- function(x,
 
     if ("OncoBN" %in% methods) {
         stopifnot(oncobn_opts_2$model %in% c("DBN", "CBN"))
-        ## Until it gets solved
-        if (oncobn_opts_2$model == "CBN")
-            warning("Computation of probabilities of genotypes is ",
-                    "reported to be wrong with OncoBN using CBN model: ",
-                    "https://github.com/phillipnicol/OncoBN/issues/4")
     }
     
     
@@ -865,9 +860,11 @@ evam <- function(x,
 
     get_paths_max <- function(method) {
         if (paths_max) {
-            trans_mat_name <- ifelse(method == "MHN", "transitionMatrixCompExp",
+            trans_mat_name <- ifelse(method == "MHN",
+                                     "transitionMatrixCompExp",
                                      "trans_mat_genots")
             trans_mat <- get_output(method, trans_mat_name)
+            if ((length(trans_mat) == 1) && is.na(trans_mat)) return(NA)
             return(trans_mat_2_paths_probs(trans_mat))
         } else {
             return(NA)
@@ -953,7 +950,6 @@ trans_mat_2_paths_probs <- function(trans_mat) {
     g <- igraph::graph_from_adjacency_matrix(trans_mat,
                                              weighted = TRUE,
                                              mode = "directed")
-    ## return(rank_paths(g, log_weights = TRUE))
     rp <- rank_paths(g, log_weights = TRUE)
     stopifnot(all.equal(sum(exp(rp$weights)), 1,
                         tolerance = 100 * sqrt(.Machine$double.eps)))
@@ -963,18 +959,22 @@ trans_mat_2_paths_probs <- function(trans_mat) {
 ## Take an object returned by rank_paths,
 ## and return a data frame with two columns
 ## path and prob, where path has "genotype -> genotype ..."
-paths_and_probs_to_df <- function(path_prob, order = "prob") {
-    df <- data.frame(Path = vapply(path_prob$paths,
+## and probability is probability
+paths_probs_2_df <- function(x, order = c("prob", "path")) {
+    order <- match.arg(order)
+    df <- data.frame(Path = vapply(x$paths,
                                    function(x) paste(igraph::as_ids(x),
                                                      collapse = " -> "), ""),
-                     Prob = exp(path_prob$weights))
+                     Prob = exp(x$weights))
     ## Always same ordering
-    if(order == "prob")
+    if (order == "prob")
         oi <- order(-df$Prob, df$Path, decreasing = FALSE)
-    else if(order == "path")
+    else if (order == "path")
         oi <- order(df$Path, decreasing = FALSE)
     return(df[oi, ])
 }
+
+
 
 
 #####################################################################

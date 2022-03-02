@@ -311,62 +311,62 @@ and identical results between algorithms with sparse matrices, CBN", {
     }
 
     expect_equivalent(
-        paths_and_probs_to_df(
+        paths_probs_2_df(
             trans_mat_2_paths_probs(cpm2tm(ex0)$trans_mat_genots)),
         sort_paths(oex0)
     )
     expect_equivalent(
-        paths_and_probs_to_df(
+        paths_probs_2_df(
             trans_mat_2_paths_probs(cpm2tm(ex1)$trans_mat_genots)),
         sort_paths(oex1)
     )
     expect_equivalent(
-        paths_and_probs_to_df(
+        paths_probs_2_df(
             trans_mat_2_paths_probs(cpm2tm(ex2)$trans_mat_genots)),
         sort_paths(oex2)
     )
     expect_equivalent(
-        paths_and_probs_to_df(
+        paths_probs_2_df(
             trans_mat_2_paths_probs(cpm2tm(ex3)$trans_mat_genots)),
         sort_paths(oex3)
     )
     expect_equivalent(
-        paths_and_probs_to_df(
+        paths_probs_2_df(
             trans_mat_2_paths_probs(cpm2tm(ex4)$trans_mat_genots)),
         sort_paths(oex4)
     )
     expect_equivalent(
-        paths_and_probs_to_df(
+        paths_probs_2_df(
             trans_mat_2_paths_probs(cpm2tm(ex5)$trans_mat_genots)),
         sort_paths(oex5)
     )
     expect_equivalent(
-        paths_and_probs_to_df(
+        paths_probs_2_df(
             trans_mat_2_paths_probs(cpm2tm(ex6)$trans_mat_genots)),
         sort_paths(oex6)
     )
     expect_equivalent(
-        paths_and_probs_to_df(
+        paths_probs_2_df(
             trans_mat_2_paths_probs(cpm2tm(ex7)$trans_mat_genots)),
         sort_paths(oex7)
     )
     expect_equivalent(
-        paths_and_probs_to_df(
+        paths_probs_2_df(
             trans_mat_2_paths_probs(cpm2tm(ex8)$trans_mat_genots)),
         sort_paths(oex8)
     )
     expect_equivalent(
-        paths_and_probs_to_df(
+        paths_probs_2_df(
             trans_mat_2_paths_probs(cpm2tm(ex9)$trans_mat_genots)),
         sort_paths(oex9)
     )
     expect_equivalent(
-        paths_and_probs_to_df(
+        paths_probs_2_df(
             trans_mat_2_paths_probs(cpm2tm(ex10)$trans_mat_genots)),
         sort_paths(oex10)
     )
     expect_equivalent(
-        paths_and_probs_to_df(
+        paths_probs_2_df(
             trans_mat_2_paths_probs(cpm2tm(ex11)$trans_mat_genots)),
         sort_paths(oex11)
     )
