@@ -179,3 +179,46 @@ test_that("Test that modify lambdas and parent set is correct", {
   expect_equal(results2$lambdas, expected_lambdas2)
   expect_equal(results2$parent_set, expected_parent_set1)
 })
+
+test_that("Modify dags works correctly on a more comples example",{
+  dag <- SHINY_DEFAULTS$template_data$dag
+  dag_parent_set <- SHINY_DEFAULTS$template_data$dag_parent_set
+
+  x <- evamtools:::modify_dag(dag, "WT", "A", "add", dag_parent_set)
+  x <- evamtools:::modify_dag(x$dag, "WT", "B", "add", x$parent_set)
+  x <- evamtools:::modify_dag(x$dag, "A", "C", "add", x$parent_set)
+  x <- evamtools:::modify_dag(x$dag, "B", "C", "add", x$parent_set)
+  x <- evamtools:::modify_dag(x$dag, "B", "D", "add", x$parent_set)
+  x <- evamtools:::modify_dag(x$dag, "A", "D", "add", x$parent_set)
+  
+  lambdas <- SHINY_DEFAULTS$template_data$lambdas
+  dag_parent_set <- SHINY_DEFAULTS$template_data$dag_parent_set
+  dag_parent_set["C"] <- "AND"
+  dag_parent_set["D"] <- "AND"
+  dag_table <- data.frame(
+    From = c("Root", "Root", "A", "B", "A", "B"),
+    To = c("A", "B", "C", "C", "D", "D"),
+    Relation = c("Single", "Single", "AND", "AND", "AND", "AND"),
+    Lambdas = c(1,1,1,1,1,1)
+  )
+
+  new_data <- data.frame(
+    row = c(rep(1,4), rep(2,4), rep(3, 4), rep(4,4), rep(5,4), rep(6,4)),
+    col = c(rep(c(0,1,2,3),6)),
+    value = c(
+      "Root", "A", "Single", 1, 
+      "Root", "B", "Single", 1, 
+      "A", "C", "AND", 1,
+      "B", "C", "AND", 1,
+      "A", "D", "OR", 1,
+      "B", "D", "AND", 1
+    )
+  )
+
+  results <- evamtools:::modify_lambdas_and_parent_set_from_table(
+    dag_table, new_data, lambdas, x$dag, x$parent_set
+  )
+  new_parent_set <- x$parent_set
+  new_parent_set["D"] <- "OR"
+  expect_equal(results$parent_set, new_parent_set)
+})

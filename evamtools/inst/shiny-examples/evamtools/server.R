@@ -1,15 +1,17 @@
 #'  I followed this link to structure the shiny app whithin the package
 #'  https://deanattali.com/2015/04/21/r-package-shiny-app/
 
-dataModal <- function(error_message) {
+dataModal <- function(error_message, type="Error: ") {
   modalDialog(
     easyClose = TRUE,
-    title = tags$h3("There was an error"),
+    title = tags$h3(type),
     tags$div(
       error_message
     )
   )
   }
+
+
 
 server <- function(input, output, session) {
   examples_csd$csd <- examples_csd$csd[1:5]
@@ -18,7 +20,6 @@ server <- function(input, output, session) {
   max_genes <- SHINY_DEFAULTS$max_genes
   default_csd_samples <- SHINY_DEFAULTS$csd_samples
   default_cpm_samples <- SHINY_DEFAULTS$cpm_samples
-  more_cpms <- NULL
   keep_dataset_name <- FALSE
 
   last_visited_pages <- list(csd = "User", dag = "User", matrix = "User")
@@ -28,12 +29,7 @@ server <- function(input, output, session) {
     all_csd = all_csd_data
   )
 
-  adv_options <- reactiveValues(
-    do_MCCBN = FALSE,
-    cpm_samples = default_cpm_samples
-  )
-
-  data <- reactiveValues(
+   data <- reactiveValues(
     csd_freqs = SHINY_DEFAULTS$template_data$csd_freqs
     , data = SHINY_DEFAULTS$template_data$data
     , dag = SHINY_DEFAULTS$template_data$dag
@@ -217,6 +213,7 @@ server <- function(input, output, session) {
       data$data <- tmp_data$data
 
       shinyjs::disable("analysis")
+      shinyjs::hide("all_advanced_options")
       if(!is.null(data$data)){
         data$csd_freqs <- evamtools:::get_csd(data$data)
         shinyjs::enable("analysis")
@@ -309,34 +306,8 @@ server <- function(input, output, session) {
 
   # ## Advanced option for running evamtools
   observeEvent(input$advanced_options, {
-    showModal(modalDialog(
-      size = "l",
-      easyClose = TRUE,
-      title = tags$h3("Advanced options"),
-      tags$div(
-        numericInput("num_steps", "Sampling steps", adv_options$cpm_samples
-          , min = 0, max = 100000, step = 100, width="100%"),
-        # checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("HyperTRAPS", "MCCBN"), choiceValues = c("hypertraps", "mccbn")),
-        checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("MCCBN"), choiceValues = c("MCCBN"), selected=c(adv_options$do_MCCBN)),
-        tags$h4("DISCLAIMER: MCCBN may take hours to run")
-        # tags$h4("DISCLAIMER: Both HyperTraps and MCCBN may take hours to run")
-        )
-      )
-    )
-    ## TODO this has no effect so far
+    shinyjs::toggle("all_advanced_options")
   })
-
-  observeEvent(input$num_steps, {
-    adv_options$cpm_samples <- input$num_steps
-  })
-
-  observeEvent(input$more_cpms, {
-    if("MCCBN" %in% input$more_cpms) {
-      adv_options$do_MCCBN <- "MCCBN"
-    } else {
-      adv_options$do_MCCBN <- FALSE
-    }
-  }, ignoreNULL = FALSE)
 
   # ## Define number of genes
   output$genes_number <- renderUI({
@@ -668,7 +639,9 @@ server <- function(input, output, session) {
   output$plot <- renderPlot({
     tryCatch({
       evamtools:::plot_genotypes_freqs(display_freqs())
-    }, error = function(e){})
+    }, error = function(e){
+      showModal(dataModal(e[[1]]))
+    })
   })
 
   ## Plot dag of dataset
@@ -708,6 +681,9 @@ server <- function(input, output, session) {
     # }
 
     tryCatch({
+      if(input$gene_number > 7){
+        showModal(dataModal("Take care! You are running a dataset with 8 genes or more. This make take longer than usual and plots may be crowded. We recommend using top_paths options in the Results' tab.", type = "Warning: "))
+      }
       shinyjs::disable("analysis")
       # Create a Progress object
       progress <- shiny::Progress$new()
@@ -716,7 +692,51 @@ server <- function(input, output, session) {
 
       progress$set(message = "Running evamtools", value = 0)
 
-      data2run <- evamtools:::freqs2csd(display_freqs(), data$gene_names[1:input$gene_number])
+      mhn_opts <- list()
+      if(!is.na(input$MHN_lambda)) mhn_opts$lambda <- input$MHN_lambda
+      
+      ot_opts <- list()
+      if(input$OT_with_error == "TRUE"){
+        ot_opts$with_errors_dist_ot <- TRUE
+      } else ot_opts$with_errors_dist_ot <- FALSE
+
+      cbn_opts <- list(init_poset = input$CBN_init_poset)
+      hesbcn_opts <- list(
+        steps = input$HESBCN_steps,
+        reg = input$HESBCN_reg
+      ) 
+      if(!is.na(input$HESBCN_seed)) hesbcn_opts$seed <- input$HESBCN_seed
+
+      oncobn_opts <- list(
+        model = input$OncoBN_model,
+        algorithm = input$OncoBN_algorithm,
+        k = input$OncoBN_k
+      ) 
+      if(!is.na(input$OncoBN_epsilon)) oncobn_opts$epsilon <- input$OncoBN_epsilon
+
+      mccbn_opts <- list(
+        model = input$MCCBN_model,
+        L = input$MCCBN_L,
+        sampling = input$MCCBN_sampling,
+        max.iter = input$MCCBN_max_iter,
+        update.step.size = input$MCCBN_update_step_size,
+        tol = input$MCCBN_tol,
+        max.lambda.val = input$MCCBN_max_lambda_val,
+        T0 = input$MCCBN_T0,
+        adap.rate = input$MCCBN_adapt_rate,
+        max.iter.asa = input$MCCBN_max_iter_asa,
+        neighborhood.dist = input$MCCBN_neighborhood_dist
+      )
+      if(!is.na(input$MCCBN_seed)) mccbn_opts$seed <- input$MCCBN_seed
+      if(!is.na(input$MCCBN_acceptance_rate)) mccbn_opts$acceptance.rate <-  input$MCCBN_acceptance_rate
+      if(!is.na(input$MCCBN_step_size)) mccbn_opts$step.size <-  input$MCCBN_acceptance_rate
+      if(input$MCCBN_adaptive == "TRUE"){
+        mccbn_opts$adaptive <- TRUE
+      } else mccbn_opts$adaptive <- FALSE
+
+      data2run <- evamtools:::freqs2csd(display_freqs(), data$gene_names[1:input$gene_number]
+        
+        )
       progress$inc(1/5, detail = "Setting up data")
       Sys.sleep(0.5)
       progress$inc(2/5, detail = "Running CPMs")
@@ -725,7 +745,13 @@ server <- function(input, output, session) {
       if(!is.null(input$more_cpms)){
         methods <- unique(c(methods, input$more_cpms[input$more_cpms %in% SHINY_DEFAULTS$all_cpms]))
       }
-      cpm_output <- evam(data2run, methods = methods)
+      cpm_output <- evam(data2run, methods = methods
+        , mhn_opts = mhn_opts
+        , ot_opts = ot_opts
+        , cbn_opts = cbn_opts
+        , hesbcn_opts = hesbcn_opts
+        , oncobn_opts = oncobn_opts
+        , mccbn_opts = mccbn_opts)
    
       ## To see Source data in the results section
       # if(input$input2build != "csd"){
@@ -741,7 +767,7 @@ server <- function(input, output, session) {
       #     , 1:input$gene_number]
       # }
 
-      n_samples <- adv_options$cpm_samples
+      n_samples <- input$num_steps
       if(is.null(n_samples) | !is.numeric(n_samples) | n_samples < 100){
         n_samples <- SHINY_DEFAULTS$cpm_samples
       }
@@ -802,7 +828,10 @@ server <- function(input, output, session) {
   output$sims <- renderUI({
     if(length(names(all_cpm_out)) > 0 & !is.null(input$select_cpm)){
       tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
-      column_models2show <- floor(12 / length(input$cpm2show))
+      # column_models2show <- floor(12 / length(input$cpm2show))
+
+      number_of_columns <- floor(12 /
+        ifelse(length(input$cpm2show) <=4, 4, length(input$cpm2show)))
 
       lapply(input$cpm2show, function(met){
         method_data <- evamtools:::process_data(tmp_data, met, plot_type = "trans_mat")
@@ -813,11 +842,12 @@ server <- function(input, output, session) {
           , met)
         })
         return(
-          column(3,
+          # column(3,
+          column(number_of_columns,
             plotOutput(sprintf("plot_sims_%s", met)))
         )
-        })
-      }
+      })
+    }
   })
 
   output$sims2 <- renderUI({
@@ -827,14 +857,17 @@ server <- function(input, output, session) {
       shinyjs::enable(selector = "#download_cpm")
 
       ## Main display
-      column_models2show <- floor(12 / length(input$cpm2show))
+      # column_models2show <- floor(12 / length(input$cpm2show))
       selected_plot_type <- input$data2plot
+
+      number_of_columns <- floor(12 /
+        ifelse(length(input$cpm2show) <=4, 4, length(input$cpm2show)))
 
       if(!(is.null(selected_plot_type))){
         lapply(input$cpm2show, function(met){
           method_data <- evamtools:::process_data(tmp_data, met, plot_type = selected_plot_type)
           output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
-          pl <- evamtools:::plot_genot_fg(method_data$data2plot,
+            pl <- evamtools:::plot_genot_fg(method_data$data2plot,
                       observations = tmp_data$analyzed_data, # We use it to define "Observed" and "Not Observed" genotypes
                       predicted_genotypes = method_data$predicted_genotype_freqs, # To compute node sizes if sampled_freqs is NULL
                       sampled_freqs = method_data$sampled_genotype_freqs,
@@ -844,7 +877,8 @@ server <- function(input, output, session) {
                       # , freq2label = input$freq2label)
           })
           return(
-            column(3,
+            # column(3,
+            column(number_of_columns,
               plotOutput(sprintf("plot_sims2_%s", met)))
           )
         })

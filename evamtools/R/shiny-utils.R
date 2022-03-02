@@ -159,6 +159,7 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, da
 
   ##Relationships
   number_of_parents <- colSums(dag)[-1]
+  number_of_parents <- number_of_parents[number_of_parents > 0]
   tmp_parent_set <- parent_set
   new_relationships <- info[info["col"] == 2,"value"]
   names(new_relationships) <- info[info["col"] == 1,"value"]
@@ -167,15 +168,19 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, da
   genes_in_relationships <- names(new_relationships)
   freq_genes_in_relationships <- table(genes_in_relationships)
 
+  old_relationships <- stats::setNames(dag_data$Relation, dag_data$To)
   new_relationships[!(new_relationships %in% c("Single", "AND", "OR", "XOR"))] <- "AND"
-  new_relationships[number_of_parents < 2] <- "Single"
+  new_relationships[names(number_of_parents[number_of_parents<2])] <- "Single"
   new_relationships[setdiff(unique(genes_in_relationships), 
     names(freq_genes_in_relationships[freq_genes_in_relationships > 1]))] <- "Single"
   
   multiple_parents <- names(number_of_parents[number_of_parents > 1])
 
   for(i in multiple_parents){
-    tmp_parent_set[i] <- setdiff(new_relationships[genes_in_relationships == i], c(parent_set[i]))[[1]]
+    changed_relationships <- setdiff(new_relationships[genes_in_relationships == i], c(parent_set[i]))
+    if (length(changed_relationships) > 0){
+      tmp_parent_set[i] <- changed_relationships[[1]]
+    }
   }
   # for(idx in c(1:length(new_relationships))){
   #   tmp_parent_set[names(new_relationships[idx])] <- new_relationships[idx]
