@@ -1,7 +1,9 @@
 #' Test the procedure of node labeling for the plot_genot_fg function
 #' It labels nodes as those involved in the most transited paths
+
 #' that star in the root of the tree and that lead to any leave 
 test_that("Modifying matrix with top_paths",{
+
     base_adj_matrix <- matrix(0, nrow = 6, ncol = 6)
     rownames(base_adj_matrix) <- colnames(base_adj_matrix) <- c("WT", "A", "A, B",
                                                       "A, C", "C", "C, D")
@@ -17,7 +19,7 @@ test_that("Modifying matrix with top_paths",{
     g <- igraph::graph_from_adjacency_matrix(adj_matrix, mode = "directed", weighted = TRUE)
     
     all_genotypes <- c("WT", "A", "A, B", "A, C", "C", "C, D")
-    all_paths <- rank_paths(g)
+    all_paths <- rank_paths(g, log_weights = FALSE)$paths
 
     l1 <- c("WT", "A", "A, B", "", "", "")
     names(l1) <- all_genotypes
@@ -244,5 +246,38 @@ test_that("Returns the correct number and type of edges labels", {
     expect_equal(labels_4$vertex_labels, base_vertex)
     expect_equal(labels_4$vertex_labels, base_vertex)
 })
+
+
+test_that("Simple test that we recover correct rank of paths and their prob", {
+    ## This would have failed in older code
+    m1 <- matrix(0, nrow = 7, ncol = 7)
+    rownames(m1) <- colnames(m1) <- c("WT", "A", "B", "A, B",
+                                      "B, D", "B, E", "A, B, C")
+    m1["WT", "A"] <- .1
+    m1["A", "A, B"] <- 1
+    m1["A, B", "A, B, C"] <- 1
+    m1["WT", "B"] <- 0.9
+    m1["B", "B, D"] <- 0.6
+    m1["B", "B, E"] <- 0.4
+    m1 <- Matrix(m1, sparse = TRUE)
+    m1
+    ## So three paths, with these probabilities,
+    ## WT -> A -> AB -> ABC : 0.1
+    ## WT -> B -> BD        : 0.9 * 0.6
+    ## WT -> B -> BE        : 0.9 * 0.4
+
+    
+    m1g <- igraph::graph_from_adjacency_matrix(m1, weighted = TRUE,
+                                               mode = "directed")
+    rp <- rank_paths(m1g, log_weights = TRUE)
+
+    ## This is correct. Note former behavior, with sum was not.
+    expect_identical(lapply(rp$paths, igraph::as_ids),
+                     list(c("WT", "B", "B, D"),
+                          c("WT", "B", "B, E"),
+                          c("WT", "A", "A, B", "A, B, C")))
+    expect_equal(exp(rp$prob), c(0.9 * 0.6, 0.9 * 0.4, 0.1))         
+})
+
 
 cat("\n Done test.rank-paths-graphs.R \n")

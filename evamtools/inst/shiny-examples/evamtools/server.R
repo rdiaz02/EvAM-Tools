@@ -839,7 +839,8 @@ server <- function(input, output, session) {
                       predicted_genotypes = method_data$predicted_genotype_freqs, # To compute node sizes if sampled_freqs is NULL
                       sampled_freqs = method_data$sampled_genotype_freqs,
                       top_paths = input$freq2label,
-                      label_type = input$label2plot)
+                      label_type = input$label2plot,
+                      plot_type = selected_plot_type)
                       # , freq2label = input$freq2label)
           })
           return(

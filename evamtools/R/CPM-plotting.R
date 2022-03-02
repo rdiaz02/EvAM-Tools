@@ -1,4 +1,4 @@
-## Copyright 2021, 2022 Pablo Herrera Nieto
+## Copyright 2021, 2022 Pablo Herrera Nieto, Ramon Diaz-Uriarte
 
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -51,18 +51,27 @@ plot_sampled_genots <- function(data) {
 ## #' 
 ## #' @param graph igraph object with genotype transition. The graph is expect to be directed and weighted
 ## #' @return List with all paths sorted in descreasing order of importance
-rank_paths <- function(graph) {
+##   and weights (log prob of path or sum of the weights)
+rank_paths <- function(graph, log_weights) {
     g <- graph
     all_paths <- list()
     ## Starting from WT --> get the most likely children
     ## recusively until reaching a leaf
     leaves <- V(g)[igraph::degree(g, mode = "out") == 0]
     all_paths <- igraph::all_simple_paths(g, from = "WT", to = leaves)
-    cum_weigths <- vapply(all_paths, function(x){
-        sum(igraph::E(g, path = x)$weight)
-    }, numeric(1))
+    if (log_weights) {
+        cum_weights <- vapply(all_paths, function(x){
+            sum(log(igraph::E(g, path = x)$weight))
+        }, numeric(1))
+    } else {
+       cum_weights <- vapply(all_paths, function(x){
+            sum(igraph::E(g, path = x)$weight)
+        }, numeric(1))
+    }
+    oi <- order(cum_weights, decreasing = TRUE)
 
-    return(all_paths[order(cum_weigths, decreasing = TRUE)])
+    return(list(paths = all_paths[oi],
+                prob  = cum_weights[oi]))
 }
 
 ## #' Return the labels of most relevant paths starting from WT 
@@ -237,6 +246,7 @@ plot_genot_fg <- function(trans_mat
     , min_edge = NULL
     , fixed_vertex_size = FALSE
     , label_type = "genotype"
+    , plot_type = NA ## On purpose: fail if not given
     ) {
     if(is.null(trans_mat) | any(is.na(trans_mat))){
         warning("There is no data to plot ",
@@ -249,7 +259,8 @@ plot_genot_fg <- function(trans_mat
     unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
     rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", ",")
     names(predicted_genotypes) <- str_replace_all(names(predicted_genotypes), ", ", ",")
-    graph <- igraph::graph_from_adjacency_matrix(trans_mat, weighted = TRUE)
+    graph <- igraph::graph_from_adjacency_matrix(trans_mat, weighted = TRUE,
+                                                 mode = "directed")
 
     num_genes <- length(unique_genes_names)
     graph <- igraph::decompose(graph)[[1]] ## We do not want disconnected nodes
@@ -271,6 +282,10 @@ plot_genot_fg <- function(trans_mat
     lyt <- cpm_layout(graph)
 
     ## Labels
+    if (is.na(plot_type)) stop("plot_type is NA")
+    log_weights <- ifelse(plot_type == "trans_mat", TRUE, FALSE)
+    sorted_paths <- rank_paths(graph, log_weights)$paths
+
     if(is.null(freq2label)){
         paths_from_graph <- rank_paths(graph)
         new_adj_matrix <- compute_matrix_from_top_paths(graph
@@ -727,12 +742,16 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
             plot_sampled_genots(cpm_output$analyzed_data)
         } else {
             plot_genot_fg(method_data2plot$data2plot,
-                        observations = cpm_output$analyzed_data, # We use it to define "Observed" and "Not Observed" genotypes
-                        predicted_genotypes = method_data2plot$predicted_genotype_freqs, # To compute node sizes if sampled_freqs is NULL
-                        sampled_freqs = method_data2plot$sampled_genotype_freqs,
-                        top_paths = top_paths,
-                        label_type = label_type,
-                        fixed_vertex_size = fixed_vertex_size)
+                          ## We use it to define "Observed" and "Not Observed" genotypes
+                          observations = cpm_output$analyzed_data,
+                          ## To compute node sizes if sampled_freqs is NULL
+                          predicted_genotypes = method_data2plot$predicted_genotype_freqs, 
+                          sampled_freqs = method_data2plot$sampled_genotype_freqs,
+                          top_paths = top_paths,
+                          label_type = label_type,
+                          fixed_vertex_size = fixed_vertex_size,
+                          ## Need to use the right rank_paths
+                          plot_type = plot_type)
         }
     }
     par(op1)

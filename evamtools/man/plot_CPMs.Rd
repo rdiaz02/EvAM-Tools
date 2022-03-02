@@ -47,7 +47,7 @@ plot_CPMs(
   size; otherwise, scale them proportional to frequencies of observed data.}
 
 \item{top_paths}{Number of most relevant paths to plot. Default NULL 
-will plot all paths}
+will plot all paths. See below, Description, for details about relevance.}
 }
 
 \description{
@@ -76,19 +76,25 @@ AND relationship).
 In the bottom row plots, non-observed genotypes are shown in light
 green, to differentiate them from the observed genotypes (shown in orange).
 
-The criteria to decide which are the most relevant paths with the top_paths option
-is the following:
-1) get all the leaves from the graph.
-2) calculate all the paths leading from "WT" to all leaves.
-3) select n paths with highest cumulate weight. The nature of the weights
-depends on the plot_type: for trans_mat it will be probabilities, 
-for trans_rate_mat it will be rates, and for obs_genotype_transitions it will be
-raw counts.  
+
+
+
+The criteria to decide which are the most relevant paths with the
+top_paths option is the following:
+1) Get all the leaves from the graph.
+2) Calculate all the paths leading from "WT" to all leaves.
+3) Select n paths with highest cumulative weight sum.
+
+The weights used depend on the plot_type: for trans_mat it will be
+log probabilities (so the most relevant paths are the most likely paths), for trans_rate_mat it will be
+rates, and for obs_genotype_transitions it will be raw counts.  
+
 
 Plots can be more readable with a combination of top_paths and
 label_type. If \code{label_type = 'acquisition'} node labels will dissapear
 and edge label will be shown instead. They will display the information of
 the last gene mutated.
+
 
 }
 

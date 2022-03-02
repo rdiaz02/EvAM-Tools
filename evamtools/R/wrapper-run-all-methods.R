@@ -849,7 +849,8 @@ evam <- function(x,
     ## Make sure we are not repeating expensive operations
     ## When testing, compare against cpm2tm
     ## for OT and CBN
-
+    ## Much simpler to use something like rank_paths.
+    
     ## f_graph: remember this is the transition rate matrix
     ## for CBN, MCCBN, HESBCN
     ## For OT ... well, it is something else, but not really probabilities
@@ -1011,14 +1012,3 @@ evam <- function(x,
 ##                            return(all_methods_2_trans_mat(all_data[[i]]))
 ##                        }
 ##                        )
-
-
-
-
-
-
-
-
-
-
-
