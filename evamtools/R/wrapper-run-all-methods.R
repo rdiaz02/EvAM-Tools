@@ -839,25 +839,19 @@ evam <- function(x,
     names(all_out) <- methods
 
     
-    ## Future: Getting all paths to global maximum
-    ## Simply call do_weighted_paths_to_max on a list of
-    ## transition matrices and a pre-created paths_to_max
-    ## Make sure we are not repeating expensive operations
-    ## When testing, compare against cpm2tm
-    ## for OT and CBN
-    ## Much simpler to use something like rank_paths.
-    
     ## f_graph: remember this is the transition rate matrix
     ## for CBN, MCCBN, HESBCN
     ## For OT ... well, it is something else, but not really probabilities
     ## of anything.
 
+    ## To avoid repeated code
     get_output <- function(method, component) {
         if (!exists(method, all_out)) return(NA)
         if (!exists(component, all_out[[method]])) return(NA)
         return(all_out[[method]][[component]])
     }
-
+    
+    ## To avoid repeating code
     get_paths_max <- function(method) {
         if (paths_max) {
             trans_mat_name <- ifelse(method == "MHN",
