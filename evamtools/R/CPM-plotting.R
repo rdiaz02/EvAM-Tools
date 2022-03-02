@@ -84,14 +84,14 @@ rank_paths <- function(graph, log_weights) {
 ## #' "acquisition" option returns the genotype acquire along the path.
 compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
                                   type = "genotype") {
-    if(is.null(top_paths)) top_paths <- length(paths_from_graph)
-    else if(is.numeric(top_paths)){
-        if(top_paths <= 0 || top_paths > length(paths_from_graph))
+    if (is.null(top_paths)) top_paths <- length(paths_from_graph)
+    else if (is.numeric(top_paths)){
+        if (top_paths <= 0 || top_paths > length(paths_from_graph))
             top_paths <- length(paths_from_graph)
-        else if(top_paths > 0) top_paths <- as.integer(top_paths)
+        else if (top_paths > 0) top_paths <- as.integer(top_paths)
     } else top_paths <- length(paths_from_graph)
 
-    if(!is.numeric(top_paths)){
+    if (!is.numeric(top_paths)){
         stop("You should provide a positive integer for top_paths")
     }
     paths_from_graph <- paths_from_graph[1:top_paths]
@@ -100,7 +100,7 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
         function(x) x$name
     )))
 
-    if(type == "genotype"){
+    if (type == "genotype"){
         vertex_labels <- sapply(igraph::V(graph)$name,
             function(x){
                 if (x %in% nodes_in_top_paths){
@@ -109,7 +109,7 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
                 else return("")
             })
         edge_labels <- rep("", length(igraph::E(graph)))
-    } else if(type == "acquisition") {
+    } else if (type == "acquisition") {
         vertex_labels <- rep("", length(igraph::V(graph)))
 
         ## All paths as a single string

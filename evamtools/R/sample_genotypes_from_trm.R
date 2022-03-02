@@ -351,6 +351,28 @@ sparse_transM_from_genotypes <- function(genots) {
                         dimnames = list(genots, genots)))
 }
 
+## Return vector of ranks (not order) so we can generate
+## an "Index" column, or similar, so that ordering according to it
+## gives us standard order.
+## x: genotype names
+standard_rank_genots_1 <- function(x) {
+    muts <- stringi::stri_count_fixed(x, ",")
+    xwt <- which(x == "WT")
+    if (length(xwt)) muts[xwt] <- -1
+    return(order(order(muts, x)))
+}
+
+## Like version _1, but for two sets of genotypes, such as "From" and "To"
+standard_rank_genots_2 <- function(x, y) {
+    mutsx <- stringi::stri_count_fixed(x, ",")
+    xwt <- which(x == "WT")
+    if (length(xwt)) mutsx[xwt] <- -1
+    mutsy <- stringi::stri_count_fixed(y, ",")
+    ywt <- which(y == "WT")
+    if (length(ywt)) mutsy[ywt] <- -1
+    return(order(order(mutsx, x, mutsy, y)))
+}
+
 
 sample_CPMs <- function(cpm_output
                       , N
@@ -613,7 +635,7 @@ reorder_to_standard_order <- function(x) {
     ## Ensure genotype names are canonical
     genots_n <- canonicalize_genotype_names(genots_n)
     names(x) <- genots_n
-    
+
     ## Get gene names
     gene_n <- unique(stringi::stri_replace_all_fixed(
                                   unlist(
@@ -622,14 +644,14 @@ reorder_to_standard_order <- function(x) {
     gene_n <- setdiff(gene_n, "WT")
     sorted_genots <- genotypes_standard_order(gene_names = gene_n)
 
-    if(!all(genots_n %in% sorted_genots))
+    if (!all(genots_n %in% sorted_genots))
         stop("At least one genotype name not in sorted_genots")
-    
+
     ## Sort to original, return
     x2 <- x[sorted_genots]
     names(x2) <- sorted_genots
-    
-    return(x2)  
+
+    return(x2)
 }
 
 

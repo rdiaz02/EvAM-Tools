@@ -227,49 +227,55 @@ get_dag_data <- function(data, parent_set, N = 10000){
               data = freqs2csd(tmp_samples_as_df, gene_names)))
 }
 
-create_tabular_data <- function(data){
+create_tabular_data <- function(data) {
     available_methods <- c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN")
-    attr_to_make_tabular <- c("trans_mat", "trans_rate_mat", "obs_genotype_transitions"
-      , "predicted_genotype_freqs", "sampled_genotype_freqs")
-    
+    attr_to_make_tabular <- c("trans_mat", "trans_rate_mat",
+                              "obs_genotype_transitions",
+                              "predicted_genotype_freqs",
+                              "sampled_genotype_freqs")
     tabular_data <- list()
-    for(attr in attr_to_make_tabular){
-      if(attr %in% c("sampled_genotype_freqs", "predicted_genotype_freqs")){
+    for (attr in attr_to_make_tabular){
+        if (attr %in% c("sampled_genotype_freqs",
+                        "predicted_genotype_freqs")) {
         all_counts <- data.frame(Genotype = c(NULL))
 
-        for(method in available_methods){
+        for (method in available_methods){
           tmp_data <- data[[paste0(method, "_", attr)]]
-          if(!any(is.null(tmp_data)) && !any(is.na(tmp_data))){
-            if(any(is.null(all_counts$Genotype))){
+          if (!any(is.null(tmp_data)) && !any(is.na(tmp_data))) {
+            if (any(is.null(all_counts$Genotype))){
               all_counts <- data.frame(Genotype = names(tmp_data)) #They include all genotypes
               rownames(all_counts) <- all_counts$Genotype
             }
             all_counts[, method] <- round(tmp_data, 3)
           }
         }
-        order_by_counts <- sort(rowSums(all_counts[-1]), 
-          decreasing = TRUE, index.return = TRUE)$ix
-    
-        tabular_data[[attr]] <- all_counts[order_by_counts, ]
+        ## order_by_counts <- order(rowSums(all_counts[-1]),
+        ##                          decreasing = TRUE)
+        ## tabular_data[[attr]] <- all_counts[order_by_counts, ]
+        all_counts <-
+            data.frame(Index = standard_rank_genots_1(all_counts$Genotype),
+                       all_counts)
+        tabular_data[[attr]] <- all_counts[order(all_counts$Index), ]
 
-      }else if(attr %in% c("trans_rate_mat", "obs_genotype_transitions", "trans_mat")){
-          df <- data.frame(From=character(),
-                 To=character(), 
-                 OT=numeric(), 
-                 OncoBN=numeric(), 
-                 CBN=numeric(), 
-                 HESBCN=numeric(), 
-                 MCCBN=numeric(), 
-                 MHN=numeric(), 
-                 stringsAsFactors=FALSE) 
+      } else if (attr %in% c("trans_rate_mat",
+                             "obs_genotype_transitions", "trans_mat")) {
+          df <- data.frame(From = character(),
+                 To = character(), 
+                 OT = numeric(), 
+                 OncoBN = numeric(), 
+                 CBN = numeric(), 
+                 HESBCN = numeric(), 
+                 MCCBN = numeric(), 
+                 MHN = numeric(), 
+                 stringsAsFactors = FALSE) 
 
-          for(method in available_methods){
+          for (method in available_methods){
             #1 Matrix to vector
             tmp_data <- data[[paste0(method, "_", attr)]]
-            if(!is.null(tmp_data)){
-              indexes <- which(as.matrix(tmp_data)>0, arr.ind = TRUE)
+            if (!is.null(tmp_data)) {
+              indexes <- which(as.matrix(tmp_data) > 0, arr.ind = TRUE)
               genotypes <- colnames(tmp_data)
-              transitions <- mapply(function(x, y) paste0(x, "->", y)
+              transitions <- mapply(function(x, y) paste0(x, " -> ", y)
                 , genotypes[indexes[, "row"]], genotypes[indexes[, "col"]])
               # counts <- tmp_data[tmp_data > 0]
               counts <- mapply(function(x, y) tmp_data[x, y]
@@ -281,7 +287,8 @@ create_tabular_data <- function(data){
                 ## New row
                 if(all(is.na(df[transition, ]))){
                   genes <- strsplit(transition, "->")[[1]]
-                  df[transition, ] <- c(genes[[1]], genes[[2]], rep(0, length(available_methods)))
+                  df[transition, ] <- c(genes[[1]], genes[[2]],
+                                        rep(0, length(available_methods)))
                   df[transition, method] <- counts[[transition]]
                 } else {
                   df[transition, method] <- counts[[transition]]
@@ -290,17 +297,21 @@ create_tabular_data <- function(data){
             }
           }
           ## Dropping empty columns
-          for(method in available_methods){
+          for (method in available_methods){
             tmp_col <- as.numeric(df[[method]])
-            if(sum(abs(tmp_col)) == 0) df[[method]] <- NULL
+            if (sum(abs(tmp_col)) == 0) df[[method]] <- NULL
             else df[[method]] <- round(tmp_col, 3)
           }
 
+          df <- data.frame(Index = standard_rank_genots_2(df$To, df$From),
+                           df)
           ## Sorting 
-          order_by_counts <- sort(rowSums(df[,3:ncol(df)]), decreasing=TRUE, index.return=TRUE)$ix
+          ## order_by_counts <- order(rowSums(df[,3:ncol(df)]),
+          ##                          decreasing = TRUE)
 
-          tabular_data[[attr]] <- df[order_by_counts, ]
-      } 
+          ## tabular_data[[attr]] <- df[order_by_counts, ]
+          tabular_data[[attr]] <- df[order(df$Index), ]
+      }
       # else if(type %in% c("lambdas")){
       #     lambda_field <- c("Lambdas", "OT_edgeWeight", "rerun_lambda", "Lambdas", "lambda", "Thetas")
       #     names(lambda_field) <- c("Source", "OT", "CBN", "HESBCN", "MCCBN")
