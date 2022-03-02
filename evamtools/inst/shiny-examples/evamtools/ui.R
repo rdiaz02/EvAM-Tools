@@ -113,6 +113,42 @@ results_simple <- function(){
         visibility: hidden !important;
       }
 
+      .col-sm-12{
+        padding-left:5px;
+        padding-right:5px;
+      }
+      .col-sm-10{
+        padding-left:0px;
+        padding-right:0px;
+      }
+
+      .col-sm-11{
+        padding-right:0px;
+      }
+
+      .col-sm-2{
+        padding-left:0px;
+        padding-right:0px;
+      }
+
+      .col-sm-4{
+        padding-left:0px;
+        padding-right:0px;
+      }
+
+      .col-sm-7{
+        padding-left:0px;
+        padding-right:0px;
+      }
+
+      .col-sm-1{
+        padding-left:0px;
+      }
+
+      .row{
+        margin-right:0px;
+      }
+
                    
                 #select_cpm div.radio{
                   background-color: rgba(200,200,200, 0.5);
@@ -128,19 +164,19 @@ results_simple <- function(){
 
                 @media only screen and (min-width: 1400px) {
                   #select_cpm div.radio{
-                    max-width: 150px;
+                    max-width: 200px;
                   }
                   #select_cpm div.radio{
-                    max-width: 150px;
+                    max-width: 200px;
                   }
                 }
 
                 @media only screen and (min-width: 1900px) {
                   #select_cpm div.radio{
-                    max-width: 200px;
+                    max-width: 250px;
                   }
                   #select_cpm div.radio{
-                    max-width: 200px;
+                    max-width: 250px;
                   }
 
                 }
@@ -157,7 +193,6 @@ results_simple <- function(){
                   border: 2px solid gray;
                   border-radius: 3px;
                   margin-top: 5px;
-                  margin-left: -20px;
                   white-space: nowrap;
                   overflow: hidden;
                   text-overflow: ellipsis;
@@ -168,13 +203,16 @@ results_simple <- function(){
             )
         ),
         tags$div(class = "row",
-          column(1,
-            tags$h3("Outputs"),
-            uiOutput("cpm_list")),
-          column(11,
+          # column(1,
+          # column(11,
             column(2,
               tags$div(class = "frame",
-                tags$h3("1. Download"),
+                tags$h3("Outputs"),
+                uiOutput("cpm_list")
+              ),
+              uiOutput("customize"),
+              tags$div(class = "frame",
+                tags$h3("Download"),
                 # tags$div(id = "noprogress",
                 # fileInput("output_cpms", "Load your results"
                 #   , multiple = FALSE,
@@ -183,8 +221,7 @@ results_simple <- function(){
                 tags$div(class = "download_button",
                   downloadButton("download_cpm", "Download")
                 )
-              ),
-              uiOutput("customize")
+              )
             ),
             column(10,
               column(12, uiOutput("sims")),
@@ -199,7 +236,7 @@ results_simple <- function(){
               uiOutput("tabular_data")
             )
 
-          )
+          # )
         )
     )
 
@@ -410,7 +447,7 @@ user_input <- function() {
           width: 140px;
         }
         #select_cpm div.radio{
-          width: 130px;
+          width: 170px;
         }
       }
 

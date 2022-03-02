@@ -919,7 +919,7 @@ server <- function(input, output, session) {
 
   output$customize <- renderUI({
     tags$div(class = "frame",
-      tags$h3("2. Customize the visualization"),
+      tags$h3("Customize the visualization"),
       tags$div(class = "inline",
         checkboxGroupInput(inputId = "cpm2show",
           label = "CPMs to show",
