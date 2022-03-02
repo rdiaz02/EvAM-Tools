@@ -347,7 +347,9 @@ test_that("Create tabular data from CPM output works correctly", {
 
   tabular_data <- create_tabular_data(cpm_out)
 
-  expect_equal(1, length(unique(colSums(tabular_data$sampled_genotype_freqs[-1]))))
+  expect_equal(1,
+               length(unique(
+                   colSums(tabular_data$sampled_genotype_freqs[, -c(1, 2)]))))
 
   for(method in methods2test){
     if(method == "OT"){
@@ -367,7 +369,7 @@ test_that("Create tabular data from CPM output works correctly", {
       }
 
       for(transition in rownames(tabular_data$obs_genotype_transitions)){
-        trans <- strsplit(transition, "->")[[1]]
+        trans <- strsplit(transition, " -> ")[[1]]
         value <- tabular_data$obs_genotype_transitions[transition, method]
         if(value > 0){
           expect_equal(value

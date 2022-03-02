@@ -826,7 +826,7 @@ server <- function(input, output, session) {
   all_cpm_out <- reactiveValues(user = cpm_out)
 
   output$sims <- renderUI({
-    if(length(names(all_cpm_out)) > 0 & !is.null(input$select_cpm)){
+    if ((length(names(all_cpm_out)) > 0) && (!is.null(input$select_cpm))) {
       tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
       # column_models2show <- floor(12 / length(input$cpm2show))
 
@@ -834,7 +834,8 @@ server <- function(input, output, session) {
         ifelse(length(input$cpm2show) <=4, 4, length(input$cpm2show)))
 
       lapply(input$cpm2show, function(met){
-        method_data <- evamtools:::process_data(tmp_data, met, plot_type = "trans_mat")
+          method_data <- evamtools:::process_data(tmp_data, met,
+                                                  plot_type = "trans_mat")
         output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
           pl <- evamtools:::plot_method(method_data$method_info
           , method_data$parent_set
@@ -851,7 +852,7 @@ server <- function(input, output, session) {
   })
 
   output$sims2 <- renderUI({
-    if(length(names(all_cpm_out)) > 0 & !is.null(input$select_cpm)){
+    if ((length(names(all_cpm_out)) > 0)  && (!is.null(input$select_cpm))) {
       tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
       ## Enabling donwload button
       shinyjs::enable(selector = "#download_cpm")

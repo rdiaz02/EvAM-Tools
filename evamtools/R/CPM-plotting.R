@@ -574,21 +574,69 @@ DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
     g1 <- graph::graphAM(as.matrix(am),
                          edgemode = "directed")
     
-    if(!(exists("Relation", edges))) edges$Relation <- "Single"
+    if (!(exists("Relation", edges))) edges$Relation <- "Single"
 
     colors_edges <- vapply(edges$Relation, color_relat, "")
     names(colors_edges) <- paste0(edges$From, "~", edges$To)
-        
+
+    get_edge_label <- function(edges) {
+        wce <- which(colnames(edges) %in% c("rerun_lambda", ## CBN, from rerun
+                                     "lambda", ## MCCBN
+                                     "OT_edgeWeight", ## OT
+                                     "Lambdas", ## HESBCN
+                                     "Thetas" ## OncoBN
+                                     ))
+        if (length(wce) > 1) {
+            stop("more than one column with weights")
+        } else if (length(wce) == 1) {
+            ## Ugly hack to move them sideways
+            labels_edges <- paste0("  ", round(edges[, wce], 2))
+        } else {
+            ## The plot for the pre-built examples
+            labels_edges <- rep("", nrow(edges))
+        }
+        return(labels_edges)
+    }
+    
+    labels_edges <- get_edge_label(edges)
+    names(labels_edges) <- names(colors_edges)
+    ## Leave a single label per node
+    dupto <- which(duplicated(edges$To))
+    if (length(dupto)) labels_edges <- labels_edges[-dupto]
+    
     ## We need edgeAttrs, not edgeData, which is ignored when plotting
-    graph::plot(g1,
+    gg1 <- Rgraphviz::layoutGraph(g1,
                 attrs = list(node = list(color = "transparent",
                                          fontsize = font_size,
                                          fontcolor = "black"), ## dodgerblue4
                              edge = list(arrowsize = arrowsize,
-                                         lwd = edge_width)),
+                                         lwd = edge_width
+                                         ## , fontsize = 10
+                                        )),
+                ## labelfontcolor = "red")), ## does nothing
                 ## Last, if you pass edge in attrs
-                edgeAttrs = list(color = colors_edges),
-                main = main)
+                edgeAttrs = list(color = colors_edges,
+                                 label = labels_edges))
+    graph::graph.par(list(graph = list(main = main),
+                   edges = list(textCol = "darkgoldenrod4",
+                                cex = 1.5)))
+    Rgraphviz::renderGraph(gg1)
+    
+    ## graph::plot(g1,
+    ##             attrs = list(node = list(color = "transparent",
+    ##                                      fontsize = font_size,
+    ##                                      fontcolor = "black"), ## dodgerblue4
+    ##                          edge = list(arrowsize = arrowsize,
+    ##                                      lwd = edge_width,
+    ##                                      fontsize = 6
+    ##                                     )),
+    ##             ## labelfontcolor = "red")), ## does nothing
+    ##             ## Last, if you pass edge in attrs
+    ##             edgeAttrs = list(color = colors_edges,
+    ##                              label = labels_edges),
+    ##             main = main)
+
+    
 }
 
 
