@@ -800,12 +800,13 @@ server <- function(input, output, session) {
   all_cpm_out <- reactiveValues(user = cpm_out)
 
   output$sims <- renderUI({
-    if(length(names(all_cpm_out)) > 0 & !is.null(input$select_cpm)){
+    if ((length(names(all_cpm_out)) > 0) && (!is.null(input$select_cpm))) {
       tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
       column_models2show <- floor(12 / length(input$cpm2show))
 
       lapply(input$cpm2show, function(met){
-        method_data <- evamtools:::process_data(tmp_data, met, plot_type = "trans_mat")
+          method_data <- evamtools:::process_data(tmp_data, met,
+                                                  plot_type = "trans_mat")
         output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
           pl <- evamtools:::plot_method(method_data$method_info
           , method_data$parent_set
@@ -821,7 +822,7 @@ server <- function(input, output, session) {
   })
 
   output$sims2 <- renderUI({
-    if(length(names(all_cpm_out)) > 0 & !is.null(input$select_cpm)){
+    if ((length(names(all_cpm_out)) > 0)  && (!is.null(input$select_cpm))) {
       tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
       ## Enabling donwload button
       shinyjs::enable(selector = "#download_cpm")
@@ -830,8 +831,8 @@ server <- function(input, output, session) {
       column_models2show <- floor(12 / length(input$cpm2show))
       selected_plot_type <- input$data2plot
 
-      if(!(is.null(selected_plot_type))){
-        lapply(input$cpm2show, function(met){
+      if (!(is.null(selected_plot_type))) {
+        lapply(input$cpm2show, function(met) {
           method_data <- evamtools:::process_data(tmp_data, met, plot_type = selected_plot_type)
           output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
           pl <- evamtools:::plot_genot_fg(method_data$data2plot,

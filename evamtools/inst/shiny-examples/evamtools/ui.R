@@ -185,8 +185,6 @@ results_simple <- function(){
                 )
               ),
               uiOutput("customize")
-              
-              
             ),
             column(10,
               column(12, uiOutput("sims")),
@@ -207,7 +205,7 @@ results_simple <- function(){
 
 }
 
-user_input <- function(){
+user_input <- function() {
   fluidPage(
     shinyjs::useShinyjs(),
     tags$head(
