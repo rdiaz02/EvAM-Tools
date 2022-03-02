@@ -756,17 +756,20 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
 }
 
 plot_genotypes_freqs <- function(data) {
-    if(nrow(data) == 0) return()
+    if (nrow(data) == 0) return()
     largest_genot_name <- max(vapply(data$Genotype, nchar, 1))
     bottom_mar <- min(25, max(5, (2/3) * largest_genot_name))
     op <- par(las = 2, cex.main=1.6, cex.lab=1.5, cex.axis=1.2,
               mar = c(bottom_mar, 5, 5, 1))
-    barplot(data[, 2]
-        , names = data$Genotype
+
+    data2 <- stats::setNames(data[, "Freq"], nm = data[, "Genotype"])
+    data2 <- na.omit(reorder_to_standard_order(data2))
+
+    barplot(height = as.vector(data2)
+        , names = names(data2)
         , ylab="Counts", main="Absolute\n Genotype Frequencies"
         , horiz = FALSE)
-    ##        , panel.first=grid())
+
     grid(nx = NA, ny = NULL, col='gray', lwd = 2)
-    ## TODO sort genotypes
     par(op)
 }
