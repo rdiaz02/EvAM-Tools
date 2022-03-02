@@ -50,4 +50,5 @@ importFrom("RhpcBLASctl", "blas_set_num_threads", "omp_set_num_threads")
 importFrom("Rlinsolve", "lsolve.jacobi")
 importFrom("fastmatrix", "seidel")
 
-importFrom("graph", "plot", "graphAM")
+importFrom("graph", "plot", "graphAM", "graph.par")
+importFrom("Rgraphviz", "layoutGraph", "renderGraph")
