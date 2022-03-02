@@ -572,6 +572,7 @@ evam <- function(x,
                  methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN"),
                  max_cols = 15,
                  cores = detectCores(),
+                 paths_max = FALSE,
                  mhn_opts = list(lambda = 1/nrow(x),
                                  omp_threads = ifelse(cores > 1, 1, detectCores())
                                 ),
@@ -857,11 +858,26 @@ evam <- function(x,
     ## of anything.
 
     get_output <- function(method, component) {
-        if(!exists(method, all_out)) return(NA)
-        if(!exists(component, all_out[[method]])) return(NA)
+        if (!exists(method, all_out)) return(NA)
+        if (!exists(component, all_out[[method]])) return(NA)
         return(all_out[[method]][[component]])
     }
 
+    get_paths_max <- function(method) {
+        if (paths_max) {
+            trans_mat_name <- ifelse(method == "MHN", "transitionMatrixCompExp",
+                                     "trans_mat_genots")
+            trans_mat <- get_output(method, trans_mat_name)
+            if ((length(trans_mat) == 1) && is.na(trans_mat)) return(NA)
+            g <- igraph::graph_from_adjacency_matrix(trans_mat,
+                                                     weighted = TRUE,
+                                                     mode = "directed")
+            return(rank_paths(g, log_weights = TRUE))
+        } else {
+            return(NA)
+        }
+    }
+  
     return(list(
         OT_model = get_output("OT", "edges"),
         OT_f_graph = get_output("OT", "weighted_fgraph"),
@@ -870,20 +886,23 @@ evam <- function(x,
                                                  "predicted_genotype_freqs"),
         OT_eps = get_output("OT", "eps"),
         OT_fit = get_output("OT", "ot_fit"),
-
+        OT_paths_max = get_paths_max("OT"),
+       
         CBN_model = get_output("CBN", "edges"),
         CBN_trans_rate_mat = get_output("CBN", "weighted_fgraph"),
         CBN_trans_mat = get_output("CBN", "trans_mat_genots"),
         CBN_td_trans_mat = get_output("CBN", "td_trans_mat"),
         CBN_predicted_genotype_freqs = get_output("CBN",
                                                   "predicted_genotype_freqs"),
-
+        CBN_paths_max = get_paths_max("CBN"),
+        
         MCCBN_model = get_output("MCCBN", "edges"),
         MCCBN_trans_rate_mat = get_output("MCCBN", "weighted_fgraph"),
         MCCBN_trans_mat = get_output("MCCBN", "trans_mat_genots"),
         MCCBN_td_trans_mat = get_output("CBN", "td_trans_mat"),
         MCCBN_predicted_genotype_freqs = get_output("MCCBN",
                                                     "predicted_genotype_freqs"),
+        MCCBN_paths_max = get_paths_max("MCCBN"),
         
         MHN_theta = get_output("MHN", "theta"),
         MHN_trans_rate_mat = get_output("MHN", "transitionRateMatrix"),
@@ -892,7 +911,8 @@ evam <- function(x,
         MHN_exp_theta = exp(get_output("MHN", "theta")),
         MHN_predicted_genotype_freqs = get_output("MHN",
                                                   "predicted_genotype_freqs"),
-
+        MHN_paths_max = get_paths_max("MHN"),
+        
         OncoBN_model = get_output("OncoBN", "edges"),
         OncoBN_likelihood = get_output("OncoBN", "likelihood"),
         OncoBN_f_graph = get_output("OncoBN", "weighted_fgraph"), 
@@ -902,7 +922,8 @@ evam <- function(x,
         OncoBN_fitted_model = get_output("OncoBN", "model"),
         OncoBN_epsilon = get_output("OncoBN", "epsilon"),
         OncoBN_parent_set = get_output("OncoBN", "parent_set"),
-
+        OncoBN_paths_max = get_paths_max("OncoBN"),
+        
         HESBCN_model = get_output("HESBCN", "edges"),
         HESBCN_parent_set = get_output("HESBCN", "parent_set"),
         HESBCN_trans_rate_mat = get_output("HESBCN", "weighted_fgraph"),
@@ -911,9 +932,13 @@ evam <- function(x,
         HESBCN_predicted_genotype_freqs = get_output("HESBCN",
                                                      "predicted_genotype_freqs"),
         HESBCN_command = get_output("HESBCN", "command"),
+        HESBCN_paths_max = get_paths_max("HESBCN"),
         
         original_data = xoriginal,
         analyzed_data = x,
+        genotype_id_ordered =
+            stats::setNames(1:(2^ncol(x)),
+                            genotypes_standard_order(colnames(x))),
         all_options = list(
             mhn_opts = mhn_opts_2,
             ot_opts = ot_opts,
@@ -926,7 +951,15 @@ evam <- function(x,
 }
 
 
-
+## Take an object returned by rank_paths,
+## and return a data frame with two columns
+## path and prob, where path has "genotype -> genotype ..."
+paths_and_probs_to_df <- function(path_prob) {
+    return(data.frame(Path = vapply(path_prob$paths,
+                                    function(x) paste(igraph::as_ids(x),
+                                                      collapse = " -> "), ""),
+                      Prob = exp(path_prob$weights)))
+}
 
 
 #####################################################################

@@ -6,6 +6,7 @@ evam(x,
      methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN"),
      max_cols = 15,
      cores = detectCores(),
+     paths_max = FALSE,
      mhn_opts = list(lambda = 1/nrow(x),
                      omp_threads = ifelse(cores > 1, 1, detectCores())),
      ot_opts = list(with_errors_dist_ot = TRUE),
@@ -63,6 +64,9 @@ evam(x,
 \item{cores}{If larger than 1, use mclapply to run all methods. This is
   the default. If you use mclapply, MHN and MCCBN should not use OMP
   (i.e., the number of threads for OMP for MHN and MCCBN should be 1).}
+
+\item{paths_max}{If TRUE, return all paths to the maxim/maxima, with
+  their log probabilities.}
 
 \item{mhn_opts}{A list with two named arguments.
   \itemize{
@@ -144,6 +148,10 @@ speed things much or what is the best number of threads to use. }
   really an abuse of what an untimed OT provides. See full documentation for details.}
         \item{OT_predicted_genotype_freqs: }{Probabilities of genotypes from the
   OT model, as a data frame.}
+	\item{OT_paths_max: }{If \code{paths_max} is TRUE, a list of two components, \code{paths} and \code{weights}. The \code{paths} list is a list of \code{igraph.vs} (igraph vertex sequences) objects, one for each path; the \code{weights} is vector of log-probabilities of each path. If \code{paths_max} is FALSE, the default, NA.}
+
+
+
 
         \item{CBN_model: }{Similar to the ouput from OT, but with
         lambdas. The lambda to be used is "rerun_lambda".}
@@ -155,13 +163,17 @@ speed things much or what is the best number of threads to use. }
       \item{CBN_predicted_genotype_freqs: }{Named vector of probabilities of genotypes predicted
         by the CBN model (under a model where sampling times are
         distributed as an exponential of rate 1).}
+      \item{CBN_paths_max: }{As for OT.}
+
       
         \item{MCCBN_model: }{As for CBN, only with one column of \eqn{\lambda}s.}
         \item{MCCBN_trans_rate_mat: }{As for CBN.}
         \item{MCCBN_trans_mat: }{As for CBN.}
         \item{MCCBN_td_trans_mat: }{As for CBN.}
        \item{MCCBN_predicted_genotype_freqs: }{As for CBN.}
-      
+       \item{MCCBN_paths_max: }{As for OT.}
+
+       
         \item{MHN_theta: }{Matrix of estimated thetas2.}
         \item{MHN_trans_rate_mat: }{As for CBN.}
         \item{MHN_trans_mat: }{As for CBN.}
@@ -170,7 +182,9 @@ speed things much or what is the best number of threads to use. }
         matrix \eqn{\Theta} in Schill et al. (just
         each theta, exponentiated; not the matrix exponential of the matrix of thetas).}
         \item{MHN_predicted_genotype_freqs: }{As for CBN.}
-      
+	\item{MHN_paths_max: }{As for OT.}
+
+	
         \item{OncoBN_model: }{Similar to the ones above (but with a column
         named Thetas, instead of lambdas or edge weights), with the
         additional column dQuote{Relation}, that can take values OR (if
@@ -185,18 +199,23 @@ speed things much or what is the best number of threads to use. }
         to evam, but it is evaluated after possibly having modified the
         input data; see below).}
         \item{OncoBN_parent_set: }{.}
+	\item{OncoBN_paths_max: }{As for OT.}
 
+	
         \item{HESBCN_model: }{As for CBN.}
         \item{HESBCN_parent_set: }{As for CBN.}
         \item{HESBCN_trans_rate_mat: }{As for CBN.}
         \item{HESBCN_trans_mat: }{As for CBN.}
         \item{HESBCN_td_trans_mat: }{As for CBN.}
 	\item{HESBCN_predicted_genotype_freqs: }{As for CBN.}
+	\item{HESBCN_paths_max: }{As for OT.}
+	
 	
         \item{original_data: }{The original data.}
         \item{analyzed_data: }{The data that were actually analyzed. Can
         differ from the original data because of the data pre-processing
         steps.}
+      \item{genotype_id_ordered: }{A named vector, from 1:number of genotypes, with names the genotypes. This can be useful for sorting; WT has value 1, and genotypes are ordered by increasing number of mutations and, withing number of mutations, alphanumerically.}
       \item{all_options: }{All of the options used, as a list of lists.}
   }
 }
@@ -231,7 +250,10 @@ possible additional operations, such as obtaining the transition rate
 matrix, etc. (So, for example, the time for estimating the
 matrix of thetas for MHN is much smaller than the reported time here,
 which also includes building the transition rate matrix).
- 
+
+
+You can \strong{convert paths and their probabilities} to a data frame easily. For example, using the non-exported simple function \code{pats_and_probs_to_df}. See example below. By default, we do not return paths, as their number can grow very quickly with number of genotypes and you only need if, well, you care about them.
+
 }
 
 
@@ -334,5 +356,28 @@ out2 <- evam(Dat1,
                         "MHN", "HESBCN", "MCCBN"),
             mhn_opts = list(lambda = 5/nrow(Dat1)),
             oncobn_opts = list(model = "CBN"))
+
+
+## Getting paths to maximum/maxima
+
+out3 <- evam(Dat1,
+            methods = c("CBN", "OT", "OncoBN",
+                        "HESBCN"),
+            paths_max = TRUE)
+
+
+## Convert probabilities of paths into a data frame,
+## with strings and the probs. of the paths.
+## Same code as in evamtools:::paths_and_probs_to_df
+
+f_prob_paths <- function(path_prob) {
+    return(data.frame(Path = vapply(path_prob$paths,
+                             function(x) paste(igraph::as_ids(x),
+                                                collapse = " -> "), ""),
+                      Prob = exp(path_prob$weights)))
+}
+
+f_prob_paths(out3$HESBCN_paths_max)
+
 
 }
