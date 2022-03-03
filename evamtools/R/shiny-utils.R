@@ -218,6 +218,7 @@ get_dag_data <- function(data, parent_set, N = 10000){
   n_genes <- length(parent_set)
 
   dag_trm <- HESBCN_model_2_output(data, parent_set)$HESBCN_trans_rate_mat
+  browser()
   dag_probs <- probs_from_trm(dag_trm)
   tmp_samples_as_df <- genot_probs_2_pD_ordered_sample(x = dag_probs,
                                                        ngenes = n_genes,
@@ -262,7 +263,12 @@ create_tabular_data <- function(data) {
               all_counts <- data.frame(Genotype = names(tmp_data)) #They include all genotypes
               rownames(all_counts) <- all_counts$Genotype
             }
-            all_counts[, method] <- round(tmp_data, 3)
+            ## To avoid relying in indexes
+            all_counts[, method] <- rep(0, nrow(all_counts))
+            tmp_data <- round(tmp_data, 3)
+            for (genotype in names(tmp_data)){
+              all_counts[genotype, method] <- tmp_data[genotype]
+            }
           }
         }
         ## order_by_counts <- order(rowSums(all_counts[-1]),

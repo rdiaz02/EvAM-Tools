@@ -752,7 +752,7 @@ server <- function(input, output, session) {
         , hesbcn_opts = hesbcn_opts
         , oncobn_opts = oncobn_opts
         , mccbn_opts = mccbn_opts)
-   
+
       ## To see Source data in the results section
       # if(input$input2build != "csd"){
       #   ## FIXME: rename f_graph to trans_rate_mat: ???
@@ -773,7 +773,8 @@ server <- function(input, output, session) {
       }
       progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
       sampled_from_CPMs <- sample_CPMs(cpm_output, n_samples
-        , methods, c("sampled_genotype_freqs", "obs_genotype_transitions"))
+        , methods, c("sampled_genotype_freqs", "obs_genotype_transitions")
+        , obs_noise = input$sample_noise)
 
       progress$inc(4/5, detail = "Post processing data")
       Sys.sleep(0.5)
