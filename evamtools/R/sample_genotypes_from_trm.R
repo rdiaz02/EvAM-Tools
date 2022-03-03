@@ -229,11 +229,6 @@ process_samples <- function(sim, n_genes,
 
     ## Calculate frequencies: genotype frequencies
     if ("sampled_genotype_freqs" %in% output) {
-        ## FIXME: aqui
-        ## counts_tmp <- sample_to_pD_order(sim$obs_events, n_genes, gene_names)
-        ## frequencies <- stats::setNames(counts_tmp, sorted_genotypes)
-        ## retval$sampled_genotype_freqs <- frequencies
-
         retval$sampled_genotype_freqs <-
             sample_to_named_pD_ordered_out(sim$obs_events,
                                            n_genes, gene_names, "vector")
@@ -319,14 +314,7 @@ process_samples <- function(sim, n_genes,
     if ("state_counts" %in% output) { ## times each genotype visited
         if (!("obs_genotype_transitions" %in% output))
             unlisted_trajectories <- unlist(sim$trajectory)
-        ## ## FIXME: aqui
-        ## state_counts <- sample_to_pD_order(unlisted_trajectories,
-        ##                                    n_genes, gene_names)
-        ## state_counts <- data.frame(
-        ##     Genotype = sorted_genotypes,
-        ##     Counts = state_counts
-        ## )
-        ## retval$state_counts <- state_counts
+
         retval$state_counts <-
             sample_to_named_pD_ordered_out(unlisted_trajectories,
                                            n_genes, gene_names, "data.frame")
@@ -441,15 +429,6 @@ sample_CPMs <- function(cpm_output
     for (method in methods) {
         if (method %in% c("OT", "OncoBN")) {
             genots_pred <- cpm_output[[paste0(method, "_predicted_genotype_freqs")]]
-            ## ## FIXME: aqui
-            ## tmp_genotypes_sampled <- sample_to_pD_order(
-            ##     sample(names(genots_pred), size = N,
-            ##            prob = genots_pred, replace = TRUE),
-            ##     ngenes = n_genes, gene_names = gene_names)
-
-            ## retval[[sprintf("%s_sampled_genotype_freqs", method)]] <-
-            ##     stats::setNames(tmp_genotypes_sampled,
-            ##                     generate_pD_sorted_genotypes(n_genes, gene_names))
 
             retval[[sprintf("%s_sampled_genotype_freqs", method)]] <-
                 genot_probs_2_pD_ordered_sample(genots_pred,
@@ -501,18 +480,6 @@ sample_CPMs <- function(cpm_output
                     retval[[sprintf("%s_sampled_genotype_freqs",
                                     method)]] <- NULL
                 } else {
-                    ## ## FIXME: aqui
-                    ## tmp_genotypes_sampled <-
-                    ##     sample_to_pD_order(sample(names(genots_pred),
-                    ##                               size = N,
-                    ##                               prob = genots_pred,
-                    ##                               replace = TRUE),
-                    ##                        ngenes = n_genes,
-                    ##                        gene_names = gene_names)
-                    ## retval[[sprintf("%s_sampled_genotype_freqs", method)]] <-
-                    ##     stats::setNames(tmp_genotypes_sampled,
-                    ##                     generate_pD_sorted_genotypes(n_genes,
-                    ##                                                  gene_names))
                     retval[[sprintf("%s_sampled_genotype_freqs", method)]] <-
                         genot_probs_2_pD_ordered_sample(genots_pred,
                                                         n_genes,
@@ -1379,5 +1346,4 @@ sample_to_named_pD_ordered_out <- function(the_sample, ngenes, gene_names,
 }
 
 
-## FIXME: rm el FIXME: aqui
 ## cleanup old

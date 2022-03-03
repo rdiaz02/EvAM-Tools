@@ -207,17 +207,7 @@ get_mhn_data <- function(thetas, N = 10000){
                                                        N = N,
                                                        out = "data.frame"
                                                        )
-  ## ## FIXME: aqui
-  ## tmp_genotypes_sampled <- sample_to_pD_order(
-  ##               sample(names(mhn_probs), size = N,
-  ##                      prob = mhn_probs, replace = TRUE),
-  ##               ngenes = n_genes, gene_names = gene_names)
-  ## tmp_samples <- stats::setNames(tmp_genotypes_sampled,
-  ##           generate_pD_sorted_genotypes(n_genes, gene_names))
-  ## tmp_samples_as_df <- data.frame(Genotype = names(tmp_samples),
-  ##                                 Counts = tmp_samples)
-  ## ## Next was dead code
-  ## ## tmp_samples <- tmp_samples[tmp_samples > 0]
+
   return(list(csdfreqs = tmp_samples_as_df,
               data = freqs2csd(tmp_samples_as_df, gene_names)))
 }
@@ -235,7 +225,7 @@ get_dag_data <- function(data, parent_set, N = 10000){
                                                        N = N,
                                                        out = "data.frame"
                                                        )
-  ## ## FIXME: aqui
+  ## ## FIXME: aqui. To rm later
   ## tmp_genotypes_sampled <- sample_to_pD_order(
   ##               sample(names(dag_probs), size = N,
   ##                      prob = dag_probs, replace = TRUE),
@@ -244,6 +234,11 @@ get_dag_data <- function(data, parent_set, N = 10000){
   ##           generate_pD_sorted_genotypes(n_genes, gene_names))
   ## tmp_samples <- tmp_samples[tmp_samples > 0]
   ## tmp_samples_as_df <- data.frame(Genotype=names(tmp_samples), Counts=tmp_samples)
+
+  ## Note: no, the above call to genot_probs_2_pD ... does not remove
+  ## lines with 0 counts. But we do not want to do that as that is a separate
+  ## operation that has to with, maybe, generating the csd.
+  
   return(list(csd_freqs = tmp_samples_as_df,
               data = freqs2csd(tmp_samples_as_df, gene_names)))
 }
