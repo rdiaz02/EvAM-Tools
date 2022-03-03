@@ -18,6 +18,6 @@ simGenotypes <- mccbn::sample_genotypes(20000, true_p1,
                                         lambdas = c(5, 5, .5, .4))
 db2 <- simGenotypes$obs_events
 colnames(db2) <- LETTERS[1:4]
-sampledGenotypes(db2)
+data_to_counts(db2, out = "data.frame", omit_0 = TRUE)
 out <- evam(db2)
 ## plot_DAG_fg(out, db2) ## FIXME: replace by current working function.

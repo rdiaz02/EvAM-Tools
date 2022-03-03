@@ -264,7 +264,7 @@ test_that("we are using the indices of theta correctly 1", {
         ), ncol = 4, byrow = TRUE
     )
     colnames(dB) <- LETTERS[1:4]
-    sampledGenotypes(dB) ## from OncoSimulR
+    data_to_counts(dB, out = "data.frame", omit_0 = TRUE) 
     ## Note :the next crashes. Of course: don't do silly things like passing
     ## a data frame with one or more colSums == 0
     try(do_MHN(dB), silent = TRUE)
@@ -340,7 +340,7 @@ test_that("we are using the indices of theta correctly 2", {
         ), ncol = 4, byrow = TRUE
     )
     colnames(dB) <- LETTERS[1:4]
-    sampledGenotypes(dB)
+    data_to_counts(dB, out = "data.frame", omit_0 = TRUE)
     mm4 <- do_MHN(dB)
 
     round(mm4$transitionMatrixCompExp, 3)
@@ -418,7 +418,7 @@ test_that("we are using the indices of theta correctly 3", {
         ), ncol = 4, byrow = TRUE
     )
     colnames(dB) <- LETTERS[1:4]
-    sampledGenotypes(dB)
+    data_to_counts(dB, out = "data.frame", omit_0 = TRUE)
     mm77 <- do_MHN(dB)
     options(width = 300)
     
@@ -540,7 +540,7 @@ test_that("we are using the indices of theta correctly 4", {
         ), ncol = 6, byrow = TRUE
     )
     colnames(dB) <- LETTERS[1:6]
-    sampledGenotypes(dB)
+    data_to_counts(dB, out = "data.frame", omit_0 = TRUE)
     mm2 <- do_MHN(dB)
     mm22 <- do_MHN2(dB)
     options(width = 350)

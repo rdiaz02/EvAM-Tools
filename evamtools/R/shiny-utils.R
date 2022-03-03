@@ -67,7 +67,7 @@ get_display_freqs <- function(freqs, n_genes, gene_names){
 
 get_csd <- function(complete_csd){
     if(is.null(complete_csd)) return(SHINY_DEFAULTS$template_data$csd_freqs)
-    csd <- data.frame(OncoSimulR::sampledGenotypes(complete_csd))
+    csd <- data.frame(evamtools:::data_to_counts(complete_csd, out = "data.frame", omit_0 = TRUE))
     rownames(csd) <- csd$Genotype
     return(csd)
 }

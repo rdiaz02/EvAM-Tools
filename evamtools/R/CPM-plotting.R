@@ -17,24 +17,24 @@
 ## #' 
 ## #' @param data data.frame object with cross sectional datas
 plot_sampled_genots <- function(data) {
-    d1 <- as.data.frame(sampledGenotypes(data))
+    d1 <- data_to_counts(data, out = "data.frame", omit_0 = TRUE)
 
-    ## Reorder by number mutations and names, but WT always first
-    which_wt <- which(d1[, 1] == "WT")
-    if(length(which_wt)) {
-        dwt <- d1[which_wt, ]
-        dnwt <- d1[-which_wt, ]
-    } else {
-        dwt <- NULL
-        dnwt <- d1
-    }
+    ## ## Reorder by number mutations and names, but WT always first
+    ## which_wt <- which(d1[, 1] == "WT")
+    ## if(length(which_wt)) {
+    ##     dwt <- d1[which_wt, ]
+    ##     dnwt <- d1[-which_wt, ]
+    ## } else {
+    ##     dwt <- NULL
+    ##     dnwt <- d1
+    ## }
     
-    oo <- order(str_count(dnwt[, 1], ","), dnwt[, 1])
-    dnwt <- dnwt[oo, ]
-    d1 <- rbind(dwt, dnwt)
+    ## oo <- order(str_count(dnwt[, 1], ","), dnwt[, 1])
+    ## dnwt <- dnwt[oo, ]
+    ## d1 <- rbind(dwt, dnwt)
     
     m1 <- matrix(d1[, 2], ncol = 1)
-    colnames(m1) <- "Freq."
+    colnames(m1) <- "Counts"
     rownames(m1) <- d1[, 1]
     op <- par(mar = c(3, 5, 5, 3), las = 1)
     plot(m1, cex = 1.5, digits = 0, key = NULL,
@@ -266,7 +266,7 @@ plot_genot_fg <- function(trans_mat
     graph <- igraph::decompose(graph)[[1]] ## We do not want disconnected nodes
     
     if (!is.null(observations)){
-        observations <- as.data.frame(sampledGenotypes(observations))
+        observations <- as.data.frame(data_to_counts(observations, out = "data.frame", omit_0 = TRUE))
         observations$Abs_Freq <- observations$Freq / sum(observations$Freq)
         observations$Genotype <- str_replace_all(observations$Genotype, ", ", ",")
     }

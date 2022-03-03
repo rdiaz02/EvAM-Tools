@@ -396,7 +396,7 @@ server <- function(input, output, session) {
     if(input$input2build == "csd"){
       tags$div(class = "frame",
         tags$div(class = "flex",
-          tags$h3("3. Change frequencies (counts)"),
+          tags$h3("3. Change genotype's counts"),
           actionButton("display_help", "Help"),
         ),
         tags$div(id = "csd_table",
