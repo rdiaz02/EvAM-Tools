@@ -101,10 +101,17 @@ server <- function(input, output, session) {
     tryCatch({
       ## 1 save dataset to list after user data
       if(!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))){
-        datasets$all_csd[[input$input2build]][[input$dataset_name]]$name <- input$dataset_name
+          datasets$all_csd[[input$input2build]][[input$dataset_name]]$name <-
+              input$dataset_name
 
-        if(nrow(data$csd_freqs) > 0){
-          datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <- evamtools:::freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
+          if (nrow(data$csd_freqs) > 0) {
+              ## FIXME: comment_out_freqs2csd
+              ## datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <-
+              ##     evamtools:::freqs2csd(data$csd_freqs,
+              ##                           data$gene_names[1:input$gene_number])
+            datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <-
+                evamtools:::genotypeCounts_to_data(data$csd_freqs,
+                                                   e = 0)
         }
 
         tmp_data <- list(
@@ -331,7 +338,8 @@ server <- function(input, output, session) {
                 choices = options)
             ),
             tags$div(id="fr",
-              numericInput(label="Frequency", value = NA, min = 0, inputId = "genotype_freq",width = NA),
+                     numericInput(label = "Counts", value = NA, min = 0,
+                                  inputId = "genotype_freq", width = NA),
               actionButton("add_genotype", "Add Genotype")
             )
         )
@@ -388,7 +396,7 @@ server <- function(input, output, session) {
     if(input$input2build == "csd"){
       tags$div(class = "frame",
         tags$div(class = "flex",
-          tags$h3("3. Change frequencies"),
+          tags$h3("3. Change frequencies (counts)"),
           actionButton("display_help", "Help"),
         ),
         tags$div(id = "csd_table",
@@ -598,13 +606,21 @@ server <- function(input, output, session) {
       genotype <- ifelse(genotype == "", "WT", genotype)
       genot_freq <- ifelse(is.na(input$genotype_freq), -1, input$genotype_freq)
 
-      if(genot_freq >= 0){
+      if (genot_freq >= 0) {
         data$csd_freqs[genotype, ] <- c(genotype, genot_freq)
         rownames(data$csd_freqs) <- data$csd_freqs$Genotype
         data$csd_freqs[, 2] <- as.numeric(data$csd_freqs[, 2])
         ## Filtering out non-positive counts
         data$csd_freqs <- data$csd_freqs[data$csd_freqs[,2] > 0,]
-        data$data <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- evamtools:::freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
+        ## FIXME: comment_out_freqs2csd
+        ## data$data <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
+        ##              evamtools:::freqs2csd(data$csd_freqs,
+        ##                                    data$gene_names[1:input$gene_number])
+        data$data <-
+            datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
+                evamtools:::genotypeCounts_to_data(data$csd_freqs, e = 0)
+        
+        
         shinyjs::enable("analysis")
       }
       updateNumericInput(session, "genotype_freq", value = NA)
@@ -629,7 +645,16 @@ server <- function(input, output, session) {
       data$csd_freqs <- DT::editData(data$csd_freqs, info, "csd_freqs")
       ## Filtering out non-positive counts
       data$csd_freqs <- data$csd_freqs[data$csd_freqs[,2] > 0,]
-      data$data <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- evamtools:::freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
+
+      ## FIXME: comment_out_freqs2csd
+      ## data$data <-
+      ##     datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
+      ##         evamtools:::freqs2csd(data$csd_freqs,
+      ##                               data$gene_names[1:input$gene_number])
+      data$data <-
+          datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
+              evamtools:::genotypeCounts_to_data(data$csd_freqs, e = 0)
+
     }, error = function(e){
       showModal(dataModal(e[[1]]))
     })
@@ -734,9 +759,13 @@ server <- function(input, output, session) {
         mccbn_opts$adaptive <- TRUE
       } else mccbn_opts$adaptive <- FALSE
 
-      data2run <- evamtools:::freqs2csd(display_freqs(), data$gene_names[1:input$gene_number]
+      ## FIXME: comment_out_freqs2csd
+      ## data2run <- evamtools:::freqs2csd(display_freqs(),
+      ##                                   data$gene_names[1:input$gene_number])
+      data2run <- evamtools:::genotypeCounts_to_data(display_freqs(),
+                                                     e = 0)
         
-        )
+
       progress$inc(1/5, detail = "Setting up data")
       Sys.sleep(0.5)
       progress$inc(2/5, detail = "Running CPMs")

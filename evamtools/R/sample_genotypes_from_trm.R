@@ -1239,13 +1239,30 @@ OncoBN_model_2_predict_genots <- function(model, epsilon) {
 }
 
 
-## Given a data frame with columns Genotype (as string) and Counts
+## Given a data frame with columns
+## exactly equal to either c(Genotype, Counts) or c(Genotype, Freq)
+## where Genotype is a string
+## or a named vector
 ## return a data set subjects as rows and columns as genes,
 ## with 0/1
 counts_to_data_no_e <- function(x) {
+    if (is.vector(x)) {
+        stopifnot(!is.null(names(x)))
+    } else if (is.data.frame(x)) {
+        stopifnot(isTRUE(
+            identical(names(x), c("Genotype", "Counts"))
+            ||
+            identical(names(x), c("Genotype", "Freq"))
+        ))
+        ## As per previous check we know x[, 2] is Counts or Freq
+        if (is.data.frame(x)) x <- stats::setNames(x[, 2],
+                                                   x$Genotype)
+    } else {
+        stop("Input must be a data frame or a named vector")
+    }
+
     genes <- setdiff(unique(unlist(strsplit(names(x), ", "))),
                      "WT")
-    
     ## Just in case
     genotypes <- canonicalize_genotype_names(names(x))
 
@@ -1256,11 +1273,10 @@ counts_to_data_no_e <- function(x) {
                            v <- rep(0, ngenes)
                            v[wg] <- 1
                            return(v)})
-    
     genotbin <- do.call(rbind, genotbin)
     colnames(genotbin) <- genes
     rr <- rep(1:nrow(genotbin), x)
-    return(genotbin[rr, ])
+    return(genotbin[rr, , drop = FALSE])
 }
 
 
@@ -1281,11 +1297,15 @@ add_noise <- function(x, properr) {
     }
 }
 
+
+## Given named vector or data frame with columns exactly
+## equal to either c(Genotype, Counts) or c(Genotype, Freq)
 ## return a data set subjects as rows and columns as genes,
-## with 0/1
-genotypeCounts_to_data <- function(x, e = 0.01) {
+## with 0/1.
+## e: noise error, as fraction (i.e., 0 to 1)
+genotypeCounts_to_data <- function(x, e) {
     d <- counts_to_data_no_e(x)
-    if(e > 0) d <- add_noise(d, e)
+    if (e > 0) d <- add_noise(d, e)
     return(d)
 }
 
