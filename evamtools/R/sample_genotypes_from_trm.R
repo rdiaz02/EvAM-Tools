@@ -514,7 +514,8 @@ sample_CPMs <- function(cpm_output
             } else if (obs_noise > 0) {
                 data_noised <- genotypeCounts_to_data(retval[[gf_name]],
                                                       e = obs_noise)
-                retval[[gf_name]] <- reorder_to_pD(data_to_counts(data_noised))
+                retval[[gf_name]] <- reorder_to_pD(data_to_counts(data_noised,
+                                                                  out = "vector"))
 
                 if (genotype_freqs_as_data) {
                    retval[[data_name]] <- data_noised
@@ -1312,17 +1313,30 @@ genotypeCounts_to_data <- function(x, e) {
 ## The revert of counts to data. Return as standard order
 ## Similar to OncoSimulR's sampledGenotypes
 ## but using genot_matrix_2_vector.
-data_to_counts <- function(data) {
+data_to_counts <- function(data, out = c("vector", "data.frame")) {
+    out <- match.arg(out)
+    if (is.data.frame(data)) data <- data.matrix(data)
+
+    stopifnot(!is.null(colnames(data)))
+    stopifnot(length(colnames(data)) == ncol(data))
+    stopifnot(isTRUE(all(data %in% c(0, 1))))
     t_genots_string <- table(genot_matrix_2_vector(data))
     v_genots_string <- as.vector(t_genots_string)
     names(v_genots_string) <- names(t_genots_string)
-    
+
     o_genots_string <- reorder_to_standard_order(v_genots_string)
     o_genots_string[is.na(o_genots_string)] <- 0
 
     stopifnot(nrow(data) == sum(o_genots_string))
 
-    return(o_genots_string)
+    if (out == "vector") {
+            return(o_genots_string)
+    } else if (out == "data.frame") {
+        return(data.frame(Genotype = names(o_genots_string),
+                          Counts   = o_genots_string))
+    } else {
+        stop("Incorrect out option")
+    }
 }
 
 
