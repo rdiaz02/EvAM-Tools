@@ -540,7 +540,7 @@ user_input <- function() {
             tags$div(class = "frame",
               uiOutput("define_genotype"),
             ),
-            uiOutput("change_freqs"),
+            uiOutput("change_counts"),
 
             tags$div(class = "frame",
                      tags$h3("Upload your own data"),

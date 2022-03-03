@@ -22,7 +22,7 @@ Defaults values of the shiny app
 
   \item{template_data}{One of:
     \itemize{
-      \item{csd_freqs:}{Data frame with the frequencies of each genotype}
+      \item{csd_counts:}{Data frame with the frequencies of each genotype}
       \item{data:}{Data frame with cross sectional data.}
       \item{dag:}{Matrix of 10x10 with lambdas}
       \item{dag_parent_sest:}{List of 10 elements with "Single"}

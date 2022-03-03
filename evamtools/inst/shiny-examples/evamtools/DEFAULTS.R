@@ -9,7 +9,7 @@ template_lambdas <- rep(1, max_genes)
 names(template_lambdas) <- all_gene_names
 template_thetas <- matrix(0, ncol = max_genes, nrow = max_genes)
 rownames(template_thetas) <- colnames(template_thetas) <- all_gene_names
-template_csd_freqs <- data.frame(Genotype = character(), Freq = integer())
+template_csd_counts <- data.frame(Genotype = character(), Counts = integer())
 template_csd_data <- matrix(0, ncol=3, nrow=0)
 
 SHINY_DEFAULTS <- list(
@@ -21,7 +21,7 @@ SHINY_DEFAULTS <- list(
   all_cpms = c("OT", "CBN", "OncoBN", "MHN", "MCCBN", "HESBCN"),
   cpms2run = c("OT", "CBN", "OncoBN", "MHN", "HESBCN"),
   template_data = list(
-      csd_freqs =  template_csd_freqs
+      csd_counts =  template_csd_counts
     , data = NULL
     , dag = template_dag
     , dag_parent_set = template_parent_set

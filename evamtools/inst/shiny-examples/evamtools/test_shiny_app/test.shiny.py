@@ -46,7 +46,7 @@ class evamtools_basics(unittest.TestCase):
         return self.driver.find_element_by_css_selector("#shiny-modal .modal-body div").text
     
     def _get_table_info(self):
-        row_table = self.driver.find_elements_by_css_selector("#csd_freqs tbody>tr")
+        row_table = self.driver.find_elements_by_css_selector("#csd_counts tbody>tr")
         row_text = [i.text for i in row_table]
         return row_text
 
@@ -304,7 +304,7 @@ class test_csd_input(evamtools_basics):
         assert(table_info[0] == "A 100")
         assert(analysis_button.is_enabled())
 
-        ## Freq changes based on available data 
+        ## Counts (freq) changes based on available data 
         input_gene = self.driver.find_element_by_css_selector(
                     "#genotype input[value=A]").click()
         sleep(1.5)
@@ -312,7 +312,7 @@ class test_csd_input(evamtools_basics):
         sleep(1)
         assert(int(current_freq) == 100) ## This sometimes fails with invalid literal for int() with base 10: ''
 
-        ## Freq changes based on available data 
+        ## Count (freq) changes based on available data 
         input_gene = self.driver.find_element_by_css_selector(
                     "#genotype input[value=A]")
         input_gene.find_element_by_xpath('..').click()
@@ -352,7 +352,7 @@ class test_csd_input(evamtools_basics):
         prev_genotypes = self._process_genotype_table(prev_table_info)
 
         ## Double click on first freq
-        first_freq = self.driver.find_elements_by_css_selector("#csd_freqs tbody>tr>td")[1]
+        first_freq = self.driver.find_elements_by_css_selector("#csd_counts tbody>tr>td")[1]
         actions = ActionChains(self.driver)
         actions.double_click(first_freq).perform()
 
@@ -1011,7 +1011,7 @@ class test_results(evamtools_basics):
                 "trans_rate_mat": ['From', 'To', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
                 "trans_mat": ['From', 'To', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
                 "predicted_genotype_freqs": ['Genotype', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
-                "sampled_genotype_freqs": ['Genotype', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
+                "sampled_genotype_counts": ['Genotype', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
                 "obs_genotype_transitions": ['From', 'To', 'CBN', 'MHN', 'HESBCN', 'MCCBN'],            
             }
         else:
@@ -1019,7 +1019,7 @@ class test_results(evamtools_basics):
                 "trans_rate_mat": ['From', 'To', 'CBN', 'MHN', 'HESBCN'],            
                 "trans_mat": ['From', 'To', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN'],            
                 "predicted_genotype_freqs": ['Genotype', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN'],            
-                "sampled_genotype_freqs": ['Genotype', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN'],            
+                "sampled_genotype_counts": ['Genotype', 'OT', 'OncoBN', 'CBN', 'MHN', 'HESBCN'],            
                 "obs_genotype_transitions": ['From', 'To', 'CBN', 'MHN', 'HESBCN'],            
             }
 
