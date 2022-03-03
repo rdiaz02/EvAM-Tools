@@ -1,4 +1,4 @@
-## Copyright 2021, 2022 Pablo Herrera Nieto
+## Copyright 2021, 2022 Pablo Herrera Nieto, Ramon Diaz-Uriarte
 
 ## This program is free software: you can redistribute it and/or modify
 ## it under the terms of the GNU General Public License as published by
@@ -163,15 +163,16 @@ str2int <- function(str_state, sep =", ", wt = "WT", n = NULL){
 ## #'    with sorting the same as given by sample_to_pD_order
 ## #'    gene_names is always sorted inside the function to
 ## #'    ensure results do not differ by gene_names order
-## #' 
+## #'
+##      I don't remember what "pD" used to stand for. Oh well.
 ## #' @param n_genes Integer >0
 ## #' @param gene_names Vector of strings
 ## #'      If NULL, defaults gene_names will the firt n_genes letters of the alphabet
 ## #' 
 ## #' @return Vector with the sorted genotypes
 ## #' 
-generate_sorted_genotypes <- function(n_genes, gene_names = NULL,
-                                      sort_gene_names = TRUE){
+generate_pD_sorted_genotypes <- function(n_genes, gene_names = NULL,
+                                         sort_gene_names = TRUE) {
     if (n_genes <= 0) stop("Number of genes should be > 0")
     n_states <- 2**n_genes
     if (is.null(gene_names)) gene_names <- LETTERS[seq_len(n_genes)]
@@ -197,7 +198,7 @@ generate_sorted_genotypes <- function(n_genes, gene_names = NULL,
 ##  Por ejemplo, con n_genes = 0 no funciona
 ##  Y qué sentido tiene dar algo con 0 genes?
 ##  Y LETTERS[1:0] devuelve A
-##  No se debe añadir funcionalidad que no se usa a menos que se teste!!!!
+##  No se debe añadir funcionalidad que no se usa a menos que se testee
 ## #' @title List of sorted genotypes
 ## #' 
 ## #' @description Returns all sorted genotypes for a given number of genes
@@ -207,7 +208,7 @@ generate_sorted_genotypes <- function(n_genes, gene_names = NULL,
 ## #'      If NULL, defaults gene_names will the firt n_genes letters of the alphabet
 ## #' 
 ## #' @return Vector with the sorted genotypes
-## generate_sorted_genotypes <- function(n_genes, gene_names = NULL){
+## generate_pD_sorted_genotypes <- function(n_genes, gene_names = NULL){
 ##     if (is.null(gene_names)) gene_names <- LETTERS[1:n_genes]
 ##     # if(n_genes < 0) stop("Number of genes should be >= 0")
 ##     if(n_genes == 0) {states <- c()}

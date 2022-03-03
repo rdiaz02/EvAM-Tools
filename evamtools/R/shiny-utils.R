@@ -201,14 +201,23 @@ get_mhn_data <- function(thetas, N = 10000){
 
   mhn_trm <- MHN_from_thetas(thetas)$MHN_trans_rate_mat
   mhn_probs <- probs_from_trm(mhn_trm)
-  tmp_genotypes_sampled <- sample_to_pD_order(
-                sample(names(mhn_probs), size = N,
-                       prob = mhn_probs, replace = TRUE),
-                ngenes = n_genes, gene_names = gene_names)
-  tmp_samples <- setNames(tmp_genotypes_sampled,
-            generate_sorted_genotypes(n_genes, gene_names))
-  tmp_samples_as_df <- data.frame(Genotype=names(tmp_samples), Counts=tmp_samples)
-  tmp_samples <- tmp_samples[tmp_samples > 0]
+  tmp_samples_as_df <- genot_probs_2_pD_ordered_sample(x = mhn_probs,
+                                                       ngenes = n_genes,
+                                                       gene_names = gene_names,
+                                                       N = N,
+                                                       out = "data.frame"
+                                                       )
+  ## ## FIXME: aqui
+  ## tmp_genotypes_sampled <- sample_to_pD_order(
+  ##               sample(names(mhn_probs), size = N,
+  ##                      prob = mhn_probs, replace = TRUE),
+  ##               ngenes = n_genes, gene_names = gene_names)
+  ## tmp_samples <- stats::setNames(tmp_genotypes_sampled,
+  ##           generate_pD_sorted_genotypes(n_genes, gene_names))
+  ## tmp_samples_as_df <- data.frame(Genotype = names(tmp_samples),
+  ##                                 Counts = tmp_samples)
+  ## ## Next was dead code
+  ## ## tmp_samples <- tmp_samples[tmp_samples > 0]
   return(list(csdfreqs = tmp_samples_as_df,
               data = freqs2csd(tmp_samples_as_df, gene_names)))
 }
@@ -220,14 +229,21 @@ get_dag_data <- function(data, parent_set, N = 10000){
 
   dag_trm <- HESBCN_model_2_output(data, parent_set)$HESBCN_trans_rate_mat
   dag_probs <- probs_from_trm(dag_trm)
-  tmp_genotypes_sampled <- sample_to_pD_order(
-                sample(names(dag_probs), size = N,
-                       prob = dag_probs, replace = TRUE),
-                ngenes = n_genes, gene_names = gene_names)
-  tmp_samples <- setNames(tmp_genotypes_sampled,
-            generate_sorted_genotypes(n_genes, gene_names))
-  tmp_samples <- tmp_samples[tmp_samples > 0]
-  tmp_samples_as_df <- data.frame(Genotype=names(tmp_samples), Counts=tmp_samples)
+  tmp_samples_as_df <- genot_probs_2_pD_ordered_sample(x = dag_probs,
+                                                       ngenes = n_genes,
+                                                       gene_names = gene_names,
+                                                       N = N,
+                                                       out = "data.frame"
+                                                       )
+  ## ## FIXME: aqui
+  ## tmp_genotypes_sampled <- sample_to_pD_order(
+  ##               sample(names(dag_probs), size = N,
+  ##                      prob = dag_probs, replace = TRUE),
+  ##               ngenes = n_genes, gene_names = gene_names)
+  ## tmp_samples <- setNames(tmp_genotypes_sampled,
+  ##           generate_pD_sorted_genotypes(n_genes, gene_names))
+  ## tmp_samples <- tmp_samples[tmp_samples > 0]
+  ## tmp_samples_as_df <- data.frame(Genotype=names(tmp_samples), Counts=tmp_samples)
   return(list(csd_freqs = tmp_samples_as_df,
               data = freqs2csd(tmp_samples_as_df, gene_names)))
 }

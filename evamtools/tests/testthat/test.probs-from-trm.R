@@ -16,7 +16,7 @@ probs_from_Schill <- function(gene_names) {
     thetas <- Random.Theta(n = n)
     rownames(thetas) <- colnames(thetas) <- gene_names
     timep <- system.time(p <- Generate.pTh(thetas))["elapsed"]
-    names(p) <- generate_sorted_genotypes(n, gene_names,
+    names(p) <- generate_pD_sorted_genotypes(n, gene_names,
                                                       sort_gene_names = FALSE)
 
     ## What if we had sorted?
@@ -26,7 +26,7 @@ probs_from_Schill <- function(gene_names) {
     thetas2 <- thetas2[oindex, oindex]
     rm(oindex)
     p2 <- Generate.pTh(thetas2)
-    names(p2) <- generate_sorted_genotypes(n, gene_names,
+    names(p2) <- generate_pD_sorted_genotypes(n, gene_names,
                                                        sort_gene_names = TRUE)
 
     ## gn_p_can might be the same as names(p) if gene_names was ordered
@@ -145,7 +145,7 @@ if(FALSE) {
                                                   ngenes = ncol(out$analyzed_data),
                                                   gene_names = colnames(out$analyzed_data))
         
-        names(v_sampl) <- generate_sorted_genotypes(n_genes = ncol(out$analyzed_data),
+        names(v_sampl) <- generate_pD_sorted_genotypes(n_genes = ncol(out$analyzed_data),
                                                                 gene_names = colnames(out$analyzed_data))
         v_sampl <- v_sampl/sum(v_sampl)
 
@@ -196,7 +196,7 @@ if(FALSE) {
                                                    ngenes = ncol(out2$analyzed_data),
                                                    gene_names = colnames(out2$analyzed_data))
         
-        names(v2_sampl) <- generate_sorted_genotypes(n_genes = ncol(out2$analyzed_data),
+        names(v2_sampl) <- generate_pD_sorted_genotypes(n_genes = ncol(out2$analyzed_data),
                                                                  gene_names = colnames(out2$analyzed_data))
 
         chisq.test(x = v2_sampl[p2_cpm > 0], p = p2_cpm[p2_cpm > 0], B = 2000)
@@ -218,7 +218,7 @@ if(FALSE) {
                                                     ngenes = ncol(out2$analyzed_data),
                                                     gene_names = colnames(out2$analyzed_data))
         
-        names(v2b_sampl) <- generate_sorted_genotypes(n_genes = ncol(out2$analyzed_data),
+        names(v2b_sampl) <- generate_pD_sorted_genotypes(n_genes = ncol(out2$analyzed_data),
                                                                   gene_names = colnames(out2$analyzed_data))
 
 

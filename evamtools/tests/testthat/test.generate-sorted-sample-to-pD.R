@@ -1,4 +1,4 @@
-test_that("generate_sorted_genotypes and sample_to_pD_order same order", {
+test_that("generate_pD_sorted_genotypes and sample_to_pD_order same order", {
     ## 6 WT, 3 A, 4 AC, 5 D, 2 AD
     gg <- c("A, C", "C, A", "C, A", "A, C",
             "D, A", "A, D",
@@ -11,7 +11,7 @@ test_that("generate_sorted_genotypes and sample_to_pD_order same order", {
         out_pd <- sample_to_pD_order(sample(gg),
                                                  3,
                                                  sample(c("A", "C", "D")))
-        out_gsg <- generate_sorted_genotypes(3,
+        out_gsg <- generate_pD_sorted_genotypes(3,
                                                          sample(c("A", "C", "D")))
         expect_equal(out_pd, expect_out_gg_counts)
         expect_equal(out_gsg, expect_out_gsg)
@@ -32,7 +32,7 @@ test_that("generate_sorted_genotypes and sample_to_pD_order same order", {
         out_pd2 <- sample_to_pD_order(sample(gg2),
                                                   3,
                                                   sample(c("A", "C", "B")))
-        out_gsg2 <- generate_sorted_genotypes(3,
+        out_gsg2 <- generate_pD_sorted_genotypes(3,
                                                           sample(c("A", "C", "B")))
         expect_equal(out_pd2, expect_out_gg2_counts)
         expect_equal(out_gsg2, expect_out_gsg2)
@@ -202,7 +202,7 @@ test_that("generate_sorted_genotypes and sample_to_pD_order same order", {
         out_pd3 <- sample_to_pD_order(sample(gg3),
                                                   6,
                                                   sample(genes))
-        out_gsg3 <- generate_sorted_genotypes(6,
+        out_gsg3 <- generate_pD_sorted_genotypes(6,
                                                           sample(genes))
         expect_equal(out_pd3, expect_out_gg3_counts)
         expect_equal(out_gsg3, expect_out_gsg3)
@@ -342,7 +342,7 @@ test_that("Paranoia: checking an example table", {
     gene_names <- c("EZH2_msmut", "C", "D", "F_NRAS_msmut")
     n_genes <- length(gene_names)
 
-    outgs <- generate_sorted_genotypes(n_genes, gene_names)
+    outgs <- generate_pD_sorted_genotypes(n_genes, gene_names)
     outgpd <- sample_to_pD_order(s1, n_genes, gene_names)
 
     ## I can't do  table(s1)[outgs]
@@ -411,7 +411,7 @@ test_that("Test with same order of genes", {
         
         sx <- sample(genotypes_resorted, N, prob = ag[, "Fitness"], replace = TRUE)
 
-        outgs <- generate_sorted_genotypes(ngenes, gn)
+        outgs <- generate_pD_sorted_genotypes(ngenes, gn)
         outgpd <-  sample_to_pD_order(sx, ngenes, gn)
 
         ot <- table(sx)
