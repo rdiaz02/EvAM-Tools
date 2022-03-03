@@ -72,7 +72,7 @@ test_that("Output is returned only with the requested fields", {
         obs_events = obs_events
     )
 
-    out_params <- c("sampled_genotype_freqs",
+    out_params <- c("sampled_genotype_counts",
                     "state_counts",
                     "obs_genotype_transitions")
     ## out_params <- c("frequencies", "state_counts", "transitions")
@@ -150,11 +150,11 @@ test_that("Output is correct", {
     
    
     out <- process_samples(simGenotypes, 5, gene_names = LETTERS[1:5])
-    expect_equal(length(out$sampled_genotype_freqs), 2**5)
+    expect_equal(length(out$sampled_genotype_counts), 2**5)
     expect_equal(nrow(out$state_counts), 2**5)
 
     sim_counts <- table(simGenotypes$obs_events)
-    r <- out$sampled_genotype_freqs
+    r <- out$sampled_genotype_counts
     for (i in names(r)){
         if(i %in% names(sim_counts)){
             expect_equal(r[i], sim_counts[i])
@@ -164,7 +164,7 @@ test_that("Output is correct", {
         }
     }
 
-    expect_equal(sum(out$sampled_genotype_freqs), length(simGenotypes$obs_events))
+    expect_equal(sum(out$sampled_genotype_counts), length(simGenotypes$obs_events))
 
     state_counts <- table(unlist(simGenotypes$trajectory))
     rownames(out$state_counts) <- out$state_counts$Genotype 

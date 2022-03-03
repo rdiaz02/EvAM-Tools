@@ -28,7 +28,7 @@ A list with 3 items:
       \item{name}{string, Data set name.}
       \item{csd_data}{data.frame, Binary data with cross sectional data.}
       \item{*_predicted_genotype_freqs}{data.frame, Genotype probabilities of each genotype.}
-      \item{*_sampled_genotype_freqs}{vector, Genotype frequencies of each genotype sampled by each CPM.}
+      \item{*_sampled_genotype_counts}{vector, Genotype counts (or absolute frequencies) of each genotype sampled by each CPM.}
       \item{*_obs_genotype_transitions}{vector, Observed number of transitions between two genotypes.}
       \item{*_state_count}{data.frame, Observed number of times that a states has been visited.}
       \item{original_data}{data.frame, All cross sectional data passed evam.}
@@ -56,7 +56,7 @@ A list with 3 items:
       \item{trans_rate_mat}{data.frame, Rate of transitions between two genotypes for all supported models.}
       \item{obs_genotype_transitions}{data.frame, Number of times a transition between two genotypes has been observed when sampling supported models.}
       \item{predicted_genotype_freqs}{data.frame, Probabilities of each genotype at equilibrium given a model.}
-      \item{sampled_genotype_freqs}{data.frame, Times a genotype has been observed when sampling.}
+      \item{sampled_genotype_counts}{data.frame, Times a genotype has been observed when sampling.}
     }
   }
   }

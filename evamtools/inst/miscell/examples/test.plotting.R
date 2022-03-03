@@ -3,7 +3,7 @@
 data <- examples_csd$csd$AND$data
 colnames(data) <- c("AC", "DB", "XZ", "R2D2")
 sample_evam_output <- evam(data)
-samples <- evamtools:::sample_CPMs(sample_evam_output, 1000, output = c("sampled_genotype_freqs", "obs_genotype_transitions"))
+samples <- evamtools:::sample_CPMs(sample_evam_output, 1000, output = c("sampled_genotype_counts", "obs_genotype_transitions"))
 
 ## Files are named as follows: cpms_orientation_vertex-size_plot-type.png 
 png("1_1_all_horizontal_fixed_prob.png", width = 1000, height = 600, units = "px")

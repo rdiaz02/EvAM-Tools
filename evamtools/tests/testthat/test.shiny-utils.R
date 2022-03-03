@@ -8,7 +8,7 @@ test_that("Test standarize datasets works correctly", {
     for(i in setdiff(names(standard_data), expected_attr)){
       ## The rest has to be equal to SHINY_DEFAULTS
       if(i == "gene_names" & "data" %in% names(orig_data)) next
-      if(i == "csd_freqs" & "data" %in% names(orig_data)) next
+      if(i == "csd_counts" & "data" %in% names(orig_data)) next
       expect_equal(unname(standard_data[[i]])
         , unname(SHINY_DEFAULTS$template_data[[i]]))
     }
@@ -258,7 +258,7 @@ test_that("Create tabular data from CPM output works correctly", {
   ## We only define those attr that are going to be processed and we work only with 3 CPMs
   
   attr_to_make_tabular <- c("trans_mat", "trans_rate_mat", "obs_genotype_transitions"
-      , "predicted_genotype_freqs", "sampled_genotype_freqs")
+      , "predicted_genotype_freqs", "sampled_genotype_counts")
   methods2test <- c("OT", "CBN", "MHN")
   cpm_out <- list()
   
@@ -304,9 +304,9 @@ test_that("Create tabular data from CPM output works correctly", {
   MHN_predicted_genotype_freqs <- c(0.018, 0.297, 0.302, 0, 0.155, 0.002, 0.15, 0.076)
   names(MHN_predicted_genotype_freqs) <- c('WT', 'A', 'B', 'C', 'A, B', 'A, C', 'B, C', 'A, B, C')
   cpm_out$MHN_predicted_genotype_freqs <- MHN_predicted_genotype_freqs
-  MHN_sampled_genotype_freqs <- c(182, 2993, 2928, 1551, 0, 14, 1522, 810)
-  names(MHN_sampled_genotype_freqs) <- c('WT', 'A', 'B', 'A, B', 'C', 'A, C', 'B, C', 'A, B, C')
-  cpm_out$MHN_sampled_genotype_freqs <- MHN_sampled_genotype_freqs
+  MHN_sampled_genotype_counts <- c(182, 2993, 2928, 1551, 0, 14, 1522, 810)
+  names(MHN_sampled_genotype_counts) <- c('WT', 'A', 'B', 'A, B', 'C', 'A, C', 'B, C', 'A, B, C')
+  cpm_out$MHN_sampled_genotype_counts <- MHN_sampled_genotype_counts
 
   CBN_trans_mat <- sparseMatrix(c(1, 1, 2, 3, 3, 4, 5), 
     c(2, 3, 4, 4, 5, 6, 6), 
@@ -328,9 +328,9 @@ test_that("Create tabular data from CPM output works correctly", {
   names(CBN_predicted_genotype_freqs) <- c('WT', 'A', 'B', 'C', 'A, B', 'A, C', 'B, C', 'A, B, C')
   cpm_out$CBN_predicted_genotype_freqs <- CBN_predicted_genotype_freqs
 
-  CBN_sampled_genotype_freqs <- c(17, 0, 4354, 5613, 0, 0, 2, 14)
-  names(CBN_sampled_genotype_freqs) <- c('WT', 'A', 'B', 'A, B', 'C', 'A, C', 'B, C', 'A, B, C')
-  cpm_out$CBN_sampled_genotype_freqs <- CBN_sampled_genotype_freqs
+  CBN_sampled_genotype_counts <- c(17, 0, 4354, 5613, 0, 0, 2, 14)
+  names(CBN_sampled_genotype_counts) <- c('WT', 'A', 'B', 'A, B', 'C', 'A, C', 'B, C', 'A, B, C')
+  cpm_out$CBN_sampled_genotype_counts <- CBN_sampled_genotype_counts
 
   OT_trans_mat <- sparseMatrix(c(1, 1, 2, 3, 3, 4, 5), 
     c(2, 3, 4, 4, 5, 6, 6), 
@@ -342,25 +342,25 @@ test_that("Create tabular data from CPM output works correctly", {
   OT_predicted_genotype_freqs <- c(0.149, 0.169, 0.213, 0, 0.241, 0, 0.107, 0.121)
   names(OT_predicted_genotype_freqs) <- c('WT', 'A', 'B', 'C', 'A, B', 'A, C', 'B, C', 'A, B, C')
   cpm_out$OT_predicted_genotype_freqs <- OT_predicted_genotype_freqs
-  cpm_out$OT_sampled_genotype_freqs <- NULL
+  cpm_out$OT_sampled_genotype_counts <- NULL
 
 
   tabular_data <- create_tabular_data(cpm_out)
 
   expect_equal(1,
                length(unique(
-                   colSums(tabular_data$sampled_genotype_freqs[, -c(1, 2)]))))
+                   colSums(tabular_data$sampled_genotype_counts[, -c(1, 2)]))))
 
   for(method in methods2test){
     if(method == "OT"){
-      expect_equal("OT" %in% colnames(tabular_data$sampled_genotype_freqs), FALSE)
+      expect_equal("OT" %in% colnames(tabular_data$sampled_genotype_counts), FALSE)
       expect_equal("OT" %in% colnames(tabular_data$obs_genotype_freqs), FALSE)
       expect_equal("OT" %in% colnames(tabular_data$trans_rate_mat), FALSE)
     }else{
-      for(genotype in tabular_data$sampled_genotype_freqs$Genotype){
-        expect_equal(tabular_data$sampled_genotype_freqs[genotype, method]
+      for(genotype in tabular_data$sampled_genotype_counts$Genotype){
+        expect_equal(tabular_data$sampled_genotype_counts[genotype, method]
           , as.numeric(cpm_out[[paste0(method, 
-            "_sampled_genotype_freqs")]][genotype]))
+            "_sampled_genotype_counts")]][genotype]))
       }
 
       for(genotype in tabular_data$tran_rate_mat$Genotype){

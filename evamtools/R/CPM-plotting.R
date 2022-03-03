@@ -266,8 +266,8 @@ plot_genot_fg <- function(trans_mat
     graph <- igraph::decompose(graph)[[1]] ## We do not want disconnected nodes
     
     if (!is.null(observations)){
-        observations <- as.data.frame(data_to_counts(observations, out = "data.frame", omit_0 = TRUE))
-        observations$Abs_Freq <- observations$Freq / sum(observations$Freq)
+        observations <- data_to_counts(observations, out = "data.frame", omit_0 = TRUE)
+        observations$Abs_Freq <- observations$Counts / sum(observations$Counts)
         observations$Genotype <- str_replace_all(observations$Genotype, ", ", ",")
     }
 
@@ -510,7 +510,7 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
       , data2plot = all_data[[paste0(mod, "_", plot_type)]]
       , predicted_genotype_freqs = all_data[[paste0(mod, "_predicted_genotype_freqs")]]
       , parent_set = all_data[[paste0(mod, "_parent_set")]]
-      , sampled_genotype_freqs = all_data[[paste0(mod, "_sampled_genotype_freqs")]]
+      , sampled_genotype_counts = all_data[[paste0(mod, "_sampled_genotype_counts")]]
       , edges = edges
     ))
 }
@@ -792,7 +792,7 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
                           observations = cpm_output$analyzed_data,
                           ## To compute node sizes if sampled_freqs is NULL
                           predicted_genotypes = method_data2plot$predicted_genotype_freqs, 
-                          sampled_freqs = method_data2plot$sampled_genotype_freqs,
+                          sampled_freqs = method_data2plot$sampled_genotype_counts,
                           top_paths = top_paths,
                           label_type = label_type,
                           fixed_vertex_size = fixed_vertex_size,
@@ -803,15 +803,15 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
     par(op1)
 }
 
-plot_genotypes_freqs <- function(data) {
+plot_genotype_counts <- function(data) {
     if (nrow(data) == 0) return()
     largest_genot_name <- max(vapply(data$Genotype, nchar, 1))
     bottom_mar <- min(25, max(5, (2/3) * largest_genot_name))
-    op <- par(las = 2, cex.main=1.6, cex.lab=1.5, cex.axis=1.2,
+    op <- par(las = 2, cex.main = 1.6, cex.lab = 1.5, cex.axis = 1.2,
               mar = c(bottom_mar, 5, 5, 1))
-    if("Freq" %in% colnames(data)){
+    if ("Freq" %in% colnames(data)) {
         data2 <- stats::setNames(data[, "Freq"], nm = data[, "Genotype"])
-    }else if("Counts" %in% colnames(data)){
+    } else if ("Counts" %in% colnames(data)) {
         data2 <- stats::setNames(data[, "Counts"], nm = data[, "Genotype"])
     }
     data2 <- na.omit(reorder_to_standard_order(data2))

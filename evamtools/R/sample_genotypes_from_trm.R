@@ -202,7 +202,7 @@ population_sample_from_trm <- function(trm, n_samples = 10,
 ## #' counts of how many transitions between each genotype have been observed) 
 process_samples <- function(sim, n_genes,
                             gene_names,
-                            output = c("sampled_genotype_freqs",
+                            output = c("sampled_genotype_counts",
                                        "state_counts",
                                        "obs_genotype_transitions"),
                             cores = detectCores()) {
@@ -215,7 +215,7 @@ process_samples <- function(sim, n_genes,
     }
 
     ## Checking output variables
-    valid_output <- c("sampled_genotype_freqs",
+    valid_output <- c("sampled_genotype_counts",
                       "state_counts",
                       "obs_genotype_transitions")
 
@@ -228,8 +228,8 @@ process_samples <- function(sim, n_genes,
     ## sorted_genotypes <- generate_pD_sorted_genotypes(n_genes, gene_names)
 
     ## Calculate frequencies: genotype frequencies
-    if ("sampled_genotype_freqs" %in% output) {
-        retval$sampled_genotype_freqs <-
+    if ("sampled_genotype_counts" %in% output) {
+        retval$sampled_genotype_counts <-
             sample_to_named_pD_ordered_out(sim$obs_events,
                                            n_genes, gene_names, "vector")
     }
@@ -377,7 +377,7 @@ sample_CPMs <- function(cpm_output
                       , methods = c("OT", "OncoBN",
                                     "CBN", "MCCBN",
                                     "MHN", "HESBCN")
-                      , output = c("sampled_genotype_freqs")
+                      , output = c("sampled_genotype_counts")
                       , obs_noise = 0
                       , genotype_freqs_as_data = TRUE
                         ) {
@@ -403,7 +403,7 @@ sample_CPMs <- function(cpm_output
     methods <- available_methods
     
     output <- unique(output)
-    valid_output <- c("sampled_genotype_freqs",
+    valid_output <- c("sampled_genotype_counts",
                       "obs_genotype_transitions",
                       "state_counts")
     not_valid_output <- which(!(output %in% valid_output))
@@ -430,7 +430,7 @@ sample_CPMs <- function(cpm_output
         if (method %in% c("OT", "OncoBN")) {
             genots_pred <- cpm_output[[paste0(method, "_predicted_genotype_freqs")]]
 
-            retval[[sprintf("%s_sampled_genotype_freqs", method)]] <-
+            retval[[sprintf("%s_sampled_genotype_counts", method)]] <-
                 genot_probs_2_pD_ordered_sample(genots_pred,
                                                 n_genes, gene_names, N,
                                                 "vector")
@@ -448,7 +448,7 @@ sample_CPMs <- function(cpm_output
                     ogt <- cpm_output[[sprintf("%s_predicted_genotype_freqs",
                                                method)]]
                     if ((length(ogt) == 1) && is.na(ogt)) {
-                        retval[[sprintf("%s_sampled_genotype_freqs", method)]] <- NULL
+                        retval[[sprintf("%s_sampled_genotype_counts", method)]] <- NULL
                     } else {
                         ## Yes, we could sample. But this should never happen.
                         stop("No transition rate matrix in output ",
@@ -477,10 +477,10 @@ sample_CPMs <- function(cpm_output
                 genots_pred <- cpm_output[[sprintf("%s_predicted_genotype_freqs",
                                                    method)]]
                 if ((length(genots_pred) == 1) && is.na(genots_pred)) {
-                    retval[[sprintf("%s_sampled_genotype_freqs",
+                    retval[[sprintf("%s_sampled_genotype_counts",
                                     method)]] <- NULL
                 } else {
-                    retval[[sprintf("%s_sampled_genotype_freqs", method)]] <-
+                    retval[[sprintf("%s_sampled_genotype_counts", method)]] <-
                         genot_probs_2_pD_ordered_sample(genots_pred,
                                                         n_genes,
                                                         gene_names,
@@ -488,7 +488,7 @@ sample_CPMs <- function(cpm_output
                 }
             }
         }
-        if ("sampled_genotype_freqs" %in% output) {
+        if ("sampled_genotype_counts" %in% output) {
             ## #######################################
             ##
             ## Noise and genotype frequencies as data
@@ -506,8 +506,8 @@ sample_CPMs <- function(cpm_output
             ## obs_noise >  0  && genotype_freqs_as_data : as former,
             ##                                             returning data
 
-            data_name <- paste0(method, "_sampled_genotype_freqs_as_data")
-            gf_name   <- paste0(method, "_sampled_genotype_freqs")
+            data_name <- paste0(method, "_sampled_genotype_counts_as_data")
+            gf_name   <- paste0(method, "_sampled_genotype_counts")
             if ((obs_noise == 0) && (genotype_freqs_as_data)) {
                 retval[[data_name]] <-
                     genotypeCounts_to_data(retval[[gf_name]], e = 0)
