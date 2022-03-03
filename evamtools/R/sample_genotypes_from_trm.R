@@ -553,20 +553,31 @@ sample_CPMs <- function(cpm_output
 ##         gene_names is always sorted inside the function to ensure
 ##         results do not differ by gene_names order
 
+
+## Why do you need to provide ngenes and/or gene_names?
+##   Because you might have taken a small sample where not all
+##   genes you expect are represented.
 sample_to_pD_order <- function(x, ngenes, gene_names = NULL) {
-    if(is.null(gene_names)) gene_names <- LETTERS[seq_len(ngenes)]
+    if (is.null(gene_names)) gene_names <- LETTERS[seq_len(ngenes)]
+    ## Consistency checks
     stopifnot(ngenes == length(gene_names))
+    gene_names_in_x <- setdiff(unique(unlist(strsplit(unique(x), ", "))), "WT")
+    stopifnot(length(gene_names_in_x) <= ngenes)
+    stopifnot(all(gene_names_in_x %in% gene_names))
+    rm(gene_names_in_x)
+
     x <- as.data.frame(table(x), stringsAsFactors = FALSE)
     gene_names <- sort(gene_names)
     genot_int <- x[, 1]
     genot_int <- gsub("^WT$", "", genot_int, fixed = "FALSE")
 
-    genot_int <- vapply(genot_int,
-                        function(z)
-                            State.to.Int(
-                                as.integer(gene_names %in%
-                                           strsplit(z, ", ", fixed = TRUE)[[1]])),
-                        numeric(1))
+    genot_int <-
+        vapply(genot_int,
+               function(z)
+                   State.to.Int(
+                       as.integer(gene_names %in%
+                                  strsplit(z, ", ", fixed = TRUE)[[1]])),
+               numeric(1))
 
     return(tabulate(rep(unname(genot_int), x[, 2]),
                    nbins = 2^ngenes))
