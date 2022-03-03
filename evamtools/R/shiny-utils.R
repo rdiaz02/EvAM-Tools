@@ -218,7 +218,7 @@ get_dag_data <- function(data, parent_set, N = 10000){
   n_genes <- length(parent_set)
 
   dag_trm <- HESBCN_model_2_output(data, parent_set)$HESBCN_trans_rate_mat
-  browser()
+
   dag_probs <- probs_from_trm(dag_trm)
   tmp_samples_as_df <- genot_probs_2_pD_ordered_sample(x = dag_probs,
                                                        ngenes = n_genes,
