@@ -516,7 +516,9 @@ user_input <- function() {
             tags$h3("Input to build"),
             tagList(
               radioButtons(inputId = "input2build", label = "", 
-                choiceNames = c("Cross sectional data", "DAG builder", "Matrix Builder"),
+                           choiceNames = c("Cross sectional data",
+                                           "DAG builder",
+                                           "MHN matrix builder"),
                 choiceValues = c("csd", "dag", "matrix"),
                 selected = "csd"
               )
