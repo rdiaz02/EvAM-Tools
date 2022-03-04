@@ -776,6 +776,7 @@ random_evam <- function(ngenes = NULL, gene_names = NULL,
     output <- list()
     if (model == "MHN") {
         mhn_sparsity <- 1 - graph_density
+        ## Recall these thetas have theta_i,j: effect of j on i.
         thetas <- Random.Theta(n = ngenes, sparsity = mhn_sparsity)
         colnames(thetas) <- rownames(thetas) <- gene_names
         output <- MHN_from_thetas(thetas)
@@ -824,6 +825,7 @@ random_evam <- function(ngenes = NULL, gene_names = NULL,
 
 ## Pablo: use this?
 ## Named matrix of thetas -> all of the model and predicted probs
+## Recall these thetas have theta_i,j: effect of j on i.
 MHN_from_thetas <- function(thetas) {
     oindex <- order(colnames(thetas))
     thetas <- thetas[oindex, oindex]

@@ -377,14 +377,18 @@ server <- function(input, output, session) {
       } else if (input$input2build == "matrix"){
         tags$div(
           tags$div(class = "flex",
-            tags$h3("2. Define input with a Matrix"),
+                   ## tags$h3("2. Define input with a Matrix"),
+                   tags$h3("2. Define MHN's log-Theta",
+                           HTML("matrix (log-&Theta;):")),
             actionButton("how2build_matrix", "Help")
           ),
           if(!is.null(data$thetas)){
             tags$div(
-              tags$h3("Thetas table"),
+              tags$h3("Entries are ", HTML("&theta;s, range &plusmn; &infin;"),),
               DT::DTOutput("thetas_table"),
-              numericInput("mhn_samples", "Total genotypes to sample", value = default_csd_samples, min= 100, max= 10000, step = 100, width = "50%"),
+              numericInput("mhn_samples", "Total genotypes to sample",
+                           value = default_csd_samples, min = 100, max = 10000,
+                           step = 100, width = "50%"),
               actionButton("resample_mhn", "Sample from MHN")
             )
           }
@@ -571,18 +575,42 @@ server <- function(input, output, session) {
   observeEvent(input$how2build_matrix, {
     showModal(modalDialog(
       easyClose = TRUE,
-      title = tags$h3("How to build a matrix"),
+      title = tags$h3(HTML("How to input &theta;s and generate a sample")),
       tags$div(
-        tags$p("Positive theta: gene i in row makes gene j in column more likely. A negative means the opposite."),
-        tags$p("Diagonal theta: likelihood of that event i to be the first one (positive values likely, negative unlikely."),
-        tags$p("Once the thetas are defined hit the 'Sample from MHN' to generate a sample."),
-        tags$p("To make a sample we take into account multiplicative effects of all thetas"),
-        tags$h3("How to modify the table"),
-        tags$p("1. Double click in a cell to edit it"),
-        tags$p("2. Press Tab to move to the next row"),
-        tags$p("3. Use Ctrl + Enter to save changes"),
-        tags$p("4. Set a frequency to 0 to remove a genotype"),
-        tags$p("5. Type in the Search bar to filter genotypes")
+        ## tags$p("Positive theta: gene i in row makes gene j in column more likely. A negative means the opposite."),
+        ## tags$p("Diagonal theta: likelihood of that event i to be the first one (positive values likely, negative unlikely."),
+               ## tags$p("Once the thetas are defined hit the",
+               ##        " 'Sample from MHN' to generate a sample."),
+               tags$p("0. Select the number of genes with the slider, above."
+                     ## , " (Even if you set the diagonal and all off-diagonal",
+                     ## " entries as 0, that gene is still part of the data set",
+                     ## HTML(", with a value &Theta; = 1 for all its contributing terms).")
+                     ),
+               ## tags$p("To make a sample we take into account multiplicative effects of all thetas"),
+               ## tags$h3("How to modify the table"),
+               tags$p(HTML("1. &Theta;<sub>i,j</sub> ",
+                           "(i.e., <em>e<sup>&theta;<sub>i,j</sub></sup></em>) ",
+                           "is the multiplicative ",
+                           "effect of gene in column <em>j</em> on ",
+                           "gene in row <em>i</em>. ",
+                           "&Theta;<sub>i,i</sub> is the baseline hazard rate ",
+                           "of event <em>i</em>. "## ,
+                           ## "See the ",
+                           ## "figure on the right."
+                           )),
+               tags$p("2. Double click in a cell to edit it."),
+               tags$p("3. Press Tab to move to the next row."),
+               tags$p("4. Use Ctrl + Enter to save changes. ",
+                      HTML("You <strong>must</strong> save the changes.")),
+               tags$p("5. Modify, if you want, the size of the sample ",
+                      "('Total genotypes to sample') and ",
+                      "click on 'Sample from MHN' to generate a sample. ",
+                      "The sample is also updated as soon as you save an entry."),
+               tags$p("6. Possible random noise is controlled under 'Advanced options'."),
+               tags$p(HTML("Make sure <b>the &theta;s have been updated</b> "),
+                      "by checking the figure of the matrix on the right.")
+        ## tags$p("4. Set a frequency to 0 to remove a genotype"),
+        ## tags$p("5. Type in the Search bar to filter genotypes")
         )
       )
     )
