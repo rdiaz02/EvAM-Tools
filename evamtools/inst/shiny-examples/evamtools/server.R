@@ -1039,7 +1039,7 @@ server <- function(input, output, session) {
           inline = TRUE,
           choiceNames =  c( "Transition probabilities",
                             "Transition rates",
-                            "Predicted relative genotype frequencies",
+                            "Predicted genotype relative frequencies",
                             "Sampled genotype counts",
                             "Observed transitions counts"
                             ),
