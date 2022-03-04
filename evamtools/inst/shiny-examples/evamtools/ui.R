@@ -588,15 +588,20 @@ user_input <- function() {
             tags$div(id="all_advanced_options", 
               # title = tags$h3("Advanced options"),
               # tags$div(
+                tags$h4("Run additional CPMs"),
+                checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("MCCBN"), choiceValues = c("MCCBN")),
+                tags$h4("DISCLAIMER: MCCBN may take hours to run"),
+                tags$hr(),
+                tags$div(class="inlin",
+                tags$h4("Sampling options"),
+                selectInput("do_sampling", "Run samples: ", c("True" = TRUE, 
+                  "False" = FALSE), selected = FALSE),
                 numericInput("num_steps", "Sampling steps", SHINY_DEFAULTS$cpm_samples
                   , min = 0, max = 100000, step = 100, width="100%"),
                 numericInput("sample_noise", "Sampling noise", 0
                   , min = 0, max = 1, step = 0.1, width="100%"),
                 # checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("HyperTRAPS", "MCCBN"), choiceValues = c("hypertraps", "mccbn")),
-                checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("MCCBN"), choiceValues = c("MCCBN")),
-                tags$h4("DISCLAIMER: MCCBN may take hours to run"),
                 tags$hr(),
-                tags$div(class="inlin",
                 tags$h4("MHN options"),
                 numericInput("MHN_lambda", "Lambdas: ", NULL, min=0),
                 tags$hr(),

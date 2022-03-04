@@ -247,9 +247,14 @@ get_dag_data <- function(data, parent_set, N = 10000){
 create_tabular_data <- function(data) {
     available_methods <- c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN")
     attr_to_make_tabular <- c("trans_mat", "trans_rate_mat",
-                              "obs_genotype_transitions",
-                              "predicted_genotype_freqs",
-                              "sampled_genotype_freqs")
+                              "predicted_genotype_freqs"
+                              )
+
+    if(!(is.null(data$HESBCN_sampled_genotype_freqs))){
+      attr_to_make_tabular <- c(attr_to_make_tabular, "sampled_genotype_freqs"
+        , "obs_genotype_transitions")
+    }
+
     tabular_data <- list()
     for (attr in attr_to_make_tabular){
         if (attr %in% c("sampled_genotype_freqs",

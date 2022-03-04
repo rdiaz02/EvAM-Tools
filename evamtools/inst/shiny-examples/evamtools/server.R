@@ -766,15 +766,25 @@ server <- function(input, output, session) {
       #   cpm_output$Source_theta <- data$thetas[1:input$gene_number
       #     , 1:input$gene_number]
       # }
+      sampled_from_CPMs <- NULL
+      if(input$do_sampling){
+      # if(TRUE){
+        n_samples <- input$num_steps
+        if(is.null(n_samples) | !is.numeric(n_samples) | n_samples < 100){
+          n_samples <- SHINY_DEFAULTS$cpm_samples
+        }
+        progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
+        sampled_from_CPMs <- sample_CPMs(cpm_output, n_samples
+          , methods, c("sampled_genotype_freqs", "obs_genotype_transitions")
+          , obs_noise = input$sample_noise)
 
-      n_samples <- input$num_steps
-      if(is.null(n_samples) | !is.numeric(n_samples) | n_samples < 100){
-        n_samples <- SHINY_DEFAULTS$cpm_samples
-      }
-      progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
-      sampled_from_CPMs <- sample_CPMs(cpm_output, n_samples
-        , methods, c("sampled_genotype_freqs", "obs_genotype_transitions")
-        , obs_noise = input$sample_noise)
+        # ## Tabular data
+        # tabular_data <- evamtools:::create_tabular_data(c(cpm_output, sampled_from_CPMs))
+      
+      } 
+      # else {
+      #   tabular_data <- evamtools:::create_tabular_data(cpm_output)
+      # }
 
       progress$inc(4/5, detail = "Post processing data")
       Sys.sleep(0.5)
@@ -784,7 +794,6 @@ server <- function(input, output, session) {
         , thetas = data$thetas, lambdas = data$lambdas
         , dag = data$dag, dag_parent_set = data$dag_parent_set)
 
-      ## Tabular data
       tabular_data <- evamtools:::create_tabular_data(c(cpm_output, sampled_from_CPMs))
 
       all_evam_output <- list("cpm_output" = c(cpm_output, sampled_from_CPMs)
@@ -930,11 +939,13 @@ server <- function(input, output, session) {
       tags$div(class = "inline",
         radioButtons(inputId = "data2plot",
           label = "Data to show",
-          choiceNames =  c("Probabilities", "Transitions",
-                            "Transition Rate Matrix"),
-          choiceValues = c("trans_mat", "obs_genotype_transitions",
-                            "trans_rate_mat"),
-          selected = "obs_genotype_transitions"
+          choiceNames =  c("Probabilities", 
+                            "Transition Rate Matrix",
+                            "Transitions"),
+          choiceValues = c("trans_mat", 
+                            "trans_rate_mat",
+                            "obs_genotype_transitions"),
+          selected = "trans_rate_mat"
           )
         ),
       tags$div(class = "inline",
