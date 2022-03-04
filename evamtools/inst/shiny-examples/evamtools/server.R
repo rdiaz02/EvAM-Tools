@@ -1,15 +1,17 @@
 #'  I followed this link to structure the shiny app whithin the package
 #'  https://deanattali.com/2015/04/21/r-package-shiny-app/
 
-dataModal <- function(error_message) {
+dataModal <- function(error_message, type="Error: ") {
   modalDialog(
     easyClose = TRUE,
-    title = tags$h3("There was an error"),
+    title = tags$h3(type),
     tags$div(
       error_message
     )
   )
   }
+
+
 
 server <- function(input, output, session) {
   examples_csd$csd <- examples_csd$csd[1:5]
@@ -18,7 +20,6 @@ server <- function(input, output, session) {
   max_genes <- SHINY_DEFAULTS$max_genes
   default_csd_samples <- SHINY_DEFAULTS$csd_samples
   default_cpm_samples <- SHINY_DEFAULTS$cpm_samples
-  more_cpms <- NULL
   keep_dataset_name <- FALSE
 
   last_visited_pages <- list(csd = "User", dag = "User", matrix = "User")
@@ -28,13 +29,8 @@ server <- function(input, output, session) {
     all_csd = all_csd_data
   )
 
-  adv_options <- reactiveValues(
-    do_MCCBN = FALSE,
-    cpm_samples = default_cpm_samples
-  )
-
-  data <- reactiveValues(
-    csd_freqs = SHINY_DEFAULTS$template_data$csd_freqs
+   data <- reactiveValues(
+    csd_counts = SHINY_DEFAULTS$template_data$csd_counts
     , data = SHINY_DEFAULTS$template_data$data
     , dag = SHINY_DEFAULTS$template_data$dag
     , dag_parent_set = SHINY_DEFAULTS$template_data$dag_parent_set
@@ -45,7 +41,7 @@ server <- function(input, output, session) {
   )
 
   display_freqs <- reactive({
-    evamtools:::get_display_freqs(data$csd_freqs, input$gene_number, data$gene_names)
+    evamtools:::get_display_freqs(data$csd_counts, input$gene_number, data$gene_names)
   })
 
   ## Upload data
@@ -105,10 +101,17 @@ server <- function(input, output, session) {
     tryCatch({
       ## 1 save dataset to list after user data
       if(!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))){
-        datasets$all_csd[[input$input2build]][[input$dataset_name]]$name <- input$dataset_name
+          datasets$all_csd[[input$input2build]][[input$dataset_name]]$name <-
+              input$dataset_name
 
-        if(nrow(data$csd_freqs) > 0){
-          datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <- evamtools:::freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
+          if (nrow(data$csd_counts) > 0) {
+              ## FIXME: comment_out_freqs2csd
+              ## datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <-
+              ##     evamtools:::freqs2csd(data$csd_counts,
+              ##                           data$gene_names[1:input$gene_number])
+            datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <-
+                evamtools:::genotypeCounts_to_data(data$csd_counts,
+                                                   e = 0)
         }
 
         tmp_data <- list(
@@ -217,11 +220,12 @@ server <- function(input, output, session) {
       data$data <- tmp_data$data
 
       shinyjs::disable("analysis")
+      shinyjs::hide("all_advanced_options")
       if(!is.null(data$data)){
-        data$csd_freqs <- evamtools:::get_csd(data$data)
+        data$csd_counts <- evamtools:::get_csd(data$data)
         shinyjs::enable("analysis")
       } else{
-        data$csd_freqs <- SHINY_DEFAULTS$template_data$csd_freqs
+        data$csd_counts <- SHINY_DEFAULTS$template_data$csd_counts
       }
 
       data$dag <- tmp_data$dag
@@ -284,7 +288,7 @@ server <- function(input, output, session) {
       data$dag_parent_set <- new_data$dag_parent_set
       data$thetas <- new_data$thetas
       data$lambdas <- new_data$lambdas
-      data$csd_freqs <- new_data$csd_freqs
+      data$csd_counts <- new_data$csd_counts
 
       datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
     }, error = function(e){
@@ -297,7 +301,7 @@ server <- function(input, output, session) {
       easyClose = TRUE,
       title = tags$h3("How does it work?"),
       tags$div(
-        tags$p("1. Double click in a Frequency cell to edit it"),
+        tags$p("1. Double click in a Counts cell to edit it"),
         tags$p("2. Press Tab to move to the next row"),
         tags$p("3. Use Ctrl + Enter to save changes"),
         tags$p("4. Set a frequency to 0 to remove a genotype"),
@@ -309,34 +313,8 @@ server <- function(input, output, session) {
 
   # ## Advanced option for running evamtools
   observeEvent(input$advanced_options, {
-    showModal(modalDialog(
-      size = "l",
-      easyClose = TRUE,
-      title = tags$h3("Advanced options"),
-      tags$div(
-        numericInput("num_steps", "Sampling steps", adv_options$cpm_samples
-          , min = 0, max = 100000, step = 100, width="100%"),
-        # checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("HyperTRAPS", "MCCBN"), choiceValues = c("hypertraps", "mccbn")),
-        checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("MCCBN"), choiceValues = c("MCCBN"), selected=c(adv_options$do_MCCBN)),
-        tags$h4("DISCLAIMER: MCCBN may take hours to run")
-        # tags$h4("DISCLAIMER: Both HyperTraps and MCCBN may take hours to run")
-        )
-      )
-    )
-    ## TODO this has no effect so far
+    shinyjs::toggle("all_advanced_options")
   })
-
-  observeEvent(input$num_steps, {
-    adv_options$cpm_samples <- input$num_steps
-  })
-
-  observeEvent(input$more_cpms, {
-    if("MCCBN" %in% input$more_cpms) {
-      adv_options$do_MCCBN <- "MCCBN"
-    } else {
-      adv_options$do_MCCBN <- FALSE
-    }
-  }, ignoreNULL = FALSE)
 
   # ## Define number of genes
   output$genes_number <- renderUI({
@@ -360,7 +338,8 @@ server <- function(input, output, session) {
                 choices = options)
             ),
             tags$div(id="fr",
-              numericInput(label="Frequency", value = NA, min = 0, inputId = "genotype_freq",width = NA),
+                     numericInput(label = "Counts", value = NA, min = 0,
+                                  inputId = "genotype_freq", width = NA),
               actionButton("add_genotype", "Add Genotype")
             )
         )
@@ -413,15 +392,15 @@ server <- function(input, output, session) {
       }
   })
 
-  output$change_freqs <- renderUI({
+  output$change_counts <- renderUI({
     if(input$input2build == "csd"){
       tags$div(class = "frame",
         tags$div(class = "flex",
-          tags$h3("3. Change frequencies"),
+          tags$h3("3. Change genotype's counts"),
           actionButton("display_help", "Help"),
         ),
         tags$div(id = "csd_table",
-          DT::DTOutput("csd_freqs")
+          DT::DTOutput("csd_counts")
         )
       )
     }
@@ -486,7 +465,7 @@ server <- function(input, output, session) {
       colnames(tmp_dag) <- rownames(tmp_dag) <- c("WT", data$gene_names)
       tmp_dag["WT", data$gene_names[1]] <- 1
       data$dag <- tmp_dag
-      data$csd_freqs <- SHINY_DEFAULTS$template_data$csd_freqs
+      data$csd_counts <- SHINY_DEFAULTS$template_data$csd_counts
       data$data <- SHINY_DEFAULTS$template_data$data
       data$dag_parent_set <- tmp_data$dag_parent_set
       data$lambdas <- SHINY_DEFAULTS$template_data$lambdas
@@ -516,7 +495,7 @@ server <- function(input, output, session) {
       tmp_dag_data <- evamtools:::get_dag_data(dag_data()
         , data$dag_parent_set[1:input$gene_number]
         , N = input$dag_samples)
-      data$csd_freqs <- tmp_dag_data$csd_freqs
+      data$csd_counts <- tmp_dag_data$csd_counts
       data$data <- tmp_dag_data$data
 
       datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- data$data
@@ -580,7 +559,7 @@ server <- function(input, output, session) {
       mhn_data <- evamtools:::get_mhn_data(thetas = data$thetas[1:input$gene_number
                                                   , 1:input$gene_number], 
                               N = input$mhn_samples)
-      data$csd_freqs <- mhn_data$csdfreqs
+      data$csd_counts <- mhn_data$csdfreqs
       data$data <- mhn_data$data
       datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- mhn_data$data
       shinyjs::enable("analysis")
@@ -599,7 +578,7 @@ server <- function(input, output, session) {
         tags$p("Once the thetas are defined hit the 'Sample from MHN' to generate a sample."),
         tags$p("To make a sample we take into account multiplicative effects of all thetas"),
         tags$h3("How to modify the table"),
-        tags$p("1. Double click in a Frequency cell to edit it"),
+        tags$p("1. Double click in a cell to edit it"),
         tags$p("2. Press Tab to move to the next row"),
         tags$p("3. Use Ctrl + Enter to save changes"),
         tags$p("4. Set a frequency to 0 to remove a genotype"),
@@ -613,8 +592,8 @@ server <- function(input, output, session) {
   observeEvent(input$genotype, {
     tryCatch({
       genotype <- paste(input$genotype, collapse = ", ")
-      genot_freq <- data$csd_freqs[, 2][data$csd_freqs[, 1] == genotype]
-      updateNumericInput(session, "genotype_freq", value = genot_freq)
+      genot_count <- data$csd_counts[, 2][data$csd_counts[, 1] == genotype]
+      updateNumericInput(session, "genotype_freq", value = genot_count)
 
     }, error = function(e){
       showModal(dataModal(e[[1]]))
@@ -625,15 +604,23 @@ server <- function(input, output, session) {
     tryCatch({
       genotype <- paste(input$genotype, collapse = ", ")
       genotype <- ifelse(genotype == "", "WT", genotype)
-      genot_freq <- ifelse(is.na(input$genotype_freq), -1, input$genotype_freq)
+      genot_count <- ifelse(is.na(input$genotype_freq), -1, input$genotype_freq)
 
-      if(genot_freq >= 0){
-        data$csd_freqs[genotype, ] <- c(genotype, genot_freq)
-        rownames(data$csd_freqs) <- data$csd_freqs$Genotype
-        data$csd_freqs[, 2] <- as.numeric(data$csd_freqs[, 2])
+      if (genot_count >= 0) {
+        data$csd_counts[genotype, ] <- c(genotype, genot_count)
+        rownames(data$csd_counts) <- data$csd_counts$Genotype
+        data$csd_counts[, 2] <- as.numeric(data$csd_counts[, 2])
         ## Filtering out non-positive counts
-        data$csd_freqs <- data$csd_freqs[data$csd_freqs[,2] > 0,]
-        data$data <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- evamtools:::freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
+        data$csd_counts <- data$csd_counts[data$csd_counts[,2] > 0,]
+        ## FIXME: comment_out_freqs2csd
+        ## data$data <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
+        ##              evamtools:::freqs2csd(data$csd_counts,
+        ##                                    data$gene_names[1:input$gene_number])
+        data$data <-
+            datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
+                evamtools:::genotypeCounts_to_data(data$csd_counts, e = 0)
+        
+        
         shinyjs::enable("analysis")
       }
       updateNumericInput(session, "genotype_freq", value = NA)
@@ -645,20 +632,29 @@ server <- function(input, output, session) {
   })
 
   ## Genotypes table
-  output$csd_freqs <- DT::renderDT(display_freqs(), selection = 'none', server = TRUE, editable = list(target = "column", disable = list(columns = c(0)))
+  output$csd_counts <- DT::renderDT(display_freqs(), selection = 'none', server = TRUE, editable = list(target = "column", disable = list(columns = c(0)))
     , rownames = FALSE,
     options = list(
       columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE),
   )
 
-  observeEvent(input$csd_freqs_cell_edit, {
+  observeEvent(input$csd_counts_cell_edit, {
     tryCatch({
-      info <- input$csd_freqs_cell_edit
+      info <- input$csd_counts_cell_edit
       info[ , "col"] <- 2
-      data$csd_freqs <- DT::editData(data$csd_freqs, info, "csd_freqs")
+      data$csd_counts <- DT::editData(data$csd_counts, info, "csd_counts")
       ## Filtering out non-positive counts
-      data$csd_freqs <- data$csd_freqs[data$csd_freqs[,2] > 0,]
-      data$data <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- evamtools:::freqs2csd(data$csd_freqs, data$gene_names[1:input$gene_number])
+      data$csd_counts <- data$csd_counts[data$csd_counts[,2] > 0,]
+
+      ## FIXME: comment_out_freqs2csd
+      ## data$data <-
+      ##     datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
+      ##         evamtools:::freqs2csd(data$csd_counts,
+      ##                               data$gene_names[1:input$gene_number])
+      data$data <-
+          datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
+              evamtools:::genotypeCounts_to_data(data$csd_counts, e = 0)
+
     }, error = function(e){
       showModal(dataModal(e[[1]]))
     })
@@ -667,8 +663,10 @@ server <- function(input, output, session) {
   ## Plot histogram of genotypes
   output$plot <- renderPlot({
     tryCatch({
-      evamtools:::plot_genotypes_freqs(display_freqs())
-    }, error = function(e){})
+      evamtools:::plot_genotype_counts(display_freqs())
+    }, error = function(e){
+      showModal(dataModal(e[[1]]))
+    })
   })
 
   ## Plot dag of dataset
@@ -708,6 +706,9 @@ server <- function(input, output, session) {
     # }
 
     tryCatch({
+      if(input$gene_number > 7){
+        showModal(dataModal("Take care! You are running a dataset with 8 genes or more. This make take longer than usual and plots may be crowded. We recommend using top_paths options in the Results' tab.", type = "Warning: "))
+      }
       shinyjs::disable("analysis")
       # Create a Progress object
       progress <- shiny::Progress$new()
@@ -716,7 +717,55 @@ server <- function(input, output, session) {
 
       progress$set(message = "Running evamtools", value = 0)
 
-      data2run <- evamtools:::freqs2csd(display_freqs(), data$gene_names[1:input$gene_number])
+      mhn_opts <- list()
+      if(!is.na(input$MHN_lambda)) mhn_opts$lambda <- input$MHN_lambda
+      
+      ot_opts <- list()
+      if(input$OT_with_error == "TRUE"){
+        ot_opts$with_errors_dist_ot <- TRUE
+      } else ot_opts$with_errors_dist_ot <- FALSE
+
+      cbn_opts <- list(init_poset = input$CBN_init_poset)
+      hesbcn_opts <- list(
+        steps = input$HESBCN_steps,
+        reg = input$HESBCN_reg
+      ) 
+      if(!is.na(input$HESBCN_seed)) hesbcn_opts$seed <- input$HESBCN_seed
+
+      oncobn_opts <- list(
+        model = input$OncoBN_model,
+        algorithm = input$OncoBN_algorithm,
+        k = input$OncoBN_k
+      ) 
+      if(!is.na(input$OncoBN_epsilon)) oncobn_opts$epsilon <- input$OncoBN_epsilon
+
+      mccbn_opts <- list(
+        model = input$MCCBN_model,
+        L = input$MCCBN_L,
+        sampling = input$MCCBN_sampling,
+        max.iter = input$MCCBN_max_iter,
+        update.step.size = input$MCCBN_update_step_size,
+        tol = input$MCCBN_tol,
+        max.lambda.val = input$MCCBN_max_lambda_val,
+        T0 = input$MCCBN_T0,
+        adap.rate = input$MCCBN_adapt_rate,
+        max.iter.asa = input$MCCBN_max_iter_asa,
+        neighborhood.dist = input$MCCBN_neighborhood_dist
+      )
+      if(!is.na(input$MCCBN_seed)) mccbn_opts$seed <- input$MCCBN_seed
+      if(!is.na(input$MCCBN_acceptance_rate)) mccbn_opts$acceptance.rate <-  input$MCCBN_acceptance_rate
+      if(!is.na(input$MCCBN_step_size)) mccbn_opts$step.size <-  input$MCCBN_acceptance_rate
+      if(input$MCCBN_adaptive == "TRUE"){
+        mccbn_opts$adaptive <- TRUE
+      } else mccbn_opts$adaptive <- FALSE
+
+      ## FIXME: comment_out_freqs2csd
+      ## data2run <- evamtools:::freqs2csd(display_freqs(),
+      ##                                   data$gene_names[1:input$gene_number])
+      data2run <- evamtools:::genotypeCounts_to_data(display_freqs(),
+                                                     e = 0)
+        
+
       progress$inc(1/5, detail = "Setting up data")
       Sys.sleep(0.5)
       progress$inc(2/5, detail = "Running CPMs")
@@ -725,8 +774,14 @@ server <- function(input, output, session) {
       if(!is.null(input$more_cpms)){
         methods <- unique(c(methods, input$more_cpms[input$more_cpms %in% SHINY_DEFAULTS$all_cpms]))
       }
-      cpm_output <- evam(data2run, methods = methods)
-   
+      cpm_output <- evam(data2run, methods = methods
+        , mhn_opts = mhn_opts
+        , ot_opts = ot_opts
+        , cbn_opts = cbn_opts
+        , hesbcn_opts = hesbcn_opts
+        , oncobn_opts = oncobn_opts
+        , mccbn_opts = mccbn_opts)
+
       ## To see Source data in the results section
       # if(input$input2build != "csd"){
       #   ## FIXME: rename f_graph to trans_rate_mat: ???
@@ -741,13 +796,14 @@ server <- function(input, output, session) {
       #     , 1:input$gene_number]
       # }
 
-      n_samples <- adv_options$cpm_samples
+      n_samples <- input$num_steps
       if(is.null(n_samples) | !is.numeric(n_samples) | n_samples < 100){
         n_samples <- SHINY_DEFAULTS$cpm_samples
       }
       progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
       sampled_from_CPMs <- sample_CPMs(cpm_output, n_samples
-        , methods, c("sampled_genotype_freqs", "obs_genotype_transitions"))
+        , methods, c("sampled_genotype_counts", "obs_genotype_transitions")
+        , obs_noise = input$sample_noise)
 
       progress$inc(4/5, detail = "Post processing data")
       Sys.sleep(0.5)
@@ -802,7 +858,10 @@ server <- function(input, output, session) {
   output$sims <- renderUI({
     if ((length(names(all_cpm_out)) > 0) && (!is.null(input$select_cpm))) {
       tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
-      column_models2show <- floor(12 / length(input$cpm2show))
+      # column_models2show <- floor(12 / length(input$cpm2show))
+
+      number_of_columns <- floor(12 /
+        ifelse(length(input$cpm2show) <=4, 4, length(input$cpm2show)))
 
       lapply(input$cpm2show, function(met){
           method_data <- evamtools:::process_data(tmp_data, met,
@@ -814,11 +873,12 @@ server <- function(input, output, session) {
           , met)
         })
         return(
-          column(3,
+          # column(3,
+          column(number_of_columns,
             plotOutput(sprintf("plot_sims_%s", met)))
         )
-        })
-      }
+      })
+    }
   })
 
   output$sims2 <- renderUI({
@@ -828,24 +888,28 @@ server <- function(input, output, session) {
       shinyjs::enable(selector = "#download_cpm")
 
       ## Main display
-      column_models2show <- floor(12 / length(input$cpm2show))
+      # column_models2show <- floor(12 / length(input$cpm2show))
       selected_plot_type <- input$data2plot
 
-      if (!(is.null(selected_plot_type))) {
-        lapply(input$cpm2show, function(met) {
+      number_of_columns <- floor(12 /
+        ifelse(length(input$cpm2show) <=4, 4, length(input$cpm2show)))
+
+      if(!(is.null(selected_plot_type))){
+        lapply(input$cpm2show, function(met){
           method_data <- evamtools:::process_data(tmp_data, met, plot_type = selected_plot_type)
           output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
-          pl <- evamtools:::plot_genot_fg(method_data$data2plot,
+            pl <- evamtools:::plot_genot_fg(method_data$data2plot,
                       observations = tmp_data$analyzed_data, # We use it to define "Observed" and "Not Observed" genotypes
-                      predicted_genotypes = method_data$predicted_genotype_freqs, # To compute node sizes if sampled_freqs is NULL
-                      sampled_freqs = method_data$sampled_genotype_freqs,
+                      predicted_genotypes = method_data$predicted_genotype_freqs, # To compute node sizes if sampled_counts is NULL
+                      sampled_counts = method_data$sampled_genotype_counts,
                       top_paths = input$freq2label,
                       label_type = input$label2plot,
                       plot_type = selected_plot_type)
                       # , freq2label = input$freq2label)
           })
           return(
-            column(3,
+            # column(3,
+            column(number_of_columns,
               plotOutput(sprintf("plot_sims2_%s", met)))
           )
         })
@@ -869,7 +933,7 @@ server <- function(input, output, session) {
         tmp_data <- datasets$all_csd[[tmp_data$type]][[dataset_name]] <- evamtools:::standarize_dataset(tmp_data)
 
         data <- tmp_data
-        data$csd_freqs <- evamtools:::get_csd(tmp_data$data)
+        data$csd_counts <- evamtools:::get_csd(tmp_data$data)
         data$n_genes <- ncol(data$data)
 
         updateNumericInput(session, "gene_number", value = data$n_genes)
@@ -885,12 +949,12 @@ server <- function(input, output, session) {
 
   output$customize <- renderUI({
     tags$div(class = "frame",
-      tags$h3("2. Customize the visualization"),
+      tags$h3("Customize the visualization"),
       tags$div(class = "inline",
         checkboxGroupInput(inputId = "cpm2show",
           label = "CPMs to show",
           choices = c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
-          selected = c("CBN", "MHN", "HESBCN")),
+          selected = c("OT", "OncoBN", "CBN", "MHN", "HESBCN")),
 
       tags$div(class = "inline",
         radioButtons(inputId = "data2plot",
@@ -943,7 +1007,7 @@ server <- function(input, output, session) {
   })
 
   output$csd <- renderPlot({
-    evamtools:::plot_genotypes_freqs(evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data))
+    evamtools:::plot_genotype_counts(evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data))
   })
 
   output$original_data <- renderUI({
@@ -976,13 +1040,13 @@ server <- function(input, output, session) {
           choiceNames =  c( "Transition probabilities",
                             "Transition rates",
                             "Predicted relative genotype frequencies",
-                            "Sampled absolute genotype frequencies",
+                            "Sampled genotype counts",
                             "Observed transitions counts"
                             ),
           choiceValues =  c("trans_mat",
                             "trans_rate_mat",
                             "predicted_genotype_freqs",
-                            "sampled_genotype_freqs",
+                            "sampled_genotype_counts",
                             "obs_genotype_transitions"),
           selected = "trans_mat"
           ),

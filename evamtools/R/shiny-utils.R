@@ -1,37 +1,60 @@
+## ## Reasons for not using this function:
 
+## ## That it takes a gene_names is questionable:
+## ## gene_names should be extracted from freqs.
+## ## Doing it this way suggests not self-contained and it is unclear
+## ## why not self-contained.
 
-freqs2csd <- function(freqs, gene_names){
-    csd <- NULL
-    if(nrow(freqs) > 0){
-        csd2 <- apply(
-            freqs, 1
-            , function(x){
-                mut <- x[[1]]
-                freq <- as.numeric(x[[2]])
-                genot <- rep(0, length(gene_names))
-                if(mut != "WT"){
-                    mut <-  strsplit(mut, ", ")[[1]]
-                    genot[which(gene_names %in% mut)] <- 1
-                }
-                csd <- matrix(rep(genot, freq), ncol= length(gene_names), byrow = TRUE)
-                return(list(csd))
-            })
+## ## Could errors be introduced if genes not ordered or in numbers that differ from
+## ## expected? I do not know and there are no tests. For example: what would happen
+## ## if freqs had columns A, B, but gene_names was A, D, E? Or if gene_names only
+## ## had A?  One could add checks for that, but since the role of this is to
+## ## produce tabular data, it seems sensible to assume that all the info is in
+## ## freqs. (I tried adding a check but I think it is just simpler to used
+## ## genotypeCounts_to_data).
+
+## ## There is no checking for freqs having specifically named
+## ## columns: it is assumed the first is genotype and the second is
+## ## Counts/Frequency.
+
+## ## Finally: using genotypeCounts_to_data we only output columns
+## ## that have at least one mutation, never columns filled with only 0s.
+## freqs2csd <- function(freqs, gene_names) {
+##     genes_in_freqs <- setdiff(unique(unlist(strsplit(freqs[, 1], ", "))),
+##                               "WT")
+##     stopifnot(isTRUE(all(genes_in_freqs %in% gene_names)))
+    
+##     csd <- NULL
+##     if (nrow(freqs) > 0) {
+##         csd2 <- apply(
+##             freqs, 1,
+##             function(x) {
+##                 mut <- x[[1]]
+##                 freq <- as.numeric(x[[2]])
+##                 genot <- rep(0, length(gene_names))
+##                 if (mut != "WT") {
+##                     mut <-  strsplit(mut, ", ")[[1]]
+##                     genot[which(gene_names %in% mut)] <- 1
+##                 }
+##                 csd <- matrix(rep(genot, freq), ncol = length(gene_names),
+##                               byrow = TRUE)
+##                 return(list(csd))
+##             })
         
-        csd <- csd2[[1]][[1]]
-        if(nrow(freqs) > 1){ 
-            for (i in 2:nrow(freqs)){
-                csd <- rbind(csd, csd2[[i]][[1]])
-            }
-        } 
-        colnames(csd) <- gene_names
-    }
-
-    return(csd)
-}
+##         csd <- csd2[[1]][[1]]
+##         if (nrow(freqs) > 1) {
+##             for (i in 2:nrow(freqs)){
+##                 csd <- rbind(csd, csd2[[i]][[1]])
+##             }
+##         }
+##         colnames(csd) <- gene_names
+##     }
+##     return(csd)
+## }
 
 get_display_freqs <- function(freqs, n_genes, gene_names){
-  if(is.null(freqs)) return(SHINY_DEFAULTS$template_data$csd_freqs)
-  if(nrow(freqs) == 0) return(SHINY_DEFAULTS$template_data$csd_freqs)
+  if(is.null(freqs)) return(SHINY_DEFAULTS$template_data$csd_counts)
+  if(nrow(freqs) == 0) return(SHINY_DEFAULTS$template_data$csd_counts)
   valid_gene_names <- c("WT", gene_names[1:n_genes])
 
   selected_rows <- sapply(freqs$Genotype, function(x){
@@ -43,8 +66,8 @@ get_display_freqs <- function(freqs, n_genes, gene_names){
 }
 
 get_csd <- function(complete_csd){
-    if(is.null(complete_csd)) return(SHINY_DEFAULTS$template_data$csd_freqs)
-    csd <- data.frame(OncoSimulR::sampledGenotypes(complete_csd))
+    if(is.null(complete_csd)) return(SHINY_DEFAULTS$template_data$csd_counts)
+    csd <- data_to_counts(complete_csd, out = "data.frame", omit_0 = TRUE)
     rownames(csd) <- csd$Genotype
     return(csd)
 }
@@ -159,6 +182,7 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, da
 
   ##Relationships
   number_of_parents <- colSums(dag)[-1]
+  number_of_parents <- number_of_parents[number_of_parents > 0]
   tmp_parent_set <- parent_set
   new_relationships <- info[info["col"] == 2,"value"]
   names(new_relationships) <- info[info["col"] == 1,"value"]
@@ -167,15 +191,19 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, da
   genes_in_relationships <- names(new_relationships)
   freq_genes_in_relationships <- table(genes_in_relationships)
 
+  old_relationships <- stats::setNames(dag_data$Relation, dag_data$To)
   new_relationships[!(new_relationships %in% c("Single", "AND", "OR", "XOR"))] <- "AND"
-  new_relationships[number_of_parents < 2] <- "Single"
+  new_relationships[names(number_of_parents[number_of_parents<2])] <- "Single"
   new_relationships[setdiff(unique(genes_in_relationships), 
     names(freq_genes_in_relationships[freq_genes_in_relationships > 1]))] <- "Single"
   
   multiple_parents <- names(number_of_parents[number_of_parents > 1])
 
   for(i in multiple_parents){
-    tmp_parent_set[i] <- setdiff(new_relationships[genes_in_relationships == i], c(parent_set[i]))[[1]]
+    changed_relationships <- setdiff(new_relationships[genes_in_relationships == i], c(parent_set[i]))
+    if (length(changed_relationships) > 0){
+      tmp_parent_set[i] <- changed_relationships[[1]]
+    }
   }
   # for(idx in c(1:length(new_relationships))){
   #   tmp_parent_set[names(new_relationships[idx])] <- new_relationships[idx]
@@ -196,16 +224,20 @@ get_mhn_data <- function(thetas, N = 10000){
 
   mhn_trm <- MHN_from_thetas(thetas)$MHN_trans_rate_mat
   mhn_probs <- probs_from_trm(mhn_trm)
-  tmp_genotypes_sampled <- sample_to_pD_order(
-                sample(names(mhn_probs), size = N,
-                       prob = mhn_probs, replace = TRUE),
-                ngenes = n_genes, gene_names = gene_names)
-  tmp_samples <- setNames(tmp_genotypes_sampled,
-            generate_sorted_genotypes(n_genes, gene_names))
-  tmp_samples_as_df <- data.frame(Genotype=names(tmp_samples), Counts=tmp_samples)
-  tmp_samples <- tmp_samples[tmp_samples > 0]
+  tmp_samples_as_df <- genot_probs_2_pD_ordered_sample(x = mhn_probs,
+                                                       ngenes = n_genes,
+                                                       gene_names = gene_names,
+                                                       N = N,
+                                                       out = "data.frame"
+                                                       )
+
+  ## return(list(csdfreqs = tmp_samples_as_df,
+  ##             data = freqs2csd(tmp_samples_as_df, gene_names)))
+
   return(list(csdfreqs = tmp_samples_as_df,
-              data = freqs2csd(tmp_samples_as_df, gene_names)))
+              data = genotypeCounts_to_data(tmp_samples_as_df, e = 0)))
+
+
 }
 
 get_dag_data <- function(data, parent_set, N = 10000){
@@ -214,17 +246,34 @@ get_dag_data <- function(data, parent_set, N = 10000){
   n_genes <- length(parent_set)
 
   dag_trm <- HESBCN_model_2_output(data, parent_set)$HESBCN_trans_rate_mat
+
   dag_probs <- probs_from_trm(dag_trm)
-  tmp_genotypes_sampled <- sample_to_pD_order(
-                sample(names(dag_probs), size = N,
-                       prob = dag_probs, replace = TRUE),
-                ngenes = n_genes, gene_names = gene_names)
-  tmp_samples <- setNames(tmp_genotypes_sampled,
-            generate_sorted_genotypes(n_genes, gene_names))
-  tmp_samples <- tmp_samples[tmp_samples > 0]
-  tmp_samples_as_df <- data.frame(Genotype=names(tmp_samples), Counts=tmp_samples)
-  return(list(csd_freqs = tmp_samples_as_df,
-              data = freqs2csd(tmp_samples_as_df, gene_names)))
+  tmp_samples_as_df <- genot_probs_2_pD_ordered_sample(x = dag_probs,
+                                                       ngenes = n_genes,
+                                                       gene_names = gene_names,
+                                                       N = N,
+                                                       out = "data.frame"
+                                                       )
+  ## ## FIXME: aqui. To rm later
+  ## tmp_genotypes_sampled <- sample_to_pD_order(
+  ##               sample(names(dag_probs), size = N,
+  ##                      prob = dag_probs, replace = TRUE),
+  ##               ngenes = n_genes, gene_names = gene_names)
+  ## tmp_samples <- setNames(tmp_genotypes_sampled,
+  ##           generate_pD_sorted_genotypes(n_genes, gene_names))
+  ## tmp_samples <- tmp_samples[tmp_samples > 0]
+  ## tmp_samples_as_df <- data.frame(Genotype=names(tmp_samples), Counts=tmp_samples)
+
+  ## Note: no, the above call to genot_probs_2_pD ... does not remove
+  ## lines with 0 counts. But we do not want to do that as that is a separate
+  ## operation that has to with, maybe, generating the csd.
+
+  ## return(list(csd_counts = tmp_samples_as_df,
+  ##             data = freqs2csd(tmp_samples_as_df, gene_names)))
+  return(list(csd_counts = tmp_samples_as_df,
+              data = genotypeCounts_to_data(tmp_samples_as_df, e = 0)))
+
+  
 }
 
 create_tabular_data <- function(data) {
@@ -232,10 +281,10 @@ create_tabular_data <- function(data) {
     attr_to_make_tabular <- c("trans_mat", "trans_rate_mat",
                               "obs_genotype_transitions",
                               "predicted_genotype_freqs",
-                              "sampled_genotype_freqs")
+                              "sampled_genotype_counts")
     tabular_data <- list()
     for (attr in attr_to_make_tabular){
-        if (attr %in% c("sampled_genotype_freqs",
+        if (attr %in% c("sampled_genotype_counts",
                         "predicted_genotype_freqs")) {
         all_counts <- data.frame(Genotype = c(NULL))
 
@@ -246,7 +295,12 @@ create_tabular_data <- function(data) {
               all_counts <- data.frame(Genotype = names(tmp_data)) #They include all genotypes
               rownames(all_counts) <- all_counts$Genotype
             }
-            all_counts[, method] <- round(tmp_data, 3)
+            ## To avoid relying in indexes
+            all_counts[, method] <- rep(0, nrow(all_counts))
+            tmp_data <- round(tmp_data, 3)
+            for (genotype in names(tmp_data)){
+              all_counts[genotype, method] <- tmp_data[genotype]
+            }
           }
         }
         ## order_by_counts <- order(rowSums(all_counts[-1]),
@@ -432,7 +486,7 @@ standarize_dataset <- function(data){
     colnames(new_data$data) <- new_data$gene_names[1:ncol(new_data$data)]
   }
   
-  new_data$csd_freqs <- get_csd(new_data$data)
+  new_data$csd_counts <- get_csd(new_data$data)
   return(new_data)
 }
 

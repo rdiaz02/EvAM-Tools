@@ -30,7 +30,7 @@ dB <- matrix(
 )
 colnames(dB) <- LETTERS[1:2]
 storage.mode(dB) <- "integer"
-sampledGenotypes(dB)
+data_to_counts(dB, out = "data.frame", omit_0 = TRUE)
 out <- evam(dB)
 ## plot_DAG_fg(out, dB)
 

@@ -29,7 +29,7 @@ test_that("reorder_to_pD", {
             " U#/!=?¿%&8  ,  F_#$@  ,  A  " = 5)
 
 
-    sgu <- generate_sorted_genotypes(n_genes = 7,
+    sgu <- generate_pD_sorted_genotypes(n_genes = 7,
                                      gene_names = c("A", "B", "C",
                                                     "D", "E",
                                                     "U#/!=?¿%&8",

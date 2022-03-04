@@ -113,6 +113,42 @@ results_simple <- function(){
         visibility: hidden !important;
       }
 
+      .col-sm-12{
+        padding-left:5px;
+        padding-right:5px;
+      }
+      .col-sm-10{
+        padding-left:0px;
+        padding-right:0px;
+      }
+
+      .col-sm-11{
+        padding-right:0px;
+      }
+
+      .col-sm-2{
+        padding-left:0px;
+        padding-right:0px;
+      }
+
+      .col-sm-4{
+        padding-left:0px;
+        padding-right:0px;
+      }
+
+      .col-sm-7{
+        padding-left:0px;
+        padding-right:0px;
+      }
+
+      .col-sm-1{
+        padding-left:0px;
+      }
+
+      .row{
+        margin-right:0px;
+      }
+
                    
                 #select_cpm div.radio{
                   background-color: rgba(200,200,200, 0.5);
@@ -128,19 +164,19 @@ results_simple <- function(){
 
                 @media only screen and (min-width: 1400px) {
                   #select_cpm div.radio{
-                    max-width: 150px;
+                    max-width: 200px;
                   }
                   #select_cpm div.radio{
-                    max-width: 150px;
+                    max-width: 200px;
                   }
                 }
 
                 @media only screen and (min-width: 1900px) {
                   #select_cpm div.radio{
-                    max-width: 200px;
+                    max-width: 250px;
                   }
                   #select_cpm div.radio{
-                    max-width: 200px;
+                    max-width: 250px;
                   }
 
                 }
@@ -157,7 +193,6 @@ results_simple <- function(){
                   border: 2px solid gray;
                   border-radius: 3px;
                   margin-top: 5px;
-                  margin-left: -20px;
                   white-space: nowrap;
                   overflow: hidden;
                   text-overflow: ellipsis;
@@ -168,13 +203,16 @@ results_simple <- function(){
             )
         ),
         tags$div(class = "row",
-          column(1,
-            tags$h3("Outputs"),
-            uiOutput("cpm_list")),
-          column(11,
+          # column(1,
+          # column(11,
             column(2,
               tags$div(class = "frame",
-                tags$h3("1. Download"),
+                tags$h3("Outputs"),
+                uiOutput("cpm_list")
+              ),
+              uiOutput("customize"),
+              tags$div(class = "frame",
+                tags$h3("Download"),
                 # tags$div(id = "noprogress",
                 # fileInput("output_cpms", "Load your results"
                 #   , multiple = FALSE,
@@ -183,8 +221,7 @@ results_simple <- function(){
                 tags$div(class = "download_button",
                   downloadButton("download_cpm", "Download")
                 )
-              ),
-              uiOutput("customize")
+              )
             ),
             column(10,
               column(12, uiOutput("sims")),
@@ -199,7 +236,7 @@ results_simple <- function(){
               uiOutput("tabular_data")
             )
 
-          )
+          # )
         )
     )
 
@@ -410,7 +447,7 @@ user_input <- function() {
           width: 140px;
         }
         #select_cpm div.radio{
-          width: 130px;
+          width: 170px;
         }
       }
 
@@ -458,6 +495,16 @@ user_input <- function() {
       #input2build div label{
         padding-left: 20px;
       }
+      #all_advanced_options{
+        background-color:  #f1f5f8;
+        margin-top: 20px;
+        border: 5px solid white;
+        border-radius: 5px;
+        box-shadow: 0 0 10px 5px rgba(160,160,160, 0.5);
+      }
+      #all_advanced_options label{
+        width: 50%;
+      }
         ") # end HTML
       ) # end tags$style
     ),
@@ -493,7 +540,7 @@ user_input <- function() {
             tags$div(class = "frame",
               uiOutput("define_genotype"),
             ),
-            uiOutput("change_freqs"),
+            uiOutput("change_counts"),
 
             tags$div(class = "frame",
                      tags$h3("Upload your own data"),
@@ -537,6 +584,63 @@ user_input <- function() {
             ),
             tags$div(class = "download_button",
               actionButton("advanced_options", "Advanced Options")
+            ),
+            tags$div(id="all_advanced_options", 
+              # title = tags$h3("Advanced options"),
+              # tags$div(
+                numericInput("num_steps", "Sampling steps", SHINY_DEFAULTS$cpm_samples
+                  , min = 0, max = 100000, step = 100, width="100%"),
+                numericInput("sample_noise", "Sampling noise", 0
+                  , min = 0, max = 1, step = 0.1, width="100%"),
+                # checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("HyperTRAPS", "MCCBN"), choiceValues = c("hypertraps", "mccbn")),
+                checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("MCCBN"), choiceValues = c("MCCBN")),
+                tags$h4("DISCLAIMER: MCCBN may take hours to run"),
+                tags$hr(),
+                tags$div(class="inlin",
+                tags$h4("MHN options"),
+                numericInput("MHN_lambda", "Lambdas: ", NULL, min=0),
+                tags$hr(),
+                tags$h4("OT options"),
+                selectInput("OT_with_error", "Return errors: ", c("True" = TRUE, 
+                  "False" = FALSE), selected = "True"),
+                tags$h5("For large models this may take quite some time"),
+                tags$hr(),
+                tags$h4("CBN options"),
+                selectInput("CBN_init_poset", "Initial poset: ", c("OT" = "OT", "Linear" = "linear"), selected="OT"),
+                tags$hr(),
+                tags$h4("HESBCN options"),
+                numericInput("HESBCN_steps", "Steps: ", 100000, min=100, max=10000000),
+                numericInput("HESBCN_seed", "Seed: ", NULL, min=0),
+                selectInput("HESBCN_reg", "Regularization: ", c("BIC" = "bic", "AIC" = "aic", "Loglik" = "loglik"), selected = "BIC"),
+                tags$hr(),
+                tags$h4("OncoBN options"),
+                selectInput("OncoBN_model", "Model: ", c("Conjunctive" = "CBN", "Disjunctive" = "DBN"), selected = "Disjunctive"),
+                selectInput("OncoBN_algorithm", "Algorithm: ", c("Dynamic programming" = "DP", "Genetic algorithm" = "GA"), selected = "Dynamic programming"),
+                numericInput("OncoBN_k", "In-degree bound on the estimated network: ", 3, min=0),
+                numericInput("OncoBN_epsilon", "Penalty: ", NULL, min=0),
+                tags$hr(),
+                  tags$h4("MCCBN options"),
+                  selectInput("MCCBN_model", "Model: ", c("OT-CBN" = "OT-CBN", "H-CBN2" = "H-CBN2"), selected = "OT-CBN"),
+                  numericInput("MCCBN_L", "Number of samples to be drawn from the proposal in the E-step: ", 100, min=0),
+                  selectInput("MCCBN_sampling", "Sampling: ", c("forward", "add-remove", "backward", "bernoulli", "pool"), selected = "forward"),
+                  numericInput("MCCBN_max_iter", "Maximum number of EM iterations: ", 100, min=0, max=100000),
+                  numericInput("MCCBN_update_step_size", "Number of EM steps after which the number of samples, ‘L’, is doubled: ", 20L, min=0, max=100000),
+                  numericInput("MCCBN_tol", "Convergence tolerance: ", 0.001, min=0, max=100),
+                  numericInput("MCCBN_max_lambda_val", "Upper bound on the value of the rate parameters: ", 1e6, min=0, max=1e9),
+                  numericInput("MCCBN_T0", "Initial value of the temperature: ", 50, min=0, max=1000),
+                  numericInput("MCCBN_adapt_rate", "Constant adaptation rate: ", 0.3, min=0, max=1000),
+                  numericInput("MCCBN_acceptance_rate", "Desirable acceptance rate: ", NULL, min=0, max=1000),
+                  numericInput("MCCBN_step_size", "Number of iterations after which the temperature should be updated: ", NULL, min=0, max=1000),
+                  numericInput("MCCBN_max_iter_asa", "Maximun number of iterations: ", 10000L, min=0, max=1000000L),
+                  numericInput("MCCBN_neighborhood_dist", "Hamming distance between the observation and the samples generated by backward sampling: ", 1L, min=0, max=1000000L),
+                  selectInput("MCCBN_adaptive", "Use an adaptive
+                    annealing schedule?: ", c(TRUE, FALSE), selected = TRUE),
+                  numericInput("MCCBN_seed", "Seed: ", NULL, min=0, width="50%")
+                  # tags$h4("DISCLAIMER: Both HyperTraps and MCCBN may take hours to run")
+                  # )
+                )
+              # )
+            # ),
             ),
             plotOutput("plot")
             ,

@@ -126,13 +126,13 @@ test_that("Transforming back and forth works", {
 })
 
 # test_that("Generate the sorted genoytpes correctly",{
-#     expect_equal(generate_sorted_genotypes(0), c("WT"))
-#     expect_equal(generate_sorted_genotypes(1), c("WT", "A"))
-#     expect_equal(generate_sorted_genotypes(2), c("WT", "A", "B", "A, B"))
-#     expect_equal(generate_sorted_genotypes(2, sep = ""), c("WT", "A", "B", "AB"))
-#     expect_equal(generate_sorted_genotypes(3, sep = ""), c("WT", "A", "B", "C", "AB", "AC", "BC", "ABC"))
-#     expect_error(generate_sorted_genotypes(-1, sep = ""), "Number of genes should be >= 0")
-#     expect_equal(generate_sorted_genotypes(3, sep = "", index.return = TRUE), list(x = c("WT", "A", "B", "C", "AB", "AC", "BC", "ABC")
+#     expect_equal(generate_pD_sorted_genotypes(0), c("WT"))
+#     expect_equal(generate_pD_sorted_genotypes(1), c("WT", "A"))
+#     expect_equal(generate_pD_sorted_genotypes(2), c("WT", "A", "B", "A, B"))
+#     expect_equal(generate_pD_sorted_genotypes(2, sep = ""), c("WT", "A", "B", "AB"))
+#     expect_equal(generate_pD_sorted_genotypes(3, sep = ""), c("WT", "A", "B", "C", "AB", "AC", "BC", "ABC"))
+#     expect_error(generate_pD_sorted_genotypes(-1, sep = ""), "Number of genes should be >= 0")
+#     expect_equal(generate_pD_sorted_genotypes(3, sep = "", index.return = TRUE), list(x = c("WT", "A", "B", "C", "AB", "AC", "BC", "ABC")
 #         , ix = c(0, 1, 2, 4, 3, 5, 6, 7))
 #     )
 
