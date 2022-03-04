@@ -160,11 +160,12 @@ server <- function(input, output, session) {
 
   ## Download csd button
   output$download_csd <- downloadHandler(
-    filename = function() sprintf("%s_csd.RDS", input$select_csd),
+    filename = function() sprintf("%s_csd.csv", input$select_csd),
     content = function(file) {
-      tmp_data <- datasets$all_csd[[input$input2build]][[input$select_csd]]
-      tmp_data$type <- input$input2build
-      saveRDS(tmp_data, file)
+      tmp_data <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data
+      write.csv(tmp_data, file, row.names = FALSE)
+      # tmp_data$type <- input$input2build
+      # saveRDS(tmp_data, file)
     }
   )
 
@@ -362,6 +363,7 @@ server <- function(input, output, session) {
             tags$h3("DAG table"),
             DT::DTOutput("dag_table"),
             numericInput("dag_samples", "Total genotypes to sample", value = default_csd_samples, min= 100, max = 10000, step = 100, width = "50%"),
+            numericInput("dag_noise", "Noise", value = 0.01, min= 0, max = 1, step = 0.01, width = "50%"),
             actionButton("resample_dag", "Sample from DAG")
             )
           }
@@ -377,6 +379,7 @@ server <- function(input, output, session) {
               tags$h3("Thetas table"),
               DT::DTOutput("thetas_table"),
               numericInput("mhn_samples", "Total genotypes to sample", value = default_csd_samples, min= 100, max= 10000, step = 100, width = "50%"),
+              numericInput("mhn_noise", "Noise", value = 0.01, min= 0, max = 1, step = 0.01, width = "50%"),
               actionButton("resample_mhn", "Sample from MHN")
             )
           }
@@ -486,6 +489,7 @@ server <- function(input, output, session) {
     tryCatch({
       tmp_dag_data <- evamtools:::get_dag_data(dag_data()
         , data$dag_parent_set[1:input$gene_number]
+        , noise = input$dag_noise
         , N = input$dag_samples)
       data$csd_freqs <- tmp_dag_data$csd_freqs
       data$data <- tmp_dag_data$data
@@ -548,10 +552,11 @@ server <- function(input, output, session) {
 
   observeEvent(input$resample_mhn, {
     tryCatch({
-      mhn_data <- evamtools:::get_mhn_data(thetas = data$thetas[1:input$gene_number
-                                                  , 1:input$gene_number], 
-                              N = input$mhn_samples)
-      data$csd_freqs <- mhn_data$csdfreqs
+      mhn_data <- evamtools:::get_mhn_data(data$thetas[1:input$gene_number
+                                                  , 1:input$gene_number]
+                                          , noise = input$mhn_noise 
+                                          , N = input$mhn_samples)
+      data$csd_freqs <- mhn_data$csd_freqs
       data$data <- mhn_data$data
       datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- mhn_data$data
       shinyjs::enable("analysis")
@@ -934,7 +939,7 @@ server <- function(input, output, session) {
         checkboxGroupInput(inputId = "cpm2show",
           label = "CPMs to show",
           choices = c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
-          selected = c("CBN", "MHN", "HESBCN")),
+          selected = c("OT", "OncoBN", "CBN", "MHN", "HESBCN")),
 
       tags$div(class = "inline",
         radioButtons(inputId = "data2plot",
