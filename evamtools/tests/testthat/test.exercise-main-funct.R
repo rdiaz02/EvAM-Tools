@@ -10,11 +10,11 @@ test_that("Minimal test: we can run", {
 
 exercise_sample_CPMs <- function(out) {
     samp <- sample_CPMs(out, 1000,
-                                    output = c("sampled_genotype_freqs",
+                                    output = c("sampled_genotype_counts",
                                                "obs_genotype_transitions"))
-    samp2 <- sample_CPMs(out, 1000, output = "sampled_genotype_freqs")
+    samp2 <- sample_CPMs(out, 1000, output = "sampled_genotype_counts")
     se <- paste0(c("CBN", "OT", "OncoBN", "MHN", "HESBCN"),
-                 "_sampled_genotype_freqs")
+                 "_sampled_genotype_counts")
     expect_true(all(vapply(se, function(x) exists(x, samp), TRUE)))
     expect_true(exists("CBN_obs_genotype_transitions", samp))
     expect_true(all(vapply(se, function(x) exists(x, samp2), TRUE)))

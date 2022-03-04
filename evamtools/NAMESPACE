@@ -18,7 +18,7 @@ importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert",
            "write.csv", "tail", "globalVariables")
 importFrom("Matrix", "diag", "rowSums", "colSums", "summary", "Matrix",
            "sparseMatrix", "bandSparse", "t", "tril", "nnzero")
-importFrom("OncoSimulR", "sampledGenotypes", "evalAllGenotypes",
+importFrom("OncoSimulR", "evalAllGenotypes",
            "allFitnessEffects", "rfitness")
 importFrom("stringr", "str_count", "str_replace", "str_split",
            "str_replace_all")

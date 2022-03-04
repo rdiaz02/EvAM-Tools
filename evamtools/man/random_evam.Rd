@@ -87,7 +87,7 @@ rcbn <- random_evam(model = "CBN", ngenes = 5,
 ## genotypes and add observation noise
 sample_mhn <- sample_CPMs(rmhn, N = 1000, obs_noise = 0.05)
 
-## The component sampled_genotype_freqs_as_data is
+## The component sampled_genotype_counts_as_data is
 ## a matrix that you can then pass to evam as the
 ## input data argument (x)
 

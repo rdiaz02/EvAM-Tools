@@ -1,37 +1,60 @@
+## ## Reasons for not using this function:
 
+## ## That it takes a gene_names is questionable:
+## ## gene_names should be extracted from freqs.
+## ## Doing it this way suggests not self-contained and it is unclear
+## ## why not self-contained.
 
-freqs2csd <- function(freqs, gene_names){
-    csd <- NULL
-    if(nrow(freqs) > 0){
-        csd2 <- apply(
-            freqs, 1
-            , function(x){
-                mut <- x[[1]]
-                freq <- as.numeric(x[[2]])
-                genot <- rep(0, length(gene_names))
-                if(mut != "WT"){
-                    mut <-  strsplit(mut, ", ")[[1]]
-                    genot[which(gene_names %in% mut)] <- 1
-                }
-                csd <- matrix(rep(genot, freq), ncol= length(gene_names), byrow = TRUE)
-                return(list(csd))
-            })
+## ## Could errors be introduced if genes not ordered or in numbers that differ from
+## ## expected? I do not know and there are no tests. For example: what would happen
+## ## if freqs had columns A, B, but gene_names was A, D, E? Or if gene_names only
+## ## had A?  One could add checks for that, but since the role of this is to
+## ## produce tabular data, it seems sensible to assume that all the info is in
+## ## freqs. (I tried adding a check but I think it is just simpler to used
+## ## genotypeCounts_to_data).
+
+## ## There is no checking for freqs having specifically named
+## ## columns: it is assumed the first is genotype and the second is
+## ## Counts/Frequency.
+
+## ## Finally: using genotypeCounts_to_data we only output columns
+## ## that have at least one mutation, never columns filled with only 0s.
+## freqs2csd <- function(freqs, gene_names) {
+##     genes_in_freqs <- setdiff(unique(unlist(strsplit(freqs[, 1], ", "))),
+##                               "WT")
+##     stopifnot(isTRUE(all(genes_in_freqs %in% gene_names)))
+    
+##     csd <- NULL
+##     if (nrow(freqs) > 0) {
+##         csd2 <- apply(
+##             freqs, 1,
+##             function(x) {
+##                 mut <- x[[1]]
+##                 freq <- as.numeric(x[[2]])
+##                 genot <- rep(0, length(gene_names))
+##                 if (mut != "WT") {
+##                     mut <-  strsplit(mut, ", ")[[1]]
+##                     genot[which(gene_names %in% mut)] <- 1
+##                 }
+##                 csd <- matrix(rep(genot, freq), ncol = length(gene_names),
+##                               byrow = TRUE)
+##                 return(list(csd))
+##             })
         
-        csd <- csd2[[1]][[1]]
-        if(nrow(freqs) > 1){ 
-            for (i in 2:nrow(freqs)){
-                csd <- rbind(csd, csd2[[i]][[1]])
-            }
-        } 
-        colnames(csd) <- gene_names
-    }
-
-    return(csd)
-}
+##         csd <- csd2[[1]][[1]]
+##         if (nrow(freqs) > 1) {
+##             for (i in 2:nrow(freqs)){
+##                 csd <- rbind(csd, csd2[[i]][[1]])
+##             }
+##         }
+##         colnames(csd) <- gene_names
+##     }
+##     return(csd)
+## }
 
 get_display_freqs <- function(freqs, n_genes, gene_names){
-  if(is.null(freqs)) return(SHINY_DEFAULTS$template_data$csd_freqs)
-  if(nrow(freqs) == 0) return(SHINY_DEFAULTS$template_data$csd_freqs)
+  if(is.null(freqs)) return(SHINY_DEFAULTS$template_data$csd_counts)
+  if(nrow(freqs) == 0) return(SHINY_DEFAULTS$template_data$csd_counts)
   valid_gene_names <- c("WT", gene_names[1:n_genes])
 
   selected_rows <- sapply(freqs$Genotype, function(x){
@@ -43,8 +66,8 @@ get_display_freqs <- function(freqs, n_genes, gene_names){
 }
 
 get_csd <- function(complete_csd){
-    if(is.null(complete_csd)) return(SHINY_DEFAULTS$template_data$csd_freqs)
-    csd <- data.frame(OncoSimulR::sampledGenotypes(complete_csd))
+    if(is.null(complete_csd)) return(SHINY_DEFAULTS$template_data$csd_counts)
+    csd <- data_to_counts(complete_csd, out = "data.frame", omit_0 = TRUE)
     rownames(csd) <- csd$Genotype
     return(csd)
 }
@@ -208,8 +231,13 @@ get_mhn_data <- function(thetas, N = 10000){
                                                        out = "data.frame"
                                                        )
 
+  ## return(list(csdfreqs = tmp_samples_as_df,
+  ##             data = freqs2csd(tmp_samples_as_df, gene_names)))
+
   return(list(csdfreqs = tmp_samples_as_df,
-              data = freqs2csd(tmp_samples_as_df, gene_names)))
+              data = genotypeCounts_to_data(tmp_samples_as_df, e = 0)))
+
+
 }
 
 get_dag_data <- function(data, parent_set, N = 10000){
@@ -239,9 +267,13 @@ get_dag_data <- function(data, parent_set, N = 10000){
   ## Note: no, the above call to genot_probs_2_pD ... does not remove
   ## lines with 0 counts. But we do not want to do that as that is a separate
   ## operation that has to with, maybe, generating the csd.
+
+  ## return(list(csd_counts = tmp_samples_as_df,
+  ##             data = freqs2csd(tmp_samples_as_df, gene_names)))
+  return(list(csd_counts = tmp_samples_as_df,
+              data = genotypeCounts_to_data(tmp_samples_as_df, e = 0)))
+
   
-  return(list(csd_freqs = tmp_samples_as_df,
-              data = freqs2csd(tmp_samples_as_df, gene_names)))
 }
 
 create_tabular_data <- function(data) {
@@ -249,10 +281,10 @@ create_tabular_data <- function(data) {
     attr_to_make_tabular <- c("trans_mat", "trans_rate_mat",
                               "obs_genotype_transitions",
                               "predicted_genotype_freqs",
-                              "sampled_genotype_freqs")
+                              "sampled_genotype_counts")
     tabular_data <- list()
     for (attr in attr_to_make_tabular){
-        if (attr %in% c("sampled_genotype_freqs",
+        if (attr %in% c("sampled_genotype_counts",
                         "predicted_genotype_freqs")) {
         all_counts <- data.frame(Genotype = c(NULL))
 
@@ -454,7 +486,7 @@ standarize_dataset <- function(data){
     colnames(new_data$data) <- new_data$gene_names[1:ncol(new_data$data)]
   }
   
-  new_data$csd_freqs <- get_csd(new_data$data)
+  new_data$csd_counts <- get_csd(new_data$data)
   return(new_data)
 }
 

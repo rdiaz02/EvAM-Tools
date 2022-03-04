@@ -7,7 +7,7 @@ sample_CPMs(cpm_output,  N,
                 methods = c("OT", "OncoBN",
                             "CBN", "MCCBN",
                             "MHN", "HESBCN"),
-                output = c("sampled_genotype_freqs"),
+                output = c("sampled_genotype_counts"),
                 obs_noise = 0,
                 genotype_freqs_as_data = TRUE
 
@@ -21,7 +21,7 @@ sample_CPMs(cpm_output,  N,
 \item{methods}{List of methods that we want to sample}
 
 \item{output}{A vector with one or more of the following possible
-  outputs: sampled_genotype_freqs, obs_genotype_transitions,
+  outputs: sampled_genotype_counts, obs_genotype_transitions,
   state_counts. Even if requested, obs_genotype_transitions and
   state_counts are not available for OT and OncoBN. } 
 
@@ -35,17 +35,17 @@ sample_CPMs(cpm_output,  N,
 \value{
   A list, with a many entries as methods times number of components requested. If all, then for each method among CBN, MCCBN, HESBCN, and MHN:
    \itemize{
-    \item{sampled_genotype_freqs: }{Absolute genotype frequencies,
+    \item{sampled_genotype_counts: }{Counts, or absolute genotype frequencies,
   obtained by sampling from the predicted frequencies. See also
   Description, below}.
     \item{obs_genotype_transitions: }{Number of observed transitions between   genotypes (as a sparse matrix).}
     \item{state_counts: }{Number of times each genotype was visited during the transitions. Column sums of observed transitions are equal to state counts.}
-    \item{sampled_genotype_freqs_as_data: }{The genotypes in a matrix of 0/1. This can directly be passed as an argument for \code{\link{evam}}, as the input data.}
+    \item{sampled_genotype_counts_as_data: }{The genotypes in a matrix of 0/1. This can directly be passed as an argument for \code{\link{evam}}, as the input data.}
   }
   
   Observed genotype transitions are not the way to obtain estimates of transition probabilities. The transition probabilities given by each method are already available from the output of evam itself. These genotype transitions are the observed transitions during the simulation of the sampling process and, thus, have additional noise.
 
-  For OT and OncoBN, only the \code{sampled_genotype_freqs} component is available (the other two are not available).
+  For OT and OncoBN, only the \code{sampled_genotype_counts} component is available (the other two are not available).
   
 }
 
@@ -110,11 +110,11 @@ outS3 <- sample_CPMs(out, N = 1000, methods = c("CBN", "OT", "MHN"),
 
 outS4 <- sample_CPMs(out, N = 1000, methods = c("CBN", "OT", "MHN"), 
                      output = c("obs_genotype_transitions",
-                                "sampled_genotype_freqs"))
+                                "sampled_genotype_counts"))
 
 ## Only CBN,  will simulate sampling from the transition
 ## rate matrix and add observation error to the genotype frequencies. 
 
 outS5 <- sample_CPMs(out, N = 1000, methods = "CBN",
-                     output = c("obs_genotype_transitions", "sampled_genotype_freqs"), obs_noise = 0.1)
+                     output = c("obs_genotype_transitions", "sampled_genotype_counts"), obs_noise = 0.1)
 }

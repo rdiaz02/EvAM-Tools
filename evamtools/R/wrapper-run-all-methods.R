@@ -659,7 +659,7 @@ evam <- function(x,
                      min.freq = 0, max.cols = max_cols)
 
     if(ncol(x) < 2) {
-        warning("Fewer than 2 columns in data set")
+        stop("Fewer than 2 columns in data set")
         return(NA)
     }
     

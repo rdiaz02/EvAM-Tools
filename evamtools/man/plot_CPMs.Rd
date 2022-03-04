@@ -147,7 +147,7 @@ plot_CPMs(out, plot_type = "trans_rate_mat", top_paths=2)
 plot_CPMs(out, plot_type = "trans_rate_mat", top_paths=2
   , label_type ="acquisition")
 
-out_samp <- sample_CPMs(out, 1000, output = c("sampled_genotype_freqs", "obs_genotype_transitions"))
+out_samp <- sample_CPMs(out, 1000, output = c("sampled_genotype_counts", "obs_genotype_transitions"))
 
 plot_CPMs(out, out_samp, plot_type = "obs_genotype_transitions")
 
