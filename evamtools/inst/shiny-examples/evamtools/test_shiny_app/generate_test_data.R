@@ -81,7 +81,7 @@ saveRDS(bad_matrix2save, file="matrix_bad.RDS")
 ## EvAM - output
 methods <- c("OT", "CBN", "MCCBN", "HESBCN", "OncoBN", "MHN")
 and_cpm <- evam(examples_csd$csd$AND$data, methods = methods)
-and_cpm_with_simulations <- sample_CPMs(and_cpm, 10000, methods, c("sampled_genotype_freqs", "obs_genotype_transitions"))
+and_cpm_with_simulations <- sample_CPMs(and_cpm, 10000, methods, c("sampled_genotype_counts", "obs_genotype_transitions"))
 # browser()
 orig_data <- list(data = examples_csd$csd$AND$data, name = "AND_new"
             , type = "csd", gene_names = colnames(examples_csd$csd$AND$data)
@@ -110,7 +110,7 @@ save(sample_evam_output, file = "../../../../data/sample_evam_output.RData")
 # colnames(dB_AND) <- LETTERS[1:3]
 
 # and_cpm <- evam(dB_AND, methods = methods)
-# and_cpm_with_simulations <- sample_CPMs(and_cpm, 10000, methods, c("sampled_genotype_freqs", "obs_genotype_transitions"))
+# and_cpm_with_simulations <- sample_CPMs(and_cpm, 10000, methods, c("sampled_genotype_counts", "obs_genotype_transitions"))
 # orig_data <- list(data = examples_csd$csd$AND$data, name = "AND_new"
 #             , type = "csd", gene_names = colnames(examples_csd$csd$AND$data)
 #             , thetas = NULL, lambdas = NULL

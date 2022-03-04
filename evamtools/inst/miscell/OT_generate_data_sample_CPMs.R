@@ -13,17 +13,17 @@ ov.tree <- oncotree.fit(ov.cgh)
 
 d1 <- generate.data(1e4, ov.tree, with.errors = TRUE, method = "D1",
                     edge.weights = "estimated")
-d1t <- evamtools:::data_to_counts(d1)
+d1t <- evamtools:::data_to_counts(d1, out = "vector")
 d1tp <- d1t/nrow(d1)
 
 d2 <- generate.data(1e4, ov.tree, with.errors = TRUE, method = "D2",
                     edge.weights = "observed")
-d2t <- evamtools:::data_to_counts(d2)
+d2t <- evamtools:::data_to_counts(d2, out = "vector")
 d2tp <- d2t/nrow(d1)
 
 d3 <- generate.data(3e5, ov.tree, with.errors = TRUE, method = "D2",
                     edge.weights = "estimated")
-d3t <- evamtools:::data_to_counts(d3)
+d3t <- evamtools:::data_to_counts(d3, out = "vector")
 d3tp <- d3t/nrow(d1)
 
 chisq.test(cbind(d1t, d2t), simulate.p.value = TRUE) ## different
@@ -70,7 +70,8 @@ compare_sample_generate <- function(ot_oncobn_epos, obs_noise,
                                with.errors = TRUE, method = "D1",
                                edge.weights = "estimated")
     f_gd_otfit0 <-
-        evamtools:::reorder_to_pD(evamtools:::data_to_counts(gd_otfit0))
+        evamtools:::reorder_to_pD(evamtools:::data_to_counts(gd_otfit0,
+                                                             out = "vector"))
 
     
     ## Compare them
@@ -137,9 +138,11 @@ dot_noise_gd_2 <- function(of, N = 1e4) {
     noised_sample_odf2 <- evamtools:::add_noise(as.matrix(sample_odf2),
                                                 properr = of$eps[["eneg"]])
     freq_sample_odf2 <-
-        evamtools:::reorder_to_pD(evamtools:::data_to_counts(sample_odf2))
+        evamtools:::reorder_to_pD(evamtools:::data_to_counts(sample_odf2,
+                                                             out = "vector"))
     freq_noised_sample_odf2 <-
-        evamtools:::reorder_to_pD(evamtools:::data_to_counts(noised_sample_odf2))
+        evamtools:::reorder_to_pD(evamtools:::data_to_counts(noised_sample_odf2,
+                                                             out = "vector"))
 
     ## generate.data via D1 on modified object
     of3 <- of
@@ -152,7 +155,8 @@ dot_noise_gd_2 <- function(of, N = 1e4) {
                             edge.weights = "estimated")
 
     freq_gd_of3 <-
-        evamtools:::reorder_to_pD(evamtools:::data_to_counts(gd_of3))
+        evamtools:::reorder_to_pD(evamtools:::data_to_counts(gd_of3,
+                                                             out = "vector"))
     stopifnot(identical(names(freq_noised_sample_odf2),
                         names(freq_gd_of3)))
 
@@ -178,13 +182,15 @@ dot_noise_gd_2 <- function(of, N = 1e4) {
     
     ran.data2 <- evamtools:::add_noise(as.matrix(ran.data0), ee)
 
-    dxt <- evamtools:::reorder_to_pD(evamtools:::data_to_counts(ran.data))
+    dxt <- evamtools:::reorder_to_pD(evamtools:::data_to_counts(ran.data,
+                                                                out = "vector"))
 
 
     ## This is almost the same as freq_noised_sample_odf2 ,
     ## we redo sampling and add noise
     ## But even more similar to dxt, since it shares sampling with dxt
-    dr2 <- evamtools:::reorder_to_pD(evamtools:::data_to_counts(ran.data2))
+    dr2 <- evamtools:::reorder_to_pD(evamtools:::data_to_counts(ran.data2,
+                                                                out = "vector"))
 
     mycbind <- function(x, y) {
         x1 <- cbind(x, y)
@@ -268,7 +274,8 @@ dot_noise_gd_4 <- function(of, N = 1e4, prop = 0.5) {
                           with.errors = TRUE, method = "D1",
                           edge.weights = "estimated")
     freq_oogd <-
-        evamtools:::reorder_to_pD(evamtools:::data_to_counts(oogd))
+        evamtools:::reorder_to_pD(evamtools:::data_to_counts(oogd,
+                                                             out = "vector"))
 
     ## Change epos and eneg and sample with asymmetrical noise
     of3 <- of
@@ -303,7 +310,8 @@ dot_noise_gd_4 <- function(of, N = 1e4, prop = 0.5) {
         ncol = ncol(ran.data0),
         dimnames = dimnames(ran.data0))
 
-    dxt <- evamtools:::reorder_to_pD(evamtools:::data_to_counts(ran.data))
+    dxt <- evamtools:::reorder_to_pD(evamtools:::data_to_counts(ran.data,
+                                                                out = "vector"))
 
     mycbind <- function(x, y) {
         x1 <- cbind(x, y)
@@ -353,7 +361,8 @@ dot_noise_gd_3 <- function(of, N = 1e4) {
                           with.errors = TRUE, method = "D1",
                           edge.weights = "estimated")
     freq_oogd <-
-        evamtools:::reorder_to_pD(evamtools:::data_to_counts(oogd))
+        evamtools:::reorder_to_pD(evamtools:::data_to_counts(oogd,
+                                                             out = "vector"))
     
     browser()
     ## Change epos and eneg and sample with symmetrical noise
@@ -372,7 +381,8 @@ dot_noise_gd_3 <- function(of, N = 1e4) {
     noised_sample_odf2 <- evamtools:::add_noise(as.matrix(sample_odf2),
                                                 properr = of$eps[["eneg"]])
     freq_noised_sample_odf2 <-
-        evamtools:::reorder_to_pD(evamtools:::data_to_counts(noised_sample_odf2))
+        evamtools:::reorder_to_pD(evamtools:::data_to_counts(noised_sample_odf2,
+                                                             out = "vector"))
     
     mycbind <- function(x, y) {
         x1 <- cbind(x, y)

@@ -516,7 +516,9 @@ user_input <- function() {
             tags$h3("Input to build"),
             tagList(
               radioButtons(inputId = "input2build", label = "", 
-                choiceNames = c("Cross sectional data", "DAG builder", "Matrix Builder"),
+                           choiceNames = c("Cross sectional data",
+                                           "DAG builder",
+                                           "MHN matrix builder"),
                 choiceValues = c("csd", "dag", "matrix"),
                 selected = "csd"
               )
@@ -540,7 +542,7 @@ user_input <- function() {
             tags$div(class = "frame",
               uiOutput("define_genotype"),
             ),
-            uiOutput("change_freqs"),
+            uiOutput("change_counts"),
 
             tags$div(class = "frame",
                      tags$h3("Upload your own data"),

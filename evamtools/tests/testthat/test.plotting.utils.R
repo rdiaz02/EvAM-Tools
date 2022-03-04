@@ -63,7 +63,7 @@ test_that("Processing samples & Plotting of CPMs is correct", {
       expect_equal(model_probabilities[[i]], sample_evam_output[[paste0(model, "_", i)]]) 
     }
 
-    for(i in c("sampled_genotype_freqs")){
+    for(i in c("sampled_genotype_counts")){
       expect_equal(model_trm[[i]], samples[[paste0(model, "_", i)]]) 
       expect_equal(model_transitions[[i]], samples[[paste0(model, "_", i)]]) 
       expect_equal(model_probabilities[[i]], samples[[paste0(model, "_", i)]]) 
@@ -80,7 +80,7 @@ test_that("how it handles processing missing data", {
   expect_equal(out$data2plot, NA)
   expect_equal(out$predicted_genotype_freqs, NA)
   expect_equal(out$parent_set, NA)
-  expect_equal(out$sampled_genotype_freqs, NULL)
+  expect_equal(out$sampled_genotype_counts, NULL)
   expect_equal(out$edges, NA)
   
   out <- process_data(sample_evam_output, "MCCBN", "trans_mat", NULL)
@@ -88,7 +88,7 @@ test_that("how it handles processing missing data", {
   expect_equal(out$data2plot, NA)
   expect_equal(out$predicted_genotype_freqs, NA)
   expect_equal(out$parent_set, NULL)
-  expect_equal(out$sampled_genotype_freqs, NULL)
+  expect_equal(out$sampled_genotype_counts, NULL)
   expect_equal(out$edges, NA)
 })
 
