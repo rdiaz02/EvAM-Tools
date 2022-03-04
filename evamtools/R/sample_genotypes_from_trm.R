@@ -1040,6 +1040,13 @@ OT_model_2_output <- function(model, epos) {
 }
 
 OT_model_2_predict_genots <- function(model, epos) {
+    ## Minimal checks, to stop if called incorrectly
+    ## such as from shiny app
+    if ("Relation" %in% colnames(model))
+        stop("OT does not take a Relation column")
+    if (any(table(model$To) > 1))
+        stop("In OT models each gene has at most one parent.")
+    
     ## Obtain the adjacency matrix and ensure adjacency matrix
     ## and weights have genes in same order
     adjm <- igraph::as_adjacency_matrix(
@@ -1214,6 +1221,14 @@ OncoBN_model_2_predict_genots <- function(model, epsilon) {
     ## We need components: graph, theta, model, epsilon
     ## edgelist and score not added.
 
+    ## Minimal checks, to stop if called incorrectly
+    ## such as from shiny app
+    if (any(model$Relation == "XOR"))
+        stop("OncoBN does not accept XOR relations.")
+    if (sum(c("OR", "AND") %in% model$Relation ) > 1)
+        stop("OncoBN does not accept, in the same model, ",
+             "both AND and OR relations")
+    
     obnfit <- list()
     ## In OncoBN what we call Root is called WT
     model$From[model$From == "Root"] <- "WT"
