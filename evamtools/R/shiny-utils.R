@@ -194,38 +194,48 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, da
   return(list(lambdas = tmp_lambdas, parent_set = tmp_parent_set))
 }
 
-get_mhn_data <- function(thetas, N = 10000){
+get_mhn_data <- function(thetas, noise = 0, N = 10000){
   if (any(is.null(thetas))) stop("Thetas should be defined")
   n_genes <- ncol(thetas)
   gene_names <- colnames(thetas)
 
   mhn_trm <- MHN_from_thetas(thetas)$MHN_trans_rate_mat
   mhn_probs <- probs_from_trm(mhn_trm)
-  tmp_samples_as_df <- genot_probs_2_pD_ordered_sample(x = mhn_probs,
+  tmp_samples_as_vector <- genot_probs_2_pD_ordered_sample(x = mhn_probs,
                                                        ngenes = n_genes,
                                                        gene_names = gene_names,
                                                        N = N,
-                                                       out = "data.frame"
+                                                       out = "vector"
                                                        )
-
-  return(list(csdfreqs = tmp_samples_as_df,
-              data = freqs2csd(tmp_samples_as_df, gene_names)))
+  data_with_noise <- genotypeCounts_to_data(tmp_samples_as_vector,
+    e = noise)
+  data_as_vector <- data_to_counts(data_with_noise)
+  csd_freqs <- data.frame(Genotype = names(data_as_vector),
+                          Counts = data_as_vector)
+  rownames(csd_freqs) <- names(data_as_vector)
+  return(list(csd_freqs = csd_freqs,
+              data = data_with_noise))
 }
 
-get_dag_data <- function(data, parent_set, N = 10000){
+get_dag_data <- function(data, parent_set, noise = 0, N = 10000){
   if (any(is.null(data))) stop("Data should be defined")
   gene_names <- names(parent_set)
   n_genes <- length(parent_set)
 
   dag_trm <- HESBCN_model_2_output(data, parent_set)$HESBCN_trans_rate_mat
-  browser()
   dag_probs <- probs_from_trm(dag_trm)
-  tmp_samples_as_df <- genot_probs_2_pD_ordered_sample(x = dag_probs,
+  tmp_samples_as_vector <- genot_probs_2_pD_ordered_sample(x = dag_probs,
                                                        ngenes = n_genes,
                                                        gene_names = gene_names,
                                                        N = N,
-                                                       out = "data.frame"
+                                                       out = "vector"
                                                        )
+  data_with_noise <- genotypeCounts_to_data(tmp_samples_as_vector,
+    e = noise)
+  data_as_vector <- data_to_counts(data_with_noise)
+  csd_freqs <- data.frame(Genotype = names(data_as_vector),
+                          Counts = data_as_vector)
+  rownames(csd_freqs) <- names(data_as_vector)
   ## ## FIXME: aqui. To rm later
   ## tmp_genotypes_sampled <- sample_to_pD_order(
   ##               sample(names(dag_probs), size = N,
@@ -240,8 +250,8 @@ get_dag_data <- function(data, parent_set, N = 10000){
   ## lines with 0 counts. But we do not want to do that as that is a separate
   ## operation that has to with, maybe, generating the csd.
   
-  return(list(csd_freqs = tmp_samples_as_df,
-              data = freqs2csd(tmp_samples_as_df, gene_names)))
+  return(list(csd_freqs = csd_freqs,
+              data = data_with_noise))
 }
 
 create_tabular_data <- function(data) {
