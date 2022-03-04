@@ -899,8 +899,8 @@ server <- function(input, output, session) {
           output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
             pl <- evamtools:::plot_genot_fg(method_data$data2plot,
                       observations = tmp_data$analyzed_data, # We use it to define "Observed" and "Not Observed" genotypes
-                      predicted_genotypes = method_data$predicted_genotype_freqs, # To compute node sizes if sampled_freqs is NULL
-                      sampled_freqs = method_data$sampled_genotype_counts,
+                      predicted_genotypes = method_data$predicted_genotype_freqs, # To compute node sizes if sampled_counts is NULL
+                      sampled_counts = method_data$sampled_genotype_counts,
                       top_paths = input$freq2label,
                       label_type = input$label2plot,
                       plot_type = selected_plot_type)
@@ -953,7 +953,7 @@ server <- function(input, output, session) {
         checkboxGroupInput(inputId = "cpm2show",
           label = "CPMs to show",
           choices = c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
-          selected = c("CBN", "MHN", "HESBCN")),
+          selected = c("OT", "OncoBN", "CBN", "MHN", "HESBCN")),
 
       tags$div(class = "inline",
         radioButtons(inputId = "data2plot",

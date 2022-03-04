@@ -239,7 +239,7 @@ compute_matrix_from_top_paths <- function(graph
 plot_genot_fg <- function(trans_mat
     , observations = NULL
     , predicted_genotypes = NULL
-    , sampled_freqs = NULL
+    , sampled_counts = NULL
     , top_paths = NULL
     , freq2label = NULL
     , max_edge = NULL
@@ -267,16 +267,16 @@ plot_genot_fg <- function(trans_mat
     
     if (!is.null(observations)){
         observations <- data_to_counts(observations, out = "data.frame", omit_0 = TRUE)
-        observations$Abs_Freq <- observations$Counts / sum(observations$Counts)
+        observations$Rel_Freq <- observations$Counts / sum(observations$Counts)
         observations$Genotype <- str_replace_all(observations$Genotype, ", ", ",")
     }
 
-    if (!is.null(sampled_freqs)){
-        sampled_freqs <- as.data.frame(sampled_freqs)
-        colnames(sampled_freqs) <- c("Counts")
-        sampled_freqs$Genotype <- str_replace_all(rownames(sampled_freqs), ", ", ",")
-        rownames(sampled_freqs) <- sampled_freqs$Genotype
-        sampled_freqs$Abs_Freq <- sampled_freqs$Counts / sum(sampled_freqs$Counts)
+    if (!is.null(sampled_counts)){
+        sampled_counts <- as.data.frame(sampled_counts)
+        colnames(sampled_counts) <- c("Counts")
+        sampled_counts$Genotype <- str_replace_all(rownames(sampled_counts), ", ", ",")
+        rownames(sampled_counts) <- sampled_counts$Genotype
+        sampled_counts$Rel_Freq <- sampled_counts$Counts / sum(sampled_counts$Counts)
     }
     ## Layout
     lyt <- cpm_layout(graph)
@@ -297,7 +297,7 @@ plot_genot_fg <- function(trans_mat
     } else {
         vertex_labels <- vapply(igraph::V(graph)$name,
             function(x){
-                if (sampled_freqs[x, ]$Abs_Freq >= freq2label) return(x)
+                if (sampled_counts[x, ]$Rel_Freq >= freq2label) return(x)
                 else return("")
             },
             character(1))
@@ -332,11 +332,11 @@ plot_genot_fg <- function(trans_mat
     if(fixed_vertex_size){
         node_sizes <- vapply(igraph::V(graph)$name, 
         function(gen) min_size, numeric(1.0))
-    } else if(!is.null(sampled_freqs)){
+    } else if(!is.null(sampled_counts)){
         node_sizes <- vapply(igraph::V(graph)$name, 
             function(gen){
-                if (sum(match(sampled_freqs$Genotype, gen, nomatch = 0)) == 1)
-                    return(sampled_freqs$Abs_Freq[which(sampled_freqs$Genotype == gen)])
+                if (sum(match(sampled_counts$Genotype, gen, nomatch = 0)) == 1)
+                    return(sampled_counts$Rel_Freq[which(sampled_counts$Genotype == gen)])
                 else 
                     return(min_size)
             }, numeric(1.0))
@@ -344,14 +344,14 @@ plot_genot_fg <- function(trans_mat
         node_sizes <- vapply(igraph::V(graph)$name, 
             function(gen){
                 if (sum(match(observations$Genotype, gen, nomatch = 0)) == 1)
-                    return(observations$Abs_Freq[which(observations$Genotype == gen)])
+                    return(observations$Rel_Freq[which(observations$Genotype == gen)])
                 else 
                     return(0.001)
             }, numeric(1.0))
         # node_sizes <- vapply(igraph::V(graph)$name, 
         #     function(gen) predicted_genotypes[gen], 1) 
             #     if (sum(match(predicted_genotypes$Genotype, gen, nomatch = 0)) == 1) # Observed
-            #         return(predicted_genotypes$Abs_Freq[which(predicted_genotypes$Genotype == gen)])
+            #         return(predicted_genotypes$Rel_Freq[which(predicted_genotypes$Genotype == gen)])
             #     else # Not Observed
             #         return(0)
             # }, numeric(1.0))
@@ -790,9 +790,9 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
             plot_genot_fg(method_data2plot$data2plot,
                           ## We use it to define "Observed" and "Not Observed" genotypes
                           observations = cpm_output$analyzed_data,
-                          ## To compute node sizes if sampled_freqs is NULL
+                          ## To compute node sizes if sampled_counts is NULL
                           predicted_genotypes = method_data2plot$predicted_genotype_freqs, 
-                          sampled_freqs = method_data2plot$sampled_genotype_counts,
+                          sampled_counts = method_data2plot$sampled_genotype_counts,
                           top_paths = top_paths,
                           label_type = label_type,
                           fixed_vertex_size = fixed_vertex_size,
