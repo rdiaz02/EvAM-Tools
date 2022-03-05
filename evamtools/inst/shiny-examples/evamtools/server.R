@@ -564,7 +564,7 @@ server <- function(input, output, session) {
                                                   , 1:input$gene_number]
                                           , noise = input$mhn_noise 
                                           , N = input$mhn_samples)
-      data$csd_freqs <- mhn_data$csd_freqs
+      data$csd_counts <- mhn_data$csd_counts
       data$data <- mhn_data$data
       datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- mhn_data$data
       shinyjs::enable("analysis")

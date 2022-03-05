@@ -232,11 +232,10 @@ get_mhn_data <- function(thetas, noise = 0, N = 10000){
                                                        )
   data_with_noise <- genotypeCounts_to_data(tmp_samples_as_vector,
     e = noise)
-  data_as_vector <- data_to_counts(data_with_noise)
-  csd_freqs <- data.frame(Genotype = names(data_as_vector),
-                          Counts = data_as_vector)
-  rownames(csd_freqs) <- names(data_as_vector)
-  return(list(csd_freqs = csd_freqs,
+  # data_as_vector <- data_to_counts(data_with_noise, out="data.frame")
+  csd_counts <- data_to_counts(data_with_noise, out="data.frame")
+  # rownames(csd_counts) <- names(data_as_vector)
+  return(list(csd_counts = csd_counts,
               data = data_with_noise))
   # return(list(csdfreqs = tmp_samples_as_df,
   #             data = genotypeCounts_to_data(tmp_samples_as_df, e = 0)))
@@ -257,10 +256,10 @@ get_dag_data <- function(data, parent_set, noise = 0, N = 10000){
                                                        )
   data_with_noise <- genotypeCounts_to_data(tmp_samples_as_vector,
     e = noise)
-  data_as_vector <- data_to_counts(data_with_noise)
-  csd_freqs <- data.frame(Genotype = names(data_as_vector),
-                          Counts = data_as_vector)
-  rownames(csd_freqs) <- names(data_as_vector)
+  csd_counts <- data_to_counts(data_with_noise, out="data.frame")
+  # csd_counts <- data.frame(Genotype = names(data_as_vector),
+                          # Counts = data_as_vector)
+  # rownames(csd_counts) <- names(data_as_vector)
   ## ## FIXME: aqui. To rm later
   ## tmp_genotypes_sampled <- sample_to_pD_order(
   ##               sample(names(dag_probs), size = N,
@@ -280,7 +279,7 @@ get_dag_data <- function(data, parent_set, noise = 0, N = 10000){
   # return(list(csd_counts = tmp_samples_as_df,
   #             data = genotypeCounts_to_data(tmp_samples_as_df, e = 0)))
   
-  return(list(csd_freqs = csd_freqs,
+  return(list(csd_counts = csd_counts,
               data = data_with_noise))
 }
 
