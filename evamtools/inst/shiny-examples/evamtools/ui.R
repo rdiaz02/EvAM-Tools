@@ -1,3 +1,5 @@
+## Copyright 2022 Pablo Herrera Nieto, Ramon Diaz-Uriarte
+
 cpm_info <- function(){
   tags$div(id = "background",
     tags$head(
@@ -508,18 +510,19 @@ user_input <- function() {
         ") # end HTML
       ) # end tags$style
     ),
-    column(width=12,
+    column(width = 12,
       
-      sidebarLayout(
+           sidebarLayout(
         column(width = 1,
-          tags$div(
+               tags$div(
             tags$h3("Input to build"),
             tagList(
                 radioButtons(inputId = "input2build", label = "",
-                             choiceNames = c("Cross sectional\n data)",
-                                             "DAG and \n rates/probs.",
-                                             "MHN thetas"),
-                             choiceValues = c("csd", "dag", "matrix"),
+                             choiceNames = list(
+                                 HTML("Cross-sectional <br> data"),
+                                 HTML("DAG and <br> rates/probs."),
+                                 "MHN thetas"),
+                             choiceValues = list("csd", "dag", "matrix"),
                 selected = "csd"
               )
             ),
@@ -530,13 +533,17 @@ user_input <- function() {
         ),
 
         column(width = 11,
-          titlePanel("Cross sectional data input"),
+          titlePanel(HTML("&ensp; Cross-sectional data input")),
           column(width = 6,
               column(width = 12,
             tags$div(class = "frame",
                 tags$div(class = "flex",
-                    tags$h3("1. Set the number of genes"),
+                         tags$h3("1. Set the number of genes"),
+                         tags$h5("(Using 7 or more genes can lead ",
+                                 "to very long execution times for some methods ",
+                                 "and crowded figures.)"),
                     actionButton("change_gene_names", "Change gene names")
+                    
                   ),
                 uiOutput("genes_number")),
             tags$div(class = "frame",
@@ -585,47 +592,72 @@ user_input <- function() {
               actionButton("analysis", "Run evamtools!")
             ),
             tags$div(class = "download_button",
-              actionButton("advanced_options", "Advanced Options")
+              actionButton("advanced_options", "Advanced options")
             ),
             tags$div(id="all_advanced_options", 
-              # title = tags$h3("Advanced options"),
-              # tags$div(
-                tags$h4("Run additional CPMs"),
-                checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("MCCBN"), choiceValues = c("MCCBN")),
-                tags$h4("DISCLAIMER: MCCBN may take hours to run"),
-                tags$hr(),
-                tags$div(class="inlin",
-                tags$h4("Sampling options"),
-                selectInput("do_sampling", "Run samples: ", c("True" = TRUE, 
-                  "False" = FALSE), selected = FALSE),
-                numericInput("num_steps", "Sampling steps", SHINY_DEFAULTS$cpm_samples
-                  , min = 0, max = 100000, step = 100, width="100%"),
-                numericInput("sample_noise", "Sampling noise", 0
-                  , min = 0, max = 1, step = 0.1, width="100%"),
+                     ## title = tags$h3("Advanced options"),
+                     tags$h4("(See additional details for all options ",
+                             "in the help of the evam function)"),
+                     tags$hr(style="border-color: darkgrey;"),
+                     numericInput("sample_size", "Number of samples",
+                                  SHINY_DEFAULTS$cpm_samples
+                                , min = 0, max = 100000, step = 100,
+                                  width = "100%"),
+                     tags$h5("Number of genotypes to generate ",
+                             "when generating a sample of genotypes ",
+                             "according to the predicted frequencies of ",
+                             "from model."),                     
+                numericInput("sample_noise", "Observation noise", 0
+                           , min = 0, max = 1, step = 0.1, width="100%"),
+                tags$h5("If > 0, the proportion of observations ",
+                        "in the sampled matrix with error ",
+                        "(for instance, genotyping error). ",
+                        "This proportion of observations will have 0s flipped ",
+                        "to 1s, and 1s flipped to 0s."),                     
+                
+                 tags$hr(style="border-color: darkgrey;"),
                 # checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("HyperTRAPS", "MCCBN"), choiceValues = c("hypertraps", "mccbn")),
-                tags$hr(),
+                checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("MCCBN"), choiceValues = c("MCCBN")),
+                tags$h5("Beware: MCCBN may take hours to run"),
+                tags$hr(style="border-color: darkgrey;"),
+                tags$div(class="inlin",
                 tags$h4("MHN options"),
                 numericInput("MHN_lambda", "Lambdas: ", NULL, min=0),
-                tags$hr(),
+                tags$h5("Penalty term; default: 1/number of rows of data set. ",
+                        "(Do not enter anything, unless you want to a value ",
+                        "different from the default)."),
+                tags$hr(style="border-color: darkgrey;"),
                 tags$h4("OT options"),
                 selectInput("OT_with_error", "Return errors: ", c("True" = TRUE, 
                   "False" = FALSE), selected = "True"),
                 tags$h5("For large models this may take quite some time"),
-                tags$hr(),
+                tags$hr(style="border-color: darkgrey;"),
                 tags$h4("CBN options"),
                 selectInput("CBN_init_poset", "Initial poset: ", c("OT" = "OT", "Linear" = "linear"), selected="OT"),
-                tags$hr(),
+                tags$hr(style="border-color: darkgrey;"),
                 tags$h4("HESBCN options"),
                 numericInput("HESBCN_steps", "Steps: ", 100000, min=100, max=10000000),
                 numericInput("HESBCN_seed", "Seed: ", NULL, min=0),
                 selectInput("HESBCN_reg", "Regularization: ", c("BIC" = "bic", "AIC" = "aic", "Loglik" = "loglik"), selected = "BIC"),
-                tags$hr(),
+                tags$hr(style="border-color: darkgrey;"),
                 tags$h4("OncoBN options"),
-                selectInput("OncoBN_model", "Model: ", c("Conjunctive" = "CBN", "Disjunctive" = "DBN"), selected = "Disjunctive"),
-                selectInput("OncoBN_algorithm", "Algorithm: ", c("Dynamic programming" = "DP", "Genetic algorithm" = "GA"), selected = "Dynamic programming"),
-                numericInput("OncoBN_k", "In-degree bound on the estimated network: ", 3, min=0),
-                numericInput("OncoBN_epsilon", "Penalty: ", NULL, min=0),
-                tags$hr(),
+                selectInput("OncoBN_model", "Model: ",
+                            c("Conjunctive (CBN)" = "CBN",
+                              "Disjunctive (DBN)" = "DBN"), selected = "Disjunctive"),
+                selectInput("OncoBN_algorithm", "Algorithm: ",
+                            c("Dynamic programming (DP)" = "DP",
+                              "Genetic algorithm (GA)" = "GA"),
+                            selected = "Dynamic programming"),
+                numericInput("OncoBN_k",
+                             "k: In-degree bound on the estimated network: ",
+                             3, min = 0),
+                numericInput("OncoBN_epsilon", "Epsilon: ", NULL, min=0),
+                tags$h5("Penalty term for mutations not conformig ",
+                        "to estimated network.",
+                        "Default is min(colMeans(data)/2). ",
+                        "(Do not enter anything, unless you want to a value ",
+                        "different from the default)."),
+                tags$hr(style="border-color: darkgrey;"),
                   tags$h4("MCCBN options"),
                   selectInput("MCCBN_model", "Model: ", c("OT-CBN" = "OT-CBN", "H-CBN2" = "H-CBN2"), selected = "OT-CBN"),
                   numericInput("MCCBN_L", "Number of samples to be drawn from the proposal in the E-step: ", 100, min=0),
@@ -661,7 +693,7 @@ user_input <- function() {
 }
 ui <- 
   navbarPage( 
-    "Evamtools",
+    "", ## "Evamtools",
     id = "navbar",
     header = tags$head(
       tags$style(

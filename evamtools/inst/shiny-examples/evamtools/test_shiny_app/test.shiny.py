@@ -152,7 +152,7 @@ class evamtools_basics(unittest.TestCase):
     def _set_advanced_options(self, samples = 100, mccbn = False):
         self.driver.find_element_by_css_selector("#advanced_options").click()
         
-        samples_input = self.driver.find_element_by_css_selector("#num_steps")
+        samples_input = self.driver.find_element_by_css_selector("#sample_size")
         samples_input.clear()
         samples_input.send_keys(samples)
 

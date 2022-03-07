@@ -1,51 +1,55 @@
 ## This generates data/all_csd_examples.RData
 
+
 dB_linear <- matrix(
   c(
     rep(c(1, 0, 0, 0), 100) #A
-    , rep(c(1, 1, 0, 0), 100) #AB
-    , rep(c(1, 1, 1, 0), 100) #ABC
-    , rep(c(1, 1, 1, 1), 100) #ABCD
-    , rep(c(0, 0, 0, 0), 10) #WT
+    , rep(c(1, 1, 0, 0), 105) #AB
+    , rep(c(1, 1, 1, 0), 92) #ABC
+    , rep(c(1, 1, 1, 1), 113) #ABCD
+    , rep(c(0, 0, 0, 0), 7) #WT
   ), ncol = 4, byrow = TRUE
 )
 colnames(dB_linear) <- LETTERS[1:4]
 
+## Add noise randomly in all the rest. Fix seed anyway
+set.seed(22)
+
 dB_AND <- matrix(
   c(
-    rep(c(1, 0, 0, 0), 200) #A
-    , rep(c(1, 0, 1, 0), 100) #AC
-    , rep(c(1, 1, 0, 0), 100) #AB
-    , rep(c(1, 1, 1, 0), 50) #ABC
-    , rep(c(1, 1, 1, 1), 10) #ABCD
-    , rep(c(0, 0, 0, 0), 10) #WT
+    rep(c(1, 0, 0, 0), round(200 * runif(1, 0.8, 1.2))) #A
+    , rep(c(1, 0, 1, 0), round(100 * runif(1, 0.8, 1.2))) #AC
+    , rep(c(1, 1, 0, 0), round(100 * runif(1, 0.8, 1.2))) #AB
+    , rep(c(1, 1, 1, 0), round(50 * runif(1, 0.8, 1.2))) #ABC
+    , rep(c(1, 1, 1, 1), round(10 * runif(1, 0.8, 1.2))) #ABCD
+    , rep(c(0, 0, 0, 0), round(10 * runif(1, 0.8, 1.2))) #WT
   ), ncol = 4, byrow = TRUE
 )
 colnames(dB_AND) <- LETTERS[1:4]
 
 dB_OR <- matrix(
   c(
-    rep(c(1, 0, 0, 0), 400) #A
-    , rep(c(1, 0, 1, 0), 200) #AC
-    , rep(c(1, 1, 0, 0), 200) #AB
-    , rep(c(1, 1, 1, 0), 100) #ABC
-    , rep(c(1, 1, 0, 1), 150) #ABD
-    , rep(c(1, 0, 1, 1), 150) #ACD
-    , rep(c(1, 1, 1, 1), 50) #ABCD
-    , rep(c(0, 0, 0, 0), 10) #WT
+    rep(c(1, 0, 0, 0), round(400 * runif(1, 0.8, 1.2))) #A
+    , rep(c(1, 0, 1, 0), round(200 * runif(1, 0.8, 1.2))) #AC
+    , rep(c(1, 1, 0, 0), round(200 * runif(1, 0.8, 1.2))) #AB
+    , rep(c(1, 1, 1, 0), round(100 * runif(1, 0.8, 1.2))) #ABC
+    , rep(c(1, 1, 0, 1), round(150 * runif(1, 0.8, 1.2))) #ABD
+    , rep(c(1, 0, 1, 1), round(150 * runif(1, 0.8, 1.2))) #ACD
+    , rep(c(1, 1, 1, 1), round(50 * runif(1, 0.8, 1.2))) #ABCD
+    , rep(c(0, 0, 0, 0), round(10 * runif(1, 0.8, 1.2))) #WT
   ), ncol = 4, byrow = TRUE
 )
 colnames(dB_OR) <- LETTERS[1:4]
 
 dB_XOR <- matrix(
   c(
-    rep(c(1, 0, 0, 0), 400) #A
-    , rep(c(1, 1, 0, 0), 300) #AB
-    , rep(c(1, 0, 1, 0), 300) #AC
-    , rep(c(1, 1, 1, 0), 200) #ABC
-    , rep(c(1, 1, 0, 1), 100) #ABD
-    , rep(c(1, 0, 1, 1), 100) #ACD
-    , rep(c(0, 0, 0, 0), 10) #WT
+    rep(c(1, 0, 0, 0), round(400 * runif(1, 0.8, 1.2))) #A
+    , rep(c(1, 1, 0, 0), round(300 * runif(1, 0.8, 1.2))) #AB
+    , rep(c(1, 0, 1, 0), round(300 * runif(1, 0.8, 1.2))) #AC
+    , rep(c(1, 1, 1, 0), round(200 * runif(1, 0.8, 1.2))) #ABC
+    , rep(c(1, 1, 0, 1), round(100 * runif(1, 0.8, 1.2))) #ABD
+    , rep(c(1, 0, 1, 1), round(100 * runif(1, 0.8, 1.2))) #ACD
+    , rep(c(0, 0, 0, 0), round(10 * runif(1, 0.8, 1.2))) #WT
   ), ncol = 4, byrow = TRUE
 )
 colnames(dB_XOR) <- LETTERS[1:4]
@@ -53,18 +57,18 @@ colnames(dB_XOR) <- LETTERS[1:4]
 # A --> B ; C --> D; B XOR D for E 
 dB_c1 <- matrix(
   c(
-      rep(c(1, 0, 0, 0, 0), 300) #A
-    , rep(c(0, 0, 1, 0, 0), 300) #C
-    , rep(c(1, 1, 0, 0, 0), 200) #AB
-    , rep(c(0, 0, 1, 1, 0), 200) #CD
-    , rep(c(1, 1, 1, 0, 0), 100) #ABC
-    , rep(c(1, 0, 1, 1, 0), 100) #ACD
-    , rep(c(1, 1, 0, 0, 1), 100) #ABE
-    , rep(c(0, 0, 1, 1, 1), 100) #CDE
-    , rep(c(1, 1, 1, 0, 1), 100) #ABCE
-    , rep(c(1, 0, 1, 1, 1), 100) #ACDE
-    , rep(c(1, 1, 1, 1, 0), 50) # ABCD
-    , rep(c(0, 0, 0, 0, 0), 10) # WT
+      rep(c(1, 0, 0, 0, 0), round(300 * runif(1, 0.8, 1.2))) #A
+    , rep(c(0, 0, 1, 0, 0), round(300 * runif(1, 0.8, 1.2))) #C
+    , rep(c(1, 1, 0, 0, 0), round(200 * runif(1, 0.8, 1.2))) #AB
+    , rep(c(0, 0, 1, 1, 0), round(200 * runif(1, 0.8, 1.2))) #CD
+    , rep(c(1, 1, 1, 0, 0), round(100 * runif(1, 0.8, 1.2))) #ABC
+    , rep(c(1, 0, 1, 1, 0), round(100 * runif(1, 0.8, 1.2))) #ACD
+    , rep(c(1, 1, 0, 0, 1), round(100 * runif(1, 0.8, 1.2))) #ABE
+    , rep(c(0, 0, 1, 1, 1), round(100 * runif(1, 0.8, 1.2))) #CDE
+    , rep(c(1, 1, 1, 0, 1), round(100 * runif(1, 0.8, 1.2))) #ABCE
+    , rep(c(1, 0, 1, 1, 1), round(100 * runif(1, 0.8, 1.2))) #ACDE
+    , rep(c(1, 1, 1, 1, 0), round(50 * runif(1, 0.8, 1.2))) # ABCD
+    , rep(c(0, 0, 0, 0, 0), round(10 * runif(1, 0.8, 1.2))) # WT
   ), ncol = 5, byrow = TRUE
 )
 colnames(dB_c1) <- LETTERS[1:5]
@@ -73,17 +77,17 @@ colnames(dB_c1) <- LETTERS[1:5]
 # With missing genotypes ACD + BCD
 dB_c2 <- matrix(
   c(
-      rep(c(1, 0, 0, 0), 300) #A
-    , rep(c(0, 1, 0, 0), 300) #B
-    , rep(c(0, 0, 1, 0), 300) #C
-    , rep(c(1, 1, 0, 0), 200) #AB
-    , rep(c(1, 0, 1, 0), 200) #AC
-    , rep(c(0, 1, 1, 0), 200) #BC
-    , rep(c(0, 0, 1, 1), 250) #CD
-    , rep(c(1, 1, 1, 0), 100) #ABC
-    , rep(c(1, 1, 0, 1), 200) #ABD
-    , rep(c(1, 1, 1, 1), 200) # ABCD
-    , rep(c(0, 0, 0, 0), 10) # WT
+      rep(c(1, 0, 0, 0), round(300 * runif(1, 0.8, 1.2))) #A
+    , rep(c(0, 1, 0, 0), round(300 * runif(1, 0.8, 1.2))) #B
+    , rep(c(0, 0, 1, 0), round(300 * runif(1, 0.8, 1.2))) #C
+    , rep(c(1, 1, 0, 0), round(200 * runif(1, 0.8, 1.2))) #AB
+    , rep(c(1, 0, 1, 0), round(200 * runif(1, 0.8, 1.2))) #AC
+    , rep(c(0, 1, 1, 0), round(200 * runif(1, 0.8, 1.2))) #BC
+    , rep(c(0, 0, 1, 1), round(250 * runif(1, 0.8, 1.2))) #CD
+    , rep(c(1, 1, 1, 0), round(100 * runif(1, 0.8, 1.2))) #ABC
+    , rep(c(1, 1, 0, 1), round(200 * runif(1, 0.8, 1.2))) #ABD
+    , rep(c(1, 1, 1, 1), round(200 * runif(1, 0.8, 1.2))) # ABCD
+    , rep(c(0, 0, 0, 0), round(10 * runif(1, 0.8, 1.2))) # WT
   ), ncol = 4, byrow = TRUE
 )
 colnames(dB_c2) <- LETTERS[1:4]
@@ -91,19 +95,19 @@ colnames(dB_c2) <- LETTERS[1:4]
 # With ALL genotypes
 dB_c2_2 <- matrix(
   c(
-      rep(c(1, 0, 0, 0), 300) #A
-    , rep(c(0, 1, 0, 0), 300) #B
-    , rep(c(0, 0, 1, 0), 300) #C
-    , rep(c(1, 1, 0, 0), 200) #AB
-    , rep(c(1, 0, 1, 0), 200) #AC
-    , rep(c(0, 1, 1, 0), 200) #BC
-    , rep(c(0, 0, 1, 1), 250) #CD
-    , rep(c(1, 1, 1, 0), 100) #ABC
-    , rep(c(1, 1, 0, 1), 200) #ABD
-    , rep(c(1, 0, 1, 1), 200) #ACD
-    , rep(c(0, 1, 1, 1), 200) #BCD
-    , rep(c(1, 1, 1, 1), 200) # ABCD
-    , rep(c(0, 0, 0, 0), 10) # WT
+      rep(c(1, 0, 0, 0), round(300 * runif(1, 0.8, 1.2))) #A
+    , rep(c(0, 1, 0, 0), round(300 * runif(1, 0.8, 1.2))) #B
+    , rep(c(0, 0, 1, 0), round(300 * runif(1, 0.8, 1.2))) #C
+    , rep(c(1, 1, 0, 0), round(200 * runif(1, 0.8, 1.2))) #AB
+    , rep(c(1, 0, 1, 0), round(200 * runif(1, 0.8, 1.2))) #AC
+    , rep(c(0, 1, 1, 0), round(200 * runif(1, 0.8, 1.2))) #BC
+    , rep(c(0, 0, 1, 1), round(250 * runif(1, 0.8, 1.2))) #CD
+    , rep(c(1, 1, 1, 0), round(100 * runif(1, 0.8, 1.2))) #ABC
+    , rep(c(1, 1, 0, 1), round(200 * runif(1, 0.8, 1.2))) #ABD
+    , rep(c(1, 0, 1, 1), round(200 * runif(1, 0.8, 1.2))) #ACD
+    , rep(c(0, 1, 1, 1), round(200 * runif(1, 0.8, 1.2))) #BCD
+    , rep(c(1, 1, 1, 1), round(200 * runif(1, 0.8, 1.2))) # ABCD
+    , rep(c(0, 0, 0, 0), round(10 * runif(1, 0.8, 1.2))) # WT
   ), ncol = 4, byrow = TRUE
 )
 colnames(dB_c2_2) <- LETTERS[1:4]
@@ -115,15 +119,15 @@ colnames(dB_c2_2) <- LETTERS[1:4]
 ## ((A AND B) XOR (C AND D) to reach E
 dB_c3 <- matrix(
   c(
-      rep(c(1, 0, 0, 0, 0), 300) #A
-    , rep(c(0, 1, 0, 0, 0), 300) #B
-    , rep(c(0, 0, 1, 0, 0), 300) #C
-    , rep(c(0, 0, 0, 1, 0), 300) #D
-    , rep(c(1, 1, 0, 0, 0), 200) #AB
-    , rep(c(0, 0, 1, 1, 0), 200) #CD
-    , rep(c(1, 1, 0, 0, 1), 100) #ABE
-    , rep(c(0, 0, 1, 1, 1), 100) #CDE
-    , rep(c(0, 0, 0, 0, 0), 10) # WT
+      rep(c(1, 0, 0, 0, 0), round(300 * runif(1, 0.8, 1.2))) #A
+    , rep(c(0, 1, 0, 0, 0), round(300 * runif(1, 0.8, 1.2))) #B
+    , rep(c(0, 0, 1, 0, 0), round(300 * runif(1, 0.8, 1.2))) #C
+    , rep(c(0, 0, 0, 1, 0), round(300 * runif(1, 0.8, 1.2))) #D
+    , rep(c(1, 1, 0, 0, 0), round(200 * runif(1, 0.8, 1.2))) #AB
+    , rep(c(0, 0, 1, 1, 0), round(200 * runif(1, 0.8, 1.2))) #CD
+    , rep(c(1, 1, 0, 0, 1), round(100 * runif(1, 0.8, 1.2))) #ABE
+    , rep(c(0, 0, 1, 1, 1), round(100 * runif(1, 0.8, 1.2))) #CDE
+    , rep(c(0, 0, 0, 0, 0), round(10 * runif(1, 0.8, 1.2))) # WT
   ), ncol = 5, byrow = TRUE
 )
 colnames(dB_c3) <- LETTERS[1:5]
@@ -132,14 +136,14 @@ colnames(dB_c3) <- LETTERS[1:5]
 ## WT --> C --> D
 dB_c4 <- matrix(
   c(
-      rep(c(1, 0, 0, 0), 300) #A
-    , rep(c(0, 0, 1, 0), 300) #C
-    , rep(c(1, 1, 0, 0), 200) #AB
-    , rep(c(0, 0, 1, 1), 200) #CD
-    , rep(c(1, 1, 1, 0), 100) #ABC
-    , rep(c(1, 0, 1, 1), 100) #ACD
-    , rep(c(1, 1, 1, 1), 50) #ABCD
-    , rep(c(0, 0, 0, 0), 10) # WT
+      rep(c(1, 0, 0, 0), round(300 * runif(1, 0.8, 1.2))) #A
+    , rep(c(0, 0, 1, 0), round(300 * runif(1, 0.8, 1.2))) #C
+    , rep(c(1, 1, 0, 0), round(200 * runif(1, 0.8, 1.2))) #AB
+    , rep(c(0, 0, 1, 1), round(200 * runif(1, 0.8, 1.2))) #CD
+    , rep(c(1, 1, 1, 0), round(100 * runif(1, 0.8, 1.2))) #ABC
+    , rep(c(1, 0, 1, 1), round(100 * runif(1, 0.8, 1.2))) #ACD
+    , rep(c(1, 1, 1, 1), round(50 * runif(1, 0.8, 1.2))) #ABCD
+    , rep(c(0, 0, 0, 0), round(10 * runif(1, 0.8, 1.2))) # WT
   ), ncol = 4, byrow = TRUE
 )
 colnames(dB_c4) <- LETTERS[1:4]
@@ -148,116 +152,116 @@ colnames(dB_c4) <- LETTERS[1:4]
 
 dB_c5 <- matrix(
   c(
-      rep(c(1, 0, 0, 0), 500) #A
-    , rep(c(0, 1, 0, 0), 500) #B
-    , rep(c(0, 0, 1, 0), 500) #C
-    , rep(c(1, 1, 0, 0), 400) #AB
-    , rep(c(1, 0, 1, 0), 400) #AC
-    , rep(c(0, 1, 1, 0), 400) #BC
-    , rep(c(1, 1, 1, 0), 10) #ABC
-    , rep(c(1, 1, 1, 1), 600)  #ABCD
-    , rep(c(0, 0, 0, 0), 10) # WT
+      rep(c(1, 0, 0, 0), round(500 * runif(1, 0.8, 1.2))) #A
+    , rep(c(0, 1, 0, 0), round(500 * runif(1, 0.8, 1.2))) #B
+    , rep(c(0, 0, 1, 0), round(500 * runif(1, 0.8, 1.2))) #C
+    , rep(c(1, 1, 0, 0), round(400 * runif(1, 0.8, 1.2))) #AB
+    , rep(c(1, 0, 1, 0), round(400 * runif(1, 0.8, 1.2))) #AC
+    , rep(c(0, 1, 1, 0), round(400 * runif(1, 0.8, 1.2))) #BC
+    , rep(c(1, 1, 1, 0), round(10 * runif(1, 0.8, 1.2))) #ABC
+    , rep(c(1, 1, 1, 1), round(600 * runif(1, 0.8, 1.2)))  #ABCD
+    , rep(c(0, 0, 0, 0), round(10 * runif(1, 0.8, 1.2))) # WT
   ), ncol = 4, byrow = TRUE
 )
 colnames(dB_c5) <- LETTERS[1:4]
 
-## Sign epistasis
-dB_se <- matrix(
+## 
+dB_two_ind <- matrix(
   c(
-      rep(c(1, 0), 50) #A
-    , rep(c(0, 1), 300) #B
-    , rep(c(1, 1), 400) #AB
-    , rep(c(0, 0), 200) # WT
+      rep(c(1, 0), round(50 * runif(1, 0.8, 1.2))) #A
+    , rep(c(0, 1), round(300 * runif(1, 0.8, 1.2))) #B
+    , rep(c(1, 1), round(400 * runif(1, 0.8, 1.2))) #AB
+    , rep(c(0, 0), round(200 * runif(1, 0.8, 1.2))) # WT
   ), ncol = 2, byrow = TRUE
 )
-colnames(dB_se) <- LETTERS[1:2]
+colnames(dB_two_ind) <- LETTERS[1:2]
 
-## Reciprocal sign epistasis
-dB_rse <- matrix(
+## 
+dB_two_ind_b <- matrix(
   c(
-      rep(c(1, 0), 50) #A
-    , rep(c(0, 1), 50) #B
-    , rep(c(1, 1), 400) #AB
-    , rep(c(0, 0), 200) # WT
+      rep(c(1, 0), round(50 * runif(1, 0.8, 1.2))) #A
+    , rep(c(0, 1), round(50 * runif(1, 0.8, 1.2))) #B
+    , rep(c(1, 1), round(400 * runif(1, 0.8, 1.2))) #AB
+    , rep(c(0, 0), round(200 * runif(1, 0.8, 1.2))) # WT
   ), ncol = 2, byrow = TRUE
 )
-colnames(dB_rse) <- LETTERS[1:2]
+colnames(dB_two_ind_b) <- LETTERS[1:2]
 
 ## ((A AND B) OR (C AND D) to reach E
 dB_c7 <- matrix(
   c(
-      rep(c(1, 0, 0, 0, 0), 300) #A
-    , rep(c(0, 1, 0, 0, 0), 300) #B
-    , rep(c(0, 0, 1, 0, 0), 300) #C
-    , rep(c(0, 0, 0, 1, 0), 300) #D
-    , rep(c(1, 1, 0, 0, 0), 200) #AB
-    , rep(c(1, 0, 1, 0, 0), 200) #AC
-    , rep(c(1, 0, 0, 1, 0), 200) #AD
-    , rep(c(0, 1, 1, 0, 0), 200) #BC
-    , rep(c(0, 1, 0, 1, 0), 200) #BD
-    , rep(c(0, 0, 1, 1, 0), 200) #CD
-    , rep(c(1, 1, 1, 0, 0), 100) #ABC
-    , rep(c(1, 1, 0, 1, 0), 100) #ABD
-    , rep(c(0, 1, 1, 1, 0), 100) #BCD
-    , rep(c(1, 1, 0, 0, 1), 200) #ABE
-    , rep(c(0, 0, 1, 1, 1), 200) #CDE
-    , rep(c(1, 1, 1, 0, 1), 200) #ABCE
-    , rep(c(1, 1, 0, 1, 1), 200) # ABDE
-    , rep(c(1, 0, 1, 1, 1), 200) # ACDE
-    , rep(c(0, 1, 1, 1, 1), 200) # BCDE
-    , rep(c(1, 1, 1, 1, 1), 200) # ABCDE
-    , rep(c(0, 0, 0, 0, 0), 10) # WT
+      rep(c(1, 0, 0, 0, 0), round(300 * runif(1, 0.8, 1.2))) #A
+    , rep(c(0, 1, 0, 0, 0), round(300 * runif(1, 0.8, 1.2))) #B
+    , rep(c(0, 0, 1, 0, 0), round(300 * runif(1, 0.8, 1.2))) #C
+    , rep(c(0, 0, 0, 1, 0), round(300 * runif(1, 0.8, 1.2))) #D
+    , rep(c(1, 1, 0, 0, 0), round(200 * runif(1, 0.8, 1.2))) #AB
+    , rep(c(1, 0, 1, 0, 0), round(200 * runif(1, 0.8, 1.2))) #AC
+    , rep(c(1, 0, 0, 1, 0), round(200 * runif(1, 0.8, 1.2))) #AD
+    , rep(c(0, 1, 1, 0, 0), round(200 * runif(1, 0.8, 1.2))) #BC
+    , rep(c(0, 1, 0, 1, 0), round(200 * runif(1, 0.8, 1.2))) #BD
+    , rep(c(0, 0, 1, 1, 0), round(200 * runif(1, 0.8, 1.2))) #CD
+    , rep(c(1, 1, 1, 0, 0), round(100 * runif(1, 0.8, 1.2))) #ABC
+    , rep(c(1, 1, 0, 1, 0), round(100 * runif(1, 0.8, 1.2))) #ABD
+    , rep(c(0, 1, 1, 1, 0), round(100 * runif(1, 0.8, 1.2))) #BCD
+    , rep(c(1, 1, 0, 0, 1), round(200 * runif(1, 0.8, 1.2))) #ABE
+    , rep(c(0, 0, 1, 1, 1), round(200 * runif(1, 0.8, 1.2))) #CDE
+    , rep(c(1, 1, 1, 0, 1), round(200 * runif(1, 0.8, 1.2))) #ABCE
+    , rep(c(1, 1, 0, 1, 1), round(200 * runif(1, 0.8, 1.2))) # ABDE
+    , rep(c(1, 0, 1, 1, 1), round(200 * runif(1, 0.8, 1.2))) # ACDE
+    , rep(c(0, 1, 1, 1, 1), round(200 * runif(1, 0.8, 1.2))) # BCDE
+    , rep(c(1, 1, 1, 1, 1), round(200 * runif(1, 0.8, 1.2))) # ABCDE
+    , rep(c(0, 0, 0, 0, 0), round(10 * runif(1, 0.8, 1.2))) # WT
   ), ncol = 5, byrow = TRUE
 )
 colnames(dB_c7) <- LETTERS[1:5]
 
-# Claudia Vasallo 1: representative
-dB_cv1 <- matrix(
+# Four genes, one example
+dB_4g_1 <- matrix(
   c(
-      rep(c(1, 0, 0, 0), 100) #A
-    , rep(c(0, 1, 0, 0), 150) #B
-    , rep(c(0, 0, 1, 0), 200) #C
-    , rep(c(1, 1, 0, 0), 200) #AB
-    , rep(c(1, 0, 1, 0), 250) #AC
-    , rep(c(0, 1, 1, 0), 300) #BC
-    , rep(c(1, 1, 1, 0), 400) #ABC
-    , rep(c(0, 1, 1, 1), 450) #BCD
-    , rep(c(1, 1, 1, 1), 500) #ABCD
-    , rep(c(0, 0, 0, 0), 10) # WT
+      rep(c(1, 0, 0, 0), round(100 * runif(1, 0.8, 1.2))) #A
+    , rep(c(0, 1, 0, 0), round(150 * runif(1, 0.8, 1.2))) #B
+    , rep(c(0, 0, 1, 0), round(200 * runif(1, 0.8, 1.2))) #C
+    , rep(c(1, 1, 0, 0), round(200 * runif(1, 0.8, 1.2))) #AB
+    , rep(c(1, 0, 1, 0), round(250 * runif(1, 0.8, 1.2))) #AC
+    , rep(c(0, 1, 1, 0), round(300 * runif(1, 0.8, 1.2))) #BC
+    , rep(c(1, 1, 1, 0), round(400 * runif(1, 0.8, 1.2))) #ABC
+    , rep(c(0, 1, 1, 1), round(450 * runif(1, 0.8, 1.2))) #BCD
+    , rep(c(1, 1, 1, 1), round(500 * runif(1, 0.8, 1.2))) #ABCD
+    , rep(c(0, 0, 0, 0), round(10 * runif(1, 0.8, 1.2))) # WT
   ), ncol = 4, byrow = TRUE
 )
-colnames(dB_cv1) <- LETTERS[1:4]
+colnames(dB_4g_1) <- LETTERS[1:4]
 
-# Claudia Vasallo 2: Local maxima
-dB_cv2 <- matrix(
+# Four genes, another example
+dB_4g_2 <- matrix(
   c(
-      rep(c(1, 0, 0, 0), 100) #A
-    , rep(c(0, 1, 0, 0), 150) #B
-    , rep(c(0, 0, 1, 0), 200) #C
-    , rep(c(1, 1, 0, 0), 400) #AB
-    , rep(c(1, 0, 1, 0), 320) #AC
-    , rep(c(0, 1, 1, 0), 250) #BC
-    , rep(c(1, 1, 1, 0), 250) #ABC
-    , rep(c(0, 1, 1, 1), 450) #BCD
-    , rep(c(1, 1, 1, 1), 500) #ABCD
-    , rep(c(0, 0, 0, 0), 10) # WT
+      rep(c(1, 0, 0, 0), round(100 * runif(1, 0.8, 1.2))) #A
+    , rep(c(0, 1, 0, 0), round(150 * runif(1, 0.8, 1.2))) #B
+    , rep(c(0, 0, 1, 0), round(200 * runif(1, 0.8, 1.2))) #C
+    , rep(c(1, 1, 0, 0), round(400 * runif(1, 0.8, 1.2))) #AB
+    , rep(c(1, 0, 1, 0), round(320 * runif(1, 0.8, 1.2))) #AC
+    , rep(c(0, 1, 1, 0), round(250 * runif(1, 0.8, 1.2))) #BC
+    , rep(c(1, 1, 1, 0), round(250 * runif(1, 0.8, 1.2))) #ABC
+    , rep(c(0, 1, 1, 1), round(450 * runif(1, 0.8, 1.2))) #BCD
+    , rep(c(1, 1, 1, 1), round(500 * runif(1, 0.8, 1.2))) #ABCD
+    , rep(c(0, 0, 0, 0), round(10 * runif(1, 0.8, 1.2))) # WT
   ), ncol = 4, byrow = TRUE
 )
-colnames(dB_cv2) <- LETTERS[1:4]
+colnames(dB_4g_2) <- LETTERS[1:4]
 
-# Claudia Vasallo 3: RMF
-dB_cv3 <- matrix(
+# Four genes, a third example with many unobserved genotypes.
+dB_4g_3 <- matrix(
   c(
-      rep(c(1, 0, 0, 0), 250) #A
-    , rep(c(0, 1, 0, 0), 150) #B
-    , rep(c(0, 0, 1, 0), 200) #C
-    , rep(c(0, 1, 1, 0), 250) #BC
-    , rep(c(1, 1, 1, 0), 500) #ABC
-    , rep(c(0, 1, 1, 1), 250) #BCD
-    , rep(c(0, 0, 0, 0), 10) # WT
+      rep(c(1, 0, 0, 0), round(250 * runif(1, 0.8, 1.2))) #A
+    , rep(c(0, 1, 0, 0), round(150 * runif(1, 0.8, 1.2))) #B
+    , rep(c(0, 0, 1, 0), round(200 * runif(1, 0.8, 1.2))) #C
+    , rep(c(0, 1, 1, 0), round(250 * runif(1, 0.8, 1.2))) #BC
+    , rep(c(1, 1, 1, 0), round(500 * runif(1, 0.8, 1.2))) #ABC
+    , rep(c(0, 1, 1, 1), round(250 * runif(1, 0.8, 1.2))) #BCD
+    , rep(c(0, 0, 0, 0), round(10 * runif(1, 0.8, 1.2))) # WT
   ), ncol = 4, byrow = TRUE
 )
-colnames(dB_cv3) <- LETTERS[1:4]
+colnames(dB_4g_3) <- LETTERS[1:4]
 
 dag_linear <- matrix(0, ncol=5, nrow=5)
 rownames(dag_linear) <- colnames(dag_linear) <- c("WT", "A", "B", "C", "D")
@@ -324,18 +328,18 @@ dag_c4["WT", "C"] <- 1
 dag_c4["A", "B"] <- 1
 dag_c4["C", "D"] <- 1
 
-dag_se <- matrix(0, ncol=3, nrow=3)
-rownames(dag_se) <- colnames(dag_se) <- c("WT", "A", "B")
-dag_se["WT", "A"] <- 1
-dag_se["WT", "B"] <- 1
+dag_2_ind <- matrix(0, ncol=3, nrow=3)
+rownames(dag_2_ind) <- colnames(dag_2_ind) <- c("WT", "A", "B")
+dag_2_ind["WT", "A"] <- 1
+dag_2_ind["WT", "B"] <- 1
 
-dag_cv <- matrix(0, ncol=5, nrow=5)
-rownames(dag_cv) <- colnames(dag_cv) <- c("WT", "A", "B", "C", "D")
-dag_cv["WT", "A"] <- 1
-dag_cv["WT", "B"] <- 1
-dag_cv["WT", "C"] <- 1
-dag_cv["B", "D"] <- 1
-dag_cv["C", "D"] <- 1
+dag_4g <- matrix(0, ncol=5, nrow=5)
+rownames(dag_4g) <- colnames(dag_4g) <- c("WT", "A", "B", "C", "D")
+dag_4g["WT", "A"] <- 1
+dag_4g["WT", "B"] <- 1
+dag_4g["WT", "C"] <- 1
+dag_4g["B", "D"] <- 1
+dag_4g["C", "D"] <- 1
 
 template_dag <- matrix(0, ncol = 2, nrow = 2)
 rownames(template_dag) <- colnames(template_dag) <- c("WT", "A")
@@ -363,8 +367,8 @@ examples_csd <- list(
     AND = list(data = dB_AND, name = "AND", dag = dag_or, dag_parent_set = and_parent_set), 
     OR = list(data = dB_OR, name = "OR", dag = dag_or, dag_parent_set = or_parent_set), 
     XOR = list(data = dB_XOR,name = "XOR", dag = dag_or, dag_parent_set = xor_parent_set), 
-    se = list(data = dB_se, name = "Sign epistasis", dag = dag_se), 
-    rse = list(data = dB_rse, name = "Reciprocal sign epistasis", dag = dag_se), 
+    two_ind = list(data = dB_two_ind, name = "Two indep. genes", dag = dag_2_ind), 
+    two_ind_b = list(data = dB_two_ind_b, name = "Two indeo. genes, example b", dag = dag_2_ind), 
     c1 = list(data = dB_c1, name = "A --> B ; C --> D; B XOR D for E", dag = dag_c1, dag_parent_set = c1_parent_set), 
     c2 = list(ata = dB_c2, name = "Missing: ((A AND B) or C) to reach D", dag = dag_c2), 
     c2_2c2 = list(data = dB_c2_2, name = "All: ((A AND B) or C) to reach D", dag = dag_c2), 
@@ -372,9 +376,9 @@ examples_csd <- list(
     c3c2 = list(data = dB_c3, name = "Parallel XOR", dag = dag_c3), 
     c5c2 = list(data = dB_c5, name = "WT --> (A AND B AND C) --> D", dag = dag_c2), 
     c7c2 = list(data = dB_c7, name = "((A AND B) OR (C AND D) to reach E", dag = dag_c3), 
-    cv1c2 = list(data = dB_cv1, name = "CV#1 Representative", dag = dag_cv), 
-    cv2c2 = list(data = dB_cv2, name = "CV#2 Local Maxima", dag = dag_cv), 
-    cv3c2 = list(data = dB_cv3, name = "CV#3 RMF", dag = dag_cv)
+    d4gc1 = list(data = dB_4g_1, name = "Four genes, one example", dag = dag_4g), 
+    d4gc2 = list(data = dB_4g_2, name = "Four genes, second example", dag = dag_4g), 
+    d4gc3 = list(data = dB_4g_3, name = "Four genes, third example", dag = dag_4g)
   ),
   "dag" = list(
     User = list(dag = template_dag, name = "User Data"),
@@ -386,12 +390,7 @@ examples_csd <- list(
   )
 )
 
-# save(examples_csd, file = "../../../data/examples_csd.RData")
+## If running from "something/EvAM-Tools/evamtools/inst/miscell"
+save(examples_csd, file = "../../data/examples_csd.RData")
 
-# cpm_output <- list()
-# for (i in names(all_examples_csd_2[["csd"]])[2:11]){
-#   tmp <- all_examples_csd_2[["csd"]][[i]]$data
-#   cpm_output[[i]] <- evam(tmp)
-# }
 
-# save(cpm_output, file = "../../data/cpm_output.RData")

@@ -266,13 +266,14 @@ server <- function(input, output, session) {
   observeEvent(input$change_gene_names, {
     showModal(modalDialog(
       easyClose = TRUE,
-      title = tags$h3("Modify gene names"),
+      title = tags$h3("Change gene names"),
       tags$div(class = "inlin2",
         textInput(inputId = "new_gene_names", "Genes names",
           value = paste(data$gene_names[1:input$gene_number],
           collapse = ", ")
-        ),
-      tags$h3("Please, separate you gene names with a ','"),
+          ),
+        tags$h3(HTML("<br/>")),
+      tags$h4("Separate you gene names with a ','"),
       tags$div(class = "download_button",
         actionButton("action_gene_names", "Change genes names"),
         )
@@ -306,7 +307,7 @@ server <- function(input, output, session) {
   observeEvent(input$display_help, {
     showModal(modalDialog(
       easyClose = TRUE,
-      title = tags$h3("How does it work?"),
+      title = tags$h3("Changing genotype's counts"),
       tags$div(
         tags$p("1. Double click in a Counts cell to edit it"),
         tags$p("2. Press Tab to move to the next row"),
@@ -325,10 +326,11 @@ server <- function(input, output, session) {
 
   # ## Define number of genes
   output$genes_number <- renderUI({
-    val <- ifelse(is.null(data$n_genes), 3, data$n_genes)
-    tags$div(class="inlin",
-      sliderInput("gene_number", "Number of genes",
-        value = val, max = max_genes, min = min_genes, step = 1)
+      val <- ifelse(is.null(data$n_genes), 3, data$n_genes)
+      tags$div(class="inlin",
+               tags$h3(HTML("<br/>")),
+               sliderInput("gene_number", "Number of genes",
+                           value = val, max = max_genes, min = min_genes, step = 1)
     )
   })
 
@@ -348,7 +350,14 @@ server <- function(input, output, session) {
     options <- data$gene_names[1:n_genes]
     if(input$input2build == "csd"){
       tags$div(
-        tags$h3("2. Add new genotypes"),
+               tags$h3("2. Add genotypes"),
+               tags$h5("Any gene without mutations is excluded from the data, ",
+                       "regardless of the setting for number of genes. ",
+                       "This is a feature, not a bug. ",
+                       "If any gene is always observed mutated ",
+                       "(i.e., has a constant value of 1 for all observations), ",
+                       "one observation with no genes mutated is added ",
+                       "to the sample."),
             tags$div(class = "inline",
               checkboxGroupInput(inputId = "genotype",
                 label = "Mutations",
@@ -357,13 +366,13 @@ server <- function(input, output, session) {
             tags$div(id="fr",
                      numericInput(label = "Counts", value = NA, min = 0,
                                   inputId = "genotype_freq", width = NA),
-              actionButton("add_genotype", "Add Genotype")
+              actionButton("add_genotype", "Add genotype")
             )
         )
     } else if (input$input2build == "dag"){
       tags$div(
         tags$div(class = "flex",
-          tags$h3("2. Define a Direct Acyclic Graph (DAG)"),
+          tags$h3("2. Define a Directed Acyclic Graph (DAG)"),
           actionButton("how2build_dag", "Help")
         ),
         if(!is.null(data$lambdas)){
@@ -377,25 +386,30 @@ server <- function(input, output, session) {
               selected= default_dag_model)
             ),
             tags$h4("New Edge"),
+                   tags$h5(HTML("<p></p>")),
             tags$div(class = "inline",
               radioButtons(inputId = "dag_from",
-              label = "From",
+              label = "From (parent node)",
               inline = TRUE,
               choices =  c("Root", options))
             ),
             tags$div(class = "inline",
               radioButtons(inputId = "dag_to",
-              label = " To ",
+              label = " To (child node)",
               inline = TRUE,
               choices =  options)
-            ),
+              ),
+            tags$h5(HTML("<p></p>")),
             actionButton("add_edge", "Add edge"),
             actionButton("remove_edge", "Remove edge"),
             actionButton("clear_dag", "Clear dag"),
-            tags$h3("DAG table"),
+            tags$h3(HTML("<br/>DAG table")),
             DT::DTOutput("dag_table"),
-            numericInput("dag_samples", "Total genotypes to sample", value = default_csd_samples, min= 100, max = 10000, step = 100, width = "50%"),
-            numericInput("dag_noise", "Noise", value = 0.01, min= 0, max = 1, step = 0.01, width = "50%"),
+            tags$h3(HTML("<br/>")),
+            numericInput("dag_samples", HTML("Total genotypes to sample"),
+                         value = default_csd_samples, min = 100, max = 10000,
+                         step = 100, width = "50%"),
+            tags$h3(HTML("<br/>")),
             actionButton("resample_dag", "Sample from DAG")
             )
           }
@@ -410,10 +424,15 @@ server <- function(input, output, session) {
           ),
           if(!is.null(data$thetas)){
             tags$div(
-              tags$h3("Entries are ", HTML("&theta;s, range &plusmn; &infin;")),
+                     tags$h3("Entries are ",
+                             "lower case thetas, ",
+                             HTML("&theta;s, range &plusmn; &infin;"),),
               DT::DTOutput("thetas_table"),
-              numericInput("mhn_samples", "Total genotypes to sample", value = default_csd_samples, min= 100, max= 10000, step = 100, width = "50%"),
-              numericInput("mhn_noise", "Noise", value = 0.01, min= 0, max = 1, step = 0.01, width = "50%"),
+              tags$h3(HTML("<br/>")),
+              numericInput("mhn_samples", "Total genotypes to sample",
+                           value = default_csd_samples, min = 100, max = 10000,
+                           step = 100, width = "50%"),
+              tags$h3(HTML("<br/>")),
               actionButton("resample_mhn", "Sample from MHN")
             )
           }
@@ -425,8 +444,9 @@ server <- function(input, output, session) {
     if(input$input2build == "csd"){
       tags$div(class = "frame",
         tags$div(class = "flex",
-          tags$h3("3. Change genotype's counts"),
-          actionButton("display_help", "Help"),
+                 tags$h3("3. Change genotype's counts"),
+                 actionButton("display_help", "Help"),
+                 tags$h3(HTML("<br/>")),
         ),
         tags$div(id = "csd_table",
           DT::DTOutput("csd_counts")
@@ -560,19 +580,35 @@ server <- function(input, output, session) {
   observeEvent(input$how2build_dag, {
     showModal(modalDialog(
       easyClose = TRUE,
-      title = tags$h3("How to build a DAG"),
+      title = tags$h3("How to build a DAG and generate a sample"),
       tags$div(
-        tags$p("Select a parent node and child node and hit 'Add edge' or 'Remove edge'."),
-        tags$p("But, TAKE CARE"),
-        tags$p("Some edge wont be allowed if: "),
-        tags$li("That edge is already present"),
-        tags$li("It introduces cycles"),
-        tags$p("TO REMOVE EDGES: set a lambda of the relationship to 0"),
-        tags$p("But, TAKE CARE"),
-        tags$p("Breaking edges might reestructure the DAG:"),
-        tags$li("If a node has no parent, it will be assigned as descendent of WT")
-        )
-      )
+               tags$p("1. Select 'From' (parent node) and 'To' (child node) ",
+                      HTML("and hit 'Add edge' or 'Remove edge'.<ul>")),
+               tags$li(HTML("An edge wont be allowed if: <ul>")),
+               tags$li("it is already present;"),
+               tags$li("it introduces cycles."),
+               tags$p(HTML("</ul>")),
+               tags$li(HTML("To remove edge you can also "),
+                       "set the lambda of the relationship to 0."),
+               tags$li(HTML("Removing edges might restructure the DAG."),
+                       "If a node has no parent, " ,
+                       "it will be assigned as descendant of WT."),
+               tags$p(HTML("</ul>")),
+               tags$p(HTML("2. To <strong>change the value of a lambda</strong> "),
+                       "click on the cell, ",
+                      "edit the cell's content and press Ctrl+Enter."),
+               tags$p(HTML("3. Set the value of <strong>Relation</strong> "),
+                       "to one of 'Single' (single parent), ",
+                      "AND, OR, XOR.",
+                      "Edit the cell's content and press Ctrl+Enter. ",
+                      "All incoming edges to a node must have the same ",
+                      "Relation (the program will force this)."),
+               tags$p(HTML("4. Modify, if you want, the <strong>size of the sample</strong> "),
+                      "('Total genotypes to sample') and ",
+                      "click on 'Sample from DAG' to generate a sample. "),
+               tags$p("5. Possible random noise when sampling is controlled under 'Advanced options'.")
+           )
+    )
     )
   })
 
@@ -650,7 +686,7 @@ server <- function(input, output, session) {
                       "('Total genotypes to sample') and ",
                       "click on 'Sample from MHN' to generate a sample. ",
                       "The sample is also updated as soon as you save an entry."),
-               tags$p("6. Possible random noise is controlled under 'Advanced options'."),
+               tags$p("6. Possible random noise when sampling is controlled under 'Advanced options'."),
                tags$p(HTML("Make sure <b>the &theta;s have been updated</b> "),
                       "by checking the figure of the matrix on the right.")
         ## tags$p("4. Set a frequency to 0 to remove a genotype"),
@@ -778,8 +814,8 @@ server <- function(input, output, session) {
     # }
 
     tryCatch({
-      if(input$gene_number > 7){
-        showModal(dataModal("Take care! You are running a dataset with 8 genes or more. This make take longer than usual and plots may be crowded. We recommend using top_paths options in the Results' tab.", type = "Warning: "))
+      if(input$gene_number >= 7){
+        showModal(dataModal("Beware! You are running a dataset with 7 genes or more. This can take longer than usual and plots may be crowded. We recommend using top_paths options in the Results' tab.", type = "Warning: "))
       }
       shinyjs::disable("analysis")
       # Create a Progress object
@@ -1051,7 +1087,8 @@ server <- function(input, output, session) {
         ),
       ),
 
-    tags$p("Number of most relevant paths to show:"),
+      tags$p(HTML("<strong>Number of most relevant paths to show</strong> "),
+             "(set it to 0 to show all paths):"),
     tags$div(id="freq2label-wrap",
       sliderInput("freq2label", "", width = "500px",
         value = 3, max = 5, min = 0, step = 1)
