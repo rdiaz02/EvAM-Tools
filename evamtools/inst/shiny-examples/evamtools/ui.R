@@ -517,7 +517,7 @@ user_input <- function() {
             tagList(
                 radioButtons(inputId = "input2build", label = "",
                              choiceNames = list(
-                                 HTML("Cross sectional <br> data"),
+                                 HTML("Cross-sectional <br> data"),
                                  HTML("DAG and <br> rates/probs."),
                                  "MHN thetas"),
                              choiceValues = list("csd", "dag", "matrix"),
@@ -531,7 +531,7 @@ user_input <- function() {
         ),
 
         column(width = 11,
-          titlePanel("Cross sectional data input"),
+          titlePanel(HTML("&ensp; Cross-sectional data input")),
           column(width = 6,
               column(width = 12,
             tags$div(class = "frame",
