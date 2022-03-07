@@ -399,7 +399,7 @@ server <- function(input, output, session) {
             tags$h5(HTML("<p></p>")),
             actionButton("add_edge", "Add edge"),
             actionButton("remove_edge", "Remove edge"),
-            actionButton("clear_dag", "Clear dag"),
+            actionButton("clear_dag", "Clear DAG"),
             tags$h3(HTML("<br/>DAG table")),
             DT::DTOutput("dag_table"),
             tags$h3(HTML("<br/>")),
