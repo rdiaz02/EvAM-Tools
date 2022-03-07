@@ -20,6 +20,7 @@ SHINY_DEFAULTS <- list(
   cpm_samples = 10000,
   ngenes = 3,
   csd_samples = 1000,
+  dag_model = "HESBCN",
   all_cpms = c("OT", "CBN", "OncoBN", "MHN", "MCCBN", "HESBCN"),
   cpms2run = c("OT", "CBN", "OncoBN", "MHN", "HESBCN"),
   template_data = list(
