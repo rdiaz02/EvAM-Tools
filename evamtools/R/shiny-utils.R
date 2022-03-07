@@ -1,3 +1,6 @@
+## Copyright 2022 Pablo Herrera Nieto, Ramon Diaz-Uriarte
+
+
 ## ## Reasons for not using this function:
 
 ## ## That it takes a gene_names is questionable:
@@ -340,7 +343,7 @@ create_tabular_data <- function(data) {
               for(transition in transitions){
                 ## New row
                 if(all(is.na(df[transition, ]))){
-                  genes <- strsplit(transition, "->")[[1]]
+                  genes <- strsplit(transition, " -> ")[[1]]
                   df[transition, ] <- c(genes[[1]], genes[[2]],
                                         rep(0, length(available_methods)))
                   df[transition, method] <- counts[[transition]]
@@ -357,7 +360,7 @@ create_tabular_data <- function(data) {
             else df[[method]] <- round(tmp_col, 3)
           }
 
-          df <- data.frame(Index = standard_rank_genots_2(df$To, df$From),
+          df <- data.frame(Index = standard_rank_genots_2(df$From, df$To),
                            df)
           ## Sorting 
           ## order_by_counts <- order(rowSums(df[,3:ncol(df)]),
