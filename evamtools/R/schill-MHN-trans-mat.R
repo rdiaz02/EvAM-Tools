@@ -160,7 +160,7 @@ allGenotypes_3 <- function(k) {
 ##      Note that the diagonal is not added
 ##         This computes the products of the Theta, as in Fig.2 right
 theta_to_trans_rate_3 <- function(theta,
-                                inner_transition = inner_transitionRate_3_1) {
+                                  inner_transition = inner_transitionRate_3_1) {
 
     Theta <- exp(theta)
     geneNames <- colnames(theta)
