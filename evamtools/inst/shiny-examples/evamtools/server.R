@@ -336,7 +336,11 @@ server <- function(input, output, session) {
                tags$h3("2. Add genotypes"),
                tags$h5("Any gene without mutations is excluded from the data, ",
                        "regardless of the setting for number of genes. ",
-                       "This is a feature, not a bug. "),
+                       "This is a feature, not a bug. ",
+                       "If any gene is always observed mutated ",
+                       "(i.e., has a constant value of 1 for all observations), ",
+                       "one observation with no genes mutated is added ",
+                       "to the sample."),
             tags$div(class = "inline",
               checkboxGroupInput(inputId = "genotype",
                 label = "Mutations",
@@ -765,8 +769,8 @@ server <- function(input, output, session) {
     # }
 
     tryCatch({
-      if(input$gene_number > 7){
-        showModal(dataModal("Take care! You are running a dataset with 8 genes or more. This make take longer than usual and plots may be crowded. We recommend using top_paths options in the Results' tab.", type = "Warning: "))
+      if(input$gene_number >= 7){
+        showModal(dataModal("Beware! You are running a dataset with 7 genes or more. This can take longer than usual and plots may be crowded. We recommend using top_paths options in the Results' tab.", type = "Warning: "))
       }
       shinyjs::disable("analysis")
       # Create a Progress object
@@ -855,7 +859,7 @@ server <- function(input, output, session) {
       #     , 1:input$gene_number]
       # }
 
-      n_samples <- input$num_steps
+      n_samples <- input$sample_size
       if(is.null(n_samples) | !is.numeric(n_samples) | n_samples < 100){
         n_samples <- SHINY_DEFAULTS$cpm_samples
       }
@@ -1035,7 +1039,8 @@ server <- function(input, output, session) {
         ),
       ),
 
-    tags$p("Number of most relevant paths to show:"),
+      tags$p(HTML("<strong>Number of most relevant paths to show</strong> "),
+             "(set it to 0 to show all paths):"),
     tags$div(id="freq2label-wrap",
       sliderInput("freq2label", "", width = "500px",
         value = 3, max = 5, min = 0, step = 1)

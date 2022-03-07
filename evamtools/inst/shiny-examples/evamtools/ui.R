@@ -1,3 +1,5 @@
+## Copyright 2022 Pablo Herrera Nieto, Ramon Diaz-Uriarte
+
 cpm_info <- function(){
   tags$div(id = "background",
     tags$head(
@@ -536,8 +538,12 @@ user_input <- function() {
               column(width = 12,
             tags$div(class = "frame",
                 tags$div(class = "flex",
-                    tags$h3("1. Set the number of genes"),
+                         tags$h3("1. Set the number of genes"),
+                         tags$h5("(Using 7 or more genes can lead ",
+                                 "to very long execution times for some methods ",
+                                 "and crowded figures.)"),
                     actionButton("change_gene_names", "Change gene names")
+                    
                   ),
                 uiOutput("genes_number")),
             tags$div(class = "frame",
@@ -594,10 +600,22 @@ user_input <- function() {
                              "in the help of the evam function)"),
                      tags$hr(style="border-color: darkgrey;"),
               # tags$div(
-                numericInput("num_steps", "Sampling steps", SHINY_DEFAULTS$cpm_samples
-                  , min = 0, max = 100000, step = 100, width="100%"),
-                numericInput("sample_noise", "Sampling noise", 0
+                     numericInput("sample_size", "Number of samples",
+                                  SHINY_DEFAULTS$cpm_samples
+                                , min = 0, max = 100000, step = 100,
+                                  width = "100%"),
+                     tags$h5("Number of genotypes to generate ",
+                             "when generating a sample of genotypes ",
+                             "according to the predicted frequencies of ",
+                             "from model."),                     
+                numericInput("sample_noise", "Observation noise", 0
                            , min = 0, max = 1, step = 0.1, width="100%"),
+                tags$h5("If > 0, the proportion of observations ",
+                        "in the sampled matrix with error ",
+                        "(for instance, genotyping error). ",
+                        "This proportion of observations will have 0s flipped ",
+                        "to 1s, and 1s flipped to 0s."),                     
+                
                  tags$hr(style="border-color: darkgrey;"),
                 # checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("HyperTRAPS", "MCCBN"), choiceValues = c("hypertraps", "mccbn")),
                 checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("MCCBN"), choiceValues = c("MCCBN")),
