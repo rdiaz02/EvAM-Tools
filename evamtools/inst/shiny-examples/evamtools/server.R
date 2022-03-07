@@ -333,7 +333,7 @@ server <- function(input, output, session) {
     options <- data$gene_names[1:n_genes]
     if(input$input2build == "csd"){
       tags$div(
-        tags$h3("2. Add new genotypes"),
+        tags$h3("2. Add genotypes"),
             tags$div(class = "inline",
               checkboxGroupInput(inputId = "genotype",
                 label = "Mutations",
@@ -342,18 +342,18 @@ server <- function(input, output, session) {
             tags$div(id="fr",
                      numericInput(label = "Counts", value = NA, min = 0,
                                   inputId = "genotype_freq", width = NA),
-              actionButton("add_genotype", "Add Genotype")
+              actionButton("add_genotype", "Add genotype")
             )
         )
     } else if (input$input2build == "dag"){
       tags$div(
         tags$div(class = "flex",
-          tags$h3("2. Define a Direct Acyclic Graph (DAG)"),
+          tags$h3("2. Define a Directed Acyclic Graph (DAG)"),
           actionButton("how2build_dag", "Help")
         ),
         if(!is.null(data$lambdas)){
           tags$div(
-                   ## tags$h3("New Edge"),
+                   tags$h5(HTML("<p></p>")),
             tags$div(class = "inline",
               radioButtons(inputId = "dag_from",
               label = "From (parent node)",
@@ -365,7 +365,8 @@ server <- function(input, output, session) {
               label = " To (child node)",
               inline = TRUE,
               choices =  options)
-            ),
+              ),
+            tags$h5(HTML("<p></p>")),
             actionButton("add_edge", "Add edge"),
             actionButton("remove_edge", "Remove edge"),
             actionButton("clear_dag", "Clear dag"),
