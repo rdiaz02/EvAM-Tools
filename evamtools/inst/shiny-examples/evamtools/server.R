@@ -390,9 +390,11 @@ server <- function(input, output, session) {
             tags$div(
               tags$h3("Entries are ", HTML("&theta;s, range &plusmn; &infin;"),),
               DT::DTOutput("thetas_table"),
+              tags$h3(HTML("<br/>")),
               numericInput("mhn_samples", "Total genotypes to sample",
                            value = default_csd_samples, min = 100, max = 10000,
                            step = 100, width = "50%"),
+              tags$h3(HTML("<br/>")),
               actionButton("resample_mhn", "Sample from MHN")
             )
           }
@@ -521,10 +523,10 @@ server <- function(input, output, session) {
   observeEvent(input$how2build_dag, {
     showModal(modalDialog(
       easyClose = TRUE,
-      title = tags$h3("How to build a DAG"),
+      title = tags$h3("How to build a DAG and generate a sample"),
       tags$div(
-               tags$p("Select 'From' (parent node) and 'To' (child node) ",
-                      "and hit 'Add edge' or 'Remove edge'."),
+               tags$p("1. Select 'From' (parent node) and 'To' (child node) ",
+                      HTML("and hit 'Add edge' or 'Remove edge'.<ul>")),
                tags$li(HTML("An edge wont be allowed if: <ul>")),
                tags$li("it is already present;"),
                tags$li("it introduces cycles."),
@@ -534,9 +536,20 @@ server <- function(input, output, session) {
                tags$li(HTML("Removing edges might restructure the DAG."),
                        "If a node has no parent, " ,
                        "it will be assigned as descendant of WT."),
-               tags$li(HTML("To <strong>change the value of a lambda</strong> "),
+               tags$p(HTML("</ul>")),
+               tags$p(HTML("2. To <strong>change the value of a lambda</strong> "),
                        "click on the cell, ",
-                       "edit the cell's content and press Ctrl+Enter")
+                      "edit the cell's content and press Ctrl+Enter."),
+               tags$p(HTML("3. Set the value of <strong>Relation</strong> "),
+                       "to one of 'Single' (single parent), ",
+                      "AND, OR, XOR.",
+                      "Edit the cell's content and press Ctrl+Enter. ",
+                      "All incoming edges to a node must have the same ",
+                      "Relation (the program will force this)."),
+               tags$p(HTML("4. Modify, if you want, the <strong>size of the sample</strong> "),
+                      "('Total genotypes to sample') and ",
+                      "click on 'Sample from DAG' to generate a sample. "),
+               tags$p("5. Possible random noise when sampling is controlled under 'Advanced options'.")
            )
     )
     )
@@ -615,7 +628,7 @@ server <- function(input, output, session) {
                       "('Total genotypes to sample') and ",
                       "click on 'Sample from MHN' to generate a sample. ",
                       "The sample is also updated as soon as you save an entry."),
-               tags$p("6. Possible random noise is controlled under 'Advanced options'."),
+               tags$p("6. Possible random noise when sampling is controlled under 'Advanced options'."),
                tags$p(HTML("Make sure <b>the &theta;s have been updated</b> "),
                       "by checking the figure of the matrix on the right.")
         ## tags$p("4. Set a frequency to 0 to remove a genotype"),
