@@ -367,9 +367,13 @@ server <- function(input, output, session) {
             actionButton("add_edge", "Add edge"),
             actionButton("remove_edge", "Remove edge"),
             actionButton("clear_dag", "Clear dag"),
-            tags$h3("DAG table"),
+            tags$h3(HTML("<br/>DAG table")),
             DT::DTOutput("dag_table"),
-            numericInput("dag_samples", "Total genotypes to sample", value = default_csd_samples, min= 100, max = 10000, step = 100, width = "50%"),
+            tags$h3(HTML("<br/>")),
+            numericInput("dag_samples", HTML("Total genotypes to sample"),
+                         value = default_csd_samples, min = 100, max = 10000,
+                         step = 100, width = "50%"),
+            tags$h3(HTML("<br/>")),
             actionButton("resample_dag", "Sample from DAG")
             )
           }
@@ -527,8 +531,12 @@ server <- function(input, output, session) {
                tags$p(HTML("</ul>")),
                tags$li(HTML("To remove edge you can also "),
                        "set the lambda of the relationship to 0."),
-               tags$li(HTML("Removing edges might reestructure the DAG."),
-               "If a node has no parent, it will be assigned as descendent of WT.")
+               tags$li(HTML("Removing edges might restructure the DAG."),
+                       "If a node has no parent, " ,
+                       "it will be assigned as descendant of WT."),
+               tags$li(HTML("To <strong>change the value of a lambda</strong> "),
+                       "click on the cell, ",
+                       "edit the cell's content and press Ctrl+Enter")
            )
     )
     )
