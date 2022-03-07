@@ -508,18 +508,19 @@ user_input <- function() {
         ") # end HTML
       ) # end tags$style
     ),
-    column(width=12,
+    column(width = 12,
       
-      sidebarLayout(
+           sidebarLayout(
         column(width = 1,
-          tags$div(
+               tags$div(
             tags$h3("Input to build"),
             tagList(
                 radioButtons(inputId = "input2build", label = "",
-                             choiceNames = c("Cross sectional\n data)",
-                                             "DAG and \n rates/probs.",
-                                             "MHN thetas"),
-                             choiceValues = c("csd", "dag", "matrix"),
+                             choiceNames = list(
+                                 HTML("Cross sectional <br> data"),
+                                 HTML("DAG and <br> rates/probs."),
+                                 "MHN thetas"),
+                             choiceValues = list("csd", "dag", "matrix"),
                 selected = "csd"
               )
             ),

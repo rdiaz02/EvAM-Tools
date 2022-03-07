@@ -333,7 +333,10 @@ server <- function(input, output, session) {
     options <- data$gene_names[1:n_genes]
     if(input$input2build == "csd"){
       tags$div(
-        tags$h3("2. Add genotypes"),
+               tags$h3("2. Add genotypes"),
+               tags$h5("Any gene without mutations is excluded from the data, ",
+                       "regardless of the setting for number of genes. ",
+                       "This is a feature, not a bug. "),
             tags$div(class = "inline",
               checkboxGroupInput(inputId = "genotype",
                 label = "Mutations",
