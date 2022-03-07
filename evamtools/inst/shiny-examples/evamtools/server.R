@@ -259,13 +259,14 @@ server <- function(input, output, session) {
   observeEvent(input$change_gene_names, {
     showModal(modalDialog(
       easyClose = TRUE,
-      title = tags$h3("Modify gene names"),
+      title = tags$h3("Change gene names"),
       tags$div(class = "inlin2",
         textInput(inputId = "new_gene_names", "Genes names",
           value = paste(data$gene_names[1:input$gene_number],
           collapse = ", ")
-        ),
-      tags$h3("Please, separate you gene names with a ','"),
+          ),
+        tags$h3(HTML("<br/>")),
+      tags$h4("Separate you gene names with a ','"),
       tags$div(class = "download_button",
         actionButton("action_gene_names", "Change genes names"),
         )
@@ -299,7 +300,7 @@ server <- function(input, output, session) {
   observeEvent(input$display_help, {
     showModal(modalDialog(
       easyClose = TRUE,
-      title = tags$h3("How does it work?"),
+      title = tags$h3("Changing genotype's counts"),
       tags$div(
         tags$p("1. Double click in a Counts cell to edit it"),
         tags$p("2. Press Tab to move to the next row"),
@@ -318,10 +319,11 @@ server <- function(input, output, session) {
 
   # ## Define number of genes
   output$genes_number <- renderUI({
-    val <- ifelse(is.null(data$n_genes), 3, data$n_genes)
-    tags$div(class="inlin",
-      sliderInput("gene_number", "Number of genes",
-        value = val, max = max_genes, min = min_genes, step = 1)
+      val <- ifelse(is.null(data$n_genes), 3, data$n_genes)
+      tags$div(class="inlin",
+               tags$h3(HTML("<br/>")),
+               sliderInput("gene_number", "Number of genes",
+                           value = val, max = max_genes, min = min_genes, step = 1)
     )
   })
 
@@ -351,7 +353,7 @@ server <- function(input, output, session) {
         ),
         if(!is.null(data$lambdas)){
           tags$div(
-            tags$h3("New Edge"),
+                   ## tags$h3("New Edge"),
             tags$div(class = "inline",
               radioButtons(inputId = "dag_from",
               label = "From (parent node)",
@@ -406,8 +408,9 @@ server <- function(input, output, session) {
     if(input$input2build == "csd"){
       tags$div(class = "frame",
         tags$div(class = "flex",
-          tags$h3("3. Change genotype's counts"),
-          actionButton("display_help", "Help"),
+                 tags$h3("3. Change genotype's counts"),
+                 actionButton("display_help", "Help"),
+                 tags$h3(HTML("<br/>")),
         ),
         tags$div(id = "csd_table",
           DT::DTOutput("csd_counts")
