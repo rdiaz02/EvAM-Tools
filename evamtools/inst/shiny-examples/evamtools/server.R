@@ -22,8 +22,16 @@ server <- function(input, output, session) {
   default_cpm_samples <- SHINY_DEFAULTS$cpm_samples
   keep_dataset_name <- FALSE
 
+  random_name <- paste(sample(c(LETTERS, letters), size = 8, replace = TRUE),
+                       collapse = "")
   last_visited_pages <- list(csd = "User", dag = "User", matrix = "User")
-  last_visited_cpm <- "user"
+  ## last_visited_cpm <- "user" ## And why "user" and not "User"?
+ last_visited_cpm <- "User"
+
+  ## last_visited_pages <- list(csd = random_name,
+  ##                            dag = random_name,
+  ##                            matrix = random_name)
+  ## last_visited_cpm <- random_name
 
   datasets <- reactiveValues(
     all_csd = all_csd_data
@@ -251,7 +259,7 @@ server <- function(input, output, session) {
       updateNumericInput(session, "genotype_freq", value = NA)
       updateCheckboxGroupInput(session, "genotype", label = "Mutations",
         choices = lapply(1:n_genes, function(i)data$gene_names[i]), selected = NULL)
-    }, error = function(e){
+    }, error = function(e) {
       showModal(dataModal(e[[1]]))
     })
   })
@@ -261,12 +269,18 @@ server <- function(input, output, session) {
       easyClose = TRUE,
       title = tags$h3("Change gene names"),
       tags$div(class = "inlin2",
-        textInput(inputId = "new_gene_names", "Genes names",
+        textInput(inputId = "new_gene_names", "Gene names",
           value = paste(data$gene_names[1:input$gene_number],
           collapse = ", ")
           ),
         tags$h3(HTML("<br/>")),
-      tags$h4("Separate you gene names with a ','"),
+        tags$h4("Separate you gene names with a ','. ",
+                "Use only alphanumeric characters ",
+                "(of course, do not use comma as part of a gene name), ",
+                "and do not start ",
+                "a gene name with a number; ",
+                "keep gene names short (for figures)." 
+                ),
       tags$div(class = "download_button",
         actionButton("action_gene_names", "Change genes names"),
         )
@@ -334,13 +348,22 @@ server <- function(input, output, session) {
     if(input$input2build == "csd"){
       tags$div(
                tags$h3("2. Add genotypes"),
+               tags$h5("WT is added by not clicking on any mutations; ",
+                       "but the WT genotype should not be the first one added ",
+                       "(or you'll get an innocuous error message)."),
                tags$h5("Any gene without mutations is excluded from the data, ",
-                       "regardless of the setting for number of genes. ",
-                       "This is a feature, not a bug. ",
-                       "If any gene is always observed mutated ",
+                       "regardless of the setting for number of genes. "),
+               tags$h5("If any gene is always observed mutated ",
                        "(i.e., has a constant value of 1 for all observations), ",
                        "one observation with no genes mutated is added ",
                        "to the sample."),
+               tags$h5("Genes that have identical patterns",
+                       "(i.e., that lead to identical columns in the data matrix), ",
+                       "are fused into",
+                       "a single gene."),
+               tags$h5("Genotypes are always shown with gene names ",
+                       "sorted alphanumerically. "),
+               tags$h5(" "),
             tags$div(class = "inline",
               checkboxGroupInput(inputId = "genotype",
                 label = "Mutations",
@@ -664,17 +687,18 @@ server <- function(input, output, session) {
   }, ignoreNULL = FALSE)
 
   observeEvent(input$add_genotype, {
-    tryCatch({
-      genotype <- paste(input$genotype, collapse = ", ")
+      tryCatch({
+      genotype <- paste(sort(input$genotype), collapse = ", ")
       genotype <- ifelse(genotype == "", "WT", genotype)
-      genot_count <- ifelse(is.na(input$genotype_freq), -1, input$genotype_freq)
+      genot_count <- ifelse(is.na(input$genotype_freq), -1,
+                            input$genotype_freq)
 
       if (genot_count >= 0) {
         data$csd_counts[genotype, ] <- c(genotype, genot_count)
         rownames(data$csd_counts) <- data$csd_counts$Genotype
         data$csd_counts[, 2] <- as.numeric(data$csd_counts[, 2])
         ## Filtering out non-positive counts
-        data$csd_counts <- data$csd_counts[data$csd_counts[,2] > 0,]
+        data$csd_counts <- data$csd_counts[data$csd_counts[, 2] > 0,]
         ## FIXME: comment_out_freqs2csd
         ## data$data <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
         ##              evamtools:::freqs2csd(data$csd_counts,
@@ -688,8 +712,10 @@ server <- function(input, output, session) {
       }
       updateNumericInput(session, "genotype_freq", value = NA)
       updateCheckboxGroupInput(session, "genotype", label = "Mutations",
-        choices = lapply(1:input$gene_number, function(i)data$gene_names[i]), selected = NULL)
-    }, error = function(e){
+                               choices = lapply(1:input$gene_number,
+                                                function(i)data$gene_names[i]),
+                               selected = NULL)
+    }, error = function(e) {
       showModal(dataModal(e[[1]]))
     })
   })
