@@ -354,13 +354,13 @@ server <- function(input, output, session) {
             tags$h3("New Edge"),
             tags$div(class = "inline",
               radioButtons(inputId = "dag_from",
-              label = "From",
+              label = "From (parent node)",
               inline = TRUE,
               choices =  c("Root", options))
             ),
             tags$div(class = "inline",
               radioButtons(inputId = "dag_to",
-              label = " To ",
+              label = " To (child node)",
               inline = TRUE,
               choices =  options)
             ),
@@ -519,17 +519,18 @@ server <- function(input, output, session) {
       easyClose = TRUE,
       title = tags$h3("How to build a DAG"),
       tags$div(
-        tags$p("Select a parent node and child node and hit 'Add edge' or 'Remove edge'."),
-        tags$p("But, TAKE CARE"),
-        tags$p("Some edge wont be allowed if: "),
-        tags$li("That edge is already present"),
-        tags$li("It introduces cycles"),
-        tags$p("TO REMOVE EDGES: set a lambda of the relationship to 0"),
-        tags$p("But, TAKE CARE"),
-        tags$p("Breaking edges might reestructure the DAG:"),
-        tags$li("If a node has no parent, it will be assigned as descendent of WT")
-        )
-      )
+               tags$p("Select 'From' (parent node) and 'To' (child node) ",
+                      "and hit 'Add edge' or 'Remove edge'."),
+               tags$li(HTML("An edge wont be allowed if: <ul>")),
+               tags$li("it is already present;"),
+               tags$li("it introduces cycles."),
+               tags$p(HTML("</ul>")),
+               tags$li(HTML("To remove edge you can also "),
+                       "set the lambda of the relationship to 0."),
+               tags$li(HTML("Removing edges might reestructure the DAG."),
+               "If a node has no parent, it will be assigned as descendent of WT.")
+           )
+    )
     )
   })
 
