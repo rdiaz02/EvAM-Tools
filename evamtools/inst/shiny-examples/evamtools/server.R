@@ -391,7 +391,9 @@ server <- function(input, output, session) {
           ),
           if(!is.null(data$thetas)){
             tags$div(
-              tags$h3("Entries are ", HTML("&theta;s, range &plusmn; &infin;"),),
+                     tags$h3("Entries are ",
+                             "lower case thetas, ",
+                             HTML("&theta;s, range &plusmn; &infin;"),),
               DT::DTOutput("thetas_table"),
               tags$h3(HTML("<br/>")),
               numericInput("mhn_samples", "Total genotypes to sample",
