@@ -72,7 +72,7 @@ get_csd <- function(complete_csd){
     return(csd)
 }
 
-modify_dag <- function(dag, from_node, to_node, operation, parent_set){
+modify_dag <- function(dag, from_node, to_node, operation, parent_set, dag_model="HESBCN"){
   value_from_operation <- c(1, 0)
   names(value_from_operation) <- c("add", "remove")
 
@@ -140,9 +140,12 @@ modify_dag <- function(dag, from_node, to_node, operation, parent_set){
     stop("This operation had no effect.")
   }
   g2 <- igraph::graph_from_adjacency_matrix(tmp_dag2, mode = "directed")
-  if(!igraph::is_dag(g2)){
+  if(dag_model %in% c("HESBCN", "OncoBN") && !igraph::is_dag(g2)){
     stop("This relationship breaks the DAG. Revise it.")
+  } else if(dag_model %in% c("OT") && any(number_of_parents > 1)){
+    stop("This operation does not yield a tree.")
   }
+
   ## Recompute parent set
   number_of_parents <- colSums(tmp_dag2)[-1]
   tmp_parent_set <- parent_set
@@ -152,7 +155,7 @@ modify_dag <- function(dag, from_node, to_node, operation, parent_set){
   return(list(dag = tmp_dag2, parent_set = tmp_parent_set))
 }
 
-modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, dag, parent_set){
+modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, dag, parent_set, dag_model){
   if(!all(names(lambdas) == names(parent_set))){
     stop("Lambdas and parent set should have information about the same genes")
   }
@@ -161,11 +164,23 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, da
   }
 
   ## Different lambdas
-  new_lambdas <- as.numeric(info[info["col"] == 3,"value"])
+  if(dag_model %in% c("OncoBN", "HESBCN")){
+    new_lambdas <- as.numeric(info[info["col"] == 3,"value"])
+  } else if (dag_model == "OT"){
+    new_lambdas <- as.numeric(info[info["col"] == 2,"value"])
+  }
+
   if(any(is.na(new_lambdas))){
     stop("There are missing lambdas")
   }
-  old_lambdas <- dag_data$Lambdas
+  if(dag_model == "HESBCN"){
+    old_lambdas <- dag_data$Lambdas
+  } else if (dag_model == "OT"){
+    old_lambdas <- dag_data$Probability
+  } else if (dag_model == "OncoBN"){
+    old_lambdas <- dag_data$Theta
+  }
+  
   all_genes <- dag_data$To
   changed_genes <- all_genes[new_lambdas != old_lambdas
     & new_lambdas > 0]
@@ -180,31 +195,44 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, da
   tmp_lambdas <- lambdas
   tmp_lambdas[changed_genes] <- changed_lambdas
 
+  if (dag_model %in% c("OT", "OncoBN")){
+    tmp_lambdas[tmp_lambdas > 1] <- 1
+    tmp_lambdas[tmp_lambdas < 0] <- 1
+  }
+
   ##Relationships
   number_of_parents <- colSums(dag)[-1]
-  number_of_parents <- number_of_parents[number_of_parents > 0]
   tmp_parent_set <- parent_set
-  new_relationships <- info[info["col"] == 2,"value"]
-  names(new_relationships) <- info[info["col"] == 1,"value"]
-  
-  #Cleaning unwanted value
-  genes_in_relationships <- names(new_relationships)
-  freq_genes_in_relationships <- table(genes_in_relationships)
+  if(dag_model %in% c("HESBCN")){
+    number_of_parents <- number_of_parents[number_of_parents > 0]
+    new_relationships <- info[info["col"] == 2,"value"]
+    names(new_relationships) <- info[info["col"] == 1,"value"]
+    
+    #Cleaning unwanted value
+    genes_in_relationships <- names(new_relationships)
+    freq_genes_in_relationships <- table(genes_in_relationships)
 
-  old_relationships <- stats::setNames(dag_data$Relation, dag_data$To)
-  new_relationships[!(new_relationships %in% c("Single", "AND", "OR", "XOR"))] <- "AND"
-  new_relationships[names(number_of_parents[number_of_parents<2])] <- "Single"
-  new_relationships[setdiff(unique(genes_in_relationships), 
-    names(freq_genes_in_relationships[freq_genes_in_relationships > 1]))] <- "Single"
-  
-  multiple_parents <- names(number_of_parents[number_of_parents > 1])
+    old_relationships <- stats::setNames(dag_data$Relation, dag_data$To)
+    new_relationships[!(new_relationships %in% c("Single", "AND", "OR", "XOR"))] <- "AND"
+    new_relationships[names(number_of_parents[number_of_parents<2])] <- "Single"
+    new_relationships[setdiff(unique(genes_in_relationships), 
+      names(freq_genes_in_relationships[freq_genes_in_relationships > 1]))] <- "Single"
+    
+    multiple_parents <- names(number_of_parents[number_of_parents > 1])
 
-  for(i in multiple_parents){
-    changed_relationships <- setdiff(new_relationships[genes_in_relationships == i], c(parent_set[i]))
-    if (length(changed_relationships) > 0){
-      tmp_parent_set[i] <- changed_relationships[[1]]
+    for(i in multiple_parents){
+      changed_relationships <- setdiff(new_relationships[genes_in_relationships == i], c(parent_set[i]))
+      if (length(changed_relationships) > 0){
+        tmp_parent_set[i] <- changed_relationships[[1]]
+      }
     }
+  } else if (dag_model == "OncoBN"){
+    tmp_parent_set[number_of_parents > 1] <- "OR"
+    tmp_parent_set[number_of_parents <= 1] <- "Single"
+  } else if (dag_model == "OT"){
+    tmp_parent_set[1:length(tmp_parent_set)] <- "Single"
   }
+
   # for(idx in c(1:length(new_relationships))){
   #   tmp_parent_set[names(new_relationships[idx])] <- new_relationships[idx]
   # }
@@ -241,22 +269,35 @@ get_mhn_data <- function(thetas, noise = 0, N = 10000){
   #             data = genotypeCounts_to_data(tmp_samples_as_df, e = 0)))
 }
 
-get_dag_data <- function(data, parent_set, noise = 0, N = 10000){
+get_dag_data <- function(data, parent_set, noise = 0, N = 10000,
+  dag_model = "HESBCN"){
   if (any(is.null(data))) stop("Data should be defined")
   gene_names <- names(parent_set)
   n_genes <- length(parent_set)
+  
+  if (dag_model == "HESBCN"){
+    dag_trm <- HESBCN_model_2_output(data, parent_set)$HESBCN_trans_rate_mat
+    dag_probs <- probs_from_trm(dag_trm)
+  } else if (dag_model == "OT"){
+    data$OT_edgeWeight <- data$Probability 
+    dag_probs <- OT_model_2_predict_genots(data, 0)
+  } else if (dag_model == "OncoBN"){
+    epsilon <- 0.1
+    dag_probs <- OncoBN_model_2_output(data, epsilon)$OncoBN_predicted_genotype_freqs
+  }
 
-  dag_trm <- HESBCN_model_2_output(data, parent_set)$HESBCN_trans_rate_mat
-  dag_probs <- probs_from_trm(dag_trm)
   tmp_samples_as_vector <- genot_probs_2_pD_ordered_sample(x = dag_probs,
-                                                       ngenes = n_genes,
-                                                       gene_names = gene_names,
-                                                       N = N,
-                                                       out = "vector"
-                                                       )
+                                                      ngenes = n_genes,
+                                                      gene_names = gene_names,
+                                                      N = N,
+                                                      out = "vector"
+                                                      )
   data_with_noise <- genotypeCounts_to_data(tmp_samples_as_vector,
     e = noise)
   csd_counts <- data_to_counts(data_with_noise, out="data.frame")
+
+  return(list(csd_counts = csd_counts,
+              data = data_with_noise))
   # csd_counts <- data.frame(Genotype = names(data_as_vector),
                           # Counts = data_as_vector)
   # rownames(csd_counts) <- names(data_as_vector)
@@ -279,8 +320,6 @@ get_dag_data <- function(data, parent_set, noise = 0, N = 10000){
   # return(list(csd_counts = tmp_samples_as_df,
   #             data = genotypeCounts_to_data(tmp_samples_as_df, e = 0)))
   
-  return(list(csd_counts = csd_counts,
-              data = data_with_noise))
 }
 
 create_tabular_data <- function(data) {

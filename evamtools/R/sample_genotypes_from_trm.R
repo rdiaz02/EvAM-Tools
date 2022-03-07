@@ -776,6 +776,7 @@ random_evam <- function(ngenes = NULL, gene_names = NULL,
     output <- list()
     if (model == "MHN") {
         mhn_sparsity <- 1 - graph_density
+        ## Recall these thetas have theta_i,j: effect of j on i.
         thetas <- Random.Theta(n = ngenes, sparsity = mhn_sparsity)
         colnames(thetas) <- rownames(thetas) <- gene_names
         output <- MHN_from_thetas(thetas)
@@ -824,6 +825,7 @@ random_evam <- function(ngenes = NULL, gene_names = NULL,
 
 ## Pablo: use this?
 ## Named matrix of thetas -> all of the model and predicted probs
+## Recall these thetas have theta_i,j: effect of j on i.
 MHN_from_thetas <- function(thetas) {
     oindex <- order(colnames(thetas))
     thetas <- thetas[oindex, oindex]
@@ -1038,6 +1040,13 @@ OT_model_2_output <- function(model, epos) {
 }
 
 OT_model_2_predict_genots <- function(model, epos) {
+    ## Minimal checks, to stop if called incorrectly
+    ## such as from shiny app
+    if ("Relation" %in% colnames(model))
+        stop("OT does not take a Relation column")
+    if (any(table(model$To) > 1))
+        stop("In OT models each gene has at most one parent.")
+    
     ## Obtain the adjacency matrix and ensure adjacency matrix
     ## and weights have genes in same order
     adjm <- igraph::as_adjacency_matrix(
@@ -1212,6 +1221,14 @@ OncoBN_model_2_predict_genots <- function(model, epsilon) {
     ## We need components: graph, theta, model, epsilon
     ## edgelist and score not added.
 
+    ## Minimal checks, to stop if called incorrectly
+    ## such as from shiny app
+    if (any(model$Relation == "XOR"))
+        stop("OncoBN does not accept XOR relations.")
+    if (sum(c("OR", "AND") %in% model$Relation ) > 1)
+        stop("OncoBN does not accept, in the same model, ",
+             "both AND and OR relations")
+    
     obnfit <- list()
     ## In OncoBN what we call Root is called WT
     model$From[model$From == "Root"] <- "WT"
