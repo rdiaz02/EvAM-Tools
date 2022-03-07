@@ -676,7 +676,7 @@ user_input <- function() {
 }
 ui <- 
   navbarPage( 
-    "Evamtools",
+    "", ## "Evamtools",
     id = "navbar",
     header = tags$head(
       tags$style(
