@@ -330,10 +330,13 @@ create_tabular_data <- function(data) {
     attr_to_make_tabular <- c("trans_mat", "trans_rate_mat",
                               "predicted_genotype_freqs"
                               )
-
-    if(!(is.null(data$HESBCN_sampled_genotype_freqs))){
-      attr_to_make_tabular <- c(attr_to_make_tabular, "sampled_genotype_freqs"
-        , "obs_genotype_transitions")
+    for(i in names(data)){
+      if(grepl("sampled_genotype_counts", i)
+        && !(is.null(data[i]))){
+          attr_to_make_tabular <- c(attr_to_make_tabular
+            , "sampled_genotype_counts"
+            , "obs_genotype_transitions")
+      }
     }
 
     tabular_data <- list()
