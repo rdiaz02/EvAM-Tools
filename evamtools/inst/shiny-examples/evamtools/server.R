@@ -1081,7 +1081,7 @@ server <- function(input, output, session) {
     for (i in names(all_cpm_out)){
       all_names <- c(all_names, all_cpm_out[[i]]$orig_data$name)
     }
-    browser()
+
     if (length(all_names) > 0) {
         ## selected <- ifelse(is.null(input$select_csd),
         ##                    "user", input$select_csd)
