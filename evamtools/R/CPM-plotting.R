@@ -96,10 +96,9 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
     }
     paths_from_graph <- paths_from_graph[1:top_paths]
     
-    nodes_in_top_paths <- unique(as.vector(sapply(paths_from_graph,
+    nodes_in_top_paths <- unique(unlist(as.vector(sapply(paths_from_graph,
         function(x) x$name
-    )))
-
+    ))))
     if (type == "genotype"){
         vertex_labels <- sapply(igraph::V(graph)$name,
             function(x){
@@ -286,6 +285,7 @@ plot_genot_fg <- function(trans_mat
         if (is.na(plot_type)) stop("plot_type is NA")
         log_weights <- ifelse(plot_type == "trans_mat", TRUE, FALSE)
         paths_from_graph <- rank_paths(graph, log_weights)$paths
+        
         new_adj_matrix <- compute_matrix_from_top_paths(graph
             , paths_from_graph, top_paths)
         ## Reworking graph based on top_paths
