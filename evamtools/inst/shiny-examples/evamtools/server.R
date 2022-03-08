@@ -393,7 +393,8 @@ server <- function(input, output, session) {
             tags$div(id="fr",
                      numericInput(label = "Counts", value = NA, min = 0,
                                   inputId = "genotype_freq", width = NA),
-              actionButton("add_genotype", "Add genotype")
+              actionButton("add_genotype", "Add genotype"),
+              actionButton("clear_genotype", "Clear data")
             )
         )
     } else if (input$input2build == "dag"){
@@ -466,7 +467,8 @@ server <- function(input, output, session) {
                          value = 0.01, min = 0, max = 1,
                          step = 0.05, width = "50%"),
               tags$h3(HTML("<br/>")),
-              actionButton("resample_mhn", "Sample from MHN")
+              actionButton("resample_mhn", "Sample from MHN"),
+              actionButton("clear_mhn", "Clear data")
             )
           }
         )
@@ -504,17 +506,28 @@ server <- function(input, output, session) {
       , Relation = tmp_dag_parent_set[edges[, "col"] - 1]
       , Lambdas = data$lambdas[edges[, "col"] - 1])
     
+    if((default_dag_model %in% c("OT", "OncoBN"))
+      & (any(dag_data$Lambdas < 0) | any(dag_data$Lambdas > 1))){
+        showModal(dataModal("Thetas/probabilities should be between 0 and 1"))
+        updateRadioButtons(session, "dag_model", selected = "HESBCN")
+    }
+
     if(default_dag_model %in% c("OT")) {
       colnames(dag_data) <- c("From", "To", "Relation", "Probability")
       dag_data$Relation <- NULL
-      dag_data$Probability[dag_data$Probability < 0] <- 0
-      dag_data$Probability[dag_data$Probability > 1] <- 1
+      # dag_data$Probability[dag_data$Probability < 0] <- 0
+      # dag_data$Probability[dag_data$Probability > 1] <- 1
     } else if(default_dag_model %in% c("OncoBN")){
+      if(length(unique(dag_data$Relation))>2){
+        showModal(dataModal("OncoBN model must only include one type of relationship"))
+        updateRadioButtons(session, "dag_model", selected = "HESBCN")
+      }
       colnames(dag_data) <- c("From", "To", "Relation", "Thetas")
-      dag_data$Thetas[dag_data$Thetas < 0] <- 0
-      dag_data$Thetas[dag_data$Thetas > 1] <- 1
-      dag_data$Relation[dag_data$Relation != "Single"] <- "OR"
+      # dag_data$Thetas[dag_data$Thetas < 0] <- 0
+      # dag_data$Thetas[dag_data$Thetas > 1] <- 1
+      # dag_data$Relation[dag_data$Relation != "Single"] <- "OR"
     }
+
     return(dag_data)
   })
 
@@ -537,6 +550,7 @@ server <- function(input, output, session) {
         , dag_model= default_dag_model)
       data$dag <- tmp_data$dag
       data$dag_parent_set <- tmp_data$parent_set
+      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
     },error=function(e){
       showModal(dataModal(e[[1]]))
     })
@@ -550,6 +564,7 @@ server <- function(input, output, session) {
       tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene, operation = "remove", parent_set = data$dag_parent_set)
       data$dag <- tmp_data$dag
       data$dag_parent_set <- tmp_data$parent_set
+      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
     },error=function(e){
       showModal(dataModal(e[[1]]))
     })
@@ -568,6 +583,7 @@ server <- function(input, output, session) {
       data$dag_parent_set <- tmp_data$dag_parent_set
       data$lambdas <- SHINY_DEFAULTS$template_data$lambdas
       names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
+      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
       shinyjs::disable("analysis")
     }, error=function(e){
       showModal(dataModal(e[[1]]))
@@ -579,9 +595,12 @@ server <- function(input, output, session) {
       names(data$dag_parent_set) <- data$gene_names[1:length(data$dag_parent_set)]
       names(data$lambdas) <- data$gene_names[1:length(data$dag_parent_set)]
       info <- input$dag_table_cell_edit
-      tmp_data <- evamtools:::modify_lambdas_and_parent_set_from_table(dag_data(), info, data$lambdas, data$dag, data$dag_parent_set, dag_model= default_dag_model)
+      tmp_data <- evamtools:::modify_lambdas_and_parent_set_from_table(dag_data(), info, data$lambdas
+        , data$dag, data$dag_parent_set
+        , dag_model= default_dag_model)
       data$lambdas <- tmp_data$lambdas
       data$dag_parent_set <- tmp_data$parent_set
+      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
     }, error = function(e){
       showModal(dataModal(e[[1]]))
     })
@@ -685,6 +704,24 @@ server <- function(input, output, session) {
     })
   })
 
+  observeEvent(input$clear_mhn, {
+    tryCatch({
+      tmp_thetas <- SHINY_DEFAULTS$template_data$thetas
+      colnames(tmp_thetas) <- rownames(tmp_thetas) <- data$gene_names
+      data$thetas <- tmp_thetas
+      data$dag <- NULL
+      data$csd_counts <- SHINY_DEFAULTS$template_data$csd_counts
+      data$data <- SHINY_DEFAULTS$template_data$data
+      data$dag_parent_set <- SHINY_DEFAULTS$template_data$dag_parent_set
+      data$lambdas <- SHINY_DEFAULTS$template_data$lambdas
+      names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
+      shinyjs::disable("analysis")
+      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
+    }, error=function(e){
+      showModal(dataModal(e[[1]]))
+    })
+  })
+
   observeEvent(input$how2build_matrix, {
     showModal(modalDialog(
       easyClose = TRUE,
@@ -740,6 +777,24 @@ server <- function(input, output, session) {
       showModal(dataModal(e[[1]]))
     })
   }, ignoreNULL = FALSE)
+
+  observeEvent(input$clear_genotype, {
+    tryCatch({
+      tmp_dag <- SHINY_DEFAULTS$template_data$dag
+      colnames(tmp_dag) <- rownames(tmp_dag) <- c("WT", data$gene_names)
+      tmp_dag["WT", data$gene_names[1]] <- 1
+      data$dag <- NULL
+      data$csd_counts <- SHINY_DEFAULTS$template_data$csd_counts
+      data$data <- SHINY_DEFAULTS$template_data$data
+      data$dag_parent_set <- SHINY_DEFAULTS$template_data$dag_parent_set
+      data$lambdas <- SHINY_DEFAULTS$template_data$lambdas
+      names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
+      shinyjs::disable("analysis")
+      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
+    }, error=function(e){
+      showModal(dataModal(e[[1]]))
+    })
+  })
 
   observeEvent(input$add_genotype, {
       tryCatch({
@@ -941,7 +996,7 @@ server <- function(input, output, session) {
       # }
       sampled_from_CPMs <- NULL
       if(input$do_sampling){
-        n_samples <- input$num_steps
+        n_samples <- input$sample_size
         if(is.null(n_samples) | !is.numeric(n_samples) | n_samples < 100){
           n_samples <- SHINY_DEFAULTS$cpm_samples
         }
@@ -1171,7 +1226,7 @@ server <- function(input, output, session) {
 
   output$original_data <- renderUI({
     ## To see if I disable original data
-    if(length(all_cpm_out) > 0){
+    if(length(names(all_cpm_out)) > 0){
       tags$div(class="frame max_height",
         tags$h3("3. Original data"),
         plotOutput("csd"),

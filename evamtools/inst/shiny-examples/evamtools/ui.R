@@ -408,10 +408,10 @@ user_input <- function() {
         margin-top:0;
       }
 
-      #csd_table{
-        height: 40vh;
-        overflow: auto;
-      }
+      # #csd_table{
+      #   height: 30vh;
+      #   overflow: auto;
+      # }
       .row{
         padding-top: 20px;
       }
@@ -507,6 +507,7 @@ user_input <- function() {
       #all_advanced_options label{
         width: 50%;
       }
+
         ") # end HTML
       ) # end tags$style
     ),
@@ -596,9 +597,12 @@ user_input <- function() {
             ),
             tags$div(id="all_advanced_options", 
                      ## title = tags$h3("Advanced options"),
+                     tags$div(class="inlin",
                      tags$h4("(See additional details for all options ",
                              "in the help of the evam function)"),
                      tags$hr(style="border-color: darkgrey;"),
+                     selectInput("do_sampling", "Do sampling: ", c("True" = TRUE, 
+                  "False" = FALSE), selected = FALSE),
                      numericInput("sample_size", "Number of samples",
                                   SHINY_DEFAULTS$cpm_samples
                                 , min = 0, max = 100000, step = 100,
@@ -620,7 +624,7 @@ user_input <- function() {
                 checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("MCCBN"), choiceValues = c("MCCBN")),
                 tags$h5("Beware: MCCBN may take hours to run"),
                 tags$hr(style="border-color: darkgrey;"),
-                tags$div(class="inlin",
+                
                 tags$h4("MHN options"),
                 numericInput("MHN_lambda", "Lambdas: ", NULL, min=0),
                 tags$h5("Penalty term; default: 1/number of rows of data set. ",
