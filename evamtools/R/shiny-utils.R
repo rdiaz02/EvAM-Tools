@@ -198,15 +198,17 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, da
   tmp_lambdas <- lambdas
   tmp_lambdas[changed_genes] <- changed_lambdas
 
-  if (dag_model %in% c("OT", "OncoBN")){
-    tmp_lambdas[tmp_lambdas > 1] <- 1
-    tmp_lambdas[tmp_lambdas < 0] <- 1
+  if (dag_model %in% c("OT", "OncoBN")
+    & (any(tmp_lambdas < 0) | any(tmp_lambdas > 1))){
+      stop("Thetas/probabilities should be between 0 and 1")
+    # tmp_lambdas[tmp_lambdas > 1] <- 1
+    # tmp_lambdas[tmp_lambdas < 0] <- 1
   }
 
   ##Relationships
   number_of_parents <- colSums(dag)[-1]
-  tmp_parent_set <- parent_set
   if(dag_model %in% c("HESBCN")){
+    tmp_parent_set <- parent_set
     number_of_parents <- number_of_parents[number_of_parents > 0]
     new_relationships <- info[info["col"] == 2,"value"]
     names(new_relationships) <- info[info["col"] == 1,"value"]
@@ -230,9 +232,19 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, da
       }
     }
   } else if (dag_model == "OncoBN"){
-    tmp_parent_set[number_of_parents > 1] <- "OR"
+    tmp_parent_set <- parent_set
+    old_relationships <- dag_data$Relation
+    new_relationships <- info[info["col"] == 2,"value"]
+    new_relationship <- setdiff(new_relationships, old_relationships)
+
+    if(!(new_relationship %in% c("AND", "OR"))){
+      new_relationship <- "OR"
+    }
+    tmp_parent_set[number_of_parents > 1] <- new_relationship
+    # if(length(relationships)>1 && )
     tmp_parent_set[number_of_parents <= 1] <- "Single"
   } else if (dag_model == "OT"){
+    tmp_parent_set <- parent_set
     tmp_parent_set[1:length(tmp_parent_set)] <- "Single"
   }
 
