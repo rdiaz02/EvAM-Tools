@@ -214,7 +214,13 @@ results_simple <- function(){
               ),
               uiOutput("customize"),
               tags$div(class = "frame",
-                tags$h3("Download"),
+                       tags$h3(HTML("Download CPM results <br> and analyzed data")),
+                       tags$h5(HTML("Format and contents: rds file with ",
+                                    "two lists: 1. cpm_output, ",
+                                    "the concatenated output from ",
+                                    "evam and sample_CPMs; 2. the tabular data ",
+                                    "Analyzed data in ",
+                                    " object$cpm_output$analyzed_data")),
                 # tags$div(id = "noprogress",
                 # fileInput("output_cpms", "Load your results"
                 #   , multiple = FALSE,
@@ -573,13 +579,20 @@ user_input <- function() {
             )),
 
             tags$div(class = "frame",
-              tags$h3("Save & Download data"),
+                     tags$h3("Save & Download data"),
+                     tags$h5(HTML("Save dataset with a name ",
+                                  "that will also be used to save the CPM ",
+                                  "output.")),
               uiOutput("dataset_name"),
               tags$div(
                 tags$div(class = "download_button",
                   shinyjs::disabled(actionButton("save_csd_data", "Save Data")),
                 ),
                 tags$div(class = "download_button",
+                         tags$h5(HTML("Contents of saved file: ",
+                                      "the data, DAGs, thetas, etc. that ",
+                                      "you specify in the 'User input' screen ",
+                                      "as a set of lists in an rds file.")),   
                   downloadButton("download_csd", "Download your data")
                 )
               )

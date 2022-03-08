@@ -98,8 +98,10 @@ server <- function(input, output, session) {
 
   # ## Define dataset name
   output$dataset_name <- renderUI({
-    tags$div(class="inlin2",
-      textInput(inputId="dataset_name", "Give your dataset a name", value = input$select_csd)
+    tags$div(class = "inlin2",
+             textInput(inputId = "dataset_name",
+                       "Give your dataset a name",
+                       value = input$select_csd)
     )
   })
 
@@ -246,16 +248,17 @@ server <- function(input, output, session) {
       data$thetas <- tmp_data$thetas
       data$name <- tmp_data$name
 
-      if(input$input2build == "dag"){
-        to_keep <- length(which(colSums(data$dag)>0 | rowSums(data$dag)>0)) - 1
-        n_genes <- ifelse(to_keep < 1 , ngenes, to_keep)
-      } else if(input$input2build == "matrix"){
-        n_genes <- length(which(colSums(abs(data$thetas))>0
-        | rowSums(abs(data$thetas))>0))
+      if (input$input2build == "dag") {
+          to_keep <- length(which(colSums(data$dag) > 0 |
+                                  rowSums(data$dag) > 0)) - 1
+        n_genes <- ifelse(to_keep < 1, ngenes, to_keep)
+      } else if (input$input2build == "matrix") {
+        n_genes <- length(which(colSums(abs(data$thetas)) > 0
+        | rowSums(abs(data$thetas)) > 0))
         n_genes <- ifelse(n_genes <= 0, 3, n_genes)
-      } else if (input$input2build == "csd" & !is.null(data$data)){
+      } else if (input$input2build == "csd" && !is.null(data$data)) {
         n_genes <- ncol(data$data)
-      } else if (input$input2build == "csd" & is.null(data$data)){
+      } else if (input$input2build == "csd" && is.null(data$data)) {
         n_genes <- SHINY_DEFAULTS$ngenes
       }
 
@@ -486,7 +489,9 @@ server <- function(input, output, session) {
     from_gene <- input$dag_from
     to_gene <- input$dag_to
     tryCatch({
-      tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene, operation = "add", parent_set = data$dag_parent_set)
+        tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene,
+                                           operation = "add",
+                                           parent_set = data$dag_parent_set)
       data$dag <- tmp_data$dag
       data$dag_parent_set <- tmp_data$parent_set
     },error=function(e){
@@ -499,7 +504,9 @@ server <- function(input, output, session) {
     from_gene <- input$dag_from
     to_gene <- input$dag_to
     tryCatch({
-      tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene, operation = "remove", parent_set = data$dag_parent_set)
+        tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene,
+                                           operation = "remove",
+                                           parent_set = data$dag_parent_set)
       data$dag <- tmp_data$dag
       data$dag_parent_set <- tmp_data$parent_set
     },error=function(e){
@@ -910,9 +917,9 @@ server <- function(input, output, session) {
       tabular_data <- evamtools:::create_tabular_data(c(cpm_output, sampled_from_CPMs))
 
       all_evam_output <- list("cpm_output" = c(cpm_output, sampled_from_CPMs)
-        , "orig_data" = orig_data
-        , "tabular_data" = tabular_data 
-      )
+                             , "orig_data" = orig_data
+                            , "tabular_data" = tabular_data 
+                              )
 
       ##CPM output name
       result_index <- length(grep(sprintf("^%s", input$select_csd),
@@ -1166,7 +1173,8 @@ server <- function(input, output, session) {
   output$download_cpm <- downloadHandler(
     filename = function() sprintf("%s_cpm.RDS", input$select_cpm),
     content = function(file) {
-      saveRDS(all_cpm_out[[input$select_cpm]], file)
+        saveRDS(all_cpm_out[[input$select_cpm]][c("cpm_output", "tabular_data")],
+                file)
     }
   )
 
