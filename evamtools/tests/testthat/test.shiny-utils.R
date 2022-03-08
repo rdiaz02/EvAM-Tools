@@ -346,7 +346,6 @@ test_that("Create tabular data from CPM output works correctly", {
 
 
   tabular_data <- create_tabular_data(cpm_out)
-
   expect_equal(1,
                length(unique(
                    colSums(tabular_data$sampled_genotype_counts[, -c(1, 2)]))))

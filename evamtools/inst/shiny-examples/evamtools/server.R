@@ -409,6 +409,9 @@ server <- function(input, output, session) {
             numericInput("dag_samples", HTML("Total genotypes to sample"),
                          value = default_csd_samples, min = 100, max = 10000,
                          step = 100, width = "50%"),
+            numericInput("dag_noise", HTML("Noise"),
+                         value = 0.01, min = 0, max = 1,
+                         step = 0.05, width = "50%"),
             tags$h3(HTML("<br/>")),
             actionButton("resample_dag", "Sample from DAG")
             )
@@ -432,6 +435,9 @@ server <- function(input, output, session) {
               numericInput("mhn_samples", "Total genotypes to sample",
                            value = default_csd_samples, min = 100, max = 10000,
                            step = 100, width = "50%"),
+              numericInput("mhn_noise", HTML("Noise"),
+                         value = 0.01, min = 0, max = 1,
+                         step = 0.05, width = "50%"),
               tags$h3(HTML("<br/>")),
               actionButton("resample_mhn", "Sample from MHN")
             )
