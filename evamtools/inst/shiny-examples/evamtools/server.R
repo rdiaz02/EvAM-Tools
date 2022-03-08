@@ -22,12 +22,15 @@ server <- function(input, output, session) {
   default_cpm_samples <- SHINY_DEFAULTS$cpm_samples
   keep_dataset_name <- FALSE
 
-  random_name <- paste(sample(c(LETTERS, letters), size = 8, replace = TRUE),
-                       collapse = "")
   last_visited_pages <- list(csd = "User", dag = "User", matrix = "User")
-  last_visited_cpm <- "user" ## And why "user" and not "User"?
-  ## last_visited_cpm <- "User"
 
+  ## FIXME: No default "user"
+  ## last_visited_cpm <- "user" ## And why "user" and not "User"?
+  last_visited_cpm <- ""
+  
+
+  ## random_name <- paste(sample(c(LETTERS, letters), size = 8, replace = TRUE),
+  ##                    collapse = "")
   ## last_visited_pages <- list(csd = random_name,
   ##                            dag = random_name,
   ##                            matrix = random_name)
@@ -943,8 +946,10 @@ server <- function(input, output, session) {
     })
   })
 
-  cpm_out <- sample_evam_output
-  all_cpm_out <- reactiveValues(user = cpm_out)
+  ## FIXME: No default "user"
+  ## cpm_out <- sample_evam_output
+  ## all_cpm_out <- reactiveValues(user = cpm_out)
+  all_cpm_out <- reactiveValues()
 
   output$sims <- renderUI({
     if ((length(names(all_cpm_out)) > 0) && (!is.null(input$select_cpm))) {
@@ -1078,17 +1083,22 @@ server <- function(input, output, session) {
 
   output$cpm_list <- renderUI({
     all_names <- c()
-    for (i in names(all_cpm_out)){
+    for (i in names(all_cpm_out)) {
       all_names <- c(all_names, all_cpm_out[[i]]$orig_data$name)
     }
 
-    if (length(all_names) > 0) {
+    ## FIXME: No default "user"
+    if ((length(all_names) > 0) && (last_visited_cpm != "")) {
+        selected <- names(all_cpm_out)
+    ## if (length(all_names) > 0) {
+        ## The first selected is dead code
         ## selected <- ifelse(is.null(input$select_csd),
         ##                    "user", input$select_csd)
-        selected <- ifelse(input$select_csd %in%
-                           names(all_cpm_out),
-                           input$select_csd, "user")
-
+        ## selected <- ifelse(input$select_csd %in%
+        ##                    names(all_cpm_out),
+        ##                    input$select_csd, "user")
+        
+        
         tagList(
             radioButtons(
                 inputId = "select_cpm",
