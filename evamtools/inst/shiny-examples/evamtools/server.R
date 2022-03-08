@@ -25,8 +25,8 @@ server <- function(input, output, session) {
   random_name <- paste(sample(c(LETTERS, letters), size = 8, replace = TRUE),
                        collapse = "")
   last_visited_pages <- list(csd = "User", dag = "User", matrix = "User")
-  ## last_visited_cpm <- "user" ## And why "user" and not "User"?
- last_visited_cpm <- "User"
+  last_visited_cpm <- "user" ## And why "user" and not "User"?
+  ## last_visited_cpm <- "User"
 
   ## last_visited_pages <- list(csd = random_name,
   ##                            dag = random_name,
@@ -105,10 +105,10 @@ server <- function(input, output, session) {
   # })
 
   ## Saving dataset
-  observeEvent(input$save_csd_data,{
+  observeEvent(input$save_csd_data, {
     tryCatch({
       ## 1 save dataset to list after user data
-      if(!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))){
+      if (!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))){
           datasets$all_csd[[input$input2build]][[input$dataset_name]]$name <-
               input$dataset_name
 
@@ -144,7 +144,8 @@ server <- function(input, output, session) {
 
         ## 2 restore default values
         try({
-          datasets$all_csd[[input$input2build]][[input$select_csd]] <- all_csd_data[[input$input2build]][[input$select_csd]]
+            datasets$all_csd[[input$input2build]][[input$select_csd]] <-
+                all_csd_data[[input$input2build]][[input$select_csd]]
         })
 
         ## 3 update selected entry
@@ -911,7 +912,8 @@ server <- function(input, output, session) {
       )
 
       ##CPM output name
-      result_index <- length(grep(sprintf("^%s", input$select_csd), names(all_cpm_out)))
+      result_index <- length(grep(sprintf("^%s", input$select_csd),
+                                  names(all_cpm_out)))
       result_name <- ifelse(result_index == 0
         , input$select_csd
         , sprintf("%s__%s", input$select_csd, result_index))
@@ -1079,20 +1081,23 @@ server <- function(input, output, session) {
     for (i in names(all_cpm_out)){
       all_names <- c(all_names, all_cpm_out[[i]]$orig_data$name)
     }
+    browser()
+    if (length(all_names) > 0) {
+        ## selected <- ifelse(is.null(input$select_csd),
+        ##                    "user", input$select_csd)
+        selected <- ifelse(input$select_csd %in%
+                           names(all_cpm_out),
+                           input$select_csd, "user")
 
-    if(length(all_names) > 0){
-      selected <- ifelse(is.null(input$select_csd), "user", input$select_csd)
-      selected <- ifelse(input$select_csd %in% names(all_cpm_out),input$select_csd, "user")
-
-      tagList(
-        radioButtons(
-          inputId = "select_cpm",
-          label = "",
-          selected = last_visited_cpm,
-          choiceNames = names(all_cpm_out),
-          choiceValues = names(all_cpm_out)
+        tagList(
+            radioButtons(
+                inputId = "select_cpm",
+                label = "",
+                selected = last_visited_cpm,
+                choiceNames = names(all_cpm_out),
+                choiceValues = names(all_cpm_out)
+            )
         )
-      )
     }
   })
 
