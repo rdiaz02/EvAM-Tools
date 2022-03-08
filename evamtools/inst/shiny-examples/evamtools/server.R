@@ -24,7 +24,18 @@ server <- function(input, output, session) {
   keep_dataset_name <- FALSE
 
   last_visited_pages <- list(csd = "User", dag = "User", matrix = "User")
-  last_visited_cpm <- "user"
+
+  ## FIXME: No default "user"
+  ## last_visited_cpm <- "user" ## And why "user" and not "User"?
+  last_visited_cpm <- ""
+  
+
+  ## random_name <- paste(sample(c(LETTERS, letters), size = 8, replace = TRUE),
+  ##                    collapse = "")
+  ## last_visited_pages <- list(csd = random_name,
+  ##                            dag = random_name,
+  ##                            matrix = random_name)
+  ## last_visited_cpm <- random_name
 
   datasets <- reactiveValues(
     all_csd = all_csd_data
@@ -98,10 +109,10 @@ server <- function(input, output, session) {
   # })
 
   ## Saving dataset
-  observeEvent(input$save_csd_data,{
+  observeEvent(input$save_csd_data, {
     tryCatch({
       ## 1 save dataset to list after user data
-      if(!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))){
+      if (!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))){
           datasets$all_csd[[input$input2build]][[input$dataset_name]]$name <-
               input$dataset_name
 
@@ -137,7 +148,8 @@ server <- function(input, output, session) {
 
         ## 2 restore default values
         try({
-          datasets$all_csd[[input$input2build]][[input$select_csd]] <- all_csd_data[[input$input2build]][[input$select_csd]]
+            datasets$all_csd[[input$input2build]][[input$select_csd]] <-
+                all_csd_data[[input$input2build]][[input$select_csd]]
         })
 
         ## 3 update selected entry
@@ -258,7 +270,7 @@ server <- function(input, output, session) {
       updateNumericInput(session, "genotype_freq", value = NA)
       updateCheckboxGroupInput(session, "genotype", label = "Mutations",
         choices = lapply(1:n_genes, function(i)data$gene_names[i]), selected = NULL)
-    }, error = function(e){
+    }, error = function(e) {
       showModal(dataModal(e[[1]]))
     })
   })
@@ -268,12 +280,18 @@ server <- function(input, output, session) {
       easyClose = TRUE,
       title = tags$h3("Change gene names"),
       tags$div(class = "inlin2",
-        textInput(inputId = "new_gene_names", "Genes names",
+        textInput(inputId = "new_gene_names", "Gene names",
           value = paste(data$gene_names[1:input$gene_number],
           collapse = ", ")
           ),
         tags$h3(HTML("<br/>")),
-      tags$h4("Separate you gene names with a ','"),
+        tags$h4("Separate you gene names with a ','. ",
+                "Use only alphanumeric characters ",
+                "(of course, do not use comma as part of a gene name), ",
+                "and do not start ",
+                "a gene name with a number; ",
+                "keep gene names short (for figures)." 
+                ),
       tags$div(class = "download_button",
         actionButton("action_gene_names", "Change genes names"),
         )
@@ -351,13 +369,22 @@ server <- function(input, output, session) {
     if(input$input2build == "csd"){
       tags$div(
                tags$h3("2. Add genotypes"),
+               tags$h5("WT is added by not clicking on any mutations; ",
+                       "but the WT genotype should not be the first one added ",
+                       "(or you'll get an innocuous error message)."),
                tags$h5("Any gene without mutations is excluded from the data, ",
-                       "regardless of the setting for number of genes. ",
-                       "This is a feature, not a bug. ",
-                       "If any gene is always observed mutated ",
+                       "regardless of the setting for number of genes. "),
+               tags$h5("If any gene is always observed mutated ",
                        "(i.e., has a constant value of 1 for all observations), ",
                        "one observation with no genes mutated is added ",
                        "to the sample."),
+               tags$h5("Genes that have identical patterns",
+                       "(i.e., that lead to identical columns in the data matrix), ",
+                       "are fused into",
+                       "a single gene."),
+               tags$h5("Genotypes are always shown with gene names ",
+                       "sorted alphanumerically. "),
+               tags$h5(" "),
             tags$div(class = "inline",
               checkboxGroupInput(inputId = "genotype",
                 label = "Mutations",
@@ -402,7 +429,7 @@ server <- function(input, output, session) {
             tags$h5(HTML("<p></p>")),
             actionButton("add_edge", "Add edge"),
             actionButton("remove_edge", "Remove edge"),
-            actionButton("clear_dag", "Clear dag"),
+            actionButton("clear_dag", "Clear DAG"),
             tags$h3(HTML("<br/>DAG table")),
             DT::DTOutput("dag_table"),
             tags$h3(HTML("<br/>")),
@@ -715,17 +742,18 @@ server <- function(input, output, session) {
   }, ignoreNULL = FALSE)
 
   observeEvent(input$add_genotype, {
-    tryCatch({
-      genotype <- paste(input$genotype, collapse = ", ")
+      tryCatch({
+      genotype <- paste(sort(input$genotype), collapse = ", ")
       genotype <- ifelse(genotype == "", "WT", genotype)
-      genot_count <- ifelse(is.na(input$genotype_freq), -1, input$genotype_freq)
+      genot_count <- ifelse(is.na(input$genotype_freq), -1,
+                            input$genotype_freq)
 
       if (genot_count >= 0) {
         data$csd_counts[genotype, ] <- c(genotype, genot_count)
         rownames(data$csd_counts) <- data$csd_counts$Genotype
         data$csd_counts[, 2] <- as.numeric(data$csd_counts[, 2])
         ## Filtering out non-positive counts
-        data$csd_counts <- data$csd_counts[data$csd_counts[,2] > 0,]
+        data$csd_counts <- data$csd_counts[data$csd_counts[, 2] > 0,]
         ## FIXME: comment_out_freqs2csd
         ## data$data <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
         ##              evamtools:::freqs2csd(data$csd_counts,
@@ -739,8 +767,10 @@ server <- function(input, output, session) {
       }
       updateNumericInput(session, "genotype_freq", value = NA)
       updateCheckboxGroupInput(session, "genotype", label = "Mutations",
-        choices = lapply(1:input$gene_number, function(i)data$gene_names[i]), selected = NULL)
-    }, error = function(e){
+                               choices = lapply(1:input$gene_number,
+                                                function(i)data$gene_names[i]),
+                               selected = NULL)
+    }, error = function(e) {
       showModal(dataModal(e[[1]]))
     })
   })
@@ -937,7 +967,8 @@ server <- function(input, output, session) {
       )
 
       ##CPM output name
-      result_index <- length(grep(sprintf("^%s", input$select_csd), names(all_cpm_out)))
+      result_index <- length(grep(sprintf("^%s", input$select_csd),
+                                  names(all_cpm_out)))
       result_name <- ifelse(result_index == 0
         , input$select_csd
         , sprintf("%s__%s", input$select_csd, result_index))
@@ -967,8 +998,10 @@ server <- function(input, output, session) {
     })
   })
 
-  cpm_out <- sample_evam_output
-  all_cpm_out <- reactiveValues(user = cpm_out)
+  ## FIXME: No default "user"
+  ## cpm_out <- sample_evam_output
+  ## all_cpm_out <- reactiveValues(user = cpm_out)
+  all_cpm_out <- reactiveValues()
 
   output$sims <- renderUI({
     if ((length(names(all_cpm_out)) > 0) && (!is.null(input$select_cpm))) {
@@ -1104,23 +1137,31 @@ server <- function(input, output, session) {
 
   output$cpm_list <- renderUI({
     all_names <- c()
-    for (i in names(all_cpm_out)){
+    for (i in names(all_cpm_out)) {
       all_names <- c(all_names, all_cpm_out[[i]]$orig_data$name)
     }
 
-    if(length(all_names) > 0){
-      selected <- ifelse(is.null(input$select_csd), "user", input$select_csd)
-      selected <- ifelse(input$select_csd %in% names(all_cpm_out),input$select_csd, "user")
-
-      tagList(
-        radioButtons(
-          inputId = "select_cpm",
-          label = "",
-          selected = last_visited_cpm,
-          choiceNames = names(all_cpm_out),
-          choiceValues = names(all_cpm_out)
+    ## FIXME: No default "user"
+    if ((length(all_names) > 0) && (last_visited_cpm != "")) {
+        selected <- names(all_cpm_out)
+    ## if (length(all_names) > 0) {
+        ## The first selected is dead code
+        ## selected <- ifelse(is.null(input$select_csd),
+        ##                    "user", input$select_csd)
+        ## selected <- ifelse(input$select_csd %in%
+        ##                    names(all_cpm_out),
+        ##                    input$select_csd, "user")
+        
+        
+        tagList(
+            radioButtons(
+                inputId = "select_cpm",
+                label = "",
+                selected = last_visited_cpm,
+                choiceNames = names(all_cpm_out),
+                choiceValues = names(all_cpm_out)
+            )
         )
-      )
     }
   })
 

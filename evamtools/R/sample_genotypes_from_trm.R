@@ -1026,7 +1026,10 @@ OT_model_2_output <- function(model, epos) {
     ## We need to go back to the DAG representation
     ## Different from CBN: we obtain the probs. of genotypes
     ## using a call in Oncotree, that expects and oncotree.fit object.
-
+    
+    if (any(model$OT_edgeWeight > 1) || any(model$OT_edgeWeight < 0))
+        stop("OncoBN's thetas must be between 0 and 1.")
+    
     tmpo <- cpm2tm(list(edges = model))
     output <- list()
     output[["OT_f_graph"]] <- tmpo[["weighted_fgraph"]]
@@ -1200,9 +1203,10 @@ OncoBN_model_from_edges_thetas_parent_set <- function(edges,
 ## Pablo
 OncoBN_model_2_output <- function(model, epsilon) {
     ## We need to go back to the DAG representation
-    ## Different from CBN: we obtain the probs. of genotypes
-    ## using a call in Oncotree, that expects and oncotree.fit object.
-
+ 
+    if (any(model$Thetas > 1) || any(model$Thetas < 0))
+        stop("OncoBN's thetas must be between 0 and 1.")
+    
     tmpo <- cpm2tm(list(edges = model))
     output <- list()
     output[["OncoBN_f_graph"]] <- tmpo[["weighted_fgraph"]]
