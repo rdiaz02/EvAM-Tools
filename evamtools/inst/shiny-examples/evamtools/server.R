@@ -250,9 +250,9 @@ server <- function(input, output, session) {
       data$thetas <- tmp_data$thetas
       data$name <- tmp_data$name
 
-<<<<<<< HEAD
       if(input$input2build == "dag"){
-        to_keep <- length(which(colSums(data$dag)>0 | rowSums(data$dag)>0)) - 1
+          to_keep <- length(which(colSums(data$dag) > 0 |
+                                  rowSums(data$dag) > 0)) - 1
         n_genes <- ifelse(to_keep < 1 , ngenes, to_keep)
         number_of_parents <- colSums(data$dag)
         if(input$dag_model == "OT" && any(number_of_parents > 1)){
@@ -262,15 +262,6 @@ server <- function(input, output, session) {
       } else if(input$input2build == "matrix"){
         n_genes <- length(which(colSums(abs(data$thetas))>0
         | rowSums(abs(data$thetas))>0))
-=======
-      if (input$input2build == "dag") {
-          to_keep <- length(which(colSums(data$dag) > 0 |
-                                  rowSums(data$dag) > 0)) - 1
-        n_genes <- ifelse(to_keep < 1, ngenes, to_keep)
-      } else if (input$input2build == "matrix") {
-        n_genes <- length(which(colSums(abs(data$thetas)) > 0
-        | rowSums(abs(data$thetas)) > 0))
->>>>>>> f4011c8cbca09c4dd228fbc147fe82d3625f678d
         n_genes <- ifelse(n_genes <= 0, 3, n_genes)
       } else if (input$input2build == "csd" && !is.null(data$data)) {
         n_genes <- ncol(data$data)
@@ -557,15 +548,10 @@ server <- function(input, output, session) {
     from_gene <- input$dag_from
     to_gene <- input$dag_to
     tryCatch({
-<<<<<<< HEAD
-      tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene, operation = "add"
-        , parent_set = data$dag_parent_set
-        , dag_model= default_dag_model)
-=======
+
         tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene,
                                            operation = "add",
                                            parent_set = data$dag_parent_set)
->>>>>>> f4011c8cbca09c4dd228fbc147fe82d3625f678d
       data$dag <- tmp_data$dag
       data$dag_parent_set <- tmp_data$parent_set
       datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
