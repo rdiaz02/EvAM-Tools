@@ -1015,10 +1015,12 @@ server <- function(input, output, session) {
             
         sampled_from_CPMs <-
             sample_CPMs(cpm_output, n_samples , methods,
-                        out = ifelse(input$do_genotype_transitions, 
+                        out = if (input$do_genotype_transitions) { 
                                      c("sampled_genotype_counts",
-                                       "obs_genotype_transitions"),
-                                     "sampled_genotype_counts"),
+                                       "obs_genotype_transitions")
+                                     } else {
+                                         "sampled_genotype_counts"
+                                     },
                       , obs_noise = input$sample_noise)
       }
       
