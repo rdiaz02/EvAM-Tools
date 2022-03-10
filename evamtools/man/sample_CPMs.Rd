@@ -39,7 +39,8 @@ sample_CPMs(cpm_output,  N,
   obtained by sampling from the predicted frequencies. See also
   Description, below}.
     \item{obs_genotype_transitions: }{Number of observed transitions between   genotypes (as a sparse matrix).}
-    \item{state_counts: }{Number of times each genotype was visited during the transitions. Column sums of observed transitions are equal to state counts.}
+    \item{state_counts: }{Number of times each genotype was visited
+  during the transitions. Column sums of observed genotype transitions are equal to state counts.}
     \item{sampled_genotype_counts_as_data: }{The genotypes in a matrix of 0/1. This can directly be passed as an argument for \code{\link{evam}}, as the input data.}
   }
   
