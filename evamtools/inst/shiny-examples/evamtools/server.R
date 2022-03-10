@@ -114,7 +114,7 @@ server <- function(input, output, session) {
   observeEvent(input$save_csd_data, {
     tryCatch({
       ## 1 save dataset to list after user data
-      if (!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))){
+      # if (!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))){
           datasets$all_csd[[input$input2build]][[input$dataset_name]]$name <-
               input$dataset_name
 
@@ -136,49 +136,50 @@ server <- function(input, output, session) {
           , lambdas = data$lambdas
           , thetas = data$thetas
           , trm = data$trm
+          , n_genes = input$gene_number
           , name = input$dataset_name)
         datasets$all_csd[[input$input2build]][[input$dataset_name]] <- tmp_data
 
-        tmp_data_2 <- datasets$all_csd[[input$input2build]]
-        datasets$all_csd[[input$input2build]] <-
-          c(tmp_data_2["User"]
-          , tmp_data_2[input$dataset_name]
-          , tmp_data_2[which(!(names(tmp_data_2) %in% c("User",
-            input$dataset_name, names(all_csd_data))))]
-          , tmp_data_2[which(names(datasets$all_csd[[input$input2build]]) %in% names(all_csd_data))]
-        )
+        # tmp_data_2 <- datasets$all_csd[[input$input2build]]
+        # datasets$all_csd[[input$input2build]] <-
+        #   c(tmp_data_2["User"]
+        #   , tmp_data_2[input$dataset_name]
+        #   , tmp_data_2[which(!(names(tmp_data_2) %in% c("User",
+        #     input$dataset_name, names(all_csd_data))))]
+        #   , tmp_data_2[which(names(datasets$all_csd[[input$input2build]]) %in% names(all_csd_data))]
+        # )
 
-        ## 2 restore default values
-        try({
-            datasets$all_csd[[input$input2build]][[input$select_csd]] <-
-                all_csd_data[[input$input2build]][[input$select_csd]]
-        })
+        # ## 2 restore default values
+        # try({
+        #     datasets$all_csd[[input$input2build]][[input$select_csd]] <-
+        #         all_csd_data[[input$input2build]][[input$select_csd]]
+        # })
 
         ## 3 update selected entry
         updateRadioButtons(session, "select_csd", selected = input$dataset_name)
 
-        shinyjs::disable("save_csd_data")
-      }
+        # shinyjs::disable("save_csd_data")
+      # }
       }, error=function(e){
         showModal(dataModal(e[[1]]))
       })
   })
 
   # observeEvent(listen2dataset_name(), {
-  observeEvent(input$dataset_name, {
+  # observeEvent(input$dataset_name, {
     
-    tryCatch({
-      dataset_name <- ifelse(is.null(input$dataset_name), "", input$dataset_name)
-      if(dataset_name != "" &
-        !(dataset_name %in% names(datasets$all_csd[[input$input2build]]))) {
-        shinyjs::enable("save_csd_data")
-      }else if(dataset_name %in% names(datasets$all_csd[[input$input2build]])){
-        shinyjs::disable("save_csd_data")
-      }
-    }, error = function(e){
-      showModal(dataModal(e[[1]]))
-    })
-  })
+  #   tryCatch({
+  #     dataset_name <- ifelse(is.null(input$dataset_name), "", input$dataset_name)
+  #     if(dataset_name != "" &
+  #       !(dataset_name %in% names(datasets$all_csd[[input$input2build]]))) {
+  #       shinyjs::enable("save_csd_data")
+  #     }else if(dataset_name %in% names(datasets$all_csd[[input$input2build]])){
+  #       shinyjs::disable("save_csd_data")
+  #     }
+  #   }, error = function(e){
+  #     showModal(dataModal(e[[1]]))
+  #   })
+  # })
 
   ## Download csd button
   output$download_csd <- downloadHandler(
@@ -249,26 +250,33 @@ server <- function(input, output, session) {
       data$lambdas <- tmp_data$lambdas
       data$thetas <- tmp_data$thetas
       data$name <- tmp_data$name
+      data$n_genes <- tmp_data$n_genes
       
       if (input$input2build == "dag") {
-          to_keep <- length(which(colSums(data$dag) > 0 |
-                                  rowSums(data$dag) > 0)) - 1
-          n_genes <- ifelse(to_keep < 1, ngenes, to_keep)
+          # to_keep <- length(which(colSums(data$dag) > 0 |
+          #                         rowSums(data$dag) > 0)) - 1
           ## to_keep <- sum(colSums(data$dag) > 0)
           ## if (to_keep < 2) {
           ##     showModal(dataModal("You have only defined one relationship"))
           ##     updateRadioButtons(session, "dag_model", selected = "HESBCN")
           ## }
-          ngenes <- to_keep
+          # ngenedats <- to_keep
           number_of_parents <- colSums(data$dag)
-          if (input$dag_model == "OT" && any(number_of_parents > 1)) {
-              showModal(dataModal("This DAG cannot be transformed into a tree"))
-              updateRadioButtons(session, "dag_model", selected = "HESBCN")
-          }
+          to_keep <- sum(number_of_parents > 0)
+          n_genes <- ifelse(to_keep < 1, SHINY_DEFAULTS$ngenes, to_keep)
+          # if (input$dag_model == "OT" && any(number_of_parents > 1)) {
+          #     showModal(dataModal("This DAG cannot be transformed into a tree"))
+          #     # updateRadioButtons(session, "dag_model", selected = "HESBCN")
+          # }
+          updateRadioButtons(session, "dag_model", selected = "HESBCN")
       } else if (input$input2build == "matrix") {
-          n_genes <- length(which(colSums(abs(data$thetas)) > 0
-                                  | rowSums(abs(data$thetas)) > 0))
-          n_genes <- ifelse(n_genes <= 0, 3, n_genes)
+          # n_genes <- length(which(colSums(abs(data$thetas)) > 0
+          #                         | rowSums(abs(data$thetas)) > 0))
+          # n_genes <- ifelse(n_genes <= 0, 3, n_genes)
+          n_genes <- data$n_genes
+          if(is.null(n_genes)){
+            n_genes <- SHINY_DEFAULTS$ngenes
+          }
       } else if (input$input2build == "csd" && !is.null(data$data)) {
           n_genes <- ncol(data$data)
       } else if (input$input2build == "csd" && is.null(data$data)) {
@@ -283,6 +291,10 @@ server <- function(input, output, session) {
     }, error = function(e) {
       showModal(dataModal(e[[1]]))
     })
+  })
+
+  observeEvent(input$gene_number, {
+    datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <- input$gene_number
   })
 
   observeEvent(input$change_gene_names, {
@@ -455,6 +467,9 @@ server <- function(input, output, session) {
             numericInput("dag_noise", HTML("Noise"),
                          value = 0.01, min = 0, max = 1,
                          step = 0.05, width = "50%"),
+            numericInput("dag_epos", HTML("Epos/Epsilon"),
+                         value = 0.01, min = 0, max = 1,
+                         step = 0.05, width = "50%"),
             tags$h3(HTML("<br/>")),
             actionButton("resample_dag", "Sample from DAG")
             )
@@ -505,6 +520,7 @@ server <- function(input, output, session) {
     }
   })
 
+
   # ## DAG builder
   # ## Controling dag builder
   dag_data <- reactive({
@@ -516,6 +532,12 @@ server <- function(input, output, session) {
     x <- length(tmp_dag_parent_set)
     ## I have to this weird thing because using data$gene_names does not work for some unkown reason
     names(tmp_dag_parent_set) <- all_gene_names[seq(2, x + 1)]
+
+    # lambdas <- data$lambdas
+    # if(default_dag_model %in% c("OT")) {
+    #   lambdas <- rep(0.9, 10)
+    #   names(lambdas) <- data$gene_names
+    # }
     dag_data <- data.frame(From = all_gene_names[edges[, "row"]]
       , To = all_gene_names[edges[, "col"]]
       , Relation = tmp_dag_parent_set[edges[, "col"] - 1]
@@ -530,6 +552,8 @@ server <- function(input, output, session) {
     if(default_dag_model %in% c("OT")) {
       colnames(dag_data) <- c("From", "To", "Relation", "Weight")
       dag_data$Relation <- NULL
+      # data$lambdas <- data$lambdas - 0.1
+      # dag_data$Lambdas <- data$lambdas[edges[, "col"] - 1]
      
     } else if(default_dag_model %in% c("OncoBN")){
       if(length(unique(dag_data$Relation))>2){
@@ -558,12 +582,15 @@ server <- function(input, output, session) {
     to_gene <- input$dag_to
     tryCatch({
 
-        tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene,
-                                           operation = "add",
-                                           parent_set = data$dag_parent_set)
+      tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene,
+                                          operation = "add",
+                                          parent_set = data$dag_parent_set)
       data$dag <- tmp_data$dag
       data$dag_parent_set <- tmp_data$parent_set
       datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
+      if(default_dag_model != "OT"){
+        shinyjs::click("resample_dag")
+      }
     },error=function(e){
       showModal(dataModal(e[[1]]))
     })
@@ -580,6 +607,11 @@ server <- function(input, output, session) {
       data$dag <- tmp_data$dag
       data$dag_parent_set <- tmp_data$parent_set
       datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
+      if(sum(data$dag) == 0) {
+        data$csd_counts <- datasets$all_csd[[input$input2build]][[input$select_csd]]$csd_counts
+      } else if (default_dag_model != "OT"){
+        shinyjs::click("resample_dag")
+      }
     },error=function(e){
       showModal(dataModal(e[[1]]))
     })
@@ -616,6 +648,7 @@ server <- function(input, output, session) {
       data$lambdas <- tmp_data$lambdas
       data$dag_parent_set <- tmp_data$parent_set
       datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
+      shinyjs::click("resample_dag")
     }, error = function(e){
       showModal(dataModal(e[[1]]))
     })
@@ -623,13 +656,15 @@ server <- function(input, output, session) {
 
   ## Building trm from dag
   observeEvent(input$resample_dag, {
-      tryCatch({
-
+    tryCatch({
+      gene_names <- setdiff(unique(c(dag_data()$From, dag_data()$To)), "Root")
+      number_of_genes <- length(gene_names)
       tmp_dag_data <- evamtools:::get_dag_data(dag_data()
-        , data$dag_parent_set[1:input$gene_number]
+        , data$dag_parent_set[gene_names]
         , noise = input$dag_noise
         , N = input$dag_samples
-        , dag_model = default_dag_model)
+        , dag_model = default_dag_model
+        , epos = input$dag_epos)
       data$csd_counts <- tmp_dag_data$csd_counts
       data$data <- tmp_dag_data$data
 
@@ -699,6 +734,7 @@ server <- function(input, output, session) {
         DT::editData(data$thetas[1:input$gene_number, 1:input$gene_number], info, "thetas")
 
       datasets$all_csd[[input$input2build]][[input$select_csd]]$thetas <- data$thetas
+      datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <- input$gene_number
       ## Resample based on changes
       shinyjs::click("resample_mhn")
     }, error = function(e){
@@ -981,7 +1017,6 @@ server <- function(input, output, session) {
       data2run <- evamtools:::genotypeCounts_to_data(display_freqs(),
                                                      e = 0)
         
-
       progress$inc(1/5, detail = "Setting up data")
       Sys.sleep(0.5)
       progress$inc(2/5, detail = "Running CPMs")
@@ -1012,7 +1047,8 @@ server <- function(input, output, session) {
       #     , 1:input$gene_number]
       # }
       sampled_from_CPMs <- NULL
-      if (input$do_sampling) {
+      do_sampling <- input$do_sampling == "TRUE"
+      if (do_sampling) {
         n_samples <- input$sample_size
         if (is.null(n_samples) | !is.numeric(n_samples) | n_samples < 100) {
           n_samples <- SHINY_DEFAULTS$cpm_samples
@@ -1123,14 +1159,14 @@ server <- function(input, output, session) {
 
       number_of_columns <- floor(12 /
         ifelse(length(input$cpm2show) <=4, 4, length(input$cpm2show)))
-
       if(!(is.null(selected_plot_type))){
         lapply(input$cpm2show, function(met){
           method_data <- evamtools:::process_data(tmp_data, met, plot_type = selected_plot_type)
           output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
             pl <- evamtools:::plot_genot_fg(method_data$data2plot,
-                      observations = tmp_data$analyzed_data, # We use it to define "Observed" and "Not Observed" genotypes
-                      predicted_genotypes = method_data$predicted_genotype_freqs, # To compute node sizes if sampled_counts is NULL
+                      # observations = tmp_data$analyzed_data, # We use it to define "Observed" and "Not Observed" genotypes
+                      observations = tmp_data$original_data, # We use it to define "Observed" and "Not Observed" genotypes
+                      # predicted_genotypes = method_data$predicted_genotype_freqs, # To compute node sizes if sampled_counts is NULL
                       sampled_counts = method_data$sampled_genotype_counts,
                       top_paths = input$freq2label,
                       label_type = input$label2plot,
