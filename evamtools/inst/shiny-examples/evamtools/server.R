@@ -415,8 +415,10 @@ server <- function(input, output, session) {
               radioButtons(inputId = "dag_model",
               label = "Model: ",
               inline = TRUE,
-              choices =  c("OT", "OncoBN", "HESBCN"),
-              selected= default_dag_model)
+              ## choices =  c("OT", "OncoBN", "HESBCN"),
+              choiceNames = list("OT", "OncoBN", "CBN/HESBCN"),
+              choiceValues = list("OT", "OncoBN", "HESBCN"),
+              selected = default_dag_model)
             ),
             tags$h4("New Edge"),
                    tags$h5(HTML("<p></p>")),
