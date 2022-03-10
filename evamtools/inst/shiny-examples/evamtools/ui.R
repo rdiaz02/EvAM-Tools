@@ -559,6 +559,28 @@ user_input <- function() {
             uiOutput("change_counts"),
 
             tags$div(class = "frame",
+                     tags$h3("Save & Download data"),
+                     tags$h5(HTML("Save dataset with a name ",
+                                  "that will also be used to save the CPM ",
+                                  "output.")),
+              uiOutput("dataset_name"),
+              tags$div(
+                tags$div(class = "download_button",
+                  # shinyjs::disabled(
+                    actionButton("save_csd_data", "Save data"),
+                    # ),
+                ),
+                tags$div(class = "download_button",
+                         tags$h5(HTML("Contents of saved file: ",
+                                      "the data sample data as csv ",
+                                      "---comma separated values--- ",
+                                      "file.")),   
+                  downloadButton("download_csd", "Download your data")
+                )
+              )
+            ),
+
+            tags$div(class = "frame",
                      tags$h3("Upload your own data"),
                      tags$h4(paste0("Format: csv ---comma separated values---,",
                                     " with first row with gene names."
@@ -577,27 +599,7 @@ user_input <- function() {
                                             ## ".rds", ".RDS",
                                             "text/csv",
                                             ".csv")) 
-            )),
-
-            tags$div(class = "frame",
-                     tags$h3("Save & Download data"),
-                     tags$h5(HTML("Save dataset with a name ",
-                                  "that will also be used to save the CPM ",
-                                  "output.")),
-              uiOutput("dataset_name"),
-              tags$div(
-                tags$div(class = "download_button",
-                  shinyjs::disabled(actionButton("save_csd_data", "Save data")),
-                ),
-                tags$div(class = "download_button",
-                         tags$h5(HTML("Contents of saved file: ",
-                                      "the data sample data as csv ",
-                                      "---comma separated values--- ",
-                                      "file.")),   
-                  downloadButton("download_csd", "Download your data")
-                )
-              )
-            )
+            ))
             )
           ),
           column(width = 6,
@@ -615,8 +617,8 @@ user_input <- function() {
                              "in the help of the evam and sample_CPMs functions)"),
                      tags$hr(style="border-color: darkgrey;"),
                      selectInput("do_sampling", "Sample genotypes: ",
-                                 c("True" = TRUE, "False" = FALSE),
-                                 selected = TRUE),
+                                 c(TRUE, FALSE),
+                                 selected = FALSE),
                      tags$h5("Generate a sample of genotypes ",
                              "according to the predicted frequencies of ",
                              "from model."),
@@ -647,7 +649,7 @@ user_input <- function() {
                 
                  tags$hr(style="border-color: darkgrey;"),
                 # checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("HyperTRAPS", "MCCBN"), choiceValues = c("hypertraps", "mccbn")),
-                checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("MCCBN"), choiceValues = c("MCCBN")),
+                checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("MCCBN", "HESBCN"), choiceValues = c("MCCBN", "HESBCN")),
                 tags$h5("Beware: MCCBN may take hours to run"),
                 tags$hr(style="border-color: darkgrey;"),
                 
