@@ -625,8 +625,7 @@ user_input <- function() {
                                  c("True" = TRUE, "False" = FALSE),
                                  selected = FALSE
                                  ),
-                     tags$h5("Obtain observed genotype transitions ",
-                             "and state counts? ",
+                     tags$h5("Obtain observed genotype transitions? ",
                              "Requires simulating sampling from the  ",
                              "continuous time Markov chain and is ",
                              "slower than simply obtaining a sample of genotypes."),
