@@ -552,7 +552,7 @@ user_input <- function() {
                     actionButton("change_gene_names", "Change gene names")
                     
                   ),
-                uiOutput("genes_number")),
+                uiOutput("gene_number")),
             tags$div(class = "frame",
               uiOutput("define_genotype"),
             ),

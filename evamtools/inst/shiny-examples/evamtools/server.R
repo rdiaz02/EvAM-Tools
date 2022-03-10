@@ -237,10 +237,10 @@ server <- function(input, output, session) {
 
       shinyjs::disable("analysis")
       shinyjs::hide("all_advanced_options")
-      if(!is.null(data$data)){
+      if (!is.null(data$data)) {
         data$csd_counts <- evamtools:::get_csd(data$data)
         shinyjs::enable("analysis")
-      } else{
+      } else {
         data$csd_counts <- SHINY_DEFAULTS$template_data$csd_counts
       }
 
@@ -249,30 +249,31 @@ server <- function(input, output, session) {
       data$lambdas <- tmp_data$lambdas
       data$thetas <- tmp_data$thetas
       data$name <- tmp_data$name
-
-      if(input$input2build == "dag"){
+      
+      if (input$input2build == "dag") {
           to_keep <- length(which(colSums(data$dag) > 0 |
                                   rowSums(data$dag) > 0)) - 1
-        n_genes <- ifelse(to_keep < 1 , ngenes, to_keep)
-        number_of_parents <- colSums(data$dag)
-        if(input$dag_model == "OT" && any(number_of_parents > 1)){
-          showModal(dataModal("This DAG cannot be transformed into a tree"))
-          updateRadioButtons(session, "dag_model", selected = "HESBCN")
-        }
-      } else if(input$input2build == "matrix"){
-        n_genes <- length(which(colSums(abs(data$thetas))>0
-        | rowSums(abs(data$thetas))>0))
-        n_genes <- ifelse(n_genes <= 0, 3, n_genes)
+          n_genes <- ifelse(to_keep < 1, ngenes, to_keep)
+          number_of_parents <- colSums(data$dag)
+          if (input$dag_model == "OT" && any(number_of_parents > 1)) {
+              showModal(dataModal("This DAG cannot be transformed into a tree"))
+              updateRadioButtons(session, "dag_model", selected = "HESBCN")
+          }
+      } else if (input$input2build == "matrix") {
+          n_genes <- length(which(colSums(abs(data$thetas)) > 0
+                                  | rowSums(abs(data$thetas)) > 0))
+          n_genes <- ifelse(n_genes <= 0, 3, n_genes)
       } else if (input$input2build == "csd" && !is.null(data$data)) {
-        n_genes <- ncol(data$data)
+          n_genes <- ncol(data$data)
       } else if (input$input2build == "csd" && is.null(data$data)) {
-        n_genes <- SHINY_DEFAULTS$ngenes
+          n_genes <- SHINY_DEFAULTS$ngenes
       }
 
       updateNumericInput(session, "gene_number", value = n_genes)
       updateNumericInput(session, "genotype_freq", value = NA)
       updateCheckboxGroupInput(session, "genotype", label = "Mutations",
-        choices = lapply(1:n_genes, function(i)data$gene_names[i]), selected = NULL)
+                               choices = lapply(1:n_genes, function(i)data$gene_names[i]),
+                               selected = NULL)
     }, error = function(e) {
       showModal(dataModal(e[[1]]))
     })
@@ -346,12 +347,13 @@ server <- function(input, output, session) {
   })
 
   # ## Define number of genes
-  output$genes_number <- renderUI({
+  output$gene_number <- renderUI({
       val <- ifelse(is.null(data$n_genes), 3, data$n_genes)
       tags$div(class="inlin",
                tags$h3(HTML("<br/>")),
                sliderInput("gene_number", "Number of genes",
-                           value = val, max = max_genes, min = min_genes, step = 1)
+                           value = val, max = max_genes, min = min_genes,
+                           step = 1)
     )
   })
 
@@ -615,7 +617,8 @@ server <- function(input, output, session) {
 
   ## Building trm from dag
   observeEvent(input$resample_dag, {
-    tryCatch({
+      tryCatch({
+
       tmp_dag_data <- evamtools:::get_dag_data(dag_data()
         , data$dag_parent_set[1:input$gene_number]
         , noise = input$dag_noise
@@ -673,7 +676,8 @@ server <- function(input, output, session) {
 
   ## MHN
   ## Controling thetas
-  output$thetas_table <- DT::renderDT(data$thetas[1:input$gene_number, 1:input$gene_number]
+  output$thetas_table <- DT::renderDT(data$thetas[1:input$gene_number,
+                                                  1:input$gene_number]
     , selection = 'none', server = TRUE
     , editable = list(target = "all", disable = list(columns = c(0)))
     , rownames = TRUE,
