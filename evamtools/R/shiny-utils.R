@@ -290,13 +290,13 @@ get_dag_data <- function(data, parent_set, noise = 0, N = 10000,
   gene_names <- names(parent_set)
   n_genes <- length(parent_set)
   
-  if (dag_model == "HESBCN"){
+  if (dag_model == "HESBCN") {
     dag_trm <- HESBCN_model_2_output(data, parent_set)$HESBCN_trans_rate_mat
     dag_probs <- probs_from_trm(dag_trm)
-  } else if (dag_model == "OT"){
-    data$OT_edgeWeight <- data$Probability 
+  } else if (dag_model == "OT") {
+    data$OT_edgeWeight <- data$Weight
     dag_probs <- OT_model_2_predict_genots(data, 0)
-  } else if (dag_model == "OncoBN"){
+  } else if (dag_model == "OncoBN") {
     epsilon <- 0.1
     dag_probs <- OncoBN_model_2_output(data, epsilon)$OncoBN_predicted_genotype_freqs
   }

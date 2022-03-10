@@ -518,19 +518,16 @@ server <- function(input, output, session) {
     }
 
     if(default_dag_model %in% c("OT")) {
-      colnames(dag_data) <- c("From", "To", "Relation", "Probability")
+      colnames(dag_data) <- c("From", "To", "Relation", "Weight")
       dag_data$Relation <- NULL
-      # dag_data$Probability[dag_data$Probability < 0] <- 0
-      # dag_data$Probability[dag_data$Probability > 1] <- 1
+     
     } else if(default_dag_model %in% c("OncoBN")){
       if(length(unique(dag_data$Relation))>2){
         showModal(dataModal("OncoBN model must only include one type of relationship"))
         updateRadioButtons(session, "dag_model", selected = "HESBCN")
       }
       colnames(dag_data) <- c("From", "To", "Relation", "Thetas")
-      # dag_data$Thetas[dag_data$Thetas < 0] <- 0
-      # dag_data$Thetas[dag_data$Thetas > 1] <- 1
-      # dag_data$Relation[dag_data$Relation != "Single"] <- "OR"
+     
     }
 
     return(dag_data)
