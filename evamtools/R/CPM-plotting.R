@@ -237,7 +237,7 @@ compute_matrix_from_top_paths <- function(graph
 ## #' }
 plot_genot_fg <- function(trans_mat
     , observations = NULL
-    , predicted_genotypes = NULL
+    # , predicted_genotypes = NULL
     , sampled_counts = NULL
     , top_paths = NULL
     , freq2label = NULL
@@ -257,7 +257,7 @@ plot_genot_fg <- function(trans_mat
 
     unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
     rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", ",")
-    names(predicted_genotypes) <- str_replace_all(names(predicted_genotypes), ", ", ",")
+    # names(predicted_genotypes) <- str_replace_all(names(predicted_genotypes), ", ", ",")
     graph <- igraph::graph_from_adjacency_matrix(trans_mat, weighted = TRUE,
                                                  mode = "directed")
 
@@ -340,7 +340,7 @@ plot_genot_fg <- function(trans_mat
                 else 
                     return(min_size)
             }, numeric(1.0))
-    } else if(!is.null(predicted_genotypes)){
+    } else if(!is.null(observations)){
         node_sizes <- vapply(igraph::V(graph)$name, 
             function(gen){
                 if (sum(match(observations$Genotype, gen, nomatch = 0)) == 1)
@@ -359,7 +359,7 @@ plot_genot_fg <- function(trans_mat
         node_sizes <- vapply(igraph::V(graph)$name, 
         function(gen) min_size, numeric(1.0))
     }
-
+    # browser()
     # Normalizing node sizes
     node_sizes[node_sizes <= 0.01] <- 0.01
     if(length(unique(node_sizes))>1){ #Not unique values

@@ -179,7 +179,7 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, da
   if(dag_model == "HESBCN"){
     old_lambdas <- dag_data$Lambdas
   } else if (dag_model == "OT"){
-    old_lambdas <- dag_data$Probability
+    old_lambdas <- dag_data$Weight
   } else if (dag_model == "OncoBN"){
     old_lambdas <- dag_data$Theta
   }
@@ -285,10 +285,11 @@ get_mhn_data <- function(thetas, noise = 0, N = 10000){
 }
 
 get_dag_data <- function(data, parent_set, noise = 0, N = 10000,
-                         dag_model = "HESBCN") {
+                         dag_model = "HESBCN", epos = 0.01) {
 
-    if(nrow(data) == 0) stop("The DAG does not contain any edge.")
+  if(nrow(data) == 0) stop("The DAG does not contain any edge.")
   if (any(is.null(data))) stop("Data should be defined")
+
   gene_names <- names(parent_set)
   n_genes <- length(parent_set)
   
@@ -297,9 +298,9 @@ get_dag_data <- function(data, parent_set, noise = 0, N = 10000,
     dag_probs <- probs_from_trm(dag_trm)
   } else if (dag_model == "OT") {
     data$OT_edgeWeight <- data$Weight
-    dag_probs <- OT_model_2_predict_genots(data, 0)
+    dag_probs <- OT_model_2_output(data, epos)$OT_predicted_genotype_freqs
   } else if (dag_model == "OncoBN") {
-    epsilon <- 0.1
+    epsilon <- epos
     dag_probs <- OncoBN_model_2_output(data, epsilon)$OncoBN_predicted_genotype_freqs
   }
 
