@@ -285,7 +285,9 @@ get_mhn_data <- function(thetas, noise = 0, N = 10000){
 }
 
 get_dag_data <- function(data, parent_set, noise = 0, N = 10000,
-  dag_model = "HESBCN"){
+                         dag_model = "HESBCN") {
+
+    if(nrow(data) == 0) stop("The DAG does not contain any edge.")
   if (any(is.null(data))) stop("Data should be defined")
   gene_names <- names(parent_set)
   n_genes <- length(parent_set)
