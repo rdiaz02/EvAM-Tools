@@ -254,6 +254,12 @@ server <- function(input, output, session) {
           to_keep <- length(which(colSums(data$dag) > 0 |
                                   rowSums(data$dag) > 0)) - 1
           n_genes <- ifelse(to_keep < 1, ngenes, to_keep)
+          ## to_keep <- sum(colSums(data$dag) > 0)
+          ## if (to_keep < 2) {
+          ##     showModal(dataModal("You have only defined one relationship"))
+          ##     updateRadioButtons(session, "dag_model", selected = "HESBCN")
+          ## }
+          ngenes <- to_keep
           number_of_parents <- colSums(data$dag)
           if (input$dag_model == "OT" && any(number_of_parents > 1)) {
               showModal(dataModal("This DAG cannot be transformed into a tree"))
