@@ -614,8 +614,14 @@ user_input <- function() {
                      tags$h4("(See additional details for all options ",
                              "in the help of the evam function)"),
                      tags$hr(style="border-color: darkgrey;"),
-                     selectInput("do_sampling", "Do sampling: ", c("True" = TRUE, 
-                  "False" = FALSE), selected = FALSE),
+                     selectInput("do_sampling", "Do sampling: ",
+                                 c("True" = TRUE, "False" = FALSE),
+                                 selected = TRUE),
+                     selectInput("do_genotype_transitions",
+                                 "Observed genotype transitions",
+                                 c("True" = TRUE, "False" = FALSE),
+                                 selected = FALSE
+                                 ),
                      numericInput("sample_size", "Number of samples",
                                   SHINY_DEFAULTS$cpm_samples
                                 , min = 0, max = 100000, step = 100,

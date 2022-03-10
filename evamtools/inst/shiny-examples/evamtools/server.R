@@ -1001,17 +1001,25 @@ server <- function(input, output, session) {
       #     , 1:input$gene_number]
       # }
       sampled_from_CPMs <- NULL
-      if(input$do_sampling){
+      if (input$do_sampling) {
         n_samples <- input$sample_size
-        if(is.null(n_samples) | !is.numeric(n_samples) | n_samples < 100){
+        if (is.null(n_samples) | !is.numeric(n_samples) | n_samples < 100) {
           n_samples <- SHINY_DEFAULTS$cpm_samples
         }
         progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
-        sampled_from_CPMs <- sample_CPMs(cpm_output, n_samples
-          , methods, c("sampled_genotype_freqs", "obs_genotype_transitions")
-          , obs_noise = input$sample_noise)
-      } 
-
+        if (input$do_genotype_transitions) {
+            sout <- c("sampled")
+        }
+            
+        sampled_from_CPMs <-
+            sample_CPMs(cpm_output, n_samples , methods,
+                        out = ifelse(input$do_genotype_transitions, 
+                                     c("sampled_genotype_counts",
+                                       "obs_genotype_transitions"),
+                                     "sampled_genotype_counts"),
+                      , obs_noise = input$sample_noise)
+      }
+      
       progress$inc(4/5, detail = "Post processing data")
       Sys.sleep(0.5)
 
@@ -1168,13 +1176,23 @@ server <- function(input, output, session) {
       tags$div(class = "inline",
         radioButtons(inputId = "data2plot",
           label = "Data to show",
-          choiceNames =  c("Probabilities", 
-                            "Transition Rate Matrix",
-                            "Transitions"),
-          choiceValues = c("trans_mat", 
-                            "trans_rate_mat",
-                            "obs_genotype_transitions"),
-          selected = "trans_rate_mat"
+          choiceNames =  if (input$do_genotype_transitions) {
+                             c("Transition probabilities", 
+                               "Transition Rate Matrix",
+                               "Observed genotype transitions")
+                         } else {         
+                             c("Transition probabilities", 
+                               "Transition Rate Matrix")
+                         },
+          choiceValues = if (input$do_genotype_transitions) {
+                             c("trans_mat", 
+                               "trans_rate_mat",
+                               "obs_genotype_transitions")
+                         } else {
+                             c("trans_mat", 
+                               "trans_rate_mat")
+                         },
+          selected = "trans_mat"
           )
         ),
       tags$div(class = "inline",
