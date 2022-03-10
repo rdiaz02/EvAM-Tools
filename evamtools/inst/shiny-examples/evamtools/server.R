@@ -396,9 +396,11 @@ server <- function(input, output, session) {
             tags$div(id="fr",
                      numericInput(label = "Counts", value = NA, min = 0,
                                   inputId = "genotype_freq", width = NA),
-              actionButton("add_genotype", "Add genotype"),
-              actionButton("clear_genotype", "Clear data")
-            )
+                     actionButton("add_genotype", "Add genotype")
+                     ),
+            tags$h5(HTML("<br>")),
+            actionButton("clear_genotype",
+                         "Clear all genotype data")
         )
     } else if (input$input2build == "dag"){
       tags$div(
@@ -471,7 +473,7 @@ server <- function(input, output, session) {
                          step = 0.05, width = "50%"),
               tags$h3(HTML("<br/>")),
               actionButton("resample_mhn", "Sample from MHN"),
-              actionButton("clear_mhn", "Clear data")
+              actionButton("clear_mhn", "Clear matrix data")
             )
           }
         )
