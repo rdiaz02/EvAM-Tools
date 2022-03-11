@@ -278,6 +278,8 @@ dag_or["A", "C"] <- 1
 dag_or["C", "D"] <- 1
 dag_or["B", "D"] <- 1
 
+linear_parent_set <- c("Single", "Single", "Single", "Single")
+names(linear_parent_set) <- c("A", "B", "C", "D")
 and_parent_set <- c("Single", "Single", "Single", "AND")
 names(and_parent_set) <- c("A", "B", "C", "D")
 or_parent_set <- c("Single", "Single", "Single", "OR")
@@ -386,6 +388,7 @@ examples_csd <- list(
   ),
   "dag" = list(
     User = list(dag = template_dag, name = "Your Data"),
+    Linear = list(data = NULL, name = "Linear", dag = dag_linear, dag_parent_set = linear_parent_set, lambdas = and_lambdas),
     AND = list(data = NULL, name = "AND", dag = dag_or, dag_parent_set = and_parent_set, lambdas = and_lambdas),
     OR = list(data = NULL, name = "OR", dag = dag_or, dag_parent_set = or_parent_set, lambdas = and_lambdas), 
     XOR = list(data = NULL, name = "XOR", dag = dag_or, dag_parent_set = xor_parent_set, lambdas = and_lambdas) 
