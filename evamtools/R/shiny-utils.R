@@ -125,7 +125,7 @@ modify_dag <-
     }
   }
   
-  tmp_dag2 <- default_dag
+  tmp_dag2 <- default_dag*0
   colnames(tmp_dag2) <- rownames(tmp_dag2) <- colnames(dag) 
   if(nrow(tmp_vertices>0)){
     for(i in 1:nrow(tmp_vertices)){
@@ -157,9 +157,9 @@ modify_dag <-
   ## Recompute parent set
   number_of_parents <- colSums(tmp_dag2)[-1]
   tmp_parent_set <- parent_set
-  tmp_parent_set[number_of_parents > 1] <- "AND" ##Default is AND
-  tmp_parent_set[number_of_parents <= 1] <- "Single" ##Default is AND
-  tmp_parent_set[number_of_parents > 1 & !(parent_set %in% c("AND", "OR", "XOR"))] <- "AND" ##Recapture previous relationships
+  # tmp_parent_set[number_of_parents > 1] <- "AND" ##Default is AND
+  tmp_parent_set[number_of_parents <= 1] <- "Single" ##Default is Single
+  tmp_parent_set[number_of_parents > 1 & !(parent_set %in% c("AND", "OR", "XOR"))] <- "AND" ##Default is AND
   return(list(dag = tmp_dag2, parent_set = tmp_parent_set))
 }
 
