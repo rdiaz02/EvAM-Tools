@@ -274,7 +274,7 @@ server <- function(input, output, session) {
           #                         | rowSums(abs(data$thetas)) > 0))
           # n_genes <- ifelse(n_genes <= 0, 3, n_genes)
           n_genes <- data$n_genes
-          if(is.null(n_genes)){
+          if (is.null(n_genes)) {
             n_genes <- SHINY_DEFAULTS$ngenes
           }
       } else if (input$input2build == "csd" && !is.null(data$data)) {
@@ -1050,7 +1050,9 @@ server <- function(input, output, session) {
       do_sampling <- input$do_sampling == "TRUE"
       if (do_sampling) {
         n_samples <- input$sample_size
-        if (is.null(n_samples) | !is.numeric(n_samples) | n_samples < 100) {
+        if ((is.null(n_samples)) ||
+            (!is.numeric(n_samples)) ||
+            (n_samples < 100)) {
           n_samples <- SHINY_DEFAULTS$cpm_samples
         }
         progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
