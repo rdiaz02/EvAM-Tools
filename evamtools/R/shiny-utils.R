@@ -161,21 +161,22 @@ modify_dag <- function(dag, from_node, to_node, operation, parent_set, dag_model
 modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
                                                      lambdas, dag, parent_set,
                                                      dag_model) {
-  if(!all(names(lambdas) == names(parent_set))){
+    browser()
+  if (!all(names(lambdas) == names(parent_set))) {
     stop("Lambdas and parent set should have information about the same genes")
   }
-  if(!all(names(lambdas) == colnames(dag)[-1])){
+  if (!all(names(lambdas) == colnames(dag)[-1])) {
     stop("DAG should have information about the same genes as parent set")
   }
 
   ## Different lambdas
-  if(dag_model %in% c("OncoBN", "HESBCN")){
-    new_lambdas <- as.numeric(info[info["col"] == 3,"value"])
-  } else if (dag_model == "OT"){
-    new_lambdas <- as.numeric(info[info["col"] == 2,"value"])
+  if (dag_model %in% c("OncoBN", "HESBCN")) {
+    new_lambdas <- suppressWarnings(as.numeric(info[info["col"] == 3, "value"]))
+  } else if (dag_model == "OT") {
+    new_lambdas <- suppressWarnings(as.numeric(info[info["col"] == 2, "value"]))
   }
 
-  if(any(is.na(new_lambdas))){
+  if (any(is.na(new_lambdas))) {
     stop("There are missing lambdas")
   }
   if(dag_model == "HESBCN"){
