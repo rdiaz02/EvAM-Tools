@@ -584,7 +584,8 @@ server <- function(input, output, session) {
 
       tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene,
                                           operation = "add",
-                                          parent_set = data$dag_parent_set)
+                                          parent_set = data$dag_parent_set,
+                                          dag_model = default_dag_model)
       data$dag <- tmp_data$dag
       data$dag_parent_set <- tmp_data$parent_set
       datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
@@ -603,7 +604,8 @@ server <- function(input, output, session) {
     tryCatch({
         tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene,
                                            operation = "remove",
-                                           parent_set = data$dag_parent_set)
+                                           parent_set = data$dag_parent_set,
+                                           dag_model = default_dag_model)
       data$dag <- tmp_data$dag
       data$dag_parent_set <- tmp_data$parent_set
       datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
