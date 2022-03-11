@@ -275,8 +275,10 @@ server <- function(input, output, session) {
           }
       } else if (input$input2build == "csd" && !is.null(data$data)) {
           n_genes <- ncol(data$data)
+          if (data$name == "User Data") data$dag[] <- 0
       } else if (input$input2build == "csd" && is.null(data$data)) {
           n_genes <- SHINY_DEFAULTS$ngenes
+          data$dag[] <- 0
       }
 
       updateNumericInput(session, "gene_number", value = n_genes)
@@ -375,7 +377,10 @@ server <- function(input, output, session) {
   observeEvent(input$dag_model, {
     number_of_parents <- colSums(data$dag)
     if (input$dag_model == "OT" && any(number_of_parents > 1)) {
-      showModal(dataModal("This DAG cannot be transformed into a tree"))
+        showModal(dataModal(
+            paste("This DAG cannot be transformed into a tree. ",
+                  "Are there nodes with multiple parents? ",
+                  "(OT cannot not have nodes with multiple parents.)")))
       updateRadioButtons(session, "dag_model", selected = "HESBCN")
     } else {
       default_dag_model <<- input$dag_model
@@ -457,15 +462,25 @@ server <- function(input, output, session) {
             tags$h3(HTML("<br/>DAG table")),
             DT::DTOutput("dag_table"),
             tags$h3(HTML("<br/>")),
-            numericInput("dag_samples", HTML("Total genotypes to sample"),
+            numericInput("dag_samples", HTML("Number of genotypes to sample"),
                          value = default_csd_samples, min = 100, max = 10000,
                          step = 100, width = "50%"),
+            tags$h3(HTML("<br/>")),
             numericInput("dag_noise", HTML("Noise"),
                          value = 0.01, min = 0, max = 1,
                          step = 0.05, width = "50%"),
+            tags$h5("Observational noise (e.g., genotyping error). ",
+                    "Added during sampling, ",
+                    "after predictions from model ",
+                    "have been obtained; ",
+                    "predicted probabilities are not affected."),
+             tags$h3(HTML("<br/>")),
             numericInput("dag_epos", HTML("Epos/Epsilon"),
                          value = 0.01, min = 0, max = 1,
                          step = 0.05, width = "50%"),
+            tags$h5("For OT/OncoBN only: prob. of children ",
+                    "not allowed by model to occur. ",
+                    "(Affects predicted probabilities.) "),
             tags$h3(HTML("<br/>")),
             actionButton("resample_dag", "Sample from DAG")
             )
@@ -486,12 +501,18 @@ server <- function(input, output, session) {
                              HTML("&theta;s, range &plusmn; &infin;"),),
               DT::DTOutput("thetas_table"),
               tags$h3(HTML("<br/>")),
-              numericInput("mhn_samples", "Total genotypes to sample",
+              numericInput("mhn_samples", "Number of genotypes to sample",
                            value = default_csd_samples, min = 100, max = 10000,
                            step = 100, width = "50%"),
+              tags$h3(HTML("<br/>")),
               numericInput("mhn_noise", HTML("Noise"),
                          value = 0.01, min = 0, max = 1,
                          step = 0.05, width = "50%"),
+              tags$h5("Observational noise (e.g., genotyping error). ",
+                      "Added during sampling, ",
+                      "after predictions from model ",
+                      "have been obtained; ",
+                      "predicted probabilities are not affected."),
               tags$h3(HTML("<br/>")),
               actionButton("resample_mhn", "Sample from MHN"),
               actionButton("clear_mhn", "Clear matrix data")
@@ -651,27 +672,34 @@ server <- function(input, output, session) {
 
   ## Building trm from dag
   observeEvent(input$resample_dag, {
-    tryCatch({
-      gene_names <- setdiff(unique(c(dag_data()$From, dag_data()$To)), "Root")
-      number_of_genes <- length(gene_names)
-      tmp_dag_data <- evamtools:::get_dag_data(dag_data()
-        , data$dag_parent_set[gene_names]
-        , noise = input$dag_noise
-        , N = input$dag_samples
-        , dag_model = default_dag_model
-        , epos = input$dag_epos)
-      data$csd_counts <- tmp_dag_data$csd_counts
-      data$data <- tmp_dag_data$data
+      tryCatch({
 
-      datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- data$data
-      datasets$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$dag
-      datasets$all_csd[[input$input2build]][[input$select_csd]]$lambdas <- data$lambdas
-      datasets$all_csd[[input$input2build]][[input$select_csd]]$dag_parent_set <- data$dag_parent_set
+          if (sum(colSums(data$dag) > 0) < 2)
+              stop("The must be at least two genes ",
+                   "in the DAG.")
 
-      shinyjs::enable("analysis")
-    }, error = function(e){
-      showModal(dataModal(e[[1]]))
-    })
+              gene_names <- setdiff(unique(c(dag_data()$From, dag_data()$To)),
+                                    "Root")
+              number_of_genes <- length(gene_names)
+              tmp_dag_data <-
+                  evamtools:::get_dag_data(dag_data()
+                                         , data$dag_parent_set[gene_names]
+                                         , noise = input$dag_noise
+                                         , N = input$dag_samples
+                                         , dag_model = default_dag_model
+                                         , epos = input$dag_epos)
+              
+              data$csd_counts <- tmp_dag_data$csd_counts
+              data$data <- tmp_dag_data$data
+              
+              datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- data$data
+              datasets$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$dag
+              datasets$all_csd[[input$input2build]][[input$select_csd]]$lambdas <- data$lambdas
+              datasets$all_csd[[input$input2build]][[input$select_csd]]$dag_parent_set <- data$dag_parent_set
+              shinyjs::enable("analysis")
+      }, error = function(e) {
+          showModal(dataModal(e[[1]]))
+      })
   })
 
   ## Help for DAG building
@@ -702,7 +730,7 @@ server <- function(input, output, session) {
                       "All incoming edges to a node must have the same ",
                       "Relation (the program will force this)."),
                tags$p(HTML("4. Modify, if you want, the <strong>size of the sample</strong> "),
-                      "('Total genotypes to sample') and ",
+                      "('Number of genotypes to sample') and ",
                       "click on 'Sample from DAG' to generate a sample. "),
                tags$p("5. Possible random noise when sampling is controlled under 'Advanced options'.")
            )
@@ -801,7 +829,7 @@ server <- function(input, output, session) {
                tags$p("4. Use Ctrl + Enter to save changes. ",
                       HTML("You <strong>must</strong> save the changes.")),
                tags$p("5. Modify, if you want, the size of the sample ",
-                      "('Total genotypes to sample') and ",
+                      "('Number of genotypes to sample') and ",
                       "click on 'Sample from MHN' to generate a sample. ",
                       "The sample is also updated as soon as you save an entry."),
                tags$p("6. Possible random noise when sampling is controlled under 'Advanced options'."),
