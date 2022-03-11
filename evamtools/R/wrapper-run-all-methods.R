@@ -436,7 +436,7 @@ cpm2tm <- function(x,
                          "lambda", ## MCCBN
                          "OT_edgeWeight", ## OT
                          "Lambdas", ## HESBCN
-                         "Thetas" ## OncoBN
+                         "theta" ## OncoBN
                          )) {
     if(inherits(x, "try-error") || all(is.na(x)) || is.null(x)) {
         return(list(

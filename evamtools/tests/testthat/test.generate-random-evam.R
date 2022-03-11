@@ -48,7 +48,7 @@ test_that("Test OncoBN thetas in right order", {
     ## And that is how I found a bug in OncoBN
     m1 <- data.frame(From = c("Root", "Root", "A", "B"),
                      To = c("A", "B", "C", "C"),
-                     Thetas = c(0.3, 0.4, 0.6, 0.6),
+                     theta = c(0.3, 0.4, 0.6, 0.6),
                      Relation = c("Single", "Single", "OR", "OR"))
     
     m1o <- OncoBN_model_2_output(m1, 0)
@@ -65,7 +65,7 @@ test_that("Test OncoBN thetas in right order", {
     
     m2 <- data.frame(From = c("Root", "Root", "A", "B"),
                      To = c("A", "B", "C", "C"),
-                     Thetas = c(0.3, 0.4, 0.6, 0.6),
+                     theta = c(0.3, 0.4, 0.6, 0.6),
                      Relation = c("Single", "Single", "AND", "AND"))
     
     m2o <- OncoBN_model_2_output(m2, 0)

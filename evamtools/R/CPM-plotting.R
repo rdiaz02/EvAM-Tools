@@ -584,7 +584,7 @@ DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
                                      "lambda", ## MCCBN
                                      "OT_edgeWeight", ## OT
                                      "Lambdas", ## HESBCN
-                                     "Thetas" ## OncoBN
+                                     "theta" ## OncoBN
                                      ))
         if (length(wce) > 1) {
             stop("more than one column with weights")

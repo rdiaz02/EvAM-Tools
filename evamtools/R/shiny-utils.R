@@ -202,7 +202,7 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
 
   if (dag_model %in% c("OT", "OncoBN")
     & (any(tmp_lambdas < 0) | any(tmp_lambdas > 1))){
-      stop("Thetas/probabilities should be between 0 and 1")
+      stop("thetas/probabilities should be between 0 and 1")
     # tmp_lambdas[tmp_lambdas > 1] <- 1
     # tmp_lambdas[tmp_lambdas < 0] <- 1
   }
@@ -263,7 +263,7 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
 }
 
 get_mhn_data <- function(thetas, noise = 0, N = 10000){
-  if (any(is.null(thetas))) stop("Thetas should be defined")
+  if (any(is.null(thetas))) stop("thetas should be defined")
   n_genes <- ncol(thetas)
   gene_names <- colnames(thetas)
 

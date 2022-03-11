@@ -545,7 +545,7 @@ server <- function(input, output, session) {
     
     if((default_dag_model %in% c("OT", "OncoBN"))
       & (any(dag_data$Lambdas < 0) | any(dag_data$Lambdas > 1))){
-        showModal(dataModal("Thetas/probabilities should be between 0 and 1"))
+        showModal(dataModal("thetas/probabilities should be between 0 and 1"))
         updateRadioButtons(session, "dag_model", selected = "HESBCN")
     }
 
@@ -560,7 +560,7 @@ server <- function(input, output, session) {
         showModal(dataModal("OncoBN model must only include one type of relationship"))
         updateRadioButtons(session, "dag_model", selected = "HESBCN")
       }
-      colnames(dag_data) <- c("From", "To", "Relation", "Thetas")
+      colnames(dag_data) <- c("From", "To", "Relation", "theta")
      
     }
 
