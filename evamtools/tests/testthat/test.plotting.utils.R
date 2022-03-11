@@ -99,3 +99,15 @@ test_that("plot_CPMs handles argument correctly", {
   expect_error(plot_CPMs(sample_evam_output, orientation="horizontal",
                          plot_type = "transitions"))
 })
+
+
+test_that("plotting works, minimal, with mixed edges", {
+    ## Yes, in the help file but make sure we run this
+    data("ex_mixed_and_or_xor")
+
+    out_AND_OR_XOR <- evam(ex_mixed_and_or_xor,
+                       methods = c("OT", "HESBCN", "MHN", "OncoBN"),
+                       hesbcn_opts = list(seed = 26))
+
+    plot_CPMs(out_AND_OR_XOR, plot_type = "trans_mat", top_paths = 4)
+})
