@@ -4,23 +4,23 @@ test_that("Modify dags works correctly",{
 
   mod1 <- dag
   mod1["WT", "A"] <- 1
-  expect_equal(evamtools:::modify_dag(dag, "Root", "A", "add", dag_parent_set)$dag, mod1)
-  expect_equal(evamtools:::modify_dag(mod1, "Root", "A", "remove", dag_parent_set)$dag, dag)
-  expect_error(evamtools:::modify_dag(NULL, "Root", "A", "remove", dag_parent_set)$dag, "From and To options and DAG have to be defined")
-  expect_error(evamtools:::modify_dag(dag, NULL, "A", "remove", dag_parent_set)$dag, "From and To options and DAG have to be defined")
-  expect_error(evamtools:::modify_dag(dag, "WT", NULL, "remove", dag_parent_set)$dag,"From and To options and DAG have to be defined")
-  expect_error(evamtools:::modify_dag(dag, "WT2", "A", "add", dag_parent_set)$dag, "Both From and To options have to be valid gene names")
-  expect_error(evamtools:::modify_dag(dag, "WT", "A2", "add", dag_parent_set)$dag, "Both From and To options have to be valid gene names")
+  expect_equal(modify_dag(dag, "Root", "A", "add", dag_parent_set)$dag, mod1)
+  expect_equal(modify_dag(mod1, "Root", "A", "remove", dag_parent_set)$dag, dag)
+  expect_error(modify_dag(NULL, "Root", "A", "remove", dag_parent_set)$dag, "From and To options and DAG have to be defined")
+  expect_error(modify_dag(dag, NULL, "A", "remove", dag_parent_set)$dag, "From and To options and DAG have to be defined")
+  expect_error(modify_dag(dag, "WT", NULL, "remove", dag_parent_set)$dag,"From and To options and DAG have to be defined")
+  expect_error(modify_dag(dag, "WT2", "A", "add", dag_parent_set)$dag, "Both From and To options have to be valid gene names")
+  expect_error(modify_dag(dag, "WT", "A2", "add", dag_parent_set)$dag, "Both From and To options have to be valid gene names")
 
   mod2 <- mod1
   mod2["A", "B"] <- 1
-  expect_error(evamtools:::modify_dag(mod2, "B", "A", "add", dag_parent_set)$dag, "Relationships cannot be bidirectional")
-  expect_error(evamtools:::modify_dag(mod2, "B", "B", "add", dag_parent_set)$dag, "Both From and To options must be different")
-  expect_error(evamtools:::modify_dag(mod2, "A", "B", "add", dag_parent_set)$dag,"That edge is already present")
-  expect_error(evamtools:::modify_dag(mod2, "A", "B", "add", dag_parent_set)$dag,"That edge is already present")
-  expect_error(evamtools:::modify_dag(mod2, "D", "A", "add", dag_parent_set)$dag, "A direct children of Root cannot have multiple parents")
-  expect_equal(evamtools:::modify_dag(mod2, "WT", "A", "clear", dag_parent_set)$dag, SHINY_DEFAULTS$template_data$dag)
-  expect_equal(evamtools:::modify_dag(mod2, "WT", "A", "remove", dag_parent_set)$dag, SHINY_DEFAULTS$template_data$dag)
+  expect_error(modify_dag(mod2, "B", "A", "add", dag_parent_set)$dag, "Relationships cannot be bidirectional")
+  expect_error(modify_dag(mod2, "B", "B", "add", dag_parent_set)$dag, "Both From and To options must be different")
+  expect_error(modify_dag(mod2, "A", "B", "add", dag_parent_set)$dag,"That edge is already present")
+  expect_error(modify_dag(mod2, "A", "B", "add", dag_parent_set)$dag,"That edge is already present")
+  expect_error(modify_dag(mod2, "D", "A", "add", dag_parent_set)$dag, "A direct children of Root cannot have multiple parents")
+  expect_equal(modify_dag(mod2, "WT", "A", "clear", dag_parent_set)$dag, SHINY_DEFAULTS$template_data$dag)
+  expect_equal(modify_dag(mod2, "WT", "A", "remove", dag_parent_set)$dag, SHINY_DEFAULTS$template_data$dag)
 
   ## More complex scenarios where we also test parent_set
   mod3 <- dag
@@ -31,7 +31,7 @@ test_that("Modify dags works correctly",{
   mod3["C", "D"] <- 1
   tmp_parent_set3 <- dag_parent_set
   tmp_parent_set3["D"] <- "AND"
-  tmp_res1 <- evamtools:::modify_dag(mod3, "C", "D", "remove", tmp_parent_set3)
+  tmp_res1 <- modify_dag(mod3, "C", "D", "remove", tmp_parent_set3)
   expect_equal(tmp_res1$parent_set, dag_parent_set)
   res_dag1 <- mod3
   res_dag1["C", "D"] <- 0
@@ -57,20 +57,20 @@ test_that("Modify dags works correctly",{
   tmp_parent_set6["A"] <- "Bad_rel"
   tmp_parent_set6["D"] <- "NOTAND"
 
-  expect_error(evamtools:::modify_dag(mod5, "G", "B", "add", tmp_parent_set6), "This relationship breaks the DAG. Revise it.")
+  expect_error(modify_dag(mod5, "G", "B", "add", tmp_parent_set6), "This relationship breaks the DAG. Revise it.")
 
-  mod5_results <- evamtools:::modify_dag(mod5, "D", "E", "remove", tmp_parent_set5)
+  mod5_results <- modify_dag(mod5, "D", "E", "remove", tmp_parent_set5)
   expect_equal(mod5_results$dag, mod4)
   expect_equal(mod5_results$parent_set, tmp_parent_set4)
 
-  mod5_results_2 <- evamtools:::modify_dag(mod5, "D", "E", "remove", tmp_parent_set5)
+  mod5_results_2 <- modify_dag(mod5, "D", "E", "remove", tmp_parent_set5)
   expect_equal(mod5_results_2$dag, mod4)
   expect_equal(mod5_results_2$parent_set, tmp_parent_set4)
 
   mod6 <- mod4
   mod6["WT", "G"] <- 1
   mod6["G", "B"] <- 1
-  mod6_results <- evamtools:::modify_dag(mod4, "G", "B", "add", tmp_parent_set6)
+  mod6_results <- modify_dag(mod4, "G", "B", "add", tmp_parent_set6)
   expect_equal(mod6_results$dag, mod6)
 })
 
@@ -116,8 +116,8 @@ test_that("Test that modify lambdas and parent set is correct", {
   expected_lambdas1 <- lambdas1
   expected_lambdas1["A"] <- 4
 
-  results1 <- evamtools:::modify_lambdas_and_parent_set_from_table(
-    dag_table1, new_data1, lambdas1, mod1, parent_set1
+  results1 <- modify_lambdas_and_parent_set_from_table(
+    dag_table1, new_data1, lambdas1, mod1, parent_set1, "HESBCN"
   )
 
   expect_equal(results1$lambdas, expected_lambdas1)
@@ -134,9 +134,10 @@ test_that("Test that modify lambdas and parent set is correct", {
       "C", "D", "AND", 4
     )
   )
+
   
-  expect_error(evamtools:::modify_lambdas_and_parent_set_from_table(
-    dag_table1, new_data2, lambdas1, mod1, parent_set1
+  expect_error(modify_lambdas_and_parent_set_from_table(
+    dag_table1, new_data2, lambdas1, mod1, parent_set1, "HESBCN"
   ), "There are missing lambdas")
 
   new_data3 <- data.frame(
@@ -151,8 +152,8 @@ test_that("Test that modify lambdas and parent set is correct", {
     )
   )
   
-  expect_error(evamtools:::modify_lambdas_and_parent_set_from_table(
-    dag_table1, new_data3, lambdas1, mod1, parent_set1
+  expect_error(modify_lambdas_and_parent_set_from_table(
+    dag_table1, new_data3, lambdas1, mod1, parent_set1, "HESBCN"
   ), "There are unkown genes")
 
 
@@ -168,8 +169,8 @@ test_that("Test that modify lambdas and parent set is correct", {
     )
   )
 
-  results2 <- evamtools:::modify_lambdas_and_parent_set_from_table(
-    dag_table1, new_data2, lambdas1, mod1, parent_set1
+  results2 <- modify_lambdas_and_parent_set_from_table(
+    dag_table1, new_data2, lambdas1, mod1, parent_set1, "HESBCN"
   )
   expected_lambdas2 <- lambdas
   expected_lambdas2["A"] <- 6
@@ -184,12 +185,12 @@ test_that("Modify dags works correctly on a more comples example",{
   dag <- SHINY_DEFAULTS$template_data$dag
   dag_parent_set <- SHINY_DEFAULTS$template_data$dag_parent_set
 
-  x <- evamtools:::modify_dag(dag, "WT", "A", "add", dag_parent_set)
-  x <- evamtools:::modify_dag(x$dag, "WT", "B", "add", x$parent_set)
-  x <- evamtools:::modify_dag(x$dag, "A", "C", "add", x$parent_set)
-  x <- evamtools:::modify_dag(x$dag, "B", "C", "add", x$parent_set)
-  x <- evamtools:::modify_dag(x$dag, "B", "D", "add", x$parent_set)
-  x <- evamtools:::modify_dag(x$dag, "A", "D", "add", x$parent_set)
+  x <- modify_dag(dag, "WT", "A", "add", dag_parent_set)
+  x <- modify_dag(x$dag, "WT", "B", "add", x$parent_set)
+  x <- modify_dag(x$dag, "A", "C", "add", x$parent_set)
+  x <- modify_dag(x$dag, "B", "C", "add", x$parent_set)
+  x <- modify_dag(x$dag, "B", "D", "add", x$parent_set)
+  x <- modify_dag(x$dag, "A", "D", "add", x$parent_set)
   
   lambdas <- SHINY_DEFAULTS$template_data$lambdas
   dag_parent_set <- SHINY_DEFAULTS$template_data$dag_parent_set
@@ -215,8 +216,8 @@ test_that("Modify dags works correctly on a more comples example",{
     )
   )
 
-  results <- evamtools:::modify_lambdas_and_parent_set_from_table(
-    dag_table, new_data, lambdas, x$dag, x$parent_set
+  results <- modify_lambdas_and_parent_set_from_table(
+    dag_table, new_data, lambdas, x$dag, x$parent_set, "HESBCN"
   )
   new_parent_set <- x$parent_set
   new_parent_set["D"] <- "OR"
