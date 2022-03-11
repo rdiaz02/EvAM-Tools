@@ -158,7 +158,9 @@ modify_dag <- function(dag, from_node, to_node, operation, parent_set, dag_model
   return(list(dag = tmp_dag2, parent_set = tmp_parent_set))
 }
 
-modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, dag, parent_set, dag_model){
+modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
+                                                     lambdas, dag, parent_set,
+                                                     dag_model) {
   if(!all(names(lambdas) == names(parent_set))){
     stop("Lambdas and parent set should have information about the same genes")
   }
