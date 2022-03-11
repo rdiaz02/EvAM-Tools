@@ -68,23 +68,28 @@ get_display_freqs <- function(freqs, n_genes, gene_names){
   return(freqs[selected_rows, ])
 }
 
-get_csd <- function(complete_csd){
-    if(is.null(complete_csd)) return(SHINY_DEFAULTS$template_data$csd_counts)
+get_csd <- function(complete_csd,
+                    default_counts = SHINY_DEFAULTS$template_data$csd_counts){
+    if (is.null(complete_csd)) return(default_counts)
     csd <- data_to_counts(complete_csd, out = "data.frame", omit_0 = TRUE)
     rownames(csd) <- csd$Genotype
     return(csd)
 }
 
-modify_dag <- function(dag, from_node, to_node, operation, parent_set, dag_model="HESBCN"){
+modify_dag <-
+    function(dag, from_node, to_node, operation, parent_set,
+             dag_model="HESBCN",
+             default_dag = SHINY_DEFAULTS$template_data$dag,
+             default_dag_parent_set = SHINY_DEFAULTS$template_data$dag_parent_set){
   value_from_operation <- c(1, 0)
   names(value_from_operation) <- c("add", "remove")
 
-  if(operation == "clear") {
-    return(list(dag=SHINY_DEFAULTS$template_data$dag
-      , dag_parent_set=SHINY_DEFAULTS$template_data$dag_parent_set))
+  if (operation == "clear") {
+    return(list(dag = default_dag,
+                dag_parent_set = default_dag_parent_set)) 
   }
 
-  if(is.null(from_node) | is.null(to_node) | is.null(dag)){
+  if (is.null(from_node) | is.null(to_node) | is.null(dag)){
     stop("From and To options and DAG have to be defined")
   } 
 
@@ -120,7 +125,7 @@ modify_dag <- function(dag, from_node, to_node, operation, parent_set, dag_model
     }
   }
   
-  tmp_dag2 <- SHINY_DEFAULTS$template_data$dag
+  tmp_dag2 <- default_dag
   colnames(tmp_dag2) <- rownames(tmp_dag2) <- colnames(dag) 
   if(nrow(tmp_vertices>0)){
     for(i in 1:nrow(tmp_vertices)){
@@ -465,8 +470,21 @@ create_tabular_data <- function(data) {
 
 
 ## Fills empty attributes of a csd data object
-standarize_dataset <- function(data){
-  if(is.null(data)) return(SHINY_DEFAULTS$template_data)
+
+## Yes, could have passed all default_* as part of a single list. Whatever.
+standarize_dataset <- function(data,
+                               default_max_genes = SHINY_DEFAULTS$max_genes,
+                               default_template_data = SHINY_DEFAULTS$template_data
+                               ) {
+    ## Be completely explicit upfront!!!
+    default_data <- default_template_data$data
+    default_lambdas <- default_template_data$lambdas
+    default_dag_parent_set <- default_template_data$dag_parent_set
+    default_dag <- default_template_data$dag
+    default_thetas <- default_template_data$thetas
+    
+    
+  if(is.null(data)) return(default_template_data)
 
   if(typeof(data) != "list"){
     stop("Input data should be a list")
@@ -487,35 +505,35 @@ standarize_dataset <- function(data){
   }
 
   new_data$gene_names <- c(tmp_names 
-    , LETTERS[(length(tmp_names) + 1) : SHINY_DEFAULTS$max_genes ])[1:SHINY_DEFAULTS$max_genes]
+    , LETTERS[(length(tmp_names) + 1) : default_max_genes ])[1:default_max_genes]
   
   new_data$name <- data$name  
 
   if(is.null(data$lambdas)) {
-    new_data$lambdas <- SHINY_DEFAULTS$template_data$lambdas
+    new_data$lambdas <- default_lambdas
   }else{
     if(!is.numeric(data$lambdas)){
       stop("Lambdas should only contain numbers")
     }
-    new_lambdas <- SHINY_DEFAULTS$template_data$lambdas
+    new_lambdas <- default_lambdas
     new_lambdas[1:length(data$lambdas)] <- data$lambdas
     new_data$lambdas <- new_lambdas
   }
   names(new_data$lambdas) <- new_data$gene_names
 
   if(is.null(data$dag_parent_set)) {
-    new_data$dag_parent_set <- SHINY_DEFAULTS$template_data$dag_parent_set
+    new_data$dag_parent_set <- default_dag_parent_set
   }else {
     if(!all(data$dag_parent_set %in% c("Single", "AND", "OR", "XOR")))
       stop("Parent set must include only 'Single', 'AND', 'OR' or 'XOR'")
-    new_parent_set <- SHINY_DEFAULTS$template_data$dag_parent_set
+    new_parent_set <- default_dag_parent_set
     new_parent_set[1:length(data$dag_parent_set)] <- data$dag_parent_set
     new_data$dag_parent_set <- new_parent_set
   }
   names(new_data$dag_parent_set ) <- new_data$gene_names
 
   if(is.null(data$dag)) {
-    new_data$dag <- SHINY_DEFAULTS$template_data$dag
+    new_data$dag <- default_dag
   } else {
     if(!all(unique(data$dag) %in% c(0, 1))){
       stop("Adjacency matrix should be binary: only 0 and 1")
@@ -523,7 +541,7 @@ standarize_dataset <- function(data){
     to_keep <- which(colSums(data$dag)>0 | rowSums(data$dag)>0)
     tmp_dag <- data$dag[to_keep, to_keep]
     n_genes <- ncol(data$dag)
-    new_dag <- SHINY_DEFAULTS$template_data$dag 
+    new_dag <- default_dag 
     new_dag[to_keep, to_keep] <- tmp_dag
     new_data$dag <- new_dag
 
@@ -538,20 +556,20 @@ standarize_dataset <- function(data){
   rownames(new_data$dag) <- colnames(new_data$dag) <- c("WT", new_data$gene_names)
 
   if(is.null(data$thetas)) {
-    new_data$thetas <- SHINY_DEFAULTS$template_data$thetas
+    new_data$thetas <- default_thetas
   } else {
     if(!is.numeric(data$thetas)){
       stop("Theta matrix should only contain numbers")
     }
     n_genes <- ncol(data$thetas)
-    new_thetas <- SHINY_DEFAULTS$template_data$thetas 
+    new_thetas <- default_thetas 
     new_thetas[1:n_genes, 1:n_genes] <- data$thetas
     new_data$thetas <- new_thetas
   }
   rownames(new_data$thetas) <- colnames(new_data$thetas) <- new_data$gene_names
 
-  if(is.null(data$data)) {
-    new_data$data <- SHINY_DEFAULTS$template_data$data
+  if (is.null(data$data)) {
+    new_data$data <- default_data
   } else {
       if(!all(unique(unlist(data$data)) %in% c(0, 1))){
       stop("Data should be binary: only 0 and 1")
@@ -559,7 +577,6 @@ standarize_dataset <- function(data){
     new_data$data <- data$data
     colnames(new_data$data) <- new_data$gene_names[1:ncol(new_data$data)]
   }
-  
   new_data$csd_counts <- get_csd(new_data$data)
   return(new_data)
 }
