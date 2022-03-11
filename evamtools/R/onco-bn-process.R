@@ -71,7 +71,7 @@ do_OncoBN <- function(data,
     dbn_out$From[dbn_out$From == "WT"] <- "Root"
     dbn_out$edge <- mapply(function(x, y) { paste0(x, " -> ", y) },
                             dbn_out$From, dbn_out$To)
-    dbn_out$Thetas <- thetas[dbn_out$To]
+    dbn_out$theta <- thetas[dbn_out$To]
 
     dbn_out$Relation <- ifelse(model == "DBN", "OR", "AND")
     dbn_out$Relation[dbn_out$From == "Root"] <- "Single"

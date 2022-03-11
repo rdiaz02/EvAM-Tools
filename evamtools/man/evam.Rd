@@ -186,7 +186,7 @@ speed things much or what is the best number of threads to use. }
 
 	
         \item{OncoBN_model: }{Similar to the ones above (but with a column
-        named Thetas, instead of lambdas or edge weights), with the
+        named theta, instead of lambdas or edge weights), with the
         additional column dQuote{Relation}, that can take values OR (if
         fitting model DBN) or AND (if fitting model CBN); Single
         indicates nodes with a single ancestor (where OR or AND make no difference).}

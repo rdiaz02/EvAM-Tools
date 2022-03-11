@@ -584,7 +584,7 @@ DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
                                      "lambda", ## MCCBN
                                      "OT_edgeWeight", ## OT
                                      "Lambdas", ## HESBCN
-                                     "Thetas" ## OncoBN
+                                     "theta" ## OncoBN
                                      ))
         if (length(wce) > 1) {
             stop("more than one column with weights")
@@ -761,11 +761,14 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
     n_rows <- 2
    
     if (orientation == "vertical") {
-        op1 <- par(mfrow = c(l_methods, n_rows))
+        op1 <- par(mfrow = c(l_methods, n_rows),
+                   mar = c(0.5, 1, 0.5, 0.5),
+                   mai = c(0.25, 0.25, 0.25, 0.25))
     } else {
-        op1 <- par(mfcol = c(n_rows, l_methods))
+        op1 <- par(mfcol = c(n_rows, l_methods),
+                   mar = c(0.5, 1, 0.5, 0.5),
+                   mai = c(0.25, 0.25, 0.25, 0.25))
     }
-    par(mar = c(0.5, 1, 0.5, 0.5), mai = c(0.25, 0.25, 0.25, 0.25))
 
     ## Plotting CPMs
     ## For each CPM there are two plots
@@ -791,7 +794,7 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
                           ## We use it to define "Observed" and "Not Observed" genotypes
                           observations = cpm_output$analyzed_data,
                           ## To compute node sizes if sampled_counts is NULL
-                        #   predicted_genotypes = method_data2plot$predicted_genotype_freqs, 
+                          ## predicted_genotypes = method_data2plot$predicted_genotype_freqs, 
                           sampled_counts = method_data2plot$sampled_genotype_counts,
                           top_paths = top_paths,
                           label_type = label_type,

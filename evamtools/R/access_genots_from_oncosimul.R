@@ -64,8 +64,8 @@ cpm_out_to_oncosimul <- function(x, sh = -Inf) {
         ## Also using this for DBN, as it could return an AND
         if("Lambdas" %in% names(x) ) ## HESBCN
             s <- x$Lambdas
-        if("Thetas" %in% names(x) ) ## DBN
-            s <- x$Thetas
+        if("theta" %in% names(x) ) ## DBN
+            s <- x$theta
         typeDep <- x$Relation
         typeDep[typeDep == "Single"] <- "AND"
     } else if ("OT_edgeWeight" %in% names(x)) { ## OT

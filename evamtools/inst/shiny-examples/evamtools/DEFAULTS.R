@@ -5,14 +5,17 @@ max_genes <- 10
 all_gene_names <- LETTERS[1: max_genes]
 template_dag <- matrix(0, ncol = max_genes + 1, nrow = max_genes + 1)
 rownames(template_dag) <- colnames(template_dag) <- c("WT", all_gene_names)
+template_dag[1, 2] <- 1
+template_dag[1, 3] <- 1
+template_dag[2, 4] <- 1
 template_parent_set <- rep("Single", max_genes)
 names(template_parent_set) <- all_gene_names
-template_lambdas <- rep(1, max_genes)
+template_lambdas <- rep(0.5, max_genes)
 names(template_lambdas) <- all_gene_names
 template_thetas <- matrix(0, ncol = max_genes, nrow = max_genes)
 rownames(template_thetas) <- colnames(template_thetas) <- all_gene_names
 template_csd_counts <- data.frame(Genotype = character(), Counts = integer())
-template_csd_data <- matrix(0, ncol=3, nrow=0)
+template_csd_data <- matrix(0, ncol = 3, nrow = 0)
 
 SHINY_DEFAULTS <- list(
   max_genes = 10,
@@ -35,4 +38,5 @@ SHINY_DEFAULTS <- list(
   )
 )
 
+## This expects to be run evamtools directory. O.w. adjust path
 save(SHINY_DEFAULTS, file = "./data/SHINY_DEFAULTS.RData")

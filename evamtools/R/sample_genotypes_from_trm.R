@@ -1048,7 +1048,8 @@ OT_model_2_predict_genots <- function(model, epos) {
     if ("Relation" %in% colnames(model))
         stop("OT does not take a Relation column")
     if (any(table(model$To) > 1))
-        stop("In OT models each gene has at most one parent.")
+        stop("In OT models each gene has at most one parent. ",
+             "Fix the input DAG/model.")
     
     ## Obtain the adjacency matrix and ensure adjacency matrix
     ## and weights have genes in same order
@@ -1192,7 +1193,7 @@ OncoBN_from_poset_thetas_epsilon_model <- function(poset,
 
 OncoBN_model_from_edges_thetas_parent_set <- function(edges,
                                                        thetas, parent_set) {
-    edges[["Thetas"]] <- vapply(edges[, "To"],
+    edges[["theta"]] <- vapply(edges[, "To"],
                                        function(x) thetas[x], 0.0)
     edges[["Relation"]] <- vapply(edges[, "To"],
                                   function(x) parent_set[x], "")
@@ -1204,7 +1205,7 @@ OncoBN_model_from_edges_thetas_parent_set <- function(edges,
 OncoBN_model_2_output <- function(model, epsilon) {
     ## We need to go back to the DAG representation
  
-    if (any(model$Thetas > 1) || any(model$Thetas < 0))
+    if (any(model$theta > 1) || any(model$theta < 0))
         stop("OncoBN's thetas must be between 0 and 1.")
     
     tmpo <- cpm2tm(list(edges = model))
@@ -1237,8 +1238,8 @@ OncoBN_model_2_predict_genots <- function(model, epsilon) {
     ## In OncoBN what we call Root is called WT
     model$From[model$From == "Root"] <- "WT"
 
-    thetadf <- aggregate(Thetas ~ To, data = model, FUN = unique)
-    thetav <- thetadf$Thetas
+    thetadf <- aggregate(theta ~ To, data = model, FUN = unique)
+    thetav <- thetadf$theta
     names(thetav) <- thetadf$To
     theta <- thetav[sort(names(thetav))]
     names_g <- names(theta)

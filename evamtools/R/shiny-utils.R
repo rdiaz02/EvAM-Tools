@@ -158,22 +158,24 @@ modify_dag <- function(dag, from_node, to_node, operation, parent_set, dag_model
   return(list(dag = tmp_dag2, parent_set = tmp_parent_set))
 }
 
-modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, dag, parent_set, dag_model){
-  if(!all(names(lambdas) == names(parent_set))){
+modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
+                                                     lambdas, dag, parent_set,
+                                                     dag_model) {
+  if (!all(names(lambdas) == names(parent_set))) {
     stop("Lambdas and parent set should have information about the same genes")
   }
-  if(!all(names(lambdas) == colnames(dag)[-1])){
+  if (!all(names(lambdas) == colnames(dag)[-1])) {
     stop("DAG should have information about the same genes as parent set")
   }
 
   ## Different lambdas
-  if(dag_model %in% c("OncoBN", "HESBCN")){
-    new_lambdas <- as.numeric(info[info["col"] == 3,"value"])
-  } else if (dag_model == "OT"){
-    new_lambdas <- as.numeric(info[info["col"] == 2,"value"])
+  if (dag_model %in% c("OncoBN", "HESBCN")) {
+    new_lambdas <- suppressWarnings(as.numeric(info[info["col"] == 3, "value"]))
+  } else if (dag_model == "OT") {
+    new_lambdas <- suppressWarnings(as.numeric(info[info["col"] == 2, "value"]))
   }
 
-  if(any(is.na(new_lambdas))){
+  if (any(is.na(new_lambdas))) {
     stop("There are missing lambdas")
   }
   if(dag_model == "HESBCN"){
@@ -200,7 +202,7 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, da
 
   if (dag_model %in% c("OT", "OncoBN")
     & (any(tmp_lambdas < 0) | any(tmp_lambdas > 1))){
-      stop("Thetas/probabilities should be between 0 and 1")
+      stop("thetas/probabilities should be between 0 and 1")
     # tmp_lambdas[tmp_lambdas > 1] <- 1
     # tmp_lambdas[tmp_lambdas < 0] <- 1
   }
@@ -261,7 +263,7 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info, lambdas, da
 }
 
 get_mhn_data <- function(thetas, noise = 0, N = 10000){
-  if (any(is.null(thetas))) stop("Thetas should be defined")
+  if (any(is.null(thetas))) stop("thetas should be defined")
   n_genes <- ncol(thetas)
   gene_names <- colnames(thetas)
 
