@@ -116,11 +116,7 @@ test_that("Test that modify lambdas and parent set is correct", {
   expected_lambdas1 <- lambdas1
   expected_lambdas1["A"] <- 4
 
-<<<<<<< HEAD
-  results1 <- evamtools:::modify_lambdas_and_parent_set_from_table(
-=======
   results1 <- modify_lambdas_and_parent_set_from_table(
->>>>>>> 8dd0b684d4b57626b3e9bbebaf830b377d3d1669
     dag_table1, new_data1, lambdas1, mod1, parent_set1, "HESBCN"
   )
 
@@ -140,11 +136,7 @@ test_that("Test that modify lambdas and parent set is correct", {
   )
 
   
-<<<<<<< HEAD
-  expect_error(evamtools:::modify_lambdas_and_parent_set_from_table(
-=======
   expect_error(modify_lambdas_and_parent_set_from_table(
->>>>>>> 8dd0b684d4b57626b3e9bbebaf830b377d3d1669
     dag_table1, new_data2, lambdas1, mod1, parent_set1, "HESBCN"
   ), "There are missing lambdas")
 
@@ -160,11 +152,7 @@ test_that("Test that modify lambdas and parent set is correct", {
     )
   )
   
-<<<<<<< HEAD
-  expect_error(evamtools:::modify_lambdas_and_parent_set_from_table(
-=======
   expect_error(modify_lambdas_and_parent_set_from_table(
->>>>>>> 8dd0b684d4b57626b3e9bbebaf830b377d3d1669
     dag_table1, new_data3, lambdas1, mod1, parent_set1, "HESBCN"
   ), "There are unkown genes")
 
@@ -181,11 +169,7 @@ test_that("Test that modify lambdas and parent set is correct", {
     )
   )
 
-<<<<<<< HEAD
-  results2 <- evamtools:::modify_lambdas_and_parent_set_from_table(
-=======
   results2 <- modify_lambdas_and_parent_set_from_table(
->>>>>>> 8dd0b684d4b57626b3e9bbebaf830b377d3d1669
     dag_table1, new_data2, lambdas1, mod1, parent_set1, "HESBCN"
   )
   expected_lambdas2 <- lambdas
