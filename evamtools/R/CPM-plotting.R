@@ -791,7 +791,7 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
                           ## We use it to define "Observed" and "Not Observed" genotypes
                           observations = cpm_output$analyzed_data,
                           ## To compute node sizes if sampled_counts is NULL
-                          predicted_genotypes = method_data2plot$predicted_genotype_freqs, 
+                          ## predicted_genotypes = method_data2plot$predicted_genotype_freqs, 
                           sampled_counts = method_data2plot$sampled_genotype_counts,
                           top_paths = top_paths,
                           label_type = label_type,
