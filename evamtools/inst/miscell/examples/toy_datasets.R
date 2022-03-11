@@ -295,6 +295,26 @@ names(or_parent_set) <- c("A", "B", "C", "D")
 xor_parent_set <- c("Single", "Single", "Single", "XOR")
 names(xor_parent_set) <- c("A", "B", "C", "D")
 
+
+
+
+dag_and_or_xor <- matrix(0, ncol = 6, nrow = 6)
+rownames(dag_and_or_xor) <- colnames(dag_and_or_xor) <- c("WT", "A", "B", "C", "D", "E")
+dag_and_or_xor["WT", "A"] <- 1
+dag_and_or_xor["WT", "B"] <- 1
+dag_and_or_xor["A" , "C"] <- 1
+dag_and_or_xor["B", "C"] <- 1
+dag_and_or_xor["A", "D"] <- 1
+dag_and_or_xor["B", "D"] <- 1
+dag_and_or_xor["A", "E"] <- 1
+dag_and_or_xor["B", "E"] <- 1
+and_or_xor_parent_set <- c("Single", "Single", "AND", "OR", "XOR")
+names(and_or_xor_parent_set) <- c("A", "B", "C", "D", "E")
+and_or_xor_lambdas <- c(1, 2, 3, 4, 5)
+names(and_or_xor_lambdas) <- c("A", "B", "C", "D", "E")
+
+
+
 dag_c1 <- matrix(0, ncol=6, nrow=6)
 rownames(dag_c1) <- colnames(dag_c1) <- c("WT", "A", "B", "C", "D", "E")
 dag_c1["WT", "A"] <- 1
@@ -388,18 +408,26 @@ examples_csd <- list(
   ),
   "dag" = list(
     User = list(dag = template_dag, name = "Your Data"),
-    Linear = list(data = NULL, name = "Linear", dag = dag_linear, dag_parent_set = linear_parent_set, lambdas = and_lambdas),
-    AND = list(data = NULL, name = "AND", dag = dag_or, dag_parent_set = and_parent_set, lambdas = and_lambdas),
-    OR = list(data = NULL, name = "OR", dag = dag_or, dag_parent_set = or_parent_set, lambdas = and_lambdas), 
-    XOR = list(data = NULL, name = "XOR", dag = dag_or, dag_parent_set = xor_parent_set, lambdas = and_lambdas) 
+    AND = list(data = NULL, name = "AND",
+               dag = dag_or, dag_parent_set = and_parent_set,
+               lambdas = and_lambdas),
+    OR = list(data = NULL, name = "OR", dag = dag_or,
+              dag_parent_set = or_parent_set), 
+    XOR = list(data = NULL, name = "XOR", dag = dag_or,
+               dag_parent_set = xor_parent_set),
+    AND_OR_XOR = list(data = NULL,
+                      name = "AND_OR_XOR",
+                      dag = dag_and_or_xor,
+                      dag_parent_set = and_or_xor_parent_set,
+                      lambdas = and_or_xor_lambdas)
   ),
   "matrix" = list(
     User = list(thetas = template_thetas, name = "Your Data"),
-    test1 = list(thetas = mhn_example_lambdas2, name = "Example 1")
+    MHN_Ex_1 = list(thetas = mhn_example_lambdas2, name = "MHN_Ex_1")
   )
 )
 
-## If running from "something/EvAM-Tools/evamtools/inst/miscell"
-save(examples_csd, file = "../../data/examples_csd.RData")
+## If running from "something/EvAM-Tools/evamtools/inst/miscell/examples"
+save(examples_csd, file = "../../../data/examples_csd.RData")
 
 

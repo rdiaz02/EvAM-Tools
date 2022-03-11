@@ -275,7 +275,9 @@ server <- function(input, output, session) {
           }
       } else if (input$input2build == "csd" && !is.null(data$data)) {
           n_genes <- ncol(data$data)
-          if (data$name == "User Data") data$dag[] <- 0
+          ## Never show DAGs here.
+          ## if (data$name == "User Data") data$dag[] <- 0
+          data$dag[] <- 0
       } else if (input$input2build == "csd" && is.null(data$data)) {
           n_genes <- SHINY_DEFAULTS$ngenes
           data$dag[] <- 0
