@@ -15,6 +15,7 @@ dataModal <- function(error_message, type="Error: ") {
 
 server <- function(input, output, session) {
   examples_csd$csd <- examples_csd$csd[1:5]
+  examples_csd$dag <- examples_csd$dag[1:5]
   all_csd_data <- evamtools:::standarize_all_datasets(examples_csd)
   min_genes <- SHINY_DEFAULTS$min_genes
   max_genes <- SHINY_DEFAULTS$max_genes
@@ -38,7 +39,8 @@ server <- function(input, output, session) {
   ## last_visited_cpm <- random_name
 
   datasets <- reactiveValues(
-    all_csd = all_csd_data
+    all_csd = all_csd_data,
+    fixed_examples = all_csd_data
   )
 
    data <- reactiveValues(
@@ -114,20 +116,6 @@ server <- function(input, output, session) {
   observeEvent(input$save_csd_data, {
     tryCatch({
       ## 1 save dataset to list after user data
-      # if (!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))){
-          datasets$all_csd[[input$input2build]][[input$dataset_name]]$name <-
-              input$dataset_name
-
-          if (nrow(data$csd_counts) > 0) {
-              ## FIXME: comment_out_freqs2csd
-              ## datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <-
-              ##     evamtools:::freqs2csd(data$csd_counts,
-              ##                           data$gene_names[1:input$gene_number])
-            datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <-
-                evamtools:::genotypeCounts_to_data(data$csd_counts,
-                                                   e = 0)
-        }
-
         tmp_data <- list(
           data = data$data
           , dag = data$dag
@@ -138,7 +126,28 @@ server <- function(input, output, session) {
           , trm = data$trm
           , n_genes = input$gene_number
           , name = input$dataset_name)
+
+        if (!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))){
+          datasets$fixed_examples[[input$input2build]][[input$dataset_name]] <- tmp_data
+        }
+
         datasets$all_csd[[input$input2build]][[input$dataset_name]] <- tmp_data
+
+        datasets$all_csd[[input$input2build]][[input$dataset_name]]$name <-
+            input$dataset_name
+
+        if (nrow(data$csd_counts) > 0) {
+            ## FIXME: comment_out_freqs2csd
+            ## datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <-
+            ##     evamtools:::freqs2csd(data$csd_counts,
+            ##                           data$gene_names[1:input$gene_number])
+          datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <-
+              evamtools:::genotypeCounts_to_data(data$csd_counts,
+                                                  e = 0)
+      }
+
+        
+
 
         # tmp_data_2 <- datasets$all_csd[[input$input2build]]
         # datasets$all_csd[[input$input2build]] <-
@@ -151,9 +160,10 @@ server <- function(input, output, session) {
 
         # ## 2 restore default values
         # try({
-        #     datasets$all_csd[[input$input2build]][[input$select_csd]] <-
-        #         all_csd_data[[input$input2build]][[input$select_csd]]
+        datasets$all_csd[[input$input2build]][[input$select_csd]] <-
+            datasets$fixed_examples[[input$input2build]][[input$select_csd]]
         # })
+        # browser()
 
         ## 3 update selected entry
         updateRadioButtons(session, "select_csd", selected = input$dataset_name)
