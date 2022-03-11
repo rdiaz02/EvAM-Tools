@@ -761,11 +761,14 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
     n_rows <- 2
    
     if (orientation == "vertical") {
-        op1 <- par(mfrow = c(l_methods, n_rows))
+        op1 <- par(mfrow = c(l_methods, n_rows),
+                   mar = c(0.5, 1, 0.5, 0.5),
+                   mai = c(0.25, 0.25, 0.25, 0.25))
     } else {
-        op1 <- par(mfcol = c(n_rows, l_methods))
+        op1 <- par(mfcol = c(n_rows, l_methods),
+                   mar = c(0.5, 1, 0.5, 0.5),
+                   mai = c(0.25, 0.25, 0.25, 0.25))
     }
-    par(mar = c(0.5, 1, 0.5, 0.5), mai = c(0.25, 0.25, 0.25, 0.25))
 
     ## Plotting CPMs
     ## For each CPM there are two plots
