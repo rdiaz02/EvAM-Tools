@@ -649,7 +649,8 @@ user_input <- function() {
                 
                  tags$hr(style="border-color: darkgrey;"),
                 # checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("HyperTRAPS", "MCCBN"), choiceValues = c("hypertraps", "mccbn")),
-                checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("MCCBN", "HESBCN"), choiceValues = c("MCCBN", "HESBCN")),
+                checkboxGroupInput("more_cpms", "Additional CPMs", 
+                  width = "100%", choiceNames = c("MCCBN", "HESBCN"), choiceValues = c("MCCBN", "HESBCN"), inline=TRUE),
                 tags$h5("Beware: MCCBN may take hours to run"),
                 tags$hr(style="border-color: darkgrey;"),
                 
