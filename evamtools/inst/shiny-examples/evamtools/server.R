@@ -264,10 +264,6 @@ server <- function(input, output, session) {
           number_of_parents <- colSums(data$dag)
           to_keep <- sum(number_of_parents > 0)
           n_genes <- ifelse(to_keep < 1, SHINY_DEFAULTS$ngenes, to_keep)
-          # if (input$dag_model == "OT" && any(number_of_parents > 1)) {
-          #     showModal(dataModal("This DAG cannot be transformed into a tree"))
-          #     # updateRadioButtons(session, "dag_model", selected = "HESBCN")
-          # }
           updateRadioButtons(session, "dag_model", selected = "HESBCN")
       } else if (input$input2build == "matrix") {
           # n_genes <- length(which(colSums(abs(data$thetas)) > 0
@@ -378,10 +374,10 @@ server <- function(input, output, session) {
   ## Define new genotype
   observeEvent(input$dag_model, {
     number_of_parents <- colSums(data$dag)
-    if(input$dag_model == "OT" && any(number_of_parents > 1)){
+    if (input$dag_model == "OT" && any(number_of_parents > 1)) {
       showModal(dataModal("This DAG cannot be transformed into a tree"))
       updateRadioButtons(session, "dag_model", selected = "HESBCN")
-    }else{
+    } else {
       default_dag_model <<- input$dag_model
     }
   })
