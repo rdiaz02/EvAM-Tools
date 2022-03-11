@@ -543,27 +543,26 @@ server <- function(input, output, session) {
       , Relation = tmp_dag_parent_set[edges[, "col"] - 1]
       , Lambdas = data$lambdas[edges[, "col"] - 1])
     
-    if((default_dag_model %in% c("OT", "OncoBN"))
+    if ((default_dag_model %in% c("OT", "OncoBN"))
       & (any(dag_data$Lambdas < 0) | any(dag_data$Lambdas > 1))){
         showModal(dataModal("thetas/probabilities should be between 0 and 1"))
         updateRadioButtons(session, "dag_model", selected = "HESBCN")
     }
 
-    if(default_dag_model %in% c("OT")) {
+    if (default_dag_model %in% c("OT")) {
       colnames(dag_data) <- c("From", "To", "Relation", "Weight")
       dag_data$Relation <- NULL
       # data$lambdas <- data$lambdas - 0.1
       # dag_data$Lambdas <- data$lambdas[edges[, "col"] - 1]
      
-    } else if(default_dag_model %in% c("OncoBN")){
-      if(length(unique(dag_data$Relation))>2){
+    } else if (default_dag_model %in% c("OncoBN")) {
+      if (length(unique(dag_data$Relation)) > 2) {
         showModal(dataModal("OncoBN model must only include one type of relationship"))
         updateRadioButtons(session, "dag_model", selected = "HESBCN")
       }
       colnames(dag_data) <- c("From", "To", "Relation", "theta")
      
     }
-
     return(dag_data)
   })
 
