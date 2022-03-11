@@ -280,6 +280,10 @@ dag_or["B", "D"] <- 1
 
 and_parent_set <- c("Single", "Single", "Single", "AND")
 names(and_parent_set) <- c("A", "B", "C", "D")
+or_parent_set <- c("Single", "Single", "Single", "OR")
+names(or_parent_set) <- c("A", "B", "C", "D")
+xor_parent_set <- c("Single", "Single", "Single", "XOR")
+names(xor_parent_set) <- c("A", "B", "C", "D")
 and_lambdas <- c(1,2,3,4)
 names(and_lambdas) <- c("A", "B", "C", "D")
 
@@ -362,7 +366,7 @@ rownames(mhn_example_lambdas2) <- colnames(mhn_example_lambdas2) <- c("A1", "B2"
 
 examples_csd <- list(
   "csd" = list(
-    User = list(data = NULL, name = "User Data"),
+    User = list(data = NULL, name = "Your Data"),
     Linear = list(data = dB_linear,  name = "Linear", dag = dag_linear), 
     AND = list(data = dB_AND, name = "AND", dag = dag_or, dag_parent_set = and_parent_set), 
     OR = list(data = dB_OR, name = "OR", dag = dag_or, dag_parent_set = or_parent_set), 
@@ -381,11 +385,13 @@ examples_csd <- list(
     d4gc3 = list(data = dB_4g_3, name = "Four genes, third example", dag = dag_4g)
   ),
   "dag" = list(
-    User = list(dag = template_dag, name = "User Data"),
-    AND = list(data = NULL, name = "AND", dag = dag_or, dag_parent_set = and_parent_set, lambdas = and_lambdas) 
+    User = list(dag = template_dag, name = "Your Data"),
+    AND = list(data = NULL, name = "AND", dag = dag_or, dag_parent_set = and_parent_set, lambdas = and_lambdas),
+    OR = list(data = NULL, name = "OR", dag = dag_or, dag_parent_set = or_parent_set, lambdas = and_lambdas), 
+    XOR = list(data = NULL, name = "XOR", dag = dag_or, dag_parent_set = xor_parent_set, lambdas = and_lambdas) 
   ),
   "matrix" = list(
-    User = list(thetas = template_thetas, name = "User Data"),
+    User = list(thetas = template_thetas, name = "Your Data"),
     test1 = list(thetas = mhn_example_lambdas2, name = "Example 1")
   )
 )
