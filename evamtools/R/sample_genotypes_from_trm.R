@@ -1048,7 +1048,8 @@ OT_model_2_predict_genots <- function(model, epos) {
     if ("Relation" %in% colnames(model))
         stop("OT does not take a Relation column")
     if (any(table(model$To) > 1))
-        stop("In OT models each gene has at most one parent.")
+        stop("In OT models each gene has at most one parent. ",
+             "Fix the input DAG/model.")
     
     ## Obtain the adjacency matrix and ensure adjacency matrix
     ## and weights have genes in same order
