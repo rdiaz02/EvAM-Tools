@@ -164,9 +164,7 @@ test_that("Test standarize datasets works correctly", {
     data8 <- list(gene_names = LETTERS[3:20])
     expected_data_8 <- list(gene_names = LETTERS[3:12])
 
-    ## FIXME: I think the logic of the next test is just wrong
-    ## 
-    ## check_fields(data1, list())
+    check_fields(data1, list())
     
     check_fields(data2, list(data = test_data))
     check_fields(data3, list(data = tmp_data3
