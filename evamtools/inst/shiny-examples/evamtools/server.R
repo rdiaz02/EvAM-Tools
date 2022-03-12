@@ -392,8 +392,9 @@ server <- function(input, output, session) {
   output$define_genotype <- renderUI({
     n_genes <- ifelse(is.null(input$gene_number), 3, input$gene_number)
     options <- data$gene_names[1:n_genes]
-    if(input$input2build == "csd"){
-      tags$div(
+    if (input$input2build == "csd") {
+                   
+        tags$div(
                tags$h3("2. Add genotypes"),
                tags$h5("WT is added by not clicking on any mutations; ",
                        "but the WT genotype should not be the first one added ",
@@ -421,11 +422,8 @@ server <- function(input, output, session) {
                                   inputId = "genotype_freq", width = NA),
                      actionButton("add_genotype", "Add genotype")
                      ),
-            tags$h5(HTML("<br>")),
-            actionButton("clear_genotype",
-                         "Clear all genotype data")
         )
-    } else if (input$input2build == "dag"){
+    } else if (input$input2build == "dag") {
       tags$div(
         tags$div(class = "flex",
           tags$h3("2. Define a Directed Acyclic Graph (DAG)"),
@@ -460,9 +458,17 @@ server <- function(input, output, session) {
             tags$h5(HTML("<p></p>")),
             actionButton("add_edge", "Add edge"),
             actionButton("remove_edge", "Remove edge"),
-            actionButton("clear_dag", "Clear DAG"),
             tags$h3(HTML("<br/>DAG table")),
             DT::DTOutput("dag_table"),
+            tags$h3(HTML("<br/>")),
+            numericInput("dag_epos",
+                         HTML("epos,&epsilon;"),
+                         ##HTML("epos (OT)/&epsilon;"),
+                         value = 0.01, min = 0, max = 1,
+                         step = 0.05, width = "50%"),
+            tags$h5(HTML("For OT (epos) and OncoBN (&epsilon;) only: prob. of children "),
+                    "not allowed by model to occur. ",
+                    "(Affects predicted probabilities.) "),
             tags$h3(HTML("<br/>")),
             numericInput("dag_samples", HTML("Number of genotypes to sample"),
                          value = default_csd_samples, min = 100, max = 10000,
@@ -471,28 +477,23 @@ server <- function(input, output, session) {
             numericInput("dag_noise", HTML("Noise"),
                          value = 0.01, min = 0, max = 1,
                          step = 0.05, width = "50%"),
-            tags$h5("Observational noise (e.g., genotyping error). ",
+            tags$h5("Observational noise (e.g., genotyping error) ",
+                    "for all models. ",
                     "Added during sampling, ",
                     "after predictions from model ",
                     "have been obtained; ",
                     "predicted probabilities are not affected."),
              tags$h3(HTML("<br/>")),
-            numericInput("dag_epos", HTML("Epos/Epsilon"),
-                         value = 0.01, min = 0, max = 1,
-                         step = 0.05, width = "50%"),
-            tags$h5("For OT/OncoBN only: prob. of children ",
-                    "not allowed by model to occur. ",
-                    "(Affects predicted probabilities.) "),
-            tags$h3(HTML("<br/>")),
-            actionButton("resample_dag", "Sample from DAG")
+            actionButton("resample_dag", "Sample from DAG"),
+            actionButton("clear_dag", "Clear DAG and genotype data"),
             )
           }
         )
-      } else if (input$input2build == "matrix"){
+      } else if (input$input2build == "matrix") {
         tags$div(
           tags$div(class = "flex",
                    ## tags$h3("2. Define input with a Matrix"),
-                   tags$h3("2. Define MHN's log-Theta",
+                   tags$h3("2. Define MHN''s log-Theta",
                            HTML("matrix (log-&Theta;):")),
             actionButton("how2build_matrix", "Help")
           ),
@@ -517,7 +518,8 @@ server <- function(input, output, session) {
                       "predicted probabilities are not affected."),
               tags$h3(HTML("<br/>")),
               actionButton("resample_mhn", "Sample from MHN"),
-              actionButton("clear_mhn", "Clear matrix data")
+              actionButton("clear_mhn",
+                           HTML("Clear log-&Theta; matrix and genotype data"))
             )
           }
         )
@@ -525,7 +527,7 @@ server <- function(input, output, session) {
   })
 
   output$change_counts <- renderUI({
-    if(input$input2build == "csd"){
+    if (input$input2build == "csd") {
       tags$div(class = "frame",
         tags$div(class = "flex",
                  tags$h3("3. Change genotype's counts"),
@@ -534,12 +536,45 @@ server <- function(input, output, session) {
         ),
         tags$div(id = "csd_table",
           DT::DTOutput("csd_counts")
-        )
+          ),
+        tags$h5(HTML("<br/>")),
+        actionButton("clear_genotype", "Clear genotype data")  
       )
     }
   })
 
 
+
+  output$upload_data <- renderUI({
+      if (input$input2build == "csd") {
+          tags$div(## class = "frame",
+                   tags$h4("0. Upload your own data"),
+                   tags$h5(paste0("Format: csv ---comma separated values---,",
+                                  " with first row with gene names."
+                                  )),
+                   tags$h5(paste0("Use only alphanumeric characters ",
+                                  "for gene names, and do not start ",
+                                  "a gene name with a number; ",
+                                  "keep gene names short (for figures). ",
+                                  "Use 0 or 1 for ",
+                                  "altered/not-altered (mutated/not-mutated)."
+                                  )),
+                   tags$div(class = "upload_file",
+                            fileInput("csd", "Load Data",
+                                      multiple = FALSE,
+                                      accept = c(
+                                          "text/csv",
+                                          ".csv"))),
+                   tags$h5(HTML("<br/>")),
+                   )
+      }
+  })
+
+
+
+
+
+  
   # ## DAG builder
   # ## Controling dag builder
   dag_data <- reactive({
@@ -1210,7 +1245,7 @@ server <- function(input, output, session) {
       ## Disabling donwload button
       shinyjs::disable(selector = "#download_cpm")
 
-      return(tags$h3("There are not results to show yet. Go to the input tab, select a dataset and hit the 'Run evamtools!' button"))
+      return(tags$h3("There are not results to show yet. Go to the input tab, select a dataset and hit the 'Run evamtools' button"))
     }
     }
   })
