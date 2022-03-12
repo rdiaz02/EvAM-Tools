@@ -533,7 +533,7 @@ user_input <- function() {
                 selected = "csd"
               )
             ),
-            tags$h3("Some examples"),
+            tags$h4("Examples and user's data"),
             uiOutput("csd_list")
           )
           ## do it with a render UI
@@ -542,8 +542,44 @@ user_input <- function() {
         column(width = 11,
           titlePanel(HTML("&ensp; Cross-sectional data input")),
           column(width = 6,
-              column(width = 12,
+                 column(width = 12,
+                        ## Upload
+            ## tags$div(class = "frame",
+            ##          tags$h3("Upload your own data"),
+            ##          tags$h4(paste0("Format: csv ---comma separated values---,",
+            ##                         " with first row with gene names."
+            ##                         )),
+            ##          tags$h5(paste0("Use only alphanumeric characters ",
+            ##                         "for gene names, and do not start ",
+            ##                         "a gene name with a number; ",
+            ##                         "keep gene names short (for figures). ",
+            ##                         "Use 0 or 1 for ",
+            ##                         "altered/not-altered (mutated/not-mutated)."
+            ##                         )),
+            ##          tags$div(class = "upload_file",
+            ##                   fileInput("csd", "Load Data",
+            ##                             multiple = FALSE,
+            ##                             accept = c(
+            ##                                 "text/csv",
+            ##                                 ".csv")) 
+            ## )) ,
             tags$div(class = "frame",
+                     tags$h3(" Define your data interactively"),
+                     ## tags$h5(HTML("<br/>")),
+            ## Save/Download/Rename/Use
+            tags$div(class = "frame",
+                     tags$h3("(Re)name the data"),
+                     tags$h5(HTML("Give the modified data a name ",
+                                  "that will also be used to save the CPM ",
+                                  "output.")),
+                     tags$div(class = "download_button",
+                              ),
+                     uiOutput("dataset_name"),
+                     actionButton("save_csd_data", "Use this name"),
+              ),
+            
+            tags$div(class = "frame",
+                     uiOutput("upload_data"),
                 tags$div(class = "flex",
                          tags$h3("1. Set the number of genes"),
                          tags$h5("(Using 7 or more genes can lead ",
@@ -558,54 +594,25 @@ user_input <- function() {
             ),
             uiOutput("change_counts"),
 
-            tags$div(class = "frame",
-                     tags$h3("Save & Download data"),
-                     tags$h5(HTML("Save dataset with a name ",
-                                  "that will also be used to save the CPM ",
-                                  "output.")),
-              uiOutput("dataset_name"),
-              tags$div(
-                tags$div(class = "download_button",
-                  # shinyjs::disabled(
-                    actionButton("save_csd_data", "Save data"),
-                    # ),
-                ),
-                tags$div(class = "download_button",
+             tags$div(
+                      class = "frame",
+                      tags$h3("Download the data"),
+                            tags$div(class = "download_button",
                          tags$h5(HTML("Contents of saved file: ",
                                       "the data sample data as csv ",
                                       "---comma separated values--- ",
                                       "file.")),   
                   downloadButton("download_csd", "Download your data")
                 )
-              )
-            ),
-
-            tags$div(class = "frame",
-                     tags$h3("Upload your own data"),
-                     tags$h4(paste0("Format: csv ---comma separated values---,",
-                                    " with first row with gene names."
-                                    )),
-                     tags$h5(paste0("Use only alphanumeric characters ",
-                                    "for gene names, and do not start ",
-                                    "a gene name with a number; ",
-                                    "keep gene names short (for figures). ",
-                                    "Use 0 or 1 for ",
-                                    "altered/not-altered (mutated/not-mutated)."
-                                    )),
-                     tags$div(class = "upload_file",
-                              fileInput("csd", "Load Data",
-                                        multiple = FALSE,
-                                        accept = c(
-                                            ## ".rds", ".RDS",
-                                            "text/csv",
-                                            ".csv")) 
-            ))
+             )
             )
-          ),
+
+            )
+          ), 
           column(width = 6,
           
             tags$div(class = "download_button submit_button",
-              actionButton("analysis", "Run evamtools!")
+              actionButton("analysis", "Run evamtools")
             ),
             tags$div(class = "download_button",
               actionButton("advanced_options", "Advanced options")

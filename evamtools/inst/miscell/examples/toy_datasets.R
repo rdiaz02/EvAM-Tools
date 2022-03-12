@@ -270,6 +270,12 @@ dag_linear["A" , "B"] <- 1
 dag_linear["B", "C"] <- 1
 dag_linear["C", "D"] <- 1
 
+linear_parent_set <- c("Single", "Single", "Single", "Single")
+names(linear_parent_set) <- c("A", "B", "C", "D")
+linear_lambdas <- c(2 ,1 ,4 ,3)
+names(linear_lambdas) <- c("A", "B", "C", "D")
+
+
 dag_or <- matrix(0, ncol=5, nrow=5)
 rownames(dag_or) <- colnames(dag_or) <- c("WT", "A", "B", "C", "D")
 dag_or["WT", "A"] <- 1
@@ -383,12 +389,13 @@ mhn_example_lambdas <- matrix(c(
 mhn_example_lambdas2 <- template_thetas
 mhn_example_lambdas2[1:ncol(mhn_example_lambdas)
   , 1:ncol(mhn_example_lambdas)] <- mhn_example_lambdas
-rownames(mhn_example_lambdas2) <- colnames(mhn_example_lambdas2) <- c("A1", "B2", "C3", LETTERS[4:10])
+rownames(mhn_example_lambdas2) <- colnames(mhn_example_lambdas2) <-
+    c("A", "B", "C", LETTERS[4:10])
 
 
 examples_csd <- list(
   "csd" = list(
-    User = list(data = NULL, name = "Your Data"),
+    User = list(data = NULL, name = "User"),
     Linear = list(data = dB_linear,  name = "Linear", dag = dag_linear), 
     AND = list(data = dB_AND, name = "AND", dag = dag_or, dag_parent_set = and_parent_set), 
     OR = list(data = dB_OR, name = "OR", dag = dag_or, dag_parent_set = or_parent_set), 
@@ -407,7 +414,11 @@ examples_csd <- list(
     d4gc3 = list(data = dB_4g_3, name = "Four genes, third example", dag = dag_4g)
   ),
   "dag" = list(
-    User = list(dag = template_dag, name = "Your Data"),
+      User = list(dag = template_dag, name = "User"),
+      Linear = list(data = NULL,  name = "Linear", dag = dag_linear,
+                    dag_parent_set = linear_parent_set,
+                    lambdas = linear_lambdas
+                    ),
     AND = list(data = NULL, name = "AND",
                dag = dag_or, dag_parent_set = and_parent_set,
                lambdas = and_lambdas),
@@ -422,8 +433,7 @@ examples_csd <- list(
                       lambdas = and_or_xor_lambdas)
   ),
   "matrix" = list(
-    User = list(thetas = template_thetas, name = "Your Data"),
-    MHN_Ex_1 = list(thetas = mhn_example_lambdas2, name = "MHN_Ex_1")
+    User = list(thetas = template_thetas, name = "User"),
   )
 )
 
