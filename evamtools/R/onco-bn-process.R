@@ -40,7 +40,7 @@ do_OncoBN <- function(data,
                       epsilon = min(colMeans(data)/2),
                       silent = TRUE) {
 
-    if(silent)
+    if (silent)
         invisible(capture.output(fit <- fitCPN(data,
                                                model = model,
                                                algorithm = algorithm,
@@ -106,6 +106,7 @@ do_OncoBN <- function(data,
       , model = model
       , parent_set = ps_v
       , predicted_genotype_freqs = est_genots
+      , fit = fit
     ))
 }
 

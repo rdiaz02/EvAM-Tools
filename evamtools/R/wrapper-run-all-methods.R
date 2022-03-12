@@ -909,6 +909,7 @@ evam <- function(x,
         OncoBN_fitted_model = get_output("OncoBN", "model"),
         OncoBN_epsilon = get_output("OncoBN", "epsilon"),
         OncoBN_parent_set = get_output("OncoBN", "parent_set"),
+        OncoBN_fit = get_output("OncoBN", "fit"),
         OncoBN_paths_max = get_paths_max("OncoBN"),
         
         HESBCN_model = get_output("HESBCN", "edges"),
