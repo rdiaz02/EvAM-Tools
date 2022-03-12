@@ -38,5 +38,5 @@ SHINY_DEFAULTS <- list(
   )
 )
 
-## This expects to be run evamtools directory. O.w. adjust path
+## This expects to be run from the evamtools directory. O.w. adjust path
 save(SHINY_DEFAULTS, file = "./data/SHINY_DEFAULTS.RData")
