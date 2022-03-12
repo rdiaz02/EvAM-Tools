@@ -41,6 +41,28 @@ test_that("Exercise random_evam with different options", {
 })
 
 
+test_that("Predicting from CBN and HESBCN is identical when only AND", {
+    n <- 10
+    for (i in 1:n) {
+        ngenes <- sample(4:7, 1)
+        gene_names <- LETTERS[seq_len(ngenes)]
+        graph_density <- runif(1, 0.3, 0.7)
+        poset <- mccbn::random_poset(ngenes,
+                                     graph_density = graph_density)
+        lambdas <- runif(ngenes, 1/10, 10)
+        names(lambdas) <-  colnames(poset) <- rownames(poset) <- gene_names
+        ocbn <- CBN_from_poset_lambdas(poset, lambdas)
+        ohesbcn <- HESBCN_from_poset_lambdas_relation_probs(poset, lambdas,
+                                                            c("AND" = 1,
+                                                              "OR" = 0,
+                                                              "XOR" = 0))
+        expect_equal(ohesbcn$HESBCN_trans_rate_mat,
+                     ocbn$CBN_trans_rate_mat)
+    }
+})
+
+
+
 test_that("Test OncoBN thetas in right order", {
     ## Both a test that I am doing it right and that OncoBN is doing it right.
     ## The m2b are about the procedures in evam, but they cannot work
