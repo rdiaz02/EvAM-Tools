@@ -151,7 +151,8 @@ modify_dag <-
   if(dag_model %in% c("HESBCN", "OncoBN") && !igraph::is_dag(g2)){
     stop("This relationship breaks the DAG. Revise it.")
   } else if(dag_model %in% c("OT") && any(number_of_parents > 1)){
-    stop("This operation does not yield a tree.")
+      stop("This operation does not give a tree. ",
+           "With OT nodes cannot have multiple parents.")
   }
 
   ## Recompute parent set
