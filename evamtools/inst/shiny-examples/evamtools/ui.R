@@ -534,6 +534,8 @@ user_input <- function() {
               )
             ),
             tags$h4("Examples and user's data"),
+            ## How many to show is controlled from server function
+            ## in server.R, examples_csd$dag, etc
             uiOutput("csd_list")
           )
           ## do it with a render UI

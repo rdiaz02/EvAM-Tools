@@ -433,7 +433,8 @@ examples_csd <- list(
                       lambdas = and_or_xor_lambdas)
   ),
   "matrix" = list(
-    User = list(thetas = template_thetas, name = "User"),
+      User = list(thetas = template_thetas, name = "User"),
+     MHN_Ex_1 = list(thetas = mhn_example_lambdas2, name = "MHN_Ex_1")      
   )
 )
 

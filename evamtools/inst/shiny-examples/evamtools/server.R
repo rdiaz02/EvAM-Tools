@@ -15,7 +15,7 @@ dataModal <- function(error_message, type="Error: ") {
 
 server <- function(input, output, session) {
   examples_csd$csd <- examples_csd$csd[1:5]
-  examples_csd$dag <- examples_csd$dag[1:5]
+  examples_csd$dag <- examples_csd$dag[1:6]
   all_csd_data <- evamtools:::standarize_all_datasets(examples_csd)
   min_genes <- SHINY_DEFAULTS$min_genes
   max_genes <- SHINY_DEFAULTS$max_genes
