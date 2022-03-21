@@ -550,7 +550,7 @@ DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
                              font_size = 12) {
     
     ## I find the documentation and general working of this
-    ## hideous. Documentation ifficult to locate, spread between Rgraphviz and
+    ## hideous. Documentation difficult to locate, spread between Rgraphviz and
     ## graph, no clear indication that some things have no effect on plots,
     ## errors when issuing plot(object) (but not graph::plot(object)), etc,
     ## etc. But for DAGs, I like the output better than igraph.

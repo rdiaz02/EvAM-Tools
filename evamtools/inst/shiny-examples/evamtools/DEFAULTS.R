@@ -4,7 +4,7 @@
 max_genes <- 10
 all_gene_names <- LETTERS[1: max_genes]
 template_dag <- matrix(0, ncol = max_genes + 1, nrow = max_genes + 1)
-rownames(template_dag) <- colnames(template_dag) <- c("WT", all_gene_names)
+rownames(template_dag) <- colnames(template_dag) <- c("Root", all_gene_names)
 template_dag[1, 2] <- 1
 template_dag[1, 3] <- 1
 template_dag[2, 4] <- 1

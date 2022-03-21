@@ -16,7 +16,7 @@ generate_old <- function() {
     max_genes <- 10
     all_gene_names <- LETTERS[1: max_genes]
     template_dag <- matrix(0, ncol = max_genes + 1, nrow = max_genes + 1)
-    rownames(template_dag) <- colnames(template_dag) <- c("WT", all_gene_names)
+    rownames(template_dag) <- colnames(template_dag) <- c("Root", all_gene_names)
     template_parent_set <- rep("Single", max_genes)
     names(template_parent_set) <- all_gene_names
     template_lambdas <- rep(1, max_genes)
@@ -75,7 +75,7 @@ test_that("Test standarize datasets works correctly", {
         ## I am not sure this is really testing anything
         ## that is not true by construction in most cases.
         expect_equal(standard_data$gene_names, colnames(standard_data$thetas))
-        expect_equal(c("WT", standard_data$gene_names), colnames(standard_data$dag))
+        expect_equal(c("Root", standard_data$gene_names), colnames(standard_data$dag))
         expect_equal(standard_data$gene_names, names(standard_data$dag_parent_set))
         expect_equal(standard_data$gene_names, names(standard_data$lambdas))
         if(!is.null(standard_data$data)){
@@ -113,7 +113,7 @@ test_that("Test standarize datasets works correctly", {
         c(0, 0, 0, 0, 0)
     ), byrow = TRUE, ncol=5
     )
-    colnames(test_dag) <- rownames(test_dag) <- c("WT", "A1", "B2", "C3", "D4")
+    colnames(test_dag) <- rownames(test_dag) <- c("Root", "A1", "B2", "C3", "D4")
     
     parent_set_5 <- c("Single", "OR", "AND", "AND")
     names(parent_set_5) <- c("x1", "x2", "x3", "x4")
@@ -130,7 +130,7 @@ test_that("Test standarize datasets works correctly", {
     names(parent_set_5) <- gene_names_5 
 
     expected_dag_5 <- matrix(0, nrow=11, ncol = 11)
-    colnames(expected_dag_5) <- rownames(expected_dag_5) <- c("WT", gene_names_5)
+    colnames(expected_dag_5) <- rownames(expected_dag_5) <- c("Root", gene_names_5)
     expected_dag_5[1:5, 1:5] <- test_dag 
     expected_lambdas_5 <- c(lambdas_5, rep(1, 7))
     names(expected_lambdas_5) <- gene_names_5
@@ -189,7 +189,7 @@ test_that("Test standarize datasets works correctly", {
         c(0, 0, 0, 0, 0)
     ), byrow = TRUE, ncol=5
     )
-    colnames(test_dag) <- rownames(test_dag) <- c("WT", "A1", "B2", "C3", "D4")
+    colnames(test_dag) <- rownames(test_dag) <- c("Root", "A1", "B2", "C3", "D4")
 
     lambdas <- c(1,2,3,4)
     names(lambdas) <- c("z", "x", "y", "w")
@@ -220,7 +220,7 @@ test_that("Test standarize datasets works correctly", {
     colnames(expected_data) <- gene_names[1 : ncol(expected_data)]
 
     expected_dag <- matrix(0, nrow=11, ncol = 11)
-    colnames(expected_dag) <- rownames(expected_dag) <- c("WT", gene_names)
+    colnames(expected_dag) <- rownames(expected_dag) <- c("Root", gene_names)
     expected_dag[1:5, 1:5] <- test_dag 
 
     expected_thetas <- matrix(0, nrow=10, ncol = 10)
@@ -272,7 +272,7 @@ test_that("Standarize does not work with bad data", {
         c(0, 0, 0, 0, 0)
     ), byrow = TRUE, ncol=5
     )
-    colnames(test_dag) <- rownames(test_dag) <- c("WT", "A1", "B2", "C3", "D4")
+    colnames(test_dag) <- rownames(test_dag) <- c("Root", "A1", "B2", "C3", "D4")
     
     dag_1 <- test_dag
     dag_1["D4", "A1"] <- 1 #Breaks DAG

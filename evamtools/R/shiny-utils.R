@@ -97,9 +97,9 @@ modify_dag <-
   if(!all(names(parent_set) == colnames(dag)[-1])){
     stop("Dag and parent set should have information of the same genes")
   }
-
-  from_node <- ifelse(from_node == "Root", "WT", from_node)
-  if(!(from_node %in% colnames(dag)) | !(to_node %in% colnames(dag))){
+  
+  ## from_node <- ifelse(from_node == "Root", "WT", from_node)
+  if (!(from_node %in% colnames(dag)) | !(to_node %in% colnames(dag))) {
     stop("Both From and To options have to be valid gene names")
   } else if(!all(unique(as.vector(dag)) %in% c(0, 1))){
     stop("The adjacency matrix should only contain 0 and 1")
@@ -109,7 +109,8 @@ modify_dag <-
     stop("Relationships cannot be bidirectional")
   } else if (dag[from_node, to_node] == 1 && operation == "add"){
     stop("That edge is already present")
-  } else if(dag["WT", to_node] == 1 && operation == "add"){
+  } else if (dag["Root", to_node] == 1 && operation == "add"){
+ ##      else if(dag["WT", to_node] == 1 && operation == "add"){
     stop("A direct children of Root cannot have multiple parents")
   } 
   
@@ -118,9 +119,10 @@ modify_dag <-
 
    ##Taking subcomponent starting from WT
   g1 <- igraph::graph_from_adjacency_matrix(tmp_dag, mode = "directed")
-  # browser()
+
   for(tmp_g in igraph::decompose(g1)){
-    if("WT" %in% V(tmp_g)$name){
+      ## if ("WT" %in% V(tmp_g)$name) {
+      if ("Root" %in% V(tmp_g)$name) {          
       tmp_vertices <- igraph::as_data_frame(tmp_g)
     }
   }
@@ -140,7 +142,8 @@ modify_dag <-
   for(i in colnames(tmp_dag2)[-1]){
     if(number_of_children[i] > 0 & number_of_parents[i] == 0){
       ## We add link to WT
-      tmp_dag2["WT", i] <- 1
+        ## tmp_dag2["WT", i] <- 1
+        tmp_dag2["Root", i] <- 1
     }
   }
 
@@ -554,7 +557,8 @@ standarize_dataset <- function(data,
     ## Only genes with multiple parent can have something different from "Single" relationship
     new_data$dag_parent_set[colSums(new_dag)[-1] <= 1] <- "Single"
   }
-  rownames(new_data$dag) <- colnames(new_data$dag) <- c("WT", new_data$gene_names)
+    ## rownames(new_data$dag) <- colnames(new_data$dag) <- c("WT", new_data$gene_names)
+  rownames(new_data$dag) <- colnames(new_data$dag) <- c("Root", new_data$gene_names)
 
   if(is.null(data$thetas)) {
     new_data$thetas <- default_thetas

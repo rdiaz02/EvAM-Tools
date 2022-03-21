@@ -16,7 +16,7 @@ generate_old <- function() {
     max_genes <- 10
     all_gene_names <- LETTERS[1: max_genes]
     template_dag <- matrix(0, ncol = max_genes + 1, nrow = max_genes + 1)
-    rownames(template_dag) <- colnames(template_dag) <- c("WT", all_gene_names)
+    rownames(template_dag) <- colnames(template_dag) <- c("Root", all_gene_names)
     template_parent_set <- rep("Single", max_genes)
     names(template_parent_set) <- all_gene_names
     template_lambdas <- rep(1, max_genes)
@@ -60,16 +60,16 @@ test_that("Modify dags works correctly",{
 
     
   mod1 <- dag
-  mod1["WT", "A"] <- 1
+  mod1["Root", "A"] <- 1
   expect_equal(modify_dag(dag, "Root", "A", "add", dag_parent_set,
                           default_dag = old$template_data$dag)$dag,
                mod1)
   expect_equal(modify_dag(mod1, "Root", "A", "remove", dag_parent_set, default_dag = old$template_data$dag)$dag, dag)
   expect_error(modify_dag(NULL, "Root", "A", "remove", dag_parent_set, default_dag = old$template_data$dag)$dag, "From and To options and DAG have to be defined")
   expect_error(modify_dag(dag, NULL, "A", "remove", dag_parent_set, default_dag = old$template_data$dag)$dag, "From and To options and DAG have to be defined")
-  expect_error(modify_dag(dag, "WT", NULL, "remove", dag_parent_set, default_dag = old$template_data$dag)$dag,"From and To options and DAG have to be defined")
-  expect_error(modify_dag(dag, "WT2", "A", "add", dag_parent_set, default_dag = old$template_data$dag)$dag, "Both From and To options have to be valid gene names")
-  expect_error(modify_dag(dag, "WT", "A2", "add", dag_parent_set, default_dag = old$template_data$dag)$dag, "Both From and To options have to be valid gene names")
+  expect_error(modify_dag(dag, "Root", NULL, "remove", dag_parent_set, default_dag = old$template_data$dag)$dag,"From and To options and DAG have to be defined")
+  expect_error(modify_dag(dag, "Root2", "A", "add", dag_parent_set, default_dag = old$template_data$dag)$dag, "Both From and To options have to be valid gene names")
+  expect_error(modify_dag(dag, "Root", "A2", "add", dag_parent_set, default_dag = old$template_data$dag)$dag, "Both From and To options have to be valid gene names")
 
   mod2 <- mod1
   mod2["A", "B"] <- 1
@@ -78,18 +78,18 @@ test_that("Modify dags works correctly",{
   expect_error(modify_dag(mod2, "A", "B", "add", dag_parent_set, default_dag = old$template_data$dag)$dag,"That edge is already present")
   expect_error(modify_dag(mod2, "A", "B", "add", dag_parent_set, default_dag = old$template_data$dag)$dag,"That edge is already present")
   expect_error(modify_dag(mod2, "D", "A", "add", dag_parent_set, default_dag = old$template_data$dag)$dag, "A direct children of Root cannot have multiple parents")
-  expect_equal(modify_dag(mod2, "WT", "A", "clear", dag_parent_set, default_dag = old$template_data$dag)$dag,
+  expect_equal(modify_dag(mod2, "Root", "A", "clear", dag_parent_set, default_dag = old$template_data$dag)$dag,
                ## SHINY_DEFAULTS$template_data$dag
                old$template_data$dag
                )
-  expect_equal(modify_dag(mod2, "WT", "A", "remove", dag_parent_set, default_dag = old$template_data$dag)$dag,
+  expect_equal(modify_dag(mod2, "Root", "A", "remove", dag_parent_set, default_dag = old$template_data$dag)$dag,
                ##SHINY_DEFAULTS$template_data$dag
                old$template_data$dag
                )
 
   ## More complex scenarios where we also test parent_set
   mod3 <- dag
-  mod3["WT", "A"] <- 1
+  mod3["Root", "A"] <- 1
   mod3["A", "B"] <- 1
   mod3["A", "C"] <- 1
   mod3["B", "D"] <- 1
@@ -103,7 +103,7 @@ test_that("Modify dags works correctly",{
   expect_equal(tmp_res1$dag, res_dag1)
 
   mod4 <- dag
-  mod4["WT", "A"] <- 1
+  mod4["Root", "A"] <- 1
   mod4["A", "B"] <- 1
   mod4["A", "C"] <- 1
   mod4["B", "D"] <- 1
@@ -133,7 +133,7 @@ test_that("Modify dags works correctly",{
   expect_equal(mod5_results_2$parent_set, tmp_parent_set4)
 
   mod6 <- mod4
-  mod6["WT", "G"] <- 1
+  mod6["Root", "G"] <- 1
   mod6["G", "B"] <- 1
   mod6_results <- modify_dag(mod4, "G", "B", "add", tmp_parent_set6, default_dag = old$template_data$dag)
   expect_equal(mod6_results$dag, mod6)
@@ -159,7 +159,7 @@ test_that("Test that modify lambdas and parent set is correct", {
 
 
   mod1 <- dag
-  mod1["WT", "A"] <- 1
+  mod1["Root", "A"] <- 1
   mod1["A", "B"] <- 1
   mod1["A", "C"] <- 1
   mod1["B", "D"] <- 1
@@ -261,8 +261,8 @@ test_that("Modify dags works correctly on a more comples example",{
   ##   dag <- SHINY_DEFAULTS$template_data$dag
   ## dag_parent_set <- SHINY_DEFAULTS$template_data$dag_parent_set
 
-  x <- modify_dag(dag, "WT", "A", "add", dag_parent_set, default_dag = old$template_data$dag)
-  x <- modify_dag(x$dag, "WT", "B", "add", x$parent_set, default_dag = old$template_data$dag)
+  x <- modify_dag(dag, "Root", "A", "add", dag_parent_set, default_dag = old$template_data$dag)
+  x <- modify_dag(x$dag, "Root", "B", "add", x$parent_set, default_dag = old$template_data$dag)
   x <- modify_dag(x$dag, "A", "C", "add", x$parent_set, default_dag = old$template_data$dag)
   x <- modify_dag(x$dag, "B", "C", "add", x$parent_set)
   x <- modify_dag(x$dag, "B", "D", "add", x$parent_set)
