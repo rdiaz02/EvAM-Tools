@@ -130,7 +130,7 @@ The results include:
 
 &nbsp;
 
-#### CBN and MCCBN ####
+#### H-CBN and MC-CBN ####
 
 - Beerenwinkel, N., & Sullivant, S. (2009). Markov models for accumulating
   mutations. Biometrika, 96(3), 645.
