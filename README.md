@@ -1,5 +1,5 @@
 # EvAM Tools #
-<!-- Create talk with markdown-toc, from node. -->
+<!-- Create toc with markdown-toc, from node. -->
 <!-- ./markdown-toc ~/Proyectos/EvAM-Tools/README.md -i -->
 
 <!-- toc -->
