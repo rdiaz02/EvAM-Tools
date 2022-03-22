@@ -451,13 +451,16 @@ plot_genot_fg <- function(trans_mat
         , cex = 2
         , pos = margin)
     if (!(is.null(observations))) {
-        legend(-1, -1.3, c("Observed", "Not observed") 
+        legend(-1.25,
+               1.3, ## -1.3,
+               c("Observed", "Not\nobserved")[2]
             , box.lwd = 0, lty=c(NA, NA), lwd = c(NA, NA)
             , pch = c(21, 21), bty = "n"
-            , col = c(observed_color, not_observed_color)
-            , pt.bg = c(observed_color, not_observed_color)
-            , pt.cex = c(2, 2), horiz = TRUE
-            , x.intersp = c(0, 0)
+            , col = c(observed_color, not_observed_color)[2]
+            , pt.bg = c(observed_color, not_observed_color)[2]
+            , pt.cex = c(2, 2)[2]
+            , horiz = FALSE
+            , x.intersp = c(0, 0)[2]
             )
     }
     mtext("Number of features acquired", side = 1, line = -1)
