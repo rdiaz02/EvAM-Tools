@@ -1374,7 +1374,7 @@ server <- function(input, output, session) {
     ## To see if I disable original data
     if(length(names(all_cpm_out)) > 0){
       tags$div(class="frame max_height",
-        tags$h3("3. Original data"),
+        tags$h3("Original data"),
         plotOutput("csd"),
         tags$div(class = "download_button",
           actionButton("modify_data", "Modify data")
@@ -1393,7 +1393,7 @@ server <- function(input, output, session) {
   output$tabular_data <- renderUI({
     if(length(names(all_cpm_out)) > 0){
       tags$div(class="frame max_height",
-        tags$h3("4. Tabular data"),
+        tags$h3("Tabular output"),
         radioButtons(inputId = "tabular_data2show",
           label = "",
           inline = TRUE,
@@ -1401,7 +1401,7 @@ server <- function(input, output, session) {
                             "Transition rates",
                             "Predicted genotype relative frequencies",
                             "Sampled genotype counts",
-                            "Observed transitions counts"
+                            "Observed genotype transitions (counts)"
                             ),
           choiceValues =  c("trans_mat",
                             "trans_rate_mat",

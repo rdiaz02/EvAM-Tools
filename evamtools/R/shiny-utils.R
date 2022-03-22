@@ -386,9 +386,7 @@ create_tabular_data <- function(data) {
             }
           }
         }
-        ## order_by_counts <- order(rowSums(all_counts[-1]),
-        ##                          decreasing = TRUE)
-        ## tabular_data[[attr]] <- all_counts[order_by_counts, ]
+        
         all_counts <-
             data.frame(Index = standard_rank_genots_1(all_counts$Genotype),
                        all_counts)
