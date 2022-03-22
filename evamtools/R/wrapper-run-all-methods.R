@@ -154,8 +154,9 @@ DAG_2_access_genots <- function(x) {
     all_gty <- all_gty[1:(i - 1)]
     ng <- unlist(lapply(all_gty, length))
     all_gty <- all_gty[order(ng)]
-    return(list(accessible_genots = all_gty,
-                graph = g))
+    return(list(accessible_genots = all_gty
+              ##, graph = g
+                ))
 }
 
 
@@ -234,8 +235,9 @@ DAG_2_access_genots_OR <- function(x) {
     all_gty <- unique(all_gty)
     ng <- unlist(lapply(all_gty, length))
     all_gty <- all_gty[order(ng)]
-    return(list(accessible_genots = all_gty,
-                graph = g))
+    return(list(accessible_genots = all_gty
+              ## , graph = g
+                ))
 }
 
 ## DAG of restrictions (as data frame), options info about gene_relations
@@ -341,8 +343,9 @@ DAG_2_access_genots_relationships <- function(x,
     all_gty <- unique(all_gty)
     ng <- unlist(lapply(all_gty, length))
     all_gty <- all_gty[order(ng)]
-    return(list(accessible_genots = all_gty,
-                graph = g))
+    return(list(accessible_genots = all_gty
+              ## , graph = g
+                ))
 }
 
 
@@ -467,9 +470,8 @@ cpm2tm <- function(x,
     if(exists("parent_set", x) && !(exists("Relation", x$edges)))
         stop("x has parent_set but no Relation. Old format?")
 
-    
     ## OT, CBN, and OncoBN if using CBN, HESBCN only Single and AND
-    if(!exists("Relation", x$edges) ||
+    if (!exists("Relation", x$edges) ||
        isTRUE(all(x$edges$Relation %in% c("AND", "Single")))) {
         tmp <- try(DAG_2_access_genots(x$edges[, c("From", "To")]))
     } else if (all(x$edges$Relation %in% c("OR", "Single"))) { ## OncoBN with DBN model, HESBCN if only ORs
@@ -486,12 +488,14 @@ cpm2tm <- function(x,
             ))
     }
 
-    if(inherits(tmp, "try-error")) {
+    if (inherits(tmp, "try-error")) {
         stop("Some error here: ", tmp)
     } else {
         fgraph <- unrestricted_fitness_graph_sparseM(tmp$accessible_genots)
     }
 
+
+    
     which_col_weights <- which(colnames(x$edges) %in% names_weights_paths)
     if (length(which_col_weights) > 1) {
         stop("more than one column with weights")
@@ -507,6 +511,18 @@ cpm2tm <- function(x,
     } else {
         weighted_fgraph <- NA
     }
+
+    ## OncoBN can return edges with theta 0. So rm the inaccessible
+    ## genotypes. Do not remove by predicted genotype freq. = 0.
+    ## That would be wrong: with a theta of 1, the parent genotype
+    ## can have a predicted freq. of 0, and yet be part of the path.
+    if ("theta" %in% colnames(x$edges)) {
+        weighted_fgraph <- adjm_rm_no_access(weighted_fgraph)
+    }
+
+    ## Check
+    if (sum(colSums(weighted_fgraph) == 0) > 1) ## WT always has colSum = 0
+        warning("weighted_fgraph contains unreachable destinations")
 
     ## weighted_fgraph need not have each row sum to 1.  Not if they are lambdas
     ## from CBN, neither do they sum to 1 from some OT models  (see example ex1
@@ -970,6 +986,24 @@ paths_probs_2_df <- function(x, order = c("prob", "path")) {
 }
 
 
+
+## With OncoBN at least, edges of theta 0 lead to
+## genotypes that cannot exist. Clean up the adjacency matrix
+adjm_rm_no_access <- function(x) {
+    ## A single loop should be enough, I think.
+    ## But continue until done
+    while (TRUE) {
+        nacc <- which(colSums(x) == 0)
+        wwt <- which(colnames(x) == "WT")
+        nacc <- setdiff(nacc, wwt)
+        if (length(nacc)) {
+            x <- x[-nacc, -nacc]
+        } else {
+            break
+        }
+    }
+    return(x)
+}
 
 
 #####################################################################

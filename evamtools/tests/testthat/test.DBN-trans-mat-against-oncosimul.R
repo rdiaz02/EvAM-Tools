@@ -174,7 +174,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     all_mixed_examples <- list(d3_1, d2_1, d222_1, d333_1,
                                d3_1_AND, d2_1_AND, d222_1_AND, d333_1_AND)
     
-    for(ex in all_mixed_examples){
+    for (ex in all_mixed_examples) {
         run_test_for_dataset(ex)
     }
     set.seed(NULL)

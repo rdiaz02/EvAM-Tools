@@ -51,21 +51,32 @@ do_OncoBN <- function(data,
                       model = model,
                       algorithm = algorithm,
                       epsilon = epsilon)
+
     thetas <- fit$theta
+
+    ## No longer need
     names(thetas) <- colnames(data)
+
+    if (is.null(names(thetas))) stop("fit$theta should be named. ",
+                                    "You are probably using and old ",
+                                    "version of OncoBN.")
+    stopifnot(identical(names(thetas), colnames(data)))
+
+    ## No longer needed, though I do not like that
+    ## the graph does not have WT first.
+    ## Actually, not really fixed.
     ## Possible issues with the way the graph is returned
     ## Fixing it temporarily
     ## See https://github.com/phillipnicol/OncoBN/issues/3#issuecomment-1049074644
     adjm <- igraph::as_adjacency_matrix(
                         igraph::make_directed_graph(fit$edgelist))
 
-    ## gn <- setdiff(colnames(df), "WT")
+    
     gn <- colnames(data)
     adjm <- adjm[c("WT", gn), c("WT", gn)]
     new_graph <- igraph::graph_from_adjacency_matrix(adjm)
     fit$graph <- new_graph
 
-    
     dbn_out <- igraph::as_data_frame(fit$graph)
     colnames(dbn_out) <- c("From", "To")
     dbn_out$From[dbn_out$From == "WT"] <- "Root"
@@ -94,6 +105,11 @@ do_OncoBN <- function(data,
         "some_string"
     )
 
+    ## Resort what will be the edges component with Root on top
+    ir <- which(dbn_out$From == "Root")
+    inr <- setdiff(seq_len(nrow(dbn_out)), ir)
+    dbn_out <- dbn_out[c(ir, inr), ]
+    
     est_genots <- DBN_prob_genotypes(fit, colnames(data))
     ## Give a named vector for the predicted freqs of genotypes
     est_genots <- DBN_est_genots_2_named_genotypes(est_genots)
@@ -117,13 +133,27 @@ DBN_prob_genotypes <- function(fit, gene_names) {
     n <- length(gene_names)
     genotypes <- expand.grid(replicate(n, 0:1, simplify = FALSE))
     colnames(genotypes) <- gene_names
+
+    ## No longer needed, as Lik.genotype does the right thing now.
+    ## Not quite. 
     ## Pre-check same order and proper naming
     ## See https://github.com/phillipnicol/OncoBN/issues/3#issuecomment-1048814030
     G <- t(as.matrix(as_adjacency_matrix(fit$graph)))
     stopifnot(colnames(genotypes) == colnames(G)[-1])
     stopifnot(colnames(G)[1] == "WT")
-    genotypes$Prob <- apply(genotypes, 1,
-                            function(x) Lik.genotype(fit, x))
+
+    ## ## FIXME: Lik.genotype does many identical operations for all genotypes.
+    ## ## Extract that code, and call GA_Likelihood.
+    ## genotypes$Prob <- apply(genotypes, 1,
+    ##                         function(x) old_Lik.genotype(fit, x))
+
+    ## Faster
+    genotypes2 <- cbind(1, genotypes)
+    theta.in <- c(1, fit$theta)
+    genotypes$Prob <- apply(genotypes2, 1,
+                            function(x) evam_GA_Likelihood(x, G, theta.in,
+                                                      fit$epsilon,
+                                                      fit$model))
     return(genotypes)
 }
 
@@ -137,4 +167,14 @@ DBN_est_genots_2_named_genotypes <- function(odt) {
     return(reorder_to_standard_order(odt))
 }
 
+
+
+## Lik.genotype in commit aa039d3
+## old_Lik.genotype <- function(fit, genotype) {
+##   x <- c(1,genotype)
+##   G <- t(as.matrix(as_adjacency_matrix(fit$graph)))
+##   theta.in <- c(1,fit$theta)
+##   val <- GA_Likelihood(x, G, theta.in, fit$epsilon, fit$model)
+##   return(val)
+## }
 
