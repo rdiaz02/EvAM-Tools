@@ -1,6 +1,6 @@
 ## This test was very kludgy as it used as reference
 ## a set of defaults that one might one to change.
-## And that object (SHINY_DEFAULTS) is loaded implicitly.
+## And that object (.ev_SHINY_dflt) is loaded implicitly.
 
 ## So now we create a function that is only used to
 ## generate that old default, for the pieces that are needed.
@@ -27,7 +27,7 @@ generate_old <- function() {
     template_csd_data <- matrix(0, ncol=3, nrow=0)
 
 
-    old_SHINY_DEFAULTS <- list(
+    old_.ev_SHINY_dflt <- list(
         max_genes = 10,
         ## min_genes = 2,
         ## cpm_samples = 10000,
@@ -47,7 +47,7 @@ generate_old <- function() {
           , name = "New_CSD"
         )
     )
-    return(old_SHINY_DEFAULTS)
+    return(old_.ev_SHINY_dflt)
 }
 
 
@@ -66,7 +66,7 @@ test_that("Test standarize datasets works correctly", {
             expect_equal(standard_data[[i]], expected_data[[i]])
         }
         for(i in setdiff(names(standard_data), expected_attr)){
-            ## The rest has to be equal to SHINY_DEFAULTS
+            ## The rest has to be equal to .ev_SHINY_dflt
             if(i == "gene_names" & "data" %in% names(orig_data)) next
             if(i == "csd_counts" & "data" %in% names(orig_data)) next
             expect_equal(unname(standard_data[[i]])

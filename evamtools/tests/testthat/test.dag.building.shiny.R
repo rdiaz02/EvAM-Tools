@@ -1,6 +1,6 @@
 ## This test was very kludgy as it used as reference
 ## a set of defaults that one might one to change.
-## And that object (SHINY_DEFAULTS) is loaded implicitly.
+## And that object (.ev_SHINY_dflt) is loaded implicitly.
 
 ## So now we create a function that is only used to
 ## generate that old default, for the pieces that are needed.
@@ -27,7 +27,7 @@ generate_old <- function() {
     template_csd_data <- matrix(0, ncol=3, nrow=0)
 
 
-    old_SHINY_DEFAULTS <- list(
+    old_.ev_SHINY_dflt <- list(
         ## max_genes = 10,
         ## min_genes = 2,
         ## cpm_samples = 10000,
@@ -47,13 +47,13 @@ generate_old <- function() {
           , name = "New_CSD"
         )
     )
-    return(old_SHINY_DEFAULTS)
+    return(old_.ev_SHINY_dflt)
 }
 
 
 test_that("Modify dags works correctly",{
-    ## dag <- SHINY_DEFAULTS$template_data$dag
-    ## dag_parent_set <- SHINY_DEFAULTS$template_data$dag_parent_set
+    ## dag <- .ev_SHINY_dflt$template_data$dag
+    ## dag_parent_set <- .ev_SHINY_dflt$template_data$dag_parent_set
     old <- generate_old()
     dag <- old$template_data$dag
     dag_parent_set <- old$template_data$dag_parent_set
@@ -79,11 +79,11 @@ test_that("Modify dags works correctly",{
   expect_error(modify_dag(mod2, "A", "B", "add", dag_parent_set, default_dag = old$template_data$dag)$dag,"That edge is already present")
   expect_error(modify_dag(mod2, "D", "A", "add", dag_parent_set, default_dag = old$template_data$dag)$dag, "A direct children of Root cannot have multiple parents")
   expect_equal(modify_dag(mod2, "Root", "A", "clear", dag_parent_set, default_dag = old$template_data$dag)$dag,
-               ## SHINY_DEFAULTS$template_data$dag
+               ## .ev_SHINY_dflt$template_data$dag
                old$template_data$dag
                )
   expect_equal(modify_dag(mod2, "Root", "A", "remove", dag_parent_set, default_dag = old$template_data$dag)$dag,
-               ##SHINY_DEFAULTS$template_data$dag
+               ##.ev_SHINY_dflt$template_data$dag
                old$template_data$dag
                )
 
@@ -140,9 +140,9 @@ test_that("Modify dags works correctly",{
 })
 
 test_that("Test that modify lambdas and parent set is correct", {
-  ## dag <- SHINY_DEFAULTS$template_data$dag
-  ## dag_parent_set <- SHINY_DEFAULTS$template_data$dag_parent_set
-  ## lambdas <- SHINY_DEFAULTS$template_data$lambdas
+  ## dag <- .ev_SHINY_dflt$template_data$dag
+  ## dag_parent_set <- .ev_SHINY_dflt$template_data$dag_parent_set
+  ## lambdas <- .ev_SHINY_dflt$template_data$lambdas
 
   old <- generate_old()
   dag <- old$template_data$dag
@@ -258,8 +258,8 @@ test_that("Modify dags works correctly on a more comples example",{
     dag_parent_set <- old$template_data$dag_parent_set
 
 
-  ##   dag <- SHINY_DEFAULTS$template_data$dag
-  ## dag_parent_set <- SHINY_DEFAULTS$template_data$dag_parent_set
+  ##   dag <- .ev_SHINY_dflt$template_data$dag
+  ## dag_parent_set <- .ev_SHINY_dflt$template_data$dag_parent_set
 
   x <- modify_dag(dag, "Root", "A", "add", dag_parent_set, default_dag = old$template_data$dag)
   x <- modify_dag(x$dag, "Root", "B", "add", x$parent_set, default_dag = old$template_data$dag)
@@ -269,8 +269,8 @@ test_that("Modify dags works correctly on a more comples example",{
   x <- modify_dag(x$dag, "A", "D", "add", x$parent_set)
 
     lambdas <- old$template_data$lambdas
-    ## lambdas <- SHINY_DEFAULTS$template_data$lambdas
-    ## dag_parent_set <- SHINY_DEFAULTS$template_data$dag_parent_set
+    ## lambdas <- .ev_SHINY_dflt$template_data$lambdas
+    ## dag_parent_set <- .ev_SHINY_dflt$template_data$dag_parent_set
     
   dag_parent_set["C"] <- "AND"
   dag_parent_set["D"] <- "AND"

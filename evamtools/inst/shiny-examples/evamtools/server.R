@@ -17,11 +17,11 @@ server <- function(input, output, session) {
   examples_csd$csd <- examples_csd$csd[1:5]
   examples_csd$dag <- examples_csd$dag[1:6]
   all_csd_data <- evamtools:::standarize_all_datasets(examples_csd)
-  min_genes <- SHINY_DEFAULTS$min_genes
-  max_genes <- SHINY_DEFAULTS$max_genes
-  default_csd_samples <- SHINY_DEFAULTS$csd_samples
-  default_cpm_samples <- SHINY_DEFAULTS$cpm_samples
-  default_dag_model <- SHINY_DEFAULTS$dag_model
+  min_genes <- .ev_SHINY_dflt$min_genes
+  max_genes <- .ev_SHINY_dflt$max_genes
+  default_csd_samples <- .ev_SHINY_dflt$csd_samples
+  default_cpm_samples <- .ev_SHINY_dflt$cpm_samples
+  default_dag_model <- .ev_SHINY_dflt$dag_model
   keep_dataset_name <- FALSE
 
   last_visited_pages <- list(csd = "User", dag = "User", matrix = "User")
@@ -44,13 +44,13 @@ server <- function(input, output, session) {
   )
 
    data <- reactiveValues(
-    csd_counts = SHINY_DEFAULTS$template_data$csd_counts
-    , data = SHINY_DEFAULTS$template_data$data
-    , dag = SHINY_DEFAULTS$template_data$dag
-    , dag_parent_set = SHINY_DEFAULTS$template_data$dag_parent_set
-    , lambdas = SHINY_DEFAULTS$template_data$lambdas
-    , thetas = SHINY_DEFAULTS$template_data$thetas
-    , n_genes = SHINY_DEFAULTS$ngenes
+    csd_counts = .ev_SHINY_dflt$template_data$csd_counts
+    , data = .ev_SHINY_dflt$template_data$data
+    , dag = .ev_SHINY_dflt$template_data$dag
+    , dag_parent_set = .ev_SHINY_dflt$template_data$dag_parent_set
+    , lambdas = .ev_SHINY_dflt$template_data$lambdas
+    , thetas = .ev_SHINY_dflt$template_data$thetas
+    , n_genes = .ev_SHINY_dflt$ngenes
     , gene_names = LETTERS[1: max_genes]
   )
 
@@ -252,7 +252,7 @@ server <- function(input, output, session) {
         data$csd_counts <- evamtools:::get_csd(data$data)
         shinyjs::enable("analysis")
       } else {
-        data$csd_counts <- SHINY_DEFAULTS$template_data$csd_counts
+        data$csd_counts <- .ev_SHINY_dflt$template_data$csd_counts
       }
 
       data$dag <- tmp_data$dag
@@ -273,7 +273,7 @@ server <- function(input, output, session) {
           # ngenedats <- to_keep
           number_of_parents <- colSums(data$dag)
           to_keep <- sum(number_of_parents > 0)
-          n_genes <- ifelse(to_keep < 1, SHINY_DEFAULTS$ngenes, to_keep)
+          n_genes <- ifelse(to_keep < 1, .ev_SHINY_dflt$ngenes, to_keep)
           updateRadioButtons(session, "dag_model", selected = "HESBCN")
       } else if (input$input2build == "matrix") {
           # n_genes <- length(which(colSums(abs(data$thetas)) > 0
@@ -281,7 +281,7 @@ server <- function(input, output, session) {
           # n_genes <- ifelse(n_genes <= 0, 3, n_genes)
           n_genes <- data$n_genes
           if (is.null(n_genes)) {
-            n_genes <- SHINY_DEFAULTS$ngenes
+            n_genes <- .ev_SHINY_dflt$ngenes
           }
       } else if (input$input2build == "csd" && !is.null(data$data)) {
           n_genes <- ncol(data$data)
@@ -289,7 +289,7 @@ server <- function(input, output, session) {
           ## if (data$name == "User Data") data$dag[] <- 0
           data$dag[] <- 0
       } else if (input$input2build == "csd" && is.null(data$data)) {
-          n_genes <- SHINY_DEFAULTS$ngenes
+          n_genes <- .ev_SHINY_dflt$ngenes
           data$dag[] <- 0
       }
 
@@ -689,10 +689,10 @@ server <- function(input, output, session) {
       colnames(tmp_dag) <- rownames(tmp_dag) <- c("WT", data$gene_names)
       tmp_dag["WT", data$gene_names[1]] <- 1
       data$dag <- tmp_dag
-      data$csd_counts <- SHINY_DEFAULTS$template_data$csd_counts
-      data$data <- SHINY_DEFAULTS$template_data$data
+      data$csd_counts <- .ev_SHINY_dflt$template_data$csd_counts
+      data$data <- .ev_SHINY_dflt$template_data$data
       data$dag_parent_set <- tmp_data$dag_parent_set
-      data$lambdas <- SHINY_DEFAULTS$template_data$lambdas
+      data$lambdas <- .ev_SHINY_dflt$template_data$lambdas
       names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
       datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
       shinyjs::disable("analysis")
@@ -830,14 +830,14 @@ server <- function(input, output, session) {
 
   observeEvent(input$clear_mhn, {
     tryCatch({
-      tmp_thetas <- SHINY_DEFAULTS$template_data$thetas
+      tmp_thetas <- .ev_SHINY_dflt$template_data$thetas
       colnames(tmp_thetas) <- rownames(tmp_thetas) <- data$gene_names
       data$thetas <- tmp_thetas
       data$dag <- NULL
-      data$csd_counts <- SHINY_DEFAULTS$template_data$csd_counts
-      data$data <- SHINY_DEFAULTS$template_data$data
-      data$dag_parent_set <- SHINY_DEFAULTS$template_data$dag_parent_set
-      data$lambdas <- SHINY_DEFAULTS$template_data$lambdas
+      data$csd_counts <- .ev_SHINY_dflt$template_data$csd_counts
+      data$data <- .ev_SHINY_dflt$template_data$data
+      data$dag_parent_set <- .ev_SHINY_dflt$template_data$dag_parent_set
+      data$lambdas <- .ev_SHINY_dflt$template_data$lambdas
       names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
       shinyjs::disable("analysis")
       datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
@@ -904,14 +904,14 @@ server <- function(input, output, session) {
 
   observeEvent(input$clear_genotype, {
     tryCatch({
-      tmp_dag <- SHINY_DEFAULTS$template_data$dag
+      tmp_dag <- .ev_SHINY_dflt$template_data$dag
       colnames(tmp_dag) <- rownames(tmp_dag) <- c("WT", data$gene_names)
       tmp_dag["WT", data$gene_names[1]] <- 1
       data$dag <- NULL
-      data$csd_counts <- SHINY_DEFAULTS$template_data$csd_counts
-      data$data <- SHINY_DEFAULTS$template_data$data
-      data$dag_parent_set <- SHINY_DEFAULTS$template_data$dag_parent_set
-      data$lambdas <- SHINY_DEFAULTS$template_data$lambdas
+      data$csd_counts <- .ev_SHINY_dflt$template_data$csd_counts
+      data$data <- .ev_SHINY_dflt$template_data$data
+      data$dag_parent_set <- .ev_SHINY_dflt$template_data$dag_parent_set
+      data$lambdas <- .ev_SHINY_dflt$template_data$lambdas
       names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
       shinyjs::disable("analysis")
       datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
@@ -1092,9 +1092,9 @@ server <- function(input, output, session) {
       Sys.sleep(0.5)
       progress$inc(2/5, detail = "Running CPMs")
 
-      methods <- SHINY_DEFAULTS$cpms2run
+      methods <- .ev_SHINY_dflt$cpms2run
       if(!is.null(input$more_cpms)){
-        methods <- unique(c(methods, input$more_cpms[input$more_cpms %in% SHINY_DEFAULTS$all_cpms]))
+        methods <- unique(c(methods, input$more_cpms[input$more_cpms %in% .ev_SHINY_dflt$all_cpms]))
       }
       cpm_output <- evam(data2run, methods = methods
         , mhn_opts = mhn_opts
@@ -1124,7 +1124,7 @@ server <- function(input, output, session) {
         if ((is.null(n_samples)) ||
             (!is.numeric(n_samples)) ||
             (n_samples < 100)) {
-          n_samples <- SHINY_DEFAULTS$cpm_samples
+          n_samples <- .ev_SHINY_dflt$cpm_samples
         }
         progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
         if (input$do_genotype_transitions) {

@@ -56,8 +56,8 @@
 ## }
 
 get_display_freqs <- function(freqs, n_genes, gene_names){
-  if(is.null(freqs)) return(SHINY_DEFAULTS$template_data$csd_counts)
-  if(nrow(freqs) == 0) return(SHINY_DEFAULTS$template_data$csd_counts)
+  if(is.null(freqs)) return(.ev_SHINY_dflt$template_data$csd_counts)
+  if(nrow(freqs) == 0) return(.ev_SHINY_dflt$template_data$csd_counts)
   valid_gene_names <- c("WT", gene_names[1:n_genes])
 
   selected_rows <- sapply(freqs$Genotype, function(x){
@@ -69,7 +69,7 @@ get_display_freqs <- function(freqs, n_genes, gene_names){
 }
 
 get_csd <- function(complete_csd,
-                    default_counts = SHINY_DEFAULTS$template_data$csd_counts){
+                    default_counts = .ev_SHINY_dflt$template_data$csd_counts){
     if (is.null(complete_csd)) return(default_counts)
     csd <- data_to_counts(complete_csd, out = "data.frame", omit_0 = TRUE)
     rownames(csd) <- csd$Genotype
@@ -79,8 +79,8 @@ get_csd <- function(complete_csd,
 modify_dag <-
     function(dag, from_node, to_node, operation, parent_set,
              dag_model="HESBCN",
-             default_dag = SHINY_DEFAULTS$template_data$dag,
-             default_dag_parent_set = SHINY_DEFAULTS$template_data$dag_parent_set){
+             default_dag = .ev_SHINY_dflt$template_data$dag,
+             default_dag_parent_set = .ev_SHINY_dflt$template_data$dag_parent_set){
   value_from_operation <- c(1, 0)
   names(value_from_operation) <- c("add", "remove")
 
@@ -477,8 +477,8 @@ create_tabular_data <- function(data) {
 
 ## Yes, could have passed all default_* as part of a single list. Whatever.
 standarize_dataset <- function(data,
-                               default_max_genes = SHINY_DEFAULTS$max_genes,
-                               default_template_data = SHINY_DEFAULTS$template_data
+                               default_max_genes = .ev_SHINY_dflt$max_genes,
+                               default_template_data = .ev_SHINY_dflt$template_data
                                ) {
     ## Be completely explicit upfront!!!
     default_data <- default_template_data$data

@@ -17,7 +17,7 @@ rownames(template_thetas) <- colnames(template_thetas) <- all_gene_names
 template_csd_counts <- data.frame(Genotype = character(), Counts = integer())
 template_csd_data <- matrix(0, ncol = 3, nrow = 0)
 
-SHINY_DEFAULTS <- list(
+.ev_SHINY_dflt <- list(
   max_genes = 10,
   min_genes = 2,
   cpm_samples = 10000,
@@ -39,4 +39,5 @@ SHINY_DEFAULTS <- list(
 )
 
 ## This expects to be run from the evamtools directory. O.w. adjust path
-save(SHINY_DEFAULTS, file = "./data/SHINY_DEFAULTS.RData")
+## Note how the object itself is called (to minimize risk of overwritting)
+save(.ev_SHINY_dflt, file = "./data/SHINY_DEFAULTS.RData")

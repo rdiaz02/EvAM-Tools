@@ -641,7 +641,7 @@ user_input <- function() {
                              "continuous time Markov chain and is ",
                              "slower than simply obtaining a sample of genotypes."),
                      numericInput("sample_size", "Number of samples",
-                                  SHINY_DEFAULTS$cpm_samples
+                                  .ev_SHINY_dflt$cpm_samples
                                 , min = 0, max = 100000, step = 100,
                                   width = "100%"),
                      tags$h5("Number of genotypes to generate ",
@@ -657,9 +657,12 @@ user_input <- function() {
                         "to 1s, and 1s flipped to 0s."),                     
                 
                  tags$hr(style="border-color: darkgrey;"),
-                # checkboxGroupInput("more_cpms", "Additional CPMs", width = "100%", choiceNames = c("HyperTRAPS", "MCCBN"), choiceValues = c("hypertraps", "mccbn")),
+                
                 checkboxGroupInput("more_cpms", "Additional CPMs", 
-                  width = "100%", choiceNames = c("MCCBN", "HESBCN"), choiceValues = c("MCCBN", "HESBCN"), inline=TRUE),
+                                   width = "100%", choiceNames = c("MCCBN",
+                                                                   "H-ESBCN"),
+                                   choiceValues = c("MCCBN", "HESBCN"),
+                                   inline = FALSE),
                 tags$h5("Beware: MCCBN may take hours to run"),
                 tags$hr(style="border-color: darkgrey;"),
                 

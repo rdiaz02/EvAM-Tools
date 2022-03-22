@@ -1,1 +1,1 @@
-utils::globalVariables(c("SHINY_DEFAULTS"))
+utils::globalVariables(c(".ev_SHINY_dflt"))
