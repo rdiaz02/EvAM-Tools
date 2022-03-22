@@ -85,11 +85,11 @@ The results include:
 </center>
 
 
+<!-- FIXME: add this when ready -->
+<!-- ## Additional documentation<a id="additional_docs"></a> -->
+<!-- *** -->
 
-## Additional documentation<a id="additional_docs"></a>
-***
-
-Additional documentation is available from the R package itself (you would need to install the package or download one of the Docker images and run it from there) and the PDF  https://github.com/rdiaz02/EvAM-Tools/Additional_doc.pdf.
+<!-- Additional documentation is available from the R package itself (you would need to install the package or download one of the Docker images and run it from there) and the PDF  https://github.com/rdiaz02/EvAM-Tools/Additional_doc.pdf. -->
 
 
 
@@ -201,3 +201,7 @@ This app is free to use (if you have confidential data, you might want not to up
 
 Most of the files for this app (and the package) are copyright Pablo Herrera Nieto and Ramon Diaz-Uriarte (and released under the GPL v3 license) except some files for HESBCN, MHN, and the CBN code; see full details in https://github.com/rdiaz02/EvAM-Tools#copyright-and-origin-of-files.
 
+
+&nbsp;
+### Contact and bug reports
+Please, use the repository (https://github.com/rdiaz02/EvAM-Tools) and submit bug reports there. 
