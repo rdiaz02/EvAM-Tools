@@ -209,7 +209,7 @@ results_simple <- function(){
           # column(11,
             column(2,
               tags$div(class = "frame",
-                tags$h3("Outputs"),
+                       tags$h3("Active data set"),
                 uiOutput("cpm_list")
               ),
               uiOutput("customize"),
