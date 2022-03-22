@@ -171,9 +171,18 @@ runShiny()
 
 ### Run the R package from the Docker image
 **FIXME**.
+```
+sudo docker build -t evamtools ## To build
+sudo docker run -it evamtools ## To run
+sudo docker run -it --entrypoint bash evamtools ## To access to command line
+```
 
 ### Run the Shiny app from the Docker image
 **FIXME**.
+```
+sudo docker build -f ShinyDockerfile  --tag shinyevam . ##To create image to run shiny
+sudo docker run -it -p 3000:3000 shinyevam ##To launch shiny from docker image
+```
 
 
 ---
