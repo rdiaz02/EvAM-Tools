@@ -590,7 +590,7 @@ DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
             stop("more than one column with weights")
         } else if (length(wce) == 1) {
             ## Ugly hack to move them sideways
-            labels_edges <- paste0("  ", round(edges[, wce], 2))
+            labels_edges <- paste0("   ", round(edges[, wce], 2))
         } else {
             ## The plot for the pre-built examples
             labels_edges <- rep("", nrow(edges))
@@ -652,7 +652,7 @@ plot_method <- function(method_info, parent_set, edges, method = "") {
                                   "#E2D810",
                                   "coral2")
         names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
-        if (plotting == "igraph") {       
+        if (plotting == "igraph") {      
             g <- method_info
             if (!is.null(parent_set)) {
                 for (i in igraph::E(g)) {
@@ -687,7 +687,8 @@ plot_method <- function(method_info, parent_set, edges, method = "") {
         
         if (!is.null(parent_set)) {
             legend("topleft", legend = names(colors_relationships),
-                   col = colors_relationships, lty = 1, lwd = 5, bty = "n")
+                   col = colors_relationships, lty = 1, lwd = 5, bty = "n",
+                   seg.len = 0.5)
         }
     } else if (is.matrix(method_info)) { ## Plotting matrix, for MHN
         op <- par(mar=c(3, 3, 7, 3), las = 1)
