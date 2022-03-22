@@ -729,9 +729,8 @@ NA, NA, NA), OT_edgeWeight = c(0.525915054637741, 0.101508072999909,
     "43", "44", "45", "46", "47", "48", "49", "50"), c("A", "B", 
     "C", "D"))))
                                                                                                                                         
-  
-  mm <- c("OT", "CAPRESE", "CAPRI_BIC", "CAPRI_AIC",
-          "CBN_ot", "MCCBN")
+  ## "CAPRESE", "CAPRI_BIC", "CAPRI_AIC" no longer used
+  mm <- c("OT", "CBN_ot", "MCCBN")
   
   mm0  <- lapply(cpm_out_others1[mm],  cpm_access_genots_paths_w)
   mmSM <- lapply(cpm_out_others1[mm], cpm2tm)
