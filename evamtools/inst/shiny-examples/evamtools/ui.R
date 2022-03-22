@@ -665,7 +665,9 @@ user_input <- function() {
                                                                    "H-ESBCN"),
                                    choiceValues = c("MCCBN", "HESBCN"),
                                    inline = FALSE),
-                tags$h5("Beware: MCCBN may take hours to run"),
+                tags$h5("Beware: MCCBN may take hours to run. ",
+                        "H-ESBCN often takes much longer than the ",
+                        " remaining methods (often > 20 seconds)."),
                 tags$hr(style="border-color: darkgrey;"),
                 
                 tags$h4("MHN options"),
