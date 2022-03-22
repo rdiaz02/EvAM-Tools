@@ -58,18 +58,6 @@ RUN mkdir -p /app/Sources/
 
 RUN apt-get install -y texlive-fonts-recommended
 
-COPY . /app/
-
-#Install cbn
-RUN cd /app/ && \  
-    cp ct-cbn-0.1.04b-RDU.tar.gz /app/Sources && \
-    cd /app/Sources && \
-    tar -xvzf ct-cbn-0.1.04b-RDU.tar.gz && \
-    cd ct-cbn-0.1.04b-RDU && \
-    ./configure && \
-    make install && \
-    cp -t /usr/local/bin/ ct-cbn h-cbn 
-
 #Install HESBCN
 RUN cd /app/Sources && \
     git clone https://github.com/danro9685/HESBCN && \
@@ -94,17 +82,33 @@ RUN cd /app/Sources && \
 # RUN apt-get install -y libboost-filesystem1.67-dev libboost-graph-parallel1.67-dev libboost-iostreams1.67-dev libboost-locale1.67-dev libboost-regex1.67-dev libboost-serialization1.67-dev libboost-system1.67-dev libboost-test1.67-dev libboost1.67-dev libboost1.67-tools-dev libboost-graph1.67-dev libboost-graph1.67.0
 # #Install HyperTraPS
 
+# #Install EvAM-tools
+COPY . /app/
+RUN  cd /app/evamtools && \
+    echo ".First <- function() { library(evamtools); runShiny(); cat('Loading EvAM-tools\n');}" > .Rprofile
+
+#Install cbn
+RUN cd /app/ && \  
+    cp ct-cbn-0.1.04b-RDU.tar.gz /app/Sources && \
+    cd /app/Sources && \
+    tar -xvzf ct-cbn-0.1.04b-RDU.tar.gz && \
+    cd ct-cbn-0.1.04b-RDU && \
+    ./configure && \
+    make install && \
+    cp -t /usr/local/bin/ ct-cbn h-cbn 
+
+RUN cd app && \
+    R --no-site-file --no-init-file CMD build evamtools && \
+    R --no-site-file --no-init-file CMD INSTALL --install-tests evamtools_*.tar.gz && \
+    R --no-site-file --no-init-file CMD check evamtools_*.tar.gz
+# RUN ./build-test.sh
+# RUN bash build-test.sh > log.txt
+
 #Create folder to share with the outside
 RUN mkdir /app/outside
 
-# #Install EvAM-tools
-RUN cd /app/ && \
-    bash build-test.sh
-
-
 WORKDIR /app/evamtools
 
-RUN echo ".First <- function() { library(evamtools); print('Loading EvAM-tools')}" >>.Rprofile
 ENTRYPOINT  ["R", "--interactive"]
 # ENTRYPOINT  ["../docker/runFromImage.R", "-f"]
 CMD ["NULL"]
