@@ -599,7 +599,14 @@ DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
             stop("more than one column with weights")
         } else if (length(wce) == 1) {
             ## Ugly hack to move them sideways
-            labels_edges <- paste0("   ", round(edges[, wce], 2))
+            the_num_funct <- function(x) {
+                if (x == 0) return("0")
+                else if (x < 0.01) return(format(x, scientific = TRUE))
+                else return(as.character(round(x, 2)))
+            }
+            
+            labels_edges <- paste0("   ",
+                                   vapply(edges[, wce], the_num_funct, ""))
         } else {
             ## The plot for the pre-built examples
             labels_edges <- rep("", nrow(edges))
