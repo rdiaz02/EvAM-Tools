@@ -359,7 +359,7 @@ plot_genot_fg <- function(trans_mat
         node_sizes <- vapply(igraph::V(graph)$name, 
         function(gen) min_size, numeric(1.0))
     }
-    # browser()
+
     # Normalizing node sizes
     node_sizes[node_sizes <= 0.01] <- 0.01
     if(length(unique(node_sizes))>1){ #Not unique values
@@ -412,6 +412,7 @@ plot_genot_fg <- function(trans_mat
     #     }
     # }
     ## Actual plotting
+
     plot(graph
         , layout = lyt[, 2:1]
         , vertex.label.color = "black"
@@ -431,7 +432,8 @@ plot_genot_fg <- function(trans_mat
         , edge.label.cex = 1.4
         , edge.label.dist = 3
         , edge.arrow.size = 0
-        , edge.width = w2
+       , edge.width = w2
+         , xlab = "Number of features acquired"
     )
 
     margin <- -1.15
@@ -449,7 +451,12 @@ plot_genot_fg <- function(trans_mat
         , labels = 0:(max_node_depth)
         , lwd = 2
         , cex = 2
-        , pos = margin)
+       , pos = margin)
+    axis(1, tick = FALSE, at = 0, labels = "Number of features acquired",
+         pos = margin - 0.15)
+    ## mtext("Number of features acquired", side = 1, line = -1)
+    ## title(xlab = "Number of features acquired", line = 2)
+    
     if (!(is.null(observations))) {
         legend(-1.25,
                1.3, ## -1.3,
@@ -463,8 +470,7 @@ plot_genot_fg <- function(trans_mat
             , x.intersp = c(0, 0)[2]
             )
     }
-    mtext("Number of features acquired", side = 1, line = -1)
-    ## title(xlab = "Number of features acquired", line = 2)
+  
 }
 
 ## #' Process data of CPMs to make it easier to plot
