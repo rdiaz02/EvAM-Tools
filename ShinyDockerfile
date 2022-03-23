@@ -110,19 +110,20 @@ RUN cd app && \
     R --no-site-file --no-init-file CMD check evamtools_$V_PKG.tar.gz && \
     R_ENVIRON_USER=./Renviron.based_on_bioc R --no-site-file --no-init-file CMD check evamtools_$V_PKG.tar.gz
 
-RUN  cd /app/evamtools && \
-     echo ".First <- function() { library(evamtools); cat('Loading EvAM-tools\n'); runShiny();}" > .Rprofile
+## RUN  cd /app/evamtools && \
+##      echo ".First <- function() { library(evamtools); cat('Loading EvAM-tools\n'); runShiny();}" > .Rprofile
 
 #Create folder to share with the outside
 RUN mkdir /app/outside
 
 WORKDIR /app/evamtools
 
-ENTRYPOINT  ["R", "--interactive"]
-CMD ["NULL"]
+## ENTRYPOINT  ["R", "--interactive"]
+## CMD ["NULL"]
 
 EXPOSE 3000
 
+CMD R --slave -e 'library(evamtools); runShiny()'
 
 ## Debugging errors: for example, start as
 ## sudo docker run -it --entrypoint bash shinyevam
