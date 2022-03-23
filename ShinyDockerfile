@@ -89,14 +89,9 @@ RUN cd /app/ && \
 
 ## Install EvAM-tools
 
-RUN  cd /app/evamtools && \
-    echo ".First <- function() { library(evamtools); cat('Loading EvAM-tools\n'); runShiny();}" > .Rprofile
-
-
 RUN cd app && \
     rm -r -f evamtools.Rcheck && \
     V_PKG=$(cat ./evamtools/DESCRIPTION | grep Version | cut -d' ' -f2) && \
-    rm evamtools_$V_PKG.tar.gz && \
     R --no-site-file --no-init-file CMD build evamtools && \
     R --no-site-file --no-init-file CMD INSTALL --install-tests evamtools_$V_PKG.tar.gz && \
     R --no-site-file --no-init-file CMD check evamtools_$V_PKG.tar.gz
@@ -108,6 +103,12 @@ RUN cd app && \
 
 # RUN ./build-test.sh
 # RUN bash build-test.sh > log.txt
+
+
+RUN  cd /app/evamtools && \
+    echo ".First <- function() { library(evamtools); cat('Loading EvAM-tools\n'); runShiny();}" > .Rprofile
+
+
 
 #Create folder to share with the outside
 RUN mkdir /app/outside
