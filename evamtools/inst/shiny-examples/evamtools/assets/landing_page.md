@@ -32,7 +32,7 @@ In cross-sectional data, a single sample has is obtained from each patient. That
     - When you generate data according to a model, you can specify the sample size, the amount of noise, if any, to add, and of course the parameters of the models.
     - You can also increase or decrease the number of genes, or rename genes.
 
-* Change, if you want, the "Advanced options" (on the right of the screen).
+* Change, if you want, options under "Advanced options and CPMs to use" (on the right of the screen).
 * Click on "Run evamtools". 
 * Results will be shown in the ```Results``` tab.
 
@@ -54,7 +54,7 @@ The results include:
         * Remember: these are DAGs that have *genes (not genotypes) as nodes*. They represent the order restrictions of the events.
     * On the bottom row, the transition probabilities between genotypes or the transition rate matrix (for the models that return it); what is represented is chosen on the left, ```Customize the visualization```.
         * These plots have *genotypes (not genes) as nodes*.
-        * (If you choose to *Sample for observed genotype transitions*, under  ```Advanced options```, for models that return a transition rate matrix (CBN, H-ESBCN, MHN), you can also represent the observed genotype transitions.)
+        * (If you choose to *Sample for observed genotype transitions*, under  ```Advanced options and CPMs to use```, for models that return a transition rate matrix (CBN, H-ESBCN, MHN), you can also represent the observed genotype transitions.)
         * You can show, for the bottom plots, only some of the most relevant paths; again, modify options under ```Customize the visualization```.
         * The bottom plots might include genotypes never observed in the sample; these are shown in light green.
         * For easier visualization, in very busy plots, instead of the Genotypes you might want to show the last gene mutated.
@@ -66,7 +66,7 @@ The results include:
     * Transition rates: for models that provide them (CBN, H-ESBCN, MHN) transition rates.
     * Predicted genotype relative frequencies: the predicted genotype frequencies from the fitted models.
     * Sampled genotype counts: the counts from obtaining a finite sample (of the size you chose) with the probabilities given by the predicted genotype frequencies. If you add noise, they include observational (e.g., genotyping) noise.
-    * Observed genotype transitions (counts): if you choose to *Sample for observed genotype transitions* (under  ```Advanced options```), for models that return a transition rate matrix (CBN, H-ESBCN, MHN), we obtain the observed sampled of genotypes by simulating sampling from the continuous time Markov chain; this provides also observed transition counts between genotypes.
+    * Observed genotype transitions (counts): if you choose to *Sample for observed genotype transitions* (under  ```Advanced options and CPMs to use```), for models that return a transition rate matrix (CBN, H-ESBCN, MHN), we obtain the observed sampled of genotypes by simulating sampling from the continuous time Markov chain; this provides also observed transition counts between genotypes.
 	
 	
 &nbsp;		
@@ -101,9 +101,17 @@ The results include:
 *  **OncoBN**: Similar to OT, in the sense of being an untimed oncogenetic model, but allows both AND (the conjunctive or CBN model) and OR relationships (the disjunctive or DBN model).
 
   
-*  **Mutual Hazard networks (MHN):** With MHN dependencies are not deterministic and events can make other events more like or less likely (inhibiting influence). The fitted parameters are multiplicative hazards that represent how one event influences other events.
+*  **Mutual Hazard networks (MHN):** With MHN dependencies are not deterministic and events can make other events more like or less likely (inhibiting influence**. The fitted parameters are multiplicative hazards that represent how one event influences other events.
 
 &nbsp;
+
+## Default options and default CPMs run
+***
+
+- In the Shiny app, we always run CBN, OT, OncoBN, and MHN. If you want to run H-ESBCN or MC-CBN, you have to select them under ```Advanced options and CPMs to use```. (They are not run by default, as they can take a long time).
+- OncoBN can be run using a conjunctive or a disjunctive model. The default used in the Shiny app (and the evam function in the package) is the disjunctive model. You can use the conjunctive one by selecting it under ```Advanced options and CPMs to use```.
+- Most methods have other options that can be modified. Again, check ```Advanced options and CPMs to use```.
+
 
 ### References and related repositories<a id="refs"></a>
 ***
