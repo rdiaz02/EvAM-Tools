@@ -9,7 +9,8 @@ RUN apt-get update && \
     apt-get install -y libgsl-dev && \
     apt-get install -y libfftw3-single3 && \
     apt-get install -y libfftw3-double3 && \
-    apt-get install -y libfftw3-dev
+    apt-get install -y libfftw3-dev && \
+    apt-get install -y firefox
 
 ## Make sure LC is set
 ### RUN apt-get update && \
