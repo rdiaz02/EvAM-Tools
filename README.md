@@ -251,6 +251,12 @@ Once you have the Docker image built run the following command to run the image 
 docker run -p 3000:3000 evamtools ##
 ```
 
+FIXME: FIXMED: that is wrong? Two reasons: the image should be called, I think
+shinyevam. And when launched it says 
+Listening on http://0.0.0.0:3000
+sh: 1: /usr/bin/google-chrome: not found
+And why does it need to start a browser? It should just listen.
+
 
 **FIXME: Pablo writes this**
 
@@ -275,8 +281,9 @@ To run the shiny app you may want to change the port (right now it runs in 3000)
 
 The Dockerfile includes all the information to create a container with all dependencies. It first uses a default image that includes the latest R version. Then install all R dependencies. Finally it also deals with the installation of third party code. 
 
-### docker ###
+### docker directory ###
 **FIXME: Pablo writes this**
+Can we remove this?
 
 
 ### evamtools
