@@ -40,6 +40,8 @@ RUN R -e "install.packages('fastmatrix')"
 RUN R -e "install.packages('shiny')"
 RUN R -e "install.packages('Matrix')"
 RUN R -e "install.packages('stringi')"
+RUN R -e "install.packages('foreach')"
+RUN R -e "install.packages('R.utils')"
 RUN R -e "BiocManager::install('OncoSimulR')"
 RUN R -e "library(devtools);devtools::install_github('phillipnicol/OncoBN')"
 
