@@ -74,6 +74,9 @@ RUN cd /app/Sources && \
     R CMD build . && \
     R CMD INSTALL mccbn_*.tar.gz
 
+## Copy repo for subsequent operations
+COPY . /app/
+
 ## Install cbn
 RUN cd /app/ && \  
     cp ct-cbn-0.1.04b-RDU.tar.gz /app/Sources && \
@@ -85,7 +88,7 @@ RUN cd /app/ && \
     cp -t /usr/local/bin/ ct-cbn h-cbn 
 
 ## Install EvAM-tools
-COPY . /app/
+
 RUN  cd /app/evamtools && \
     echo ".First <- function() { library(evamtools); cat('Loading EvAM-tools\n'); runShiny();}" > .Rprofile
 
