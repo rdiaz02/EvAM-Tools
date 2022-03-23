@@ -9,11 +9,8 @@ This web interface provides a user-friendly interactive version of the package. 
 * In the ```User input``` tab (on top of the page) you can upload data or define cross-sectional data, or simulate cross-sectional data from models. These are then submitted to run.
 * In the ```Results``` tab you can see the output.
 
-<!-- FIXME: you add/remove images doing blablabla -->
+<!-- You add/remove images by adding HTML code. The usual img block. But do not leave that commented code around or shiny might break. -->
 
-<center>
-<img src="evamtools.png" width=1/>
-</center>
 
 
 
@@ -79,10 +76,6 @@ The results include:
 
 * You can also *download* the tabular results, fitted models, and the analyzed data.
 
-
-<center>
-<img src="transitions_dbxor.png" width=1>
-</center>
 
 
 <!-- FIXME: add this when ready -->
