@@ -8,7 +8,10 @@ RUN apt-get update && \
     apt-get install -y libgsl-dev && \
     apt-get install -y libfftw3-single3 && \
     apt-get install -y libfftw3-double3 && \
-    apt-get install -y libfftw3-dev
+    apt-get install -y libfftw3-dev && \
+    apt-get install -y openssl && \
+    apt-get install -y libcurl4-openssl-dev && \
+    apt-get install -y libssl-dev	
 
 
 
@@ -42,7 +45,10 @@ RUN R -e "install.packages('stringi')"
 RUN R -e "install.packages('foreach')"
 RUN R -e "install.packages('R.utils')"
 RUN R -e "BiocManager::install('OncoSimulR')"
+RUN R -e "install.packages('devtools')"
 RUN R -e "library(devtools);devtools::install_github('phillipnicol/OncoBN')"
+
+
 
 ## These are dependencies of OncoSimul.
 ## RUN R -e "install.packages('data.table')"

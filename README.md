@@ -174,6 +174,10 @@ sudo docker run -it evamtools ## To run
 sudo docker run -it --entrypoint bash evamtools ## To access to command line
 ```
 
+FIXME: FIXMED: I think the last one does not work.
+I think it should be something like 
+sudo docker run -it --entrypoint bash shinyevam
+
 FIXME: FIXMED: We do not want the command line. We want RStudio.
 
 FIXME: FIXMED: do we need two different docker images, one with RStudio, one for shiny, or can we provide just one?
