@@ -24,14 +24,12 @@
   * [Dockerfile](#dockerfile)
   * [docker](#docker)
   * [evamtools](#evamtools)
-  * [Selenium tests of the server](#selenium-tests-of-the-server)
-      - [Running the Selenium tests](#running-the-selenium-tests)
 - [References](#references)
   * [OT](#ot)
-  * [CBN](#cbn)
+  * [CBN and MCCBN](#cbn-and-mccbn)
   * [MHN](#mhn)
   * [HESBCN (PMCE)](#hesbcn-pmce)
-  * [OncoBN, DBN](#oncobn-dbn)
+  * [OncoBN (DBN)](#oncobn-dbn)
   * [Conditional prediction of genotypes and probabilities of paths from CPMs](#conditional-prediction-of-genotypes-and-probabilities-of-paths-from-cpms)
 
 <!-- tocstop -->
@@ -263,39 +261,40 @@ The Dockerfile includes all the information to create a container with all depen
 
 ### evamtools
 The R package itself with standard organization. Directories and files under inst:
-  * shiny-examples: code for the shiny application. The application consists on two main files: `server.R` (that controls the logic) and `ui.R` (includes all the interface). There are two additional directories: `assets` (with files for the landing page) and `test_shiny_app` (with Selenium tests for the app and testing related files ---see [Selenium tests of the server](#selenium-tests-of-the-server)).
+  * shiny-examples: code for the shiny application. The application consists on two main files: `server.R` (that controls the logic) and `ui.R` (includes all the interface). There are two additional directories: `assets` (with files for the landing page) and `test_shiny_app` (with Selenium tests for the app and testing related files ---but these are no yet ready).
+    <!-- ---see [Selenium tests of the server](#selenium-tests-of-the-server)). -->
   * miscell/Using_OncoSimulR_to_get_accessible_genotypes_trans_mats.tex: explanation of using OncoSimulR to check transition matrices for OT, CBN, OncoBN, and HESBCN, the equivalence of lambdas to terms in fitness expressions, interpretation of the lambdas for HESBCN with OR and XOR.
   * miscell/examples: examples referred to from other files (for example, from the former tex file).
   * miscell/tests-sample_genotypes_from_trm: output of tests that were run to verify the code for sampling genotypes from the transition rate matrices. We compared the output of our code with that from the code of the original authors (MHN, MCCBN) for a large set of cases.
       
 	Note that the R package uses testthat to test our R code. Those tests will run automatically with the usual procedures from testthat or while doing `R CMD check`. For example, we check that transition rate matrices and transition probability matrices give identical results when compared to finding them via OncoSimulR (file test.OT-CBN-trans-mat-against-oncosimul.R and test.HESBCN-trans-mat-against-oncosimul.R) and against hand-computed examples (file test.trans-rates-f-graphs.R and test.HESBCN-transition-rate-matrices.R). The tests in evamtools/tests/testthat are separate from the tests under  inst/miscell/tests-sample_genotypes_from_trm  
 
-### Selenium tests of the server ###
+<!-- ### Selenium tests of the server ### -->
   
- The shiny web app also include its own set of tests that are run with Selenium. They are found under `inst/shiny_examples/evamtools/test_shiny_app/test.shiny.py.`
-  There are test of the basic functionlity of the web page (navigation, loading files...), working with csd, DAG and matrix inputs (loading examples, modifying values, changes gene names and number), and checking interface behaviour in the results' tab.
+<!--  The shiny web app also include its own set of tests that are run with Selenium. They are found under `inst/shiny_examples/evamtools/test_shiny_app/test.shiny.py.` -->
+<!--   There are test of the basic functionlity of the web page (navigation, loading files...), working with csd, DAG and matrix inputs (loading examples, modifying values, changes gene names and number), and checking interface behaviour in the results' tab. -->
 
-##### Running the Selenium tests ####
+<!-- ##### Running the Selenium tests #### -->
 
-Before launching the test you have to install a web driver. For testing, I use Chrome. To download the Chrome web driver go to [https://chromedriver.chromium.org/downloads]/(https://chromedriver.chromium.org/downloads) and select the version supporting your browser. Once the web driver is downloaded, extract it and make it available from $PATH.
-
-
-To run selenium test first the shiny serve has to be running. 
-Then, in a separate console, go to
-`evamtools/inst/shiny-examples/evamtools/test_shiny_app` and type:
-
-```bash
-## To run all tests
-python test.shiny.py 
-## or
-## To run a particular test
-python test.shiny.py className.testName 
-```
-
-If you change the server where the shiny app is running, then the driver has to be changed. This is done in line 14 of `evamtools/inst/shiny-examples/evamtools/test_shiny_app/test.shiny.py` (the one with  `self.driver.get("http://127.0.0.1:3000/")`). Testing the public server directly can also be considered once it is up.
+<!-- Before launching the test you have to install a web driver. For testing, I use Chrome. To download the Chrome web driver go to [https://chromedriver.chromium.org/downloads]/(https://chromedriver.chromium.org/downloads) and select the version supporting your browser. Once the web driver is downloaded, extract it and make it available from $PATH. -->
 
 
-Running all test takes around 8 minutes, writes considerable amount of temporary files (more than 1Gb) and makes the terminal useless (windows will be continuously opening). Also, the tests are designed to run in a screen with 1377x768 resolution; they have adapted to bigger screens, but not fully tested in those settings. 
+<!-- To run selenium test first the shiny serve has to be running.  -->
+<!-- Then, in a separate console, go to -->
+<!-- `evamtools/inst/shiny-examples/evamtools/test_shiny_app` and type: -->
+
+<!-- ```bash -->
+<!-- ## To run all tests -->
+<!-- python test.shiny.py  -->
+<!-- ## or -->
+<!-- ## To run a particular test -->
+<!-- python test.shiny.py className.testName  -->
+<!-- ``` -->
+
+<!-- If you change the server where the shiny app is running, then the driver has to be changed. This is done in line 14 of `evamtools/inst/shiny-examples/evamtools/test_shiny_app/test.shiny.py` (the one with  `self.driver.get("http://127.0.0.1:3000/")`). Testing the public server directly can also be considered once it is up. -->
+
+
+<!-- Running all test takes around 8 minutes, writes considerable amount of temporary files (more than 1Gb) and makes the terminal useless (windows will be continuously opening). Also, the tests are designed to run in a screen with 1377x768 resolution; they have adapted to bigger screens, but not fully tested in those settings.  -->
 
 
 ---
