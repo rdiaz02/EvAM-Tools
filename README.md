@@ -192,7 +192,7 @@ sudo docker run -it -p 3000:3000 shinyevam
 ```
 
 (This runs the `shinyevam` tagged docker image). 
-FIXME: FIXMED
+
 
 FIXME: FIXMED: that is wrong? When launched it says 
 Listening on http://0.0.0.0:3000
