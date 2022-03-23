@@ -167,27 +167,32 @@ runShiny()
 
 
 
-### Run the R package from the Docker image
-**FIXME**.
+### How to run the R package from the Docker image
+
 ```
-sudo docker build -t evamtools ## To build
 sudo docker run -it evamtools ## To run
 sudo docker run -it --entrypoint bash evamtools ## To access to command line
 ```
 
-### Run the Shiny app from the Docker image
-**FIXME**.
+FIXME: FIXMED: We do not want the command line. We want RStudio.
+
+FIXME: FIXMED: do we need two different docker images, one with RStudio, one for shiny, or can we provide just one?
+
+
+
+### How to run the Shiny app from the Docker image
+
 ```
-sudo docker build -f ShinyDockerfile  --tag shinyevam . ##To create image to run shiny
-sudo docker run -it -p 3000:3000 shinyevam ##To launch shiny from docker image
+sudo docker run -it -p 3000:3000 shinyevam 
 ```
 
+(This runs the `shinyevam` tagged docker image). FIXME: FIXMED
 
 ---
 
-### Build your own Docker image 
+### Build your own Docker images
 
-From the `EvAM-Tools` directory run: 
+To create a Docker image to run the evamtools R package, from the `EvAM-Tools` directory run: 
 
 ```
 docker build --tag evamtools .
@@ -198,9 +203,19 @@ Details about R with Docker and Rocker project here: https://www.rocker-project.
 
 If you want to modify anything, you can modify the `Dockerfile`.
 
+To create a Docker image to run the shiny app, from the `EvAM-Tools` directory run:
+
+```
+sudo docker build -f ShinyDockerfile  --tag shinyevam . 
+```
+
+FIXME: FIXMED: why is the first command run without root and the second with sudo?
 
 
-**FIXME: Pablo completes this**
+You can now run these images, as explained above.
+
+
+**FIXME: FIXMED: Pablo completes this**
 
 - Does that need to be run as root?
 - Are you sure this is using R-4.1.2? I think we might need something else:
@@ -208,13 +223,13 @@ If you want to modify anything, you can modify the `Dockerfile`.
     - Please, give, explicitly, the *current version of R being used***	
 
 
-** Creating the image fails because of no internet connection from the container**
+**What if creating the image fails because of no internet connection from the container**
 Creating the above image requires installing R packages and that might fail because the Docker container cannot connect with the internet. The following might help: https://superuser.com/a/1582710 , https://superuser.com/a/1619378 . 
 
 
 
 #### How to update the Docker image if you change the code 
-Build the Docker image as [above](#build-your-own-docker-image). But this time it should run much faster, because many steps will be skipped.
+Build the Docker images as [above](#build-your-own-docker-image). After the first time, the build process should run much faster because many steps will be skipped.
 
 
 ---
