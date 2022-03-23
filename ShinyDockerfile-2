@@ -1,3 +1,8 @@
+## Uses Debian. And I think we run into the boost libraries
+## for MC-CBN issue. Probably not
+## worth it to try to debug this if the one based on verse works.
+
+
 FROM rocker/r-base
 
 RUN apt-get update && \
@@ -18,8 +23,13 @@ RUN apt-get update && \
     apt-get install -y emacs-bin-common && \
     apt-get install -y emacs-gtk && \
     apt-get install -y emacs-common && \
+    apt-get install -y elpa-ess	&& \        
     apt-get install -y git
 
+## Make sure LC is set
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen
+ENV LC_ALL C.UTF-8
 
 ## R packages
 RUN R -e "install.packages('BiocManager')"
@@ -53,7 +63,6 @@ RUN R -e "install.packages('R.utils')"
 RUN R -e "BiocManager::install('OncoSimulR')"
 RUN R -e "install.packages('devtools')"
 RUN R -e "library(devtools);devtools::install_github('phillipnicol/OncoBN')"
-
 
 
 ## These are dependencies of OncoSimul.
@@ -98,22 +107,14 @@ RUN cd /app/ && \
     make && \
     cp -t /usr/local/bin/ ct-cbn h-cbn 
 
-## Install EvAM-tools
-
+## Install EvAM-tools and check
 RUN cd app && \
     rm -r -f evamtools.Rcheck && \
     V_PKG=$(cat ./evamtools/DESCRIPTION | grep Version | cut -d' ' -f2) && \
     R --no-site-file --no-init-file CMD build evamtools && \
     R --no-site-file --no-init-file CMD INSTALL --install-tests evamtools_$V_PKG.tar.gz && \
-    R --no-site-file --no-init-file CMD check evamtools_$V_PKG.tar.gz
-
-
-## R_ENVIRON_USER=./Renviron.based_on_bioc R --no-site-file --no-init-file CMD build evamtools && \
-## R_ENVIRON_USER=./Renviron.based_on_bioc R --no-site-file --no-init-file CMD INSTALL --install-tests evamtools_$V_PKG.tar.gz && \
-## R_ENVIRON_USER=./Renviron.based_on_bioc R --no-site-file --no-init-file CMD check evamtools_$V_PKG.tar.gz
-
-# RUN ./build-test.sh
-# RUN bash build-test.sh > log.txt
+    R --no-site-file --no-init-file CMD check evamtools_$V_PKG.tar.gz && \
+    R_ENVIRON_USER=./Renviron.based_on_bioc R --no-site-file --no-init-file CMD check evamtools_$V_PKG.tar.gz
 
 
 RUN  cd /app/evamtools && \
@@ -130,6 +131,15 @@ ENTRYPOINT  ["R", "--interactive"]
 CMD ["NULL"]
 
 EXPOSE 3000
+
+
+
+
+
+
+
+
+
 
 
 

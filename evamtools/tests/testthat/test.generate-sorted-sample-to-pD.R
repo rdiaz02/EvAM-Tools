@@ -196,9 +196,9 @@ test_that("generate_pD_sorted_genotypes and sample_to_pD_order same order", {
 
 
 
-    seed <- round(runif(1, 1, 1e4))
+    seed <- round(runif(1, 1, 1e8))
     
-    for (i in 1:150) {
+    for (i in 1:100) {
         set.seed(seed)
         cat("\n Doing seed = ", seed, "\n")
         genes <- c("ZE", "b_mut", "F_NRAS", "colorin3", "no_ta", "colorin4")
