@@ -10,10 +10,7 @@ This web interface provides a user-friendly interactive version of the package. 
 * In the ```Results``` tab you can see the output.
 
 <!-- FIXME: you add/remove images doing blablabla -->
-
-<center>
-<img src="evamtools.png" width=1/>
-</center>
+<!-- it does not like have html directly, so the best is to remove it -->
 
 
 
@@ -79,10 +76,7 @@ The results include:
 
 * You can also *download* the tabular results, fitted models, and the analyzed data.
 
-
-<center>
-<img src="transitions_dbxor.png" width=1>
-</center>
+<!-- it does not like have html directly, so the best is to remove it -->
 
 
 <!-- FIXME: add this when ready -->

@@ -23,6 +23,6 @@ runShiny <- function(host="0.0.0.0", port = 3000) {
     stop("Could not find example directory. Try re-installing `evamtools`.", call. = FALSE)
   }
 
-  options(shiny.autoreload = TRUE, browser = "/usr/bin/google-chrome")
+  # options(shiny.autoreload = TRUE, browser = "/usr/bin/google-chrome")
   shiny::runApp(appDir, port = port, host = host, display.mode = "normal")
 }
