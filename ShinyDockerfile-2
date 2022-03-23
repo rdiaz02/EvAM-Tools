@@ -1,4 +1,4 @@
-FROM rocker/verse 
+FROM rocker/r-base
 
 RUN apt-get update && \
     apt-get install -f -y software-properties-common && \
