@@ -149,6 +149,7 @@ You can also [build your own Docker image](#build-your-own-docker-image) and you
      - Make sure you have the require dependencies and imports, as listed in DESCRIPTION: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree , gtools , plot.matrix , DT, shinyjs, shiny, RhpcBLASctl, Rlinsolve.
          - Note that we list, as imports, OncoBN, mccbn. You need those (from above). 
      - Build (R CMD build evamtools) and install (R CMD INSTALL evamtools_x.y.z.tar.gz, with x.y.z replaced by the current version number). File `build-test.sh` builds, tests, and installs the package (and takes care of the version number).
+	 - Make sure the environment variable LC_ALL is set. Several critical functions depend on sorting; there are tests that check this in the package, and we experienced problems  with docker images that did not set LC_ALL. On Docker or our local systems, we have used C.UTF-8, en_US.UTF-8, and en_GB.utf8.
       
 	  
 ### Docker images 
