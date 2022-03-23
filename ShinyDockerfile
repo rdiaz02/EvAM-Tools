@@ -96,6 +96,24 @@ RUN cd app && \
     R --no-site-file --no-init-file CMD INSTALL --install-tests evamtools_$V_PKG.tar.gz
 
 
+## In case I need to debug stuff
+RUN apt-get update && \
+    apt-get install -y locales && \
+    apt-get install -y emacs && \
+    apt-get install -y emacs-bin-common && \
+    apt-get install -y emacs-gtk && \
+    apt-get install -y emacs-common 
+
+## Make sure locales are not the culprit
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen
+ENV LANG en_US.UTF-8  
+ENV LANGUAGE en_US:en  
+ENV LC_ALL en_US.UTF-8
+
+   
+
+
 ### FIX
 ### && \
 ###     R --no-site-file --no-init-file CMD check evamtools_$V_PKG.tar.gz
@@ -112,11 +130,14 @@ RUN cd app && \
 # RUN bash build-test.sh > log.txt
 
 
-RUN  cd /app/evamtools && \
-    echo ".First <- function() { library(evamtools); cat('Loading EvAM-tools\n');}" > .Rprofile
+
+
+### RUN  cd /app/evamtools && \
+###     echo ".First <- function() { library(evamtools); cat('Loading EvAM-tools\n');}" > .Rprofile
 
 ### RUN  cd /app/evamtools && \
 ###     echo ".First <- function() { library(evamtools); cat('Loading EvAM-tools\n'); runShiny();}" > .Rprofile
+
 
 
 

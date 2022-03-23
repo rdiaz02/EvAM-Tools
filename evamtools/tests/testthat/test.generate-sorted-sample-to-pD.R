@@ -196,16 +196,23 @@ test_that("generate_pD_sorted_genotypes and sample_to_pD_order same order", {
 
 
 
+    seed <- round(runif(1, 1, 1e4))
     
-    for(i in 1:50) {
+    for (i in 1:150) {
+        set.seed(seed)
+        cat("\n Doing seed = ", seed, "\n")
         genes <- c("ZE", "b_mut", "F_NRAS", "colorin3", "no_ta", "colorin4")
         out_pd3 <- sample_to_pD_order(sample(gg3),
                                                   6,
                                                   sample(genes))
         out_gsg3 <- generate_pD_sorted_genotypes(6,
-                                                          sample(genes))
+                                                 sample(genes))
         expect_equal(out_pd3, expect_out_gg3_counts)
         expect_equal(out_gsg3, expect_out_gsg3)
+        print(out_pd3)
+        print(expect_out_gg3_counts)
+        cat("\n Done seed = ", seed, "\n")
+        seed <- seed + 1
     }
 })
 
