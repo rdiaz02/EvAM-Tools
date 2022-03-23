@@ -191,7 +191,14 @@ FIXME: FIXMED: do we need two different docker images, one with RStudio, one for
 sudo docker run -it -p 3000:3000 shinyevam 
 ```
 
-(This runs the `shinyevam` tagged docker image). FIXME: FIXMED
+(This runs the `shinyevam` tagged docker image). 
+FIXME: FIXMED
+
+FIXME: FIXMED: that is wrong? When launched it says 
+Listening on http://0.0.0.0:3000
+sh: 1: /usr/bin/google-chrome: not found
+Why does it need to start a browser? It should just listen.
+
 
 ---
 
@@ -232,6 +239,20 @@ You can now run these images, as explained above.
 Creating the above image requires installing R packages and that might fail because the Docker container cannot connect with the internet. The following might help: https://superuser.com/a/1582710 , https://superuser.com/a/1619378 . 
 
 
+
+**Cleaning the build cache and stale old images**
+Sometimes (e.g., if the base containers change or you want to remove build cache) you might want to issue
+```
+docker builder prune
+```
+
+or the much more drastic
+
+```
+docker system prune -a
+```
+
+Please, read the documentation for both.
 
 #### How to update the Docker image if you change the code 
 Build the Docker images as [above](#build-your-own-docker-image). After the first time, the build process should run much faster because many steps will be skipped.
