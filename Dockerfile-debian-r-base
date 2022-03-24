@@ -1,33 +1,35 @@
-FROM rocker/verse 
+## Uses Debian. And I think we run into the boost libraries
+## for MC-CBN issue. Probably not
+## worth it to try to debug this if the one based on verse works.
+
+
+FROM rocker/r-base
 
 RUN apt-get update && \
     apt-get install -f -y software-properties-common && \
     rm -rf /var/lib/apt/lists/* && \
-    add-apt-repository universe && \
     apt-get update && \
     apt-get install -y libboost-all-dev && \
     apt-get install -y libgsl-dev && \
     apt-get install -y libfftw3-single3 && \
     apt-get install -y libfftw3-double3 && \
     apt-get install -y libfftw3-dev && \
-    apt-get install -y firefox
-
-## Make sure LC is set
-### RUN apt-get update && \
-###     apt-get install -y locales && \
-###     locale-gen C.UTF-8
-ENV LANG C.UTF-8
-ENV LC_ALL C.UTF-8
-
-## In case I need to debug stuff have a sensible editor :)
-RUN apt-get update && \
+    apt-get install -y openssl && \
+    apt-get install -y libcurl4-openssl-dev && \
+    apt-get install -y libxml2-dev && \
+    apt-get install -y libssl-dev && \
+    apt-get install -y locales && \
     apt-get install -y emacs && \
     apt-get install -y emacs-bin-common && \
     apt-get install -y emacs-gtk && \
     apt-get install -y emacs-common && \
-    apt-get install -y elpa-ess
+    apt-get install -y elpa-ess	&& \        
+    apt-get install -y git
 
-RUN apt-get install -y texlive-fonts-recommended
+## Make sure LC is set
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen
+ENV LC_ALL C.UTF-8
 
 ## R packages
 RUN R -e "install.packages('BiocManager')"
@@ -59,7 +61,9 @@ RUN R -e "install.packages('stringi')"
 RUN R -e "install.packages('foreach')"
 RUN R -e "install.packages('R.utils')"
 RUN R -e "BiocManager::install('OncoSimulR')"
+RUN R -e "install.packages('devtools')"
 RUN R -e "library(devtools);devtools::install_github('phillipnicol/OncoBN')"
+
 
 ## These are dependencies of OncoSimul.
 ## RUN R -e "install.packages('data.table')"
@@ -69,7 +73,10 @@ RUN R -e "library(devtools);devtools::install_github('phillipnicol/OncoBN')"
 ## RUN R -e "install.packages('parallel')"
 ## RUN R -e "install.packages('gtools')"
 
+
 RUN mkdir -p /app/Sources/
+
+RUN apt-get install -y texlive-fonts-recommended
 
 ## Install HESBCN
 RUN cd /app/Sources && \
@@ -100,8 +107,7 @@ RUN cd /app/ && \
     make && \
     cp -t /usr/local/bin/ ct-cbn h-cbn 
 
-## Install EvAM-tools
-
+## Install EvAM-tools and check
 RUN cd app && \
     rm -r -f evamtools.Rcheck && \
     V_PKG=$(cat ./evamtools/DESCRIPTION | grep Version | cut -d' ' -f2) && \
@@ -110,8 +116,11 @@ RUN cd app && \
     R --no-site-file --no-init-file CMD check evamtools_$V_PKG.tar.gz && \
     R_ENVIRON_USER=./Renviron.based_on_bioc R --no-site-file --no-init-file CMD check evamtools_$V_PKG.tar.gz
 
+
 RUN  cd /app/evamtools && \
-     echo ".First <- function() { library(evamtools); cat('Loading EvAM-tools\n'); runShiny();}" > .Rprofile
+    echo ".First <- function() { library(evamtools); cat('Loading EvAM-tools\n'); runShiny();}" > .Rprofile
+
+
 
 #Create folder to share with the outside
 RUN mkdir /app/outside
@@ -122,15 +131,6 @@ ENTRYPOINT  ["R", "--interactive"]
 CMD ["NULL"]
 
 EXPOSE 3000
-
-
-## Debugging errors: for example, start as
-## sudo docker run -it --entrypoint bash shinyevam
-
-
-
-
-
 
 
 

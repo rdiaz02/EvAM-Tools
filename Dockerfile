@@ -62,8 +62,6 @@ RUN apt-get install -y texlive-fonts-recommended
 RUN cd /app/Sources && \
     git clone https://github.com/danro9685/HESBCN && \
     cd HESBCN && \ 
-    sed -i "s/gcc-5/gcc-9/g" Makefile && \
-    sed -i  "s/^LDLIBS = $/LDLIBS = -lgsl -lm -lgslcblas/g" Makefile && \ 
     make && \
     cp h-esbcn /usr/local/bin/ 
 

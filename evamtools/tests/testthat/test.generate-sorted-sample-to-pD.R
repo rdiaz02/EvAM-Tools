@@ -194,16 +194,13 @@ test_that("generate_pD_sorted_genotypes and sample_to_pD_order same order", {
         0 # "b_mut,  colorin3,  colorin4,  F_NRAS,  no_ta,  ZE"
     )
 
-
-
-    
-    for(i in 1:50) {
+    for (i in 1:50) {
         genes <- c("ZE", "b_mut", "F_NRAS", "colorin3", "no_ta", "colorin4")
         out_pd3 <- sample_to_pD_order(sample(gg3),
-                                                  6,
-                                                  sample(genes))
+                                      6,
+                                      sample(genes))
         out_gsg3 <- generate_pD_sorted_genotypes(6,
-                                                          sample(genes))
+                                                 sample(genes))
         expect_equal(out_pd3, expect_out_gg3_counts)
         expect_equal(out_gsg3, expect_out_gsg3)
     }

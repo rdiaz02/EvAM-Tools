@@ -617,7 +617,7 @@ user_input <- function() {
               actionButton("analysis", "Run evamtools")
             ),
             tags$div(class = "download_button",
-              actionButton("advanced_options", "Advanced options")
+              actionButton("advanced_options", "Advanced options and CPMs to use")
             ),
             tags$div(id="all_advanced_options", 
                      ## title = tags$h3("Advanced options"),
