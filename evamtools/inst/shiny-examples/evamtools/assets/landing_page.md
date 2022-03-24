@@ -13,7 +13,7 @@ This web interface provides a user-friendly interactive version of the package. 
 
 
 
-
+****
 ## What is _cross-sectional_ data?<a id="helpcsd"></a> 
 ***
 
@@ -21,6 +21,7 @@ In cross-sectional data, a single sample has is obtained from each patient. That
 
 &nbsp;&nbsp;
 
+****
 # How to use this web interface? <a id="input"></a>
 ***
 
@@ -42,7 +43,7 @@ To make it easier to play with the tool, under "DAG and rates/probs" there are p
 
 &nbsp;&nbsp;
 
-
+****
 ## What is available under ```Results```?<a id="helpresults"></a>
 ***
 
@@ -88,7 +89,7 @@ The results include:
 
 &nbsp;&nbsp;
 
-
+****
 # What CPMs are included in ```Evam-tools```?<a id="cpms"></a>
 ***
 
@@ -104,6 +105,7 @@ The results include:
 *  **Mutual Hazard networks (MHN):** With MHN dependencies are not deterministic and events can make other events more like or less likely (inhibiting influence**. The fitted parameters are multiplicative hazards that represent how one event influences other events.
 
 &nbsp;
+
 
 ## Default options and default CPMs run
 ***
@@ -190,7 +192,7 @@ The results include:
 &nbsp;
 
 
-
+****
 # Where is the code? Terms of use? Copyright
 ***
 
@@ -205,4 +207,10 @@ Most of the files for this app (and the package) are copyright Pablo Herrera Nie
 
 &nbsp;
 ### Contact and bug reports
-Please, use the repository (https://github.com/rdiaz02/EvAM-Tools) and submit bug reports there. 
+Please, use the repository (https://github.com/rdiaz02/EvAM-Tools** and submit bug reports there. 
+
+&nbsp;
+****
+# Cookies
+***
+We use cookies to keep "sticky sessions" to the pool of servers. By using the app, you confirm you are OK with this.
