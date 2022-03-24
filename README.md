@@ -172,12 +172,9 @@ runShiny()
 
 ```
 sudo docker run -it evamtools ## To run
-sudo docker run -it --entrypoint bash evamtools ## To access to command line
+sudo docker run -it --entrypoint bash shinyevam ## To access to command line
 ```
 
-FIXME: FIXMED: I think the last one does not work.
-I think it should be something like 
-sudo docker run -it --entrypoint bash shinyevam
 
 FIXME: FIXMED: We do not want the command line. We want RStudio.
 
@@ -188,16 +185,11 @@ FIXME: FIXMED: do we need two different docker images, one with RStudio, one for
 ### How to run the Shiny app from the Docker image
 
 ```
-sudo docker run -it -p 3000:3000 shinyevam 
+sudo docker run -it -p 4080:3000 shinyevam 
 ```
 
-(This runs the `shinyevam` tagged docker image). 
-FIXME: FIXMED
+This runs the `shinyevam` tagged docker image, mapping port 3000 of the container to port 4080 of the host. (So if you want to use the usual port 80, use 80 instead of 4080).
 
-FIXME: FIXMED: that is wrong? When launched it says 
-Listening on http://0.0.0.0:3000
-sh: 1: /usr/bin/google-chrome: not found
-Why does it need to start a browser? It should just listen.
 
 
 ---
@@ -239,6 +231,8 @@ You can now run these images, as explained above.
 Creating the above image requires installing R packages and that might fail because the Docker container cannot connect with the internet. The following might help: https://superuser.com/a/1582710 , https://superuser.com/a/1619378 . 
 
 
+In many cases, doing `sudo systemctl restart docker` might be enough.
+
 
 **Cleaning the build cache and stale old images**
 Sometimes (e.g., if the base containers change or you want to remove build cache) you might want to issue
@@ -255,7 +249,13 @@ docker system prune -a
 Please, read the documentation for both.
 
 #### How to update the Docker image if you change the code 
-Build the Docker images as [above](#build-your-own-docker-image). After the first time, the build process should run much faster because many steps will be skipped.
+Build the Docker images as [above](#build-your-own-docker-image**. After the first time, the build process should run much faster because many steps will be skipped.
+
+
+**Copying docker images from one machine to another**
+Yes, that can be done. See here, for example: https://stackoverflow.com/a/23938978
+
+
 
 
 ---
@@ -269,14 +269,10 @@ Build the Docker images as [above](#build-your-own-docker-image). After the firs
 Once you have the Docker image built run the following command to run the image connecting port 3000 of the computer with port 3000 of the container
 
 ```
-docker run -p 3000:3000 evamtools ##
+docker run -p 4000:3000 shinyevam ##
 ```
 
-FIXME: FIXMED: that is wrong? Two reasons: the image should be called, I think
-shinyevam. And when launched it says 
-Listening on http://0.0.0.0:3000
-sh: 1: /usr/bin/google-chrome: not found
-And why does it need to start a browser? It should just listen.
+4000 is the port on the host, 3000 the port of the container (unless you change the code and recreate the image, that is fixed)
 
 
 **FIXME: Pablo writes this**

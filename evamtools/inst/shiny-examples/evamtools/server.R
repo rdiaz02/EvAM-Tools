@@ -1048,7 +1048,8 @@ server <- function(input, output, session) {
         ot_opts$with_errors_dist_ot <- TRUE
       } else ot_opts$with_errors_dist_ot <- FALSE
 
-      cbn_opts <- list(init_poset = input$CBN_init_poset)
+      cbn_opts <- list(init_poset = input$CBN_init_poset,
+                       omp_threads = input$CBN_omp_threads)
       hesbcn_opts <- list(
         steps = input$HESBCN_steps,
         reg = input$HESBCN_reg
