@@ -123,7 +123,7 @@ WORKDIR /app/evamtools
 
 EXPOSE 3000
 
-CMD R --slave -e 'library(evamtools); runShiny()'
+CMD ["R", "-s", "-e", "'library(evamtools); runShiny()'"]
 
 ## Debugging errors: for example, start as
 ## sudo docker run -it --entrypoint bash shinyevam
