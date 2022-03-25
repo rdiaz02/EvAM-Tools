@@ -43,7 +43,8 @@ We provide an R package, evamtools, and a Shiny (https://shiny.rstudio.com/) app
   * Using the shiny app, easily visualize the effects of changes in genotype composition on the fitted models by entering user-defined cross-sectional data using a GUI.
 
 
-For easier use, we provide links to Docker images that you can download and run, as well as instructions on how to build Docker images.
+For easier use, we provide links to Docker images that you can download and run, as well as instructions on how to build Docker images. You can also run the Shiny app on our servers: http://evamtools.iib.uam.es .
+
 
 
 ---
@@ -112,11 +113,15 @@ For easier use, we provide links to Docker images that you can download and run,
 
 ### Overview
 
-You can install:
+If you just want to run the Shiny app:
+  * Go to http://evamtools.iib.uam.es .
+
+
+You can install on your machines:
   * The [package and its dependencies](#how-to-install-the-r-package)
   * A [Docker image](#docker-images)
 	
-You can run:
+You can run on your machines:
   * The [package from R and the Shiny app](#how-to-run-the-r-package-and-the-shiny-app-locally)
   * The [package in an RStudio session from the Docker image](#run-the-r-package-from-the-docker-image)
   * The [Shiny app from a Docker image](#run-the-shiny-app-from-the-docker-image)
