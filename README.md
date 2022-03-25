@@ -171,12 +171,18 @@ runShiny()
 ### How to run the R package from the Docker image
 
 ```
-sudo docker run -it evamtools ## To run
-sudo docker run -it --entrypoint bash shinyevam ## To access to command line
+## Starts R; then you can load the package
+sudo docker run -it --entrypoint R shinyevam
+
+## Even simpler: get to the shell
+sudo docker run -it --entrypoint bash shinyevam 
+## Now you can start R, or Emacs and from it R
 ```
 
 
 FIXME: FIXMED: We do not want the command line. We want RStudio.
+FIXME: FIXMED: This is very limited because we have no X. See also
+https://stackoverflow.com/questions/16296753/can-you-run-gui-applications-in-a-linux-docker-container
 
 FIXME: FIXMED: do we need two different docker images, one with RStudio, one for shiny, or can we provide just one?
 
@@ -185,10 +191,14 @@ FIXME: FIXMED: do we need two different docker images, one with RStudio, one for
 ### How to run the Shiny app from the Docker image
 
 ```
-sudo docker run -it -p 4080:3000 shinyevam 
+docker run -p 4080:3000 --name EVAM1 shinyevam
 ```
 
-This runs the `shinyevam` tagged docker image, mapping port 3000 of the container to port 4080 of the host. (So if you want to use the usual port 80, use 80 instead of 4080).
+This runs the `shinyevam` tagged docker image, mapping port 3000 of the container to port 4080 of the host  (so if you want to use the usual port 80, use 80 instead of 4080). You can use whatever you want instead of "EVAM1"; it is just a name to make other operations simpler (like stopping the container).
+
+This is a *non-interactive run*, and you can point your browser to 0.0.0.0:4080 and shiny should be there.
+
+(If you launch it this way, you can launch an arbitrary number of containers. For example, launch 15 different ones by specifying 15 different ports and 15 different names).
 
 
 
