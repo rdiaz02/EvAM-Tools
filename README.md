@@ -55,7 +55,7 @@ For easier use, we provide links to Docker images that you can download and run,
 
 ### Copyright and origin of files under evamtools/R ###
 
-- All files under evamtools/R are copyright Pablo Herrera Nieto and Ramon Diaz-Uriarte (and released under the GPL v3 license) except for the following:
+- All files under evamtools/R are copyright Pablo Herrera Nieto and Ramon Diaz-Uriarte (and released under the GNU Affero General Public License (AGPL) v3 license) except for the following:
 
 - File HESBCN__import.hesbcn.R: 
    This file contains function import.hesbcn (with a minor modification to return "Best Lambdas").
@@ -63,7 +63,7 @@ For easier use, we provide links to Docker images that you can download and run,
    Code from https://github.com/BIMIB-DISCo/PMCE/blob/main/Utilities/R/utils.R .
    Commit 5578c79 from 2021-09-29.
 
-   License: Apache License 2.0, which is compatible with the GPL 3 used by the rest of this project.
+   License: Apache License 2.0, which can be combined with software under the  AGPL 3 as used by the rest of this project.
    
    Author of code: from commit history, most likely Daniele Ramazzotti (danro9685)
 
@@ -99,7 +99,7 @@ For easier use, we provide links to Docker images that you can download and run,
 ### ct-cbn ###
 
    This repository includes ct-​cbn-0.1.04b, from
-   https://bsse.ethz.ch/cbg/software/ct-cbn.html, whose authors are Niko Beerenwinkel, Moritz Gerstung, and Seth Sullivant. It is released under the GNU GPL ("either version 2 of the License, or (at your option) any later version").
+   https://bsse.ethz.ch/cbg/software/ct-cbn.html, whose authors are Niko Beerenwinkel, Moritz Gerstung, and Seth Sullivant. It is released under the GNU GPL ("either version 2 of the License, or (at your option) any later version"). The GPL v3 can be combined with software under the AGPL v3, as used by the rest of this project.
    
    The code included in this repository is file ct-cbn-0.1.04b-RDU.tar.gz, a
    modification by RDU of the code in ct-​cbn-0.1.04b that includes: a minor bug fix (which, however, could be related to non-identifiability) and output with lambdas and likelihood from the initial run and each of the iterations.
