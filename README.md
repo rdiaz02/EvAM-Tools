@@ -196,12 +196,12 @@ FIXME: FIXMED: do we need two different docker images, one with RStudio, one for
 ### How to run the Shiny app from the Docker image
 
 ```
-docker run -p 4080:3000 --name EVAM1 shinyevam
+docker run -d -p 4080:3000 --memory="2g" --name EVAM1 shinyevam
 ```
 
 This runs the `shinyevam` tagged docker image, mapping port 3000 of the container to port 4080 of the host  (so if you want to use the usual port 80, use 80 instead of 4080). You can use whatever you want instead of "EVAM1"; it is just a name to make other operations simpler (like stopping the container).
 
-This is a *non-interactive run*, and you can point your browser to 0.0.0.0:4080 and shiny should be there.
+This is a *non-interactive run* (and we use the "-d" or "--detach" options, so it is running in detached mode), and you can point your browser to 0.0.0.0:4080 and shiny should be there. (In this example, we also limit the maximum memory to 2 GB).
 
 (If you launch it this way, you can launch an arbitrary number of containers. For example, launch 15 different ones by specifying 15 different ports and 15 different names).
 

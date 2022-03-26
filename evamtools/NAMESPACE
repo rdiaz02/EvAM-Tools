@@ -52,3 +52,5 @@ importFrom("fastmatrix", "seidel")
 
 importFrom("graph", "plot", "graphAM", "graph.par")
 importFrom("Rgraphviz", "layoutGraph", "renderGraph")
+
+importFrom("R.utils", "withTimeout")

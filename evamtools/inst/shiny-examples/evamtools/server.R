@@ -31,7 +31,7 @@ dataModal <- function(error_message, type="Error: ") {
 
 
 
-server <- function(input, output, session) {
+server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
   examples_csd$csd <- examples_csd$csd[1:5]
   examples_csd$dag <- examples_csd$dag[1:6]
   all_csd_data <- evamtools:::standarize_all_datasets(examples_csd)
@@ -1115,13 +1115,28 @@ server <- function(input, output, session) {
       if(!is.null(input$more_cpms)){
         methods <- unique(c(methods, input$more_cpms[input$more_cpms %in% .ev_SHINY_dflt$all_cpms]))
       }
-      cpm_output <- evam(data2run, methods = methods
+      ## cpm_output <- evam(data2run, methods = methods
+      ##   , mhn_opts = mhn_opts
+      ##   , ot_opts = ot_opts
+      ##   , cbn_opts = cbn_opts
+      ##   , hesbcn_opts = hesbcn_opts
+      ##   , oncobn_opts = oncobn_opts
+      ##   , mccbn_opts = mccbn_opts)
+      cpm_output <- R.utils::withTimeout({evam(data2run, methods = methods
         , mhn_opts = mhn_opts
         , ot_opts = ot_opts
         , cbn_opts = cbn_opts
         , hesbcn_opts = hesbcn_opts
         , oncobn_opts = oncobn_opts
-        , mccbn_opts = mccbn_opts)
+        , mccbn_opts = mccbn_opts)},
+          elapsed = EVAM_MAX_ELAPSED, 
+          timeout = EVAM_MAX_ELAPSED, 
+          cpu = Inf,
+          onTimeout = "silent")
+
+      if (is.null(cpm_output)) stop("Error running evam. ",
+                                "Most likely you exceeded maximum ",
+                                "allowed time (EVAM_MAX_ELAPSED).")
 
       ## To see Source data in the results section
       # if(input$input2build != "csd"){

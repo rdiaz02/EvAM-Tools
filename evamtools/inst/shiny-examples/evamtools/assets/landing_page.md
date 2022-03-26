@@ -89,6 +89,19 @@ The results include:
 
 &nbsp;&nbsp;
 
+
+
+****
+## Session timeouts, RAM and elapsed time execution limits<a id="limits"></a>
+***
+
+Inactive connections will timeout after 2 hours. The page will become gray, and if you refresh (e.g., F5 in most browsers) after this time, you will not get back your results, figures, etc, but start another session. 
+
+Maximum RAM of any process is limited to 2 GB. Likewise, the analyses should be aborted after 1.5 hours of elapsed (not CPU ---we parallelize the runs) time. If you want to use the Shiny app without these limits, install a local copy. (To modify the time limit, change the value of variable EVAM_MAX_ELAPSED, in the definition of function "server", in file "server.R".  The RAM limit is imposed on the Docker containers we use; to lift it, run Docker without the memory limit.)
+
+
+&nbsp;&nbsp;
+
 ****
 # What CPMs are included in ```Evam-tools```?<a id="cpms"></a>
 ***
