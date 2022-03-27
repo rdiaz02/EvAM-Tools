@@ -179,7 +179,7 @@ runShiny()
 Similar to https://hub.docker.com/r/rocker/rstudio  (and see further options there):
 
 ```
-docker run --rm -p 8787:8787 -e PASSWORD=yourpasswordhere evamrstudio
+sudo docker run --rm -p 8787:8787 -e PASSWORD=yourpasswordhere evamrstudio
 ```
 
 Go to `localhost:8787` and log in with username "rstudio" and the password you set. See https://hub.docker.com/r/rocker/rstudio for further options.
@@ -209,7 +209,7 @@ by the appropriate
 ### How to run the Shiny app from the Docker image
 
 ```
-docker run -d -p 4080:3000 --memory="2g" --name EVAM1 evamshiny
+sudo docker run -d -p 4080:3000 --memory="2g" --name EVAM1 evamshiny
 ```
 
 This runs the `shinyevam` tagged docker image, mapping port 3000 of the container to port 4080 of the host  (so if you want to use the usual port 80, use 80 instead of 4080). You can use whatever you want instead of "EVAM1"; it is just a name to make other operations simpler (like stopping the container).
@@ -284,7 +284,7 @@ docker run -p 4000:3000 shinyevam ##
 4000 is the port on the host, 3000 the port of the container (unless you change the code and recreate the image, that is fixed)
 
 
-**FIXME: Pablo writes this**
+**FIXME: Pablo writes this**  Ramon will finish it.
 
 - Is this run as root or a user? Explain the pros and cons. If possible, set up to run as user, not root.
 
@@ -307,9 +307,6 @@ To run the shiny app you may want to change the port (right now it runs in 3000)
 
 The Dockerfile includes all the information to create a container with all dependencies. It first uses a default image that includes the latest R version. Then install all R dependencies. Finally it also deals with the installation of third party code. 
 
-### docker directory ###
-**FIXME: Pablo writes this**
-Can we remove this?
 
 
 ### evamtools
