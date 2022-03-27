@@ -18,19 +18,17 @@ RUN apt-get update && \
     apt-get install -y libgsl-dev && \
     apt-get install -y fftw3 && \
     apt-get install -y libfftw3-3 && \
+    apt-get install -y libfftw3-bin && \
+    apt-get install -y libfftw3-dev && \
     apt-get install -y libfftw3-single3 && \
     apt-get install -y libfftw3-double3 && \
     apt-get install -y libfftw3-long3 && \
     apt-get install -y libfftw3-quad3 && \
-    apt-get install -y libfftw3-dev && \
-    apt-get install -y libfftw3-bin && \
     apt-get install -y libtiff-dev && \
     apt-get install -y libglpk-dev && \
-    apt-get install -y libgmp-dev && \	
+    apt-get install -y libgmp-dev && \
     apt-get install -y libx11-dev && \
     apt-get install -y git && \
-    apt-get install -y libgsl23 && \
-    apt-get install -y libgslcblas0 && \
     apt-get install -y pkg-config
 
 
@@ -147,15 +145,27 @@ RUN cd /app && \
 ######################################################################
 ######################################################################
 
-WORKDIR /app
-
 ## Increase build number if you want to force rebuild from here on
-ARG build=3
-
-RUN echo ".First <- function() {library(evamtools); cat('Loaded evamtools\n'); runShiny()}" > /app/.Rprofile
+ARG build=2
 
 ## Create folder to share with the outside
-RUN mkdir /app/outside
+## RUN mkdir /app/outside
+
+RUN addgroup --system evamapp && \
+    adduser --system --ingroup evamapp evamapp
+
+WORKDIR /home/evamapp
+RUN echo ".First <- function() {library(evamtools); cat('Loaded evamtools\n'); runShiny()}" > /home/evamapp/.Rprofile
+
+RUN chown evamapp:evamapp -R /home/evamapp
+## RUN chown evamapp:evamapp -R /app/outside
+
+USER evamapp
+
+## WORKDIR /app
+## RUN echo ".First <- function() {library(evamtools); cat('Loaded evamtools\n'); runShiny()}" > /app/.Rprofile
+
+
 
 EXPOSE 3000
 
