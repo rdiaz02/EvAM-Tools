@@ -147,14 +147,20 @@ RUN cd /app && \
 ######################################################################
 ######################################################################
 
+WORKDIR /app
+
+## Increase build number if you want to force rebuild from here on
+ARG build=3
+
+RUN echo ".First <- function() {library(evamtools); cat('Loaded evamtools\n'); runShiny()}" > /app/.Rprofile
+
 ## Create folder to share with the outside
 RUN mkdir /app/outside
 
-WORKDIR /app/evamtools
-
 EXPOSE 3000
 
-CMD ["R", "-s", "-e", "'library(evamtools); runShiny()'"]
+ENTRYPOINT ["R"]
+
 
 ## Debugging errors: for example, start as
 ## sudo docker run -it --entrypoint bash shinyevam

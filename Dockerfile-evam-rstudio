@@ -141,11 +141,14 @@ RUN cd /app && \
 ######################################################################
 ######################################################################
 
-RUN  cd /app/evamtools && \
-     echo ".First <- function() { library(evamtools); cat('Loading EvAM-tools\n');}" > .Rprofile
+## Increase build number if you want to force rebuild from here on
+ARG build=2
+
+RUN echo ".First <- function() {library(evamtools); cat('Loaded evamtools\n');}" > /home/rstudio/.Rprofile
 
 ## Debugging errors: for example, start as
 ## sudo docker run -it --entrypoint bash shinyevam
+
 
 
 
