@@ -206,14 +206,6 @@ by the appropriate
 
 
 
-FIXME: FIXMED: We do not want the command line. We want RStudio.
-FIXME: FIXMED: This is very limited because we have no X. See also
-https://stackoverflow.com/questions/16296753/can-you-run-gui-applications-in-a-linux-docker-container
-
-FIXME: FIXMED: do we need two different docker images, one with RStudio, one for shiny, or can we provide just one?
-
-
-
 ### How to run the Shiny app from the Docker image
 
 ```
@@ -232,47 +224,23 @@ This is a *non-interactive run* (and we use the "-d" or "--detach" options, so i
 
 ### Build your own Docker images
 
-To create a Docker image to run the evamtools R package, from the `EvAM-Tools` directory run: 
+(Details about Docker are available here: https://docs.docker.com/get-docker/ .
+Details about R with Docker and Rocker project here: https://www.rocker-project.org/ )
+
+If you want to how we create the Docker images, modify the `Dockerfile`s: Dockerfile-evam-rstudio (for the RStudio Dockerfile that launches RStudio) or Dockerfile-evam-shiny (well, for the Dockerfile that creates the container to run shiny). Then, from the `EvAM-Tools` directory run one or both of:
 
 ```
-docker build --tag evamtools .
-``` 
-
-to build the docker image. Of course, you need to have Docker installed for that to work. (Details about Docker are available here: https://docs.docker.com/get-docker/ .
-Details about R with Docker and Rocker project here: https://www.rocker-project.org/ **
-
-If you want to modify anything, you can modify the `Dockerfile`.
-
-To create a Docker image to run the shiny app, from the `EvAM-Tools` directory run:
-
-```
-sudo docker build -f ShinyDockerfile  --tag shinyevam . 
-
 sudo docker build -f Dockerfile-evam-shiny  --tag evamshiny .
 sudo docker build -f Dockerfile-evam-rstudio  --tag evamrstudio .
 ```
 
-
-
-FIXME: FIXMED: why is the first command run without root and the second with sudo?
-
-
 You can now run these images, as explained above.
 
-
-**FIXME: FIXMED: Pablo completes this**
-
-- Does that need to be run as root?
-- Are you sure this is using R-4.1.2? I think we might need something else:
-    - https://github.com/rocker-org/rocker-versioned2
-    - Please, give, explicitly, the *current version of R being used***	
+(It is possible to run docker without sudo; look a the Docker documentation).
 
 
 **What if creating the image fails because of no internet connection from the container**
-Creating the above image requires installing R packages and that might fail because the Docker container cannot connect with the internet. The following might help: https://superuser.com/a/1582710 , https://superuser.com/a/1619378 . 
-
-
-In many cases, doing `sudo systemctl restart docker` might be enough.
+Creating the above image requires installing R packages and that might fail because the Docker container cannot connect with the internet. The following might help: https://superuser.com/a/1582710 , https://superuser.com/a/1619378 . In many cases, doing `sudo systemctl restart docker` might be enough.
 
 
 **Cleaning the build cache and stale old images**
