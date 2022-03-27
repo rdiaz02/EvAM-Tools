@@ -29,9 +29,8 @@ ENV LC_ALL C.UTF-8
 ##     apt-get install -y emacs-common && \
 ##     apt-get install -y elpa-ess
 
-## RUN apt-get install -y texlive-fonts-recommended
 
-
+## FIXME: maybe only libx11-dev, not the rest
 RUN apt-get update && \
     apt-get install -y libx11-dev && \
     apt-get install -y x11proto-dev && \
@@ -105,6 +104,12 @@ COPY . /app/
 ## (and rm the > 130 MB .git directory)
 RUN cd /app && \
     rm -r -f .git    
+
+
+RUN apt-get update && \
+    apt-get install -y pkg-config
+
+
 
 ## Install cbn
 RUN cd /app && \  

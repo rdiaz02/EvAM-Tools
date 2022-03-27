@@ -17,19 +17,19 @@ RUN apt-get update && \
     apt-get install -y libfftw3-bin && \
     apt-get install -y libtiff-dev && \
     apt-get install -y libglpk-dev && \
-    apt-get install -y libgmp-dev	
+    apt-get install -y libgmp-dev && \	
+    apt-get install -y libx11-dev && \
+    apt-get install -y git && \
+    apt-get install -y libgsl23 && \
+    apt-get install -y libgslcblas0 && \
+    apt-get install -y pkg-config
 
-## R package imager fails installation o.w.?
-RUN apt-get update && \
-    apt-get install -y libx11-dev
 
-## && \
-    ## apt-get install -y firefox
+## RUN apt-get update && \
+##     apt-get install -y x11proto-dev && \
+##     apt-get install -y x11-common
 
-## Make sure LC is set
-### RUN apt-get update && \
-###     apt-get install -y locales && \
-###     locale-gen C.UTF-8
+
 ENV LANG C.UTF-8
 ENV LC_ALL C.UTF-8
 
@@ -41,13 +41,8 @@ ENV LC_ALL C.UTF-8
 ##     apt-get install -y emacs-common && \
 ##     apt-get install -y elpa-ess
 
-## RUN apt-get install -y texlive-fonts-recommended
 
 
-RUN apt-get update && \
-    apt-get install -y libx11-dev && \
-    apt-get install -y x11proto-dev && \
-    apt-get install -y x11-common
 
 
 
@@ -97,9 +92,6 @@ RUN R -e "library(devtools);devtools::install_github('phillipnicol/OncoBN')"
 RUN mkdir -p /app/Sources/
 
 
-RUN apt-get update && \
-    apt-get install -y git
-
 ## Install HESBCN
 RUN cd /app/Sources && \
     git clone https://github.com/danro9685/HESBCN && \
@@ -122,6 +114,11 @@ COPY . /app/
 ## (and rm the > 130 MB .git directory)
 RUN cd /app && \
     rm -r -f .git    
+
+
+
+
+
 
 ## Install cbn
 RUN cd /app && \  
