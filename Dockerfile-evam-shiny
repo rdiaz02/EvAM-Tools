@@ -13,7 +13,7 @@ RUN apt-get update && \
 
 ## R package imager fails installation o.w.?
 RUN apt-get update && \
-    apt-get install -y xorg
+    apt-get install -y xorg && \
     apt-get install -y libx11-dev
 
 ## && \
