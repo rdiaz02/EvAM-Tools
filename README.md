@@ -175,14 +175,35 @@ runShiny()
 
 ### How to run the R package from the Docker image
 
-```
-## Starts R; then you can load the package
-sudo docker run -it --entrypoint R shinyevam
 
-## Even simpler: get to the shell
-sudo docker run -it --entrypoint bash shinyevam 
-## Now you can start R, or Emacs and from it R
+Similar to https://hub.docker.com/r/rocker/rstudio  (and see further options there):
+
 ```
+docker run --rm -p 8787:8787 -e PASSWORD=yourpasswordhere evamrstudio
+```
+
+Go to `localhost:8787` and log in with username "rstudio" and the password you set. See https://hub.docker.com/r/rocker/rstudio for further options.
+
+
+<!-- ## Starts R; then you can load the package -->
+<!-- sudo docker run -it --entrypoint R shinyevam -->
+
+<!-- ## Even simpler: get to the shell -->
+<!-- sudo docker run -it --entrypoint bash shinyevam  -->
+<!-- ## Now you can start R, or Emacs and from it R -->
+
+
+<!-- ``` -->
+
+
+FIXME:  substitute all 
+- evamrstudio 
+- evamshiny 
+
+by the appropriate 
+- rdiaz02/evamrstudio
+- rdiaz02/evamshiny
+
 
 
 FIXME: FIXMED: We do not want the command line. We want RStudio.
@@ -226,7 +247,12 @@ To create a Docker image to run the shiny app, from the `EvAM-Tools` directory r
 
 ```
 sudo docker build -f ShinyDockerfile  --tag shinyevam . 
+
+sudo docker build -f Dockerfile-evam-shiny  --tag evamshiny .
+sudo docker build -f Dockerfile-evam-rstudio  --tag evamrstudio .
 ```
+
+
 
 FIXME: FIXMED: why is the first command run without root and the second with sudo?
 
