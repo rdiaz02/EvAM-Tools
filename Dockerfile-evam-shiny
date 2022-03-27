@@ -11,6 +11,11 @@ RUN apt-get update && \
     apt-get install -y libfftw3-double3 && \
     apt-get install -y libfftw3-dev
 
+## R package imager fails installation o.w.?
+RUN apt-get update && \
+    apt-get install -y xorg
+    apt-get install -y libx11-dev
+
 ## && \
     ## apt-get install -y firefox
 
