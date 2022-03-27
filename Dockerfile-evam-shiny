@@ -1,5 +1,14 @@
 FROM rocker/r-ver:4.1.3
 
+######################################################################
+######################################################################
+#####
+#####     Common to the two Dockerfiles
+#####
+######################################################################
+######################################################################
+
+
 RUN apt-get update && \
     apt-get install -f -y software-properties-common && \
     rm -rf /var/lib/apt/lists/* && \
@@ -25,13 +34,19 @@ RUN apt-get update && \
     apt-get install -y pkg-config
 
 
-## RUN apt-get update && \
-##     apt-get install -y x11proto-dev && \
-##     apt-get install -y x11-common
+## Make sure these are set (we use sort and order)
+## Using C.UTF-8 gives a warning in RStudio; use en_US
+RUN apt-get update && \
+    apt-get install -y locales 
 
+RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+    locale-gen en_US.UTF-8 && \
+    update-locale LANG=en_US.UTF-8
 
-ENV LANG C.UTF-8
-ENV LC_ALL C.UTF-8
+ENV LANG en_US.UTF-8
+ENV LANGUAGE en_US:en
+ENV LC_ALL en_US.UTF-8
+
 
 ## ## In case I need to debug stuff have a sensible editor :)
 ## RUN apt-get update && \
@@ -40,10 +55,6 @@ ENV LC_ALL C.UTF-8
 ##     apt-get install -y emacs-gtk && \
 ##     apt-get install -y emacs-common && \
 ##     apt-get install -y elpa-ess
-
-
-
-
 
 
 ## R packages
@@ -81,13 +92,6 @@ RUN R -e "install.packages('igraph')"
 RUN R -e "BiocManager::install('OncoSimulR')"
 RUN R -e "library(devtools);devtools::install_github('phillipnicol/OncoBN')"
 
-## These are dependencies of OncoSimul.
-## RUN R -e "install.packages('data.table')"
-## RUN R -e "install.packages('igraph')"
-## RUN R -e "install.packages('dplyr')"
-## RUN R -e "install.packages('stringr')"
-## RUN R -e "install.packages('parallel')"
-## RUN R -e "install.packages('gtools')"
 
 RUN mkdir -p /app/Sources/
 
@@ -115,11 +119,6 @@ COPY . /app/
 RUN cd /app && \
     rm -r -f .git    
 
-
-
-
-
-
 ## Install cbn
 RUN cd /app && \  
     cp ct-cbn-0.1.04b-RDU.tar.gz /app/Sources && \
@@ -139,10 +138,16 @@ RUN cd /app && \
     R --no-site-file --no-init-file CMD check --no-manual evamtools_$V_PKG.tar.gz && \
     R_ENVIRON_USER=./Renviron.based_on_bioc R --no-site-file --no-init-file CMD check --no-manual evamtools_$V_PKG.tar.gz
 
-## RUN  cd /app/evamtools && \
-##      echo ".First <- function() { library(evamtools); cat('Loading EvAM-tools\n'); runShiny();}" > .Rprofile
 
-#Create folder to share with the outside
+######################################################################
+######################################################################
+#####
+#####     End common to the two Dockerfiles
+#####
+######################################################################
+######################################################################
+
+## Create folder to share with the outside
 RUN mkdir /app/outside
 
 WORKDIR /app/evamtools
@@ -157,25 +162,4 @@ CMD ["R", "-s", "-e", "'library(evamtools); runShiny()'"]
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-######################################################################
-###  In case we need to modify installation of libgsl for MC-CBN.
-##   Former code. Use it right before installation of MC-CBN
-# RUN apt-get install -y dh-autoreconf autoconf automake autotools-dev autoconf autoconf-archive
-# RUN apt-get install -y libboost1.67-dev:amd64 libboost1.67-tools-dev    libboost-graph-parallel1.67-dev
-# RUN apt-get remove --purge libboost1.74-tools-dev libboost1.74-dev libboost-wave1.74-dev libboost-type-erasure1.74-dev libboost-timer1.74-dev  libboost-test1.74-dev  libboost-stacktrace1.74-dev libboost-random1.74-dev  libboost-python1.74-dev libboost-program-options1.74-dev libboost-numpy1.74-dev  libboost-nowide1.74-dev  libboost-mpi1.74-dev libboost-mpi-python1.74.0  libboost-mpi-python1.74-dev  libboost-mpi-python1.67.0  libboost-math1.74-dev  libboost-log1.74-dev  libboost-locale1.74-dev libboost-graph1.74-dev libboost-iostreams1.74-dev  libboost-graph-parallel1.74-dev  libboost-filesystem1.74-dev libboost-fiber1.74-dev libboost-exception1.74-dev  libboost-date-time1.74-dev libboost-coroutine1.74-dev  libboost-context1.74-dev libboost-container1.74-dev  libboost-chrono1.74-dev libboost-atomic1.74-dev
-# RUN apt-get -y --purge autoremove
-# RUN apt-get install -y libboost-filesystem1.67-dev libboost-graph-parallel1.67-dev libboost-iostreams1.67-dev libboost-locale1.67-dev libboost-regex1.67-dev libboost-serialization1.67-dev libboost-system1.67-dev libboost-test1.67-dev libboost1.67-dev libboost1.67-tools-dev libboost-graph1.67-dev libboost-graph1.67.0
 
