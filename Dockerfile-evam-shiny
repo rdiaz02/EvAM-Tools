@@ -11,6 +11,8 @@ RUN apt-get update && \
     apt-get install -y libfftw3-3 && \
     apt-get install -y libfftw3-single3 && \
     apt-get install -y libfftw3-double3 && \
+    apt-get install -y libfftw3-long3 && \
+    apt-get install -y libfftw3-quad3 && \
     apt-get install -y libfftw3-dev && \
     apt-get install -y libfftw3-bin && \
     apt-get install -y libtiff-dev && \
@@ -85,6 +87,10 @@ RUN R -e "library(devtools);devtools::install_github('phillipnicol/OncoBN')"
 ## RUN R -e "install.packages('gtools')"
 
 RUN mkdir -p /app/Sources/
+
+
+RUN apt-get update && \
+    apt-get install -y git
 
 ## Install HESBCN
 RUN cd /app/Sources && \
