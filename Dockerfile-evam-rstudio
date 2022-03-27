@@ -7,9 +7,15 @@ RUN apt-get update && \
     apt-get update && \
     apt-get install -y libboost-all-dev && \
     apt-get install -y libgsl-dev && \
+    apt-get install -y fftw3 && \
+    apt-get install -y libfftw3-3 && \
     apt-get install -y libfftw3-single3 && \
     apt-get install -y libfftw3-double3 && \
-    apt-get install -y libfftw3-dev
+    apt-get install -y libfftw3-dev && \
+    apt-get install -y libfftw3-bin && \
+    apt-get install -y libtiff-dev && \
+    apt-get install -y libglpk-dev && \
+    apt-get install -y libgmp-dev	
 
 ## && \
     ## apt-get install -y firefox
