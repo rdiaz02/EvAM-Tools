@@ -133,9 +133,9 @@ RUN cd /app && \
     rm -r -f evamtools.Rcheck && \
     V_PKG=$(cat ./evamtools/DESCRIPTION | grep Version | cut -d' ' -f2) && \
     R --no-site-file --no-init-file CMD build evamtools && \
-    R --no-site-file --no-init-file CMD INSTALL --install-tests evamtools_$V_PKG.tar.gz && \
-    R --no-site-file --no-init-file CMD check --no-manual evamtools_$V_PKG.tar.gz && \
-    R_ENVIRON_USER=./Renviron.based_on_bioc R --no-site-file --no-init-file CMD check --no-manual evamtools_$V_PKG.tar.gz
+    R --no-site-file --no-init-file CMD INSTALL --install-tests evamtools_$V_PKG.tar.gz ## && \
+    ## R --no-site-file --no-init-file CMD check --no-manual evamtools_$V_PKG.tar.gz && \
+    ## R_ENVIRON_USER=./Renviron.based_on_bioc R --no-site-file --no-init-file CMD check --no-manual evamtools_$V_PKG.tar.gz
 
 
 ######################################################################
@@ -147,7 +147,7 @@ RUN cd /app && \
 ######################################################################
 
 ## Increase build number if you want to force rebuild from here on
-ARG build=3
+ARG build=5
 
 ## Create folder to share with the outside
 ## RUN mkdir /app/outside
