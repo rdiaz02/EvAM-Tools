@@ -4,7 +4,7 @@
 \usepackage{graphicx}
 \usepackage[a4paper, total={6.5in, 9in}]{geometry}
 \usepackage{natbib}
-
+\usepackage{authblk} % author affiliations
 \usepackage{nameref}
 \newcommand*{\qref}[1]{\hyperref[{#1}]{\textit{``\nameref*{#1}'' (section \ref*{#1})}}}
 \newcommand*{\qrefP}[1]{\hyperref[{#1}]{\textit{``\nameref*{#1}'', section \ref*{#1}}}}
@@ -22,12 +22,20 @@
 \title{EvAM-Tools: additional documentation}
 % \author{Ramon Diaz-Uriarte, Pablo Herrera-Nieto}
 
-\author{Ramon Diaz-Uriarte\,$^{\text{\sfb 1,}}$, Pablo Herrera-Nieto\,$^{\text{\sfb 1}*}$}
 
-\address{$^{\text{\sf 2}}$Department of Biochemistry, Universidad Autonoma de Madrid, Instituto de Investigaciones Biome´ dicas ‘Alberto
-Sols’ (UAM-CSIC), Madrid, Spain}
+\author[1,2,$\dagger$]{Ramon Diaz-Uriarte}
+\author[1,2]{Pablo Herrera Nieto}
+\affil[1]{Dpt. of Biochemistry, School of Medicine, Universidad Autónoma de Madrid, Madrid, Spain}
+\affil[2]{Instituto de Investigaciones Biomédicas `Alberto Sols'
+  (UAM-CSIC), Madrid, Spain}
+\affil[$\dagger$]{To whom correspondence should be addressed: \normalfont r.diaz@uam.es}
 
-\corresp{$^\ast$To whom correspondence should be addressed.}
+% \author{Ramon Diaz-Uriarte\,$^{\text{\sfb 1,}}$, Pablo Herrera-Nieto\,$^{\text{\sfb 1}*}$}
+
+% \address{$^{\text{\sf 2}}$Department of Biochemistry, Universidad Autonoma de Madrid, Instituto de Investigaciones Biome´ dicas ‘Alberto
+% Sols’ (UAM-CSIC), Madrid, Spain}
+
+% \corresp{$^\ast$To whom correspondence should be addressed.}
 
 
 \begin{document}
