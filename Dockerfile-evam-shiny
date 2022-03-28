@@ -29,6 +29,7 @@ RUN apt-get update && \
     apt-get install -y libgmp-dev && \
     apt-get install -y libx11-dev && \
     apt-get install -y git && \
+    apt-get install -y libxt6 && \
     apt-get install -y pkg-config
 
 
@@ -132,9 +133,9 @@ RUN cd /app && \
     rm -r -f evamtools.Rcheck && \
     V_PKG=$(cat ./evamtools/DESCRIPTION | grep Version | cut -d' ' -f2) && \
     R --no-site-file --no-init-file CMD build evamtools && \
-    R --no-site-file --no-init-file CMD INSTALL --install-tests evamtools_$V_PKG.tar.gz && \
-    R --no-site-file --no-init-file CMD check --no-manual evamtools_$V_PKG.tar.gz && \
-    R_ENVIRON_USER=./Renviron.based_on_bioc R --no-site-file --no-init-file CMD check --no-manual evamtools_$V_PKG.tar.gz
+    R --no-site-file --no-init-file CMD INSTALL --install-tests evamtools_$V_PKG.tar.gz ## && \
+    ## R --no-site-file --no-init-file CMD check --no-manual evamtools_$V_PKG.tar.gz && \
+    ## R_ENVIRON_USER=./Renviron.based_on_bioc R --no-site-file --no-init-file CMD check --no-manual evamtools_$V_PKG.tar.gz
 
 
 ######################################################################
@@ -146,24 +147,24 @@ RUN cd /app && \
 ######################################################################
 
 ## Increase build number if you want to force rebuild from here on
-ARG build=2
+ARG build=3
 
 ## Create folder to share with the outside
 ## RUN mkdir /app/outside
 
-RUN addgroup --system evamapp && \
-    adduser --system --ingroup evamapp evamapp
+## RUN addgroup --system evamapp && \
+##     adduser --system --ingroup evamapp evamapp
 
-WORKDIR /home/evamapp
-RUN echo ".First <- function() {library(evamtools); cat('Loaded evamtools\n'); runShiny()}" > /home/evamapp/.Rprofile
+## WORKDIR /home/evamapp
+## RUN echo ".First <- function() {library(evamtools); cat('Loaded evamtools\n'); runShiny()}" > /home/evamapp/.Rprofile
 
-RUN chown evamapp:evamapp -R /home/evamapp
-## RUN chown evamapp:evamapp -R /app/outside
+## RUN chown evamapp:evamapp -R /home/evamapp
+## ## RUN chown evamapp:evamapp -R /app/outside
 
-USER evamapp
+## USER evamapp
 
-## WORKDIR /app
-## RUN echo ".First <- function() {library(evamtools); cat('Loaded evamtools\n'); runShiny()}" > /app/.Rprofile
+WORKDIR /app
+RUN echo ".First <- function() {library(evamtools); cat('Loaded evamtools\n'); runShiny()}" > /app/.Rprofile
 
 
 
