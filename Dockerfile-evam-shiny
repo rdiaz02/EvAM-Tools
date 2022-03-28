@@ -147,7 +147,7 @@ RUN cd /app && \
 ######################################################################
 
 ## Increase build number if you want to force rebuild from here on
-ARG build=9
+ARG build=1
 
 ## Create folder to share with the outside
 ## RUN mkdir /app/outside

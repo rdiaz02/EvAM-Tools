@@ -145,7 +145,7 @@ RUN cd /app && \
 ######################################################################
 
 ## Increase build number if you want to force rebuild from here on
-ARG build=2
+ARG build=1
 
 RUN echo ".First <- function() {library(methods); library(datasets); library(utils); library(grDevices); library(graphics); library(stats); library(shiny); library(evamtools); cat('Loaded evamtools\n');}" > /home/rstudio/.Rprofile
 
