@@ -155,16 +155,20 @@ ARG build=3
 ## RUN addgroup --system evamapp && \
 ##     adduser --system --ingroup evamapp evamapp
 
-## WORKDIR /home/evamapp
-## RUN echo ".First <- function() {library(evamtools); cat('Loaded evamtools\n'); runShiny()}" > /home/evamapp/.Rprofile
+## Oncotree does not declare via NAMESPACE
+## that it imports optim from stats. And this
+## Rprofile has stats in search() with smaller index.
+
+WORKDIR /home/evamapp
+RUN echo ".First <- function() {library(methods); library(datasets); library(utils); library(grDevices); library(graphics); library(stats); library(shiny); library(evamtools); cat('Loaded evamtools\n'); runShiny()}" > /home/evamapp/.Rprofile
 
 ## RUN chown evamapp:evamapp -R /home/evamapp
 ## ## RUN chown evamapp:evamapp -R /app/outside
 
 ## USER evamapp
 
-WORKDIR /app
-RUN echo ".First <- function() {library(evamtools); cat('Loaded evamtools\n'); runShiny()}" > /app/.Rprofile
+## WORKDIR /app
+## RUN echo ".First <- function() {library(methods); library(datasets); library(utils); library(grDevices); library(graphics); library(stats); library(shiny); library(evamtools); cat('Loaded evamtools\n'); runShiny()}" > /app/.Rprofile
 
 
 
