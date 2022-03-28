@@ -133,9 +133,9 @@ RUN cd /app && \
     rm -r -f evamtools.Rcheck && \
     V_PKG=$(cat ./evamtools/DESCRIPTION | grep Version | cut -d' ' -f2) && \
     R --no-site-file --no-init-file CMD build evamtools && \
-    R --no-site-file --no-init-file CMD INSTALL --install-tests evamtools_$V_PKG.tar.gz ## && \
-    ## R --no-site-file --no-init-file CMD check --no-manual evamtools_$V_PKG.tar.gz && \
-    ## R_ENVIRON_USER=./Renviron.based_on_bioc R --no-site-file --no-init-file CMD check --no-manual evamtools_$V_PKG.tar.gz
+    R --no-site-file --no-init-file CMD INSTALL --install-tests evamtools_$V_PKG.tar.gz && \
+    R --no-site-file --no-init-file CMD check --no-manual evamtools_$V_PKG.tar.gz && \
+    R_ENVIRON_USER=./Renviron.based_on_bioc R --no-site-file --no-init-file CMD check --no-manual evamtools_$V_PKG.tar.gz
 
 
 ######################################################################
@@ -177,6 +177,6 @@ ENTRYPOINT ["R"]
 ## sudo docker run -it --entrypoint bash shinyevam
 
 
-
+## Do I need libpng, libjpeg, libtiff, all with -dev?
 
 
