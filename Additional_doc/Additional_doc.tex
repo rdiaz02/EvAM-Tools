@@ -5,6 +5,8 @@
 \usepackage[a4paper, total={6.5in, 9in}]{geometry}
 \usepackage{natbib}
 \usepackage{authblk} % author affiliations
+%% \usepackage[UKenglish]{isodate}
+\usepackage[style=iso]{datetime2}
 \usepackage{nameref}
 \newcommand*{\qref}[1]{\hyperref[{#1}]{\textit{``\nameref*{#1}'' (section \ref*{#1})}}}
 \newcommand*{\qrefP}[1]{\hyperref[{#1}]{\textit{``\nameref*{#1}'', section \ref*{#1}}}}
@@ -47,7 +49,11 @@
 \tableofcontents
 \end{titlepage}
 
- 
+
+\section{Introduction}
+
+This document provides additional documentation about EvAM-Tools, mainly intended to complemet the Shiny web GUI application help (and that is the reason why we collate here the PDF from the R package itself).
+
 % \section{Cancer progression models}
 % The CPMs included are: 
 % \begin{enumerate}
@@ -74,11 +80,11 @@ For each of the ways to input cross-sectional data or build models, we provide s
 \begin{description}
 \item[Modifying pre-built examples] If you modify the examples, you probably will want to give your dataset or example a distinctive name.
 
-\item[Modifying pre-built examples] If you modify a pre-built example and want to go back to the original, in your browser clean the cache and refresh.
+% If you modify a pre-built example and want to go back to the original, in your browser clean the cache and refresh.
   
 \item[Cross-sectional data] We provide data sets that have been generated under specific models with AND, OR, XOR. However, no DAG is shown here, and that is on purpose; use the labels as possible hints, not as the truth and compare with datasets you can generate from models you specify under the DAG builder.
 
-\item[DAG] 
+\item[DAG] Several examples to illustrate OR/AND/XOR and mixtures of the above are provided.
   
 \end{description}
 
