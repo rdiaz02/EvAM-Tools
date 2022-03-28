@@ -147,13 +147,13 @@ RUN cd /app && \
 ######################################################################
 
 ## Increase build number if you want to force rebuild from here on
-ARG build=5
+ARG build=8
 
 ## Create folder to share with the outside
 ## RUN mkdir /app/outside
 
-## RUN addgroup --system evamapp && \
-##     adduser --system --ingroup evamapp evamapp
+RUN addgroup --system evamapp && \
+    adduser --system --ingroup evamapp evamapp
 
 ## Oncotree does not declare via NAMESPACE
 ## that it imports optim from stats. And this
@@ -162,15 +162,10 @@ ARG build=5
 WORKDIR /home/evamapp
 RUN echo ".First <- function() {library(methods); library(datasets); library(utils); library(grDevices); library(graphics); library(stats); library(shiny); library(evamtools); cat('Loaded evamtools\n'); runShiny()}" > /home/evamapp/.Rprofile
 
+
 RUN chown evamapp:evamapp -R /home/evamapp
-## RUN chown evamapp:evamapp -R /app/outside
 
 USER evamapp
-
-## WORKDIR /app
-## RUN echo ".First <- function() {library(methods); library(datasets); library(utils); library(grDevices); library(graphics); library(stats); library(shiny); library(evamtools); cat('Loaded evamtools\n'); runShiny()}" > /app/.Rprofile
-
-
 
 EXPOSE 3000
 
@@ -181,6 +176,5 @@ ENTRYPOINT ["R"]
 ## sudo docker run -it --entrypoint bash shinyevam
 
 
-## Do I need libpng, libjpeg, libtiff, all with -dev?
 
 
