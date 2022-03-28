@@ -1014,9 +1014,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
   output$dag_plot <- renderPlot({
     data2plot <- NULL
     edges <- NULL
-    ## FIXME sometimes this gives error? with one of the dockerfiles
-    ## but inocuous
-    if(input$input2build %in% c("csd", "dag")
+
+    if (input$input2build %in% c("csd", "dag")
       && sum(data$dag)>0
       && !is.null(input$gene_number)
       ){
@@ -1025,10 +1024,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       edges <- igraph::as_data_frame(data2plot)
       colnames(edges) <- c("From", "To")
       if(!is.null(data$dag_parent_set)) edges$Relation <- data$dag_parent_set[edges$To]
-    }else if(input$input2build %in% c("matrix") 
-      && !is.null(data$thetas)
+    } else if (input$input2build %in% c("matrix") 
+               && !is.null(data$thetas)
+               && !is.null(input$gene_number)
       && length(data$thetas[1:input$gene_number, 1:input$gene_number])>0
-      ){
+      ) {
         data2plot <- data$thetas[1:input$gene_number, 1:input$gene_number]
     }
     evamtools:::plot_method(data2plot, data$dag_parent_set, edges)
