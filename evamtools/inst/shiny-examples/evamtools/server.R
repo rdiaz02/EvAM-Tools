@@ -1014,6 +1014,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
   output$dag_plot <- renderPlot({
     data2plot <- NULL
     edges <- NULL
+    ## FIXME sometimes this gives error? with one of the dockerfiles
+    ## but inocuous
     if(input$input2build %in% c("csd", "dag")
       && sum(data$dag)>0
       && !is.null(input$gene_number)
