@@ -195,7 +195,7 @@ run.cbn <- function(x,
     evam_checkProperMinimalAdjMat(gr, orderedNames = FALSE)
     
     lambdas <- read.lambda(dirname)
-    rerun_lambda <- rerun_final_lambda(dirname)
+    rerun_lambda <- rerun_final_lambda(dirname, omp_threads = omp_threads)
     lambdas <- cbind(lambdas, rerun_lambda = rerun_lambda)
     
     rownames(lambdas) <- cnames
@@ -286,7 +286,7 @@ call.external.cbn <- function(data,
     write(c("null", colnames(data)),
           file = paste(dirname, ".prf", sep = ""),
           sep = " ")
-    if(is.null(omp_threads)) {
+    if (is.null(omp_threads)) {
         OMPthreads <- detectCores()
     } else{
         OMPthreads <- omp_threads
@@ -355,7 +355,7 @@ call.external.cbn <- function(data,
                               "-N", format(round(steps), scientific = FALSE),
                               "-w")), ignore.stdout = silent)
     rm(zzz)
-  if(!silent) cat("\n\n")
+  if (!silent) cat("\n\n")
   ## the final poset in dirname/00000.poset
 }
 
@@ -379,7 +379,7 @@ read.lambda.file <- function(fname, verbose = FALSE) {
 }
 
 ## re-run h-cbn to get lambda
-rerun_final_lambda <- function(dirname, verbose = FALSE) {
+rerun_final_lambda <- function(dirname, omp_threads, verbose = FALSE) {
     ## go to the dir
     ## cp dirname/00000.poset as dirname.poset
     ## call h-cbn -f dirname -w
@@ -390,9 +390,22 @@ rerun_final_lambda <- function(dirname, verbose = FALSE) {
     ## is probably ignored?
     ## Now, when I launch many CPMs that use mclapply, I set
     ## OMP_NUM_THREADS = 1 in the bash script that calls R
+
+
+    if (is.null(omp_threads)) {
+        OMPthreads <- detectCores()
+    } else{
+        OMPthreads <- omp_threads
+    }
+    message("\n Exporting OMP_threads from rerun_final_lambda. ",
+            "OMP_NUM_THREADS = ", OMPthreads, "\n")
+    ompt <- paste("export OMP_NUM_THREADS=", OMPthreads, "; ", sep = "")
+
+    
     zzz <- system(paste0("cp ", dirname, "/00000.poset ",
                          dirname, ".poset"))
-    zzz2 <- system(paste0("h-cbn -f ", dirname, " -w"),
+    zzz2 <- system(paste(ompt,
+                         paste0("h-cbn -f ", dirname, " -w")),
                    ignore.stdout = !verbose)
     relambda <- read.lambda.file(paste(dirname, ".lambda", sep = ""),
                                  verbose = verbose)
@@ -526,5 +539,3 @@ run.oncotree <- function(x,
 }
 ## library(codetools)
 ## checkUsageEnv(env = .GlobalEnv)
-
-

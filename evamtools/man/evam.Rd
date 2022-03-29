@@ -11,7 +11,7 @@ evam(x,
                      omp_threads = ifelse(cores > 1, 1, detectCores())),
      ot_opts = list(with_errors_dist_ot = TRUE),
      cbn_opts = list(
-                     omp_threads = ifelse(cores > 1, 1, detectCores()),
+                     omp_threads = 1,
                      init_poset = "OT"
                  ),
      hesbcn_opts = list(
@@ -87,8 +87,11 @@ evam(x,
   MCCBN and MHN, you can set
   this to a number larger than one even if you set \code{cores} to a
   number larger than one (i.e., if we use
-  \code{\link[parallel]{mclapply}}). It is unclear, though, that it will
-speed things much or what is the best number of threads to use. }
+  \code{\link[parallel]{mclapply}}). It is unclear, though, more than 1
+  thread will
+speed things much or what is the best number of threads to use; in fact,
+sometimes it can even slow things down, in particular if you run
+multiple evams in parallel.}
 \item{cbn_init_poset: }{Initial poset for CBN; one of "linear" or "OT" (default).}
 }
 }

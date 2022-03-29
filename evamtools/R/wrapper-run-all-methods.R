@@ -596,7 +596,7 @@ evam <- function(x,
                                 ),
                  ot_opts = list(with_errors_dist_ot = TRUE),
                  cbn_opts = list(
-                     omp_threads = ifelse(cores > 1, 1, detectCores()),
+                     omp_threads = 1,
                      init_poset = "OT"
                  ),
                  hesbcn_opts = list(
@@ -696,7 +696,7 @@ evam <- function(x,
                        omp_threads = ifelse(cores > 1, 1, detectCores())
                        )
     d_cbn_opts <- list(
-        omp_threads = ifelse(cores > 1, 1, detectCores()),
+        omp_threads = 1,
         init_poset = "OT"
     )
     d_hesbcn_opts <- list(
