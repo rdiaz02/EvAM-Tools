@@ -13,6 +13,12 @@
 ## You should have received a copy of the GNU Affero General Public License along
 ## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+## Always sort in the same way. Wraps our conventions
+evam_sort <- function(x) {
+    return(stringi::stri_sort(x,
+                       locale = "en", uppercase_first = FALSE,
+                       numeric = TRUE))
+}
 
 
 ## TODO add support for custom genes names in the str conversions
@@ -179,8 +185,8 @@ generate_pD_sorted_genotypes <- function(n_genes, gene_names = NULL,
     if (is.null(gene_names)) gene_names <- LETTERS[seq_len(n_genes)]
     stopifnot(n_genes == length(gene_names))
     if (sort_gene_names)
-        gene_names <- sort(gene_names)
-    
+        gene_names <- evam_sort(gene_names)
+        ## gene_names <- sort(gene_names)
     sorted_genotypes <- vapply(0:(n_states - 1), function(x) {
         tmp_genotype <- paste(gene_names[int2binary(x, n_genes) == 1]
             , collapse = ", ")

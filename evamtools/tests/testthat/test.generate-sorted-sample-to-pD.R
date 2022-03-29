@@ -1,5 +1,43 @@
 t1 <- Sys.time()
 
+
+
+## The possible problems are, of course, the sorting
+## See these examples
+if(FALSE) {
+    lcc <- Sys.setlocale("LC_COLLATE", "C")
+    sort(c("a", "A", "z", "Z"))
+    sort(c("a", "A", "ba", "ZX", "C-2", "C-100"))
+
+    lcc <- Sys.setlocale("LC_COLLATE", "en_US.UTF-8")
+    sort(c("a", "A", "z", "Z"))
+    sort(c("a", "A", "ba", "ZX", "C-2", "C-100"))
+
+
+    stri_sort(c("a", "A", "ba", "ZX", "C-2", "C-100"),
+              locale = "en", uppercase_first = FALSE,
+              numeric = TRUE)
+}
+
+
+
+test_that("sorted_minimal_0", {
+    expect_out_gsg0 <- c(
+        "WT"
+      , "ba"
+      , "ZX"
+      , "ba, ZX")
+
+    out_gsg0 <- generate_pD_sorted_genotypes(2,
+                                             c("ZX", "ba"))
+    expect_equal(out_gsg0, expect_out_gsg0)
+    out_gsg0b <- generate_pD_sorted_genotypes(2,
+                                             c("ba", "ZX"))
+    expect_equal(out_gsg0b, expect_out_gsg0)
+})
+
+
+
 test_that("generate_pD_sorted_genotypes and sample_to_pD_order same order", {
     ## 6 WT, 3 A, 4 AC, 5 D, 2 AD
     gg <- c("A, C", "C, A", "C, A", "A, C",
@@ -363,7 +401,7 @@ test_that("Paranoia: checking an example table", {
     nums <- table(s2)[outgs]
     nums[is.na(nums)] <- 0
     
-    expect_equal(as.vector(nums), outgpd, check.attributes = FALSE)
+    expect_equal(as.vector(nums), outgpd, ignore_attr = TRUE)
 })
 
 
@@ -393,7 +431,7 @@ test_that("Test with same order of genes", {
             gn[g] <- paste0(l1, rest)
         }
         
-        gn <- sort(gn)
+        gn <- evam_sort(gn)
         rf <- OncoSimulR::rfitness(ngenes)
         colnames(rf)[1:ngenes] <- gn
         ag <- OncoSimulR::evalAllGenotypes(OncoSimulR::allFitnessEffects(genotFitness = rf),
@@ -405,7 +443,7 @@ test_that("Test with same order of genes", {
         genotypes_resorted <-
             unname(vapply(ag[, "Genotype"],
                    function(u)
-                       paste(sort(strsplit(u, split = ", ", fixed = TRUE)[[1]]),
+                       paste(evam_sort(strsplit(u, split = ", ", fixed = TRUE)[[1]]),
                              collapse = ", "), "something"))
         
         sx <- sample(genotypes_resorted, N, prob = ag[, "Fitness"], replace = TRUE)
@@ -416,7 +454,7 @@ test_that("Test with same order of genes", {
         ot <- table(sx)
         oto <- ot[outgs]
         oto[is.na(oto)] <- 0
-        expect_equal(as.vector(oto), outgpd, check.attributes = FALSE)
+        expect_equal(as.vector(oto), outgpd, ignore_attr = TRUE)
     }
 })
 

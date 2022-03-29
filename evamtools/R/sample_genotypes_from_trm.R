@@ -420,9 +420,16 @@ sample_CPMs <- function(cpm_output
     }
 
     some_pred <- cpm_output[[paste0(methods[1], "_predicted_genotype_freqs")]]
-    gene_names <- sort(setdiff(unique(unlist(strsplit(names(some_pred),
+    
+    ## gene_names <- sort(setdiff(unique(unlist(strsplit(names(some_pred),
+    ##                                                   split = ", "))),
+    ##                            "WT"))
+    gene_names <- stringi::stri_sort(setdiff(unique(unlist(strsplit(names(some_pred),
                                                       split = ", "))),
-                          "WT"))
+                                             "WT"),
+                                     locale = "en", uppercase_first = FALSE,
+                                     numeric = TRUE
+                                     )
     n_genes <- length(gene_names)
 
     for (method in methods) {
@@ -554,7 +561,8 @@ sample_to_pD_order <- function(x, ngenes, gene_names = NULL) {
     rm(gene_names_in_x)
 
     x <- as.data.frame(table(x), stringsAsFactors = FALSE)
-    gene_names <- sort(gene_names)
+    ## gene_names <- sort(gene_names)
+    gene_names <- evam_sort(gene_names)
     genot_int <- x[, 1]
     genot_int <- gsub("^WT$", "", genot_int, fixed = "FALSE")
 
