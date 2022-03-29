@@ -255,7 +255,7 @@ plot_genot_fg <- function(trans_mat
     , plot_type = NA ## On purpose: fail if not given
     ) {
     if(is.null(trans_mat) | any(is.na(trans_mat))){
-        warning("There is no data to plot ",
+        warning("There is no data to plot: ",
                 "a blank plot will be produced.")
         par(mar = rep(3, 4))
         plot(0, type = 'n', axes = FALSE, ann = FALSE)
@@ -747,7 +747,7 @@ plot_method <- function(method_info, parent_set, edges, method = "") {
 }
 
 plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal", 
-                        methods = c("OT", "OncoBN", "CBN", "MCCBN", "HESBCN", "MHN"),
+                        methods = NULL, 
                         plot_type = "trans_mat", label_type="genotype",
                         fixed_vertex_size = FALSE,
                         top_paths = NULL) {
@@ -763,12 +763,24 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
 
     
     ## List of available methods
-    available_methods <- unique(methods[
-        vapply(methods, function(method) {
-            attr_name <- ifelse(method == "MHN", "theta", "model")
-            return(any(!is.na(cpm_output[[sprintf("%s_%s", method, attr_name)]])))
-        }, logical(1))
-    ])
+    if (!is.null(methods)) {
+        available_methods <- unique(methods[
+            vapply(methods, function(method) {
+                attr_name <- ifelse(method == "MHN", "theta", "model")
+                return(any(!is.na(cpm_output[[sprintf("%s_%s",
+                                                      method, attr_name)]])))
+            }, logical(1))
+        ])
+    } else {
+        allms <- c("OT", "OncoBN", "CBN", "MCCBN", "HESBCN", "MHN")
+        available_methods <- unique(allms[
+            vapply(allms, function(method) {
+                attr_name <- ifelse(method == "MHN", "theta", "model")
+                return(any(!is.na(cpm_output[[sprintf("%s_%s",
+                                                      method, attr_name)]])))
+            }, logical(1))
+        ])
+    }
 
     
     ## Shape of the plot
@@ -783,7 +795,6 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
     }
 
     n_rows <- 2
-   
     if (orientation == "vertical") {
         op1 <- par(mfrow = c(l_methods, n_rows),
                    mar = c(0.5, 1, 0.5, 0.5),

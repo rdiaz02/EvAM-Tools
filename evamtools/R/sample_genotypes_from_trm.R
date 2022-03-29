@@ -373,9 +373,9 @@ standard_rank_genots_2 <- function(x, y) {
 
 sample_CPMs <- function(cpm_output
                       , N
-                      , methods = c("OT", "OncoBN",
-                                    "CBN", "MCCBN",
-                                    "MHN", "HESBCN")
+                      , methods = NULL ## c("OT", "OncoBN",
+                                    ## "CBN", "MCCBN",
+                                    ## "MHN", "HESBCN")
                       , output = c("sampled_genotype_counts")
                       , obs_noise = 0
                       , genotype_freqs_as_data = TRUE
@@ -384,23 +384,35 @@ sample_CPMs <- function(cpm_output
 
     ## Anything that is passed as "cpm_output" must have
     ## something_predicted_genotype_freqs
-    methods <- unique(methods)
-    available_methods <- vapply(methods,
-                                function(m) {
-                                    outn <- paste0(m, "_predicted_genotype_freqs")
-                                    return(!(is.null(cpm_output[[outn]])) &&
-                                           !(is.na(cpm_output[outn])))
-                                }, logical(1)
-                                )
-    available_methods <- names(which(available_methods))
-    
-    l_methods <- length(available_methods)
-    if (l_methods < length(methods)) {
-        warning("At least one method you asked to be sampled ",
-                "did not have output.")
+    if (!is.null(methods)) {
+        methods <- unique(methods)
+        available_methods <- vapply(methods,
+                                    function(m) {
+                                        outn <- paste0(m, "_predicted_genotype_freqs")
+                                        return(!(is.null(cpm_output[[outn]])) &&
+                                               !(is.na(cpm_output[outn])))
+                                    }, logical(1)
+                                    )
+        available_methods <- names(which(available_methods))
+        
+        l_methods <- length(available_methods)
+        if (l_methods < length(methods)) {
+            warning("At least one method you asked to be sampled ",
+                    "did not have output.")
+        }
+        methods <- available_methods
+    } else {
+        methods <- names(which(vapply(c("OT", "OncoBN",
+                            "CBN", "MCCBN",
+                            "MHN", "HESBCN"),
+                          function(m) {
+                              outn <- paste0(m, "_predicted_genotype_freqs")
+                              return(!(is.null(cpm_output[[outn]])) &&
+                                     !(is.na(cpm_output[outn])))
+                          }, logical(1)
+                          )))
     }
-    methods <- available_methods
-    
+
     output <- unique(output)
     valid_output <- c("sampled_genotype_counts",
                       "obs_genotype_transitions",
