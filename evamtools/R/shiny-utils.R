@@ -489,7 +489,7 @@ create_tabular_data <- function(data) {
 ## Fills empty attributes of a csd data object
 
 ## Yes, could have passed all default_* as part of a single list. Whatever.
-standarize_dataset <- function(data,
+to_stnd_csd_dataset <- function(data,
                                default_max_genes = .ev_SHINY_dflt$max_genes,
                                default_template_data = .ev_SHINY_dflt$template_data
                                ) {
@@ -599,12 +599,12 @@ standarize_dataset <- function(data,
   return(new_data)
 }
 
-standarize_all_datasets <- function(datasets){
+to_stnd_csd_all_datasets <- function(datasets){
   all_new_data <- list()
   for(i in c("csd", "dag", "matrix")){
     tmp_data <- datasets[[i]] 
     for(j in names(tmp_data)) all_new_data[[i]][[j]] <-     
-      standarize_dataset(tmp_data[[j]])
+      to_stnd_csd_dataset(tmp_data[[j]])
   }
   return(all_new_data)
 }

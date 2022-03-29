@@ -34,7 +34,7 @@ dataModal <- function(error_message, type="Error: ") {
 server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
   examples_csd$csd <- examples_csd$csd[1:5]
   examples_csd$dag <- examples_csd$dag[1:6]
-  all_csd_data <- evamtools:::standarize_all_datasets(examples_csd)
+  all_csd_data <- evamtools:::to_stnd_csd_all_datasets(examples_csd)
   min_genes <- .ev_SHINY_dflt$min_genes
   max_genes <- .ev_SHINY_dflt$max_genes
   default_csd_samples <- .ev_SHINY_dflt$csd_samples
@@ -85,7 +85,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       tmp_data$data <- read.csv(input$csd$datapath)
 
       tryCatch({
-        datasets$all_csd[["csd"]][[dataset_name]] <- evamtools:::standarize_dataset(tmp_data)
+        datasets$all_csd[["csd"]][[dataset_name]] <- evamtools:::to_stnd_csd_dataset(tmp_data)
         datasets$all_csd[["csd"]][[dataset_name]]$name <- dataset_name
         last_visited_pages["csd"] <<- dataset_name
         updateRadioButtons(session, "input2build", selected = "csd")
@@ -96,7 +96,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     } else if(grepl(".rds", input$csd$datapath, ignore.case = TRUE)){
         tmp_data <- readRDS(input$csd$datapath)
         tryCatch({
-          new_data <- evamtools:::standarize_dataset(tmp_data)
+          new_data <- evamtools:::to_stnd_csd_dataset(tmp_data)
           datasets$all_csd[[tmp_data$type]][[new_data$name]] <- new_data
           last_visited_pages[tmp_data$type] <<- tmp_data$name
           # datasets$all_csd[[tmp_data$type]][[tmp_data$name]] <- tmp_data
@@ -358,7 +358,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         , LETTERS[(length(new_gene_names) + 1):max_genes]
       )
       ## Rename stuff
-      new_data <- evamtools:::standarize_dataset(data)
+      new_data <- evamtools:::to_stnd_csd_dataset(data)
       data$data <- new_data$data
       data$dag <- new_data$dag
       data$dag_parent_set <- new_data$dag_parent_set
@@ -668,7 +668,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                           dag_model = default_dag_model)
       data$dag <- tmp_data$dag
       data$dag_parent_set <- tmp_data$parent_set
-      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
+      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
       if(default_dag_model != "OT"){
         shinyjs::click("resample_dag")
       }
@@ -688,7 +688,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                            dag_model = default_dag_model)
       data$dag <- tmp_data$dag
       data$dag_parent_set <- tmp_data$parent_set
-      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
+      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
       if(sum(data$dag) == 0) {
         data$csd_counts <- datasets$all_csd[[input$input2build]][[input$select_csd]]$csd_counts
       } else if (default_dag_model != "OT"){
@@ -712,7 +712,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       data$dag_parent_set <- tmp_data$dag_parent_set
       data$lambdas <- .ev_SHINY_dflt$template_data$lambdas
       names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
-      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
+      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
       shinyjs::disable("analysis")
     }, error=function(e){
       showModal(dataModal(e[[1]]))
@@ -729,7 +729,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         , dag_model= default_dag_model)
       data$lambdas <- tmp_data$lambdas
       data$dag_parent_set <- tmp_data$parent_set
-      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
+      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
       shinyjs::click("resample_dag")
     }, error = function(e){
       showModal(dataModal(e[[1]]))
@@ -858,7 +858,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       data$lambdas <- .ev_SHINY_dflt$template_data$lambdas
       names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
       shinyjs::disable("analysis")
-      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
+      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
     }, error=function(e){
       showModal(dataModal(e[[1]]))
     })
@@ -932,7 +932,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       data$lambdas <- .ev_SHINY_dflt$template_data$lambdas
       names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
       shinyjs::disable("analysis")
-      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::standarize_dataset(data)
+      datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
     }, error=function(e){
       showModal(dataModal(e[[1]]))
     })
@@ -1305,7 +1305,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         dataset_name <- strsplit(input$select_cpm, "__")[[1]][[1]]
         dataset_type <- tmp_data$type
         last_visited_pages[[tmp_data$type]] <<- dataset_name
-        tmp_data <- datasets$all_csd[[tmp_data$type]][[dataset_name]] <- evamtools:::standarize_dataset(tmp_data)
+        tmp_data <- datasets$all_csd[[tmp_data$type]][[dataset_name]] <- evamtools:::to_stnd_csd_dataset(tmp_data)
 
         data <- tmp_data
         data$csd_counts <- evamtools:::get_csd(tmp_data$data)
