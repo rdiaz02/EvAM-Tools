@@ -14,11 +14,21 @@
 ## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## Always sort in the same way. Wraps our conventions
-evam_sort <- function(x) {
+evam_string_sort <- function(x) {
     return(stringi::stri_sort(x,
                        locale = "en", uppercase_first = FALSE,
                        numeric = TRUE))
 }
+
+
+## Always order in the same way. Wraps our conventions
+## This only applies to strings. No functionality for order(x, y, ...)
+evam_string_order <- function(x) {
+    return(stringi::stri_order(x,
+                       locale = "en", uppercase_first = FALSE,
+                       numeric = TRUE))
+}
+
 
 
 ## TODO add support for custom genes names in the str conversions
@@ -134,7 +144,7 @@ str2binary <- function(str_state, sep =", ", wt = "WT", n = NULL){
     if(str_state == wt && !(is.null(n)) && n > 0) return(rep(0, n))
     else if (str_state == wt) return(c(0))
     
-    str_state <- sort(str_split(str_state, sep)[[1]])
+    str_state <- evam_string_sort(str_split(str_state, sep)[[1]])
     num_digits <- which(LETTERS == str_state[length(str_state)])
 
     if(is.null(n) || n < 0){
@@ -185,7 +195,7 @@ generate_pD_sorted_genotypes <- function(n_genes, gene_names = NULL,
     if (is.null(gene_names)) gene_names <- LETTERS[seq_len(n_genes)]
     stopifnot(n_genes == length(gene_names))
     if (sort_gene_names)
-        gene_names <- evam_sort(gene_names)
+        gene_names <- evam_string_sort(gene_names)
         ## gene_names <- sort(gene_names)
     sorted_genotypes <- vapply(0:(n_states - 1), function(x) {
         tmp_genotype <- paste(gene_names[int2binary(x, n_genes) == 1]

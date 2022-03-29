@@ -23,7 +23,7 @@ probs_from_Schill <- function(gene_names) {
     ## What if we had sorted?
     thetas2 <- thetas
     rownames(thetas2) <- colnames(thetas2) <- gene_names
-    oindex <- order(colnames(thetas2))
+    oindex <- evam_string_order(colnames(thetas2))
     thetas2 <- thetas2[oindex, oindex]
     rm(oindex)
     p2 <- Generate.pTh(thetas2)
@@ -55,7 +55,7 @@ probs_from_Schill <- function(gene_names) {
 
 
 probs_from_theta_evam <- function(theta) {
-    oindex <- order(colnames(theta))
+    oindex <- evam_string_order(colnames(theta))
     theta <- theta[oindex, oindex]
 
     ## The previous sorting ensures genes are sorted in genotypes;

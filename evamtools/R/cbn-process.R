@@ -253,9 +253,9 @@ sortAdjMat <- function(am) {
     cn0 <- colnames(am)[-rootpos]
     namesInts <- type.convert(cn0, as.is = TRUE)
     if(is.integer(namesInts)) {
-        cn <- c("Root", sort(namesInts))
+        cn <- c("Root", evam_string_sort(namesInts))
     } else {
-        cn <- c("Root", sort(cn0))
+        cn <- c("Root", evam_string_sort(cn0))
     }
     return(am[cn, cn])
 }

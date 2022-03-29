@@ -39,7 +39,7 @@ do_MHN2 <- function(x,  lambda = 1/nrow(x), sparse = TRUE) {
     colnames(theta) <- rownames(theta) <- colnames(x)
     ## Reorder, so genotype names and transition rate matrix
     ## have names ordered
-    oindex <- order(colnames(theta))
+    oindex <- evam_string_order(colnames(theta))
     theta <- theta[oindex, oindex]
     if(!sparse) {
         trm <- theta_to_trans_rate_3(theta,
@@ -206,7 +206,8 @@ theta_to_trans_rate_3_SM <- function(theta,
     genotNames <- unlist(
         lapply(genots$bin_genotype,
                function(x)
-                   paste(geneNames[which(x == 1L)], sep = "", collapse = ", "))
+                   paste(evam_string_sort(geneNames[which(x == 1L)]),
+                         sep = "", collapse = ", "))
         )
     genotNames[genotNames == ""] <- "WT"
 
@@ -374,7 +375,7 @@ do_MHN <- function(x,  lambda = 1/nrow(x)) {
     colnames(theta) <- rownames(theta) <- colnames(x)
     ## Reorder, so genotype names and transition rate matrix
     ## have names ordered
-    oindex <- order(colnames(theta))
+    oindex <- evam_string_order(colnames(theta))
     theta <- theta[oindex, oindex]
     trm <- theta_to_trans_rate_3(theta,
                                  inner_transition = inner_transitionRate_3_1)

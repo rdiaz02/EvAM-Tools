@@ -431,7 +431,7 @@ test_that("Test with same order of genes", {
             gn[g] <- paste0(l1, rest)
         }
         
-        gn <- evam_sort(gn)
+        gn <- evam_string_sort(gn)
         rf <- OncoSimulR::rfitness(ngenes)
         colnames(rf)[1:ngenes] <- gn
         ag <- OncoSimulR::evalAllGenotypes(OncoSimulR::allFitnessEffects(genotFitness = rf),
@@ -443,7 +443,7 @@ test_that("Test with same order of genes", {
         genotypes_resorted <-
             unname(vapply(ag[, "Genotype"],
                    function(u)
-                       paste(evam_sort(strsplit(u, split = ", ", fixed = TRUE)[[1]]),
+                       paste(evam_string_sort(strsplit(u, split = ", ", fixed = TRUE)[[1]]),
                              collapse = ", "), "something"))
         
         sx <- sample(genotypes_resorted, N, prob = ag[, "Fitness"], replace = TRUE)

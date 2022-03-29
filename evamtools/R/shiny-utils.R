@@ -466,7 +466,7 @@ create_tabular_data <- function(data) {
       #     lambda_field <- c("Lambdas", "OT_edgeWeight", "rerun_lambda", "Lambdas", "lambda", "Thetas")
       #     names(lambda_field) <- c("Source", "OT", "CBN", "HESBCN", "MCCBN")
 
-      #     gene_names <- sort(unique(data$OT_model$To))
+      #     gene_names <- evam_string_sort(unique(data$OT_model$To))
       #     all_counts <- data.frame(Gene = gene_names)
       #     for(name in names(data)){
       #         if(grepl("_model", name)){

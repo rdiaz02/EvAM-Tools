@@ -81,17 +81,17 @@ test_that("Output is returned only with the requested fields", {
     out_sim <- process_samples(simGenotypes, 5,
                                            gene_names = LETTERS[1:5],
                                            output = out_params[1])
-    expect_equal(sort(names(out_sim)), sort(out_params[1]))
+    expect_equal(evam_string_sort(names(out_sim)), evam_string_sort(out_params[1]))
     
     out_sim <- process_samples(simGenotypes, 5,
                                            gene_names = LETTERS[1:5],
                                            output = out_params[2:3])
-    expect_equal(sort(names(out_sim)), sort(out_params[2:3]))
+    expect_equal(evam_string_sort(names(out_sim)), evam_string_sort(out_params[2:3]))
 
     out_sim <- process_samples(simGenotypes, 5,
                                            gene_names = LETTERS[1:5],
                                            output = out_params)
-    expect_equal(sort(names(out_sim)), sort(out_params))
+    expect_equal(evam_string_sort(names(out_sim)), evam_string_sort(out_params))
 
 
     expect_error(process_samples(simGenotypes, 5,

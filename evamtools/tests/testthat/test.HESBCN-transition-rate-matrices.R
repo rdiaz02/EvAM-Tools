@@ -15,7 +15,7 @@ against hand-computed ones", {
     }
     ## Compare OncoSimulR with cpm_access_...
     reorder_trans_mat <- function(x) {
-        gg <- c(1, 1 + order(colnames(x)[-1]))
+        gg <- c(1, 1 + evam_string_order(colnames(x)[-1]))
         return(as.matrix(x[gg, gg]))
     }
     compare_OncoSimul <- function(out) {
@@ -285,7 +285,7 @@ test_that("XOR: was broken. Fixed in commit 43ea25d", {
 
     ## Compare OncoSimulR with cpm_access_...
     reorder_trans_mat <- function(x) {
-        gg <- c(1, 1 + order(colnames(x)[-1]))
+        gg <- c(1, 1 + evam_string_order(colnames(x)[-1]))
         return(as.matrix(x[gg, gg]))
     }
 
@@ -316,7 +316,7 @@ test_that("Tests with three parents, just of the accessible, and comparing numbe
     
     ## Compare OncoSimulR with cpm_access_...
     reorder_trans_mat <- function(x) {
-        gg <- c(1, 1 + order(colnames(x)[-1]))
+        gg <- c(1, 1 + evam_string_order(colnames(x)[-1]))
         return(as.matrix(x[gg, gg]))
     }
     compare_OncoSimul <- function(out) {
@@ -330,7 +330,7 @@ test_that("Tests with three parents, just of the accessible, and comparing numbe
     compare_access_genots <- function(out, expected_accessible) {
         agenots <- colnames(cpm2tm(
                                                  out)$trans_mat_genots)
-        expect_equal(sort(agenots), sort(expected_accessible))
+        expect_equal(evam_string_sort(agenots), evam_string_sort(expected_accessible))
     }
       
     test1 <- list()

@@ -107,22 +107,73 @@ create_MHN_test_data_for_trans_rate_MHN_test <- function() {
 ## Schill's Build.Q. Recall Schill's has diagonal
 ## and is transposed w.r.t. what we give
 compare_to_Build.Q <- function(x) {
+    local_edition(3)
     bq <- Build.Q(x)
     bq <- t(bq)
     diag(bq) <- 0
+    ## Need to resort the columns/rows
+    ## as bq gives them in a different order
+    ## and without names. We must set sort_genot_names to false
+    ## because we want the gene combinations in the original
+    ## order in x. But we need to canonicalize the genotype names
+    ## to compare with t3sm
+    colnames(bq) <- rownames(bq) <-
+        canonicalize_genotype_names(
+            generate_pD_sorted_genotypes(n_genes = ncol(x),
+                                         gene_names = colnames(x),
+                                         sort_gene_names = FALSE))
     t3sm <- theta_to_trans_rate_3_SM(x)
-    expect_equal(t3sm, bq, check.attributes = FALSE)
+    colnames(t3sm) <- rownames(t3sm) <-
+        canonicalize_genotype_names(colnames(t3sm))
+
+    obq <- evam_string_order(colnames(bq))
+    bq <- bq[obq, obq]
+    ot3sm <- evam_string_order(colnames(t3sm))
+    t3sm <- t3sm[ot3sm, ot3sm]
+    expect_equal(as.matrix(t3sm), as.matrix(bq), ignore_attr = TRUE)
 }
+
+## Like previous, but for theta_to_trans_rate, preorder the columns
+## as we do in call to do_MHN2
+compare_to_Build.Qo <- function(x) {
+    local_edition(3)
+    bq <- Build.Q(x)
+    bq <- t(bq)
+    diag(bq) <- 0
+    ## Need to resort the columns/rows
+    ## as bq gives them in a different order
+    ## and without names. We must set sort_genot_names to false
+    ## because we want the gene combinations in the original
+    ## order in x. But we need to canonicalize the genotype names
+    ## to compare with t3sm
+    colnames(bq) <- rownames(bq) <-
+        canonicalize_genotype_names(
+            generate_pD_sorted_genotypes(n_genes = ncol(x),
+                                         gene_names = colnames(x),
+                                         sort_gene_names = FALSE))
+    oindex1 <- evam_string_order(colnames(x))
+    x1 <- x[oindex1, oindex1]
+    t3sm <- theta_to_trans_rate_3_SM(x1)
+    ## No need to canonicalize the names of t3sm, as
+    ## x1 was properly sorted
+    obq <- evam_string_order(colnames(bq))
+    bq <- bq[obq, obq]
+    ot3sm <- evam_string_order(colnames(t3sm))
+    t3sm <- t3sm[ot3sm, ot3sm]
+    expect_equal(as.matrix(t3sm), as.matrix(bq), ignore_attr = TRUE)
+}
+
 
 
 test_that("Diagonals of MHN trm", {
     ## paranoid check
     ## Adding the diagonal
     ## Q_ii = - \Sum Q_ji
+    local_edition(3)
     suppressWarnings(try(rm(tmp, trm1, trm0, me1, eme1), silent = TRUE))
     tmp <- create_MHN_test_data_for_trans_rate_MHN_test()
     expect_equal(rep(0, 16), rowSums(tmp$trm1),
-        check.attributes = FALSE
+        ignore_attr = TRUE
         )
     rm(tmp)
 })
@@ -131,6 +182,7 @@ test_that("Diagonals of MHN trm", {
 test_that("transition rates between different genotypes are the
   same from time discretized and using the competing exponentials
   approach", {
+      local_edition(3)
       suppressWarnings(try(rm(tmp, trm1, trm0, me1, eme1), silent = TRUE))
       tmp <- create_MHN_test_data_for_trans_rate_MHN_test()
       trm1 <- tmp$trm1
@@ -150,7 +202,7 @@ test_that("transition rates between different genotypes are the
       ## paranoid check
       expect_equal(c(rep(1, 15), 0),
                    rowSums(trans_mat_time_discr),
-                   check.attributes = FALSE
+                   ignore_attr = TRUE
                    )
 
       ## Competing exponentials
@@ -161,7 +213,7 @@ test_that("transition rates between different genotypes are the
       ## paranoid check
       expect_equal(c(rep(1, 15), 0),
                    rowSums(trans_mat_comp_exp),
-                   check.attributes = FALSE
+                   ignore_attr = TRUE
                    )
 
       ## Verify identity, as it should be
@@ -185,6 +237,7 @@ test_that("transition rates between different genotypes are the
 
 test_that("Verify code to obtain transition rate matrix, against
 a reference and using different algorithms", {
+        local_edition(3)
     suppressWarnings(try(rm(tmp, trm1, trm0, me1, eme1), silent = TRUE))
     tmp <- create_MHN_test_data_for_trans_rate_MHN_test()
     me1 <- tmp$me1
@@ -218,7 +271,6 @@ a reference and using different algorithms", {
     expect_equal(eme1[3, 3] * eme1[3, 4], trm0["D", "C, D"])
     ## This is different, of course
     expect_false(eme1[3, 3] * eme1[4, 3] == trm0["D", "C, D"])
-
     compare_to_Build.Q(me1)
 })
 
@@ -243,9 +295,28 @@ test_that("Compute TRM gives the same results with sparse matrices", {
 
     trmSMm <- as.matrix(trmSM)
     expect_identical(trm0, trmSMm)
+    local_edition(3)
     compare_to_Build.Q(theta0)
 })
-    
+
+test_that("Additional comparisons with Build.Q", {
+    theta0 <- structure(c(
+        0.26, -0.57, 0, -0.97, -0.43, -1.18, 0, -0.29, 0,
+        0, -1.84, 0, -0.23, -0.5, -0.04, -0.24
+    ), .Dim = c(4L, 4L), .Dimnames = list(
+        c("A", "B", "C", "D"), c("A", "B", "C", "D")
+    ))
+    theta0b <- theta0
+    theta0c <- theta0
+    colnames(theta0b) <- rownames(theta0b) <- c("Z", "u3", "a", "u1")
+    colnames(theta0c) <- rownames(theta0c) <- c("A", "c", "B", "x1")
+    compare_to_Build.Q(theta0b)
+    compare_to_Build.Q(theta0c)
+
+    compare_to_Build.Qo(theta0)
+    compare_to_Build.Qo(theta0b)
+    compare_to_Build.Qo(theta0c)
+})
 
 test_that("we are using the indices of theta correctly 1", {
 
@@ -820,7 +891,7 @@ test_that("Identical results from different algos", {
                                   inner_transition = inner_transitionRate_3_2))
     expect_identical(tt1, tt31)
     expect_identical(tt31, tt32)
-
+    local_edition(3)
     compare_to_Build.Q(e1)
     compare_to_Build.Q(Theta.BC)
 })

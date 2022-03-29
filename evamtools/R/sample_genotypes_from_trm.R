@@ -325,8 +325,8 @@ process_samples <- function(sim, n_genes,
             statecounts_vector <- retval$state_counts[-1, "Counts"]
             names(statecounts_vector) <- retval$state_counts[-1, "Genotype"]
             statecounts_vector <- statecounts_vector[statecounts_vector > 0]
-            cstt2 <- cstt2[order(names(cstt2))]
-            statecounts_vector <- statecounts_vector[order(names(statecounts_vector))]
+            cstt2 <- cstt2[evam_string_order(names(cstt2))]
+            statecounts_vector <- statecounts_vector[evam_string_order(names(statecounts_vector))]
             stopifnot(isTRUE(all(cstt2 == statecounts_vector)))
         }
     }
@@ -562,7 +562,7 @@ sample_to_pD_order <- function(x, ngenes, gene_names = NULL) {
 
     x <- as.data.frame(table(x), stringsAsFactors = FALSE)
     ## gene_names <- sort(gene_names)
-    gene_names <- evam_sort(gene_names)
+    gene_names <- evam_string_sort(gene_names)
     genot_int <- x[, 1]
     genot_int <- gsub("^WT$", "", genot_int, fixed = "FALSE")
 
@@ -617,7 +617,7 @@ canonicalize_genotype_names <- function(x) {
     no_space <- stringi::stri_replace_all_regex(x, pattern = "[\\s]", "")
 
     pasted_sorted <- unlist(lapply(strsplit(no_space, split = ",", fixed = TRUE),
-                  function(v) (paste(sort(v), collapse = ", "))))
+                  function(v) (paste(evam_string_sort(v), collapse = ", "))))
     return(pasted_sorted)
 }
 
@@ -625,7 +625,7 @@ canonicalize_genotype_names <- function(x) {
 ## By number of mutations, and within number of mutations, ordered
 ## as given by order.
 genotypes_standard_order <- function(gene_names) {
-    gene_names <- sort(gene_names)
+    gene_names <- evam_string_sort(gene_names)
     allgt <- allGenotypes_3(length(gene_names))$mutated
     gtn <- vapply(allgt, function(v) paste(gene_names[v], collapse = ", "),
                   "")
@@ -665,7 +665,7 @@ reorder_to_standard_order <- function(x) {
 ## Given a matrix of 0/1 return the genotypes in canonicalized way
 genot_matrix_2_vector <- function(x) {
     gn <- colnames(x)
-    gt1 <- apply(x, 1, function(v) paste(sort(gn[v == 1]), collapse = ", "))
+    gt1 <- apply(x, 1, function(v) paste(evam_string_sort(gn[v == 1]), collapse = ", "))
     gt1[gt1 == ""] <- "WT"
     return(gt1)
 }
@@ -733,7 +733,7 @@ probs_from_trm <- function(x,
     if (!all_genotypes) return(p)
 
     ## Get genes and from them number genotypes and identity genotypes
-    gene_names <- sort(setdiff(unique(unlist(strsplit(colnames(x), split = ", "))),
+    gene_names <- evam_string_sort(setdiff(unique(unlist(strsplit(colnames(x), split = ", "))),
                           "WT"))
     number_genes <- length(gene_names)
     num_genots <- 2^number_genes
@@ -779,7 +779,7 @@ random_evam <- function(ngenes = NULL, gene_names = NULL,
 
     if (is.null(gene_names)) gene_names <- LETTERS[seq_len(ngenes)]
     if (is.null(ngenes)) ngenes <- length(gene_names)
-    gene_names <- sort(gene_names)
+    gene_names <- evam_string_sort(gene_names)
     output <- list()
     if (model == "MHN") {
         mhn_sparsity <- 1 - graph_density
@@ -797,7 +797,7 @@ random_evam <- function(ngenes = NULL, gene_names = NULL,
         poset <- mccbn::random_poset(ngenes, graph_density = graph_density)
         lambdas <- runif(ngenes, cbn_hesbcn_lambda_min, cbn_hesbcn_lambda_max)
         names(lambdas) <-  colnames(poset) <- rownames(poset) <- gene_names
-        stopifnot(identical(sort(names(hesbcn_probs)), c("AND", "OR", "XOR")))
+        stopifnot(identical(evam_string_sort(names(hesbcn_probs)), c("AND", "OR", "XOR")))
         output <-
             HESBCN_from_poset_lambdas_relation_probs(poset,
                                                      lambdas,
@@ -834,7 +834,7 @@ random_evam <- function(ngenes = NULL, gene_names = NULL,
 ## Named matrix of thetas -> all of the model and predicted probs
 ## Recall these thetas have theta_i,j: effect of j on i.
 MHN_from_thetas <- function(thetas) {
-    oindex <- order(colnames(thetas))
+    oindex <- evam_string_order(colnames(thetas))
     thetas <- thetas[oindex, oindex]
     output <- list()
     output[["MHN_theta"]] <- thetas
@@ -861,7 +861,7 @@ MHN_from_thetas <- function(thetas) {
 ## poset as adjacency matrix and vector of lambdas
 ## both named -> all of the cbn output
 CBN_from_poset_lambdas <- function(poset, lambdas) {
-    stopifnot(identical(sort(colnames(poset)), sort(names(lambdas))))
+    stopifnot(identical(evam_string_sort(colnames(poset)), evam_string_sort(names(lambdas))))
     poset_as_data_frame <- poset_2_data_frame(poset)
     output <- list()
     output[["CBN_model"]] <- CBN_model_from_edges_lambdas(poset_as_data_frame,
@@ -926,7 +926,7 @@ poset_2_data_frame <- function(poset) {
 ## poset as adjac. matrix, vector of lambdas, parent_set -> full HESBCN output
 HESBCN_from_poset_lambdas_relation_probs <- function(poset, lambdas,
                                                      hesbcn_probs) {
-    stopifnot(identical(sort(colnames(poset)), sort(names(lambdas))))
+    stopifnot(identical(evam_string_sort(colnames(poset)), evam_string_sort(names(lambdas))))
     poset_as_data_frame <- poset_2_data_frame(poset)
 
     ## Assign type of relationship randomly to nodes with >= 2 parents
@@ -942,8 +942,8 @@ HESBCN_from_poset_lambdas_relation_probs <- function(poset, lambdas,
         parent_set[which(num_parents > 1)] <- ps_values
     }
     
-    stopifnot(identical(sort(names(parent_set)),
-                        sort(names(lambdas))))
+    stopifnot(identical(evam_string_sort(names(parent_set)),
+                        evam_string_sort(names(lambdas))))
     
     output <- list()
     output[["HESBCN_parent_set"]] <- parent_set
@@ -1008,7 +1008,7 @@ OT_random_poset <- function(ngenes, graph_density) {
 ##   weights: do not have Root
 ##   poset: one for OT, so no column with two or more parents
 OT_from_poset_weights_epos <- function(poset, weights, epos) {
-    stopifnot(identical(sort(colnames(poset)), sort(names(weights))))
+    stopifnot(identical(evam_string_sort(colnames(poset)), evam_string_sort(names(weights))))
     stopifnot(colSums(poset) <= 1)
     poset_as_data_frame <- poset_2_data_frame(poset)
     output <- list()
@@ -1065,7 +1065,7 @@ OT_model_2_predict_genots <- function(model, epos) {
     stopifnot(colnames(adjm)[1] == "Root")
     stopifnot(colnames(adjm) == rownames(adjm))
     ## Sort column names
-    cnadjm_nor <- sort(setdiff(colnames(adjm), "Root"))
+    cnadjm_nor <- evam_string_sort(setdiff(colnames(adjm), "Root"))
     adjm <- adjm[c("Root", cnadjm_nor), c("Root", cnadjm_nor)]
     weights <- model$OT_edgeWeight
     names(weights) <- model$To
@@ -1157,7 +1157,7 @@ OncoBN_from_poset_thetas_epsilon_model <- function(poset,
                                                 thetas,
                                                 epsilon,
                                                 model) {
-    stopifnot(identical(sort(colnames(poset)), sort(names(thetas))))
+    stopifnot(identical(evam_string_sort(colnames(poset)), evam_string_sort(names(thetas))))
     poset_as_data_frame <- poset_2_data_frame(poset)
 
     ## Assign type of relationship to nodes with >= 2 parents
@@ -1179,8 +1179,8 @@ OncoBN_from_poset_thetas_epsilon_model <- function(poset,
         parent_set[which(num_parents > 1)] <- ps_value
     }
     
-    stopifnot(identical(sort(names(parent_set)),
-                        sort(names(thetas))))
+    stopifnot(identical(evam_string_sort(names(parent_set)),
+                        evam_string_sort(names(thetas))))
 
     output <- list()
     output[["OncoBN_parent_set"]] <- parent_set
@@ -1248,7 +1248,7 @@ OncoBN_model_2_predict_genots <- function(model, epsilon) {
     thetadf <- aggregate(theta ~ To, data = model, FUN = unique)
     thetav <- thetadf$theta
     names(thetav) <- thetadf$To
-    theta <- thetav[sort(names(thetav))]
+    theta <- thetav[evam_string_sort(names(thetav))]
     names_g <- names(theta)
     obnfit[["theta"]] <- theta
     
@@ -1262,7 +1262,7 @@ OncoBN_model_2_predict_genots <- function(model, epsilon) {
     
     obnfit[["model"]] <- ifelse(any(model$Relation == "AND"), "CBN", "DBN")
     obnfit[["epsilon"]] <- epsilon
-    pred_genots <- DBN_prob_genotypes(obnfit, sort(names(thetav)))
+    pred_genots <- DBN_prob_genotypes(obnfit, evam_string_sort(names(thetav)))
     pred_genots <- DBN_est_genots_2_named_genotypes(pred_genots)
 
     return(pred_genots)

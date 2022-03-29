@@ -39,7 +39,7 @@ test_that("Exercise random_evam with different options", {
                                                 UR = 0.6,
                                                 XOR = 0.3)
                                ),
-                 'identical(sort(names(hesbcn_probs)), c("AND", "OR", "XOR")) is not TRUE',
+                 'identical(evam_string_sort(names(hesbcn_probs)), c("AND"',
                  fixed = TRUE)
 })
 

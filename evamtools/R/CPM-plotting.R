@@ -156,17 +156,24 @@ cpm_layout <- function(graph){
 
     for (i in 0:max(num_mutations)) {
         level_idx <- which(num_mutations == i)
-        gnt_names <- sort(igraph::V(graph)$name[level_idx], index.return = TRUE)
+        ## gnt_names <- sort(igraph::V(graph)$name[level_idx],
+        ##                   index.return = TRUE)
+        gnt_ix <- evam_string_order(igraph::V(graph)$name[level_idx])
+        gnt_names <- igraph::V(graph)$name[level_idx]
+        gnt_names <- gnt_names[gnt_ix]
+        
         spacing <- 6 / (length(level_idx) + 1)
         level_elements <- 1:length(level_idx) * spacing
         level_elements <-  rev(level_elements - max(level_elements))
-        correction_rate <- max(level_elements) - min(level_elements) 
+        correction_rate <- max(level_elements) - min(level_elements)
         level_elements <- level_elements + correction_rate/2
-        lyt[, 1][level_idx[gnt_names$ix]] <- level_elements
+        ## lyt[, 1][level_idx[gnt_names$ix]] <- level_elements
+        lyt[, 1][level_idx[gnt_ix]] <- level_elements
     }
 
     ## Avoiding layout in one line
-    if (all(lyt[, 1] == 0)) lyt[,1] <- rep(c(0,1,-1), ceiling(nrow(lyt)/3))[1:nrow(lyt)]
+    if (all(lyt[, 1] == 0)) lyt[, 1] <- rep(c(0, 1, -1),
+                                            ceiling(nrow(lyt)/3))[1:nrow(lyt)]
     return(lyt)
 }
 
@@ -255,7 +262,7 @@ plot_genot_fg <- function(trans_mat
         return()
     }
 
-    unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
+    unique_genes_names <- evam_string_sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
     rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", ",")
     # names(predicted_genotypes) <- str_replace_all(names(predicted_genotypes), ", ", ",")
     graph <- igraph::graph_from_adjacency_matrix(trans_mat, weighted = TRUE,
