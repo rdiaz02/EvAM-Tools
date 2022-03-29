@@ -348,7 +348,7 @@ data(every_which_way_data)
 Dat1 <- every_which_way_data[[16]][1:40, 2:6]
 out1 <- evam(Dat1,
             methods = c("CBN", "OT", "OncoBN",
-                        "MHN", "HESBCN"))
+                        "MHN", "HESBCN", "MCCBN"))
 
 
 ## Running only some methods and changing some options
@@ -358,23 +358,20 @@ out1 <- evam(Dat1,
 
 out2 <- evam(Dat1,
             methods = c("CBN", "OT", "OncoBN",
-                        "MHN", "HESBCN", "MCCBN"),
+                        "MHN"),
             mhn_opts = list(lambda = 5/nrow(Dat1)),
             oncobn_opts = list(model = "CBN"))
 
 
-## Getting paths to maximum/maxima
-
+## Getting paths to maximum/maxima. Using only two methods
+## for faster execution
 out3 <- evam(Dat1,
-            methods = c("CBN", "OT", "OncoBN",
-                        "HESBCN"),
+            methods = c("MHN", "OncoBN"),
             paths_max = TRUE)
 
 
 ## Convert probabilities of paths into a data frame,
 ## with strings and the probs. of the paths.
-
-paths_probs_2_df(out3$HESBCN_paths_max)
-
+paths_probs_2_df(out3$OncoBN_paths_max)
 
 }

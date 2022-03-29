@@ -4,9 +4,7 @@
   counts of genotype transitions.}
 \usage{
 sample_CPMs(cpm_output,  N,
-                methods = c("OT", "OncoBN",
-                            "CBN", "MCCBN",
-                            "MHN", "HESBCN"),
+                methods = NULL, 
                 output = c("sampled_genotype_counts"),
                 obs_noise = 0,
                 genotype_freqs_as_data = TRUE
@@ -18,7 +16,9 @@ sample_CPMs(cpm_output,  N,
 
 \item{N}{Number of samples to generate}
 
-\item{methods}{List of methods that we want to sample}
+\item{methods}{Vector of strings with the names of methods that we want to sample. If NULL, all
+  methods with output in cpm_output. The list of available methods is
+  OT, OncoBN, CBN, MCCBN, MHN, HESBCN.}
 
 \item{output}{A vector with one or more of the following possible
   outputs: sampled_genotype_counts, obs_genotype_transitions,
@@ -76,11 +76,23 @@ sample_CPMs(cpm_output,  N,
 }
 
 \examples{
+
 data(every_which_way_data)
 Dat1 <- every_which_way_data[[16]][1:40, 2:6]
+## For faster execution, use only some methods
 out <- suppressMessages(evam(Dat1,
                              methods = c("CBN", "OT", "OncoBN",
-                                         "MHN", "HESBCN", "MCCBN")))
+                                         "MHN")))
+
+## Sample from the predicted genotype frequencies
+## only for OT
+outS1_ot <- sample_CPMs(out, N = 1000, methods = "OT")
+
+## Sample from the predicted genotype frequencies
+## for OT and HESBCN. But the later was not in the output
+## so we get a warning-
+outS1_ot_2 <- sample_CPMs(out, N = 1000, methods = c("OT", "HESBCN"))
+
 
 ## Sample from the predicted genotype frequencies
 ## for all methods in the output out
