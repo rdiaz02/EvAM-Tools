@@ -1,3 +1,6 @@
+
+t1 <- Sys.time()
+
 test_that("Exercise random_evam with different options", {
 
     for (mm in c("MHN", "CBN", "HESBCN", "OT", "OncoBN")) {
@@ -132,3 +135,6 @@ test_that("Test OncoBN thetas in right order", {
     expect_equal(unname(m2bo$OncoBN_predicted_genotype_freqs["WT"]),
                  (1 - .3) * (1 - .4))
 })
+
+cat("\n Done test.generate-random-evam.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

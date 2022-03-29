@@ -1,7 +1,9 @@
-#' Test the procedure of node labeling for the plot_genot_fg function
-#' It labels nodes as those involved in the most transited paths
+t1 <- Sys.time()
 
-#' that star in the root of the tree and that lead to any leave 
+# #' Test the procedure of node labeling for the plot_genot_fg function
+# #' It labels nodes as those involved in the most transited paths
+
+# #' that star in the root of the tree and that lead to any leave 
 test_that("Modifying matrix with top_paths",{
 
     base_adj_matrix <- matrix(0, nrow = 6, ncol = 6)
@@ -303,4 +305,5 @@ test_that("Simple test that we recover correct rank of paths and their prob", {
 })
 
 
-cat("\n Done test.rank-paths-graphs.R \n")
+cat("\n Done test.rank-paths-graphs.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

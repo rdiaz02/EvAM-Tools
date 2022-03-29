@@ -1,3 +1,5 @@
+t1 <- Sys.time()
+
 test_that("Minimal test: we can run", {
     data(every_which_way_data)
     Dat1 <- every_which_way_data[[16]][1:40, 2:6]
@@ -283,4 +285,5 @@ out3 <- suppressMessages(evam(dB_c1,
 })
 
 
-cat("\n Done test.exercise-main-funct.R \n")
+cat("\n Done test.exercise-main-funct.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

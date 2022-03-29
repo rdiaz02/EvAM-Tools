@@ -1,3 +1,5 @@
+t1 <- Sys.time()
+
 test_that("Processing samples & Plotting of CPMs is correct", {
   sample_evam_output <- evam(examples_csd$csd$AND$data)
   models <- c("OT", "CBN", "OncoBN", "HESBCN", "MHN")
@@ -111,3 +113,7 @@ test_that("plotting works, minimal, with mixed edges", {
 
     plot_CPMs(out_AND_OR_XOR, plot_type = "trans_mat", top_paths = 4)
 })
+
+
+cat("\n Done test.plotting.utils.R.Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

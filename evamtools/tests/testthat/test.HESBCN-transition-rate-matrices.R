@@ -1,3 +1,5 @@
+t1 <- Sys.time()
+
 test_that("HESBCN: computation of the transition rate matrix
 against hand-computed ones", {
 
@@ -465,4 +467,5 @@ test_that("Tests with three parents, just of the accessible, and comparing numbe
 })
 
 
-cat("\n Done test.HESBCN-transition-reate-matrices.R \n")
+cat("\n Done test.HESBCN-transition-reate-matrices.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

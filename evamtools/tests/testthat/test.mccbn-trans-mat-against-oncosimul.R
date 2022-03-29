@@ -1,5 +1,8 @@
 ## Testing that cpm2tm gives same output as
 ## cpm_to_trans_mat_oncosimul, the function that uses OncoSimulR
+
+t1 <- Sys.time()
+
 test_that("Testing cpm2tm by comparing with
 OncoSimulR's based cpm_to_trans_mat_oncosimul.", {
     ## Recall cpm2F2tm <- cpm_to_trans_mat_oncosimul
@@ -222,5 +225,6 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul.", {
 
 })
 
-cat("\n Done test.mccbn-trans-mat-against-oncosimul.R \n")
+cat("\n Done test.mccbn-trans-mat-against-oncosimul.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")
 

@@ -1,3 +1,4 @@
+t1 <- Sys.time()
 ## Note that some of the transition matrix output is also tested
 ## using very different code from OncoSimulR. See
 ## test.access-genots-from-oncosimul.R
@@ -1065,4 +1066,6 @@ test_that("OT and CBN: algorithm consistency with various data examples", {
     rm(Dat1)
 })
 
-cat("\n Done test.trans-rates-f-graphs.R \n")
+cat("\n Done test.trans-rates-f-graphs.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")
+

@@ -1,3 +1,5 @@
+t1 <- Sys.time()
+
 test_that("generate_pD_sorted_genotypes and sample_to_pD_order same order", {
     ## 6 WT, 3 A, 4 AC, 5 D, 2 AD
     gg <- c("A, C", "C, A", "C, A", "A, C",
@@ -419,4 +421,5 @@ test_that("Test with same order of genes", {
 })
 
 
-cat("\n Done test.generate-sorted-sample-to-pD. \n")
+cat("\n Done test.generate-sorted-sample-to-pD. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

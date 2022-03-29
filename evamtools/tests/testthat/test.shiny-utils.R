@@ -11,6 +11,8 @@
 ## way, whatever is in a different object, which we might want to
 ## modify anyway.
 
+t1 <- Sys.time()
+
 generate_old <- function() {
     ## default_genes <- 3
     max_genes <- 10
@@ -469,4 +471,5 @@ test_that("Create tabular data from CPM output works correctly", {
 })
 
 rm(generate_old)
-cat("\n Done test.shiny-utils.R \n")
+cat("\n Done test.shiny-utils.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

@@ -1,3 +1,5 @@
+t1 <- Sys.time()
+
 test_that("Output is not generated with bad input", {
     trajectory <- list(
         c("WT", "C", "C, D"),
@@ -265,4 +267,5 @@ test_that("New algorithm for state transitions", {
     expect_equal(os6$obs_genotype_transitions, t6)
 })
 
-cat("\n Done test.processing-sampled-genotypes-trajectories-from-models.R \n")
+cat("\n Done test.processing-sampled-genotypes-trajectories-from-models.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

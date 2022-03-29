@@ -11,6 +11,7 @@
 ## way, whatever is in a different object, which we might want to
 ## modify anyway.
 
+t1 <- Sys.time()
 generate_old <- function() {
     ## default_genes <- 3
     max_genes <- 10
@@ -303,4 +304,5 @@ test_that("Modify dags works correctly on a more comples example",{
 })
 
 rm(generate_old)
-cat("\n Done test.dag.building.shiny. \n")
+cat("\n Done test.dag.building.shiny. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

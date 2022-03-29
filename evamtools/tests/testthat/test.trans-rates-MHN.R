@@ -1,3 +1,5 @@
+t1 <- Sys.time()
+
 ## We will use this hazard matrix and transition rates several times below.
 ## Too long to include function def. inside a test_that block.
 ##    give an unwieldy name to minimize possible conflicts.
@@ -845,4 +847,6 @@ test_that("do_MHN and do_MHN2 identical in various data sets", {
                      as.matrix(mhnSM$transitionMatrixCompExp))
     }
 })
-cat("\n Done test.trans-rates-MHN.R \n")
+
+cat("\n Done test.trans-rates-MHN.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

@@ -1,6 +1,8 @@
 ## Test miscellaneous functions for dealing with genotype names
 ## and ordering vectors of genotypes
 
+t1 <- Sys.time()
+
 test_that("canonicalize", {
     www <- c("B" = 8,
             "A,B,C" = 10,
@@ -59,3 +61,6 @@ test_that("reorder_to_pD", {
     sguv2[c(3, 8, 1, 2, 24, 28, 98, 43)] <- unname(www2)
     
 })
+
+cat("\n Done test.miscell-genot-names.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")
