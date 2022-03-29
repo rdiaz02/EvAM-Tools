@@ -18,16 +18,31 @@
 \usepackage{longtable}
 \usepackage[dvipsnames,table]{xcolor}
 \usepackage{lscape}
-\author{Ramon Diaz-Uriarte}
-\date{\today}
-\title{Using OncoSimulR to get accessible genotypes and transition matrices}
+\usepackage{authblk} % author affiliations
+
 \hypersetup{
- pdfauthor={Ramon Diaz-Uriarte},
- pdftitle={Using OncoSimulR to get accessible genotypes and transition matrices},
- pdfkeywords={},
- pdfsubject={},
- pdfcreator={Emacs 28.0.90 (Org mode 9.5.1)}, 
- pdflang={English}}
+  colorlinks = true,
+  citecolor=  black,
+  linkcolor = {blue},
+  filecolor = cyan %% controls color of external ref, if used
+}
+
+\author[1,2,$\dagger$]{Ramon Diaz-Uriarte}
+\affil[1]{Dpt. of Biochemistry, School of Medicine, Universidad Autónoma de Madrid, Madrid, Spain}
+\affil[2]{Instituto de Investigaciones Biomédicas `Alberto Sols'
+  (UAM-CSIC), Madrid, Spain}
+\affil[$\dagger$]{To whom correspondence should be addressed: \normalfont r.diaz@uam.es \qquad \texttt{https://ligarto.org/rdiaz}}
+\date{\today}
+\title{Using OncoSimulR to get accessible genotypes and transition matrices, and obtaining transition rate matrices from H-ESBCN}
+% \hypersetup{
+%  pdfauthor={Ramon Diaz-Uriarte},
+%  pdftitle={Using OncoSimulR to get accessible genotypes and transition matrices},
+%  pdfkeywords={},
+%  pdfsubject={},
+%  pdfcreator={Emacs 28.0.90 (Org mode 9.5.1)}, 
+%  pdflang={English}}
+
+
 \begin{document}
 
 \maketitle
@@ -247,7 +262,7 @@ specially when there are more genes. An example:
 
 
 
-\section{What about HESBCN/PMCE?}
+\section{What about H-ESBCN/PMCE?}
 \label{sec:org1904b6b}
 Here we detail how we interpret and use the results from the method described in 
 
@@ -268,10 +283,10 @@ We can repeat what we did above, with OR and XOR replaced by, well, OR and XOR i
 \subsection{Interpreting OR and XOR (and AND)}
 \label{sec:org94629c0}
 \begin{itemize}
-\item I find Figure 1C  of their paper possibly confusing. First, the non-confusing part:  node "D" has a rate when exactly one of B XOR C has occured, and node "G" some other rate when E or F or both E or F have occurred. (Note: the figure shows \$\(\tau\)\$s, not \$\(\lambda\)\$s. The comments here refer to the \$\(\lambda\)\$s).
+\item I find Figure 1C  of their paper possibly confusing. First, the non-confusing part:  node "D" has a rate when exactly one of B XOR C has occured, and node "G" some other rate when E or F or both E or F have occurred. (Note: the figure shows $\tau$s, not $\lambda$s. The comments here refer to the $\lambda$s).
 \item Now, the (for me, at least) possibly confusing part: it seems that the node called "B xor C" is such that B and C have the same rates of dependencies on A; in other words, it would seem to imply that \(\lambda_B = \lambda_C\). Similarly, the node called "E or F" seems to indicate that both E and F have the same rate, so \(\lambda_E = \lambda_F\). But this need not be so.
 \begin{itemize}
-\item In fact, all of the examples we have looked at, and the examples in their output, do not satisfy that the rates to the genes that are part of a XOR, OR, or AND relationship are the same. For instance, in the example above of Bladder Urothelial Carcinoma (see "inst/miscell/examples/HESBCN-lambdas-from-examples.R"), KMT2D depends on KMT2C and TP53, but the rate for KMT2C, \(\lambda_{KMT2C} = 0.1991\) and that for TP53, \(\lambda_{TP53} = 0.8062\).
+\item In fact, virtually all of the examples we have looked at, and the examples in their output, do not satisfy that the rates to the genes that are part of a XOR, OR, or AND relationship are the same. For instance, in the example above of Bladder Urothelial Carcinoma (see "inst/miscell/examples/HESBCN-lambdas-from-examples.R"), KMT2D depends on KMT2C and TP53, but the rate for KMT2C, \(\lambda_{KMT2C} = 0.1991\) and that for TP53, \(\lambda_{TP53} = 0.8062\).
 \end{itemize}
 \item The \(\lambda\) for a gene is the rate of the process until that mutation appears and is fixated, given all the dependencies of that gene are satisfied (which is, of course, the same interpretation as under CBN); again:  "[the] rates of the Poisson processes of the continuous-time HMM, associated with the vertices of the model, which allow one to estimate the expected waiting time of a node, given that its predecessor has occurred." (p. 756).
 \item But the rate at which the parents are satisfied can differ (as it was the case for CBN).

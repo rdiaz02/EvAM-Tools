@@ -2,11 +2,12 @@
 \documentclass[a4paper,11pt]{article}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
-\usepackage[a4paper, total={6.5in, 9in}]{geometry}
+%% \usepackage[a4paper, total={6.5in, 9in}]{geometry}
 \usepackage{natbib}
 \usepackage{authblk} % author affiliations
 %% \usepackage[UKenglish]{isodate}
-\usepackage[style=iso]{datetime2}
+%% \usepackage[style=iso]{datetime2}
+\usepackage[iso,english]{isodate}
 \usepackage{nameref}
 \newcommand*{\qref}[1]{\hyperref[{#1}]{\textit{``\nameref*{#1}'' (section \ref*{#1})}}}
 \newcommand*{\qrefP}[1]{\hyperref[{#1}]{\textit{``\nameref*{#1}'', section \ref*{#1}}}}
@@ -24,20 +25,13 @@
 \title{EvAM-Tools: additional documentation}
 % \author{Ramon Diaz-Uriarte, Pablo Herrera-Nieto}
 
-
+\date{\today}
 \author[1,2,$\dagger$]{Ramon Diaz-Uriarte}
 \author[1,2]{Pablo Herrera Nieto}
 \affil[1]{Dpt. of Biochemistry, School of Medicine, Universidad Autónoma de Madrid, Madrid, Spain}
 \affil[2]{Instituto de Investigaciones Biomédicas `Alberto Sols'
   (UAM-CSIC), Madrid, Spain}
 \affil[$\dagger$]{To whom correspondence should be addressed: \normalfont r.diaz@uam.es}
-
-% \author{Ramon Diaz-Uriarte\,$^{\text{\sfb 1,}}$, Pablo Herrera-Nieto\,$^{\text{\sfb 1}*}$}
-
-% \address{$^{\text{\sf 2}}$Department of Biochemistry, Universidad Autonoma de Madrid, Instituto de Investigaciones Biome´ dicas ‘Alberto
-% Sols’ (UAM-CSIC), Madrid, Spain}
-
-% \corresp{$^\ast$To whom correspondence should be addressed.}
 
 
 \begin{document}
@@ -52,7 +46,7 @@
 
 \section{Introduction}
 
-This document provides additional documentation about EvAM-Tools, mainly intended to complemet the Shiny web GUI application help (and that is the reason why we collate here the PDF from the R package itself).
+This document provides additional documentation about EvAM-Tools, mainly intended to complement the Shiny web GUI application help. % To make access to all arguments of evamtools and its functions, this document should have, concatenated, the PDF from the R package itself. In , as well as an  PDF that explains the use of OncoSimulR for testing and how we use and interpret H-ESBCN to obtain transition rate matrices.
 
 % \section{Cancer progression models}
 % The CPMs included are: 
