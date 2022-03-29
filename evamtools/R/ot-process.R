@@ -227,9 +227,6 @@ ot_proc <- function(datax, nboot = 1000,
                       ))
 }
 
-# library(codetools)
-# checkUsageEnv(env = .GlobalEnv)
-
 ## Give a named vector for the predicted freqs of genotypes
 dist_oncotree_output_2_named_genotypes <- function(odt) {
     ## In the output of distribution.oncotree there
@@ -247,3 +244,5 @@ dist_oncotree_output_2_named_genotypes <- function(odt) {
     return(odt)
 }
 
+# library(codetools)
+# checkUsageEnv(env = .GlobalEnv)

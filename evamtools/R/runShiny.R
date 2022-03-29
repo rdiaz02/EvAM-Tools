@@ -1,4 +1,4 @@
-## Copyright 2021, 2022 Pablo Herrera Nieto
+## Copyright 2021, 2022 Pablo Herrera Nieto, Ramon Diaz-Uriarte
 
 ## This program is free software: you can redistribute it and/or modify it under
 ## the terms of the GNU Affero General Public License (AGPLv3.0) as published by

@@ -153,9 +153,6 @@ do_MCCBN_HCBN2 <- function(x
                                                seed = mccbn_hcbn2_opts$seed
                                                )
 
-    ## Default iterations for asa is 10000 in original code, 100 for testing
-    ## L: ; they used 100, but I do not know if this is too low
-
     am <- fit$poset
     colnames(am) <- rownames(am) <- colnames(x)
     df1 <- igraph::as_data_frame(graph_from_adjacency_matrix(am))
@@ -181,7 +178,8 @@ do_MCCBN_HCBN2 <- function(x
 ######################################################################
 ######################################################################
 ###
-###  libboost issues
+###  libboost issues with Debian testing and unstable
+###  (at least since late 2021)
 ###
 ######################################################################
 ######################################################################

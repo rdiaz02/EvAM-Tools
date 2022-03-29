@@ -16,8 +16,8 @@
 
 
 
-#'  I followed this link to structure the shiny app whithin the package
-#'  https://deanattali.com/2015/04/21/r-package-shiny-app/
+## #'  I followed this link to structure the shiny app whithin the package
+## #'  https://deanattali.com/2015/04/21/r-package-shiny-app/
 
 dataModal <- function(error_message, type="Error: ") {
   modalDialog(
@@ -44,18 +44,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
   last_visited_pages <- list(csd = "User", dag = "User", matrix = "User")
 
-  ## FIXME: No default "user"
-  ## last_visited_cpm <- "user" ## And why "user" and not "User"?
   last_visited_cpm <- ""
   
-
-  ## random_name <- paste(sample(c(LETTERS, letters), size = 8, replace = TRUE),
-  ##                    collapse = "")
-  ## last_visited_pages <- list(csd = random_name,
-  ##                            dag = random_name,
-  ##                            matrix = random_name)
-  ## last_visited_cpm <- random_name
-
   datasets <- reactiveValues(
     all_csd = all_csd_data,
     fixed_examples = all_csd_data
@@ -126,9 +116,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     )
   })
 
-  # listen2dataset_name <- reactive({
-  #   list(input$dataset_name, input$save_csd_data)
-  # })
 
   ## Saving dataset
   observeEvent(input$save_csd_data, {
@@ -155,59 +142,21 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             input$dataset_name
 
         if (nrow(data$csd_counts) > 0) {
-            ## FIXME: comment_out_freqs2csd
-            ## datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <-
-            ##     evamtools:::freqs2csd(data$csd_counts,
-            ##                           data$gene_names[1:input$gene_number])
           datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <-
               evamtools:::genotypeCounts_to_data(data$csd_counts,
                                                   e = 0)
       }
-
-        
-
-
-        # tmp_data_2 <- datasets$all_csd[[input$input2build]]
-        # datasets$all_csd[[input$input2build]] <-
-        #   c(tmp_data_2["User"]
-        #   , tmp_data_2[input$dataset_name]
-        #   , tmp_data_2[which(!(names(tmp_data_2) %in% c("User",
-        #     input$dataset_name, names(all_csd_data))))]
-        #   , tmp_data_2[which(names(datasets$all_csd[[input$input2build]]) %in% names(all_csd_data))]
-        # )
-
-        # ## 2 restore default values
-        # try({
         datasets$all_csd[[input$input2build]][[input$select_csd]] <-
             datasets$fixed_examples[[input$input2build]][[input$select_csd]]
-        # })
-        # browser()
 
         ## 3 update selected entry
         updateRadioButtons(session, "select_csd", selected = input$dataset_name)
 
-        # shinyjs::disable("save_csd_data")
-      # }
       }, error=function(e){
         showModal(dataModal(e[[1]]))
       })
   })
 
-  # observeEvent(listen2dataset_name(), {
-  # observeEvent(input$dataset_name, {
-    
-  #   tryCatch({
-  #     dataset_name <- ifelse(is.null(input$dataset_name), "", input$dataset_name)
-  #     if(dataset_name != "" &
-  #       !(dataset_name %in% names(datasets$all_csd[[input$input2build]]))) {
-  #       shinyjs::enable("save_csd_data")
-  #     }else if(dataset_name %in% names(datasets$all_csd[[input$input2build]])){
-  #       shinyjs::disable("save_csd_data")
-  #     }
-  #   }, error = function(e){
-  #     showModal(dataModal(e[[1]]))
-  #   })
-  # })
 
   ## Download csd button
   output$download_csd <- downloadHandler(
@@ -281,22 +230,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       data$n_genes <- tmp_data$n_genes
       
       if (input$input2build == "dag") {
-          # to_keep <- length(which(colSums(data$dag) > 0 |
-          #                         rowSums(data$dag) > 0)) - 1
-          ## to_keep <- sum(colSums(data$dag) > 0)
-          ## if (to_keep < 2) {
-          ##     showModal(dataModal("You have only defined one relationship"))
-          ##     updateRadioButtons(session, "dag_model", selected = "HESBCN")
-          ## }
-          # ngenedats <- to_keep
           number_of_parents <- colSums(data$dag)
           to_keep <- sum(number_of_parents > 0)
           n_genes <- ifelse(to_keep < 1, .ev_SHINY_dflt$ngenes, to_keep)
           updateRadioButtons(session, "dag_model", selected = "HESBCN")
       } else if (input$input2build == "matrix") {
-          # n_genes <- length(which(colSums(abs(data$thetas)) > 0
-          #                         | rowSums(abs(data$thetas)) > 0))
-          # n_genes <- ifelse(n_genes <= 0, 3, n_genes)
           n_genes <- data$n_genes
           if (is.null(n_genes)) {
             n_genes <- .ev_SHINY_dflt$ngenes
@@ -304,7 +242,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       } else if (input$input2build == "csd" && !is.null(data$data)) {
           n_genes <- ncol(data$data)
           ## Never show DAGs here.
-          ## if (data$name == "User Data") data$dag[] <- 0
           data$dag[] <- 0
       } else if (input$input2build == "csd" && is.null(data$data)) {
           n_genes <- .ev_SHINY_dflt$ngenes
@@ -597,11 +534,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       }
   })
 
-
-
-
-
-  
   # ## DAG builder
   # ## Controling dag builder
   dag_data <- reactive({
@@ -986,12 +918,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       data$csd_counts <- DT::editData(data$csd_counts, info, "csd_counts")
       ## Filtering out non-positive counts
       data$csd_counts <- data$csd_counts[data$csd_counts[,2] > 0,]
-
-      ## FIXME: comment_out_freqs2csd
-      ## data$data <-
-      ##     datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
-      ##         evamtools:::freqs2csd(data$csd_counts,
-      ##                               data$gene_names[1:input$gene_number])
       data$data <-
           datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
               evamtools:::genotypeCounts_to_data(data$csd_counts, e = 0)
@@ -1038,17 +964,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
   observeEvent(input$analysis, {
     ## Calculate TRM for DAG and for matrices
 
-    # source_trm <- NULL
-    ## FIXME the following has to be moved to R/
-    # if(input$input2build == "dag"){
-    #   tmp_data <- list(edges = dag_data(), parent_set = data$dag_parent_set)
-    #   source_trm <- evamtools:::cpm2tm(tmp_data)$weighted_fgraph
-    # }else if(input$input2build == "matrix"){
-    #   source_trm <- evamtools:::theta_to_trans_rate_3_SM(data$thetas[1:input$gene_number, 1:input$gene_number],
-    #                       inner_transition = evamtools:::inner_transitionRate_3_1)
-    # }
-
-    tryCatch({
+      tryCatch({
       if(input$gene_number >= 7){
         showModal(dataModal("Beware! You are running a dataset with 7 genes or more. This can take longer than usual and plots may be crowded. We recommend using top_paths options in the Results' tab.", type = "Warning: "))
       }
@@ -1103,9 +1019,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         mccbn_opts$adaptive <- TRUE
       } else mccbn_opts$adaptive <- FALSE
 
-      ## FIXME: comment_out_freqs2csd
-      ## data2run <- evamtools:::freqs2csd(display_freqs(),
-      ##                                   data$gene_names[1:input$gene_number])
       data2run <- evamtools:::genotypeCounts_to_data(display_freqs(),
                                                      e = 0)
         
@@ -1117,13 +1030,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       if(!is.null(input$more_cpms)){
         methods <- unique(c(methods, input$more_cpms[input$more_cpms %in% .ev_SHINY_dflt$all_cpms]))
       }
-      ## cpm_output <- evam(data2run, methods = methods
-      ##   , mhn_opts = mhn_opts
-      ##   , ot_opts = ot_opts
-      ##   , cbn_opts = cbn_opts
-      ##   , hesbcn_opts = hesbcn_opts
-      ##   , oncobn_opts = oncobn_opts
-      ##   , mccbn_opts = mccbn_opts)
       cpm_output <- R.utils::withTimeout({evam(data2run, methods = methods
         , mhn_opts = mhn_opts
         , ot_opts = ot_opts
@@ -1140,19 +1046,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                 "Most likely you exceeded maximum ",
                                 "allowed time (EVAM_MAX_ELAPSED).")
 
-      ## To see Source data in the results section
-      # if(input$input2build != "csd"){
-      #   ## FIXME: rename f_graph to trans_rate_mat: ???
-      #   cpm_output$Source_trans_rate_mat <- source_trm
-      #   cpm_output$Source_trans_mat <- evamtools:::rowScaleMatrix(source_trm)
-      # }
-      # if(input$input2build == "dag"){
-      #   cpm_output$Source_model <- dag_data()
-      #   cpm_output$Source_parent_set <- data$dag_parent_set[1:input$gene_number]
-      # } else if(input$input2build == "matrix"){
-      #   cpm_output$Source_theta <- data$thetas[1:input$gene_number
-      #     , 1:input$gene_number]
-      # }
       sampled_from_CPMs <- NULL
       do_sampling <- input$do_sampling == "TRUE"
       if (do_sampling) {
@@ -1207,33 +1100,20 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       Sys.sleep(1)
       shinyjs::enable("analysis")
 
-      ## Maybe I do no want this
+      ## FIXME: Maybe I do no want this
       updateTabsetPanel(session, "navbar", selected = "result_viewer")
       updateRadioButtons(session, "select_cpm", selected = result_name)
-
-      # selected <- ifelse(is.null(input$select_cpm), last_visited_cpm, input$select_cpm)
-      # if(is.null(all_cpm_out[[selected]]$Source_genotype_transitions)){
-      #     updateCheckboxGroupInput(session, "cpm2show",
-      #         selected = setdiff(c(input$cpm2show), "Source"))
-      #     shinyjs::disable(selector = "#cpm2show input[value='Source']")
-      # }else{
-      #     shinyjs::enable(selector = "#cpm2show input[value='Source']")
-      # }
 
      }, error = function(e){
       showModal(dataModal(e[[1]]))
     })
   })
 
-  ## FIXME: No default "user"
-  ## cpm_out <- sample_evam_output
-  ## all_cpm_out <- reactiveValues(user = cpm_out)
   all_cpm_out <- reactiveValues()
 
   output$sims <- renderUI({
     if ((length(names(all_cpm_out)) > 0) && (!is.null(input$select_cpm))) {
       tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
-      # column_models2show <- floor(12 / length(input$cpm2show))
 
       number_of_columns <- floor(12 /
         ifelse(length(input$cpm2show) <=4, 4, length(input$cpm2show)))
@@ -1248,7 +1128,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
           , met)
         })
         return(
-          # column(3,
           column(number_of_columns,
             plotOutput(sprintf("plot_sims_%s", met)))
         )
@@ -1263,7 +1142,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       shinyjs::enable(selector = "#download_cpm")
 
       ## Main display
-      # column_models2show <- floor(12 / length(input$cpm2show))
       selected_plot_type <- input$data2plot
 
       number_of_columns <- floor(12 /
@@ -1273,9 +1151,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
           method_data <- evamtools:::process_data(tmp_data, met, plot_type = selected_plot_type)
           output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
             pl <- evamtools:::plot_genot_fg(method_data$data2plot,
-                      # observations = tmp_data$analyzed_data, # We use it to define "Observed" and "Not Observed" genotypes
                       observations = tmp_data$original_data, # We use it to define "Observed" and "Not Observed" genotypes
-                      # predicted_genotypes = method_data$predicted_genotype_freqs, # To compute node sizes if sampled_counts is NULL
                       sampled_counts = method_data$sampled_genotype_counts,
                       top_paths = input$freq2label,
                       label_type = input$label2plot,
@@ -1283,7 +1159,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                       # , freq2label = input$freq2label)
           })
           return(
-            # column(3,
             column(number_of_columns,
               plotOutput(sprintf("plot_sims2_%s", met)))
           )
@@ -1378,17 +1253,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       all_names <- c(all_names, all_cpm_out[[i]]$orig_data$name)
     }
 
-    ## FIXME: No default "user"
     if ((length(all_names) > 0) && (last_visited_cpm != "")) {
         selected <- names(all_cpm_out)
-    ## if (length(all_names) > 0) {
-        ## The first selected is dead code
-        ## selected <- ifelse(is.null(input$select_csd),
-        ##                    "user", input$select_csd)
-        ## selected <- ifelse(input$select_csd %in%
-        ##                    names(all_cpm_out),
-        ##                    input$select_csd, "user")
-        
         
         tagList(
             radioButtons(
@@ -1461,35 +1327,4 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 file)
     }
   )
-
-  # ## We only want the "Source" option enable if we have the data to show it
-  # observeEvent(input$select_cpm, {
-  #   selected <- ifelse(is.null(input$select_cpm), last_visited_cpm, input$select_cpm)
-  #   if(is.null(all_cpm_out[[selected]]$Source_genotype_transitions)){
-  #     updateCheckboxGroupInput(session, "cpm2show",
-  #       selected = setdiff(c(input$cpm2show), "Source"))
-  #     shinyjs::disable(selector = "#cpm2show input[value='Source']")
-  #   }else{
-  #     shinyjs::enable(selector = "#cpm2show input[value='Source']")
-  #   }
-  #   if(is.na(all_cpm_out[[selected]]$MCCBN_model)){
-  #     updateCheckboxGroupInput(session, "cpm2show",
-  #       selected = setdiff(c(input$cpm2show), "Source"))
-  #     shinyjs::disable(selector = "#cpm2show input[value='MCCBN']")
-  #   }else{
-  #     shinyjs::enable(selector = "#cpm2show input[value='MCCBN']")
-  #   }
-  # })
-
-  ## Upload button
-  # observeEvent(input$output_cpms, {
-  #   cpm_out <- readRDS(input$output_cpms$datapath)
-  #   ## FIXME: f_graph to trans_rate_mat?
-  #   # cpm_out$MHN_f_graph <- cpm_out$MHN_trans_rate_mat
-  #   if(is.null(cpm_out$name)) cpm_out$name <- "User_Data"
-  #   all_cpm_out[[cpm_out$name]] <- cpm_out
-  #   updateRadioButtons(session, "select_cpm", selected = cpm_out$name)
-  #   ## To see if I disable original data
-  #   shinyjs::disable(selector = "#variable input[value='cyl']")
-  # })
 }

@@ -14,14 +14,6 @@
 ## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-
-## ## timings
-## dates_for_timing <- function(x) {
-##     cat("\n At  ;", x, ";", date(), "\n")
-## }
-
-
-
 ## Sample an indivial from a transition rate matrix}
 ## \item{trm}{transition rate matrix}
 ## \item{T_sampling}{Time at which sampling happens.}
@@ -839,10 +831,6 @@ random_evam <- function(ngenes = NULL, gene_names = NULL,
     return(output)
 }
 
-
-
-
-## Pablo: use this?
 ## Named matrix of thetas -> all of the model and predicted probs
 ## Recall these thetas have theta_i,j: effect of j on i.
 MHN_from_thetas <- function(thetas) {
@@ -866,10 +854,6 @@ MHN_from_thetas <- function(thetas) {
     return(output)
 }
 
-
-
-
-## Pablo: use this?
 ## poset as adjacency matrix and vector of lambdas
 ## both named -> all of the cbn output
 CBN_from_poset_lambdas <- function(poset, lambdas) {
@@ -884,8 +868,6 @@ CBN_from_poset_lambdas <- function(poset, lambdas) {
     return(output)
 }
 
-
-## Pablo: or use this if you use a data frame
 ## data frame with "From", "To", "Edges" and lambdas -> all of the cbn output
 CBN_model_2_output <- function(model) {
     ## extra level of nesting
@@ -930,11 +912,6 @@ poset_2_data_frame <- function(poset) {
 }
 
 
-
-
-
-
-## Pablo: use this one?
 ## poset as adjac. matrix, vector of lambdas, parent_set -> full HESBCN output
 HESBCN_from_poset_lambdas_relation_probs <- function(poset, lambdas,
                                                      hesbcn_probs) {
@@ -969,10 +946,6 @@ HESBCN_from_poset_lambdas_relation_probs <- function(poset, lambdas,
 }
 
 
-
-
-
-## Pablo: or use this if you use a data frame and parent frame and parent set
 ## data frame with "From", "To", "Edges" and lambdas -> all of the cbn output
 HESBCN_model_2_output <- function(model, parent_set) {
     tmpo <- cpm2tm(list(edges = model, parent_set = parent_set))
@@ -1015,7 +988,6 @@ OT_random_poset <- function(ngenes, graph_density) {
 }
 
 
-## Pablo call this?
 ## poset as adjacency matrix, weights, epos -> full output, as from evam
 ##   weights: do not have Root
 ##   poset: one for OT, so no column with two or more parents
@@ -1039,7 +1011,6 @@ OT_model_from_edges_lambdas <- function(edges, weights) {
 }
 
 
-## Pablo call this?
 ## OT model and epos -> full output, as from evam
 OT_model_2_output <- function(model, epos) {
     ## We need to go back to the DAG representation
@@ -1143,28 +1114,6 @@ oncotree_fit_parent_from_adjm_weights <- function(adjm, weights) {
 }
 
 
-
-## o1 <- oncotree_fit_from_dag_weights_epos(ab, runif(5), 0.1)
-
-
-## ## this is the right call
-## o1p <- distribution.oncotree(o1, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
-
-## ## And note these are identical
-## o2 <- o1
-## o2$parent$obs.weight <- runif(length(o1$parent$est.weight))
-## o2p <- distribution.oncotree(o2, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
-## stopifnot(all.equal(o1p$Prob, o2p$Prob))
-
-
-## distribution.oncotree(o1, with.probs = TRUE, with.errors = FALSE, edge.weights = "estimated")
-
-
-## distribution.oncotree(otf, with.probs = TRUE, with.errors = FALSE, edge.weights = "estimated")
-## distribution.oncotree(otf, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
-
-
-## Pablo calls this?
 OncoBN_from_poset_thetas_epsilon_model <- function(poset,
                                                 thetas,
                                                 epsilon,

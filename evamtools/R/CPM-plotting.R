@@ -410,14 +410,6 @@ plot_genot_fg <- function(trans_mat
             val <- val * -1
         }
     }
-    # for (idx in 1:(length(y_distribution) - 1)){
-    #     if (y_distribution[idx] == y_distribution[idx +1]){
-    #         labels_dists[idx] <- val
-    #         # val <- val*-1 ## So we alternate +1 and -1
-    #         labels_dists[idx + 1] <- val * -1
-    #         # val <- val*-1 ## So we alternate +1 and -1
-    #     }
-    # }
     ## Actual plotting
 
     plot(graph
@@ -461,8 +453,6 @@ plot_genot_fg <- function(trans_mat
        , pos = margin)
     axis(1, tick = FALSE, at = 0, labels = "Number of features acquired",
          pos = margin - 0.15)
-    ## mtext("Number of features acquired", side = 1, line = -1)
-    ## title(xlab = "Number of features acquired", line = 2)
     
     if (!(is.null(observations))) {
         legend(-1.25,
@@ -531,12 +521,6 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
     ))
 }
 
-## dag_layout <- function(graph){ ## Avoiding lines
-##     lyt <- igraph::layout.reingold.tilford(graph)
-##     if(all(lyt[,1] == 0)) lyt[,1] <- rep(c(0,0.5,0,-0.5),
-##                                          ceiling(nrow(lyt)/3))[1:nrow(lyt)]
-##     return(lyt)
-## }
 
 ## The max depth of a node from Root
 ##  used for layout_with_sugiyama
@@ -644,22 +628,6 @@ DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
                    edges = list(textCol = "darkgoldenrod4",
                                 cex = 1.5)))
     Rgraphviz::renderGraph(gg1)
-    
-    ## graph::plot(g1,
-    ##             attrs = list(node = list(color = "transparent",
-    ##                                      fontsize = font_size,
-    ##                                      fontcolor = "black"), ## dodgerblue4
-    ##                          edge = list(arrowsize = arrowsize,
-    ##                                      lwd = edge_width,
-    ##                                      fontsize = 6
-    ##                                     )),
-    ##             ## labelfontcolor = "red")), ## does nothing
-    ##             ## Last, if you pass edge in attrs
-    ##             edgeAttrs = list(color = colors_edges,
-    ##                              label = labels_edges),
-    ##             main = main)
-
-    
 }
 
 

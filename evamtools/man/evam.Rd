@@ -363,6 +363,7 @@ out2 <- evam(Dat1,
             methods = c("CBN", "OT", "OncoBN",
                         "MHN"),
             mhn_opts = list(lambda = 5/nrow(Dat1)),
+            cbn_opts = list(omp_threads = 2),
             oncobn_opts = list(model = "CBN"))
 
 

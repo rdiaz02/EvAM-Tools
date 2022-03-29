@@ -103,12 +103,3 @@ add_WT <- function(x, N = 10000) {
     x <- rbind(x, matrix(0, nrow = N, ncol = ncx))
     return(x)
 }
-
-
-
-## ## a simple check
-## any_constant_col <- function(x) {
-##     nr <- nrow(x)
-##     mcs <- max(colSums(x))
-##     any(mcs == nr)
-## }

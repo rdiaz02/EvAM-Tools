@@ -33,14 +33,14 @@ evam_string_order <- function(x) {
 
 ## TODO add support for custom genes names in the str conversions
 
-#' @title Integer to binary
-#' 
-#' @description  Transform a genotype from integer nomenclature to binary coding
-#' 
-#' @param int_state Ingeter >=0
-#' @param n Integer. Number of digits to return
-#' 
-#' @return vector with 0 and 1 with the binary coding
+## #' @title Integer to binary
+## #' 
+## #' @description  Transform a genotype from integer nomenclature to binary coding
+## #' 
+## #' @param int_state Ingeter >=0
+## #' @param n Integer. Number of digits to return
+## #' 
+## #' @return vector with 0 and 1 with the binary coding
 int2binary <- function(int_state, n = NULL) {
     int_state <- as.integer(int_state)
 
@@ -108,15 +108,15 @@ binary2int <- function(binary_state){
     return(as.integer(binary_state %*% powers.of.two))
 }
 
-#' @title Binary to string
-#' 
-#' @description  Transform a genotype from binary nomenclature to integer string
-#' 
-#' @param binary_state vector with 0 and 1
-#' @param sep String. Separator between genes letters
-#' @param wt String. How to define the wild type
-#' 
-#' @return string with mutated genes
+## #' @title Binary to string
+## #' 
+## #' @description  Transform a genotype from binary nomenclature to integer string
+## #' 
+## #' @param binary_state vector with 0 and 1
+## #' @param sep String. Separator between genes letters
+## #' @param wt String. How to define the wild type
+## #' 
+## #' @return string with mutated genes
 binary2str <- function(binary_state, sep = ", ", wt = "WT"){
     if(length(binary_state) == 0) stop("Empty state")
 
@@ -130,16 +130,16 @@ binary2str <- function(binary_state, sep = ", ", wt = "WT"){
         ], collapse = sep))
 }
 
-#' @title String to binary
-#' 
-#' @description Transform a genotype from string nomenclature to binary coding
-#' 
-#' @param str_state String
-#' @param sep String. Separator between genes letters
-#' @param wt String. How to define the wild type
-#' @param n Integer. Number of digits to return
-#' 
-#' @return vector with 0 and 1 with the binary coding
+## #' @title String to binary
+## #' 
+## #' @description Transform a genotype from string nomenclature to binary coding
+## #' 
+## #' @param str_state String
+## #' @param sep String. Separator between genes letters
+## #' @param wt String. How to define the wild type
+## #' @param n Integer. Number of digits to return
+## #' 
+## #' @return vector with 0 and 1 with the binary coding
 str2binary <- function(str_state, sep =", ", wt = "WT", n = NULL){
     if(str_state == wt && !(is.null(n)) && n > 0) return(rep(0, n))
     else if (str_state == wt) return(c(0))
@@ -157,16 +157,16 @@ str2binary <- function(str_state, sep =", ", wt = "WT", n = NULL){
         , rep(0, remaining_digits)))
 } 
 
-#' @title String to Integer
-#' 
-#' @description Transform a genotype from string nomenclature to binary coding
-#' 
-#' @param str_state String
-#' @param sep String. Separator between genes letters
-#' @param wt String. How to define the wild type
-#' @param n Integer. Number of digits to return
-#' 
-#' @return vector with 0 and 1 with the binary coding
+## #' @title String to Integer
+## #' 
+## #' @description Transform a genotype from string nomenclature to binary coding
+## #' 
+## #' @param str_state String
+## #' @param sep String. Separator between genes letters
+## #' @param wt String. How to define the wild type
+## #' @param n Integer. Number of digits to return
+## #' 
+## #' @return vector with 0 and 1 with the binary coding
 str2int <- function(str_state, sep =", ", wt = "WT", n = NULL){
     binary_state <- str2binary(str_state, sep = sep, wt = wt, n = n)
     return(binary2int(binary_state))
@@ -206,40 +206,3 @@ generate_pD_sorted_genotypes <- function(n_genes, gene_names = NULL,
 
     return(sorted_genotypes)
 }
-
-
-
-
-
-## RDU: FIXME: Esto está roto!!!
-##  Por ejemplo, con n_genes = 0 no funciona
-##  Y qué sentido tiene dar algo con 0 genes?
-##  Y LETTERS[1:0] devuelve A
-##  No se debe añadir funcionalidad que no se usa a menos que se testee
-## #' @title List of sorted genotypes
-## #' 
-## #' @description Returns all sorted genotypes for a given number of genes
-## #' 
-## #' @param n_genes Ingeter >=0
-## #' @param gene_names Vector of strings
-## #'      If NULL, defaults gene_names will the firt n_genes letters of the alphabet
-## #' 
-## #' @return Vector with the sorted genotypes
-## generate_pD_sorted_genotypes <- function(n_genes, gene_names = NULL){
-##     if (is.null(gene_names)) gene_names <- LETTERS[1:n_genes]
-##     # if(n_genes < 0) stop("Number of genes should be >= 0")
-##     if(n_genes == 0) {states <- c()}
-##     else {n_states <- 2**n_genes}
-
-##     if(is.null(gene_names)) gene_names <- LETTERS[1:n_genes]
-
-##     sorted_genotypes <- vapply(0:(n_states - 1), function(x){
-##         tmp_genotype <- paste(gene_names[int2binary(x, n_genes) == 1]
-##             , collapse = ", ")
-##         tmp_genotype <- ifelse(tmp_genotype == "", "WT", tmp_genotype)
-##         return(tmp_genotype)
-##     }, character(1))
-
-##     return(sorted_genotypes)
-## }
-

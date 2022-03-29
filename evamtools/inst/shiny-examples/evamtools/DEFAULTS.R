@@ -1,6 +1,5 @@
 ## Source this file whenever you make changes to it
 
-## default_genes <- 3
 max_genes <- 10
 all_gene_names <- LETTERS[1: max_genes]
 template_dag <- matrix(0, ncol = max_genes + 1, nrow = max_genes + 1)
