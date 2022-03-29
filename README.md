@@ -158,7 +158,14 @@ You can also [build your own Docker image](#build-your-own-docker-image) and you
       
 	  
 ### Docker images 
-We provide two docker images, one for running the Shiny app, and another with  RStudio to run the evamtools package directly.  They are available from **FIXME**. Download the one you need.
+We provide two docker images, one for running the Shiny app, and another with  RStudio to run the evamtools package directly.  They are available from https://hub.docker.com/rdiaz02/evamshiny and 
+https://hub.docker.com/rdiaz02/evamrstudio ; the first for running the Shiny app, the second for using the package from RStudio. Download the one you need.
+
+<!-- FIXME: test the above URLS -->
+
+
+(Details about Docker are available here: https://docs.docker.com/get-docker/ .
+Details about R with Docker and Rocker project here: https://www.rocker-project.org/ )
 
 
 ### How to run the R package and the shiny app locally 
@@ -172,129 +179,29 @@ runShiny()
 (If you do not want to run the Shiny app, do not issue `runShiny`).
 
 
-
 ### How to run the R package from the Docker image
 
 
 Similar to https://hub.docker.com/r/rocker/rstudio  (and see further options there):
 
 ```
-sudo docker run --rm -p 8787:8787 -e PASSWORD=yourpasswordhere evamrstudio
+sudo docker run --rm -p 8787:8787 -e PASSWORD=yourpasswordhere rdiaz02/evamrstudio
 ```
 
 Go to `localhost:8787` and log in with username "rstudio" and the password you set. See https://hub.docker.com/r/rocker/rstudio for further options.
 
 
-<!-- ## Starts R; then you can load the package -->
-<!-- sudo docker run -it --entrypoint R shinyevam -->
-
-<!-- ## Even simpler: get to the shell -->
-<!-- sudo docker run -it --entrypoint bash shinyevam  -->
-<!-- ## Now you can start R, or Emacs and from it R -->
-
-
-<!-- ``` -->
-
-
-FIXME:  substitute all 
-- evamrstudio 
-- evamshiny 
-
-by the appropriate 
-- rdiaz02/evamrstudio
-- rdiaz02/evamshiny
-
-
-
 ### How to run the Shiny app from the Docker image
 
 ```
-sudo docker run -d -p 4080:3000 --memory="2g" --name EVAM1 evamshiny
+sudo docker run -d -p 4080:3000 --memory="2g" --name EVAM1 rdiaz02/evamshiny
 ```
 
-This runs the `shinyevam` tagged docker image, mapping port 3000 of the container to port 4080 of the host  (so if you want to use the usual port 80, use 80 instead of 4080). You can use whatever you want instead of "EVAM1"; it is just a name to make other operations simpler (like stopping the container).
+This runs the `evamshiny` docker image, mapping port 3000 of the container to port 4080 of the host  (so if you want to use the usual port 80, write 80 instead of 4080). You can use whatever you want instead of "EVAM1"; it is just a name to make other operations simpler (like stopping the container).
 
 This is a *non-interactive run* (and we use the "-d" or "--detach" options, so it is running in detached mode), and you can point your browser to 0.0.0.0:4080 and shiny should be there. (In this example, we also limit the maximum memory to 2 GB).
 
 (If you launch it this way, you can launch an arbitrary number of containers. For example, launch 15 different ones by specifying 15 different ports and 15 different names).
-
-
-
----
-
-### Build your own Docker images
-
-(Details about Docker are available here: https://docs.docker.com/get-docker/ .
-Details about R with Docker and Rocker project here: https://www.rocker-project.org/ )
-
-If you want to how we create the Docker images, modify the `Dockerfile`s: Dockerfile-evam-rstudio (for the RStudio Dockerfile that launches RStudio) or Dockerfile-evam-shiny (well, for the Dockerfile that creates the container to run shiny). Then, from the `EvAM-Tools` directory run one or both of:
-
-```
-sudo docker build -f Dockerfile-evam-shiny  --tag evamshiny .
-sudo docker build -f Dockerfile-evam-rstudio  --tag evamrstudio .
-```
-
-You can now run these images, as explained above.
-
-(It is possible to run docker without sudo; look a the Docker documentation).
-
-
-**What if creating the image fails because of no internet connection from the container**
-Creating the above image requires installing R packages and that might fail because the Docker container cannot connect with the internet. The following might help: https://superuser.com/a/1582710 , https://superuser.com/a/1619378 . In many cases, doing `sudo systemctl restart docker` might be enough.
-
-
-**Cleaning the build cache and stale old images**
-Sometimes (e.g., if the base containers change or you want to remove build cache) you might want to issue
-```
-docker builder prune
-```
-
-or the much more drastic
-
-```
-docker system prune -a
-```
-
-Please, read the documentation for both.
-
-#### How to update the Docker image if you change the code 
-Build the Docker images as [above](#build-your-own-docker-image**. After the first time, the build process should run much faster because many steps will be skipped.
-
-
-**Copying docker images from one machine to another**
-Yes, that can be done. See here, for example: https://stackoverflow.com/a/23938978
-
-
-
-
----
-
-
-
-### How to run the Shiny app in a local intranet  
-
-#### From the Docker image
-
-Once you have the Docker image built run the following command to run the image connecting port 3000 of the computer with port 3000 of the container
-
-```
-docker run -p 4000:3000 shinyevam ##
-```
-
-4000 is the port on the host, 3000 the port of the container (unless you change the code and recreate the image, that is fixed)
-
-
-**FIXME: Pablo writes this**  Ramon will finish it.
-
-- Is this run as root or a user? Explain the pros and cons. If possible, set up to run as user, not root.
-
-
-
-####  Without the Docker image
-
-To run the shiny app you may want to change the port (right now it runs in 3000). This can be done by modifying line 27 in `evamtools/R/runShiny.R` (the one with
-`shiny::runApp(appDir, port = 3000, host = "0.0.0.0", display.mode = "normal")`). Then, the Shiny app has to be launched as explained [above](#how-to-run-the-r-package-and-the-shiny-app-locally) and the corresponding port in the server has to be opened to make it visible. 
-
 
 ---
 ---

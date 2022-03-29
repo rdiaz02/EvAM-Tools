@@ -409,6 +409,55 @@ Moreover, notice this in the Shiny Server documentation (\url{https://shiny.rstu
 However, we might be missing something; if you think Shiny Server would allow or ease some use cases, please let us know.
 
 
+\subsection{I want to create my own Docker images}
+
+If you want to modify the Docker images, modify the `Dockerfile`s: Dockerfile-evam-rstudio (for the RStudio Dockerfile that launches RStudio) or Dockerfile-evam-shiny (well, for the Dockerfile that creates the container to run shiny). More details are provided in the Additional documentation: 
+FIXME: URL.
+
+
+Then, from the `EvAM-Tools` directory run one or both of:
+
+\begin{verbatim}
+sudo docker build -f Dockerfile-evam-shiny  --tag somename .
+sudo docker build -f Dockerfile-evam-rstudio  --tag somename .
+\end{verbatim}
+
+
+You can now run these images, as explained in the README file..
+
+(It is possible to run docker without sudo; look a the Docker documentation).
+
+
+\subsubsection{What if creating the image fails because of no internet connection from the container}
+Creating the above image requires installing R packages and that might fail because the Docker container cannot connect with the internet. The following might help: \url{https://superuser.com/a/1582710}, \url{https://superuser.com/a/1619378}. In many cases, doing
+\verb@ sudo systemctl restart docker@ might be enough.
+
+
+\subsubsection{Cleaning the build cache and stale old images}
+Sometimes (e.g., if the base containers change or you want to remove build cache) you might want to issue
+
+\begin{verbatim}
+docker builder prune
+\end{verbatim}
+
+or the much more drastic
+
+\begin{verbatim}
+docker system prune -a
+
+\end{verbatim}
+Please, read the documentation for both.
+
+% \subsubsection{How to update the Docker image if you change the code} 
+% Build the Docker images as explained before. After the first time, the build process should run much faster because many steps will be skipped.
+
+
+\subsubsection{Copying docker images from one machine to another}
+Yes, that can be done. See here, for example: \url{https://stackoverflow.com/a/23938978}
+
+
+
+
 \bibliographystyle{natbib}
 \bibliography{cpm_refs}
 
