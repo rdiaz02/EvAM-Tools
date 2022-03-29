@@ -1204,7 +1204,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         checkboxGroupInput(inputId = "cpm2show",
           label = "CPMs to show",
           choices = c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
-          selected = c("OT", "OncoBN", "CBN", "MHN", "HESBCN")),
+          selected = c("OT", "OncoBN", "CBN", "MHN")),
 
       tags$div(class = "inline",
         radioButtons(inputId = "data2plot",
