@@ -1,4 +1,5 @@
-# What is Evam-tools?
+***
+<center><h1>Evam-tools</h1></center>
 ***
 
 ```Evam-tools``` is an R package and Shiny app that provides tools for evolutionary accumulation, or event accumulation, models. We use code from  "Cancer Progression Models" (CPM) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost). ```Evam-tools``` is  also available as an R package (see https://github.com/rdiaz02/EvAM-Tools).
@@ -12,12 +13,10 @@ This web interface provides a user-friendly interactive version of the package. 
 <!-- You add/remove images by adding HTML code. The usual img block. But do not leave that commented code around or shiny might break. -->
 
 
+&nbsp;
+### What is _cross-sectional_ data?<a id="helpcsd"></a> 
 
-****
-## What is _cross-sectional_ data?<a id="helpcsd"></a> 
-***
-
-In cross-sectional data, a single sample has is obtained from each patient. That single sample represents the "observed genotype" of, for example, the tumor of that patient. Genotype can refer to single point mutations, insertions, deletions, or any other genetic modification. In this app, as is often done by CPM software, we store cross-sectional data in a matrix, where rows are patients or subjects, and columns are genes; the data is a 1 if the event was observed and 0 if it was not.
+In cross-sectional data, a single sample is obtained from each subject or patient. That single sample represents the "observed genotype" of, for example, the tumor of that patient. Genotype can refer to single point mutations, insertions, deletions, or any other genetic modification. In this app, as is often done by CPM software, we store cross-sectional data in a matrix, where rows are patients or subjects, and columns are genes; the data is a 1 if the event was observed and 0 if it was not.
 
 &nbsp;&nbsp;
 
@@ -78,13 +77,14 @@ The results include:
 * You can also *download* the tabular results, fitted models, and the analyzed data.
 
 
+&nbsp;&nbsp;
+***
+## Additional documentation<a id="additional_docs"></a>
+***
 
-<!-- FIXME: add this when ready -->
-<!-- ## Additional documentation<a id="additional_docs"></a> -->
-<!-- *** -->
+Additional documentation is available from https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_doc_all.pdf.
 
-<!-- Additional documentation is available from the R package itself (you would need to install the package or download one of the Docker images and run it from there) and the PDF  https://github.com/rdiaz02/EvAM-Tools/Additional_doc.pdf. -->
-
+(If you install the R package or the RStudio Docker image with the package, you also have access to the documentation of the package, which is included in this pdf).
 
 
 &nbsp;&nbsp;
@@ -97,7 +97,7 @@ The results include:
 
 Inactive connections will timeout after 2 hours. The page will become gray, and if you refresh (e.g., F5 in most browsers) after this time, you will not get back your results, figures, etc, but start another session. 
 
-Maximum RAM of any process is limited to 2 GB. Likewise, the analyses should be aborted after 1.5 hours of elapsed (not CPU ---we parallelize the runs) time. If you want to use the Shiny app without these limits, install a local copy. (To modify the time limit, change the value of variable EVAM_MAX_ELAPSED, in the definition of function "server", in file "server.R".  The RAM limit is imposed on the Docker containers we use; to lift it, run Docker without the memory limit.)
+Maximum RAM of any process is limited to 2 GB. Likewise, the analyses should be aborted after 1.5 hours of elapsed (not CPU ---we parallelize the runs) time. If you want to use the Shiny app without these limits, install a local copy. (To modify the time limit, change the value of variable EVAM_MAX_ELAPSED, in the definition of function "server", in file "server.R".  The RAM limit is imposed on the Docker containers we use; to remove it, run Docker without the memory limit.)
 
 
 &nbsp;&nbsp;
@@ -119,7 +119,7 @@ Maximum RAM of any process is limited to 2 GB. Likewise, the analyses should be 
 
 &nbsp;
 
-
+****
 ## Default options and default CPMs run
 ***
 
@@ -128,6 +128,7 @@ Maximum RAM of any process is limited to 2 GB. Likewise, the analyses should be 
 - Most methods have other options that can be modified. Again, check ```Advanced options and CPMs to use```.
 
 
+****
 ### References and related repositories<a id="refs"></a>
 ***
 

@@ -43,7 +43,7 @@ We provide an R package, evamtools, and a Shiny (https://shiny.rstudio.com/) app
   * Using the shiny app, easily visualize the effects of changes in genotype composition on the fitted models by entering user-defined cross-sectional data using a GUI.
 
 
-For easier use, we provide links to Docker images that you can download and run, as well as instructions on how to build Docker images. You can also run the Shiny app on our servers: http://evamtools.iib.uam.es .
+For easier use, we provide links to Docker images that you can download and run, as well as instructions on how to build Docker images. You can also run the Shiny app on our servers: https://www.iib.uam.es/evamtools/ .
 
 
 
@@ -337,3 +337,8 @@ The R package itself with standard organization. Directories and files under ins
   consecutive tumor evolution using cancer progression models: What genotype
   comes next? PLOS Computational Biology, 17(12),
   1009055. http://dx.doi.org/10.1371/journal.pcbi.1009055
+
+
+
+## Additional documentation
+   Additional documentation is available from: https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_doc_all.pdf
