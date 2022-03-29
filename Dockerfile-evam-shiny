@@ -115,8 +115,9 @@ COPY . /app/
 
 ## (and rm the > 130 MB .git directory)
 RUN cd /app && \
-    rm -r -f .git    
-
+    rm -r -f .git && \   
+    rm .gitignore
+    
 ## Install cbn
 RUN cd /app && \  
     cp ct-cbn-0.1.04b-RDU.tar.gz /app/Sources && \
@@ -130,6 +131,7 @@ RUN cd /app && \
 ## Install EvAM-tools with paranoid testing
 RUN cd /app && \
     rm -r -f evamtools.Rcheck && \
+    rm evamtools_*.tar.gz && \
     V_PKG=$(cat ./evamtools/DESCRIPTION | grep Version | cut -d' ' -f2) && \
     R --no-site-file --no-init-file CMD build evamtools && \
     R --no-site-file --no-init-file CMD INSTALL --install-tests evamtools_$V_PKG.tar.gz && \

@@ -1,7 +1,7 @@
 Package: evamtools
 Type: Package
 Title: Implimentation of CPM and related tools to test their performance
-Version: 1.0.3
+Version: 1.0.4
 Date: 2022-03-29
 Authors@R: c(
             person("Ramon", "Diaz-Uriarte",			      
