@@ -8,7 +8,6 @@ FROM rocker/r-ver:4.1.3
 ######################################################################
 ######################################################################
 
-
 RUN apt-get update && \
     apt-get install -f -y software-properties-common && \
     rm -rf /var/lib/apt/lists/* && \
@@ -33,18 +32,18 @@ RUN apt-get update && \
     apt-get install -y pkg-config
 
 
-## Make sure these are set (we use sort and order)
-## Using C.UTF-8 gives a warning in RStudio; use en_US
-RUN apt-get update && \
-    apt-get install -y locales 
+## ## Make sure these are set (we use sort and order)
+## ## Using C.UTF-8 gives a warning in RStudio; use en_US
+## RUN apt-get update && \
+##     apt-get install -y locales 
 
-RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
-    locale-gen en_US.UTF-8 && \
-    update-locale LANG=en_US.UTF-8
+## RUN sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen && \
+##     locale-gen en_US.UTF-8 && \
+##     update-locale LANG=en_US.UTF-8
 
-ENV LANG en_US.UTF-8
-ENV LANGUAGE en_US:en
-ENV LC_ALL en_US.UTF-8
+## ENV LANG en_US.UTF-8
+## ENV LANGUAGE en_US:en
+## ENV LC_ALL en_US.UTF-8
 
 
 ## ## In case I need to debug stuff have a sensible editor :)
@@ -128,12 +127,13 @@ RUN cd /app && \
     make && \
     cp -t /usr/local/bin/ ct-cbn h-cbn 
 
-## Install EvAM-tools 
+## Install EvAM-tools with paranoid testing
 RUN cd /app && \
     rm -r -f evamtools.Rcheck && \
     V_PKG=$(cat ./evamtools/DESCRIPTION | grep Version | cut -d' ' -f2) && \
     R --no-site-file --no-init-file CMD build evamtools && \
     R --no-site-file --no-init-file CMD INSTALL --install-tests evamtools_$V_PKG.tar.gz && \
+    export TESTTHAT_CPUS=$(cat /proc/cpuinfo | awk '/^processor/{print $3}' | tail -n 1) && \
     R --no-site-file --no-init-file CMD check --no-manual evamtools_$V_PKG.tar.gz && \
     R_ENVIRON_USER=./Renviron.based_on_bioc R --no-site-file --no-init-file CMD check --no-manual evamtools_$V_PKG.tar.gz
 
@@ -173,7 +173,7 @@ ENTRYPOINT ["R"]
 
 
 ## Debugging errors: for example, start as
-## sudo docker run -it --entrypoint bash shinyevam
+## sudo docker run -it --entrypoint bash evamshiny
 
 
 
