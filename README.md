@@ -13,16 +13,10 @@
   * [How to install the R package](#how-to-install-the-r-package)
   * [Docker images](#docker-images)
   * [How to run the R package and the shiny app locally](#how-to-run-the-r-package-and-the-shiny-app-locally)
-  * [Run the R package from the Docker image](#run-the-r-package-from-the-docker-image)
-  * [Run the Shiny app from the Docker image](#run-the-shiny-app-from-the-docker-image)
-  * [Build your own Docker image](#build-your-own-docker-image)
-    + [How to update the Docker image if you change the code](#how-to-update-the-docker-image-if-you-change-the-code)
-  * [How to run the Shiny app in a local intranet](#how-to-run-the-shiny-app-in-a-local-intranet)
-    + [From the Docker image](#from-the-docker-image)
-    + [Without the Docker image](#without-the-docker-image)
+  * [How to run the R package from the Docker image](#how-to-run-the-r-package-from-the-docker-image)
+  * [How to run the Shiny app from the Docker image](#how-to-run-the-shiny-app-from-the-docker-image)
 - [Main files and directories](#main-files-and-directories)
   * [Dockerfile](#dockerfile)
-  * [docker](#docker)
   * [evamtools](#evamtools)
 - [References](#references)
   * [OT](#ot)
@@ -31,6 +25,7 @@
   * [HESBCN (PMCE)](#hesbcn-pmce)
   * [OncoBN (DBN)](#oncobn-dbn)
   * [Conditional prediction of genotypes and probabilities of paths from CPMs](#conditional-prediction-of-genotypes-and-probabilities-of-paths-from-cpms)
+- [Additional documentation](#additional-documentation)
 
 <!-- tocstop -->
 
