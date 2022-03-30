@@ -164,9 +164,9 @@ Details about Docker are available here: https://docs.docker.com/get-docker/ .
 Details about R with Docker and Rocker project here: https://www.rocker-project.org/ . Our images are based on the r-ver (https://hub.docker.com/r/rocker/r-ver) and rstudio (https://hub.docker.com/r/rocker/rstudio) Docker images from the Rocker project (https://www.rocker-project.org/).
 
 
-### How to run the R package and the shiny app locally 
+### How to run the R package and the shiny app locally without Docker
 
-Once the package is installed, if you want to run the Shiny app open an R terminal and type
+Install the [dependencies first](#how-to-install-the-r-package) and then the package. Once the package is installed, if you want to run the Shiny app open an R terminal and type
 
 ```
 library(evamtools)
@@ -186,6 +186,7 @@ sudo docker run --rm -p 8787:8787 -e PASSWORD=yourpasswordhere rdiaz02/evamrstud
 
 Go to `localhost:8787` and log in with username "rstudio" and the password you set. See https://hub.docker.com/r/rocker/rstudio for further options.
 
+(If you get errors such as "docker: Error response from daemon: driver failed programming external connectivity on" you might want to restart the docker service).
 
 ### How to run the Shiny app from the Docker image
 
