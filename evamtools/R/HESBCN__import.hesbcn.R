@@ -1,8 +1,8 @@
 ## Code from https://github.com/BIMIB-DISCo/PMCE/blob/main/Utilities/R/utils.R
 ## Commit 5578c79 from 2021-09-29
 
-## License: Apache License 2.0, which is compatible with the GPL 3 used by
-## the rest of this project.
+## License: Apache License 2.0, which can be combined with software under the
+## AGPL 3 as used by the rest of this project.
 
 ## Author of code: from commit history, most likely Daniele Ramazzotti (danro9685)
 

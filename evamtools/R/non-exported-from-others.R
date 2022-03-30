@@ -21,7 +21,6 @@ evam_checkProperMinimalAdjMat <-
     utils::getFromNamespace("checkProperMinimalAdjMat",
                             "OncoSimulR")
 
-
 evam_OTtoPoset <- utils::getFromNamespace("OTtoPoset",
                                           "OncoSimulR")
 
@@ -30,4 +29,3 @@ evam_posetToGraph <- utils::getFromNamespace("posetToGraph",
 
 evam_shannonI <- utils::getFromNamespace("shannonI",
                                          "OncoSimulR")
-

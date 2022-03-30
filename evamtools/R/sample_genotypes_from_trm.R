@@ -1,26 +1,17 @@
 # Copyright 2022 Ramon Diaz-Uriarte, Pablo Herrera Nieto.
 
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
+## This program is free software: you can redistribute it and/or modify it under
+## the terms of the GNU Affero General Public License (AGPLv3.0) as published by
+## the Free Software Foundation, either version 3 of the License, or (at your
+## option) any later version.
 
 ## This program is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## GNU Affero General Public License for more details.
 
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-## ## timings
-## dates_for_timing <- function(x) {
-##     cat("\n At  ;", x, ";", date(), "\n")
-## }
-
-
-
-
+## You should have received a copy of the GNU Affero General Public License along
+## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 ## Sample an indivial from a transition rate matrix}
@@ -326,8 +317,8 @@ process_samples <- function(sim, n_genes,
             statecounts_vector <- retval$state_counts[-1, "Counts"]
             names(statecounts_vector) <- retval$state_counts[-1, "Genotype"]
             statecounts_vector <- statecounts_vector[statecounts_vector > 0]
-            cstt2 <- cstt2[order(names(cstt2))]
-            statecounts_vector <- statecounts_vector[order(names(statecounts_vector))]
+            cstt2 <- cstt2[evam_string_order(names(cstt2))]
+            statecounts_vector <- statecounts_vector[evam_string_order(names(statecounts_vector))]
             stopifnot(isTRUE(all(cstt2 == statecounts_vector)))
         }
     }
@@ -374,9 +365,9 @@ standard_rank_genots_2 <- function(x, y) {
 
 sample_CPMs <- function(cpm_output
                       , N
-                      , methods = c("OT", "OncoBN",
-                                    "CBN", "MCCBN",
-                                    "MHN", "HESBCN")
+                      , methods = NULL ## c("OT", "OncoBN",
+                                    ## "CBN", "MCCBN",
+                                    ## "MHN", "HESBCN")
                       , output = c("sampled_genotype_counts")
                       , obs_noise = 0
                       , genotype_freqs_as_data = TRUE
@@ -385,23 +376,35 @@ sample_CPMs <- function(cpm_output
 
     ## Anything that is passed as "cpm_output" must have
     ## something_predicted_genotype_freqs
-    methods <- unique(methods)
-    available_methods <- vapply(methods,
-                                function(m) {
-                                    outn <- paste0(m, "_predicted_genotype_freqs")
-                                    return(!(is.null(cpm_output[[outn]])) &&
-                                           !(is.na(cpm_output[outn])))
-                                }, logical(1)
-                                )
-    available_methods <- names(which(available_methods))
-    
-    l_methods <- length(available_methods)
-    if (l_methods < length(methods)) {
-        warning("At least one method you asked to be sampled ",
-                "did not have output.")
+    if (!is.null(methods)) {
+        methods <- unique(methods)
+        available_methods <- vapply(methods,
+                                    function(m) {
+                                        outn <- paste0(m, "_predicted_genotype_freqs")
+                                        return(!(is.null(cpm_output[[outn]])) &&
+                                               !(is.na(cpm_output[outn])))
+                                    }, logical(1)
+                                    )
+        available_methods <- names(which(available_methods))
+        
+        l_methods <- length(available_methods)
+        if (l_methods < length(methods)) {
+            warning("At least one method you asked to be sampled ",
+                    "did not have output.")
+        }
+        methods <- available_methods
+    } else {
+        methods <- names(which(vapply(c("OT", "OncoBN",
+                            "CBN", "MCCBN",
+                            "MHN", "HESBCN"),
+                          function(m) {
+                              outn <- paste0(m, "_predicted_genotype_freqs")
+                              return(!(is.null(cpm_output[[outn]])) &&
+                                     !(is.na(cpm_output[outn])))
+                          }, logical(1)
+                          )))
     }
-    methods <- available_methods
-    
+
     output <- unique(output)
     valid_output <- c("sampled_genotype_counts",
                       "obs_genotype_transitions",
@@ -421,9 +424,16 @@ sample_CPMs <- function(cpm_output
     }
 
     some_pred <- cpm_output[[paste0(methods[1], "_predicted_genotype_freqs")]]
-    gene_names <- sort(setdiff(unique(unlist(strsplit(names(some_pred),
+    
+    ## gene_names <- sort(setdiff(unique(unlist(strsplit(names(some_pred),
+    ##                                                   split = ", "))),
+    ##                            "WT"))
+    gene_names <- stringi::stri_sort(setdiff(unique(unlist(strsplit(names(some_pred),
                                                       split = ", "))),
-                          "WT"))
+                                             "WT"),
+                                     locale = "en", uppercase_first = FALSE,
+                                     numeric = TRUE
+                                     )
     n_genes <- length(gene_names)
 
     for (method in methods) {
@@ -555,7 +565,8 @@ sample_to_pD_order <- function(x, ngenes, gene_names = NULL) {
     rm(gene_names_in_x)
 
     x <- as.data.frame(table(x), stringsAsFactors = FALSE)
-    gene_names <- sort(gene_names)
+    ## gene_names <- sort(gene_names)
+    gene_names <- evam_string_sort(gene_names)
     genot_int <- x[, 1]
     genot_int <- gsub("^WT$", "", genot_int, fixed = "FALSE")
 
@@ -610,7 +621,7 @@ canonicalize_genotype_names <- function(x) {
     no_space <- stringi::stri_replace_all_regex(x, pattern = "[\\s]", "")
 
     pasted_sorted <- unlist(lapply(strsplit(no_space, split = ",", fixed = TRUE),
-                  function(v) (paste(sort(v), collapse = ", "))))
+                  function(v) (paste(evam_string_sort(v), collapse = ", "))))
     return(pasted_sorted)
 }
 
@@ -618,7 +629,7 @@ canonicalize_genotype_names <- function(x) {
 ## By number of mutations, and within number of mutations, ordered
 ## as given by order.
 genotypes_standard_order <- function(gene_names) {
-    gene_names <- sort(gene_names)
+    gene_names <- evam_string_sort(gene_names)
     allgt <- allGenotypes_3(length(gene_names))$mutated
     gtn <- vapply(allgt, function(v) paste(gene_names[v], collapse = ", "),
                   "")
@@ -658,7 +669,7 @@ reorder_to_standard_order <- function(x) {
 ## Given a matrix of 0/1 return the genotypes in canonicalized way
 genot_matrix_2_vector <- function(x) {
     gn <- colnames(x)
-    gt1 <- apply(x, 1, function(v) paste(sort(gn[v == 1]), collapse = ", "))
+    gt1 <- apply(x, 1, function(v) paste(evam_string_sort(gn[v == 1]), collapse = ", "))
     gt1[gt1 == ""] <- "WT"
     return(gt1)
 }
@@ -726,7 +737,7 @@ probs_from_trm <- function(x,
     if (!all_genotypes) return(p)
 
     ## Get genes and from them number genotypes and identity genotypes
-    gene_names <- sort(setdiff(unique(unlist(strsplit(colnames(x), split = ", "))),
+    gene_names <- evam_string_sort(setdiff(unique(unlist(strsplit(colnames(x), split = ", "))),
                           "WT"))
     number_genes <- length(gene_names)
     num_genots <- 2^number_genes
@@ -772,7 +783,7 @@ random_evam <- function(ngenes = NULL, gene_names = NULL,
 
     if (is.null(gene_names)) gene_names <- LETTERS[seq_len(ngenes)]
     if (is.null(ngenes)) ngenes <- length(gene_names)
-    gene_names <- sort(gene_names)
+    gene_names <- evam_string_sort(gene_names)
     output <- list()
     if (model == "MHN") {
         mhn_sparsity <- 1 - graph_density
@@ -790,7 +801,7 @@ random_evam <- function(ngenes = NULL, gene_names = NULL,
         poset <- mccbn::random_poset(ngenes, graph_density = graph_density)
         lambdas <- runif(ngenes, cbn_hesbcn_lambda_min, cbn_hesbcn_lambda_max)
         names(lambdas) <-  colnames(poset) <- rownames(poset) <- gene_names
-        stopifnot(identical(sort(names(hesbcn_probs)), c("AND", "OR", "XOR")))
+        stopifnot(identical(evam_string_sort(names(hesbcn_probs)), c("AND", "OR", "XOR")))
         output <-
             HESBCN_from_poset_lambdas_relation_probs(poset,
                                                      lambdas,
@@ -820,14 +831,10 @@ random_evam <- function(ngenes = NULL, gene_names = NULL,
     return(output)
 }
 
-
-
-
-## Pablo: use this?
 ## Named matrix of thetas -> all of the model and predicted probs
 ## Recall these thetas have theta_i,j: effect of j on i.
 MHN_from_thetas <- function(thetas) {
-    oindex <- order(colnames(thetas))
+    oindex <- evam_string_order(colnames(thetas))
     thetas <- thetas[oindex, oindex]
     output <- list()
     output[["MHN_theta"]] <- thetas
@@ -847,14 +854,10 @@ MHN_from_thetas <- function(thetas) {
     return(output)
 }
 
-
-
-
-## Pablo: use this?
 ## poset as adjacency matrix and vector of lambdas
 ## both named -> all of the cbn output
 CBN_from_poset_lambdas <- function(poset, lambdas) {
-    stopifnot(identical(sort(colnames(poset)), sort(names(lambdas))))
+    stopifnot(identical(evam_string_sort(colnames(poset)), evam_string_sort(names(lambdas))))
     poset_as_data_frame <- poset_2_data_frame(poset)
     output <- list()
     output[["CBN_model"]] <- CBN_model_from_edges_lambdas(poset_as_data_frame,
@@ -865,8 +868,6 @@ CBN_from_poset_lambdas <- function(poset, lambdas) {
     return(output)
 }
 
-
-## Pablo: or use this if you use a data frame
 ## data frame with "From", "To", "Edges" and lambdas -> all of the cbn output
 CBN_model_2_output <- function(model) {
     ## extra level of nesting
@@ -911,15 +912,10 @@ poset_2_data_frame <- function(poset) {
 }
 
 
-
-
-
-
-## Pablo: use this one?
 ## poset as adjac. matrix, vector of lambdas, parent_set -> full HESBCN output
 HESBCN_from_poset_lambdas_relation_probs <- function(poset, lambdas,
                                                      hesbcn_probs) {
-    stopifnot(identical(sort(colnames(poset)), sort(names(lambdas))))
+    stopifnot(identical(evam_string_sort(colnames(poset)), evam_string_sort(names(lambdas))))
     poset_as_data_frame <- poset_2_data_frame(poset)
 
     ## Assign type of relationship randomly to nodes with >= 2 parents
@@ -935,8 +931,8 @@ HESBCN_from_poset_lambdas_relation_probs <- function(poset, lambdas,
         parent_set[which(num_parents > 1)] <- ps_values
     }
     
-    stopifnot(identical(sort(names(parent_set)),
-                        sort(names(lambdas))))
+    stopifnot(identical(evam_string_sort(names(parent_set)),
+                        evam_string_sort(names(lambdas))))
     
     output <- list()
     output[["HESBCN_parent_set"]] <- parent_set
@@ -950,10 +946,6 @@ HESBCN_from_poset_lambdas_relation_probs <- function(poset, lambdas,
 }
 
 
-
-
-
-## Pablo: or use this if you use a data frame and parent frame and parent set
 ## data frame with "From", "To", "Edges" and lambdas -> all of the cbn output
 HESBCN_model_2_output <- function(model, parent_set) {
     tmpo <- cpm2tm(list(edges = model, parent_set = parent_set))
@@ -996,12 +988,11 @@ OT_random_poset <- function(ngenes, graph_density) {
 }
 
 
-## Pablo call this?
 ## poset as adjacency matrix, weights, epos -> full output, as from evam
 ##   weights: do not have Root
 ##   poset: one for OT, so no column with two or more parents
 OT_from_poset_weights_epos <- function(poset, weights, epos) {
-    stopifnot(identical(sort(colnames(poset)), sort(names(weights))))
+    stopifnot(identical(evam_string_sort(colnames(poset)), evam_string_sort(names(weights))))
     stopifnot(colSums(poset) <= 1)
     poset_as_data_frame <- poset_2_data_frame(poset)
     output <- list()
@@ -1020,7 +1011,6 @@ OT_model_from_edges_lambdas <- function(edges, weights) {
 }
 
 
-## Pablo call this?
 ## OT model and epos -> full output, as from evam
 OT_model_2_output <- function(model, epos) {
     ## We need to go back to the DAG representation
@@ -1058,7 +1048,7 @@ OT_model_2_predict_genots <- function(model, epos) {
     stopifnot(colnames(adjm)[1] == "Root")
     stopifnot(colnames(adjm) == rownames(adjm))
     ## Sort column names
-    cnadjm_nor <- sort(setdiff(colnames(adjm), "Root"))
+    cnadjm_nor <- evam_string_sort(setdiff(colnames(adjm), "Root"))
     adjm <- adjm[c("Root", cnadjm_nor), c("Root", cnadjm_nor)]
     weights <- model$OT_edgeWeight
     names(weights) <- model$To
@@ -1124,33 +1114,11 @@ oncotree_fit_parent_from_adjm_weights <- function(adjm, weights) {
 }
 
 
-
-## o1 <- oncotree_fit_from_dag_weights_epos(ab, runif(5), 0.1)
-
-
-## ## this is the right call
-## o1p <- distribution.oncotree(o1, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
-
-## ## And note these are identical
-## o2 <- o1
-## o2$parent$obs.weight <- runif(length(o1$parent$est.weight))
-## o2p <- distribution.oncotree(o2, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
-## stopifnot(all.equal(o1p$Prob, o2p$Prob))
-
-
-## distribution.oncotree(o1, with.probs = TRUE, with.errors = FALSE, edge.weights = "estimated")
-
-
-## distribution.oncotree(otf, with.probs = TRUE, with.errors = FALSE, edge.weights = "estimated")
-## distribution.oncotree(otf, with.probs = TRUE, with.errors = TRUE, edge.weights = "estimated")
-
-
-## Pablo calls this?
 OncoBN_from_poset_thetas_epsilon_model <- function(poset,
                                                 thetas,
                                                 epsilon,
                                                 model) {
-    stopifnot(identical(sort(colnames(poset)), sort(names(thetas))))
+    stopifnot(identical(evam_string_sort(colnames(poset)), evam_string_sort(names(thetas))))
     poset_as_data_frame <- poset_2_data_frame(poset)
 
     ## Assign type of relationship to nodes with >= 2 parents
@@ -1172,8 +1140,8 @@ OncoBN_from_poset_thetas_epsilon_model <- function(poset,
         parent_set[which(num_parents > 1)] <- ps_value
     }
     
-    stopifnot(identical(sort(names(parent_set)),
-                        sort(names(thetas))))
+    stopifnot(identical(evam_string_sort(names(parent_set)),
+                        evam_string_sort(names(thetas))))
 
     output <- list()
     output[["OncoBN_parent_set"]] <- parent_set
@@ -1241,7 +1209,7 @@ OncoBN_model_2_predict_genots <- function(model, epsilon) {
     thetadf <- aggregate(theta ~ To, data = model, FUN = unique)
     thetav <- thetadf$theta
     names(thetav) <- thetadf$To
-    theta <- thetav[sort(names(thetav))]
+    theta <- thetav[evam_string_sort(names(thetav))]
     names_g <- names(theta)
     obnfit[["theta"]] <- theta
     
@@ -1255,7 +1223,7 @@ OncoBN_model_2_predict_genots <- function(model, epsilon) {
     
     obnfit[["model"]] <- ifelse(any(model$Relation == "AND"), "CBN", "DBN")
     obnfit[["epsilon"]] <- epsilon
-    pred_genots <- DBN_prob_genotypes(obnfit, sort(names(thetav)))
+    pred_genots <- DBN_prob_genotypes(obnfit, evam_string_sort(names(thetav)))
     pred_genots <- DBN_est_genots_2_named_genotypes(pred_genots)
 
     return(pred_genots)

@@ -6,8 +6,9 @@
  /*  Commit 49a8cc0 from 2018-08-16 */
 
  /*  We have added the "MHN__" and made minor modifications to conform to usage
-     within an R package. We have moved the inline C code to MHN.c and done the
-     rest of the scaffolding for it to be used from the R package. */
+     within an R package. We have moved the inline C code in InlineFunctions.R
+     (now MHN__InlineFuctions.R) to MHN.c and done the rest of the scaffolding
+     for it to be used from the R package. */
   
  /*  License: no license information available in the repository nor the
      files. */

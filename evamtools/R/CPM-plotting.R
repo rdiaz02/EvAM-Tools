@@ -1,17 +1,17 @@
 ## Copyright 2021, 2022 Pablo Herrera Nieto, Ramon Diaz-Uriarte
 
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
+## This program is free software: you can redistribute it and/or modify it under
+## the terms of the GNU Affero General Public License (AGPLv3.0) as published by
+## the Free Software Foundation, either version 3 of the License, or (at your
+## option) any later version.
 
 ## This program is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## GNU Affero General Public License for more details.
 
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU Affero General Public License along
+## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## #' Use plot matrix to plot the sampled genotypes
 ## #' 
@@ -156,17 +156,24 @@ cpm_layout <- function(graph){
 
     for (i in 0:max(num_mutations)) {
         level_idx <- which(num_mutations == i)
-        gnt_names <- sort(igraph::V(graph)$name[level_idx], index.return = TRUE)
+        ## gnt_names <- sort(igraph::V(graph)$name[level_idx],
+        ##                   index.return = TRUE)
+        gnt_ix <- evam_string_order(igraph::V(graph)$name[level_idx])
+        gnt_names <- igraph::V(graph)$name[level_idx]
+        gnt_names <- gnt_names[gnt_ix]
+        
         spacing <- 6 / (length(level_idx) + 1)
         level_elements <- 1:length(level_idx) * spacing
         level_elements <-  rev(level_elements - max(level_elements))
-        correction_rate <- max(level_elements) - min(level_elements) 
+        correction_rate <- max(level_elements) - min(level_elements)
         level_elements <- level_elements + correction_rate/2
-        lyt[, 1][level_idx[gnt_names$ix]] <- level_elements
+        ## lyt[, 1][level_idx[gnt_names$ix]] <- level_elements
+        lyt[, 1][level_idx[gnt_ix]] <- level_elements
     }
 
     ## Avoiding layout in one line
-    if (all(lyt[, 1] == 0)) lyt[,1] <- rep(c(0,1,-1), ceiling(nrow(lyt)/3))[1:nrow(lyt)]
+    if (all(lyt[, 1] == 0)) lyt[, 1] <- rep(c(0, 1, -1),
+                                            ceiling(nrow(lyt)/3))[1:nrow(lyt)]
     return(lyt)
 }
 
@@ -248,14 +255,14 @@ plot_genot_fg <- function(trans_mat
     , plot_type = NA ## On purpose: fail if not given
     ) {
     if(is.null(trans_mat) | any(is.na(trans_mat))){
-        warning("There is no data to plot ",
+        warning("There is no data to plot: ",
                 "a blank plot will be produced.")
         par(mar = rep(3, 4))
         plot(0, type = 'n', axes = FALSE, ann = FALSE)
         return()
     }
 
-    unique_genes_names <- sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
+    unique_genes_names <- evam_string_sort(unique(unlist(str_split(rownames(trans_mat)[-1], ", "))))
     rownames(trans_mat) <- colnames(trans_mat) <- str_replace_all(rownames(trans_mat), ", ", ",")
     # names(predicted_genotypes) <- str_replace_all(names(predicted_genotypes), ", ", ",")
     graph <- igraph::graph_from_adjacency_matrix(trans_mat, weighted = TRUE,
@@ -403,14 +410,6 @@ plot_genot_fg <- function(trans_mat
             val <- val * -1
         }
     }
-    # for (idx in 1:(length(y_distribution) - 1)){
-    #     if (y_distribution[idx] == y_distribution[idx +1]){
-    #         labels_dists[idx] <- val
-    #         # val <- val*-1 ## So we alternate +1 and -1
-    #         labels_dists[idx + 1] <- val * -1
-    #         # val <- val*-1 ## So we alternate +1 and -1
-    #     }
-    # }
     ## Actual plotting
 
     plot(graph
@@ -454,8 +453,6 @@ plot_genot_fg <- function(trans_mat
        , pos = margin)
     axis(1, tick = FALSE, at = 0, labels = "Number of features acquired",
          pos = margin - 0.15)
-    ## mtext("Number of features acquired", side = 1, line = -1)
-    ## title(xlab = "Number of features acquired", line = 2)
     
     if (!(is.null(observations))) {
         legend(-1.25,
@@ -524,12 +521,6 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
     ))
 }
 
-## dag_layout <- function(graph){ ## Avoiding lines
-##     lyt <- igraph::layout.reingold.tilford(graph)
-##     if(all(lyt[,1] == 0)) lyt[,1] <- rep(c(0,0.5,0,-0.5),
-##                                          ceiling(nrow(lyt)/3))[1:nrow(lyt)]
-##     return(lyt)
-## }
 
 ## The max depth of a node from Root
 ##  used for layout_with_sugiyama
@@ -637,22 +628,6 @@ DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
                    edges = list(textCol = "darkgoldenrod4",
                                 cex = 1.5)))
     Rgraphviz::renderGraph(gg1)
-    
-    ## graph::plot(g1,
-    ##             attrs = list(node = list(color = "transparent",
-    ##                                      fontsize = font_size,
-    ##                                      fontcolor = "black"), ## dodgerblue4
-    ##                          edge = list(arrowsize = arrowsize,
-    ##                                      lwd = edge_width,
-    ##                                      fontsize = 6
-    ##                                     )),
-    ##             ## labelfontcolor = "red")), ## does nothing
-    ##             ## Last, if you pass edge in attrs
-    ##             edgeAttrs = list(color = colors_edges,
-    ##                              label = labels_edges),
-    ##             main = main)
-
-    
 }
 
 
@@ -740,7 +715,7 @@ plot_method <- function(method_info, parent_set, edges, method = "") {
 }
 
 plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal", 
-                        methods = c("OT", "OncoBN", "CBN", "MCCBN", "HESBCN", "MHN"),
+                        methods = NULL, 
                         plot_type = "trans_mat", label_type="genotype",
                         fixed_vertex_size = FALSE,
                         top_paths = NULL) {
@@ -756,12 +731,24 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
 
     
     ## List of available methods
-    available_methods <- unique(methods[
-        vapply(methods, function(method) {
-            attr_name <- ifelse(method == "MHN", "theta", "model")
-            return(any(!is.na(cpm_output[[sprintf("%s_%s", method, attr_name)]])))
-        }, logical(1))
-    ])
+    if (!is.null(methods)) {
+        available_methods <- unique(methods[
+            vapply(methods, function(method) {
+                attr_name <- ifelse(method == "MHN", "theta", "model")
+                return(any(!is.na(cpm_output[[sprintf("%s_%s",
+                                                      method, attr_name)]])))
+            }, logical(1))
+        ])
+    } else {
+        allms <- c("OT", "OncoBN", "CBN", "MCCBN", "HESBCN", "MHN")
+        available_methods <- unique(allms[
+            vapply(allms, function(method) {
+                attr_name <- ifelse(method == "MHN", "theta", "model")
+                return(any(!is.na(cpm_output[[sprintf("%s_%s",
+                                                      method, attr_name)]])))
+            }, logical(1))
+        ])
+    }
 
     
     ## Shape of the plot
@@ -776,7 +763,6 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
     }
 
     n_rows <- 2
-   
     if (orientation == "vertical") {
         op1 <- par(mfrow = c(l_methods, n_rows),
                    mar = c(0.5, 1, 0.5, 0.5),

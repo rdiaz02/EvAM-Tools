@@ -1,17 +1,17 @@
-## Copyright 2016, 2017, 2018 Ramon Diaz-Uriarte
+## Copyright 2016, 2017, 2018, 2022 Ramon Diaz-Uriarte
 
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
+## This program is free software: you can redistribute it and/or modify it under
+## the terms of the GNU Affero General Public License (AGPLv3.0) as published by
+## the Free Software Foundation, either version 3 of the License, or (at your
+## option) any later version.
 
 ## This program is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## GNU Affero General Public License for more details.
 
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU Affero General Public License along
+## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 options(mc.cores = 1L)
@@ -227,9 +227,6 @@ ot_proc <- function(datax, nboot = 1000,
                       ))
 }
 
-# library(codetools)
-# checkUsageEnv(env = .GlobalEnv)
-
 ## Give a named vector for the predicted freqs of genotypes
 dist_oncotree_output_2_named_genotypes <- function(odt) {
     ## In the output of distribution.oncotree there
@@ -247,3 +244,5 @@ dist_oncotree_output_2_named_genotypes <- function(odt) {
     return(odt)
 }
 
+# library(codetools)
+# checkUsageEnv(env = .GlobalEnv)

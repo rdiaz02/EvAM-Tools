@@ -1,6 +1,6 @@
 \name{evam}
 \alias{evam}
-\title{Runs the CPMs}
+\title{Runs the CPMs (or evams)}
 \usage{
 evam(x,
      methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN"),
@@ -11,7 +11,7 @@ evam(x,
                      omp_threads = ifelse(cores > 1, 1, detectCores())),
      ot_opts = list(with_errors_dist_ot = TRUE),
      cbn_opts = list(
-                     omp_threads = ifelse(cores > 1, 1, detectCores()),
+                     omp_threads = 1,
                      init_poset = "OT"
                  ),
      hesbcn_opts = list(
@@ -87,8 +87,11 @@ evam(x,
   MCCBN and MHN, you can set
   this to a number larger than one even if you set \code{cores} to a
   number larger than one (i.e., if we use
-  \code{\link[parallel]{mclapply}}). It is unclear, though, that it will
-speed things much or what is the best number of threads to use. }
+  \code{\link[parallel]{mclapply}}). It is unclear, though, more than 1
+  thread will
+speed things much or what is the best number of threads to use; in fact,
+sometimes it can even slow things down, in particular if you run
+multiple evams in parallel.}
 \item{cbn_init_poset: }{Initial poset for CBN; one of "linear" or "OT" (default).}
 }
 }
@@ -252,7 +255,8 @@ matrix of thetas for MHN is much smaller than the reported time here,
 which also includes building the transition rate matrix).
 
 
-You can \strong{convert paths and their probabilities} to a data frame easily. For example, using the non-exported simple function \code{pats_and_probs_to_df}. See example below. By default, we do not return paths, as their number can grow very quickly with number of genotypes and you only need if, well, you care about them.
+You can \strong{convert paths and their probabilities} to a data frame
+easily; see example below. By default, we do not return paths, as their number can grow very quickly with number of genotypes and you only need if, well, you care about them.
 
 }
 
@@ -348,7 +352,7 @@ data(every_which_way_data)
 Dat1 <- every_which_way_data[[16]][1:40, 2:6]
 out1 <- evam(Dat1,
             methods = c("CBN", "OT", "OncoBN",
-                        "MHN", "HESBCN"))
+                        "MHN", "HESBCN", "MCCBN"))
 
 
 ## Running only some methods and changing some options
@@ -358,23 +362,21 @@ out1 <- evam(Dat1,
 
 out2 <- evam(Dat1,
             methods = c("CBN", "OT", "OncoBN",
-                        "MHN", "HESBCN", "MCCBN"),
+                        "MHN"),
             mhn_opts = list(lambda = 5/nrow(Dat1)),
+            cbn_opts = list(omp_threads = 2),
             oncobn_opts = list(model = "CBN"))
 
 
-## Getting paths to maximum/maxima
-
+## Getting paths to maximum/maxima. Using only two methods
+## for faster execution
 out3 <- evam(Dat1,
-            methods = c("CBN", "OT", "OncoBN",
-                        "HESBCN"),
+            methods = c("MHN", "OncoBN"),
             paths_max = TRUE)
 
 
 ## Convert probabilities of paths into a data frame,
 ## with strings and the probs. of the paths.
-
-paths_probs_2_df(out3$HESBCN_paths_max)
-
+paths_probs_2_df(out3$OncoBN_paths_max)
 
 }

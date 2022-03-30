@@ -1,31 +1,30 @@
 Package: evamtools
 Type: Package
-Title: Implimentation of CPM and related tools to test their performance
-Version: 0.98.33
-Date: 2022-03-22
-Authors@R: c(person("Herrera-Nieto", "Pablo",
-	   email = "pablo.h.nieto@gmail.com", role = "aut"), 
-            person("Ramon", "Diaz-Uriarte",
-	    email = "r.diaz@uam.es", role = c("cre", "aut")),
+Title: Tools for evolutionary accumulation models, now mainly cancer progression models
+Version: 1.0.5
+Date: 2022-03-29
+Authors@R: c(
+            person("Ramon", "Diaz-Uriarte",			      
+	    	    email = "r.diaz@uam.es", role = c("cre", "aut")),	      
+            person("Herrera-Nieto", "Pablo",
+	   	   email = "pablo.h.nieto@gmail.com", role = "aut"), 
 	    person("Daniele", "Ramazzotti", role = "ctb",
-	    comment = "import.hesbcn"),
+	           comment = "import.hesbcn"),
 	    person("Rudolf", "Schill", role = "ctb",
-	    comment = "MHN"))
+	           comment = "MHN"))
 Author: Ramon Diaz-Uriarte [aut, cre]
         Pablo Herrera-Nieto [aut]
 	Daniele Ramazzotti [ctb],
 	Rudolf Schill [ctb]
 Maintainer: Ramon Diaz-Uriarte <r.diaz@uam.es>
-Description: Wrapper to run cancer progression models (CPMs) on
-    cross-sectional data, to obtain finite samples using transition rate matrices,
-    and to compare the results of the different methods.
+Description: Wrappers to run cancer progression models (CPMs) on
+    cross-sectional data, including Conjuntive Bayesian Networks (CBN ---and their MC-CBN version---), Oncogenetic trees (OT), Mutual Hazard Networks (MHN), Hidden Extended Suppes-Bayes Causal Networks (H-ESBCNs ---PMCE---), and Disjunctive Bayesian Networks (DBN, from the OncoBN package). Tools to represent, graphically, the fitted models (DAGs of restrictions or matrix of hazards, as appropriate), the transition matrices and transition rate matrices (where appropriate) between genotypes and to show frequencies of genotypes sampled from the fitted models. Functions to sample from the fitted models or from random models to facilitate comparing different methods. An interactive Shiny app allows users to easily visualize the effects of changes in genotype composition and to interactively modify and create datasets from models defined from scratch.
 URL: https://github.com/rdiaz02/EvAM-Tools
 BugReports: https://github.com/rdiaz02/EvAM-Tools/issues
 Depends: R (>= 4.0.0)
-License: GPL-3 + file LICENSE
+License: AGPL-3 + file LICENSE
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.1.2
 Imports: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree
     , gtools, stringi
     , plot.matrix
@@ -35,4 +34,8 @@ Imports: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree
     , RhpcBLASctl
     , Rlinsolve, fastmatrix
     , graph, Rgraphviz
+    , R.utils
 Suggests: testthat (>= 3.0.0)
+Config/testthat/parallel: true
+Config/testthat/edition: 3
+

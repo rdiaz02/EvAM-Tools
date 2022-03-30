@@ -1,17 +1,17 @@
 ## Copyright 2020, 2022 Ramon Diaz-Uriarte
 
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
+## This program is free software: you can redistribute it and/or modify it under
+## the terms of the GNU Affero General Public License (AGPLv3.0) as published by
+## the Free Software Foundation, either version 3 of the License, or (at your
+## option) any later version.
 
 ## This program is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## GNU Affero General Public License for more details.
 
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU Affero General Public License along
+## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 ## Code to run Schill et al.'s MHN and obtain transition matrices between
@@ -39,7 +39,7 @@ do_MHN2 <- function(x,  lambda = 1/nrow(x), sparse = TRUE) {
     colnames(theta) <- rownames(theta) <- colnames(x)
     ## Reorder, so genotype names and transition rate matrix
     ## have names ordered
-    oindex <- order(colnames(theta))
+    oindex <- evam_string_order(colnames(theta))
     theta <- theta[oindex, oindex]
     if(!sparse) {
         trm <- theta_to_trans_rate_3(theta,
@@ -206,7 +206,8 @@ theta_to_trans_rate_3_SM <- function(theta,
     genotNames <- unlist(
         lapply(genots$bin_genotype,
                function(x)
-                   paste(geneNames[which(x == 1L)], sep = "", collapse = ", "))
+                   paste(evam_string_sort(geneNames[which(x == 1L)]),
+                         sep = "", collapse = ", "))
         )
     genotNames[genotNames == ""] <- "WT"
 
@@ -374,7 +375,7 @@ do_MHN <- function(x,  lambda = 1/nrow(x)) {
     colnames(theta) <- rownames(theta) <- colnames(x)
     ## Reorder, so genotype names and transition rate matrix
     ## have names ordered
-    oindex <- order(colnames(theta))
+    oindex <- evam_string_order(colnames(theta))
     theta <- theta[oindex, oindex]
     trm <- theta_to_trans_rate_3(theta,
                                  inner_transition = inner_transitionRate_3_1)
@@ -650,56 +651,3 @@ inner_transitionRate_2 <- function(i, j, genotypes, Theta) {
     return(Theta[posy, posy] * prod(Theta[posy, x]))
 
 }
-
-
-
-## ## genotype position (row), genotype position,
-## ##    genotype data frame
-## ##    Theta (as exp(theta)) -> transition rate x -> y
-## inner_transitionRate_2 <- function(i, j, genotypes, Theta) {
-
-##     x <- genotypes[[i, "mutated"]]
-##     y <- genotypes[[j, "mutated"]]
-    
-##     if( (genotypes[j, "num_mut"] != (genotypes[i, "num_mut"] + 1) ) ||
-##         (length(posy <- setdiff(y, x)) != 1) ) {
-##         ## (length(setdiff(y, x)) != 1) ) {
-##         return(0)
-##     } else {
-##         ## posy <- setdiff(y, x)
-##         if(all(is.na(x))) { ## x is WT
-##             return(Theta[posy, posy])
-##         } else {
-##             return(Theta[posy, posy] * prod(Theta[posy, x]))
-##         }
-##     }
-## }
-
-
-
-## ## Not used anywhere anymore
-## ## genotype, genotype, Theta (as exp(theta)) -> transition rate x -> y
-## transitionRate <- function(x, y, Theta) {
-##     if(sum(y) != (sum(x) + 1) ) {
-##         return(0)
-##     } else {
-##         posy <- which(y != x)
-##         if(length(posy) != 1) {
-##             return(0)
-##         } else {
-##             posx <- which(x == 1L)
-##             if(length(posx) == 0) {
-##                 ret <- return(Theta[posy, posy])
-##             } else {
-##                 ret <- (Theta[posy, posy] * prod(Theta[posy, posx]))
-##             }
-##             if(length(ret) > 1) {
-##                 cat("\n here")
-##                 stop()
-##             }
-##             else (return(ret))
-##             ## if(length(posx) == 0) return(Theta[posy, posy])
-##             ## else return(Theta[posy, posy] * cumprod(Theta[posy, posx]))
-##         }
-##     }
-## }

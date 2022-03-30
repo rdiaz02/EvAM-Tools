@@ -1,5 +1,11 @@
-# What is Evam-tools?
-***
+
+<center><h1>Evam-tools</h1></center>
+
+&nbsp;
+
+****
+## Evam-tools <a id="evamtools"></a>
+****
 
 ```Evam-tools``` is an R package and Shiny app that provides tools for evolutionary accumulation, or event accumulation, models. We use code from  "Cancer Progression Models" (CPM) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost). ```Evam-tools``` is  also available as an R package (see https://github.com/rdiaz02/EvAM-Tools).
 
@@ -12,17 +18,15 @@ This web interface provides a user-friendly interactive version of the package. 
 <!-- You add/remove images by adding HTML code. The usual img block. But do not leave that commented code around or shiny might break. -->
 
 
+&nbsp;
+#### What is _cross-sectional_ data?<a id="helpcsd"></a> 
 
-****
-## What is _cross-sectional_ data?<a id="helpcsd"></a> 
-***
-
-In cross-sectional data, a single sample has is obtained from each patient. That single sample represents the "observed genotype" of, for example, the tumor of that patient. Genotype can refer to single point mutations, insertions, deletions, or any other genetic modification. In this app, as is often done by CPM software, we store cross-sectional data in a matrix, where rows are patients or subjects, and columns are genes; the data is a 1 if the event was observed and 0 if it was not.
+In cross-sectional data, a single sample is obtained from each subject or patient. That single sample represents the "observed genotype" of, for example, the tumor of that patient. Genotype can refer to single point mutations, insertions, deletions, or any other genetic modification. In this app, as is often done by CPM software, we store cross-sectional data in a matrix, where rows are patients or subjects, and columns are genes; the data is a 1 if the event was observed and 0 if it was not.
 
 &nbsp;&nbsp;
 
 ****
-# How to use this web interface? <a id="input"></a>
+## How to use this web interface? <a id="input"></a>
 ***
 
 
@@ -44,7 +48,7 @@ To make it easier to play with the tool, under "DAG and rates/probs" there are p
 &nbsp;&nbsp;
 
 ****
-## What is available under ```Results```?<a id="helpresults"></a>
+### What is available under ```Results```?<a id="helpresults"></a>
 ***
 
 The results include:
@@ -60,7 +64,6 @@ The results include:
         * The bottom plots might include genotypes never observed in the sample; these are shown in light green.
         * For easier visualization, in very busy plots, instead of the Genotypes you might want to show the last gene mutated.
     * You can represent only a subset of the fitted models (choose the CPMs to show). 
-
 &nbsp;	
 * Tabular output: a table where you can choose to display:
     * Transition probabilities: the probabilities of transition between genotypes. For OT and OncoBN see the additional documentation as these are not really available for untimed oncogenetic models.
@@ -68,29 +71,38 @@ The results include:
     * Predicted genotype relative frequencies: the predicted genotype frequencies from the fitted models.
     * Sampled genotype counts: the counts from obtaining a finite sample (of the size you chose) with the probabilities given by the predicted genotype frequencies. If you add noise, they include observational (e.g., genotyping) noise.
     * Observed genotype transitions (counts): if you choose to *Sample for observed genotype transitions* (under  ```Advanced options and CPMs to use```), for models that return a transition rate matrix (CBN, H-ESBCN, MHN), we obtain the observed sampled of genotypes by simulating sampling from the continuous time Markov chain; this provides also observed transition counts between genotypes.
-	
-	
 &nbsp;		
 * Original data: to help interpret the results, a histogram of the genotype counts is also provided.
-
 &nbsp;
-
 * You can also *download* the tabular results, fitted models, and the analyzed data.
 
+&nbsp;&nbsp;
+***
+### Additional documentation<a id="additional_docs"></a>
+***
+
+Additional documentation is available from https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_doc_all.pdf.
+
+(If you install the R package or the RStudio Docker image with the package, you also have access to the documentation of the package, which is included in this pdf).
 
 
-<!-- FIXME: add this when ready -->
-<!-- ## Additional documentation<a id="additional_docs"></a> -->
-<!-- *** -->
+&nbsp;&nbsp;
 
-<!-- Additional documentation is available from the R package itself (you would need to install the package or download one of the Docker images and run it from there) and the PDF  https://github.com/rdiaz02/EvAM-Tools/Additional_doc.pdf. -->
 
+
+****
+### Session timeouts, RAM and elapsed time execution limits<a id="limits"></a>
+***
+
+Inactive connections will timeout after 2 hours. The page will become gray, and if you refresh (e.g., F5 in most browsers) after this time, you will not get back your results, figures, etc, but start another session. 
+
+Maximum RAM of any process is limited to 2 GB. Likewise, the analyses should be aborted after 1.5 hours of elapsed (not CPU ---we parallelize the runs) time. If you want to use the Shiny app without these limits, install a local copy. (To modify the time limit, change the value of variable EVAM_MAX_ELAPSED, in the definition of function "server", in file "server.R".  The RAM limit is imposed on the Docker containers we use; to remove it, run Docker without the memory limit.)
 
 
 &nbsp;&nbsp;
 
 ****
-# What CPMs are included in ```Evam-tools```?<a id="cpms"></a>
+## What CPMs are included in ```Evam-tools```?<a id="cpms"></a>
 ***
 
 *  **Oncogenetic Tress (OT):** Restrictions in the accumulation of mutations (or events) are represented as a tree. Hence, a parent node can have many children, but children have a single parent. OTs are untimed (edge weights represent conditional probabilities of observing a given mutation, when the sample is taken, given the parents are observed).
@@ -106,8 +118,8 @@ The results include:
 
 &nbsp;
 
-
-## Default options and default CPMs run
+****
+### Default options and default CPMs run
 ***
 
 - In the Shiny app, we always run CBN, OT, OncoBN, and MHN. If you want to run H-ESBCN or MC-CBN, you have to select them under ```Advanced options and CPMs to use```. (They are not run by default, as they can take a long time).
@@ -115,10 +127,11 @@ The results include:
 - Most methods have other options that can be modified. Again, check ```Advanced options and CPMs to use```.
 
 
-### References and related repositories<a id="refs"></a>
+****
+#### References and related repositories<a id="refs"></a>
 ***
 
-#### OT ####
+##### OT ####
 
 
 - Desper, R., Jiang, F., Kallioniemi, O. P., Moch, H., Papadimitriou, C. H., &
@@ -133,7 +146,7 @@ The results include:
 
 &nbsp;
 
-#### H-CBN and MC-CBN ####
+##### H-CBN and MC-CBN ####
 
 - Beerenwinkel, N., & Sullivant, S. (2009). Markov models for accumulating
   mutations. Biometrika, 96(3), 645.
@@ -154,7 +167,7 @@ The results include:
 
 &nbsp;
 
-#### MHN ####
+##### MHN ####
 
 
 - Schill, R., Solbrig, S., Wettig, T., & Spang, R. (2020). Modelling cancer progression using Mutual Hazard Networks. Bioinformatics, 36(1), 241–249. http://dx.doi.org/10.1093/bioinformatics/btz513 
@@ -163,7 +176,7 @@ The results include:
 
 &nbsp;
 
-#### H-ESBCN (PMCE) ####
+##### H-ESBCN (PMCE) ####
 
 
 - Angaroni, F., Chen, K., Damiani, C., Caravagna, G., Graudenzi, A., & Ramazzotti, D. (2021). PMCE: efficient inference of expressive models of cancer evolution with high prognostic power. Bioinformatics, 38(3), 754–762. http://dx.doi.org/10.1093/bioinformatics/btab717 
@@ -173,7 +186,7 @@ The results include:
 
 &nbsp;
 
-#### OncoBN (DBN) ####
+##### OncoBN (DBN) ####
 
 - Nicol, P. B., Coombes, K. R., Deaver, C., Chkrebtii, O., Paul, S., Toland, A. E., & Asiaee, A. (2021). Oncogenetic network estimation with disjunctive Bayesian networks. Computational and Systems Oncology, 1(2), 1027. http://dx.doi.org/10.1002/cso2.1027 
 
@@ -181,9 +194,9 @@ The results include:
 
 &nbsp;
 
-#### Conditional prediction of genotypes and probabilities of paths from CPMs ####
+##### Conditional prediction of genotypes and probabilities of paths from CPMs ####
 
-- Hosseini, S., Diaz-Uriarte, Ramon, Markowetz, F., & Beerenwinkel, N. (2019). Estimating the predictability of cancer evolution. Bioinformatics, 35(14), 389–397. http://dx.doi.org/10.1093/bioinformatics/btz332 
+- Hosseini, S., Diaz-Uriarte, R., Markowetz, F., & Beerenwinkel, N. (2019). Estimating the predictability of cancer evolution. Bioinformatics, 35(14), 389–397. http://dx.doi.org/10.1093/bioinformatics/btz332 
 
 - Diaz-Uriarte, R., & Vasallo, C. (2019). Every which way? On predicting tumor evolution using cancer progression models. PLOS Computational Biology, 15(8), 1007246. http://dx.doi.org/10.1371/journal.pcbi.1007246 
 
@@ -193,7 +206,7 @@ The results include:
 
 
 ****
-# Where is the code? Terms of use? Copyright
+## Where is the code? Terms of use? Copyright
 ***
 
 The complete source code for the package and the shiny app, as well information about how to run the shiny app locally, is available from https://github.com/rdiaz02/EvAM-Tools.
@@ -202,15 +215,18 @@ The complete source code for the package and the shiny app, as well information 
 This app is free to use (if you have confidential data, you might want not to upload it here, and instead install the package locally). 
 
 
-Most of the files for this app (and the package) are copyright Pablo Herrera Nieto and Ramon Diaz-Uriarte (and released under the GPL v3 license) except some files for HESBCN, MHN, and the CBN code; see full details in https://github.com/rdiaz02/EvAM-Tools#copyright-and-origin-of-files.
+Most of the files for this app (and the package) are copyright Ramon Diaz-Uriarte and Pablo Herrera Nieto (and released under the Affero GPL v3 license ---https://www.gnu.org/licenses/agpl-3.0.html) except some files for HESBCN, MHN, and the CBN code; see full details in https://github.com/rdiaz02/EvAM-Tools#copyright-and-origin-of-files.
 
 
 &nbsp;
-### Contact and bug reports
-Please, use the repository (https://github.com/rdiaz02/EvAM-Tools** and submit bug reports there. 
+#### Authors, contact and bug reports
+Please, use the repository (https://github.com/rdiaz02/EvAM-Tools) and submit bug reports there. 
+
 
 &nbsp;
 ****
-# Cookies
+## Cookies
 ***
-We use cookies to keep "sticky sessions" to the pool of servers. By using the app, you confirm you are OK with this.
+We use cookies to keep "sticky sessions" to the pool of servers (load balanced using [HAproxy](https://www.haproxy.org/)). By using the app, you confirm you are OK with this.
+
+

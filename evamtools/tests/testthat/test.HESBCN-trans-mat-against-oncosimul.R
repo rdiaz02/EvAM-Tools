@@ -1,13 +1,14 @@
 ## Testing that cpm2tm gives same output as
 ## cpm_to_trans_mat_oncosimul, the function that uses OncoSimulR
 
+t1 <- Sys.time()
 test_that("Testing cpm2tm by comparing with
 OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     ## Recall cpm2F2tm <- cpm_to_trans_mat_oncosimul
 
     ## For testing
     reorder_trans_mat <- function(x) {
-        gg <- c(1, 1 + order(colnames(x)[-1]))
+        gg <- c(1, 1 + evam_string_order(colnames(x)[-1]))
         return(as.matrix(x[gg, gg]))
     }
 
@@ -146,8 +147,5 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     
 })
 
-cat("\n Done test.HESBCN-trans-mat-against-oncosimul.R \n")
-
-
-
-
+cat("\n Done test.HESBCN-trans-mat-against-oncosimul.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

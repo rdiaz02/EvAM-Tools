@@ -1,4 +1,3 @@
-
 \docType{data}
 \name{SHINY_DEFAULTS}
 \alias{.ev_SHINY_dflt}

@@ -1,9 +1,10 @@
-#' Test the procedure of node labeling for the plot_genot_fg function
-#' It labels nodes as those involved in the most transited paths
+t1 <- Sys.time()
 
-#' that star in the root of the tree and that lead to any leave 
+# #' Test the procedure of node labeling for the plot_genot_fg function
+# #' It labels nodes as those involved in the most transited paths
+
+# #' that star in the root of the tree and that lead to any leave 
 test_that("Modifying matrix with top_paths",{
-
     base_adj_matrix <- matrix(0, nrow = 6, ncol = 6)
     rownames(base_adj_matrix) <- colnames(base_adj_matrix) <- c("WT", "A", "A, B",
                                                       "A, C", "C", "C, D")
@@ -16,7 +17,8 @@ test_that("Modifying matrix with top_paths",{
     adj_matrix["C", "A, C"] <- 100
     adj_matrix["C", "C, D"] <- 200
 
-    g <- igraph::graph_from_adjacency_matrix(adj_matrix, mode = "directed", weighted = TRUE)
+    g <- igraph::graph_from_adjacency_matrix(adj_matrix, mode = "directed",
+                                             weighted = TRUE)
     
     all_genotypes <- c("WT", "A", "A, B", "A, C", "C", "C, D")
     all_paths <- rank_paths(g, log_weights = FALSE)$paths
@@ -73,13 +75,13 @@ test_that("Modifying matrix with top_paths",{
     new_matrix_40 <-   compute_matrix_from_top_paths(g, all_paths, top_paths = 40)
     new_matrix_null <- compute_matrix_from_top_paths(g, all_paths, top_paths = NULL)
 
-    expect_equal(new_matrix_1, adj1, check.attributes=FALSE)
-    expect_equal(new_matrix_2, adj2, check.attributes=FALSE)
-    expect_equal(new_matrix_3, adj3, check.attributes=FALSE)
-    expect_equal(new_matrix_4, adj4, check.attributes=FALSE)
-    expect_equal(new_matrix_40, adj4, check.attributes=FALSE)
-    expect_equal(new_matrix_null, adj4, check.attributes=FALSE)
-    expect_equal(new_matrix_0, adj4, check.attributes=FALSE)
+    expect_equal(as.matrix(new_matrix_1), as.matrix(adj1), ignore_attr = TRUE)
+    expect_equal(as.matrix(new_matrix_2), as.matrix(adj2), ignore_attr = TRUE)
+    expect_equal(as.matrix(new_matrix_3), as.matrix(adj3), ignore_attr = TRUE)
+    expect_equal(as.matrix(new_matrix_4), as.matrix(adj4), ignore_attr = TRUE)
+    expect_equal(as.matrix(new_matrix_40), as.matrix(adj4), ignore_attr = TRUE)
+    expect_equal(as.matrix(new_matrix_null), as.matrix(adj4), ignore_attr = TRUE)
+    expect_equal(as.matrix(new_matrix_0), as.matrix(adj4), ignore_attr = TRUE)
 })
 
 test_that("Returns the correct number and type of vertex labels", {
@@ -303,4 +305,5 @@ test_that("Simple test that we recover correct rank of paths and their prob", {
 })
 
 
-cat("\n Done test.rank-paths-graphs.R \n")
+cat("\n Done test.rank-paths-graphs.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

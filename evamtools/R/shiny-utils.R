@@ -1,59 +1,18 @@
 ## Copyright 2022 Pablo Herrera Nieto, Ramon Diaz-Uriarte
 
+## This program is free software: you can redistribute it and/or modify it under
+## the terms of the GNU Affero General Public License (AGPLv3.0) as published by
+## the Free Software Foundation, either version 3 of the License, or (at your
+## option) any later version.
 
-## ## Reasons for not using this function:
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU Affero General Public License for more details.
 
-## ## That it takes a gene_names is questionable:
-## ## gene_names should be extracted from freqs.
-## ## Doing it this way suggests not self-contained and it is unclear
-## ## why not self-contained.
+## You should have received a copy of the GNU Affero General Public License along
+## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-## ## Could errors be introduced if genes not ordered or in numbers that differ from
-## ## expected? I do not know and there are no tests. For example: what would happen
-## ## if freqs had columns A, B, but gene_names was A, D, E? Or if gene_names only
-## ## had A?  One could add checks for that, but since the role of this is to
-## ## produce tabular data, it seems sensible to assume that all the info is in
-## ## freqs. (I tried adding a check but I think it is just simpler to used
-## ## genotypeCounts_to_data).
-
-## ## There is no checking for freqs having specifically named
-## ## columns: it is assumed the first is genotype and the second is
-## ## Counts/Frequency.
-
-## ## Finally: using genotypeCounts_to_data we only output columns
-## ## that have at least one mutation, never columns filled with only 0s.
-## freqs2csd <- function(freqs, gene_names) {
-##     genes_in_freqs <- setdiff(unique(unlist(strsplit(freqs[, 1], ", "))),
-##                               "WT")
-##     stopifnot(isTRUE(all(genes_in_freqs %in% gene_names)))
-    
-##     csd <- NULL
-##     if (nrow(freqs) > 0) {
-##         csd2 <- apply(
-##             freqs, 1,
-##             function(x) {
-##                 mut <- x[[1]]
-##                 freq <- as.numeric(x[[2]])
-##                 genot <- rep(0, length(gene_names))
-##                 if (mut != "WT") {
-##                     mut <-  strsplit(mut, ", ")[[1]]
-##                     genot[which(gene_names %in% mut)] <- 1
-##                 }
-##                 csd <- matrix(rep(genot, freq), ncol = length(gene_names),
-##                               byrow = TRUE)
-##                 return(list(csd))
-##             })
-        
-##         csd <- csd2[[1]][[1]]
-##         if (nrow(freqs) > 1) {
-##             for (i in 2:nrow(freqs)){
-##                 csd <- rbind(csd, csd2[[i]][[1]])
-##             }
-##         }
-##         colnames(csd) <- gene_names
-##     }
-##     return(csd)
-## }
 
 get_display_freqs <- function(freqs, n_genes, gene_names){
   if(is.null(freqs)) return(.ev_SHINY_dflt$template_data$csd_counts)
@@ -141,8 +100,7 @@ modify_dag <-
   number_of_children <- rowSums(tmp_dag2)
   for(i in colnames(tmp_dag2)[-1]){
     if(number_of_children[i] > 0 & number_of_parents[i] == 0){
-      ## We add link to WT
-        ## tmp_dag2["WT", i] <- 1
+      ## We add link to Root
         tmp_dag2["Root", i] <- 1
     }
   }
@@ -161,7 +119,6 @@ modify_dag <-
   ## Recompute parent set
   number_of_parents <- colSums(tmp_dag2)[-1]
   tmp_parent_set <- parent_set
-  # tmp_parent_set[number_of_parents > 1] <- "AND" ##Default is AND
   tmp_parent_set[number_of_parents <= 1] <- "Single" ##Default is Single
   tmp_parent_set[number_of_parents > 1 & !(parent_set %in% c("AND", "OR", "XOR"))] <- "AND" ##Default is AND
   return(list(dag = tmp_dag2, parent_set = tmp_parent_set))
@@ -259,15 +216,6 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
     tmp_parent_set[1:length(tmp_parent_set)] <- "Single"
   }
 
-  # for(idx in c(1:length(new_relationships))){
-  #   tmp_parent_set[names(new_relationships[idx])] <- new_relationships[idx]
-  # }
-  # if(is.null(new_relationships)  && !is.null(data$dag_parent_set)){
-  #   tmp_parent_set <- data$dag_parent_set
-  # } else {
-  #   tmp_parent_set[!(tmp_parent_set %in% c("Single", "AND", "OR", "XOR"))] <- "AND"
-  #   tmp_parent_set[number_of_parents <= 1] <- "Single"
-  # }
   return(list(lambdas = tmp_lambdas, parent_set = tmp_parent_set))
 }
 
@@ -286,13 +234,9 @@ get_mhn_data <- function(thetas, noise = 0, N = 10000){
                                                        )
   data_with_noise <- genotypeCounts_to_data(tmp_samples_as_vector,
     e = noise)
-  # data_as_vector <- data_to_counts(data_with_noise, out="data.frame")
   csd_counts <- data_to_counts(data_with_noise, out="data.frame")
-  # rownames(csd_counts) <- names(data_as_vector)
   return(list(csd_counts = csd_counts,
               data = data_with_noise))
-  # return(list(csdfreqs = tmp_samples_as_df,
-  #             data = genotypeCounts_to_data(tmp_samples_as_df, e = 0)))
 }
 
 get_dag_data <- function(data, parent_set, noise = 0, N = 10000,
@@ -327,28 +271,6 @@ get_dag_data <- function(data, parent_set, noise = 0, N = 10000,
 
   return(list(csd_counts = csd_counts,
               data = data_with_noise))
-  # csd_counts <- data.frame(Genotype = names(data_as_vector),
-                          # Counts = data_as_vector)
-  # rownames(csd_counts) <- names(data_as_vector)
-  ## ## FIXME: aqui. To rm later
-  ## tmp_genotypes_sampled <- sample_to_pD_order(
-  ##               sample(names(dag_probs), size = N,
-  ##                      prob = dag_probs, replace = TRUE),
-  ##               ngenes = n_genes, gene_names = gene_names)
-  ## tmp_samples <- setNames(tmp_genotypes_sampled,
-  ##           generate_pD_sorted_genotypes(n_genes, gene_names))
-  ## tmp_samples <- tmp_samples[tmp_samples > 0]
-  ## tmp_samples_as_df <- data.frame(Genotype=names(tmp_samples), Counts=tmp_samples)
-
-  ## Note: no, the above call to genot_probs_2_pD ... does not remove
-  ## lines with 0 counts. But we do not want to do that as that is a separate
-  ## operation that has to with, maybe, generating the csd.
-
-  ## return(list(csd_counts = tmp_samples_as_df,
-  ##             data = freqs2csd(tmp_samples_as_df, gene_names)))
-  # return(list(csd_counts = tmp_samples_as_df,
-  #             data = genotypeCounts_to_data(tmp_samples_as_df, e = 0)))
-  
 }
 
 create_tabular_data <- function(data) {
@@ -447,25 +369,6 @@ create_tabular_data <- function(data) {
           ## tabular_data[[attr]] <- df[order_by_counts, ]
           tabular_data[[attr]] <- df[order(df$Index), ]
       }
-      # else if(type %in% c("lambdas")){
-      #     lambda_field <- c("Lambdas", "OT_edgeWeight", "rerun_lambda", "Lambdas", "lambda", "Thetas")
-      #     names(lambda_field) <- c("Source", "OT", "CBN", "HESBCN", "MCCBN")
-
-      #     gene_names <- sort(unique(data$OT_model$To))
-      #     all_counts <- data.frame(Gene = gene_names)
-      #     for(name in names(data)){
-      #         if(grepl("_model", name)){
-      #             method_name <- strsplit(name, "_")[[1]][[1]]
-      #             if(!is.null(data[[name]]) & !is.na(data[[name]])){
-      #                 tmp_data <- data[[name]][[lambda_field[method_name]]]
-      #                 names(tmp_data) <- data[[name]]$To
-      #                 all_counts[[method_name]] <- round(tmp_data[all_counts$Gene], 2)
-      #             }
-      #         }
-      #     }
-
-      #     return(all_counts)
-      # }
     }
     return(tabular_data)
 }
@@ -474,7 +377,7 @@ create_tabular_data <- function(data) {
 ## Fills empty attributes of a csd data object
 
 ## Yes, could have passed all default_* as part of a single list. Whatever.
-standarize_dataset <- function(data,
+to_stnd_csd_dataset <- function(data,
                                default_max_genes = .ev_SHINY_dflt$max_genes,
                                default_template_data = .ev_SHINY_dflt$template_data
                                ) {
@@ -555,7 +458,7 @@ standarize_dataset <- function(data,
     ## Only genes with multiple parent can have something different from "Single" relationship
     new_data$dag_parent_set[colSums(new_dag)[-1] <= 1] <- "Single"
   }
-    ## rownames(new_data$dag) <- colnames(new_data$dag) <- c("WT", new_data$gene_names)
+
   rownames(new_data$dag) <- colnames(new_data$dag) <- c("Root", new_data$gene_names)
 
   if(is.null(data$thetas)) {
@@ -584,122 +487,12 @@ standarize_dataset <- function(data,
   return(new_data)
 }
 
-standarize_all_datasets <- function(datasets){
+to_stnd_csd_all_datasets <- function(datasets){
   all_new_data <- list()
   for(i in c("csd", "dag", "matrix")){
     tmp_data <- datasets[[i]] 
     for(j in names(tmp_data)) all_new_data[[i]][[j]] <-     
-      standarize_dataset(tmp_data[[j]])
+      to_stnd_csd_dataset(tmp_data[[j]])
   }
   return(all_new_data)
 }
-
-
-# plot_model <- function(cpm_output, mod){
-#     ## DAG relationships colors 
-#     standard_relationship <- "gray73"
-#     colors_relationships <- c(standard_relationship, standard_relationship, "cornflowerblue", "coral2")
-#     names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
-    
-#     model_data2plot <- process_data(cpm_output, mod)
-#     ## Plotting data
-#     if(!is.null(model_data2plot$dag_tree)) {
-
-#         if(!is.null(model_data2plot$parent_set)){
-#             for(i in names(model_data2plot$parent_set)){
-#                 igraph::E(model_data2plot$dag_tree)[.to(i)]$color <- colors_relationships[model_data2plot$parent_set[[i]]]
-#             }
-#         } else igraph::E(model_data2plot$dag_tree)$color <- standard_relationship
-#         plot(model_data2plot$dag_tree
-#             , layout = igraph::layout.reingold.tilford
-#             , vertex.size = 55 
-#             , vertex.label.color = "black"
-#             , vertex.label.family = "Helvetica"
-#             , vertex.label.cex = 1.5
-#             , font.best = 2
-#             , vertex.frame.width = 0.5
-#             , vertex.color = "white"
-#             , vertex.frame.color = "black" 
-#             , vertex.label.cex = 1
-#             , edge.arrow.size = 0
-#             , edge.width = 5
-#             )
-#         # par(mar=c(0, 0, 0, 0))
-#         if(!is.null(model_data2plot$parent_set)){
-#             legend("topleft", legend = names(colors_relationships),
-#                 col = colors_relationships, lty = 1, lwd = 5, bty = "n")
-#         }
-#     }else if(!is.null(model_data2plot$theta)) {
-#         op <- par(mar=c(3, 3, 5, 3), las = 1)
-#         plot(model_data2plot$theta, cex = 1.4, digits = 2, key = NULL
-#             , axis.col = list(side = 3)
-#             , xlab = "Effect of this (effector)"
-#             , ylab = " on this (affected)"
-#             , main = ""
-#             , mgp = c(2, 1, 0))
-#         par(op)
-#     }
-#     title(mod, cex.main = 1.8)
-# }
-
-
-
-
-# plot_dag <- function(dag, parent_set){
-#     if (is.null(dag)) return()
-#     standard_relationship <- "gray73"
-#     colors_relationships <- c(standard_relationship, standard_relationship, "cornflowerblue", "coral2")
-#     names(colors_relationships) <- c("Single", "AND", "OR", "XOR")
-#     dag <- igraph::graph_from_adjacency_matrix(dag, mode = "directed")
-#     dag <- igraph::decompose(dag)[[1]]
-#     ## Plotting data
-#     if(!is.null(parent_set)){
-#         for(i in igraph::E(dag)){
-#             igraph::E(dag)[i]$color <- colors_relationships[parent_set[[igraph::head_of(dag, igraph::E(dag)[i])$name]]]
-#         }
-#     } else igraph::E(dag)$color <- standard_relationship
-        
-#     plot(dag
-#         , layout = igraph::layout.reingold.tilford
-#         , vertex.size = 30 
-#         , vertex.label.color = "black"
-#         , vertex.label.family = "Helvetica"
-#         , vertex.label.cex = 1.5
-#         , font.best = 2
-#         , vertex.frame.width = 0.5
-#         , vertex.color = "white"
-#         , vertex.frame.color = "black" 
-#         , vertex.label.cex = 1
-#         , edge.arrow.size = 0
-#         , edge.width = 5
-#         )
-#     if(!is.null(parent_set)){
-#         legend("topleft", legend = names(colors_relationships),
-#             col = colors_relationships, lty = 1, lwd = 5, bty = "n")
-#     }
-#     title("Direct acyclic graph", cex.main = 1.8)
-# }
-
-
-# check_if_csd <- function(data){
-#     tmp_names <- c("data", "dag", "dag_parent_set", "gene_names", "name", "type", "thetas")
-#     types <- c("csd", "dag", "matrix")
-#     if(is.null(data)) return(FALSE)
-#     if(all(tmp_names %in% names(data))){
-#         if((data$type %in% types 
-#         & all(unique(c(data$data)) %in% c(0, 1)))){
-#             return(TRUE)
-#         } else {return(FALSE)}
-#     } else { ## We assume a data.frame
-#         tmp_data <- unlist(data)
-#         names(tmp_data) <- NULL
-#         return(all(unique(tmp_data) %in% c(0, 1)))
-#     }
-# }
-
-
-# available_cpms <- function(data){
-#     data$csd_data <- NULL
-#     cpm_names <- unique(sapply(names(data), function(x) str_split(x, "_")[[1]][[1]]))
-#     return(cpm_names)
-# }

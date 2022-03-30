@@ -11,6 +11,8 @@
 ## way, whatever is in a different object, which we might want to
 ## modify anyway.
 
+t1 <- Sys.time()
+
 generate_old <- function() {
     ## default_genes <- 3
     max_genes <- 10
@@ -57,7 +59,7 @@ test_that("Test standarize datasets works correctly", {
     old <- generate_old()
     
     check_fields <- function(orig_data, expected_data) {
-        standard_data <- standarize_dataset(orig_data,
+        standard_data <- to_stnd_csd_dataset(orig_data,
                                             default_max_genes = old$max_genes,
                                             default_template_data = old$template_data
                                             )
@@ -247,7 +249,7 @@ test_that("Test standarize datasets works correctly", {
 
 test_that("Standarize does not work with bad data", {
  old <- generate_old()
-    expect_error(standarize_dataset("asd",
+    expect_error(to_stnd_csd_dataset("asd",
                                     default_template_data = old$template_data,
                                     default_max_genes = old$max_genes
                                     )
@@ -258,7 +260,7 @@ test_that("Standarize does not work with bad data", {
                                         # Try with a CSD
     data1 <- list(data = test_data)
 
-    expect_error(standarize_dataset(data1, default_template_data = old$template_data,
+    expect_error(to_stnd_csd_dataset(data1, default_template_data = old$template_data,
                                     default_max_genes = old$max_genes
                                     )
                , "Data should be binary: only 0 and 1")
@@ -277,40 +279,40 @@ test_that("Standarize does not work with bad data", {
     dag_1 <- test_dag
     dag_1["D4", "A1"] <- 1 #Breaks DAG
     test_dag_1 <- list(dag = dag_1)
-    expect_error(standarize_dataset(test_dag_1, default_template_data = old$template_data,
+    expect_error(to_stnd_csd_dataset(test_dag_1, default_template_data = old$template_data,
                                     default_max_genes = old$max_genes),
                  "The graph is not a DAG")
     
     dag_2 <- test_dag
     dag_2["A1", "A1"] <- 1 #Breaks DAG
     test_dag_2 <- list(dag = dag_2)
-    expect_error(standarize_dataset(test_dag_2, default_template_data = old$template_data,
+    expect_error(to_stnd_csd_dataset(test_dag_2, default_template_data = old$template_data,
                                     default_max_genes = old$max_genes),
                  "The graph is not a DAG")
 
     dag_3 <- test_dag
     dag_3["A1", "B2"] <- 2 #Bad input
     test_dag_3 <- list(dag = dag_3)
-    expect_error(standarize_dataset(test_dag_3, default_template_data = old$template_data,
+    expect_error(to_stnd_csd_dataset(test_dag_3, default_template_data = old$template_data,
                                     default_max_genes = old$max_genes)
                , "Adjacency matrix should be binary: only 0 and 1")
 
     dag_4 <- test_dag
     dag_4["A1", "B2"] <- "abc" #Bad input
     test_dag_4 <- list(dag = dag_4)
-    expect_error(standarize_dataset(test_dag_4, default_template_data = old$template_data,
+    expect_error(to_stnd_csd_dataset(test_dag_4, default_template_data = old$template_data,
                                     default_max_genes = old$max_genes)
                , "Adjacency matrix should be binary: only 0 and 1")
     
     parent_set <- c("Single", "OR", "AND2", "AND") #Bad data relationships
     test_parent_set <- list(dag_parent_set = parent_set)
-    expect_error(standarize_dataset(test_parent_set, default_template_data = old$template_data,
+    expect_error(to_stnd_csd_dataset(test_parent_set, default_template_data = old$template_data,
                                     default_max_genes = old$max_genes)
                , "Parent set must include only 'Single', 'AND', 'OR' or 'XOR'")
 
     lambdas <- c(1, "AB", 4)
     test_lambdas <- list(lambdas = lambdas)
-    expect_error(standarize_dataset(test_lambdas, default_template_data = old$template_data,
+    expect_error(to_stnd_csd_dataset(test_lambdas, default_template_data = old$template_data,
                                     default_max_genes = old$max_genes)
                , "Lambdas should only contain numbers")
 
@@ -325,7 +327,7 @@ test_that("Standarize does not work with bad data", {
     colnames(thetas) <- rownames(thetas) <- c("A1", "B2", "C3", "D4")
 
     test_thetas <- list(thetas = thetas)
-    expect_error(standarize_dataset(test_thetas, default_template_data = old$template_data,
+    expect_error(to_stnd_csd_dataset(test_thetas, default_template_data = old$template_data,
                                     default_max_genes = old$max_genes)
                , "Theta matrix should only contain numbers")
 })
@@ -469,4 +471,5 @@ test_that("Create tabular data from CPM output works correctly", {
 })
 
 rm(generate_old)
-cat("\n Done test.shiny-utils.R \n")
+cat("\n Done test.shiny-utils.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

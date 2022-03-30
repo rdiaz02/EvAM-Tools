@@ -1,17 +1,18 @@
 ## Copyright 2016, 2017, 2018, 2020, 2022 Ramon Diaz-Uriarte
 
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
+## This program is free software: you can redistribute it and/or modify it under
+## the terms of the GNU Affero General Public License (AGPLv3.0) as published by
+## the Free Software Foundation, either version 3 of the License, or (at your
+## option) any later version.
 
 ## This program is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## GNU Affero General Public License for more details.
 
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU Affero General Public License along
+## with this program.  If not, see <http://www.gnu.org/licenses/>.
+
 
 
 ## wrap calling the CPMs.
@@ -104,7 +105,7 @@ DAG_2_access_genots <- function(x) {
     
     ## g: an igraph object, with a "Root"
     ## returns a list
-    children <- sort(setdiff(V(g)$name, "Root"))
+    children <- evam_string_sort(setdiff(V(g)$name, "Root"))
     node_depth <-
         unlist(lapply(children,
                       function(node)
@@ -121,8 +122,9 @@ DAG_2_access_genots <- function(x) {
     i <- 1
     for(j in seq_along(node_depth)) {
         tmp_gty_1 <-
-            sort(setdiff(names(subcomponent(g, v = names(node_depth)[j],
-                                            mode = "in")),
+            evam_string_sort(setdiff(names(subcomponent(g,
+                                                        v = names(node_depth)[j],
+                                                        mode = "in")),
                                   "Root"))
         all_gty[[i]] <- tmp_gty_1
 
@@ -137,7 +139,7 @@ DAG_2_access_genots <- function(x) {
         if(length(to_unite)) {
             ## we need unique as some sets are the same
             tmp_gty_2 <- unique(lapply(all_gty[to_unite],
-                                       function(u) sort(union(u, tmp_gty_1))))
+                                       function(u) evam_string_sort(union(u, tmp_gty_1))))
             ## check remaining space in preallocated list.
             ## expand if needed.
             if(length(all_gty) < (i + 1 + length(tmp_gty_2))) {
@@ -174,7 +176,7 @@ DAG_2_access_genots_OR <- function(x) {
     
     ## g: an igraph object, with a "Root"
     ## returns a list
-    children <- sort(setdiff(V(g)$name, "Root"))
+    children <- evam_string_sort(setdiff(V(g)$name, "Root"))
     node_depth <-
         unlist(lapply(children,
                       function(node)
@@ -197,7 +199,7 @@ DAG_2_access_genots_OR <- function(x) {
             names)
 
         all_tmp_gty_1 <- lapply(all_tmp_gty_1,
-                                function(u) sort(setdiff(u, "Root")))
+                                function(u) evam_string_sort(setdiff(u, "Root")))
         for(k in seq_along(all_tmp_gty_1)) {
             tmp_gty_1 <- all_tmp_gty_1[[k]]
             all_gty[[i]] <- tmp_gty_1
@@ -214,7 +216,7 @@ DAG_2_access_genots_OR <- function(x) {
                 ## we need unique as some sets are the same
                 tmp_gty_2 <-
                     unique(lapply(all_gty[to_unite],
-                                  function(u) sort(union(u, tmp_gty_1))))
+                                  function(u) evam_string_sort(union(u, tmp_gty_1))))
                 ## check remaining space in preallocated list.
                 ## expand if needed.
                 if(length(all_gty) < (i + 1 + length(tmp_gty_2))) {
@@ -272,7 +274,7 @@ DAG_2_access_genots_relationships <- function(x,
     ## returns a list
     g <- igraph::graph_from_data_frame(x, directed = TRUE)
 
-    children <- sort(setdiff(V(g)$name, "Root"))
+    children <- evam_string_sort(setdiff(V(g)$name, "Root"))
     node_depth <-
         unlist(lapply(children,
                       function(node)
@@ -295,7 +297,7 @@ DAG_2_access_genots_relationships <- function(x,
             names)
 
         all_tmp_gty_1 <- lapply(all_tmp_gty_1,
-                                function(u) sort(setdiff(u, "Root")))
+                                function(u) evam_string_sort(setdiff(u, "Root")))
         for (k in seq_along(all_tmp_gty_1)) {
             tmp_gty_1 <- all_tmp_gty_1[[k]]
 
@@ -317,7 +319,7 @@ DAG_2_access_genots_relationships <- function(x,
                 ## we need unique as some sets are the same
                 tmp_gty_2 <-
                     unique(lapply(all_gty[to_unite],
-                                  function(u) sort(union(u, tmp_gty_1))))
+                                  function(u) evam_string_sort(union(u, tmp_gty_1))))
                 ## check remaining space in preallocated list.
                 ## expand if needed.
                 tmp_gty_2 <-
@@ -594,7 +596,7 @@ evam <- function(x,
                                 ),
                  ot_opts = list(with_errors_dist_ot = TRUE),
                  cbn_opts = list(
-                     omp_threads = ifelse(cores > 1, 1, detectCores()),
+                     omp_threads = 1,
                      init_poset = "OT"
                  ),
                  hesbcn_opts = list(
@@ -694,7 +696,7 @@ evam <- function(x,
                        omp_threads = ifelse(cores > 1, 1, detectCores())
                        )
     d_cbn_opts <- list(
-        omp_threads = ifelse(cores > 1, 1, detectCores()),
+        omp_threads = 1,
         init_poset = "OT"
     )
     d_hesbcn_opts <- list(

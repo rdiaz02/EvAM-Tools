@@ -1,4 +1,5 @@
 ## Testing functionality in access_genots_from_oncosimul.R
+t1 <- Sys.time()
 
 test_that("Genotype not accessible if no increase in fitness wrt to ancestor", {
     x1 <- c("WT" = 1, "A" = 2, "B" = 1, "A, B" = 2.5)
@@ -92,4 +93,5 @@ under general fitness landscapes", {
     expect_equal(names(x2o$accessible_genotypes), c("A", "D"))
 })
 
-cat("\n Done test.access-genots-from-oncosimul.R \n")
+cat("\n Done test.access-genots-from-oncosimul.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

@@ -36,7 +36,7 @@ while(TRUE) {
 
     ## For testing
     reorder_trans_mat <- function(x) {
-        gg <- c(1, 1 + order(colnames(x)[-1]))
+        gg <- c(1, 1 + evam_string_order(colnames(x)[-1]))
         return(as.matrix(x[gg, gg]))
     }
 

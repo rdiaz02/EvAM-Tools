@@ -1,8 +1,9 @@
 ## The testing is convoluted, but the original code
 ## in MHN does not compute the probabilities from a transition rate
 ## matrix but from the thetas which, in addition, can
-## be an object without row/column names. 
+## be an object without row/column names.
 
+t1 <- Sys.time()
 
 ## Given some gene names, generate some random theta and from it
 ## the vector of probabilities. Return the theta and the probs.
@@ -22,7 +23,7 @@ probs_from_Schill <- function(gene_names) {
     ## What if we had sorted?
     thetas2 <- thetas
     rownames(thetas2) <- colnames(thetas2) <- gene_names
-    oindex <- order(colnames(thetas2))
+    oindex <- evam_string_order(colnames(thetas2))
     thetas2 <- thetas2[oindex, oindex]
     rm(oindex)
     p2 <- Generate.pTh(thetas2)
@@ -54,7 +55,7 @@ probs_from_Schill <- function(gene_names) {
 
 
 probs_from_theta_evam <- function(theta) {
-    oindex <- order(colnames(theta))
+    oindex <- evam_string_order(colnames(theta))
     theta <- theta[oindex, oindex]
 
     ## The previous sorting ensures genes are sorted in genotypes;
@@ -233,3 +234,6 @@ if(FALSE) {
         summary(comps)
     })
 }
+
+cat("\n Done test.probs-from-trm.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

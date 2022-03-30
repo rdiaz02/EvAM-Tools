@@ -6,7 +6,7 @@ plot_CPMs(
   cpm_output,
   samples = NULL,
   orientation = "horizontal",
-  methods = c("OT", "OncoBN", "CBN", "MCCBN", "HESBCN", "MHN"),
+  methods = NULL, 
   plot_type = "trans_mat",
   label_type = "genotype",
   fixed_vertex_size = FALSE,
@@ -21,7 +21,9 @@ plot_CPMs(
 
 \item{orientation}{String. If it is not "vertical" it will be displayed with an horizontal layout. Optional.}
 
-\item{methods}{Methods for which you want output.}
+\item{methods}{Vector of strings with the names of methods that we want to plot. If NULL, all
+  methods with output in cpm_output. The list of available methods is
+  OT, OncoBN, CBN, MCCBN, MHN, HESBCN.}
 
 \item{plot_type}{One of:
   \itemize{
@@ -164,31 +166,34 @@ data("ex_mixed_and_or_xor")
 
 out_AND_OR_XOR <- evam(ex_mixed_and_or_xor,
                        methods = c("OT", "HESBCN", "MHN", "OncoBN"),
-                       hesbcn_opts = list(seed = 26,
-                                          silent = FALSE))
+                       hesbcn_opts = list(seed = 26))
 
-plot_CPMs(out_AND_OR_XOR,plot_type = "trans_mat")
+plot_CPMs(out_AND_OR_XOR,plot_type = "trans_mat",
+          top_paths = 3)
 
-         
 
+## Asking for a method not in the output will give a warning
+plot_CPMs(out_AND_OR_XOR, plot_type = "trans_mat",
+          methods = c("OT", "OncoBN"),
+          top_paths = 4)
+
+   
 ## Only two methods, but one not fitted
 plot_CPMs(out_AND_OR_XOR, methods = c("CBN", "HESBCN"),
            plot_type = "trans_mat")
 
 ## Only one method
 plot_CPMs(out_AND_OR_XOR, methods = c("MHN"),
-          plot_type = "trans_mat")
+          plot_type = "trans_mat",
+          top_paths = 5)
 
 plot_CPMs(out_AND_OR_XOR, plot_type = "trans_mat", top_paths = 3)
 
 
-
-plot_CPMs(out_AND_OR_XOR, methods = c("MHN", "HESBCN"),
-          plot_type = "trans_mat")
-
 plot_CPMs(out_AND_OR_XOR, methods = c("MHN", "HESBCN"),
           plot_type = "trans_mat", label_type="acquisition"
           , top_paths=3)
+
 plot_CPMs(out_AND_OR_XOR, methods = c("MHN", "HESBCN"),
           plot_type = "trans_mat", label_type="genotype"
           , top_paths=3)

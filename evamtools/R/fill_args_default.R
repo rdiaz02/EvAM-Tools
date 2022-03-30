@@ -1,3 +1,19 @@
+## Copyright 2022 Ramon Diaz-Uriarte
+
+## This program is free software: you can redistribute it and/or modify it under
+## the terms of the GNU Affero General Public License (AGPLv3.0) as published by
+## the Free Software Foundation, either version 3 of the License, or (at your
+## option) any later version.
+
+## This program is distributed in the hope that it will be useful,
+## but WITHOUT ANY WARRANTY; without even the implied warranty of
+## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+## GNU Affero General Public License for more details.
+
+## You should have received a copy of the GNU Affero General Public License along
+## with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
 ## list, list -> list
 
 ## If any entry en defaults is not in inputl, add to inputl
@@ -25,12 +41,3 @@ fill_args_default <- function(inputl, defaults) {
     inputl <- c(inputl, defaults[not_passed])
     return(inputl)
 }
-
-## This can introduce bugs
-## ## wrap the above, expecting the defaults to be called d_name
-## ## For this to work, the default arguments must start with "d_"
-## wrap_fill_args_default <- function(name) {
-##     name0 <- paste0("d_", deparse(substitute(name)))
-##     tmp <- fill_args_default(name, get(name0, envir = parent.frame(n = 1)))
-##     return(tmp)
-## }

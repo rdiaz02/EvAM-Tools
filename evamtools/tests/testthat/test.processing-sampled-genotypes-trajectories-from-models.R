@@ -1,3 +1,5 @@
+t1 <- Sys.time()
+
 test_that("Output is not generated with bad input", {
     trajectory <- list(
         c("WT", "C", "C, D"),
@@ -79,17 +81,17 @@ test_that("Output is returned only with the requested fields", {
     out_sim <- process_samples(simGenotypes, 5,
                                            gene_names = LETTERS[1:5],
                                            output = out_params[1])
-    expect_equal(sort(names(out_sim)), sort(out_params[1]))
+    expect_equal(evam_string_sort(names(out_sim)), evam_string_sort(out_params[1]))
     
     out_sim <- process_samples(simGenotypes, 5,
                                            gene_names = LETTERS[1:5],
                                            output = out_params[2:3])
-    expect_equal(sort(names(out_sim)), sort(out_params[2:3]))
+    expect_equal(evam_string_sort(names(out_sim)), evam_string_sort(out_params[2:3]))
 
     out_sim <- process_samples(simGenotypes, 5,
                                            gene_names = LETTERS[1:5],
                                            output = out_params)
-    expect_equal(sort(names(out_sim)), sort(out_params))
+    expect_equal(evam_string_sort(names(out_sim)), evam_string_sort(out_params))
 
 
     expect_error(process_samples(simGenotypes, 5,
@@ -265,4 +267,5 @@ test_that("New algorithm for state transitions", {
     expect_equal(os6$obs_genotype_transitions, t6)
 })
 
-cat("\n Done test.processing-sampled-genotypes-trajectories-from-models.R \n")
+cat("\n Done test.processing-sampled-genotypes-trajectories-from-models.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

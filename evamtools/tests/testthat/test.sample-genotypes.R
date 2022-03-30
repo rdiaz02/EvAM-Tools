@@ -1,3 +1,5 @@
+t1 <- Sys.time()
+
 test_that("We get requested output, by the specified means", {
     data(every_which_way_data)
     Dat1 <- every_which_way_data[[16]][1:40, 2:6]
@@ -91,4 +93,5 @@ test_that("Exercise random_evam and sampling", {
 }
 })
 
-cat("\n Done test.sample-genotypes.R \n")
+cat("\n Done test.sample-genotypes.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

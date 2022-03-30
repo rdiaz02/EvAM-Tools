@@ -1,0 +1,129 @@
+FROM rocker/rstudio:4.1.3
+
+######################################################################
+######################################################################
+#####
+#####     Common to the two Dockerfiles
+#####
+######################################################################
+######################################################################
+
+RUN apt-get update && \
+    apt-get install -f -y software-properties-common && \
+    rm -rf /var/lib/apt/lists/* && \
+    add-apt-repository universe && \
+    apt-get update && \
+    apt-get install -y libboost-all-dev && \
+    apt-get install -y libgsl-dev && \
+    apt-get install -y fftw3 && \
+    apt-get install -y libfftw3-3 && \
+    apt-get install -y libfftw3-bin && \
+    apt-get install -y libfftw3-dev && \
+    apt-get install -y libfftw3-single3 && \
+    apt-get install -y libfftw3-double3 && \
+    apt-get install -y libfftw3-long3 && \
+    apt-get install -y libfftw3-quad3 && \
+    apt-get install -y libtiff-dev && \
+    apt-get install -y libglpk-dev && \
+    apt-get install -y libgmp-dev && \
+    apt-get install -y libx11-dev && \
+    apt-get install -y git && \
+    apt-get install -y libxt6 && \
+    apt-get install -y pkg-config
+
+## R packages
+RUN R -e "install.packages('BiocManager')"
+RUN R -e "install.packages('relations')"
+RUN R -e "install.packages('RhpcBLASctl')"
+RUN R -e "install.packages('inline')"
+RUN R -e "install.packages('Oncotree')"
+RUN R -e "install.packages('pryr')"
+RUN R -e "install.packages('readr')"
+RUN R -e "install.packages('testthat')"
+RUN R -e "install.packages('plot.matrix')"
+RUN R -e "install.packages('httr')"
+RUN R -e "install.packages('openssl')"
+RUN R -e "install.packages('xml2')"
+RUN R -e "install.packages('usethids')"
+RUN R -e "install.packages('credentials')"
+RUN R -e "install.packages('roxygen2')"
+RUN R -e "install.packages('optparse')"
+RUN R -e "install.packages('rversions')"
+RUN R -e "install.packages('imager')"
+RUN R -e "install.packages('DT')"
+RUN R -e "install.packages('shinyjs')"
+RUN R -e "install.packages('markdown')"
+RUN R -e "install.packages('Rlinsolve')"
+RUN R -e "install.packages('fastmatrix')"
+RUN R -e "install.packages('shiny')"
+RUN R -e "install.packages('Matrix')"
+RUN R -e "install.packages('stringi')"
+RUN R -e "install.packages('foreach')"
+RUN R -e "install.packages('R.utils')"
+RUN R -e "BiocManager::install('Rgraphviz')"
+RUN R -e "install.packages('devtools')"
+RUN R -e "install.packages('igraph')"
+RUN R -e "BiocManager::install('OncoSimulR')"
+RUN R -e "library(devtools);devtools::install_github('phillipnicol/OncoBN')"
+
+RUN mkdir -p /app/Sources/
+
+## Install HESBCN
+RUN cd /app/Sources && \
+    git clone https://github.com/danro9685/HESBCN && \
+    cd HESBCN && \ 
+    make && \
+    cp h-esbcn /usr/local/bin/ 
+
+## Install MCCBN
+RUN cd /app/Sources && \
+    git clone https://github.com/cbg-ethz/MC-CBN && \
+    cd MC-CBN  && \ 
+    apt-get install -y dh-autoreconf autoconf automake autotools-dev autoconf autoconf-archive && \
+    autoreconf -vif -I m4  && \
+    R CMD build . && \
+    R CMD INSTALL mccbn_*.tar.gz
+    
+## Install cbn
+COPY ct-cbn-0.1.04b-RDU.tar.gz /app/Sources/
+RUN cd /app/Sources && \
+    tar -xvzf ct-cbn-0.1.04b-RDU.tar.gz && \
+    cd ct-cbn-0.1.04b-RDU && \
+    ./configure && \
+    make && \
+    cp -t /usr/local/bin/ ct-cbn h-cbn 
+
+## Copy a file used for testing
+COPY Renviron.based_on_bioc /app/
+
+## Copy the directory and install EvAM-tools with paranoid testing
+COPY evamtools/ /app/evamtools/
+  
+RUN cd /app && \
+    V_PKG=$(cat ./evamtools/DESCRIPTION | grep Version | cut -d' ' -f2) && \
+    R --no-site-file --no-init-file CMD build evamtools && \
+    R --no-site-file --no-init-file CMD INSTALL --install-tests evamtools_$V_PKG.tar.gz && \
+    export TESTTHAT_CPUS=$(cat /proc/cpuinfo | awk '/^processor/{print $3}' | tail -n 1) && \
+    R_ENVIRON_USER=./Renviron.based_on_bioc R --no-site-file --no-init-file CMD check --no-manual evamtools_$V_PKG.tar.gz
+
+
+######################################################################
+######################################################################
+#####
+#####     End common to the two Dockerfiles
+#####
+######################################################################
+######################################################################
+
+## Increase build number if you want to force rebuild from here on
+ARG build=1
+
+RUN echo ".First <- function() {library(methods); library(datasets); library(utils); library(grDevices); library(graphics); library(stats); library(shiny); library(evamtools); cat('Loaded evamtools\n');}" > /home/rstudio/.Rprofile
+
+## Debugging errors: for example, start as
+## sudo docker run -it --entrypoint bash evamrstudio
+
+
+
+
+

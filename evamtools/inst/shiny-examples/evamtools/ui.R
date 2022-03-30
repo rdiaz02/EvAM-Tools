@@ -546,28 +546,8 @@ user_input <- function() {
           column(width = 6,
                  column(width = 12,
                         ## Upload
-            ## tags$div(class = "frame",
-            ##          tags$h3("Upload your own data"),
-            ##          tags$h4(paste0("Format: csv ---comma separated values---,",
-            ##                         " with first row with gene names."
-            ##                         )),
-            ##          tags$h5(paste0("Use only alphanumeric characters ",
-            ##                         "for gene names, and do not start ",
-            ##                         "a gene name with a number; ",
-            ##                         "keep gene names short (for figures). ",
-            ##                         "Use 0 or 1 for ",
-            ##                         "altered/not-altered (mutated/not-mutated)."
-            ##                         )),
-            ##          tags$div(class = "upload_file",
-            ##                   fileInput("csd", "Load Data",
-            ##                             multiple = FALSE,
-            ##                             accept = c(
-            ##                                 "text/csv",
-            ##                                 ".csv")) 
-            ## )) ,
             tags$div(class = "frame",
                      tags$h3(" Define your data interactively"),
-                     ## tags$h5(HTML("<br/>")),
             ## Save/Download/Rename/Use
             tags$div(class = "frame",
                      tags$h3("(Re)name the data"),

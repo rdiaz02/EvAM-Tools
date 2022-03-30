@@ -1,3 +1,4 @@
+t1 <- Sys.time()
 test_that("Transforming 2binary works", {
     int_state1 <- 0
     int_state2 <- 15
@@ -138,4 +139,5 @@ test_that("Transforming back and forth works", {
 
 # })
 
-cat("\n Done test.transforming-genotypes.R \n")
+cat("\n Done test.transforming-genotypes.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

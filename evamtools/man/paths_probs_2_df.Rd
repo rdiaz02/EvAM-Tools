@@ -48,5 +48,4 @@ out11 <- evam(d11,
 paths_probs_2_df(out11$MHN_paths_max, order = "prob")
 paths_probs_2_df(out11$MHN_paths_max, order = "path")
 
-
 }

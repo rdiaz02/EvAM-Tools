@@ -1,3 +1,6 @@
+
+t1 <- Sys.time()
+
 test_that("Exercise random_evam with different options", {
 
     for (mm in c("MHN", "CBN", "HESBCN", "OT", "OncoBN")) {
@@ -36,7 +39,7 @@ test_that("Exercise random_evam with different options", {
                                                 UR = 0.6,
                                                 XOR = 0.3)
                                ),
-                 'identical(sort(names(hesbcn_probs)), c("AND", "OR", "XOR")) is not TRUE',
+                 'identical(evam_string_sort(names(hesbcn_probs)), c("AND"',
                  fixed = TRUE)
 })
 
@@ -132,3 +135,6 @@ test_that("Test OncoBN thetas in right order", {
     expect_equal(unname(m2bo$OncoBN_predicted_genotype_freqs["WT"]),
                  (1 - .3) * (1 - .4))
 })
+
+cat("\n Done test.generate-random-evam.R. Seconds = ",
+    as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

@@ -1,17 +1,17 @@
 ## Copyright 2021, 2022 Pablo Herrera Nieto, Ramon Diaz-Uriarte
 
-## This program is free software: you can redistribute it and/or modify
-## it under the terms of the GNU General Public License as published by
-## the Free Software Foundation, either version 3 of the License, or
-## (at your option) any later version.
+## This program is free software: you can redistribute it and/or modify it under
+## the terms of the GNU Affero General Public License (AGPLv3.0) as published by
+## the Free Software Foundation, either version 3 of the License, or (at your
+## option) any later version.
 
 ## This program is distributed in the hope that it will be useful,
 ## but WITHOUT ANY WARRANTY; without even the implied warranty of
 ## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
+## GNU Affero General Public License for more details.
 
-## You should have received a copy of the GNU General Public License
-## along with this program.  If not, see <http://www.gnu.org/licenses/>.
+## You should have received a copy of the GNU Affero General Public License along
+## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
 
@@ -135,14 +135,13 @@ DBN_prob_genotypes <- function(fit, gene_names) {
     colnames(genotypes) <- gene_names
 
     ## No longer needed, as Lik.genotype does the right thing now.
-    ## Not quite. 
+    ## Not quite: it doesn't and I am moving out common ops.
     ## Pre-check same order and proper naming
     ## See https://github.com/phillipnicol/OncoBN/issues/3#issuecomment-1048814030
     G <- t(as.matrix(as_adjacency_matrix(fit$graph)))
     stopifnot(colnames(genotypes) == colnames(G)[-1])
     stopifnot(colnames(G)[1] == "WT")
 
-    ## ## FIXME: Lik.genotype does many identical operations for all genotypes.
     ## ## Extract that code, and call GA_Likelihood.
     ## genotypes$Prob <- apply(genotypes, 1,
     ##                         function(x) old_Lik.genotype(fit, x))
