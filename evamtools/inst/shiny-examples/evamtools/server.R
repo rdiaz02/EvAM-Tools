@@ -164,8 +164,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     content = function(file) {
       tmp_data <- datasets$all_csd[[input$input2build]][[input$select_csd]]$data
       write.csv(tmp_data, file, row.names = FALSE)
-      # tmp_data$type <- input$input2build
-      # saveRDS(tmp_data, file)
     }
   )
 
