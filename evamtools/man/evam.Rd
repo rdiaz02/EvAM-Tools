@@ -255,7 +255,8 @@ matrix of thetas for MHN is much smaller than the reported time here,
 which also includes building the transition rate matrix).
 
 
-You can \strong{convert paths and their probabilities} to a data frame easily. For example, using the non-exported simple function \code{pats_and_probs_to_df}. See example below. By default, we do not return paths, as their number can grow very quickly with number of genotypes and you only need if, well, you care about them.
+You can \strong{convert paths and their probabilities} to a data frame
+easily; see example below. By default, we do not return paths, as their number can grow very quickly with number of genotypes and you only need if, well, you care about them.
 
 }
 
