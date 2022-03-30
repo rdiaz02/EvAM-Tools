@@ -220,7 +220,7 @@ Most of the files for this app (and the package) are copyright Ramon Diaz-Uriart
 
 &nbsp;
 #### Authors, contact and bug reports
-Please, use the repository (https://github.com/rdiaz02/EvAM-Tools** and submit bug reports there. 
+Please, use the repository (https://github.com/rdiaz02/EvAM-Tools) and submit bug reports there. 
 
 
 &nbsp;
