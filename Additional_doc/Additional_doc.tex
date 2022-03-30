@@ -47,7 +47,10 @@
 
 \section{Introduction}
 
-This document provides additional documentation about EvAM-Tools, mainly intended to complement the Shiny web GUI application help. % To make access to all arguments of evamtools and its functions, this document should have, concatenated, the PDF from the R package itself. In , as well as an  PDF that explains the use of OncoSimulR for testing and how we use and interpret H-ESBCN to obtain transition rate matrices.
+This document provides additional documentation about EvAM-Tools, mainly intended to complement the Shiny web GUI application help. You can run the app from \url{https://www.iib.uam.es/evamtools/} or download a Docker image from \url{https://hub.docker.com/r/rdiaz02/evamshiny}. 
+
+
+% To make access to all arguments of evamtools and its functions, this document should have, concatenated, the PDF from the R package itself. In , as well as an  PDF that explains the use of OncoSimulR for testing and how we use and interpret H-ESBCN to obtain transition rate matrices.
 
 % \section{Cancer progression models}
 % The CPMs included are: 
@@ -212,35 +215,46 @@ Why this difference? When you use a model fitted to real data, it is sensible to
 \label{sec:random-evam-models}
 
 As of now, the generation of random EvAM models uses transitively reduced graphs (we call \texttt{mccbn::random\_poset} with argument \texttt{trans\_reduced = TRUE}). This does not decrease the number of models that can be expressed when using CBN. However, it can limit the range of models when we can mix AND, OR, XOR in the same model. The following  examples illustrate how this makes certain models impossible.
+\clearpage
 
 \begin{figure}[h!]
-\centering
-\includegraphics[width=.23\linewidth]{./dag2.png}
-\caption{Non-transitively reduced DAG, OR and AND}\label{dag2}
+%  \centering
+  \hspace*{-1.8cm}
+  \includegraphics[width=.35\linewidth]{./dag2.png}
+\includegraphics[width=.35\linewidth]{./dag3.png}
+\includegraphics[width=.35\linewidth]{./dag1.png}
+\caption{Non-transitively reduced DAG, OR and AND (left),
+  non-transitively reduced DAG, OR and XOR (center),
+  transitively reduced DAG.}\label{dag2}
 \end{figure}
 
-Under DAG in Fig.~\ref{dag2} we cannot observe genotype BCD.
-
-\begin{figure}[h!]
-\centering
-\includegraphics[width=.23\linewidth]{./dag3.png}
-\caption{Non-transitively reduced DAG, OR and XOR}\label{dag3}
-\end{figure}
-
-Under DAG in Fig.~\ref{dag3} we cannot observe genotype ACD.
+\begin{itemize}
+\item Under the left-most DAG in Fig.~\ref{dag2} we cannot observe genotype BCD.
+\item Under the center DAG in Fig.~\ref{dag2} we cannot observe genotype ACD.
+\item Under the right-most DAG, which is the transitive reduction of the above two graphs, we can observe both BCD and ACD.
+\end{itemize}
 
 
-\begin{figure}[h!]
-\centering
-\includegraphics[width=.23\linewidth]{./dag1.png}
-\caption{Transitively reduced DAG}\label{dag1}
-\end{figure}
+% \begin{figure}[h!]
+% \centering
+% \includegraphics[width=.43\linewidth]{./dag3.png}
+% \caption{Non-transitively reduced DAG, OR and XOR}\label{dag3}
+% \end{figure}
 
-Under DAG in Fig.~\ref{dag1}, which is the transitive reduction of the above two graphs, we can observe both BCD and ACD.
+% Under the DAG in Fig.~\ref{dag3} we cannot observe genotype ACD.
 
-Can we imagine biological scenarios where Fig.~\ref{dag2} or Fig.~\ref{dag3} would apply? Yes. We don't recall seeing them in the literature, though. If this is deemed relevant, it is just a matter of changing  \texttt{trans\_reduced = TRUE} when we are simulating HESBCN models inside function \texttt{random\_evam}.
 
-You can of course construct the non-transitively reduced graphs by hand or using the shiny app.
+% \begin{figure}[h!]
+% \centering
+% \includegraphics[width=.43\linewidth]{./dag1.png}
+% \caption{Transitively reduced DAG}\label{dag1}
+% \end{figure}
+
+% Under the DAG in Fig.~\ref{dag1}, which is the transitive reduction of the above two graphs, we can observe both BCD and ACD.
+
+Can we imagine biological scenarios where the left-most or center scenarios in Fig.~\ref{dag2} would apply? Yes. We don't recall seeing them in the literature, though. If this is deemed relevant, it is just a matter of changing  \texttt{trans\_reduced = TRUE} when we are simulating HESBCN models inside function \texttt{random\_evam}.
+
+You can of course construct the non-transitively reduced graphs ``by hand'' (creating the data frame with the appropriate structure) or, much simpler, using the Shiny web app.
 
 
 
@@ -406,8 +420,7 @@ However, we might be missing something; if you think Shiny Server would allow or
 
 \subsection{I want to create my own Docker images}
 
-If you want to modify the Docker images, modify the `Dockerfile`s: Dockerfile-evam-rstudio (for the RStudio Dockerfile that launches RStudio) or Dockerfile-evam-shiny (well, for the Dockerfile that creates the container to run shiny). More details are provided in the Additional documentation: 
-FIXME: URL.
+If you want to modify the Docker images, modify the Dockerfiles: Dockerfile-evam-rstudio (for the RStudio Dockerfile that launches RStudio) or Dockerfile-evam-shiny (well, for the Dockerfile that creates the container to run shiny). 
 
 
 Then, from the `EvAM-Tools` directory run one or both of:
