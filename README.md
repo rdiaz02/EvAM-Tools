@@ -158,14 +158,15 @@ You can also [build your own Docker image](#build-your-own-docker-image) and you
       
 	  
 ### Docker images 
-We provide two docker images, one for running the Shiny app, and another with  RStudio to run the evamtools package directly.  They are available from https://hub.docker.com/rdiaz02/evamshiny and 
-https://hub.docker.com/rdiaz02/evamrstudio ; the first for running the Shiny app, the second for using the package from RStudio. Download the one you need.
+We provide two docker images, one for running the Shiny app, and another with  RStudio to run the evamtools package directly.  They are available from
+https://hub.docker.com/r/rdiaz02/evamshiny
+and 
+https://hub.docker.com/r/rdiaz02/evamrstudio ; the first for running the Shiny app, the second for using the package from RStudio. Pull the one you need (`docker pull rdiaz02/evamshiny` or `docker pull rdiaz02/evamrstudio`).
 
-<!-- FIXME: test the above URLS -->
 
 
-(Details about Docker are available here: https://docs.docker.com/get-docker/ .
-Details about R with Docker and Rocker project here: https://www.rocker-project.org/ )
+Details about Docker are available here: https://docs.docker.com/get-docker/ .
+Details about R with Docker and Rocker project here: https://www.rocker-project.org/ . Our images are based on the r-ver (https://hub.docker.com/r/rocker/r-ver) and rstudio (https://hub.docker.com/r/rocker/rstudio) Docker images from the Rocker project (https://www.rocker-project.org/).
 
 
 ### How to run the R package and the shiny app locally 
