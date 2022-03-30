@@ -198,7 +198,7 @@ This runs the `evamshiny` docker image, mapping port 3000 of the container to po
 
 This is a *non-interactive run*, and we use the "-d" or "--detach" options, so it is running in detached mode. You can point your browser to 0.0.0.0:4080 and the Shiny app should be there. 
 
-(If you launch it this way, you can launch an arbitrary number of containers. For example, launch 15 different ones by specifying 15 different ports and 15 different names).
+(If you launch it this way, you can launch an arbitrary number of containers. For example, launch 15 different ones by specifying 15 different ports and 15 different names, and use HAProxy, https://www.haproxy.org/, to load-balance them ---you will want to use "sticky sessions").
 
 ---
 ---

@@ -227,6 +227,6 @@ Please, use the repository (https://github.com/rdiaz02/EvAM-Tools) and submit bu
 ****
 ## Cookies
 ***
-We use cookies to keep "sticky sessions" to the pool of servers. By using the app, you confirm you are OK with this.
+We use cookies to keep "sticky sessions" to the pool of servers (load balanced using [HAproxy](https://www.haproxy.org/)). By using the app, you confirm you are OK with this.
 
 
