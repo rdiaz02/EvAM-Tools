@@ -43,7 +43,7 @@ rowScaleMatrix <- function(x) {
 
 
 boot_data_index <- function(x, boot) {
-    ## Used by CBN and DiP
+    ## Used by CBN
     ## boot is an integer. 0 means no boot
     ## that is because I reuse boot for two purposes
     boot <- as.logical(boot)
@@ -55,31 +55,17 @@ boot_data_index <- function(x, boot) {
     }
 }
 
-add_pseudosamples <- function(x, n00 = "auto3") {
-    if (n00 == "auto") {
-        if(nrow(x) <= 500) {
-            n00 <- round(nrow(x) * 0.10)
-        } else {
-            n00 <- round(nrow(x) * 0.05)
-        }
-    } else if(n00 == "auto2") {
-        ## add only if max. freq. of any gene is > 95%
-        fmax <- max(colSums(x)) / nrow(x)
-        if(fmax > 0.95)
-            n00 <- round(nrow(x) * 0.05)
-        else
-            n00 <- 0
-    } else if(n00 == "auto3") {
-        ## add only if any gene is 100%
-        ## add just 1
-        fmax <- max(colSums(x))/nrow(x)
-        if(fmax == 1) {
-            message("\n  Added one pseudosample \n ")
-            n00 <- 1
-        } else { 
-            n00 <- 0
-        }
+add_pseudosamples <- function(x) {
+    ## Add only if any gene is 100%
+    ## add just 1
+    fmax <- max(colSums(x))/nrow(x)
+    if (fmax == 1) {
+        message("\n  Added one pseudosample \n ")
+        n00 <- 1
+    } else { 
+        n00 <- 0
     }
+    
     return(rbind(x,
                  matrix(0L, nrow = n00, ncol = ncol(x))
                  ))

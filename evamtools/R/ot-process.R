@@ -18,6 +18,7 @@ options(mc.cores = 1L)
 options(boot.parallel = "no")
 options(boot.ncpus = 1L)
 
+
 ot_consensus_sb <- function(x) {
     ## Taking the code from plot.boottree
     child <- x$original$child
@@ -33,10 +34,6 @@ ot_consensus_sb <- function(x) {
             parent[i] <- child[number]
         }
     }
-
-    ## why was this here??
-    ## mostfreq <- list(child = child, parent = parent,
-    ##                  parent.num = parent.num)
 
     ## Now, extract the From and To in my usual way
     edges.matrix <- cbind(parent = parent,
@@ -55,6 +52,7 @@ ot_consensus_sb <- function(x) {
                                    sep = " -> "),
                       stringsAsFactors = FALSE))
 }
+
 
 
 ## ## You can verify this function by running examples

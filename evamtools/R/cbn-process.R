@@ -287,7 +287,9 @@ call.external.cbn <- function(data,
           file = paste(dirname, ".prf", sep = ""),
           sep = " ")
     if (is.null(omp_threads)) {
-        OMPthreads <- detectCores()
+        ## setting this to detectCores() can lead to huge computing times
+        ## if nothing passed, 1, just in case
+        OMPthreads <- 1 
     } else{
         OMPthreads <- omp_threads
     }
@@ -326,25 +328,29 @@ call.external.cbn <- function(data,
             write.poset(evam_OTtoPoset(ot1),
                         ncol(data), dirname)
         }
-    } else if (init.poset == "custom") {
-        write.poset(custom.poset, ncol(data), dirname)
-    } else { ## Use ct-cbn to search and create starting poset;
-        ## possibly eternal. NOT RECOMMENDED
-        warning("Not using an initial poset can take VERY long")
-        writeLines(as.character(c(ncol(data), 0)),
-                   con = paste(dirname, ".poset", sep = ""))
-        ## First create the lambda file
-        zzz <- system(paste(ompt , paste("h-cbn -f",  dirname, "-w")),
-                      ignore.stdout = silent)
-        if(!silent) cat("\n\n")
-        ## this call requires a lambda file
-        zzz <- system(paste(ompt,
-                            paste("h-cbn -f",  dirname,
-                                  "-e", format(eparam, scientific = FALSE),
-                                  "-w -m")), ignore.stdout = silent)
-        rm(zzz)
-        if(!silent) cat("\n\n")
-    }
+    } ## The next are probably such bad ideas in almost
+    ## any conceivable case that I comment the code
+
+    ## else if (init.poset == "custom") {
+    ##     write.poset(custom.poset, ncol(data), dirname)
+    ## } else { ## Use ct-cbn to search and create starting poset;
+    ##     ## possibly eternal. NOT RECOMMENDED
+    ##     warning("Not using an initial poset can take VERY long")
+    ##     writeLines(as.character(c(ncol(data), 0)),
+    ##                con = paste(dirname, ".poset", sep = ""))
+    ##     ## First create the lambda file
+    ##     zzz <- system(paste(ompt , paste("h-cbn -f",  dirname, "-w")),
+    ##                   ignore.stdout = silent)
+    ##     if(!silent) cat("\n\n")
+    ##     ## this call requires a lambda file
+    ##     zzz <- system(paste(ompt,
+    ##                         paste("h-cbn -f",  dirname,
+    ##                               "-e", format(eparam, scientific = FALSE),
+    ##                               "-w -m")), ignore.stdout = silent)
+    ##     rm(zzz)
+    ##     if(!silent) cat("\n\n")
+    ## }
+    
   ## Remove option -m, the printing of most likely path as
   ##    - we do not use it now
   ##    - it can lead to strange problems getting millions of ceros printed out
