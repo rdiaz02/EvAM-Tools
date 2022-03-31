@@ -254,7 +254,7 @@ plot_genot_fg <- function(trans_mat
     , label_type = "genotype"
     , plot_type = NA ## On purpose: fail if not given
     ) {
-    if(is.null(trans_mat) | any(is.na(trans_mat))){
+    if (is.null(trans_mat) || any(is.na(trans_mat))) {
         warning("There is no data to plot: ",
                 "a blank plot will be produced.")
         par(mar = rep(3, 4))
@@ -319,6 +319,7 @@ plot_genot_fg <- function(trans_mat
     observed_color <- "#ff7b00"
     not_observed_color <- "lightgreen" ## "#0892d0" 
     if(is.null(observations)){
+        ## This seems unreachable code to me.
         not_observed_color <- "#ff7b00"
     } 
     colors <- sapply(igraph::V(graph)$name, 
@@ -757,8 +758,10 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
     par(op1)
 }
 
+
+## called from the shiny code
 plot_genotype_counts <- function(data) {
-    if (nrow(data) == 0) return()
+    if (nrow(data) == 0) return(invisible(NULL))
     largest_genot_name <- max(vapply(data$Genotype, nchar, 1))
     bottom_mar <- min(25, max(5, (2/3) * largest_genot_name))
     op <- par(las = 2, cex.main = 1.6, cex.lab = 1.5, cex.axis = 1.2,
