@@ -1,7 +1,7 @@
 Package: evamtools
 Type: Package
 Title: Tools for evolutionary accumulation models, now mainly cancer progression models
-Version: 1.0.6
+Version: 1.0.7
 Date: 2022-03-31
 Authors@R: c(
             person("Ramon", "Diaz-Uriarte",			      
