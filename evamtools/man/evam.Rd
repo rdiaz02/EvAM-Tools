@@ -177,7 +177,7 @@ multiple evams in parallel.}
        \item{MCCBN_paths_max: }{As for OT.}
 
        
-        \item{MHN_theta: }{Matrix of estimated thetas2.}
+        \item{MHN_theta: }{Matrix of estimated thetas (the log-Theta matrix).}
         \item{MHN_trans_rate_mat: }{As for CBN.}
         \item{MHN_trans_mat: }{As for CBN.}
         \item{MHN_td_trans_mat: }{As for CBN.}
