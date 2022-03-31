@@ -908,14 +908,19 @@ test_that("do_MHN and do_MHN2 identical in various data sets", {
     for (data in every_which_way_data[c(4, 6, 22)]) {        
         mhn0 <- do_MHN(data)
         mhnSM <- do_MHN2(data)
-
+        mhnSMnos <- doMHN2(data, sparse = FALSE)
         expect_identical(mhn0$theta, mhnSM$theta)
+        expect_identical(mhn0$theta, mhnSMnos$theta)
         expect_identical(mhn0$transitionRateMatrix,
                          as.matrix(mhnSM$transitionRateMatrix))
+        expect_identical(mhn0$transitionRateMatrix,
+                         as.matrix(mhnSMnos$transitionRateMatrix))
         expect_equal(mhn0$transitionMatrixTimeDiscretized,
                      as.matrix(mhnSM$transitionMatrixTimeDiscretized))
         expect_equal(mhn0$transitionMatrixCompExp,
                      as.matrix(mhnSM$transitionMatrixCompExp))
+        expect_equal(mhn0$transitionMatrixCompExp,
+                     as.matrix(mhnSMnos$transitionMatrixCompExp))
     }
 })
 

@@ -7,6 +7,13 @@ test_that("Minimal test: we can run", {
                                  methods = c("CBN", "OT", "OncoBN",
                                              "MHN", "HESBCN", "MCCBN")))
     expect_true(exists("OT_model", where = out))
+
+    out2 <- evam(Dat1[, 1:3],
+                 methods = c("OT", "OncoBN",
+                             "MHN", "CBN"),
+                 paths_max = TRUE)
+    expect_true(is.na(out2$HESBCN_paths_max))
+    expect_true(all(!is.na(out2$CBN_paths_max)))
 })
 
 
@@ -280,8 +287,112 @@ out3 <- suppressMessages(evam(dB_c1,
     
     expect_true(out3$all_options$mhn_opts$lambda == 100/nrow(dB_c1))
     expect_true(out3$all_options$oncobn_opts$epsilon == max(colMeans(dB_c1)))
-    
-    
+})
+
+
+test_that("Exercise some internal code, inaccessible o.w." ,{
+    data(every_which_way_data)
+    Dat1 <- every_which_way_data[[16]][1:40, 2:6]
+    o1 <- ot_proc(Dat1, nboot = 3, distribution.oncotree = FALSE)
+    expect_true(!is.na(o1$ot.boot.original))
+    expect_true(is.na(o1$predicted_genotype_freqs))
+
+    o2 <- cbn_proc(Dat1[, 1:3],
+                               addname = "tmpi",
+                               parall = TRUE,
+                               mc.cores = 2,
+                               nboot = 2)
+    expect_true(all(!is.na(o2$edges)))
+
+    o3 <- cbn_proc(Dat1[, 1:3],
+                               addname = NULL,
+                               init.poset = "linear",
+                               parall = FALSE,
+                               mc.cores = 2,
+                               nboot = 2)
+    expect_true(all(!is.na(o3$edges)))
+    o4 <- cbn_proc(Dat1[, 1:3],
+                               addname = NULL,
+                               init.poset = "linear",
+                               parall = FALSE,
+                               verbose = TRUE,
+                               silent = FALSE,
+                               mc.cores = 2,
+                               nboot = 0)
+    expect_true(all(is.na(o4$edges$CBN_edgeBootFreq)))
+
+    expect_error(df_2_mat_integer(matrix(c(1, 0, 1e-9, 1), ncol = 2)),
+                 "Not in 0L, 1L", fixed = TRUE)
+    expect_error(df_2_mat_integer(matrix(c(1, 0, "1", 1), ncol = 2)))
+    expect_error(df_2_mat_integer(matrix(c(1, 0, "a", 1), ncol = 2)))
+    expect_error(df_2_mat_integer(data.frame(a = c(1, 0), b = c("1", 0))))
+    expect_error(df_2_mat_integer(data.frame(a = c(1, 0), b = c(1e-10, 0))))
+
+    ## Fail graciously
+    expect_true(cpm2tm(NULL)$fgraph == "ERROR_CPM_ANALYSIS")
+    expect_true(cpm2tm(NA)$fgraph == "ERROR_CPM_ANALYSIS")
+    expect_true(
+        cpm2tm(try(log("a"), silent = TRUE))$fgraph == "ERROR_CPM_ANALYSIS")
+
+    dfe <- list(edges = data.frame(From = c("Root", "A"),
+                                   To = c("A", "B"),
+                                   lambda = 3,
+                                   OT_edgeWeight = 2))
+
+    expect_error(cpm2tm(dfe),
+                 "more than one column with weights",
+                 fixed = TRUE)
+
+    dfe2 <-  list(edges = data.frame(From = c("A"),
+                                     To = c("B"),
+                                     lambda = 3,
+                                     OT_edgeWeight = 2))
+    expect_error(cpm2tm(dfe2),
+                 "Some error here",
+                 fixed = TRUE)
+
+    ## The error is  "using 'as.environment(NULL)'
+    ## because we pass a NULL object
+    ## The actual error is irrelevant. What matters is we fail
+    expect_error(cpm2tm(dfe$edges))
+})
+
+
+test_that("Miscell error conditions", {
+   data(every_which_way_data)
+   Dat1 <- every_which_way_data[[16]][1:40, 2:6]
+   d1e <- Dat1
+   colnames(d1e)[1] <- "cucu,tras"
+   expect_error(evam(d1e),
+                "At least one of your gene names has a comma",
+                fixed = TRUE)
+   colnames(d1e)[1] <- "cucu\tras"
+   expect_error(evam(d1e),
+                "At least one of your gene names has a space",
+                fixed = TRUE)
+   colnames(d1e)[1] <- "cucu\\tras"
+   expect_error(evam(d1e),
+                "At least one of your gene names has a backslash",
+                fixed = TRUE)
+   colnames(d1e)[1] <- "cucu tras"
+   expect_error(evam(d1e),
+                "At least one of your gene names has a space",
+                fixed = TRUE)
+   colnames(d1e)[1] <- "WT"
+   expect_error(evam(d1e),
+                "One of your genes is called WT",
+                fixed = TRUE)
+   expect_error(evam(Dat1[, 1, drop = FALSE]),
+                "Fewer than 2 columns",
+                fixed = TRUE)
+   expect_error(evam(Dat1[, 1]),
+                "colnames must exist",
+                fixed = TRUE)
+   
+ expect_error(evam(Dat1[, 1:3], methods = "CBN",
+                      cbn_opts = list(init_poset = "custom")),
+                 "CBN's init_poset must be one of OT or linear",
+                 fixed = TRUE)
 })
 
 

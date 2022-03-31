@@ -112,7 +112,61 @@ test_that("plotting works, minimal, with mixed edges", {
                        hesbcn_opts = list(seed = 26))
 
     plot_CPMs(out_AND_OR_XOR, plot_type = "trans_mat", top_paths = 4)
+
+    ## Now, only some, and change options
+    plot_CPMs(out_AND_OR_XOR, methods = "OT", top_paths = 2,
+              orientation = "vertical")
+    expect_warning(plot_CPMs(out_AND_OR_XOR, methods = c("OT", "CBN"),
+                             top_paths = 2,
+                             orientation = "vertical"),
+                   "At least one method you asked",
+                   fixed = TRUE)
+    
+    expect_error(plot_CPMs(out_AND_OR_XOR, methods = c("CBN"),
+                           top_paths = 2,
+                           orientation = "vertical"),
+                 "No valid methods", fixed = TRUE)
+    
+    expect_error(plot_CPMs(NULL),
+                 "No valid methods", fixed = TRUE)
+    
 })
+
+test_that("Exercise other plotting options", {
+    dB_c1 <- matrix(
+        c(
+            rep(c(1, 0, 0, 0, 0), 30) #A
+          , rep(c(0, 0, 1, 0, 0), 30) #C
+          , rep(c(1, 1, 0, 0, 0), 20) #AB
+          , rep(c(0, 0, 1, 1, 0), 20) #CD
+          , rep(c(1, 1, 1, 0, 0), 10) #ABC
+          , rep(c(1, 0, 1, 1, 0), 10) #ACD
+          , rep(c(1, 1, 0, 0, 1), 10) #ABE
+          , rep(c(0, 0, 1, 1, 1), 10) #CDE
+          , rep(c(1, 1, 1, 0, 1), 10) #ABCE
+          , rep(c(1, 0, 1, 1, 1), 10) #ACDE
+          , rep(c(1, 1, 1, 1, 0), 5) # ABCD
+          , rep(c(0, 0, 0, 0, 0), 1) # WT
+        ), ncol = 5, byrow = TRUE
+    )
+    colnames(dB_c1) <- LETTERS[1:5]
+    out <- evam(dB_c1[, 1:3],
+                methods = c("CBN", "OT", "MHN"))
+
+    plot_CPMs(out, plot_type = "trans_mat")
+    plot_CPMs(out, plot_type = "trans_rate_mat")
+    out_samp <- sample_CPMs(out, 100,
+                            output = c("sampled_genotype_counts",
+                                       "obs_genotype_transitions"))
+    plot_CPMs(out, out_samp, plot_type = "obs_genotype_transitions")
+    plot_CPMs(out, out_samp, plot_type = "obs_genotype_transitions", 
+              label_type = "acquisition")
+
+    expect_error(plot_CPMs(out, samples = NULL,
+                           plot_type = "obs_genotype_transitions"),
+                 "obs_genotype_transitions needs", fixed = TRUE)
+})
+
 
 
 cat("\n Done test.plotting.utils.R.Seconds = ",

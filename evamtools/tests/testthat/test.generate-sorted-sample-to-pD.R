@@ -458,6 +458,17 @@ test_that("Test with same order of genes", {
     }
 })
 
+test_that("Using without gene names and error donditions", {
+    expect_true(length(generate_pD_sorted_genotypes(5, gene_names = NULL)) == 2^5)
+    
+    expect_error(generate_pD_sorted_genotypes(0),
+                 "Number of genes should be > 0",
+                 fixed = TRUE)
+    
+    expect_error(generate_pD_sorted_genotypes(5, gene_names = LETTERS[1:4]),
+                 "n_genes == length(gene_names) is not TRUE",
+                 fixed = TRUE)
+})
 
 cat("\n Done test.generate-sorted-sample-to-pD. Seconds = ",
     as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")
