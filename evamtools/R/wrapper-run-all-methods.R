@@ -696,7 +696,6 @@ evam <- function(x,
     if (ncol(x) < 2) {
         stop("Fewer than 2 columns in data set. ",
              "There must be at least two genes to run evam.")
-        return(NA)
     }
     
     
