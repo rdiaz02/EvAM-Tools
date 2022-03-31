@@ -247,8 +247,23 @@ DAG_2_access_genots_OR <- function(x) {
 ##  Under OR, AND, XOR models, as specified by gene_relations
 ##  Called from cpm2tm_relationships
 ##   which itself is used for HESBCN
+
+## We could just rm the "gene_relations" and create it as we do inside
+## Left as a consistency check
 DAG_2_access_genots_relationships <- function(x,
                                               gene_relations = NULL) {
+
+    if (is.null(gene_relations)) {
+        warning("gene_relations (parent_set) NULL. ",
+                "Creating it from edges component.")
+        gene_relations <- parent_set_from_edges(x)
+    } else {
+        ## A consistency check
+        ng <- evam_string_sort(names(gene_relations))
+        parent_set_input <- gene_relations[ng]
+        parent_set_edges <- parent_set_from_edges(x)[ng]
+        stopifnot(identical(parent_set_input, parent_set_edges))
+    }
 
     ## check if genotype follows the XOR/AND relationship.
     genotype_follows_relationship <- function(genotype) {
@@ -476,16 +491,18 @@ cpm2tm <- function(x,
     if (!exists("Relation", x$edges) ||
        isTRUE(all(x$edges$Relation %in% c("AND", "Single")))) {
         tmp <- try(DAG_2_access_genots(x$edges[, c("From", "To")]))
-    } else if (all(x$edges$Relation %in% c("OR", "Single"))) { ## OncoBN with DBN model, HESBCN if only ORs
+    } else if (all(x$edges$Relation %in% c("OR", "Single"))) {
+        ## OncoBN with DBN model, HESBCN if only ORs
         tmp <- try(DAG_2_access_genots_OR(x$edges[, c("From", "To")]))
     } else { ## HESBCN
         ## Use the "parent_set" component, which is returned
         ## from HESBCN itself, not the "Relation" component
-        ## which we create from the paernt_set. "Relation" is shown
-        ## for a human to easily interpret the $edges data frame
+        ## which we create from the parent_set. "Relation" is shown
+        ## for a human to easily interpret the $edges data frame.
+        ## We check for consistency anyway.
         tmp <-
             try(DAG_2_access_genots_relationships(
-                x$edges[, c("From", "To")],
+                x$edges[, c("From", "To", "Relation")],
                 x$parent_set
             ))
     }
@@ -676,8 +693,9 @@ evam <- function(x,
     x <- pre_process(x, remove.constant = FALSE,
                      min.freq = 0, max.cols = max_cols)
 
-    if(ncol(x) < 2) {
-        stop("Fewer than 2 columns in data set")
+    if (ncol(x) < 2) {
+        stop("Fewer than 2 columns in data set. ",
+             "There must be at least two genes to run evam.")
         return(NA)
     }
     
@@ -1005,6 +1023,21 @@ adjm_rm_no_access <- function(x) {
         }
     }
     return(x)
+}
+
+## Return parent set from our usual edges structure
+parent_set_from_edges <- function(edges) {
+    ## Simpler with a table? Oh well
+    ps <- aggregate(Relation ~ To,
+                    data = edges,
+                    FUN = function(x) {
+                        if (length(x) == 1) return("Single")
+                        else return(x[1])
+                    }
+                    )
+    ps_v <- ps[, "Relation"]
+    names(ps_v) <- ps[, "To"]
+    return(ps_v)
 }
 
 

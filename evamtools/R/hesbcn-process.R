@@ -108,11 +108,11 @@ do_HESBCN <- function(data,
                                    Lambdas = lambdas)
 
     ## Check we are not in the strange case of AND when hanging from Root
-    for(ic in seq_along(model_info$parent_set)) {
-        if(model_info$parent_set[ic] != "AND") next
+    for (ic in seq_along(model_info$parent_set)) {
+        if (model_info$parent_set[ic] != "AND") next
         name_child <- names(model_info$parent_set)[ic]
         parents <- model_info$edges[model_info$edges$To == name_child, "From"]
-        if((length(parents) == 1) && (parents == "Root")) {
+        if ((length(parents) == 1) && (parents == "Root")) {
             warning("The strange case of AND when hanging from root happened. ",
                     "Setting 'AND' to 'Single'")
             model_info$parent_set[ic] <- "Single"

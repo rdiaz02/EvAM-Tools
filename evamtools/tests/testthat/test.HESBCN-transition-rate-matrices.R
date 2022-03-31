@@ -467,5 +467,39 @@ test_that("Tests with three parents, just of the accessible, and comparing numbe
 })
 
 
+test_that("Verify we run creation of parent_set if not given", {
+    ## Yeah, for lack of a better place
+    df1 <-
+        data.frame(From = c("Root", "Root", "A", "B", "A", "B", "C", "D"),
+                   To   = c("A", "B", "C", "C", "D", "D", "E", "E"),
+                   Relation = c("Single", "Single", "AND", "AND", "OR", "OR",
+                                "XOR", "XOR"),
+                   Lambdas = c(1, 2, 3, 3, 4, 4, 5, 5))
+    expect_warning(null <- DAG_2_access_genots_relationships(df1),
+                   "gene_relations (parent_set) NULL.",
+                   fixed = TRUE)
+
+})
+
+
+test_that("Verify we fail the consistency check when we should", {
+    ## Yeah, for lack of a better place
+    df1 <-
+        data.frame(From = c("Root", "Root", "A", "B", "A", "B", "C", "D"),
+                   To   = c("A", "B", "C", "C", "D", "D", "E", "E"),
+                   Relation = c("Single", "Single", "AND", "AND", "OR", "OR",
+                                "XOR", "XOR"),
+                   Lambdas = c(1, 2, 3, 3, 4, 4, 5, 5))
+    ## Give it unordered, to check this too
+    ps_right <- c(E = "XOR", C = "AND", A = "Single", D = "OR", B = "Single")
+    ps_wrong <- c(E = "OR", C = "AND", A = "Single", D = "OR", B = "Single")
+    expect_silent(null1 <- DAG_2_access_genots_relationships(df1, ps_right))
+    expect_error(null2 <- DAG_2_access_genots_relationships(df1, ps_wrong),
+                 "identical(parent_set_input, parent_set_edges)",
+                 fixed = TRUE)
+})
+
+
+
 cat("\n Done test.HESBCN-transition-reate-matrices.R. Seconds = ",
     as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")
