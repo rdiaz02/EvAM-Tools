@@ -14,6 +14,7 @@
 ## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
+##  See below for a more sensible approach when we ask for many times.
 ## Sample an indivial from a transition rate matrix}
 ## \item{trm}{transition rate matrix}
 ## \item{T_sampling}{Time at which sampling happens.}
@@ -27,7 +28,6 @@
 ## of transition probabilities between genotypes. For example, this
 ## cannot be used with OT.
 ## }
-
 indiv_sample_from_trm <- function(trm, T_sampling, ngenots = NULL,
                             genot_names = NULL) {
     if(is.null(ngenots)) ngenots <- ncol(trm)
