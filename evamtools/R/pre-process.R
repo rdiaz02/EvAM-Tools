@@ -61,7 +61,7 @@ pre_process <- function(x, remove.constant, min.freq = 0.05,
     ##          - those always absent are always removed
     ##          - No default for remove.constant: you must be explicit.
     if(!identical(sort(unique(as.vector(x))), c(0L, 1L)))
-        stop("Values in x not in 0, 1")
+        stop("Values in x not in 0L, 1L")
     ## if(!isTRUE(all.equal(sort(unique(as.vector(x))), c(0L, 1L))))
     ##     stop("Values in x not in 0, 1")
     
