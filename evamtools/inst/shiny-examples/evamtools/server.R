@@ -163,20 +163,23 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     filename = function() sprintf("%s_data.rds", input$select_csd),
     content = function(file) {
       tmp_data <- datasets$all_csd[[input$input2build]][[input$select_csd]]
-      if(input$input2build == "csd"){
+      if (input$input2build == "csd") {
         # write.csv(tmp_data$data, file, row.names = FALSE)
         saveRDS(tmp_data$data, file=file)
-      } else if(input$input2build == "dag"){
-        data2save <- list(data = tmp_data$data[,1:input$gene_number]
-          , dag_parent_set = tmp_data$dag_parent_set[1:input$gene_number]
-          , dag = tmp_data$dag[1:(input$gene_number + 1),
-          1:(input$gene_number + 1)])
+      } else if(input$input2build == "dag") {
+          data2save <- list(
+              data = tmp_data$data[, 1:input$gene_number]
+            , model_edges = dag_data()
+            , model = default_dag_model
+            , dag_parent_set = tmp_data$dag_parent_set[1:input$gene_number]
+            , dag = tmp_data$dag[1:(input$gene_number + 1),
+                                 1:(input$gene_number + 1)])
         saveRDS(data2save, file=file)
         # write.csv(tmp_data$data, file, row.names = FALSE)
-      } else if(input$input2build == "matrix"){
+      } else if (input$input2build == "matrix") {
         # write.csv(tmp_data$data, file, row.names = FALSE)
         data2save <- list(data = tmp_data$data[,1:input$gene_number]
-          , thetas = tmp_data$thetas[1:input$gene_number, 1:input$gene_number])
+          , log_Theta_matrix = tmp_data$thetas[1:input$gene_number, 1:input$gene_number])
         saveRDS(data2save, file=file)
       }
     }
