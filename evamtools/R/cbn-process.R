@@ -399,7 +399,7 @@ rerun_final_lambda <- function(dirname, omp_threads, verbose = FALSE) {
 
 
     if (is.null(omp_threads)) {
-        OMPthreads <- detectCores()
+        OMPthreads <- 1
     } else{
         OMPthreads <- omp_threads
     }
