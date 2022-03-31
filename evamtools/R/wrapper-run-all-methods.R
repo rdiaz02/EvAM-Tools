@@ -687,7 +687,7 @@ evam <- function(x,
     x <- df_2_mat_integer(x)
     xoriginal <- x
     
-    x <- add_pseudosamples(x, n00 = "auto3")
+    x <- add_pseudosamples(x)
     ## remove.constant makes no difference IFF we add pseudosamples, as
     ## there can be no constant column when we add pseudosamples
     x <- pre_process(x, remove.constant = FALSE,
@@ -764,7 +764,7 @@ evam <- function(x,
     rm(d_cbn_opts, d_hesbcn_opts, d_oncobn_opts, d_mccbn_opts, d_mhn_opts)
 
     if (!(cbn_opts_2$init_poset %in% c("OT", "linear")))
-        stop("cbn_init_poset must be one of OT or linear. ",
+        stop("CBN's init_poset must be one of OT or linear. ",
              " Custom not allowed in call from evam.")
 
     if ("MCCBN" %in% methods) {
