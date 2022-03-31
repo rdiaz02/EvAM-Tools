@@ -182,17 +182,19 @@ runShiny()
 Similar to https://hub.docker.com/r/rocker/rstudio  (and see further options there):
 
 ```
-sudo docker run --rm -p 8787:8787 -e PASSWORD=yourpasswordhere rdiaz02/evamrstudio
+docker run --rm -p 8787:8787 -e PASSWORD=yourpasswordhere rdiaz02/evamrstudio
 ```
 
 Go to `localhost:8787` and log in with username "rstudio" and the password you set. See https://hub.docker.com/r/rocker/rstudio for further options.
 
 (If you get errors such as "docker: Error response from daemon: driver failed programming external connectivity on" you might want to restart the docker service).
 
+(We do not show Docker commands with `sudo`: it is possible to run docker without sudo; look a the Docker documentation in https://docs.docker.com/engine/security/rootless/ .)
+
 ### How to run the Shiny app from the Docker image
 
 ```
-sudo docker run -d -p 4080:3000 --memory="2g" --name EVAM1 rdiaz02/evamshiny
+docker run -d -p 4080:3000 --memory="2g" --name EVAM1 rdiaz02/evamshiny
 ```
 
 This runs the `evamshiny` docker image, mapping port 3000 of the container to port 4080 of the host  (so if you want to use the usual port 80, write 80 instead of 4080). You can use whatever you want instead of "EVAM1"; it is just a name to make other operations  (like stopping the container) simpler. In this example, we also limit the maximum memory to 2 GB.

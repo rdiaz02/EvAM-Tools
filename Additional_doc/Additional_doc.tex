@@ -47,7 +47,7 @@
 
 \section{Introduction}
 
-This document provides additional documentation about EvAM-Tools, mainly intended to complement the Shiny web GUI application help. You can run the app from \url{https://www.iib.uam.es/evamtools/} or download a Docker image from \url{https://hub.docker.com/r/rdiaz02/evamshiny}. 
+This document provides additional documentation about EvAM-Tools; some of the sections complement the Shiny web GUI application help but others apply to the package or to both. You can run the app from \url{https://www.iib.uam.es/evamtools/} or download a Docker image from \url{https://hub.docker.com/r/rdiaz02/evamshiny}. 
 
 
 % To make access to all arguments of evamtools and its functions, this document should have, concatenated, the PDF from the R package itself. In , as well as an  PDF that explains the use of OncoSimulR for testing and how we use and interpret H-ESBCN to obtain transition rate matrices.
@@ -66,34 +66,6 @@ This document provides additional documentation about EvAM-Tools, mainly intende
 
 
 % \section{Naming data, saving data}
-
-\section{Building the models and example data}
-\label{sec:build-models-example}
-
-\subsection{Example data/DAGs/MHNs}
-\label{sec:exampe-datadagsmhns}
-
-For each of the ways to input cross-sectional data or build models, we provide some pre-built examples. You can use these to directly run the CPMs or modify them to your liking. The MHN and DAG builders allow you start from working examples. Explanations on what is available and why: 
-
-\begin{description}
-\item[Modifying pre-built examples] If you modify the examples, you probably will want to give your dataset or example a distinctive name.
-
-% If you modify a pre-built example and want to go back to the original, in your browser clean the cache and refresh.
-  
-\item[Cross-sectional data] We provide data sets that have been generated under specific models with AND, OR, XOR. However, no DAG is shown here, and that is on purpose; use the labels as possible hints, not as the truth and compare with datasets you can generate from models you specify under the DAG builder.
-
-\item[DAG] Several examples to illustrate OR/AND/XOR and mixtures of the above are provided.
-  
-\end{description}
-
-
-\section{Cross-sectional data input}
-\label{sec:cross-sectional-data}
-
-\subsection{Number of genes and genes without mutations}
-\label{sec:number-genes-genes}
-
- When creating user data (for instance, when adding new genotypes), any gene that has no mutations is automatically excluded from the data, regardless of the setting for number of genes. This is a feature, not a bug. For example, suppose you set the number of genes to 3, but you only specify frequencies, or counts, for genotypes "A" and "A, B". The data set will only contain columns for genes A and B (since gene C has no mutations and it would be excluded during the analyses).
 
 
 \section{Generating random CPM/EvAM models, sampling from them, and error models}\label{sec:random_evam}
@@ -260,6 +232,65 @@ You can of course construct the non-transitively reduced graphs ``by hand'' (cre
 
 
 
+\section{Shiny EvAM-Tools app}
+\subsection{Building the models and example data}
+\label{sec:build-models-example}
+
+\subsubsection{Example data/DAGs/MHNs}
+\label{sec:exampe-datadagsmhns}
+
+For each of the ways to input cross-sectional data or build models, we provide some pre-built examples. You can use these to directly run the CPMs or modify them to your liking. The MHN and DAG builders allow you start from working examples. Explanations on what is available and why: 
+
+\begin{description}
+\item[Modifying pre-built examples] If you modify the examples, you probably will want to give your dataset or example a distinctive name.
+
+% If you modify a pre-built example and want to go back to the original, in your browser clean the cache and refresh.
+  
+\item[Cross-sectional data] We provide data sets that have been generated under specific models with AND, OR, XOR. However, no DAG is shown here, and that is on purpose; use the labels as possible hints, not as the truth and compare with datasets you can generate from models you specify under the DAG builder.
+
+\item[DAG] Several examples to illustrate OR/AND/XOR and mixtures of the above are provided.
+  
+\end{description}
+
+
+\subsection{Cross-sectional data input}
+\label{sec:cross-sectional-data}
+
+\subsubsection{Number of genes and genes without mutations}
+\label{sec:number-genes-genes}
+
+ When creating user data (for instance, when adding new genotypes), any gene that has no mutations is automatically excluded from the data, regardless of the setting for number of genes. This is a feature, not a bug. For example, suppose you set the number of genes to 3, but you only specify frequencies, or counts, for genotypes "A" and "A, B". The data set will only contain columns for genes A and B (since gene C has no mutations and it would be excluded during the analyses).
+
+
+ \subsection{Naming and saving data and model}
+ \label{shiny-save}
+
+ To make it easier to use and analyze different models and data sets, you can name/rename the dataset used. This is at the top of the page, under ``(Re)name the data''.
+
+ You can save the data and models (at the bottom of the page). If you define a DAG or an MHN model, the object saved contains the model. In the case of the DAG, that includes the generate data (if any), and several components that are used by evamtools and that provide a complete description of the model. If you use MHN, what are saved are the sampled data (if any) and the log$\Theta$ matrix you entered.
+
+\subsection{Tabular output from the Shiny app}
+\label{tabular-output}
+
+\begin{description}
+\item[Transition probabilities] Conditional probability of transitions to a genotype (obtained using competing exponentials from the transition rate matrix; for OT and OncoBN this is actually a abuse of the untimed oncogenetic tree model, as explained in \cite{diaz2019every}.
+\item[Transition rates] Transition rates of the continuous time Markov chain that models the transition from one genotype to another. This option is not available for OT and OncoBN, as these do not return rates.
+\item[Predicted genotype relative frequencies] The predicted frequencies of genotypes under the model. See \qrefS{error_models} for details about OT and OncoBN
+\item[Sampled genotype counts] Counts, or absolute genotype frequencies, obtained by sampling from the predicted frequencies.
+  
+  %% Next only if you ask for 'Sample for observed genotype transitions'
+\item[Observed genotype transitions (counts)] Only if you ask for 'Sample for observed genotype transitions' in the Advanced options. Number of observed transitions between genotypes.
+  
+\end{description}
+
+
+See also further details in section \qrefS{error_models} as well as in the help for functions \texttt{evam} and \texttt{sample\_CPMs}.
+
+
+ 
+
+
+
 
 
 
@@ -343,22 +374,6 @@ You can of course construct the non-transitively reduced graphs ``by hand'' (cre
 
 
 
-\section{Tabular output from the Shiny app}
-\label{tabular-output}
-
-\begin{description}
-\item[Transition probabilities] Conditional probability of transitions to a genotype (obtained using competing exponentials from the transition rate matrix; for OT and OncoBN this is actually a abuse of the untimed oncogenetic tree model, as explained in \cite{diaz2019every}.
-\item[Transition rates] Transition rates of the continuous time Markov chain that models the transition from one genotype to another. This option is not available for OT and OncoBN, as these do not return rates.
-\item[Predicted genotype relative frequencies] The predicted frequencies of genotypes under the model. See \qrefS{error_models} for details about OT and OncoBN
-\item[Sampled genotype counts] Counts, or absolute genotype frequencies, obtained by sampling from the predicted frequencies.
-  
-  %% Next only if you ask for 'Sample for observed genotype transitions'
-\item[Observed genotype transitions (counts)] Only if you ask for 'Sample for observed genotype transitions' in the Advanced options. Number of observed transitions between genotypes.
-  
-\end{description}
-
-
-See also further details in section \qrefS{error_models} as well as in the help for functions \texttt{evam} and \texttt{sample\_CPMs}.
 
 
 
@@ -368,10 +383,6 @@ See also further details in section \qrefS{error_models} as well as in the help 
 \subsection{With OncoBN sometimes I obtain DAGs that are not transitively reduced}
 
 Yes, that can happen. See details here \url{https://github.com/phillipnicol/OncoBN/issues/5}.
-
-\subsection{I want to setup my own Shiny server with different default ``Advanced options''}
-
-In file \texttt{EvAM-Tools/evamtools/inst/shiny-examples/evamtools/ui.R} search for ``Advanced options'' and modify the defaults to whatever you want.
 
 
 \subsection{In the DAG figures, why do nodes with two or more incoming edges have only a single annotated edge with a number?}
@@ -386,6 +397,8 @@ And why then not annotate the nodes, instead of the edges? Because in our experi
 \item Annotating edges shows what transitions are likely/fast, an idea not conveyed by annotating nodes.
 \end{itemize}
 
+
+
 \subsection{Do sampled genotype frequencies and counts contain observation noise? And predicted genotype frequencies?}
 \label{sec:do-sampled-genotype}
 
@@ -394,7 +407,14 @@ For all models except OT, predicted genotype frequencies do not have observation
 When we obtain a finite sample from the predicted frequencies, you can decide to add observation noise with argument \texttt{obs\_noise} to function \texttt{sample\_CPMs}; what happens with OT depends on whether the predictions are from a simulated model or a model fit to observed data; see details in \qref{error_ot}.
 
 
-\subsection{Using the Shiny app in a local intranet with load balancing using multiple Docker instances}
+
+
+\subsection{I want to setup my own Shiny server with different default ``Advanced options''}
+
+In file \texttt{EvAM-Tools/evamtools/inst/shiny-examples/evamtools/ui.R} search for ``Advanced options'' and modify the defaults to whatever you want.
+
+
+\subsection{How can I use the Shiny app in a local intranet with load balancing using multiple Docker instances}
 \label{haproxy}
 
 This is well beyond the scope of this document and there are many options available. One that can work is the following:
@@ -433,7 +453,8 @@ sudo docker build -f Dockerfile-evam-rstudio  --tag somename .
 
 You can now run these images, as explained in the README file..
 
-(It is possible to run docker without sudo; look a the Docker documentation).
+Note: it is possible, and actually a better idea, to run docker without sudo; look a the Docker documentation:
+\url{https://docs.docker.com/engine/security/rootless/}).
 
 
 \subsubsection{What if creating the image fails because of no internet connection from the container}
