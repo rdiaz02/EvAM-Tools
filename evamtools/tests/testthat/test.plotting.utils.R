@@ -168,6 +168,43 @@ test_that("Exercise other plotting options", {
 })
 
 
+test_that("Check implementation of graphAM for DAG", {
+     dfe <- data.frame(From = c("Root", "A"),
+                                   To = c("A", "B"),
+                                   lambda = c(3, 4),
+                                   OT_edgeWeight = c(.2, .7))
+     expect_error(DAG_plot_graphAM(dfe, NULL),
+                  "more than one column with weights",
+                  fixed = TRUE)
+
+     dfe2 <- data.frame(From = c("Root", "A"),
+                                     To = c("A", "B"),
+                                     lambda = c(0, 0.00001))
+     expect_silent(DAG_plot_graphAM(dfe2, "something"))
+
+     dfe3 <- data.frame(From = c("Root", "A"),
+                        To = c("A", "B"))
+     expect_silent(DAG_plot_graphAM(dfe3, "something"))
+})
+
+test_that("plot_genotype_counts", {
+    ## This cannot be tested with the usual code
+    ## as only called from shiny
+
+    dx1 <- data.frame(Genotype = c("A", "A, B, C, D", "E"),
+                      Freq = c(0.1, 0.2, 0.7))
+    expect_silent(plot_genotype_counts(dx1))
+
+    dx2 <- data.frame(Genotype = c("A", "A, B, C, D", "E"),
+                      Counts = c(8, 100, 50))
+    expect_silent(plot_genotype_counts(dx2))
+
+    dx3 <- data.frame()
+    expect_silent(plot_genotype_counts(dx3))
+})
+
+
+
 
 cat("\n Done test.plotting.utils.R.Seconds = ",
     as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

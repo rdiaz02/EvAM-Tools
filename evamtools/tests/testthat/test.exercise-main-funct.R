@@ -279,11 +279,15 @@ out3 <- suppressMessages(evam(dB_c1,
                                  cbn_opts = list(omp_threads = 2),
                                  hesbcn_opts = list(steps = 20000, seed = 2),
                                  mhn_opts = list(lambda = 100/nrow(dB_c1)),
-                                 oncobn_opts = list(model = "CBN", epsilon = max(colMeans(dB_c1))),
+                              oncobn_opts = list(model = "CBN",
+                                                 epsilon = max(colMeans(dB_c1)),
+                                                 silent = FALSE),
                                  ot_opts = list(with_errors_dist_ot = FALSE),
                                  mccbn_opts = list(model = "H-CBN2",
-                                                      thrds = 8, max.iter = 20,
-                                                   max.iter.asa = 25)))
+                                                   thrds = 8, max.iter = 20,
+                                                   max.iter.asa = 25,
+                                                   silent = FALSE,
+                                                   tmp_dir = "tmpdmccbn")))
     
     expect_true(out3$all_options$mhn_opts$lambda == 100/nrow(dB_c1))
     expect_true(out3$all_options$oncobn_opts$epsilon == max(colMeans(dB_c1)))
@@ -298,18 +302,20 @@ test_that("Exercise some internal code, inaccessible o.w." ,{
     expect_true(is.na(o1$predicted_genotype_freqs))
 
     o2 <- cbn_proc(Dat1[, 1:3],
-                               addname = "tmpi",
-                               parall = TRUE,
-                               mc.cores = 2,
-                               nboot = 2)
+                   addname = "tmpi",
+                   parall = TRUE,
+                   mc.cores = 2,
+                   omp_threads = NULL,
+                   nboot = 2)
     expect_true(all(!is.na(o2$edges)))
 
     o3 <- cbn_proc(Dat1[, 1:3],
-                               addname = NULL,
-                               init.poset = "linear",
-                               parall = FALSE,
-                               mc.cores = 2,
-                               nboot = 2)
+                   addname = NULL,
+                   init.poset = "linear",
+                   parall = FALSE,
+                   mc.cores = 2,
+                   verbose = TRUE,
+                   nboot = 2)
     expect_true(all(!is.na(o3$edges)))
     o4 <- cbn_proc(Dat1[, 1:3],
                                addname = NULL,
@@ -328,6 +334,37 @@ test_that("Exercise some internal code, inaccessible o.w." ,{
     expect_error(df_2_mat_integer(data.frame(a = c(1, 0), b = c("1", 0))))
     expect_error(df_2_mat_integer(data.frame(a = c(1, 0), b = c(1e-10, 0))))
 
+    expect_error(pre_process(matrix(1:4, ncol = 2)),
+                 "Values in x not in 0L, 1L", fixed = TRUE)
+    expect_silent(null1 <- pre_process(cbind(c1 = c(1L, 1L), c2 = c(0L, 1L)),
+                                       remove.constant = TRUE))
+    expect_identical(null1,
+                 matrix(c(0L, 1L), dimnames = list(NULL, c("c2")), ncol = 1))
+    expect_silent(null2 <- pre_process(cbind(c1 = rep(c(0L, 1L), 50),
+                                             c2 = c(rep(0L, 97), rep(1L, 3))),
+                                       remove.constant = TRUE,
+                                       min.freq = 0.04))
+    expect_identical(null2,
+                     matrix(rep(c(0L, 1L), 50),
+                            dimnames = list(NULL, c("c1")), ncol = 1))
+    expect_error(null2 <- pre_process(cbind(c1 = rep(c(0L, 1L), 50),
+                                             c2 = c(rep(0L, 97), rep(1L, 3))),
+                                       remove.constant = TRUE,
+                                      min.freq = -1e-9),
+                 "min.freq has to be positive or 0", fixed = TRUE)
+
+    m1 <- matrix(1:9, ncol = 3, dimnames = list(c("23", "Root", "17"),
+                                                c("23", "Root", "17")))
+    expect_silent(m1s <- sortAdjMat(m1))
+    m1se <- matrix(c(5, 6, 4,
+                     8, 9, 7,
+                     2, 3, 1),
+                   ncol = 3,
+                   dimnames = list(c("Root", "17", "23"),
+                                   c("Root", "17", "23")))
+    expect_identical(m1s, m1se)
+    
+    
     ## Fail graciously
     expect_true(cpm2tm(NULL)$fgraph == "ERROR_CPM_ANALYSIS")
     expect_true(cpm2tm(NA)$fgraph == "ERROR_CPM_ANALYSIS")
@@ -355,6 +392,15 @@ test_that("Exercise some internal code, inaccessible o.w." ,{
     ## because we pass a NULL object
     ## The actual error is irrelevant. What matters is we fail
     expect_error(cpm2tm(dfe$edges))
+    
+    dfe3 <- list(edges = data.frame(From = c("Root", "A"),
+                                   To = c("A", "B"),
+                                   lambda = 3),
+                 parent_set = c(A = "Single", B = "Single"))
+
+    expect_error(cpm2tm(dfe3),
+                 "x has parent_set but no Relation",
+                 fixed = TRUE)
 })
 
 
