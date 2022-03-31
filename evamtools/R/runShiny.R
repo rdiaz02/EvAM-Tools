@@ -13,8 +13,9 @@
 ## You should have received a copy of the GNU Affero General Public License along
 ## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-runShiny <- function(host="0.0.0.0", port = 3000) {
+## No sensible way to use covr to test this
+# nocov start
+runShiny <- function(host="0.0.0.0", port = 3000, test.mode = FALSE) {
   appDir <- system.file("shiny-examples", "evamtools", package = "evamtools")
   if (appDir == "") {
     stop("Could not find example directory. Try re-installing `evamtools`.", call. = FALSE)
@@ -22,5 +23,7 @@ runShiny <- function(host="0.0.0.0", port = 3000) {
 
   opt <- options(shiny.autoreload = TRUE, browser = "/usr/bin/firefox")
   on.exit(options(opt))
-  shiny::runApp(appDir, port = port, host = host, display.mode = "normal")
+  shiny::runApp(appDir, port = port, host = host, display.mode = "normal",
+                test.mode = test.mode)
 }
+# nocov end
