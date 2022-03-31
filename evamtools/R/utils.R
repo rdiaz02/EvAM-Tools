@@ -31,8 +31,6 @@ evam_string_order <- function(x) {
 
 
 
-## TODO add support for custom genes names in the str conversions
-
 ## #' @title Integer to binary
 ## #' 
 ## #' @description  Transform a genotype from integer nomenclature to binary coding
