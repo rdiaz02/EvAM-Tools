@@ -106,7 +106,7 @@ ot_proc <- function(datax, nboot = 1000,
                           child = ot.fit$parent$child)
     edge.weights <- ot.fit$parent$est.weight
     
-    if(identical(edges.matrix[1, ], c(parent = "", child = "Root"))){
+    if (identical(edges.matrix[1, ], c(parent = "", child = "Root"))){
         edges.matrix <- edges.matrix[-1, , drop = FALSE]
         edge.weights <- edge.weights[-1]
         if(is.null(edge.weights)) {
@@ -126,11 +126,11 @@ ot_proc <- function(datax, nboot = 1000,
     ## as these are the predicted frequencies of the receiving node.
     obs_marginal <- colSums(datax)/nrow(datax)
     pred_marginal <- try(marginal.distr(ot.fit))
-    if(inherits(pred_marginal, "try-error")) {
+    if (inherits(pred_marginal, "try-error")) {
         pred_marginal <- marginal.distr(ot.fit, with.errors = FALSE)
         error.fun <- paste(error.fun, "pred.marginal.no.error", sep = ",")
     }
-    if(nboot > 0) {
+    if (nboot > 0) {
         message(" Starting bootstrap.oncotree ", date())
         ot.boot <- bootstrap.oncotree(ot.fit,
                                       R = nboot, 
