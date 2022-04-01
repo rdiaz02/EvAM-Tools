@@ -299,9 +299,10 @@ out3 <- suppressMessages(evam(dB_c1,
 
 test_that("Exercise some internal code, inaccessible o.w." ,{
     data(every_which_way_data)
-    Dat1 <- every_which_way_data[[16]][1:40, 2:6]
-    o1 <- ot_proc(Dat1, nboot = 3, distribution.oncotree = FALSE)
+    Dat1 <- every_which_way_data[[16]][, 1:4]
+    o1 <- ot_proc(Dat1, nboot = 100, distribution.oncotree = FALSE)
     expect_true(!is.na(o1$ot.boot.original))
+    expect_true(!any(is.na(o1$consensus)))
     expect_true(is.na(o1$predicted_genotype_freqs))
 
     o2 <- cbn_proc(Dat1[, 1:3],
