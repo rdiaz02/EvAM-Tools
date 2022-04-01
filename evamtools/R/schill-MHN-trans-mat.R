@@ -153,7 +153,12 @@ allGenotypes_3 <- function(k) {
 
 }
 
-
+check_names_theta <- function(theta) {
+    stopifnot(!is.null(colnames(theta)))
+    stopifnot(identical(colnames(theta), rownames(theta)))
+    stopifnot(length(unique(colnames(theta))) == nrow(theta))
+    return(invisible(NULL))
+}
 
 ## theta from Learn.MHN
 ##      function used to compute theta -> transition rate matrix
@@ -162,6 +167,7 @@ allGenotypes_3 <- function(k) {
 theta_to_trans_rate_3 <- function(theta,
                                   inner_transition = inner_transitionRate_3_1) {
 
+    check_names_theta(theta)
     Theta <- exp(theta)
     geneNames <- colnames(theta)
     
@@ -196,8 +202,11 @@ theta_to_trans_rate_3 <- function(theta,
 theta_to_trans_rate_3_SM <- function(theta,
                                      inner_transition = inner_transitionRate_3_1) {
     
+    check_names_theta(theta)
+
     ## t1 <- Sys.time()
     Theta <- exp(theta)
+    
     geneNames <- colnames(theta)
     k <- ncol(theta)
     genots <- allGenotypes_3(k)
@@ -399,6 +408,7 @@ do_MHN <- function(x,  lambda = 1/nrow(x)) {
 ##      Note that the diagonal is not added
 ##         This computes the products of the Theta, as in Fig.2 right
 theta_to_trans_rate_1 <- function(theta) {
+    check_names_theta(theta)
     Theta <- exp(theta)
     geneNames <- colnames(theta)
 
@@ -440,6 +450,7 @@ theta_to_trans_rate_1 <- function(theta) {
 theta_to_trans_rate <- function(theta,
                                 inner_transition = inner_transitionRate_1) {
 
+    check_names_theta(theta)
     ## t1 <- Sys.time()
     Theta <- exp(theta)
     geneNames <- colnames(theta)
