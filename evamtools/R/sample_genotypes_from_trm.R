@@ -303,6 +303,8 @@ process_samples <- function(sim, n_genes,
 
     ## Calculate state_counts
     if ("state_counts" %in% output) { ## times each genotype visited
+        ## The next should never happen, because of when/how
+        ## we call process samples
         if (!("obs_genotype_transitions" %in% output))
             unlisted_trajectories <- unlist(sim$trajectory)
 
@@ -453,17 +455,19 @@ sample_CPMs <- function(cpm_output
                 trm <- cpm_output[[sprintf("%s_trans_rate_mat", method)]]
                 ## Do we have the necessary output to simulate?
                 if ((length(trm) == 1) && is.na(trm)) {
-                    retval[[sprintf("%s_obs_genotype_transitions", method)]] <- NULL
+                    ## I think this is dead code. Unreachable now
+                    stop("How are we here??!! (length(trm) == 1) && is.na(trm)")
+                    ## retval[[sprintf("%s_obs_genotype_transitions", method)]] <- NULL
 
-                    ogt <- cpm_output[[sprintf("%s_predicted_genotype_freqs",
-                                               method)]]
-                    if ((length(ogt) == 1) && is.na(ogt)) {
-                        retval[[sprintf("%s_sampled_genotype_counts", method)]] <- NULL
-                    } else {
-                        ## Yes, we could sample. But this should never happen.
-                        stop("No transition rate matrix in output ",
-                             "but predicted_genotype_freqs")
-                    }
+                    ## ogt <- cpm_output[[sprintf("%s_predicted_genotype_freqs",
+                    ##                            method)]]
+                    ## if ((length(ogt) == 1) && is.na(ogt)) {
+                    ##     retval[[sprintf("%s_sampled_genotype_counts", method)]] <- NULL
+                    ## } else {
+                    ##     ## Yes, we could sample. But this should never happen.
+                    ##     stop("No transition rate matrix in output ",
+                    ##          "but predicted_genotype_freqs")
+                    ## }
                 } else { ## transition rate matrix present
                     sims <- population_sample_from_trm(trm, n_samples = N)
 
@@ -487,8 +491,11 @@ sample_CPMs <- function(cpm_output
                 genots_pred <- cpm_output[[sprintf("%s_predicted_genotype_freqs",
                                                    method)]]
                 if ((length(genots_pred) == 1) && is.na(genots_pred)) {
-                    retval[[sprintf("%s_sampled_genotype_counts",
-                                    method)]] <- NULL
+                    ## I think this is dead code. Unreachable now
+                    stop("How are we here??!!",
+                         "(length(genots_pred) == 1) && is.na(genots_pred)")
+                    ## retval[[sprintf("%s_sampled_genotype_counts",
+                    ##                 method)]] <- NULL
                 } else {
                     retval[[sprintf("%s_sampled_genotype_counts", method)]] <-
                         genot_probs_2_pD_ordered_sample(genots_pred,
@@ -555,6 +562,7 @@ sample_CPMs <- function(cpm_output
 ## Why do you need to provide ngenes and/or gene_names?
 ##   Because you might have taken a small sample where not all
 ##   genes you expect are represented.
+##   We cater to the common use case where gene names are letters.
 sample_to_pD_order <- function(x, ngenes, gene_names = NULL) {
     if (is.null(gene_names)) gene_names <- LETTERS[seq_len(ngenes)]
     ## Consistency checks
