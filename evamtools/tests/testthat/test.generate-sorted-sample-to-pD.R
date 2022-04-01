@@ -458,8 +458,9 @@ test_that("Test with same order of genes", {
     }
 })
 
-test_that("Using without gene names and error donditions", {
-    expect_true(length(generate_pD_sorted_genotypes(5, gene_names = NULL)) == 2^5)
+test_that("Using without gene names and error conditions", {
+    expect_true(
+        length(generate_pD_sorted_genotypes(5, gene_names = NULL)) == 2^5)
     
     expect_error(generate_pD_sorted_genotypes(0),
                  "Number of genes should be > 0",
@@ -468,7 +469,52 @@ test_that("Using without gene names and error donditions", {
     expect_error(generate_pD_sorted_genotypes(5, gene_names = LETTERS[1:4]),
                  "n_genes == length(gene_names) is not TRUE",
                  fixed = TRUE)
+
+    ## this works
+    expect_equal(sample_to_pD_order(c("A", "C"), ngenes = 2,
+                                    gene_names = c("A", "C")),
+                 c(0, 1, 1, 0))
+    ## Fails: ambiguous
+    expect_error(sample_to_pD_order(c("A", "C"), ngenes = 2),
+                 "all(gene_names", fixed = TRUE)
+    ## Works
+    expect_equal(sample_to_pD_order(c("A", "C"), ngenes = 3),
+                 c(0, 1, 0, 0, 1, 0, 0, 0))
+    ## Fails: ambiguous
+    expect_error(sample_to_pD_order(c("cucu", "tras"), ngenes = 2),
+                 "all(gene_names", fixed = TRUE)
+    expect_error(sample_to_pD_order(c("cucu", "tras"), ngenes = 3),
+                 "all(gene_names", fixed = TRUE)
+
+    ## Works
+    expect_equal(sample_to_pD_order(c("cucu, tras", "tras, cucu", "tras"),
+                                    ngenes = 2,
+                                    c("tras", "cucu")),
+                 c(0, 0, 1, 2))
+    expect_equal(sample_to_pD_order(c("tras, cucu", "cucu, tras", "cucu, tras",
+                                      "cucu"),
+                                    ngenes = 3,
+                                    c("tras", "cucu", "dedo")),
+                 c(0, ## WT
+                   1, ## cucu
+                   0, ## dedo
+                   0, ## cucu, dedo
+                   0, ## tras
+                   3, ## cucu, tras
+                   0, ## dedo, tras
+                   0 ## cucu, dedo, tras
+                   ))
+
+    expect_error(sample_to_pD_order(c("A", "C, E"), ngenes = 2),
+                 "length(gene_names_in_x)", fixed = TRUE)
+    expect_error(sample_to_pD_order(c("A", "C, E"),
+                                    ngenes = 2,
+                                    gene_names = c("A", "C", "E")),
+                 "ngenes == length(gene_names)", fixed = TRUE)
 })
+
+
+
 
 cat("\n Done test.generate-sorted-sample-to-pD. Seconds = ",
     as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

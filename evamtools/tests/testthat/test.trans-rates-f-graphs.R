@@ -1066,6 +1066,26 @@ test_that("OT and CBN: algorithm consistency with various data examples", {
     rm(Dat1)
 })
 
+
+test_that("Error conditions in old cpm_access_genots_paths_w", {
+    e1 <- cpm_access_genots_paths_w(try(log("a"), silent = TRUE))
+    e2 <- cpm_access_genots_paths_w(NA)
+    e3 <- cpm_access_genots_paths_w(NULL)
+
+    expect_true(e1$likely_error == "Error_in_run")
+    expect_true(e2$likely_error == "ncol_x")
+    expect_true(e3$likely_error == "other_error")
+
+    dfe <- list(edges = data.frame(From = c("Root", "A"),
+                                   To = c("A", "B"),
+                                   lambda = 3,
+                                   OT_edgeWeight = 2))
+
+    expect_error(cpm_access_genots_paths_w(dfe),
+                 "more than one column with weights",
+                 fixed = TRUE)
+})
+
 cat("\n Done test.trans-rates-f-graphs.R. Seconds = ",
     as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")
 

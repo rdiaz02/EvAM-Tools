@@ -62,7 +62,7 @@ probs_from_theta_evam <- function(theta) {
     ## genotypes themselves not necessarily sorted
     ## as in pD
     trm <- theta_to_trans_rate_3_SM(theta,
-                                                inner_transition = inner_transitionRate_3_1)
+                                    inner_transition = inner_transitionRate_3_1)
     tptm <- system.time(p <- probs_from_trm(trm))["elapsed"]
     ## message("time in probs_from_trm = ", tptm)
     return(list(
@@ -106,7 +106,9 @@ test_that("Same results as original MHN code by Schill", {
         compare_schill_evam_probs(sample(LETTERS[1:ng]))
     }
 
-    ## ## Overkill and slow
+    
+    ## ## Overkill and slow. Do a single one with 10 genes
+    compare_schill_evam_probs(sample(LETTERS[1:10]))
     ## for(i in 1:10) {
     ##     ng <- 11
     ##     compare_schill_evam_probs(LETTERS[1:ng])
@@ -120,6 +122,29 @@ test_that("Same results as original MHN code by Schill", {
         compare_schill_evam_probs(wg)
     }
 })
+
+
+test_that("population_sample_from_trm: pre and not precompute", {
+    for (i in 1:2) {
+        ng <- sample(3:4, size = 1)
+        thetas <- Random.Theta(n = ng)
+        rownames(thetas) <- colnames(thetas) <- LETTERS[1:ng]
+        trm <- theta_to_trans_rate_3_SM(thetas,
+                                        inner_transition = inner_transitionRate_3_1)
+        seed <- round(runif(1, 1, 1e8))
+        set.seed(seed)
+        ## Crucial not to use multiple cores or random numbers differ
+        p1 <- population_sample_from_trm(trm, 1e3, rep(1, 1e3), pre_compute = TRUE,
+                                         cores = 1)
+        set.seed(seed)
+        p2 <- population_sample_from_trm(trm, 1e3, rep(1, 1e3), pre_compute = FALSE,
+                                         cores = 1)
+        expect_equal(p1, p2)
+        ## cat("\n seed = ", seed, "\n")
+        set.seed(NULL)
+        }
+})
+
 
 
 if(FALSE) {

@@ -136,5 +136,16 @@ test_that("Test OncoBN thetas in right order", {
                  (1 - .3) * (1 - .4))
 })
 
+
+test_that("error/warning/messages conditions random_evam", {
+    expect_error(random_evam(ngenes = 3, gene_names = LETTERS[1:3]),
+                 "Give exactly", fixed = TRUE)
+    expect_warning(random_evam(ngenes = 3, model = c("OT", "CBN")),
+                   "Only one model", fixed = TRUE)
+    expect_message(random_evam(ngenes = 3, model = "MCCBN"),
+                   "Generating a random MCCBN",
+                   fixed = TRUE)
+})
+
 cat("\n Done test.generate-random-evam.R. Seconds = ",
     as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")
