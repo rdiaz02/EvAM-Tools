@@ -359,9 +359,9 @@ test_that("Exercise some internal code, inaccessible o.w." ,{
     m1 <- matrix(1:9, ncol = 3, dimnames = list(c("23", "Root", "17"),
                                                 c("23", "Root", "17")))
     expect_silent(m1s <- sortAdjMat(m1))
-    m1se <- matrix(c(5, 6, 4,
-                     8, 9, 7,
-                     2, 3, 1),
+    m1se <- matrix(c(5L, 6L, 4L,
+                     8L, 9L, 7L,
+                     2L, 3L, 1L),
                    ncol = 3,
                    dimnames = list(c("Root", "17", "23"),
                                    c("Root", "17", "23")))
