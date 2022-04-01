@@ -16,7 +16,7 @@
   * [How to run the R package from the Docker image](#how-to-run-the-r-package-from-the-docker-image)
   * [How to run the Shiny app from the Docker image](#how-to-run-the-shiny-app-from-the-docker-image)
 - [Main files and directories](#main-files-and-directories)
-  * [Dockerfile](#dockerfile)
+  * [Dockerfiles](#dockerfiles)
   * [evamtools](#evamtools)
 - [References](#references)
   * [OT](#ot)
@@ -212,9 +212,9 @@ This is a *non-interactive run*, and we use the "-d" or "--detach" options, so i
 
 ## Main files and directories
 
-### Dockerfile ###  
+### Dockerfiles ###  
 
-The Dockerfile includes all the information to create a container with all dependencies. It first uses a default image that includes the latest R version. Then install all R dependencies. Finally it also deals with the installation of third party code. 
+The Dockerfiles (Dockerfile-evam-shiny, Dockerfile-evam-rstudio) include all the information to create the containers with all dependencies. <!-- It first uses a default image that includes the latest R version. Then install all R dependencies. Finally it also deals with the installation of third party code.  -->
 
 
 
@@ -224,9 +224,9 @@ The R package itself with standard organization. Directories and files under ins
     <!-- ---see [Selenium tests of the server](#selenium-tests-of-the-server)). -->
   * miscell/Using_OncoSimulR_to_get_accessible_genotypes_trans_mats.tex: explanation of using OncoSimulR to check transition matrices for OT, CBN, OncoBN, and HESBCN, the equivalence of lambdas to terms in fitness expressions, interpretation of the lambdas for HESBCN with OR and XOR.
   * miscell/examples: examples referred to from other files (for example, from the former tex file).
-  * miscell/tests-sample_genotypes_from_trm: output of tests that were run to verify the code for sampling genotypes from the transition rate matrices. We compared the output of our code with that from the code of the original authors (MHN, MCCBN) for a large set of cases.
+  * miscell/tests-sample_genotypes_from_trm: output of tests that were run to verify the code for sampling genotypes from the transition rate matrices. <!-- We compared the output of our code with that from the code of the original authors (MHN, MCCBN) for a large set of cases. -->
       
-	Note that the R package uses testthat to test our R code. Those tests will run automatically with the usual procedures from testthat or while doing `R CMD check`. For example, we check that transition rate matrices and transition probability matrices give identical results when compared to finding them via OncoSimulR (file test.OT-CBN-trans-mat-against-oncosimul.R and test.HESBCN-trans-mat-against-oncosimul.R) and against hand-computed examples (file test.trans-rates-f-graphs.R and test.HESBCN-transition-rate-matrices.R). The tests in evamtools/tests/testthat are separate from the tests under  inst/miscell/tests-sample_genotypes_from_trm  
+	Note that the R package uses testthat to test our R code. Those tests will run automatically with the usual procedures from testthat or while doing `R CMD check`. <!-- For example, we check that transition rate matrices and transition probability matrices give identical results when compared to finding them via OncoSimulR (file test.OT-CBN-trans-mat-against-oncosimul.R and test.HESBCN-trans-mat-against-oncosimul.R) and against hand-computed examples (file test.trans-rates-f-graphs.R and test.HESBCN-transition-rate-matrices.R). --> The tests in evamtools/tests/testthat are separate from the tests under  inst/miscell/tests-sample_genotypes_from_trm  
 
 <!-- ### Selenium tests of the server ### -->
   
