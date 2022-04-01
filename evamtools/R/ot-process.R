@@ -19,7 +19,7 @@ options(boot.parallel = "no")
 options(boot.ncpus = 1L)
 
 
-ot_consensus_sb <- function(x) {
+ot_consensus <- function(x) {
     ## Taking the code from plot.boottree
     child <- x$original$child
     parent.num <- as.numeric(x$consensus)
@@ -82,13 +82,13 @@ ot_consensus_sb <- function(x) {
 ##     cat("\n mine\n")
 ##     print(mine <- ot_consensus_mine(otf, otb))
 ##     cat("\n sb\n")
-##     print(otsb <- ot_consensus_sb(otb))
+##     print(otsb <- ot_consensus(otb))
 ##     identical(otsb, mine)
 ## }
 ## ## and do, for instance
 ## ## check_ot_consensus(ov.cgh, 5)
 
-ot_consensus <- ot_consensus_sb
+
 
 ot_proc <- function(datax, nboot = 1000,
                     distribution.oncotree = TRUE,
