@@ -147,10 +147,12 @@ You can also [build your own Docker image](#build-your-own-docker-image) and you
     - If it fails, make sure to review the installation instructions and then install manually: https://github.com/cbg-ethz/MC-CBN#installation-from-source 
   
   * Install the evamtools package
-     - Make sure you have the require dependencies and imports, as listed in DESCRIPTION: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree , gtools , plot.matrix , DT, shinyjs, shiny, RhpcBLASctl, Rlinsolve.
+     - Make sure you have the required dependencies and imports, as listed in the DESCRIPTION file: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree , gtools , plot.matrix , DT, shinyjs, shiny, RhpcBLASctl, Rlinsolve, fastmatrix, graph, Rgraphviz, R.utils.
          - Note that we list, as imports, OncoBN, mccbn. You need those (from above). 
      - Build (R CMD build evamtools) and install (R CMD INSTALL evamtools_x.y.z.tar.gz, with x.y.z replaced by the current version number). File `build-test.sh` builds, tests, and installs the package (and takes care of the version number).
-	 - Make sure the environment variable LC_ALL is set. Several critical functions depend on sorting; there are tests that check this in the package, and we experienced problems  with docker images that did not set LC_ALL. On Docker or our local systems, we have used C.UTF-8, en_US.UTF-8, and en_GB.utf8.
+	 
+	   Testing is, by default, parallelized and will use all CPUs except 1 (up to 20, the number of test files): the package includes over 1400 tests, with a test coverage of more than 90%. If you want to use fewer CPUs modify variable `TESTTHAT_CPUS` in script `build-test.sh` (see also https://testthat.r-lib.org/articles/parallel.html).
+	 <!-- - Make sure the environment variable LC_ALL is set. Several critical functions depend on sorting; there are tests that check this in the package, and we experienced problems  with docker images that did not set LC_ALL. On Docker or our local systems, we have used C.UTF-8, en_US.UTF-8, and en_GB.utf8. -->
       
 	  
 ### Docker images 
@@ -189,7 +191,7 @@ Go to `localhost:8787` and log in with username "rstudio" and the password you s
 
 (If you get errors such as "docker: Error response from daemon: driver failed programming external connectivity on" you might want to restart the docker service).
 
-(We do not show Docker commands with `sudo`: it is possible to run docker without sudo; look a the Docker documentation in https://docs.docker.com/engine/security/rootless/ .)
+(We do not show Docker commands with `sudo`: it is possible, and generally preferable, to run docker without sudo; look a the Docker documentation in https://docs.docker.com/engine/security/rootless/ .)
 
 ### How to run the Shiny app from the Docker image
 
