@@ -229,8 +229,12 @@ results_simple <- function(){
                 tags$div(class = "download_button",
                   downloadButton("download_cpm", "Download")
                 )
-              )
-            ),
+                ),
+              tags$div(
+                       tags$h5(paste("evamtools version: ",
+                          packageVersion("evamtools")))
+                       )
+              ),
             column(10,
               column(12, uiOutput("sims")),
               column(12, uiOutput("sims2"))
@@ -536,7 +540,12 @@ user_input <- function() {
             tags$h4("Examples and user's data"),
             ## How many to show is controlled from server function
             ## in server.R, examples_csd$dag, etc
-            uiOutput("csd_list")
+            uiOutput("csd_list"),
+
+            tags$h3(HTML("<br/>")),
+            tags$h5(paste("evamtools version: ",
+                          packageVersion("evamtools")))
+            
           )
           ## do it with a render UI
         ),
