@@ -68,6 +68,31 @@ This document provides additional documentation about EvAM-Tools; some of the se
 % \section{Naming data, saving data}
 
 
+\section{Predicted genotype frequencies}
+\label{pred-gen-freq}
+
+\subsection{Predicted genotype frequencies for CBN, MCCBN, MHN, H-ESBCN}
+\label{predicted-cbn-et-al}
+
+For CBN, MCCBN, MHN, and H-ESBCN, the transition rate matrix describes the true process that generates genotypes and this matrix can be obtained from the parameters of the model ($\theta$s for MHN, $\lambda$s for the rest). Therefore, we can use the transition rate matrix to calculate the predicted probabilities of the different genotypes. In all cases here, we assume that the time of observation is exponentially distributed with rate 1 (as in \citealp{gerstung2009quantifying, schill2020modelling}).
+
+
+The fastest way to obtain the predicted probabilities is using equation 4 in 
+\cite{schill2020modelling}; this is implemented in the non-exported function \texttt{probs\_from\_trm}, and follows also what is done in the original \texttt{Generate.pTh} from \cite{schill2020modelling}. \texttt{probs\_from\_trm} is called from function \texttt{evam}.
+
+
+Otherwise, we can sample from the continuous-time Markov Chain using standard procedures (\citealp[e.g., ch.~5 in][]{wilkinson2019stochastic} or \citealp[][Algorithm 1]{gotovos2021}). Sampling is what we do when \texttt{sample\_CPMs} is called asking for \texttt{obs\_genotype\_transitions} or \texttt{state\_counts} to be returned (and this sampling is implemented in the non-exported function \texttt{population\_sample\_from\_trm}, and called, as needed, by \texttt{sample\_CPMs}).
+
+
+Once we have the predicted probabilities, we can obtain a finite sample and, if we want, add observational (or genotyping) noise; see \qrefS{error_models}.
+
+
+\subsection{Predicted genotype frequencies for OT and OncoBN}
+\label{predicted-ot-oncobn}
+Predicted probabilities of genotypes for OT and OncoBN are obtained using the weights (OT) or $\theta$s (OncoBN), according to the expression for the probability of observing a genotype. For example, see section 2.2 in \cite{Szabo2008} for OT and Figure 1 and section 2.1 in \cite{nicol2021oncogenetic} for OncoBN. For OT we can use function \texttt{distributiion.oncotree} in package \texttt{Oncotree} and for OncoBN function \texttt{Lik.genotype} from package \texttt{OncoBN}.
+
+In OT observation error is already part of the model  (in contrast to what happened in CBN, MHN, H-ESBCN). This is explained in more detail in \qrefS{error_models}.
+
 \section{Generating random CPM/EvAM models, sampling from them, and error models}\label{sec:random_evam}
 
 
@@ -89,7 +114,7 @@ Addressing the above needs involves:
 \begin{enumerate}
 \item Generating random a model.
  
-\item Obtaining the predicted genotype frequencies from that model.
+\item Obtaining the predicted genotype frequencies from that model (see \qrefP{pred-gen-freq}).
  
 \item Obtaining a finite sample from the predicted frequencies of that model.
   
@@ -108,7 +133,7 @@ We explain in each one in turn in details below, with reference to \texttt{evamt
 
 \item Obtaining the predicted genotype frequencies from that model.
   
-  These are returned as part of the output of \texttt{generate\_random\_evam} (as well as part of the output of \texttt{evam}). In all cases, the predicted distribution of genotypes for a model is done assuming perfect compliance with the model (see further details below).
+  These are returned as part of the output of \texttt{generate\_random\_evam} (as well as part of the output of \texttt{evam}). In all cases, the predicted distribution of genotypes for a model is done assuming perfect compliance with the model; we explained the general process in \qref{pred-gen-freq}; see also further details below.
 
 \item Obtaining a finite sample from the predicted frequencies of that model.
 
@@ -129,7 +154,7 @@ We explain in each one in turn in details below, with reference to \texttt{evamt
   
 \end{enumerate}
 
-
+  
 \subsection{Error models}
 \label{error_models}
 
