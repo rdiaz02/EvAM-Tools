@@ -96,7 +96,7 @@ RUN cd /app/Sources && \
 ## Copy a file used for testing
 COPY Renviron.based_on_bioc /app/
 
-## Copy the directory and install EvAM-tools with paranoid testing
+## Copy the directory and install and test evamtools
 COPY evamtools/ /app/evamtools/
   
 RUN cd /app && \
@@ -117,6 +117,10 @@ RUN cd /app && \
 
 ## Increase build number if you want to force rebuild from here on
 ARG build=1
+
+## Oncotree does not declare via NAMESPACE
+## that it imports optim from stats. And this
+## Rprofile has stats in search() with smaller index.
 
 RUN echo ".First <- function() {library(methods); library(datasets); library(utils); library(grDevices); library(graphics); library(stats); library(shiny); library(evamtools); cat('Loaded evamtools\n');}" > /home/rstudio/.Rprofile
 

@@ -96,7 +96,7 @@ RUN cd /app/Sources && \
 ## Copy a file used for testing
 COPY Renviron.based_on_bioc /app/
 
-## Copy the directory and install EvAM-tools with paranoid testing
+## Copy the directory and install and test evamtools
 COPY evamtools/ /app/evamtools/
   
 RUN cd /app && \
