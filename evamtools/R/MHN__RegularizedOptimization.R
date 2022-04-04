@@ -6,8 +6,9 @@
 ##   Commit 49a8cc0 from 2018-08-16
 ##   (we have added the "MHN__" and made minor modifications to conform to usage
 ##   within an R package).
-  
-##   License: no license information available in the repository nor the files.
+
+##   License: MIT, which can be combined with software under the AGPL 3 as used
+##   by the rest of this project. (Updated on 2022-04-04).
   
 ##   Author of code: from commit history, most likely Rudolf Schill.
   

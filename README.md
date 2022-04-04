@@ -73,9 +73,9 @@ For easier use, we provide links to Docker images that you can download and run,
 - Files MHN__*.R: MHN__UtilityFunctions.R, MHN__RegularizedOptimization.R, MHN__ModelConstruction.R, MHN__Likelihood.R, MHN__InlineFunctions.R,  MHN__ExampleApplications.R
 
   Files obtained from https://github.com/RudiSchill/MHN .
-  Commit 49a8cc0 from 2018-08-16. We have added the "MHN__" and made minor modifications to conform to usage within an R package. We have moved the inline C code in InlineFunctions.R (now MHN__InlineFuctions.R) to MHN.c and done the rest of the scaffolding for it to be used from the R package.
+  Commit 49a8cc0 from 2018-08-16 (updated to reflect explicit MIT license on 2022-04-04). We have added the "MHN__" and made minor modifications to conform to usage within an R package. We have moved the inline C code in InlineFunctions.R (now MHN__InlineFuctions.R) to MHN.c and done the rest of the scaffolding for it to be used from the R package.
   
-  License: no license information available in the repository nor the files.
+  License: MIT, which can be combined with software under the  AGPL 3 as used by the rest of this project.
   
   Author of code: Rudolf Schill (inferred from commit history).
   
