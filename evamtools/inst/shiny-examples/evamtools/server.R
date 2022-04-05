@@ -888,7 +888,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
   observeEvent(input$add_genotype, {
       tryCatch({
-      genotype <- paste(evam_string_sort(input$genotype), collapse = ", ")
+      genotype <- paste(evamtools:::evam_string_sort(input$genotype), collapse = ", ")
       genotype <- ifelse(genotype == "", "WT", genotype)
       genot_count <- ifelse(is.na(input$genotype_freq), -1,
                             input$genotype_freq)
