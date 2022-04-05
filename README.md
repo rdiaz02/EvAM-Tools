@@ -199,9 +199,9 @@ Go to `localhost:8787` and log in with username "rstudio" and the password you s
 docker run -d -p 4080:3000 --memory="2g" --name EVAM1 rdiaz02/evamshiny
 ```
 
-This runs the `evamshiny` docker image, mapping port 3000 of the container to port 4080 of the host  (so if you want to use the usual port 80, write 80 instead of 4080). You can use whatever you want instead of "EVAM1"; it is just a name to make other operations  (like stopping the container) simpler. In this example, we also limit the maximum memory to 2 GB.
+This runs the `evamshiny` docker image, mapping port 3000 of the container to port 4080 of the host  (so if you want to use the usual port 80, write 80 instead of 4080). You can use whatever you want instead of "EVAM1"; it is just a name to make other operations  (like stopping the container) simpler. In this example, we also limit the maximum memory to 2 GB. 
 
-This is a *non-interactive run*, and we use the "-d" or "--detach" options, so it is running in detached mode. You can point your browser to 0.0.0.0:4080 and the Shiny app should be there. 
+This is a *non-interactive run*, and we use the "-d" or "--detach" options, so it is running in detached mode. You can point your browser to 0.0.0.0:4080 and the Shiny app should be there.  (If you want to keep the container running, you might want to add `tail -f /dev/null` to the above command).
 
 (If you launch it this way, you can launch an arbitrary number of containers. For example, launch 15 different ones by specifying 15 different ports and 15 different names, and use HAProxy, https://www.haproxy.org/, to load-balance them ---you will want to use "sticky sessions").
 
