@@ -106,7 +106,11 @@ modify_dag <-
   }
 
   if(all(dag == tmp_dag2)){
-    stop("This operation had no effect.")
+      stop("This operation had no effect. ",
+           "Are you drawing a disconnected DAG, ",
+           "where the From node is not already ",
+           "part of the DAG (i.e., has no ancestor)?: ",
+           "all nodes except Root must have an ancestor.")
   }
   g2 <- igraph::graph_from_adjacency_matrix(tmp_dag2, mode = "directed")
   if(dag_model %in% c("HESBCN", "OncoBN") && !igraph::is_dag(g2)){
