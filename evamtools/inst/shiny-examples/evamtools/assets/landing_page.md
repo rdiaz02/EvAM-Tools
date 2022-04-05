@@ -102,6 +102,15 @@ Maximum RAM of any process is limited to 2 GB. Likewise, the analyses should be 
 &nbsp;&nbsp;
 
 ****
+### How long does it take to run? <a id="timetorun"></a>
+***
+
+It depends on the number of features. For six features, and if you do not use H-ESBCN nor MC-CBN, it should take about 20 seconds.
+
+&nbsp;&nbsp;
+
+
+****
 ## What CPMs are included in ```Evam-tools```?<a id="cpms"></a>
 ***
 
@@ -125,6 +134,9 @@ Maximum RAM of any process is limited to 2 GB. Likewise, the analyses should be 
 - In the Shiny app, we always run CBN, OT, OncoBN, and MHN. If you want to run H-ESBCN or MC-CBN, you have to select them under ```Advanced options and CPMs to use```. (They are not run by default, as they can take a long time).
 - OncoBN can be run using a conjunctive or a disjunctive model. The default used in the Shiny app (and the evam function in the package) is the disjunctive model. You can use the conjunctive one by selecting it under ```Advanced options and CPMs to use```.
 - Most methods have other options that can be modified. Again, check ```Advanced options and CPMs to use```.
+
+
+
 
 
 ****
