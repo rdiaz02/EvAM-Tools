@@ -1,23 +1,21 @@
-
 <center><h1>Evam-tools</h1></center>
 
 &nbsp;
-
-## Table of contents <a id="evamtools"></a>
 ****
-1. [Evam-tools](#evamtools)
-2. [What is _cross-sectional_ data?](#helpcsd)
-3. [How to use this web interface?](#input)
-4. [What is available under ```Results```?](#helpresults)
-5. [Additional documentation](#additional_docs)
-6. [Session timeouts, RAM and elapsed time execution limits](#limits)
-7. [How long does it take to run](#timetorun)
-8. [What CPMs are included in ```Evam-tools```?](#cpms)
-9. [Default options and default CPMs run](#cpms2run)
-10. [References and related repositories](#refs)
-11. [Where is the code? Terms of use? Copyright](#code)
-12. [Authors, contact and bug reports](#authors)
-13. [Cookies](#cookies)
+#### Table of contents <a id="evamtools"></a>
+****
+- [Evam-tools](#evamtools)
+- [How to use this web interface?](#input)
+<br>&nbsp;&nbsp;- [What is available under ```Results```?](#helpresults)
+<br>&nbsp;&nbsp;- [Additional documentation](#additional_docs)
+<br>&nbsp;&nbsp;- [Session timeouts, RAM and elapsed time execution limits](#limits)
+<br>&nbsp;&nbsp;- [How long does it take to run](#timetorun)
+- [What CPMs are included in ```Evam-tools```?](#cpms)
+<br>&nbsp;&nbsp;- [Default options and default CPMs run](#cpms2run)
+<br>&nbsp;&nbsp;- [References and related repositories](#refs)
+- [Where is the code? Terms of use? Copyright](#code)
+<br>&nbsp;&nbsp;- [Authors, contact and bug reports](#authors) 
+- [Cookies](#cookies)
 
 
 ****
@@ -157,7 +155,7 @@ It depends on the number of features. For six features, and if you do not use H-
 
 
 ****
-#### References and related repositories<a id="refs"></a>
+### References and related repositories<a id="refs"></a>
 ***
 
 ##### OT ####
