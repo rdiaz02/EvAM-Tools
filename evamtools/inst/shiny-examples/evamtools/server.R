@@ -1002,6 +1002,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       if(input$gene_number >= 7){
         showModal(dataModal("Beware! You are running a dataset with 7 genes or more. This can take longer than usual and plots may be crowded. We recommend using top_paths options in the Results' tab.", type = "Warning: "))
       }
+
+      if (is.null(input$cpm_methods) ||
+          (length(input$cpm_methods) ==1 && is.na(input$cpm_methods)))
+          stop("You must use at least one method ",
+               "(check 'CPMs to use' under 'Advanced options ",
+               "and CPMs to use).")
+
+      
       shinyjs::disable("analysis")
       # Create a Progress object
       progress <- shiny::Progress$new()
@@ -1060,10 +1068,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       Sys.sleep(0.5)
       progress$inc(2/5, detail = "Running CPMs")
 
-      methods <- .ev_SHINY_dflt$cpms2run
-      if(!is.null(input$more_cpms)){
-        methods <- unique(c(methods, input$more_cpms[input$more_cpms %in% .ev_SHINY_dflt$all_cpms]))
+      ## methods <- .ev_SHINY_dflt$cpms2run
+      if (!is.null(input$cpm_methods)) {
+          methods <- unique(input$cpm_methods)
       }
+      
+      
       cpm_output <- R.utils::withTimeout({evam(data2run
                                              , methods = methods
                                              , paths_max = input$return_paths_max

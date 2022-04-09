@@ -146,8 +146,8 @@ It depends on the number of features. For six features, and if you do not use H-
 ### Default options and default CPMs run<a id="cpms2run"></a>
 ***
 
-- In the Shiny app, we always run CBN, OT, OncoBN, and MHN. If you want to run H-ESBCN or MC-CBN, you have to select them under ```Advanced options and CPMs to use```. (They are not run by default, as they can take a long time).
-- OncoBN can be run using a conjunctive or a disjunctive model. The default used in the Shiny app (and the evam function in the package) is the disjunctive model. You can use the conjunctive one by selecting it under ```Advanced options and CPMs to use```.
+- In the Shiny app, by default we run CBN, OT, OncoBN, and MHN. If you want to run H-ESBCN or MC-CBN, or not run some of the above methods, (de)select them under ```Advanced options and CPMs to use```. (H-ESBCN or MC-CBN are not run by default, as they can take a long time).
+- OncoBN can be run using a conjunctive or a disjunctive model. The default used in the Shiny app (and the ```evam``` function in the package) is the disjunctive model. You can use the conjunctive one by selecting it under ```Advanced options and CPMs to use```, in ```OncoBN options```, ```Model```.
 - Most methods have other options that can be modified. Again, check ```Advanced options and CPMs to use```.
 
 

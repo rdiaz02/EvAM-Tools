@@ -17,7 +17,7 @@ Defaults values of the shiny app
   
   \item{csd_samples}{Number of patients to samples to generate csd data from a matrix or a dag}
 
-  \item{cpms2run}{Which CPMs to run in the shiny server by defaults}
+%%  \item{cpms2run}{Which CPMs to run in the shiny server by defaults}
 
   \item{template_data}{One of:
     \itemize{
