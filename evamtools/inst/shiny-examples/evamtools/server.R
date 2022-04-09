@@ -30,8 +30,26 @@ dataModal <- function(error_message, type="Error: ") {
   }
 
 
+do_gc <- function(n = 5) {
+    print("doing gc")
+    for (i in 1:n) print(gc())
+}
+
 
 server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
+    ## Just in case
+    do_gc(2)
+    ## And be paranoid about making sure memory is released on disconnect
+    session$onSessionEnded(
+                function() {
+                    message("From onSessionEnded")
+                    do_gc(5)}
+            )
+    onStop(function() {
+        cat("\n Finishing")
+        do_gc(5)
+    })
+   
   examples_csd$csd <- examples_csd$csd[1:5]
   examples_csd$dag <- examples_csd$dag[1:6]
   all_csd_data <- evamtools:::to_stnd_csd_all_datasets(examples_csd)

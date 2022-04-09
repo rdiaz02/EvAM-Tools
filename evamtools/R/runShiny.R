@@ -20,10 +20,10 @@ runShiny <- function(host="0.0.0.0", port = 3000, test.mode = FALSE) {
   if (appDir == "") {
     stop("Could not find example directory. Try re-installing `evamtools`.", call. = FALSE)
   }
-
   opt <- options(shiny.autoreload = TRUE, browser = "/usr/bin/firefox")
   on.exit(options(opt))
   shiny::runApp(appDir, port = port, host = host, display.mode = "normal",
                 test.mode = test.mode)
 }
 # nocov end
+

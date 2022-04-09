@@ -8,7 +8,7 @@ export(
   , "random_evam"
      )
 
-importFrom("shiny", "runApp", "Progress")
+importFrom("shiny", "runApp", "Progress", "onStop")
 importFrom("shinyjs", "useShinyjs", "enable", "disable", "disabled")
 importFrom("grDevices", "rgb", "colorRampPalette")
 importFrom("graphics", "axis", "legend", "lines", "par", "title", "barplot",
