@@ -1046,17 +1046,19 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       if(!is.null(input$more_cpms)){
         methods <- unique(c(methods, input$more_cpms[input$more_cpms %in% .ev_SHINY_dflt$all_cpms]))
       }
-      cpm_output <- R.utils::withTimeout({evam(data2run, methods = methods
-        , mhn_opts = mhn_opts
-        , ot_opts = ot_opts
-        , cbn_opts = cbn_opts
-        , hesbcn_opts = hesbcn_opts
-        , oncobn_opts = oncobn_opts
-        , mccbn_opts = mccbn_opts)},
-          elapsed = EVAM_MAX_ELAPSED, 
-          timeout = EVAM_MAX_ELAPSED, 
-          cpu = Inf,
-          onTimeout = "silent")
+      cpm_output <- R.utils::withTimeout({evam(data2run
+                                             , methods = methods
+                                             , paths_max = input$return_paths_max
+                                             , mhn_opts = mhn_opts
+                                             , ot_opts = ot_opts
+                                             , cbn_opts = cbn_opts
+                                             , hesbcn_opts = hesbcn_opts
+                                             , oncobn_opts = oncobn_opts
+                                             , mccbn_opts = mccbn_opts)},
+                                         elapsed = EVAM_MAX_ELAPSED, 
+                                         timeout = EVAM_MAX_ELAPSED, 
+                                         cpu = Inf,
+                                         onTimeout = "silent")
 
       if (is.null(cpm_output)) stop("Error running evam. ",
                                 "Most likely you exceeded maximum ",

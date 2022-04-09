@@ -342,7 +342,7 @@ Executes all CPMS given a cross sectional data set.
 }
 
 \seealso{
-  \code{\link{paths_probs_2_df}}, \code{\link{sample_CPMs}},
+   \code{\link{sample_CPMs}},
    \code{\link{plot_CPMs}}
   
 }
@@ -374,9 +374,6 @@ out3 <- evam(Dat1,
             methods = c("MHN", "OncoBN"),
             paths_max = TRUE)
 
-
-## Convert probabilities of paths into a data frame,
-## with strings and the probs. of the paths.
-paths_probs_2_df(out3$OncoBN_paths_max)
+out3$OncoBN_paths_max
 
 }

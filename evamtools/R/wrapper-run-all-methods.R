@@ -894,7 +894,8 @@ evam <- function(x,
                                      "trans_mat_genots")
             trans_mat <- get_output(method, trans_mat_name)
             if ((length(trans_mat) == 1) && is.na(trans_mat)) return(NA)
-            return(trans_mat_2_paths_probs(trans_mat))
+            return(paths_probs_2_df(trans_mat_2_paths_probs(trans_mat),
+                                    order = "prob"))
         } else {
             return(NA)
         }
@@ -986,7 +987,8 @@ trans_mat_2_paths_probs <- function(trans_mat) {
     return(rp)
 }
     
-## Take an object returned by rank_paths,
+## Take an object returned by trans_mat_2_paths_probs or rank_paths
+## (list of paths and their weights)
 ## and return a data frame with two columns
 ## path and prob, where path has "genotype -> genotype ..."
 ## and probability is probability
@@ -1003,6 +1005,9 @@ paths_probs_2_df <- function(x, order = c("prob", "path")) {
         oi <- order(df$Path, decreasing = FALSE)
     return(df[oi, ])
 }
+
+
+
 
 
 
