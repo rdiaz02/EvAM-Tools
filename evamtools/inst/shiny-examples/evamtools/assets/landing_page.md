@@ -3,6 +3,23 @@
 
 &nbsp;
 
+## Table of contents <a id="evamtools"></a>
+****
+1. [Evam-tools](#evamtools)
+2. [What is _cross-sectional_ data?](#helpcsd)
+3. [How to use this web interface?](#input)
+4. [What is available under ```Results```?](#helpresults)
+5. [Additional documentation](#additional_docs)
+6. [Session timeouts, RAM and elapsed time execution limits](#limits)
+7. [How long does it take to run](#timetorun)
+8. [What CPMs are included in ```Evam-tools```?](#cpms)
+9. [Default options and default CPMs run](#cpms2run)
+10. [References and related repositories](#refs)
+11. [Where is the code? Terms of use? Copyright](#code)
+12. [Authors, contact and bug reports](#authors)
+13. [Cookies](#cookies)
+
+
 ****
 ## Evam-tools <a id="evamtools"></a>
 ****
@@ -128,7 +145,7 @@ It depends on the number of features. For six features, and if you do not use H-
 &nbsp;
 
 ****
-### Default options and default CPMs run
+### Default options and default CPMs run<a id="cpms2run"></a>
 ***
 
 - In the Shiny app, we always run CBN, OT, OncoBN, and MHN. If you want to run H-ESBCN or MC-CBN, you have to select them under ```Advanced options and CPMs to use```. (They are not run by default, as they can take a long time).
@@ -218,7 +235,7 @@ It depends on the number of features. For six features, and if you do not use H-
 
 
 ****
-## Where is the code? Terms of use? Copyright
+## Where is the code? Terms of use? Copyright<a id="code"></a>
 ***
 
 The complete source code for the package and the shiny app, as well information about how to run the shiny app locally, is available from https://github.com/rdiaz02/EvAM-Tools.
@@ -231,13 +248,13 @@ Most of the files for this app (and the package) are copyright Ramon Diaz-Uriart
 
 
 &nbsp;
-#### Authors, contact and bug reports
+#### Authors, contact and bug reports<a id="authors"></a>
 Please, use the repository (https://github.com/rdiaz02/EvAM-Tools) and submit bug reports there. 
 
 
 &nbsp;
 ****
-## Cookies
+## Cookies<a id="cookies"></a>
 ***
 We use cookies to keep "sticky sessions" to the pool of servers (load balanced using [HAproxy](https://www.haproxy.org/)). By using the app, you confirm you are OK with this.
 
