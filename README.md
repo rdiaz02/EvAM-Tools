@@ -189,9 +189,18 @@ docker run --rm -p 8787:8787 -e PASSWORD=yourpasswordhere rdiaz02/evamrstudio
 
 Go to `localhost:8787` and log in with username "rstudio" and the password you set. See https://hub.docker.com/r/rocker/rstudio for further options.
 
-(If you get errors such as "docker: Error response from daemon: driver failed programming external connectivity on" you might want to restart the docker service).
+If you want to easily share data between your local file system and the Docker image you can do
 
-(We do not show Docker commands with `sudo`: it is possible, and generally preferable, to run docker without sudo; look a the Docker documentation in https://docs.docker.com/engine/security/rootless/ .)
+```
+docker run --rm -p 8787:8787 -v $HOME/tmp/rst:/home/rstudio -e PASSWORD=yourpasswordhere rdiaz02/evamrstudio
+```
+which will allow you to use your local `~/tmp/rst` to read from/write with the RStudio container (if using Windows you could write `-v /c/Users/someuser/somedirectory:/home/rstudio`); see additional documentation in https://www.rocker-project.org/use/shared_volumes/. See also https://docs.docker.com/storage/bind-mounts/. 
+
+
+
+Some additional notes:
+   - If you get errors such as "docker: Error response from daemon: driver failed programming external connectivity on" you might want to restart the docker service.
+   - We do not show Docker commands with `sudo`: it is possible, and generally preferable, to run docker without sudo; look a the Docker documentation in https://docs.docker.com/engine/security/rootless/ .
 
 ### How to run the Shiny app from the Docker image
 
