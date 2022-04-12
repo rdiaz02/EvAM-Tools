@@ -74,7 +74,7 @@ This document provides additional documentation about EvAM-Tools; some of the se
 \subsection{Predicted genotype frequencies for CBN, MCCBN, MHN, H-ESBCN}
 \label{predicted-cbn-et-al}
 
-For CBN, MCCBN, MHN, and H-ESBCN, the transition rate matrix describes the true process that generates genotypes and this matrix can be obtained from the parameters of the model ($\theta$s for MHN, $\lambda$s for the rest). Therefore, we can use the transition rate matrix to calculate the predicted probabilities of the different genotypes. In all cases here, we assume that the time of observation is exponentially distributed with rate 1 (as in \citealp{gerstung2009quantifying, schill2020modelling}).
+For CBN, MCCBN, MHN, and H-ESBCN, the transition rate matrix describes the true process that generates genotypes and this matrix can be obtained from the parameters of the model ($\theta$s for MHN, $\lambda$s for the rest). Therefore, we can use the transition rate matrix to calculate the predicted probabilities of the different genotypes. In all cases here, we assume that the time of observation is exponentially distributed with rate 1 (as in \citealp{gerstung2009quantifying, schill2020modelling})\footnote{There is code in \texttt{evamtools}, in function \texttt{population\_sample\_from\_trm}, to obtain samples at arbitrary times ---i.e., not limited to  times exponentially distributed  with rate 1}.
 
 
 The fastest way to obtain the predicted probabilities is using equation 4 in 
