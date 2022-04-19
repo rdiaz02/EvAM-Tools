@@ -29,6 +29,8 @@ evam_string_order <- function(x) {
                        numeric = TRUE))
 }
 
+## this function is not used now, but this is pattern
+## is in the code. Eventually, replace and use this function
 ## vector of genotype names -> vector of gene names
 genes_in_genotypes <- function(x) {
     return(evam_string_sort(setdiff(
