@@ -24,11 +24,8 @@ if(.._EvamTools_test.hesbcn) {
         "\n  WARNING \n",
         "The external program h-esbcn was not found.",
         "You will not be able to use HESBCN.",
-        "You can download them from https://github.com/danro9685/HESBCN",
-        "For proper compilation you should modify", 
-        "line 23 in *Makefile* to include *LDLIBS = -lgsl -lm -lgslcblas*.", 
-        "You can also change compilation from gcc-5 to something a bit more up to date, like gcc-10.", 
-        "Finally, add this folder to your $PATH.",
+        "You can it from https://github.com/danro9685/HESBCN",
+        "See further instructions in the README."
         "\n******************************************************",
         "\n******************************************************",
         "\n\n"

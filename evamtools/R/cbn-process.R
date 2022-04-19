@@ -44,9 +44,7 @@ if(.._OncoSimul_test.ctcbn || .._OncoSimul_test.hcbn) {
         "The external programs h-cbn and ct-cbn were not found.",
         "You will not be able to use CBN.",
         "You can download them from http://www.bsse.ethz.ch/cbg/software/ct-cbn.html",
-        "Actually, you might want to include the versions with fixes\n",
-        "in some subdirectory of this repo\n",
-        "called something like ct-cbn-0.1.04b-with-rdu-bug-fix-write-lambda-likelihood",
+        "See further instructions in the README."
         "\n******************************************************",
         "\n******************************************************",
         "\n\n"
