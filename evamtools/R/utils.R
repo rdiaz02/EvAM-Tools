@@ -29,6 +29,12 @@ evam_string_order <- function(x) {
                        numeric = TRUE))
 }
 
+## vector of genotype names -> vector of gene names
+genes_in_genotypes <- function(x) {
+    return(evam_string_sort(setdiff(
+        unique(unlist(strsplit(x, split = ", "))),
+        "WT")))
+}
 
 
 ## #' @title Integer to binary
