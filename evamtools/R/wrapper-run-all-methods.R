@@ -254,7 +254,7 @@ DAG_2_access_genots_relationships <- function(x,
                                               gene_relations = NULL) {
 
     if (is.null(gene_relations)) {
-        warning("gene_relations (parent_set) NULL. ",
+        message("gene_relations (parent_set) NULL. ",
                 "Creating it from edges component.")
         gene_relations <- parent_set_from_edges(x)
     } else {
