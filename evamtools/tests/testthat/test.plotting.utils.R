@@ -34,7 +34,7 @@ test_that("Processing samples & Plotting of CPMs is correct", {
   }
 
   # Checking with sampling
-  samples <- sample_CPMs(sample_evam_output, 100)
+  samples <- sample_evam(sample_evam_output, 100)
 
   for(model in models) {
       cat("\n model ", model, "\n")
@@ -94,11 +94,11 @@ test_that("how it handles processing missing data", {
   expect_equal(out$edges, NA)
 })
 
-test_that("plot_CPMs handles argument correctly", {
+test_that("plot_evam handles argument correctly", {
   sample_evam_output <- evam(examples_csd$csd$AND$data)
-  expect_error(plot_CPMs(sample_evam_output, orientation="horizontal",
+  expect_error(plot_evam(sample_evam_output, orientation="horizontal",
                          plot_type = "not_supported"))
-  expect_error(plot_CPMs(sample_evam_output, orientation="horizontal",
+  expect_error(plot_evam(sample_evam_output, orientation="horizontal",
                          plot_type = "transitions"))
 })
 
@@ -111,23 +111,23 @@ test_that("plotting works, minimal, with mixed edges", {
                        methods = c("OT", "HESBCN", "MHN", "OncoBN"),
                        hesbcn_opts = list(seed = 26))
 
-    plot_CPMs(out_AND_OR_XOR, plot_type = "trans_mat", top_paths = 4)
+    plot_evam(out_AND_OR_XOR, plot_type = "trans_mat", top_paths = 4)
 
     ## Now, only some, and change options
-    plot_CPMs(out_AND_OR_XOR, methods = "OT", top_paths = 2,
+    plot_evam(out_AND_OR_XOR, methods = "OT", top_paths = 2,
               orientation = "vertical")
-    expect_warning(plot_CPMs(out_AND_OR_XOR, methods = c("OT", "CBN"),
+    expect_warning(plot_evam(out_AND_OR_XOR, methods = c("OT", "CBN"),
                              top_paths = 2,
                              orientation = "vertical"),
                    "At least one method you asked",
                    fixed = TRUE)
     
-    expect_error(plot_CPMs(out_AND_OR_XOR, methods = c("CBN"),
+    expect_error(plot_evam(out_AND_OR_XOR, methods = c("CBN"),
                            top_paths = 2,
                            orientation = "vertical"),
                  "No valid methods", fixed = TRUE)
     
-    expect_error(plot_CPMs(NULL),
+    expect_error(plot_evam(NULL),
                  "No valid methods", fixed = TRUE)
     
 })
@@ -153,16 +153,16 @@ test_that("Exercise other plotting options", {
     out <- evam(dB_c1[, 1:3],
                 methods = c("CBN", "OT", "MHN"))
 
-    plot_CPMs(out, plot_type = "trans_mat")
-    plot_CPMs(out, plot_type = "trans_rate_mat")
-    out_samp <- sample_CPMs(out, 100,
+    plot_evam(out, plot_type = "trans_mat")
+    plot_evam(out, plot_type = "trans_rate_mat")
+    out_samp <- sample_evam(out, 100,
                             output = c("sampled_genotype_counts",
                                        "obs_genotype_transitions"))
-    plot_CPMs(out, out_samp, plot_type = "obs_genotype_transitions")
-    plot_CPMs(out, out_samp, plot_type = "obs_genotype_transitions", 
+    plot_evam(out, out_samp, plot_type = "obs_genotype_transitions")
+    plot_evam(out, out_samp, plot_type = "obs_genotype_transitions", 
               label_type = "acquisition")
 
-    expect_error(plot_CPMs(out, samples = NULL,
+    expect_error(plot_evam(out, samples = NULL,
                            plot_type = "obs_genotype_transitions"),
                  "obs_genotype_transitions needs", fixed = TRUE)
 })

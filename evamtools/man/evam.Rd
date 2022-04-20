@@ -342,8 +342,8 @@ Executes all CPMS given a cross sectional data set.
 }
 
 \seealso{
-   \code{\link{sample_CPMs}},
-   \code{\link{plot_CPMs}}
+   \code{\link{sample_evam}},
+   \code{\link{plot_evam}}
   
 }
 

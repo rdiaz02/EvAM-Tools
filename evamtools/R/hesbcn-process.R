@@ -25,7 +25,7 @@ if(.._EvamTools_test.hesbcn) {
         "The external program h-esbcn was not found.",
         "You will not be able to use HESBCN.",
         "You can it from https://github.com/danro9685/HESBCN",
-        "See further instructions in the README."
+        "See further instructions in the README.",
         "\n******************************************************",
         "\n******************************************************",
         "\n\n"

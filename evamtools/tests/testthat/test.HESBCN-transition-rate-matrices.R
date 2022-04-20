@@ -475,7 +475,7 @@ test_that("Verify we run creation of parent_set if not given", {
                    Relation = c("Single", "Single", "AND", "AND", "OR", "OR",
                                 "XOR", "XOR"),
                    Lambdas = c(1, 2, 3, 3, 4, 4, 5, 5))
-    expect_warning(null <- DAG_2_access_genots_relationships(df1),
+    expect_message(null <- DAG_2_access_genots_relationships(df1),
                    "gene_relations (parent_set) NULL.",
                    fixed = TRUE)
 

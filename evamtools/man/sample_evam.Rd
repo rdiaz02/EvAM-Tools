@@ -1,8 +1,17 @@
-\name{sample_CPMs}
+\name{sample_evam}
+\alias{sample_evam}
 \alias{sample_CPMs}
-\title{Obtain samples of genotypes from the CPM models and, optionally,
+\title{Obtain samples of genotypes from the EvAM (CPM) models and, optionally,
   counts of genotype transitions.}
 \usage{
+sample_evam(cpm_output,  N,
+                methods = NULL, 
+                output = c("sampled_genotype_counts"),
+                obs_noise = 0,
+                genotype_freqs_as_data = TRUE
+
+)
+
 sample_CPMs(cpm_output,  N,
                 methods = NULL, 
                 output = c("sampled_genotype_counts"),
@@ -50,6 +59,9 @@ sample_CPMs(cpm_output,  N,
   
 }
 
+\note{
+\strong{sample_CPMs has been deprecated}. Use sample_evam.
+}
 
 \description{
   Obtain samples of genotypes from the CPM models and, optionally, counts of genotype transitions.
@@ -86,33 +98,33 @@ out <- suppressMessages(evam(Dat1,
 
 ## Sample from the predicted genotype frequencies
 ## only for OT
-outS1_ot <- sample_CPMs(out, N = 1000, methods = "OT")
+outS1_ot <- sample_evam(out, N = 1000, methods = "OT")
 
 ## Sample from the predicted genotype frequencies
 ## for OT and HESBCN. But the later was not in the output
 ## so we get a warning-
-outS1_ot_2 <- sample_CPMs(out, N = 1000, methods = c("OT", "HESBCN"))
+outS1_ot_2 <- sample_evam(out, N = 1000, methods = c("OT", "HESBCN"))
 
 
 ## Sample from the predicted genotype frequencies
 ## for all methods in the output out
 
-outS1 <- sample_CPMs(out, N = 1000)
+outS1 <- sample_evam(out, N = 1000)
 
 ## Same, but adding observation error
-outS1e <- sample_CPMs(out, N = 1000, obs_noise = 0.1)
+outS1e <- sample_evam(out, N = 1000, obs_noise = 0.1)
 
 ## Only CBN and will simulate sampling from the transition
 ## rate matrix. 
 
-outS2 <- sample_CPMs(out, N = 1000, methods = "CBN",
+outS2 <- sample_evam(out, N = 1000, methods = "CBN",
                      output = "obs_genotype_transitions")
 
 
 ## No output available for OT
 ## For CBN and MHN simulate from the transition rate matrix
 
-outS3 <- sample_CPMs(out, N = 1000, methods = c("CBN", "OT", "MHN"), 
+outS3 <- sample_evam(out, N = 1000, methods = c("CBN", "OT", "MHN"), 
                      output = c("obs_genotype_transitions",
                                 "state_counts"))
 
@@ -121,13 +133,13 @@ outS3 <- sample_CPMs(out, N = 1000, methods = c("CBN", "OT", "MHN"),
 ## No obs_genotype_transitions available for OT
 ## CBN and OT simulate from the transition rate matrix, for consistency
 
-outS4 <- sample_CPMs(out, N = 1000, methods = c("CBN", "OT", "MHN"), 
+outS4 <- sample_evam(out, N = 1000, methods = c("CBN", "OT", "MHN"), 
                      output = c("obs_genotype_transitions",
                                 "sampled_genotype_counts"))
 
 ## Only CBN,  will simulate sampling from the transition
 ## rate matrix and add observation error to the genotype frequencies. 
 
-outS5 <- sample_CPMs(out, N = 1000, methods = "CBN",
+outS5 <- sample_evam(out, N = 1000, methods = "CBN",
                      output = c("obs_genotype_transitions", "sampled_genotype_counts"), obs_noise = 0.1)
 }

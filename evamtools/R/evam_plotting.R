@@ -476,7 +476,7 @@ plot_genot_fg <- function(trans_mat
 ## #' Extracts the outpus concerning a single CPM
 ## #' 
 ## #' @param data Complete CPM output
-## #' by calling sample_CPMs with the exact CPM output from data parameter
+## #' by calling sample_evam with the exact CPM output from data parameter
 ## #' @param mod String for the CPM to process.
 ## #' @param plot_type String for the plot_type to process.
 ## #' @param sample_data Data form sampling, this must be generated 
@@ -668,6 +668,24 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
                         plot_type = "trans_mat", label_type="genotype",
                         fixed_vertex_size = FALSE,
                         top_paths = NULL) {
+    .Deprecated("plot_evam")
+    plot_evam(
+        cpm_output = cpm_output,
+        samples = samples,
+        orientation = orientation, 
+        methods = methods, 
+        plot_type = plot_type,
+        label_type = label_type,
+        fixed_vertex_size = fixed_vertex_size,
+        top_paths = top_paths
+    )
+}
+
+plot_evam <- function(cpm_output, samples = NULL, orientation = "horizontal", 
+                        methods = NULL, 
+                        plot_type = "trans_mat", label_type="genotype",
+                        fixed_vertex_size = FALSE,
+                        top_paths = NULL) {
 
     if (!(plot_type %in% c("trans_mat", "trans_rate_mat", "obs_genotype_transitions"))){
         stop(sprintf("Plot type %s is not supported", plot_type))
@@ -675,7 +693,7 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
 
     if ((plot_type == "obs_genotype_transitions") & is.null(samples)){
         stop("obs_genotype_transitions needs you to pass the output ",
-             "of a call to sample_CPMs")
+             "of a call to sample_evam")
     }
 
     

@@ -367,9 +367,24 @@ standard_rank_genots_2 <- function(x, y) {
 
 sample_CPMs <- function(cpm_output
                       , N
-                      , methods = NULL ## c("OT", "OncoBN",
-                                    ## "CBN", "MCCBN",
-                                    ## "MHN", "HESBCN")
+                      , methods = NULL
+                      , output = c("sampled_genotype_counts")
+                      , obs_noise = 0
+                      , genotype_freqs_as_data = TRUE) {
+    .Deprecated("sample_evam")
+    sample_evam(
+        cpm_output = cpm_output, 
+        N = N, 
+        methods = methods,  
+        output = output,  
+        obs_noise = obs_noise,  
+        genotype_freqs_as_data = genotype_freqs_as_data  
+        )
+}
+
+sample_evam <- function(cpm_output
+                      , N
+                      , methods = NULL
                       , output = c("sampled_genotype_counts")
                       , obs_noise = 0
                       , genotype_freqs_as_data = TRUE

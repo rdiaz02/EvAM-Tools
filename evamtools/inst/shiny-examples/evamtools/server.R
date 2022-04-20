@@ -1107,7 +1107,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
             
         sampled_from_CPMs <-
-            sample_CPMs(cpm_output, n_samples , methods,
+            sample_evam(cpm_output, n_samples , methods,
                         out = if (input$do_genotype_transitions) { 
                                      c("sampled_genotype_counts",
                                        "obs_genotype_transitions")

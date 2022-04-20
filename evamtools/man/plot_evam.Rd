@@ -1,7 +1,19 @@
-\name{plot_CPMs}
+\name{plot_evam}
+\alias{plot_evam}
 \alias{plot_CPMs}
-\title{Plot results from CPMs}
+\title{Plot results from EvAMs (CPMs)}
 \usage{
+plot_evam(
+  cpm_output,
+  samples = NULL,
+  orientation = "horizontal",
+  methods = NULL, 
+  plot_type = "trans_mat",
+  label_type = "genotype",
+  fixed_vertex_size = FALSE,
+  top_paths = NULL
+)
+
 plot_CPMs(
   cpm_output,
   samples = NULL,
@@ -12,11 +24,13 @@ plot_CPMs(
   fixed_vertex_size = FALSE,
   top_paths = NULL
 )
+
+
 }
 \arguments{
 \item{cpm_output}{Output from the cpm}
 
-\item{samples}{Output from a call to \link{sample_CPMs}. Necessary if
+\item{samples}{Output from a call to \link{sample_evam}. Necessary if
   you request plot type \code{transitions}.}
 
 \item{orientation}{String. If it is not "vertical" it will be displayed with an horizontal layout. Optional.}
@@ -34,7 +48,7 @@ plot_CPMs(
   unavailable for OT and OncoBN. This plots the object of
   name \code{trans_rate_mat} from the output of \code{\link{evam}}.}
     \item{obs_genotype_transitions: }{Observed transitions during the
-  simulation of the sampling process. This plots the object called  \code{obs_genotype_transitions} from the output of \code{\link{sample_CPMs}}.}
+  simulation of the sampling process. This plots the object called  \code{obs_genotype_transitions} from the output of \code{\link{sample_evam}}.}
   }
 }
 
@@ -50,6 +64,10 @@ plot_CPMs(
 
 \item{top_paths}{Number of most relevant paths to plot. Default NULL 
 will plot all paths. See below, Description, for details about relevance.}
+}
+
+\note{
+\strong{plot_CPMs has been deprecated}. Use plot_evam.
 }
 
 \description{
@@ -141,23 +159,23 @@ colnames(dB_c1) <- LETTERS[1:5]
 out <- evam(dB_c1,
             methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN"))
 
-plot_CPMs(out, plot_type = "trans_mat")
+plot_evam(out, plot_type = "trans_mat")
 
-plot_CPMs(out, plot_type = "trans_rate_mat")
+plot_evam(out, plot_type = "trans_rate_mat")
 
-plot_CPMs(out, plot_type = "trans_rate_mat", top_paths=2)
-plot_CPMs(out, plot_type = "trans_rate_mat", top_paths=2
+plot_evam(out, plot_type = "trans_rate_mat", top_paths=2)
+plot_evam(out, plot_type = "trans_rate_mat", top_paths=2
   , label_type ="acquisition")
 
-out_samp <- sample_CPMs(out, 1000, output = c("sampled_genotype_counts", "obs_genotype_transitions"))
+out_samp <- sample_evam(out, 1000, output = c("sampled_genotype_counts", "obs_genotype_transitions"))
 
-plot_CPMs(out, out_samp, plot_type = "obs_genotype_transitions")
+plot_evam(out, out_samp, plot_type = "obs_genotype_transitions")
 
 ## Only showing new gene mutated respect with its parent
-plot_CPMs(out, out_samp, plot_type = "obs_genotype_transitions", 
+plot_evam(out, out_samp, plot_type = "obs_genotype_transitions", 
   label_type = "acquisition")
 
-plot_CPMs(out, out_samp, plot_type = "obs_genotype_transitions", 
+plot_evam(out, out_samp, plot_type = "obs_genotype_transitions", 
   label_type = "acquisition", top_paths = 3)
 
 
@@ -168,33 +186,33 @@ out_AND_OR_XOR <- evam(ex_mixed_and_or_xor,
                        methods = c("OT", "HESBCN", "MHN", "OncoBN"),
                        hesbcn_opts = list(seed = 26))
 
-plot_CPMs(out_AND_OR_XOR,plot_type = "trans_mat",
+plot_evam(out_AND_OR_XOR,plot_type = "trans_mat",
           top_paths = 3)
 
 
 ## Asking for a method not in the output will give a warning
-plot_CPMs(out_AND_OR_XOR, plot_type = "trans_mat",
+plot_evam(out_AND_OR_XOR, plot_type = "trans_mat",
           methods = c("OT", "OncoBN"),
           top_paths = 4)
 
    
 ## Only two methods, but one not fitted
-plot_CPMs(out_AND_OR_XOR, methods = c("CBN", "HESBCN"),
+plot_evam(out_AND_OR_XOR, methods = c("CBN", "HESBCN"),
            plot_type = "trans_mat")
 
 ## Only one method
-plot_CPMs(out_AND_OR_XOR, methods = c("MHN"),
+plot_evam(out_AND_OR_XOR, methods = c("MHN"),
           plot_type = "trans_mat",
           top_paths = 5)
 
-plot_CPMs(out_AND_OR_XOR, plot_type = "trans_mat", top_paths = 3)
+plot_evam(out_AND_OR_XOR, plot_type = "trans_mat", top_paths = 3)
 
 
-plot_CPMs(out_AND_OR_XOR, methods = c("MHN", "HESBCN"),
+plot_evam(out_AND_OR_XOR, methods = c("MHN", "HESBCN"),
           plot_type = "trans_mat", label_type="acquisition"
           , top_paths=3)
 
-plot_CPMs(out_AND_OR_XOR, methods = c("MHN", "HESBCN"),
+plot_evam(out_AND_OR_XOR, methods = c("MHN", "HESBCN"),
           plot_type = "trans_mat", label_type="genotype"
           , top_paths=3)
 }

@@ -44,7 +44,7 @@ if(.._OncoSimul_test.ctcbn || .._OncoSimul_test.hcbn) {
         "The external programs h-cbn and ct-cbn were not found.",
         "You will not be able to use CBN.",
         "You can download them from http://www.bsse.ethz.ch/cbg/software/ct-cbn.html",
-        "See further instructions in the README."
+        "See further instructions in the README.",
         "\n******************************************************",
         "\n******************************************************",
         "\n\n"

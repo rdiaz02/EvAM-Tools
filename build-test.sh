@@ -1,4 +1,5 @@
 #!/bin/bash
+rm -r -f ./evamtools/tests/testthat/_snaps
 rm -r -f evamtools.Rcheck
 V_PKG=$(cat ./evamtools/DESCRIPTION | grep Version | cut -d' ' -f2)
 rm evamtools_$V_PKG.tar.gz

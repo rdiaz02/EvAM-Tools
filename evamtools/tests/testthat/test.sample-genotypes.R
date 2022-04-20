@@ -9,7 +9,7 @@ test_that("We get requested output, by the specified means", {
 
     ## Sample from the predicted genotype frequencies
     ## for all methods in the output out
-    outS1 <- sample_CPMs(out, N = 100)
+    outS1 <- sample_evam(out, N = 100)
 
     expect_true(all(
         c("OT_sampled_genotype_counts",
@@ -24,7 +24,7 @@ test_that("We get requested output, by the specified means", {
     ## Only CBN and will simulate sampling from the transition
     ## rate matrix. 
 
-    expect_message(outS2 <- sample_CPMs(out, N = 100, methods = "CBN",
+    expect_message(outS2 <- sample_evam(out, N = 100, methods = "CBN",
                                          output = "obs_genotype_transitions"),
                     "For the requested output we will need to simulate",
                    fixed = TRUE)
@@ -39,7 +39,7 @@ test_that("We get requested output, by the specified means", {
 
     ## No output available for OT
     ## For CBN and MHN simulate from the transition rate matrix
-    expect_message(outS3 <- sample_CPMs(out, N = 100, methods = c("CBN", "OT", "MHN"), 
+    expect_message(outS3 <- sample_evam(out, N = 100, methods = c("CBN", "OT", "MHN"), 
                          output = c("obs_genotype_transitions",
                                     "state_counts")),
                    "For the requested output we will need to simulate",
@@ -61,7 +61,7 @@ test_that("We get requested output, by the specified means", {
     ## No obs_genotype_transitions available for OT
     ## CBN and OT simulate from the transition rate matrix, for consistency
 
-    expect_message(outS4 <- sample_CPMs(out, N = 100, methods = c("CBN", "OT", "MHN"), 
+    expect_message(outS4 <- sample_evam(out, N = 100, methods = c("CBN", "OT", "MHN"), 
                          output = c("obs_genotype_transitions",
                                     "sampled_genotype_counts")),
                    "For the requested output we will need to simulate",
@@ -81,11 +81,11 @@ test_that("Exercise random_evam and sampling", {
     rcbn <- random_evam(model = "CBN", ngenes = 5,
                              graph_density = 0.5)
     
-    sample_mhn <- sample_CPMs(rmhn, N = 1000)
-    sample_cbn <- sample_CPMs(rcbn, N = 40)
+    sample_mhn <- sample_evam(rmhn, N = 1000)
+    sample_cbn <- sample_evam(rcbn, N = 40)
 
-    sample_mhne <- sample_CPMs(rmhn, N = 1000, obs_noise = 0.2)
-    sample_cbne <- sample_CPMs(rcbn, N = 40, obs_noise = 0.1)
+    sample_mhne <- sample_evam(rmhn, N = 1000, obs_noise = 0.2)
+    sample_cbne <- sample_evam(rcbn, N = 40, obs_noise = 0.1)
 
     ## d1 <- genotypeCounts_to_data(sample_mhn$MHN_sampled_genotype_counts, 0)
     ## d2 <- genotypeCounts_to_data(sample_cbn$CBN_sampled_genotype_counts, 0)

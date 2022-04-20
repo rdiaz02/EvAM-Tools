@@ -30,7 +30,7 @@ out_AND_OR_XOR <- evam(ex_mixed_and_or_xor,
                        methods = c("OT", "HESBCN", "MHN", "OncoBN"),
                        hesbcn_opts = list(seed = 26))
 
-plot_CPMs(out_AND_OR_XOR, plot_type = "trans_mat", top_paths = 4)
+plot_evam(out_AND_OR_XOR, plot_type = "trans_mat", top_paths = 4)
 
 }
 \keyword{datasets}

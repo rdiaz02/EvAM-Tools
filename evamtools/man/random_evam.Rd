@@ -61,7 +61,7 @@ Random model, with the same structure as returned by function \code{\link{evam}}
 
   For both OT and OncoBN model, the \code{ot_oncobn_epos} controls the probability that a gene can mutate if its requirements are not satisfied. (This is thus intrinsic to the model, and independent of observation error; see next).
   
-  In all cases, the predicted distribution of genotypes for a model is done assuming perfect compliance with the model. See the additional documentation for details about the error models. Adding observation error can be done using \code{obs_error > 0} when calling \code{\link{sample_CPMs}}.
+  In all cases, the predicted distribution of genotypes for a model is done assuming perfect compliance with the model. See the additional documentation for details about the error models. Adding observation error can be done using \code{obs_error > 0} when calling \code{\link{sample_evam}}.
 
 }
 
@@ -72,7 +72,7 @@ Random model, with the same structure as returned by function \code{\link{evam}}
 
 
 \seealso{
-  \code{\link{sample_CPMs}}
+  \code{\link{sample_evam}}
   
 }
 
@@ -85,7 +85,7 @@ rcbn <- random_evam(model = "CBN", ngenes = 5,
 ## Now, obtain some data
 ## You can obtain a random sample, with counts of frequencies of
 ## genotypes and add observation noise
-sample_mhn <- sample_CPMs(rmhn, N = 1000, obs_noise = 0.05)
+sample_mhn <- sample_evam(rmhn, N = 1000, obs_noise = 0.05)
 
 ## The component sampled_genotype_counts_as_data is
 ## a matrix that you can then pass to evam as the

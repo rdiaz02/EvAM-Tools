@@ -1,12 +1,14 @@
 useDynLib(evamtools, .registration = TRUE)
 
 export(
-    "sample_CPMs"
-  , "evam"
-  , "plot_CPMs"
-  , "runShiny"
-  , "random_evam"
-     )
+   "evam"
+ , "sample_evam"
+ , "plot_evam"
+ , "runShiny"
+ , "random_evam"
+ , "sample_CPMs"
+ , "plot_CPMs"
+)
 
 importFrom("shiny", "runApp", "Progress", "onStop")
 importFrom("shinyjs", "useShinyjs", "enable", "disable", "disabled")

@@ -1,5 +1,5 @@
 ## Showing the behavior of Oncotree::generate.data
-## sample_CPMs, and random_evam to illustrate error model
+## sample_evam, and random_evam to illustrate error model
 
 ######################################################################
 ##
@@ -34,7 +34,7 @@ chisq.test(cbind(d1t, d3t), simulate.p.value = TRUE) ## similar
 
 ######################################################################
 ##
-##     random_evam + sample_CPMs
+##     random_evam + sample_evam
 ##     compared to generate.data
 ##
 ######################################################################
@@ -48,7 +48,7 @@ chisq.test(cbind(d1t, d3t), simulate.p.value = TRUE) ## similar
 ##                eneg = y
 
 ## ot_oncobn_epos : value of that argument in random_evam
-## obs_noise: value of that argument in sample_CPMs
+## obs_noise: value of that argument in sample_evam
 ## gn: number of genes
 ## N: size of sample
 compare_sample_generate <- function(ot_oncobn_epos, obs_noise,
@@ -56,8 +56,8 @@ compare_sample_generate <- function(ot_oncobn_epos, obs_noise,
     rx <- random_evam(gn, model = "OT",
                                ot_oncobn_epos = ot_oncobn_epos)
 
-    ## Sample using sample_CPMs
-    s_rx <- sample_CPMs(rx, N = N, genotype_freqs_as_data = FALSE,
+    ## Sample using sample_evam
+    s_rx <- sample_evam(rx, N = N, genotype_freqs_as_data = FALSE,
                         obs_noise = obs_noise)
     
     ## Sample using generate.data
@@ -124,7 +124,7 @@ compare_sample_generate(0.1, .1)
 ## D1 generate data on modified eps
 dot_noise_gd_2 <- function(of, N = 1e4) {
 
-    ## Emulate random_evam + sample_CPMs
+    ## Emulate random_evam + sample_evam
     of2 <- of
     of2$eps <- c(epos = of$eps[["epos"]],
                  eneg = 0)
