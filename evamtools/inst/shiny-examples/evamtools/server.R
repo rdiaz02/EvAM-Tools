@@ -491,7 +491,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         tags$div(
           tags$div(class = "flex",
                    ## tags$h3("2. Define input with a Matrix"),
-                   tags$h3("2. Define MHN''s log-Theta",
+                   tags$h3("2. Define MHN's log-Theta",
                            HTML("matrix (log-&Theta;):")),
             actionButton("how2build_matrix", "Help")
           ),
