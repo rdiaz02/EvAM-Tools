@@ -177,13 +177,15 @@ multiple evams in parallel.}
        \item{MCCBN_paths_max: }{As for OT.}
 
        
-        \item{MHN_theta: }{Matrix of estimated thetas (the log-Theta matrix).}
+        \item{MHN_theta: }{Matrix of estimated thetas (the log-Theta
+        matrix). The values in this matrix can range from minus to plus infinity.}
         \item{MHN_trans_rate_mat: }{As for CBN.}
         \item{MHN_trans_mat: }{As for CBN.}
         \item{MHN_td_trans_mat: }{As for CBN.}
         \item{MHN_exp_theta: }{Matrix of the exponential of thetas; the
         matrix \eqn{\Theta} in Schill et al. (just
-        each theta, exponentiated; not the matrix exponential of the matrix of thetas).}
+        each theta, exponentiated; not the matrix exponential of the
+        matrix of thetas). These are the multiplicative effects themselves.}
         \item{MHN_predicted_genotype_freqs: }{As for CBN.}
 	\item{MHN_paths_max: }{As for OT.}
 

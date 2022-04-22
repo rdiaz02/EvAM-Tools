@@ -852,7 +852,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                            "effect of gene in column <em>j</em> on ",
                            "gene in row <em>i</em>. ",
                            "&Theta;<sub>i,i</sub> is the baseline hazard rate ",
-                           "of event <em>i</em>. "## ,
+                           "of event <em>i</em>. ",
+                           "The entries you provide in the matrix are ",
+                           "the &theta;<sub>i,j</sub>, ",
+                           "the lower-case theta (not the multiplicative ",
+                           "effects themselves, but their log)."## ,
                            ## "See the ",
                            ## "figure on the right."
                            )),
