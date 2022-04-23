@@ -120,7 +120,7 @@ Maximum RAM of any process is limited to 2 GB. Likewise, the analyses should be 
 ### How long does it take to run? <a id="timetorun"></a>
 ***
 
-It depends on the number of features. For six features, and if you do not use H-ESBCN nor MC-CBN, it should take about 20 seconds.
+It depends on the number of features and methods used. For six features, and if you do not use H-ESBCN nor MC-CBN, it should take about 20 seconds. If you do not use CBN either (i.e., if you only use MHN, OT, and OncoBN) it should run in less than 8 seconds. Model fitting itself is parallelized, but other parts of the program cannot be (e.g., displaying the final figures).
 
 &nbsp;&nbsp;
 
