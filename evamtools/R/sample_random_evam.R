@@ -106,6 +106,8 @@ indiv_sample_from_trm_pre <- function(trmstd,
                 t_accum = t_accum))
 }
 
+
+
 ##
 ## @title Sample a population from a transition rate matrix.
 ## 
@@ -174,6 +176,30 @@ population_sample_from_trm <- function(trm, n_samples = 10,
       , obs_events = unlist(lapply(out, function(x) x$genotype))
         ))
 }
+
+
+## It would be silly to use the code for population_sample_from_trm to obtain the
+## predicted genotype frequencies at a fixed time by passing a laaaarge vector
+## with the same time. This can be obtained immediately from the transition rate
+## matrix without sampling. The following would do; we do not use it here for
+## anything, but left just in case. We use the expm package but there is also a
+## function in Matrix that gives the matrix exponential (though this one is
+## preferred).
+
+## ## transition rate matrix, time -> genotype composition at that time
+## ## Use the exact solution
+## genots_at_t_from_trm <- function(trm, t) { 
+##     ## Recall our trms have zero in diagonal
+##     stopifnot(isTRUE(all(diag(trm) == 0)))
+##     diag(trm) <- -1 * rowSums(trm)
+##     out <- expm::expAtv(A = t(trm), v = c(1, rep(0, ncol(trm) - 1)), t = t)$eAtv
+##     names(out) <- colnames(trm)
+##     stopifnot(isTRUE(all.equal(sum(out), 1.0)))
+##     out
+## } 
+
+
+
 
 ## # @noRd
 ## #' @title Process samples
