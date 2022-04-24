@@ -45,7 +45,7 @@
 
 \section{Introduction}
 
-This document provides additional documentation about EvAM-Tools; some of the sections complement the Shiny web GUI application help but others apply to the package or to both. You can run the app from \url{https://www.iib.uam.es/evamtools/} or download a Docker image from \url{https://hub.docker.com/r/rdiaz02/evamshiny}. 
+This document provides additional documentation about EvAM-Tools; some of the sections complement the Shiny web GUI application help, others apply to the package, or to both. You can run the web app from \url{https://iib.uam.es/evamtools/} or download a Docker image from \url{https://hub.docker.com/r/rdiaz02/evamshiny}; to run the R package download a Docker image from \url{https://hub.docker.com/r/rdiaz02/evamrstudio}.
 
 
 \section{Predicted genotype frequencies}
@@ -54,14 +54,14 @@ This document provides additional documentation about EvAM-Tools; some of the se
 \subsection{Predicted genotype frequencies for CBN, MCCBN, MHN, H-ESBCN}
 \label{predicted-cbn-et-al}
 
-For CBN, MCCBN, MHN, and H-ESBCN, the transition rate matrix describes the true process that generates genotypes and this matrix can be obtained from the parameters of the model ($\theta$s for MHN, $\lambda$s for the rest). Therefore, we can use the transition rate matrix to calculate the predicted probabilities of the different genotypes. In all cases here, we assume that the time of observation is exponentially distributed with rate 1 (as in \citealp{gerstung2009quantifying, schill2020modelling})\footnote{There is code in \texttt{evamtools}, in function \texttt{population\_sample\_from\_trm}, to obtain samples at arbitrary times ---i.e., not limited to  times exponentially distributed  with rate 1}.
+For CBN, MCCBN, MHN, and H-ESBCN, the transition rate matrix describes the true process that generates genotypes and this matrix can be obtained from the parameters of the model ($\theta$s for MHN, $\lambda$s for the rest). Therefore, we can use the transition rate matrix to calculate the predicted probabilities of the different genotypes. In all cases here, we assume that the time of observation is exponentially distributed with rate 1 (as in \citealp{gerstung2009quantifying, schill2020modelling})\footnote{There is code in \texttt{evamtools}, in function \texttt{population\_sample\_from\_trm}, to obtain samples at arbitrary collections of times ---i.e., not limited to  times exponentially distributed  with rate 1}.
 
 
 The fastest way to obtain the predicted probabilities is using equation 4 in 
 \cite{schill2020modelling}; this is implemented in the non-exported function \texttt{probs\_from\_trm}, and follows also what is done in the original \texttt{Generate.pTh} from \cite{schill2020modelling}. \texttt{probs\_from\_trm} is called from function \texttt{evam}.
 
 
-Otherwise, we can sample from the continuous-time Markov Chain using standard procedures (\citealp[e.g., ch.~5 in][]{wilkinson2019stochastic} or \citealp[][Algorithm 1]{gotovos2021}). Sampling is what we do when \texttt{sample\_CPMs} is called asking for \texttt{obs\_genotype\_transitions} or \texttt{state\_counts} to be returned (and this sampling is implemented in the non-exported function \texttt{population\_sample\_from\_trm}, and called, as needed, by \texttt{sample\_CPMs}).
+Otherwise, we can sample from the continuous-time Markov Chain using standard procedures (\citealp[e.g., ch.~5 in][]{wilkinson2019stochastic} or \citealp[][Algorithm 1]{gotovos2021}). Sampling is what we do when you call \texttt{sample\_CPMs} asking for \texttt{obs\_genotype\_transitions} or \texttt{state\_counts} to be returned (and this sampling is implemented in the non-exported function \texttt{population\_sample\_from\_trm}, and called, as needed, by \texttt{sample\_CPMs}).
 
 
 Once we have the predicted probabilities, we can obtain a finite sample and, if we want, add observational (or genotyping) noise; see \qrefS{error_models}.
@@ -69,19 +69,19 @@ Once we have the predicted probabilities, we can obtain a finite sample and, if 
 
 \subsection{Predicted genotype frequencies for OT and OncoBN}
 \label{predicted-ot-oncobn}
-Predicted probabilities of genotypes for OT and OncoBN are obtained using the weights (OT) or $\theta$s (OncoBN), according to the expression for the probability of observing a genotype. For example, see section 2.2 in \cite{Szabo2008} for OT and Figure 1 and section 2.1 in \cite{nicol2021oncogenetic} for OncoBN. For OT we can use function \texttt{distributiion.oncotree} in package \texttt{Oncotree} and for OncoBN function \texttt{Lik.genotype} from package \texttt{OncoBN}.
+Predicted probabilities of genotypes for OT and OncoBN are obtained using the weights (OT) or $\theta$s (OncoBN), according to the expression for the probability of observing a genotype. For example, see section 2.2 in \cite{Szabo2008} for OT and Figure 1 and section 2.1 in \cite{nicol2021oncogenetic} for OncoBN. For OT we can use function \texttt{distributiion.oncotree} in package \texttt{Oncotree} and for OncoBN function \texttt{Lik.genotype} from package \texttt{OncoBN}\footnote{Though for OncoBN we do not use \texttt{Lik.genotype} directly, as that would involve making the exact same repeated set of calls for every individual; see the non-exported function \texttt{DBN\_prob\_genotypes} in file \texttt{onco-bn-process.R}}.
 
 In OT observation error is already part of the model  (in contrast to what happened in CBN, MHN, H-ESBCN). This is explained in more detail in \qrefS{error_models}.
 
 
-\subsection{H-ESBCN: transition rate matrices}\label{hesbcn}
+\subsection{H-ESBCN: transition rate matrices and predicted genotype frequencies}\label{hesbcn}
 
-Here I provide full details about how we interpret and use the results from the method described in \cite{angaroni2021}. I do this here because, in contrast to CBN or MHN, there is no existing previous code that does this, and we found some potentially confusing issues.
+Here I provide full details about how we interpret and use the results from the method described in \cite{angaroni2021}. I do this here because, in contrast to CBN or MHN, there is no existing previous code or examples that do this, and we found some potentially confusing issues.
 
 
 \subsubsection{Lambdas from the output: "Best Lambdas" and "lambdas\_matrix"}
 
-The output returned by the HESBCN function contains a "Best Lambdas". The output returned by function "import.hesbcn" (that we have included in the code) has an object called "lambdas\_matrix" where each of the lambdas for a gene is divided by the number of parents. This can be checked for any of their examples. Code that shows three examples, with XOR, OR, AND is available under "inst/miscell/examples/HESBCN-lambdas-from-examples.R".
+The output returned by the HESBCN function contains a "Best Lambdas". The output returned by function "import.hesbcn" (that we have included in the code) has an object called "lambdas\_matrix" where each of the lambdas for a gene is divided by the number of parents. This can be checked in any of the examples in the PMCE repository. Code that shows three examples, with XOR, OR, AND is available under "inst/miscell/examples/HESBCN-lambdas-from-examples.R".
 
 
 It is the output from "Best lambdas" (i.e., the undivided lambdas) that are "[the] rates of the Poisson processes of the continuous-time HMM, associated with the vertices of the model, which allow one to estimate the expected waiting time of a node, given that its predecessor has occurred." (p. 756). (What is the division? An  operation that modifies an internal data structure, and just a temporary operation, done merely for implementation purposes. In line 95 of the code (as of current version, in \url{https://github.com/BIMIB-DISCo/PMCE/blob/main/Utilities/R/utils.R}) the divided lambdas are again summed, so the partition disappears: "curr\_in\_lambda = sum(hesbcn\$lambdas\_matrix[,curr\_node])", and it is that value that is used in further downstream computations;  email with the authors on 2021-07-09).
@@ -95,12 +95,17 @@ I find Figure 1C  of  \cite{angaroni2021} possibly confusing. First, the non-con
 Now the (for me, at least) possibly confusing part: it seems that the node called "B xor C" is such that B and C have the same rates of dependencies on A; in other words, it would seem to imply that \(\lambda_B = \lambda_C\). Similarly, the node called "E or F" seems to indicate that both E and F have the same rate, so \(\lambda_E = \lambda_F\). But this need not be so. In fact, virtually all of the examples we have looked at, and the examples in their output, do not satisfy that the rates to the genes that are part of a XOR, OR, or AND relationship are the same. For instance, in the example above of Bladder Urothelial Carcinoma (see "inst/miscell/examples/HESBCN-lambdas-from-examples.R"), KMT2D depends on KMT2C and TP53, but the rate for KMT2C, \(\lambda_{KMT2C} = 0.1991\) and that for TP53, \(\lambda_{TP53} = 0.8062\).
 
 
-Remember that the \(\lambda\) for a gene is the rate of the process until that mutation appears and is fixated, given all the dependencies of that gene are satisfied (which is, of course, the same interpretation as under CBN); again:  "[the] rates of the Poisson processes of the continuous-time HMM, associated with the vertices of the model, which allow one to estimate the expected waiting time of a node, given that its predecessor has occurred." (p. 756).
+Remember that the \(\lambda\) for a gene is the rate of the process until that mutation appears and is fixated, given all the dependencies of that gene are satisfied (which is, of course, the same interpretation as under CBN). Again:  "[the] rates of the Poisson processes of the continuous-time HMM, associated with the vertices of the model, which allow one to estimate the expected waiting time of a node, given that its predecessor has occurred." (p. 756).
 
 But the rate at which the parents are satisfied can differ (as it was the case for CBN). A difference with respect to CBN is that, with CBN, if a gene D depends on three genes A, B, C, regardless of the lambdas of each of A, B, C, D can only happen once all of A, B, C are present. With OR and XOR relationships this is no longer the case: one can see D with just A, for example.
 
 
-What about combining AND, XOR, OR? Just apply the rules to each type of dependency. In the HESBCN model if a gene depends on a set of genes, it has the same type of dependency on all the genes of that set.
+What if some genes depend with and AND, others with a XOR and other with a OR? Just apply the rules to each type of dependency: in the HESBCN model if a gene depends on a set of genes, it has the same type of dependency on all the genes of that set.
+
+\subsubsection{Predicted genotype frequencies}
+\label{sec:pred-genotype-freq}
+
+Once we have the transition rate matrix, obtaining the predicted genotype frequencies uses the same procedure as for CBN and MHN; see \qrefS{predicted-cbn-et-al}.
 
 
 
@@ -153,7 +158,7 @@ WT &  & $\lambda_A$ & $\lambda_B$ & $\lambda_C$ &  &  &  &  &  &  &  &  &  &  & 
 \subsubsection{Three examples from actual analysis}
 \label{sec:orgdc3f991}
 \begin{itemize}
-\item The code in inst/miscell/HESBCN-OR-XOR-AND-lambda-and-rates.R contains examples of how we use those lambdas.
+\item The code in inst/miscell/HESBCN-OR-XOR-AND-lambda-and-rates.R contains examples of how we use those lambdas (the \texttt{n}, number of steps, used is ridiculously small, and just for the sake of speed).
 \end{itemize}
 \begin{enumerate}
 \item OR
@@ -173,11 +178,12 @@ WT &  & $\lambda_A$ & $\lambda_B$ & $\lambda_C$ &  &  &  &  &  &  &  &  &  &  & 
 
  $lambdas_matrix
       Root     A     B     C      D
- Root    0 7.364 2.367 0.000 0.0000
- A       0 0.000 0.000 6.569 0.1078
- B       0 0.000 0.000 6.569 0.1078
+ Root    0 8.083 2.585 0.000 0.0000
+ A       0 0.000 0.000 8.914 0.2062
+ B       0 0.000 0.000 8.914 0.2062
  C       0 0.000 0.000 0.000 0.0000
  D       0 0.000 0.000 0.000 0.0000
+
 
  $parent_set
         A        B        C        D 
@@ -185,27 +191,28 @@ WT &  & $\lambda_A$ & $\lambda_B$ & $\lambda_C$ &  &  &  &  &  &  &  &  &  &  & 
 
 
  $lambdas
- [1]  7.3644  2.3673 13.1389  0.2156
+ [1]  8.0833  2.5854 17.8277  0.4124
 
  $edges
-   From To    Edge Lambdas Relation
- 1 Root  A Root->A  7.3644   Single
- 2 Root  B Root->B  2.3673   Single
- 3    A  C    A->C 13.1389      XOR
- 4    B  C    B->C 13.1389      XOR
- 5    A  D    A->D  0.2156       OR
- 6    B  D    B->D  0.2156       OR
+   From To      Edge Lambdas Relation
+ 1 Root  A Root -> A  8.0833   Single
+ 2 Root  B Root -> B  2.5854   Single
+ 3    A  C    A -> C 17.8277      XOR
+ 4    B  C    B -> C 17.8277      XOR
+ 5    A  D    A -> D  0.4124       OR
+ 6    B  D    B -> D  0.4124       OR
+
 \end{verbatim}
 
 \begin{itemize}
-\item From the above output, these are the lambdas: $\lambda_A = 7.3644, \lambda_B = 2.367, \lambda_C = 13.1389, \lambda_D = 0.2156$.
+\item From the above output, these are the lambdas: $\lambda_A = 8.0833, \lambda_B = 2.5854, \lambda_C = 17.8277, \lambda_D = 0.4124$.
 \item Focusing only on A, B, D, to see gene D we can follow four paths.
 \begin{itemize}
 \item The first two involve only two mutations:
 \begin{itemize}
 \item \(WT \rightarrow A \rightarrow AD\)
 \item \(WT \rightarrow B \rightarrow BD\)
-\item The first is much faster, since the rate for the transition from WT to A is 7.4 compared to 2.4 of the transition B to D (from competing exponentials, the probabilities of moving to A and B are 0.76 and 0.24, respectively).
+\item The first is much faster, since the rate for the transition from WT to A is 8.1 compared to 2.6 of the transition B to D (from competing exponentials, the probabilities of moving to A and B are 0.76 and 0.24, respectively).
 \end{itemize}
 \item In the other two paths D is the third gene to appear:
 \begin{itemize}
@@ -220,7 +227,7 @@ WT &  & $\lambda_A$ & $\lambda_B$ & $\lambda_C$ &  &  &  &  &  &  &  &  &  &  & 
 \item \(WT \rightarrow B \rightarrow AB \rightarrow ABD\)
 \item \(WT \rightarrow A \rightarrow AD \rightarrow ABD\)
 \item \(WT \rightarrow B \rightarrow BD \rightarrow ABD\)
-\item All of them take the same expected time, as we need for A, B, and D to happen, each governed by \(\lambda_A\), \(\lambda_B\), \(\lambda_D\), respectively.
+\item All of them take the same expected time, as we need A, B, and D to happen, each governed by \(\lambda_A\), \(\lambda_B\), \(\lambda_D\), respectively.
 \end{itemize}
 \end{itemize}
 \item In terms of fitness, if we used OncoSimulR (see additional document ``Using OncoSimulR to get accessible genotypes and transition matrices''), we would write, for the fitness of AB: \((1 + \lambda_A) (1 + \lambda_B)\), for AD \((1 + \lambda_A) (1 + \lambda_D)\), and for ABD \((1 + \lambda_A) (1 + \lambda_B) (1 + \lambda_D)\).
@@ -236,7 +243,7 @@ WT &  & $\lambda_A$ & $\lambda_B$ & $\lambda_C$ &  &  &  &  &  &  &  &  &  &  & 
 \item \(WT \rightarrow A \rightarrow AC\)
 \item \(WT \rightarrow B \rightarrow BC\)
 \item As we have a XOR, no routes can go through AB.
-\item The first is much faster and common than the second (\(\lambda_A = 7.4; \lambda_B = 2.4\)).
+\item The first is much faster and common than the second (\(\lambda_A = 8.1; \lambda_B = 2.6\)).
 \item Fitness (again, this is relevant if using, for example, OncoSimulR) of \(AC\) is \((1 + \lambda_A) (1 + \lambda_C)\) and of \(BC\) \((1 + \lambda_B) (1 + \lambda_C)\).
 \end{itemize}
 \end{itemize}
@@ -288,19 +295,19 @@ Addressing the above needs involves:
 
 
 \begin{enumerate}
-\item Generating random a model.
+\item Generating a random model.
  
 \item Obtaining the predicted genotype frequencies from that model (see \qrefP{pred-gen-freq}).
  
 \item Obtaining a finite sample from the predicted frequencies of that model.
   
-\item Using the data to answer whichever questions we had; for example, analyzed the sampled data with another or the same method, plot the genotype frequencies, etc.
+\item Using the data to answer whichever questions we had; for example, analyze the sampled data with another or the same method, plot the genotype frequencies, etc.
   
 \end{enumerate}
 
 
 
-We explain in each one in turn in details below, with reference to \texttt{evamtools} functions and arguments.
+We explain each one in turn below, with reference to \texttt{evamtools} functions and arguments.
 
 \begin{enumerate}
 \item Generating a random model.
@@ -309,7 +316,7 @@ We explain in each one in turn in details below, with reference to \texttt{evamt
 
 \item Obtaining the predicted genotype frequencies from that model.
   
-  These are returned as part of the output of \texttt{generate\_random\_evam} (as well as part of the output of \texttt{evam}). In all cases, the predicted distribution of genotypes for a model is done assuming perfect compliance with the model; we explained the general process in \qref{pred-gen-freq}; see also further details below.
+  These are returned as part of the output of \texttt{generate\_random\_evam} (as well as part of the output of \texttt{evam}). In all cases, the predicted distribution of genotypes for a model is done assuming perfect compliance with the model; we explain the general process in \qref{pred-gen-freq} and see also further details below.
 
 \item Obtaining a finite sample from the predicted frequencies of that model.
 
@@ -323,7 +330,7 @@ We explain in each one in turn in details below, with reference to \texttt{evamt
   \item If requested (i.e., if \texttt{obs\_noise > 0}), flipping a fraction \texttt{obs\_noise} of the observations (i.e., turning 1s to 0s and 0s to 1s).
   \end{enumerate}
   
-\item Using the data to answer whichever questions we had; for example, analyzed the sampled data with another or the same method, plot the genotype frequencies, etc.
+\item Using the data to answer whichever questions we had; for example, analyze the sampled data with another or the same method, plot the genotype frequencies, etc.
 
   To make this simpler, function \texttt{sample\_CPMs} can return the finite sample (with or without observation noise) as a typical cross-sectional data set: a matrix where each row is a "sampled genotype", in which 0 denotes no alteration and 1 alteration in the gene of the corresponding column. This data matrix can be used directly as input for CPM methods, for instance as argument \texttt{x} (the cross-sectional data) to function \texttt{evam}.
 
@@ -339,9 +346,9 @@ We explained above that when obtaining the predicted frequencies under a model w
 \begin{description}
 \item[CBN] In H-CBN the $\lambda$s describe the true underlying model that produces the true, hidden genotypes, but the observed genotypes might differ from the true ones because of observation error, for instance genotyping error  \cite[p.~2810]{gerstung2009quantifying}.
 \item[H-ESBCN] As for CBN \cite[p.~756]{angaroni2021}.
-\item[MHN] As for CBN (e.g., description of the simulation process in p.244 of \citealp{schill2020modelling}).
-\item[MC-CBN] With MC-CBN the model is mixture between the CBN model and a noise component model \cite[p.~i730-i731]{montazeri2016large}. The simulations in \url{https://github.com/cbg-ethz/MC-CBN}, however, use a procedure where observations are generated from an underlying poset with a given set of lambdas, and symmetric error is then added (see the functions \texttt{mccbn:::random\_poset} and \texttt{mccbn:::random\_posets}).
-\item[OncoBN] The model includes a DBN (disjunctive) or CBN (conjunctive) model, as given by a DAG and a set of $\theta$s, and an ``spontaneous activation model'' \cite[p.~3-4]{nicol2021oncogenetic}. The ``spontaneous activation model'', with parameter $\epsilon$, represents deviations from the DBN or CBN and allows child mutations to appear even if the parents in the DAG have not been mutated (i.e., even if the DAG restrictions are not satisfied).
+\item[MHN] As for CBN (e.g., description of the simulation process in p.~244 of \citealp{schill2020modelling}).
+\item[MC-CBN] With MC-CBN the model is a mixture between the CBN model and a noise component model \cite[p.~i730-i731]{montazeri2016large}. The simulations in \url{https://github.com/cbg-ethz/MC-CBN}, however, use a procedure where observations are generated from an underlying poset with a given set of lambdas, and symmetric error is then added (see the functions \texttt{mccbn:::random\_poset} and \texttt{mccbn:::random\_posets}).
+\item[OncoBN] The model includes a DBN (disjunctive) or CBN (conjunctive) model, as given by a DAG and a set of $\theta$s, and a ``spontaneous activation model'' \cite[p.~3-4]{nicol2021oncogenetic}. The ``spontaneous activation model'', with parameter $\epsilon$, represents deviations from the model and allows child mutations to appear even if the parents in the DAG have not been mutated (i.e., even if the restrictions encoded in the DAG are not satisfied).
   
 \item[OT] There are two sources of deviations from the OT model: a) those that result from observational (or genotyping) errors, that can lead to both false positive and false negative observational errors; b) events occurring that do not respect the OT model \cite{Szabo2002}. The second would be the same as the ``spontaneous activation'' in OncoBN.
   
@@ -440,14 +447,14 @@ You can of course construct the non-transitively reduced graphs ``by hand'' (cre
 \subsubsection{Example data/DAGs/MHNs}
 \label{sec:exampe-datadagsmhns}
 
-For each of the ways to input cross-sectional data or build models, we provide some pre-built examples. You can use these to directly run the CPMs or modify them to your liking. The MHN and DAG builders allow you start from working examples. Explanations on what is available and why: 
+For each of the ways to input cross-sectional data or build models, we provide some pre-built examples. You can use these to directly run the CPMs or modify them to your liking. The MHN and DAG builders allow you start from working examples. Explanations on what is available and why follow: 
 
 \begin{description}
 \item[Modifying pre-built examples] If you modify the examples, you probably will want to give your dataset or example a distinctive name.
 
 % If you modify a pre-built example and want to go back to the original, in your browser clean the cache and refresh.
   
-\item[Cross-sectional data] We provide data sets that have been generated under specific models with AND, OR, XOR. However, no DAG is shown here, and that is on purpose; use the labels as possible hints, not as the truth and compare with datasets you can generate from models you specify under the DAG builder.
+\item[Cross-sectional data] We provide data sets that have been generated under specific models with AND, OR, XOR. However, no DAG is shown here, and that is on purpose; use the labels as possible hints, not as the truth, and compare with datasets you can generate from models you specify under the DAG builder.
 
 \item[DAG] Several examples to illustrate OR/AND/XOR and mixtures of the above are provided.
   
@@ -468,19 +475,19 @@ For each of the ways to input cross-sectional data or build models, we provide s
 
  To make it easier to use and analyze different models and data sets, you can name/rename the dataset used. This is at the top of the page, under ``(Re)name the data''.
 
- You can save the data and models (at the bottom of the page). If you define a DAG or an MHN model, the object saved contains the model. In the case of the DAG, that includes the generated data (if any), and several components that are used by evamtools and that provide a complete description of the model. If you use MHN, what are saved are the sampled data (if any) and the log$\Theta$ matrix you entered.
+ You can save the data and models (at the bottom of the page). If you define a DAG or an MHN model, the saved object contains the model. In the case of the DAG, that includes the generated data (if any), and several components that are used by evamtools and that provide a complete description of the model. If you use MHN, what are saved are the sampled data (if any) and the log$\Theta$ matrix you entered.
 
 \subsection{Tabular output from the Shiny app}
 \label{tabular-output}
 
 \begin{description}
-\item[Transition probabilities] Conditional probability of transitions to a genotype (obtained using competing exponentials from the transition rate matrix; for OT and OncoBN this is actually a abuse of the untimed oncogenetic tree model, as explained in \cite{diaz2019every}.
-\item[Transition rates] Transition rates of the continuous time Markov chain that models the transition from one genotype to another. This option is not available for OT and OncoBN, as these do not return rates.
+\item[Transition probabilities] Conditional probability of transitions to a genotype (obtained using competing exponentials from the transition rate matrix for all methods except OT and OncoBN); for OT and OncoBN this is actually an abuse of the untimed oncogenetic tree model, as explained in \cite{diaz2019every}.
+\item[Transition rates] Transition rates of the continuous-time Markov chain that models the transition from one genotype to another. This option is not available for OT and OncoBN, as these do not return rates.
 \item[Predicted genotype relative frequencies] The predicted frequencies of genotypes under the model. See \qrefS{error_models} for details about OT and OncoBN
 \item[Sampled genotype counts] Counts, or absolute genotype frequencies, obtained by sampling from the predicted frequencies.
   
   %% Next only if you ask for 'Sample for observed genotype transitions'
-\item[Observed genotype transitions (counts)] Only if you ask for 'Sample for observed genotype transitions' in the Advanced options. Number of observed transitions between genotypes.
+\item[Observed genotype transitions (counts)] Only if you ask for 'Sample for observed genotype transitions' in ``Advanced options and CPMs to use''. This is the number of observed transitions between genotypes.
   
 \end{description}
 
@@ -489,6 +496,18 @@ See also further details in section \qrefS{error_models} as well as in the help 
 
 \section{FAQ}
 \label{sec:faq}
+
+
+\subsubsection{Why haven't you used method X?}\label{other_methods}
+
+We have included here what we believe are the current state-of-the-art methods that have existing public implementations that run in reasonable time. After searching the literature, we have included any method that could be deemed appropriate. We have, in fact, provided access to two very recent methods: H-ESBCN and OncoBN (and their github repos show we have contributed bug reports).
+
+Among the remaining methods available, most of them do not seem to be developed nor used anymore. For some of these methods, their authors have developed newer methods that seem to have superseded the former methods. Some other methods  have dependencies on external libraries that are not open source.  And, of course, we cannot provide access to methods that have no software, or have software that will run only under proprietary systems. Some further comments are provided in S4\_Text in \cite{diaz2019every} (\url{https://doi.org/10.1371/journal.pcbi.1007246.s006}).
+
+If you think we have overlooked a method that should be included, please let us know.
+
+
+
 
 \subsection{With OncoBN sometimes I obtain DAGs that are not transitively reduced}
 
@@ -527,13 +546,20 @@ In file \texttt{EvAM-Tools/evamtools/inst/shiny-examples/evamtools/ui.R} search 
 \subsection{How can I use the Shiny app in a local intranet with load balancing using multiple Docker instances}
 \label{haproxy}
 
-This is well beyond the scope of this document and there are many options available. One that can work is the following:
+This is well beyond the scope of this document and there are many options available. One that can work (and this is more or less what we actually do) is the following:
+
 \begin{itemize}
-\item Start multiple Docker instances (say, 10) by changing the range of ports, for example 3010 to 3020.
-\item Use HAProxy (\url{https://www.haproxy.org/}) so that you have a single entry point for all requests to the service that are then distributed, with load balancing, to the 10 instances. You will want to use ``sticky connections''.
+\item Start multiple Docker instances (say, 20) by changing the range of ports, for example, 3010 to 3030.
+\item Use HAProxy (\url{https://www.haproxy.org/}) so that you have a single entry point for all requests to the service that are then distributed, with load balancing, to the 20 instances. You will want to use ``sticky connections'' (see the HAProxy documentation).
 \end{itemize}
 
 As said above, this is just a sketch of the basic procedure. There are many other options.
+
+
+\subsection{If I use the Docker image for the package (rdiaz02/evamrstudio), can I run the Shiny app?}
+
+Yes, you can. Just start a browser as explained in the README (\url{https://github.com/rdiaz02/EvAM-Tools#how-to-run-the-r-package-from-the-docker-image}). Then, once in RStudio, in the R console type \verb@ runShiny() @ and you will have the interactive Shiny app open. But even if you can do it, it is not clear why you'd want to do this: if you only want to run the Shiny app, the Docker image rdiaz02/evamshiny is lighter and the steps to launch it much faster.
+
 
 
 \subsection{Why aren't you using Shiny Server?}
@@ -548,6 +574,8 @@ Moreover, notice this in the Shiny Server documentation (\url{https://shiny.rstu
 However, we might be missing something; if you think Shiny Server would allow or ease some use cases, please let us know.
 
 
+
+
 \subsection{I want to create my own Docker images}
 
 If you want to modify the Docker images, modify the Dockerfiles: Dockerfile-evam-rstudio (for the RStudio Dockerfile that launches RStudio) or Dockerfile-evam-shiny (well, for the Dockerfile that creates the container to run shiny). 
@@ -556,8 +584,8 @@ If you want to modify the Docker images, modify the Dockerfiles: Dockerfile-evam
 Then, from the `EvAM-Tools` directory run one or both of:
 
 \begin{verbatim}
-sudo docker build -f Dockerfile-evam-shiny  --tag somename .
-sudo docker build -f Dockerfile-evam-rstudio  --tag somename .
+docker build -f Dockerfile-evam-shiny  --tag somename .
+docker build -f Dockerfile-evam-rstudio  --tag somename .
 \end{verbatim}
 
 
