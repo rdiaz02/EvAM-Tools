@@ -1,10 +1,11 @@
 # EvAM Tools #
 <!-- Create toc with markdown-toc, from node. -->
-<!-- ./markdown-toc ~/Proyectos/EvAM-Tools/README.md -i -->
+<!-- markdown-toc README.md -i -->
 
 <!-- toc -->
 
 - [EvAM Tools: purpose](#evam-tools-purpose)
+  * [Some examples of use](#some-examples-of-use)
 - [Copyright and origin of files](#copyright-and-origin-of-files)
   * [Copyright and origin of files under evamtools/R](#copyright-and-origin-of-files-under-evamtoolsr)
   * [ct-cbn](#ct-cbn)
@@ -12,7 +13,7 @@
   * [Overview](#overview)
   * [How to install the R package](#how-to-install-the-r-package)
   * [Docker images](#docker-images)
-  * [How to run the R package and the shiny app locally](#how-to-run-the-r-package-and-the-shiny-app-locally)
+  * [How to run the R package and the shiny app locally without Docker](#how-to-run-the-r-package-and-the-shiny-app-locally-without-docker)
   * [How to run the R package from the Docker image](#how-to-run-the-r-package-from-the-docker-image)
   * [How to run the Shiny app from the Docker image](#how-to-run-the-shiny-app-from-the-docker-image)
 - [Main files and directories](#main-files-and-directories)
@@ -42,6 +43,20 @@ We provide an R package, evamtools, and a Shiny (https://shiny.rstudio.com/) app
 For easier use, we provide links to Docker images that you can download and run, as well as instructions on how to build Docker images. You can also run the Shiny app on our servers: https://www.iib.uam.es/evamtools/ .
 
 
+### Some examples of use
+
+What can EvAM-Tools be used for?
+
+   * To understand CPMs and how different inputs (which can be easily modified interactively in the web app) affect the fitted models. For example, change the genotype frequencies according to sensible models of dependencies and run the CPMs.
+
+   * To understand what different models imply about how the cross-sectional data looks like. Create the dependency structures (DAGs or MHN log-Theta matrix) and generate data from them, possibly playing with the amount of noise. This does not even require to run the methods themselves.
+   
+   * As a research tool to analyze cross-sectional data with state-of-the-art CPMs.
+   
+   * As a research tool in methodological work. For example:
+       * We can examine how well a method can recover the true structure when the data fulfills the assumptions of a method. We would generate data under a particular model and see if the method that implements that model can recover the true structure under different sample sizes. (The web app only allows for playing with this; for serious work one would use the package itself and build code using the package functions).
+       * We can examine how a give method works, and what type of inferences it performs, when data are generated under the model of another method. For example, what is the output from MHN if the data are really coming from an H-ESBCN model?
+       * We can compare new methods against existing state-of-the-art ones (using different data sources ---simulated from EvAM-Tools or imported from other sources).
 
 ---
 ---
@@ -194,7 +209,7 @@ If you want to easily share data between your local file system and the Docker i
 ```
 docker run --rm -p 8787:8787 -v $HOME/tmp/rst:/home/rstudio -e PASSWORD=yourpasswordhere rdiaz02/evamrstudio
 ```
-which will allow you to use your local `~/tmp/rst` to read from/write with the RStudio container (if using Windows you could write `-v /c/Users/someuser/somedirectory:/home/rstudio`); see additional documentation in https://www.rocker-project.org/use/shared_volumes/. See also https://docs.docker.com/storage/bind-mounts/. 
+which will allow you to use your local `~/tmp/rst` to read from/write to the RStudio container (if using Windows you could write `-v /c/Users/someuser/somedirectory:/home/rstudio`); see additional documentation in https://www.rocker-project.org/use/shared_volumes/. See also https://docs.docker.com/storage/bind-mounts/. 
 
 
 
