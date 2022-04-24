@@ -1,3 +1,6 @@
+Changes in version 1.1.1 (2022-04-24):
+	- Documentation: moved content between files and furhter details about thetas.
+	
 Changes in version 1.1.0 (2022-04-20):
 	- Deprecated sample_evam and plot_CPMs.
 

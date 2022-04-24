@@ -3,17 +3,17 @@
 \usepackage[a4paper,margin=2.7cm]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
-%% \usepackage[a4paper, total={6.5in, 9in}]{geometry}
 \usepackage{natbib}
 \usepackage{authblk} % author affiliations
-%% \usepackage[UKenglish]{isodate}
-%% \usepackage[style=iso]{datetime2}
 \usepackage[iso,english]{isodate}
 \usepackage{nameref}
 \newcommand*{\qref}[1]{\hyperref[{#1}]{\textit{``\nameref*{#1}'' (section \ref*{#1})}}}
 \newcommand*{\qrefP}[1]{\hyperref[{#1}]{\textit{``\nameref*{#1}'', section \ref*{#1}}}}
 \newcommand*{\qrefS}[1]{\hyperref[{#1}]{section \textit{\ref*{#1},
       ``\nameref*{#1}''}}}
+\usepackage{lscape}
+\usepackage{longtable}
+\usepackage[dvipsnames,table]{xcolor}
 
 \usepackage{hyperref}
 
@@ -24,11 +24,9 @@
   filecolor = cyan %% controls color of external ref, if used
 }
 \title{EvAM-Tools: additional documentation}
-% \author{Ramon Diaz-Uriarte, Pablo Herrera-Nieto}
 
 \date{\today}
 \author[1,2,$\dagger$]{Ramon Diaz-Uriarte}
-\author[1,2]{Pablo Herrera Nieto}
 \affil[1]{Dpt. of Biochemistry, School of Medicine, Universidad Autónoma de Madrid, Madrid, Spain}
 \affil[2]{Instituto de Investigaciones Biomédicas `Alberto Sols'
   (UAM-CSIC), Madrid, Spain}
@@ -48,24 +46,6 @@
 \section{Introduction}
 
 This document provides additional documentation about EvAM-Tools; some of the sections complement the Shiny web GUI application help but others apply to the package or to both. You can run the app from \url{https://www.iib.uam.es/evamtools/} or download a Docker image from \url{https://hub.docker.com/r/rdiaz02/evamshiny}. 
-
-
-% To make access to all arguments of evamtools and its functions, this document should have, concatenated, the PDF from the R package itself. In , as well as an  PDF that explains the use of OncoSimulR for testing and how we use and interpret H-ESBCN to obtain transition rate matrices.
-
-% \section{Cancer progression models}
-% The CPMs included are: 
-% \begin{enumerate}
-%     \item \textbf{Oncogenetic Tress (OT):} this is the simplest graphical model. Restrictions are represented as a tree. Hence, a parent node can have many children, but children have a single parent.
-%     \item \textbf{Conjuntive Bayesian Networks (CBN):} this model generalizes the tree-based restricion of OT to a direct acyclic graph (DAG). A DAG allows to include multiple parents. In CBN, when a node depends of many parent events, all of the them have to be present for the children to appear. In that sense, CBN models this relationships as conjuntive, in other words, it models the AND relationship.
-%     \item \textbf{Monte Carlo CBN (MCCBN):} this is an implementation of CBN using Monte Carlo expectationi-maximization algorithm to work with a large number of mutations.
-%     \item \textbf{Progression Models of Cancer Evolution (PMCE):} is also a graphical model which main features it the aumatic detection of logical formulas AND, OR and XOR.
-%     \item \textbf{Mutual Hazard networks (MHN):} in this model dpeendencies are not deterministic. In that sense, we do not see a direct dependence relationship, i.e. mutation B depends on mutation A. Conversely, an envent is influenced by all others. So, one event can make other more like (the presence of A promotes B) and also inhibiting it (the presence of A inhibits B). Hence, MHN includes multiple dependencies and is not limited to DAG schemes. The main parameters is a theta matrix that represents how one event influences other.
-%     \item \textbf{Hypergraph Transition Path Sampling (HyperTraPS):}
-% \end{enumerate}
-
-
-
-% \section{Naming data, saving data}
 
 
 \section{Predicted genotype frequencies}
@@ -92,6 +72,202 @@ Once we have the predicted probabilities, we can obtain a finite sample and, if 
 Predicted probabilities of genotypes for OT and OncoBN are obtained using the weights (OT) or $\theta$s (OncoBN), according to the expression for the probability of observing a genotype. For example, see section 2.2 in \cite{Szabo2008} for OT and Figure 1 and section 2.1 in \cite{nicol2021oncogenetic} for OncoBN. For OT we can use function \texttt{distributiion.oncotree} in package \texttt{Oncotree} and for OncoBN function \texttt{Lik.genotype} from package \texttt{OncoBN}.
 
 In OT observation error is already part of the model  (in contrast to what happened in CBN, MHN, H-ESBCN). This is explained in more detail in \qrefS{error_models}.
+
+
+\subsection{H-ESBCN: transition rate matrices}\label{hesbcn}
+
+Here I provide full details about how we interpret and use the results from the method described in \cite{angaroni2021}. I do this here because, in contrast to CBN or MHN, there is no existing previous code that does this, and we found some potentially confusing issues.
+
+
+\subsubsection{Lambdas from the output: "Best Lambdas" and "lambdas\_matrix"}
+
+The output returned by the HESBCN function contains a "Best Lambdas". The output returned by function "import.hesbcn" (that we have included in the code) has an object called "lambdas\_matrix" where each of the lambdas for a gene is divided by the number of parents. This can be checked for any of their examples. Code that shows three examples, with XOR, OR, AND is available under "inst/miscell/examples/HESBCN-lambdas-from-examples.R".
+
+
+It is the output from "Best lambdas" (i.e., the undivided lambdas) that are "[the] rates of the Poisson processes of the continuous-time HMM, associated with the vertices of the model, which allow one to estimate the expected waiting time of a node, given that its predecessor has occurred." (p. 756). (What is the division? An  operation that modifies an internal data structure, and just a temporary operation, done merely for implementation purposes. In line 95 of the code (as of current version, in \url{https://github.com/BIMIB-DISCo/PMCE/blob/main/Utilities/R/utils.R}) the divided lambdas are again summed, so the partition disappears: "curr\_in\_lambda = sum(hesbcn\$lambdas\_matrix[,curr\_node])", and it is that value that is used in further downstream computations;  email with the authors on 2021-07-09).
+
+
+\subsubsection{Interpreting OR and XOR (and AND)}
+
+I find Figure 1C  of  \cite{angaroni2021} possibly confusing. First, the non-confusing part:  node "D" has a rate when exactly one of B XOR C has occured, and node "G" some other rate when E or F or both E or F have occurred. (Note: the figure shows $\tau$s, not $\lambda$s. The comments here refer to the $\lambda$s).
+
+
+Now the (for me, at least) possibly confusing part: it seems that the node called "B xor C" is such that B and C have the same rates of dependencies on A; in other words, it would seem to imply that \(\lambda_B = \lambda_C\). Similarly, the node called "E or F" seems to indicate that both E and F have the same rate, so \(\lambda_E = \lambda_F\). But this need not be so. In fact, virtually all of the examples we have looked at, and the examples in their output, do not satisfy that the rates to the genes that are part of a XOR, OR, or AND relationship are the same. For instance, in the example above of Bladder Urothelial Carcinoma (see "inst/miscell/examples/HESBCN-lambdas-from-examples.R"), KMT2D depends on KMT2C and TP53, but the rate for KMT2C, \(\lambda_{KMT2C} = 0.1991\) and that for TP53, \(\lambda_{TP53} = 0.8062\).
+
+
+Remember that the \(\lambda\) for a gene is the rate of the process until that mutation appears and is fixated, given all the dependencies of that gene are satisfied (which is, of course, the same interpretation as under CBN); again:  "[the] rates of the Poisson processes of the continuous-time HMM, associated with the vertices of the model, which allow one to estimate the expected waiting time of a node, given that its predecessor has occurred." (p. 756).
+
+But the rate at which the parents are satisfied can differ (as it was the case for CBN). A difference with respect to CBN is that, with CBN, if a gene D depends on three genes A, B, C, regardless of the lambdas of each of A, B, C, D can only happen once all of A, B, C are present. With OR and XOR relationships this is no longer the case: one can see D with just A, for example.
+
+
+What about combining AND, XOR, OR? Just apply the rules to each type of dependency. In the HESBCN model if a gene depends on a set of genes, it has the same type of dependency on all the genes of that set.
+
+
+
+\subsubsection{An example with OR and XOR}
+\label{sec:org6769f8f}
+In this example:
+
+\begin{itemize}
+ \item A, B, C depend on none.
+ \item D depends, with an OR, on both A and B
+ \item E depends, with an XOR, on B and C
+ \item Transition rate matrix is shown below: rows are origin, column destination. $\lambda$s are those from "Best Lambdas".
+ \end{itemize}
+
+ \begin{landscape}
+ \begin{table}[ht]
+   \rowcolors{2}{gray!25}{white}
+\centering
+\begin{tabular}{rlllllllllllllllllllll}
+  \hline
+ & WT & A & B & C & AB & AC & AD & BC & BD & BE & CE & ABC & ABD & ABE & ACD & ACE & BCD & BDE & ABCD & ABDE & ACDE \\ 
+  \hline
+WT &  & $\lambda_A$ & $\lambda_B$ & $\lambda_C$ &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\ 
+  A &  &  &  &  & $\lambda_B$ & $\lambda_C$ & $\lambda_D$ &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\ 
+  B &  &  &  &  & $\lambda_A$ &  &  & $\lambda_C$ & $\lambda_D$ & $\lambda_E$ &  &  &  &  &  &  &  &  &  &  &  \\ 
+  C &  &  &  &  &  & $\lambda_A$ &  & $\lambda_B$ &  &  & $\lambda_E$ &  &  &  &  &  &  &  &  &  &  \\ 
+  AB &  &  &  &  &  &  &  &  &  &  &  & $\lambda_C$ & $\lambda_D$ & $\lambda_E$ &  &  &  &  &  &  &  \\ 
+  AC &  &  &  &  &  &  &  &  &  &  &  & $\lambda_B$ &  &  & $\lambda_D$ & $\lambda_E$ &  &  &  &  &  \\ 
+  AD &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_B$ &  & $\lambda_C$ &  &  &  &  &  &  \\ 
+  BC &  &  &  &  &  &  &  &  &  &  &  & $\lambda_A$ &  &  &  &  & $\lambda_D$ &  &  &  &  \\ 
+  BD &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_A$ &  &  &  & $\lambda_C$ & $\lambda_E$ &  &  &  \\ 
+  BE &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_A$ &  &  &  & $\lambda_D$ &  &  &  \\ 
+  CE &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_A$ &  &  &  &  &  \\ 
+  ABC &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_D$ &  &  \\ 
+  ABD &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_C$ &  &  \\ 
+  ABE &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_D$ &  \\ 
+  ACD &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_B$ &  & $\lambda_E$ \\ 
+  ACE &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_E$ \\ 
+  BCD &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_A$ &  &  \\ 
+  BDE &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  & $\lambda_A$ &  \\ 
+  ABCD &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\ 
+  ABDE &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\ 
+  ACDE &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  &  \\ 
+   \hline
+\end{tabular}
+\end{table}
+ \end{landscape}
+
+
+\subsubsection{Three examples from actual analysis}
+\label{sec:orgdc3f991}
+\begin{itemize}
+\item The code in inst/miscell/HESBCN-OR-XOR-AND-lambda-and-rates.R contains examples of how we use those lambdas.
+\end{itemize}
+\begin{enumerate}
+\item OR
+\label{sec:org9d47997}
+\begin{itemize}
+\item Suppose output such as this (again, see file inst/miscell/HESBCN-OR-XOR-AND-lambda-and-rates.R for how to reproduce it).
+\end{itemize}
+
+\begin{verbatim}
+ $adjacency_matrix
+      Root A B C D
+ Root    0 1 1 0 0
+ A       0 0 0 1 1
+ B       0 0 0 1 1
+ C       0 0 0 0 0
+ D       0 0 0 0 0
+
+ $lambdas_matrix
+      Root     A     B     C      D
+ Root    0 7.364 2.367 0.000 0.0000
+ A       0 0.000 0.000 6.569 0.1078
+ B       0 0.000 0.000 6.569 0.1078
+ C       0 0.000 0.000 0.000 0.0000
+ D       0 0.000 0.000 0.000 0.0000
+
+ $parent_set
+        A        B        C        D 
+ "Single" "Single"    "XOR"     "OR" 
+
+
+ $lambdas
+ [1]  7.3644  2.3673 13.1389  0.2156
+
+ $edges
+   From To    Edge Lambdas Relation
+ 1 Root  A Root->A  7.3644   Single
+ 2 Root  B Root->B  2.3673   Single
+ 3    A  C    A->C 13.1389      XOR
+ 4    B  C    B->C 13.1389      XOR
+ 5    A  D    A->D  0.2156       OR
+ 6    B  D    B->D  0.2156       OR
+\end{verbatim}
+
+\begin{itemize}
+\item From the above output, these are the lambdas: $\lambda_A = 7.3644, \lambda_B = 2.367, \lambda_C = 13.1389, \lambda_D = 0.2156$.
+\item Focusing only on A, B, D, to see gene D we can follow four paths.
+\begin{itemize}
+\item The first two involve only two mutations:
+\begin{itemize}
+\item \(WT \rightarrow A \rightarrow AD\)
+\item \(WT \rightarrow B \rightarrow BD\)
+\item The first is much faster, since the rate for the transition from WT to A is 7.4 compared to 2.4 of the transition B to D (from competing exponentials, the probabilities of moving to A and B are 0.76 and 0.24, respectively).
+\end{itemize}
+\item In the other two paths D is the third gene to appear:
+\begin{itemize}
+\item \(WT \rightarrow A \rightarrow AB \rightarrow ABD\)
+\item \(WT \rightarrow B \rightarrow AB \rightarrow ABD\)
+\item These two paths take the same time, on average: both A and B need to appear (with rates given by \(\lambda_A\), \(\lambda_B\)) and then we need D to appear (\(\lambda_D\)).
+\end{itemize}
+
+\item Similarly, to get to genotype "A, B, D" we can follow these paths:
+\begin{itemize}
+\item \(WT \rightarrow A \rightarrow AB \rightarrow ABD\)
+\item \(WT \rightarrow B \rightarrow AB \rightarrow ABD\)
+\item \(WT \rightarrow A \rightarrow AD \rightarrow ABD\)
+\item \(WT \rightarrow B \rightarrow BD \rightarrow ABD\)
+\item All of them take the same expected time, as we need for A, B, and D to happen, each governed by \(\lambda_A\), \(\lambda_B\), \(\lambda_D\), respectively.
+\end{itemize}
+\end{itemize}
+\item In terms of fitness, if we used OncoSimulR (see additional document ``Using OncoSimulR to get accessible genotypes and transition matrices''), we would write, for the fitness of AB: \((1 + \lambda_A) (1 + \lambda_B)\), for AD \((1 + \lambda_A) (1 + \lambda_D)\), and for ABD \((1 + \lambda_A) (1 + \lambda_B) (1 + \lambda_D)\).
+\begin{itemize}
+\item Note, specifically, that genotypes \(AD\) and \(BD\) are not fitness equivalent, unless \(\lambda_A = \lambda_B\).
+\end{itemize}
+\end{itemize}
+\item XOR
+\label{sec:orgc1e93a8}
+\begin{itemize}
+\item Using the above example, and focusing only on A, B, C, these are the only ways of seeing a C:
+\begin{itemize}
+\item \(WT \rightarrow A \rightarrow AC\)
+\item \(WT \rightarrow B \rightarrow BC\)
+\item As we have a XOR, no routes can go through AB.
+\item The first is much faster and common than the second (\(\lambda_A = 7.4; \lambda_B = 2.4\)).
+\item Fitness (again, this is relevant if using, for example, OncoSimulR) of \(AC\) is \((1 + \lambda_A) (1 + \lambda_C)\) and of \(BC\) \((1 + \lambda_B) (1 + \lambda_C)\).
+\end{itemize}
+\end{itemize}
+
+\item Both OR and XOR
+\label{sec:org5edd44b}
+\begin{itemize}
+\item There is nothing new. As an example, gaining both C and D mutations.
+\begin{itemize}
+\item \(WT \rightarrow A \rightarrow AC \rightarrow ACD\)
+\item \(WT \rightarrow B \rightarrow BC \rightarrow BCD\)
+\item \(WT \rightarrow A \rightarrow AD \rightarrow ACD\)
+\item \(WT \rightarrow B \rightarrow BD \rightarrow BCD\)
+\item There is no path going through \(AB\) since C has a XOR relationship on A and B.
+
+\item In the first path we first need to wait for A to happen (rate \(\lambda_A\)) then C (\(\lambda_C\)) then D (\(\lambda_D\)).
+\item Same for the second, with B instead of A. The first path is much more common than the second.
+\item The third path transposes the order of occurrence of D and C, but takes the same average time as the third. Note that the fitness of the final genotype is the same through both routes, only the order of steps changes.
+\item The fourth path transposes the order of occurrence of D and C, but takes the same average time as the fourth. Note that the fitness of the final genotype is the same through both routes, only the order of steps changes.
+\end{itemize}
+\end{itemize}
+\end{enumerate}
+
+\subsubsection{Combining AND, OR, XOR?}
+\label{sec:org78cffb2}
+Nothing changes. Use the rules for AND where there is an AND, XOR where there is a XOR, OR where there is an OR. Again, in the HESBCN model if a gene depends on a set of genes, it has the same type of dependency on all the genes of that set.
+
+
+
+
+
 
 \section{Generating random CPM/EvAM models, sampling from them, and error models}\label{sec:random_evam}
 
@@ -212,7 +388,7 @@ Why this difference? When you use a model fitted to real data, it is sensible to
 \label{sec:random-evam-models}
 
 As of now, the generation of random EvAM models uses transitively reduced graphs (we call \texttt{mccbn::random\_poset} with argument \texttt{trans\_reduced = TRUE}). This does not decrease the number of models that can be expressed when using CBN. However, it can limit the range of models when we can mix AND, OR, XOR in the same model. The following  examples illustrate how this makes certain models impossible.
-\clearpage
+
 
 \begin{figure}[h!]
 %  \centering
@@ -310,97 +486,6 @@ For each of the ways to input cross-sectional data or build models, we provide s
 
 
 See also further details in section \qrefS{error_models} as well as in the help for functions \texttt{evam} and \texttt{sample\_CPMs}.
-
-
- 
-
-
-
-
-
-
-
-% \section{Sampling scheme}
-% From transition rate matrices it is possible to establish a scheme to sample a population based on stochactic simulation with continious time Markov chains \cite{wilkinson2018stochastic}.
-
-% To sample an individual the proccess include the following steps:
-% \begin{enumerate}
-%   \item SET \textit{sample time}. It is drawn from an Exp($\lambda = 1$). This is the time at which the observation will be made, and when the sampling process will finish. 
-%   \item \textit{Accumulated time} SET to zero.
-%   \item SET \textit{trajectory} to wild type (no genes is mutated).
-%   \item WHILE \textit{accumulated time $<$ random sampling time AND
-%    having accesible genotypes}:
-%    \begin{enumerate}
-%        \item \textit{Time until next mutation}. It is defined with competing exponentials. It is decided by taking the minimun time from random samples with the rates of each accesible genotype. 
-%        \item IF: \textit{acumulated time $+$ time until next mutation $<=$ sample time}:
-%        \begin{enumerate}
-%            \item ADD new mutation to the \textit{trajectory}.
-%        \end{enumerate}
-%        \item ELSE: \textit{end sampling}
-%    \end{enumerate}
-% \end{enumerate}
-
-
-% \section{Validation of the sampling algorithm}
-
-% Our implementation for sampling from transition rate matrices has been validated by comparing genotypes frequencies from our sampling scheme against to other implementations provided with the packages of MCCBN and MHN:
-
-% For a single comparison we generated random data for either MCCBN and MHN.
-% We then made a sample of 100 000 individuals with both the native software (either MCCBN or MHN) and with our implementation (after deriving the transition rate matrix).
-% This yield two sets of observed genotypes that were compared with a Chi-Squared test to test whether both observed distributions came from the same underlying probability distribution.  
-% P-values are expected to follow a uniform distribution Figures \ref{SI:MHN} and \ref{SI:MCCBN}.
-
-% The above test was performed for data sets with 5, 6, 7, and 8 genes.
-% For each gene, 10 000 random data were generated and with each population containing 100 000 individual samples.
-
-% For ks test, recall we are using permutation test, so min p.value is not but 1/(B + 1).
-
-% Scripts for running all samples and to compare them can be found in: 
-
-% % \texttt{https://github.com/PabloHNieto/CPM-SSWM-Sampling/tree/tupac/guloMAM/insts/miscell/tests-sample_genotypes_from_trm}
-
-% % \begin{enumerate}
-%   %     \item Random data generation: with native code from MHN or MCCBN. (Include number of genes tested, number of examples per gen, and number of samples per run.)
-%   %     \item Sampling process with native code based on random data.
-%   %     \item Compute observed genotype frequencies from sampling with native code.  
-%   %     \item Derived transitions rate matrices from random code with guloMAM.
-%   %     \item Sampling process with guloMAM sampling code.
-%   %     \item Compute observed genotype frequencies from sampling with guloMAM.
-%   %     \item Compare distributions with chi-squere test and Kolmogrov-Smirnov test.   
-%   % \end{enumerate}    
-  
-%   % P-values for each test are expected to follow a uniform distribution (ref to figure and table).
-%   % Code and results for this is found in \dots 
-  
-%   % \begin{figure}
-%   %   \centerline{
-%   %     \includegraphics[]{"MHN.png"}
-%   %     }
-%   %   \caption{\textbf{MHN vs guloMAM sampling}. Distribution of p-values from Chi Square Test comparing genotype distribuion from MHN sampling and guloMAM sampling. The blue line indicates the cumulative distribution for a uniform distribution. The black line represents the cumulative probability of observing a p value lower than a given value.
-%   %   }
-%   %   \label{SI:MHN}
-%   % \end{figure}
-  
-%   % \begin{figure}
-%   %   \centerline{
-%   %     \includegraphics[]{"MCCBN.png"}
-%   %     }
-%   %     \caption{\textbf{MCCBN vs guloMAM sampling.} Distribution of p-values from Chi Square Test comparing genotype distribuion from MHN sampling and guloMAM sampling. The blue line indicates the cumulative distribution for a uniform distribution. The black line represents the cumulative probability of observing a p value lower than a given value.
-%   %     }
-%   %     \label{SI:MCCBN}
-%   % \end{figure}
-    
-% \section{Hypergraph embedding}
-% Adapted from \textit{Graph Embedding and Visualization for Dynamic Acquisition on the Hypercube}
-
-% \textbf{ADD FIGURES OF A SIMPLE SAMPLING PROCESS SHOWING THE DAG AND THE HYPERGRAPH}
-    
-
-
-
-
-
-
 
 \section{FAQ}
 \label{sec:faq}
@@ -501,9 +586,6 @@ docker system prune -a
 
 \end{verbatim}
 Please, read the documentation for both.
-
-% \subsubsection{How to update the Docker image if you change the code} 
-% Build the Docker images as explained before. After the first time, the build process should run much faster because many steps will be skipped.
 
 
 \subsubsection{Copying docker images from one machine to another}
