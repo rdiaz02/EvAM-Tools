@@ -1,5 +1,6 @@
 data(examples_csd)
-ex_hesbcn_or <- evamtools:::do_HESBCN(examples_csd$csd$OR$data, seed = 9)
+## The n = 10 is not a sensible value here. Done for the sake of speed.
+ex_hesbcn_or <- evamtools:::do_HESBCN(examples_csd$csd$OR$data, seed = 9, n = 10)
 
 ## Output
 ## $adjacency_matrix
@@ -10,32 +11,34 @@ ex_hesbcn_or <- evamtools:::do_HESBCN(examples_csd$csd$OR$data, seed = 9)
 ## C       0 0 0 0 0
 ## D       0 0 0 0 0
 
+
 ## $lambdas_matrix
 ##      Root     A     B     C      D
-## Root    0 7.364 2.367 0.000 0.0000
-## A       0 0.000 0.000 6.569 0.1078
-## B       0 0.000 0.000 6.569 0.1078
+## Root    0 8.083 2.585 0.000 0.0000
+## A       0 0.000 0.000 8.914 0.2062
+## B       0 0.000 0.000 8.914 0.2062
 ## C       0 0.000 0.000 0.000 0.0000
 ## D       0 0.000 0.000 0.000 0.0000
+
 
 ## $parent_set
 ##        A        B        C        D 
 ## "Single" "Single"    "XOR"     "OR" 
 
 ## $epsilon
-## [1] 0.08162
+## [1] 0.08181
 
 ## $lambdas
-## [1]  7.3644  2.3673 13.1389  0.2156
+## [1]  8.0833  2.5854 17.8277  0.4124
 
 ## $edges
-##   From To    Edge Lambdas Relation
-## 1 Root  A Root->A  7.3644   Single
-## 2 Root  B Root->B  2.3673   Single
-## 3    A  C    A->C 13.1389      XOR
-## 4    B  C    B->C 13.1389      XOR
-## 5    A  D    A->D  0.2156       OR
-## 6    B  D    B->D  0.2156       OR
+##   From To      Edge Lambdas Relation
+## 1 Root  A Root -> A  8.0833   Single
+## 2 Root  B Root -> B  2.5854   Single
+## 3    A  C    A -> C 17.8277      XOR
+## 4    B  C    B -> C 17.8277      XOR
+## 5    A  D    A -> D  0.4124       OR
+## 6    B  D    B -> D  0.4124       OR
 
 
 ## The transition rate matrix ("weighted_fgraph") and the transition matrix
@@ -44,14 +47,17 @@ evamtools:::cpm2tm(ex_hesbcn_or)
 
 ## Get it annotated with column names
 
+require(Matrix)
+printSpMatrix(
+    evamtools:::cpm2tm(ex_hesbcn_or)$weighted_fgraph,
+    col.names = TRUE)
 
 printSpMatrix(
-    evamtools:::cpm2tm_relationships(ex_hesbcn_or)$weighted_fgraph, col.names = TRUE)
+    trans_mat <- evamtools:::cpm2tm(ex_hesbcn_or)$trans_mat_genots,
+    col.names = TRUE)
 
 ## Output from OncoSimulR
 oncosimul_out <- evamtools:::cpm2F2tm(ex_hesbcn_or$edges, max_f = NULL)
-
-## 
 
 
 
@@ -95,6 +101,6 @@ d2 <- rbind(d1,
 d3 <- d2
 d3$C[(d3$A == 1) & (d3$B == 1)] <- 1
 
-## Examples that mix output
-d3_1 <- evamtools:::do_HESBCN(d3, seed = 26) ## AND, OR, Single
-d3_2 <- evamtools:::do_HESBCN(d3, seed = 31)  ## AND, XOR, Single
+## Example that mixes output
+d3_1 <- evamtools:::do_HESBCN(d3, seed = 26, n = 100000) ## AND, OR, XOR, Single
+
