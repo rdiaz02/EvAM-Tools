@@ -22,10 +22,10 @@
 ## Evam-tools <a id="evamtools"></a>
 ****
 
-```Evam-tools``` is an R package and Shiny app that provides tools for evolutionary accumulation, or event accumulation, models. We use code from  "Cancer Progression Models" (CPM) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost). ```Evam-tools``` is  also available as an R package (see https://github.com/rdiaz02/EvAM-Tools).
+```Evam-tools``` is an R package and Shiny web app that provides tools for evolutionary accumulation, or event accumulation, models. We use code from  "Cancer Progression Models" (CPM) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost). ```Evam-tools``` is  also available as an R package (see https://github.com/rdiaz02/EvAM-Tools).
 
 
-This web interface provides a user-friendly interactive version of the package. You can analyze your data, create cross-sectional data from scratch (by giving genotype frequencies), or generate data under different CPMs. You can compare results from different methods/models, as well as experiment and understand the consequences of changes in the input data on the returned inferences. You can also examine how a given model performs when data have been generated under other (or its own) model.
+This web interface provides a GUI to the package. You can analyze your data, create cross-sectional data from scratch (by giving genotype frequencies), or generate data under different CPMs. You can compare results from different methods/models, as well as experiment and understand the consequences of changes in the input data on the returned inferences. You can also examine how a given method performs when data have been generated under another (or its own) model. See more details for examples of use in https://github.com/rdiaz02/EvAM-Tools#some-examples-of-use .
 
 * In the ```User input``` tab (on top of the page) you can upload data or define cross-sectional data, or simulate cross-sectional data from models. These are then submitted to run.
 * In the ```Results``` tab you can see the output.
@@ -49,7 +49,7 @@ In cross-sectional data, a single sample is obtained from each subject or patien
     - Define your data by specifying the genotype composition or uploading a data set or a combination of both.
     - Generate data according to CPM models specified using DAGs (Directed Acyclic Graphs) and trees: CBN, OT, OncoBN, H-ESBCN: "DAG and rates/probs".
     - Generate data according to the MHN model: "MHN thetas".
-    - When you generate data according to a model, you can specify the sample size, the amount of noise, if any, to add, and of course the parameters of the models.
+    - When you generate data according to a model, you can specify the sample size, the amount of noise, if any, to add, and the parameters of the models.
     - You can also increase or decrease the number of genes, or rename genes.
 
 * Change, if you want, options under "Advanced options and CPMs to use" (on the right of the screen).
@@ -85,7 +85,7 @@ The results include:
     * Transition rates: for models that provide them (CBN, H-ESBCN, MHN) transition rates.
     * Predicted genotype relative frequencies: the predicted genotype frequencies from the fitted models.
     * Sampled genotype counts: the counts from obtaining a finite sample (of the size you chose) with the probabilities given by the predicted genotype frequencies. If you add noise, they include observational (e.g., genotyping) noise.
-    * Observed genotype transitions (counts): if you choose to *Sample for observed genotype transitions* (under  ```Advanced options and CPMs to use```), for models that return a transition rate matrix (CBN, H-ESBCN, MHN), we obtain the observed sampled of genotypes by simulating sampling from the continuous time Markov chain; this provides also observed transition counts between genotypes.
+    * Observed genotype transitions (counts): if you choose to *Sample for observed genotype transitions* (under ```Advanced options and CPMs to use```), for models that return a transition rate matrix (CBN, H-ESBCN, MHN), we obtain the observed sampled of genotypes by simulating sampling from the continuous-time Markov chain; this provides also observed transition counts between genotypes.
 &nbsp;		
 * Original data: to help interpret the results, a histogram of the genotype counts is also provided.
 &nbsp;
@@ -111,7 +111,7 @@ Additional documentation is available from https://rdiaz02.github.io/EvAM-Tools/
 
 Inactive connections will timeout after 2 hours. The page will become gray, and if you refresh (e.g., F5 in most browsers) after this time, you will not get back your results, figures, etc, but start another session. 
 
-Maximum RAM of any process is limited to 2 GB. Likewise, the analyses should be aborted after 1.5 hours of elapsed (not CPU ---we parallelize the runs) time. If you want to use the Shiny app without these limits, install a local copy. (To modify the time limit, change the value of variable EVAM_MAX_ELAPSED, in the definition of function "server", in file "server.R".  The RAM limit is imposed on the Docker containers we use; to remove it, run Docker without the memory limit.) Note: because of what we must do to enforce these limits, running over limits might not be signalled by an explicit error, but rather by a graying out or a complete refresh of the session.
+Maximum RAM of any process is limited to 2 GB. Likewise, the analyses should be aborted after 1.5 hours of elapsed (not CPU ---we parallelize the runs) time. If you want to use the Shiny app without these limits, install a local copy. (To modify the time limit, change the value of variable EVAM_MAX_ELAPSED, in the definition of function "server", in file "server.R".  The RAM limit is imposed on the Docker containers we use; to remove it, run Docker without the memory limit.) Note: because of what we do to enforce these limits, running over limits might not be signalled by an explicit error, but rather by a graying out or a complete refresh of the session.
 
 
 &nbsp;&nbsp;
@@ -120,7 +120,7 @@ Maximum RAM of any process is limited to 2 GB. Likewise, the analyses should be 
 ### How long does it take to run? <a id="timetorun"></a>
 ***
 
-It depends on the number of features and methods used. For six features, and if you do not use H-ESBCN nor MC-CBN, it should take about 20 seconds. If you do not use CBN either (i.e., if you only use MHN, OT, and OncoBN) it should run in less than 8 seconds. Model fitting itself is parallelized, but other parts of the program cannot be (e.g., displaying the final figures).
+It depends on the number of genes or features and methods used. For six genes, and if you do not use H-ESBCN nor MC-CBN, it should take about 20 seconds. If you do not use CBN either (i.e., if you only use MHN, OT, and OncoBN) it should run in less than 8 seconds. Model fitting itself is parallelized, but other parts of the program cannot be (e.g., displaying the final figures).
 
 &nbsp;&nbsp;
 
@@ -133,12 +133,12 @@ It depends on the number of features and methods used. For six features, and if 
 
 *  **Conjuntive Bayesian Networks (CBN):** This model generalizes the tree-based restriction of OT to a direct acyclic graph (DAG). A node can have multiple parents, and it denotes that all of the parents have to be present for the children to appear. Therefore, relationships are conjuntive (AND relationships between the parents). These are timed models, and the parameters of the models are rates given that all parents have been observed. We include both H-CBN as well as MC-CBN.
 
-*  **Hidden Extended Suppes-Bayes Causal Networks (H-ESBCN):** Somewhat similar to CBN, but it includes automatic detection of logical formulas AND, OR and XOR. H-ESBCN is used by its authors as part of Progression Models of Cancer Evolution (PMCE). As for CBN, it returns rates.
+*  **Hidden Extended Suppes-Bayes Causal Networks (H-ESBCN):** Somewhat similar to CBN, but it includes automatic detection of logical formulas AND, OR, and XOR. H-ESBCN is used by its authors as part of Progression Models of Cancer Evolution (PMCE). Like CBN, it returns rates.
   
 *  **OncoBN**: Similar to OT, in the sense of being an untimed oncogenetic model, but allows both AND (the conjunctive or CBN model) and OR relationships (the disjunctive or DBN model).
 
   
-*  **Mutual Hazard networks (MHN):** With MHN dependencies are not deterministic and events can make other events more like or less likely (inhibiting influence**. The fitted parameters are multiplicative hazards that represent how one event influences other events.
+*  **Mutual Hazard networks (MHN):** With MHN dependencies are not deterministic and events can make other events more like or less likely (inhibiting influence). The fitted parameters are multiplicative hazards that represent how one event influences other events.
 
 &nbsp;
 
@@ -189,7 +189,7 @@ It depends on the number of features and methods used. For six features, and if 
   
 - GitHub repository for MC-CBN: https://github.com/cbg-ethz/MC-CBN
 
-- Source code repository for h/ct-cbn:  https://bsse.ethz.ch/cbg/software/ct-cbn.html
+- Source code for h/ct-cbn:  https://bsse.ethz.ch/cbg/software/ct-cbn.html
 
 
 &nbsp;
@@ -209,7 +209,7 @@ It depends on the number of features and methods used. For six features, and if 
 - Angaroni, F., Chen, K., Damiani, C., Caravagna, G., Graudenzi, A., & Ramazzotti, D. (2021). PMCE: efficient inference of expressive models of cancer evolution with high prognostic power. Bioinformatics, 38(3), 754–762. http://dx.doi.org/10.1093/bioinformatics/btab717 
 
 
--  Repositories and terminology: we will often refer to HESBCN, as that is the program we use, as shown here: https://github.com/danro9685/HESBCN. H-ESBCN is part of the PMCE procedure: https://github.com/BIMIB-DISCo/PMCE.
+-  Repositories and terminology: we will often refer to H-ESBCN, as that is the program we use, as shown here: https://github.com/danro9685/HESBCN. H-ESBCN is part of the PMCE procedure: https://github.com/BIMIB-DISCo/PMCE.
 
 &nbsp;
 
@@ -239,10 +239,10 @@ It depends on the number of features and methods used. For six features, and if 
 The complete source code for the package and the shiny app, as well information about how to run the shiny app locally, is available from https://github.com/rdiaz02/EvAM-Tools.
 
 
-This app is free to use (if you have confidential data, you might want not to upload it here, and instead install the package locally). 
+This app is free to use. Confidentiality and security: ff you have confidential data, you might want not to upload it here, and instead install the package locally. 
 
 
-Most of the files for this app (and the package) are copyright Ramon Diaz-Uriarte and Pablo Herrera Nieto (and released under the Affero GPL v3 license ---https://www.gnu.org/licenses/agpl-3.0.html) except some files for HESBCN, MHN, and the CBN code; see full details in https://github.com/rdiaz02/EvAM-Tools#copyright-and-origin-of-files.
+Most of the files for this app (and the package) are copyright Ramon Diaz-Uriarte and Pablo Herrera-Nieto (and released under the Affero GPL v3 license ---https://www.gnu.org/licenses/agpl-3.0.html) except some files for HESBCN, MHN, and the CBN code; see full details in https://github.com/rdiaz02/EvAM-Tools#copyright-and-origin-of-files.
 
 
 &nbsp;
