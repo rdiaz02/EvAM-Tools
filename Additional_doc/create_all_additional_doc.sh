@@ -1,6 +1,7 @@
 #!/bin/bash
 
 ## We need to use "--shell-escape" for latexgit.
+## (usual caveat: do not use shell-escape with documents you do not trust)
 
 texi2pdf --shell-escape intro_additional_docs.tex
 texi2pdf --shell-escape Additional_doc.tex
