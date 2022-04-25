@@ -19,6 +19,8 @@
 \usepackage[dvipsnames,table]{xcolor}
 \usepackage{lscape}
 \usepackage{authblk} % author affiliations
+\usepackage{latexgit}
+
 
 \hypersetup{
   colorlinks = true,
@@ -32,7 +34,8 @@
 \affil[2]{Instituto de Investigaciones Biomédicas `Alberto Sols'
   (UAM-CSIC), Madrid, Spain}
 \affil[$\dagger$]{To whom correspondence should be addressed: \normalfont r.diaz@uam.es \qquad \texttt{https://ligarto.org/rdiaz}}
-\date{\today}
+% \date{\today}
+\date{\today \\ Version \gitcommithash}
 \title{Using OncoSimulR to get accessible genotypes and transition matrices}
 % \hypersetup{
 %  pdfauthor={Ramon Diaz-Uriarte},
@@ -52,9 +55,11 @@
 
 \section{Introduction}
 \label{sec:org58f26ba}
-Here I explain how we can use OncoSimulR\footnote{A BioConductor package. The reference is: Diaz-Uriarte, R. (2017). OncoSimulR: Genetic simulation with arbitrary epistasis and mutator genes in asexual populations. Bioinformatics, 33(12), 1898–1899. \url{https://doi.org/10.1093/bioinformatics/btx077}.
-Repo at \url{https://github.com/rdiaz02/OncoSimul}} to get accessible genotypes and transition matrices for CBN (and MCCBN), OT, HESBCN, and OncoBN. % I also clarify how our code interprets the output of HESBCN (not only as it concerns using OncoSimulR). 
-The code for using OncoSimulR is implemented in access\_genots\_from\_oncosimul.R. 
+Here I explain how we can use OncoSimulR\footnote{A BioConductor package for forward population genetic simulation in asexual populations; it allows us to specify fitness, among other ways, using DAGs of restrictions. Repo at \url{https://github.com/rdiaz02/OncoSimul}. Citation: Diaz-Uriarte, R. (2017). OncoSimulR: Genetic simulation with arbitrary epistasis and mutator genes in asexual populations. Bioinformatics, 33(12), 1898–1899. \url{https://doi.org/10.1093/bioinformatics/btx077}.
+} to get accessible genotypes and transition matrices for CBN (and MCCBN), OT, HESBCN, and OncoBN. % I also clarify how our code interprets the output of HESBCN (not only as it concerns using OncoSimulR). 
+The code for using OncoSimulR is implemented in access\_genots\_from\_oncosimul.R.
+
+(This document is written, on purpose, using an itemized list style, with plenty of repetition and detailed examples, to make it suitable for instance for class use.)
 
 \section{Using OncoSimulR to get accessible genotypes and transition matrices}
 \label{sec:org653c242}
@@ -97,12 +102,12 @@ differences, in fitness: \(s_B = \frac{W_{AB} - W_A}{W_A}\), as shown also in p.
 \item (We wrote \(W_{AB} = W_A \ (1 + s_B)\). This we can do as we explained what the meaning of the \(s_i\) are: selection coefficient from gene \(i\) with its restrictions satisfied. See below: \hyperref[sec:orge68f649]{Transition probabilities using an epistatic specification}.)
 \end{itemize}
 
-\item Note that this is the same procedure as in Weinreich et al., 2006, (Weinreich, D. M., Delaney, N. F., DePristo, M. A., \& Hartl, D. L. (2006). Darwinian Evolution Can Follow Only Very Few Mutational Paths to Fitter Proteins. Science, 312(5770), 111–114.\url{https://dx.doi.org/10.1126/science.1123539}) supplementary material, p. 4): \(s_{i \rightarrow j}\) "the selection coefficient for the mutation that carries allele i to allele j" (where selection coefficient has the usual definition, e.g., Gillespie, 2004 (Population genetics: a concise guide, 2nd. Baltimore, Md: The Johns Hopkins University Press.), p. 63 ---but we write \(W_{AB} = W_A \ (1 + s_B)\), and thus if \(s_B > 0\) AB is fitter than A; see also p.7 of the supplementary material of Weinreich et al., 2006).
+\item Note that this is the same procedure as in Weinreich et al., 2006, (Weinreich, D. M., Delaney, N. F., DePristo, M. A., \& Hartl, D. L. (2006). Darwinian Evolution Can Follow Only Very Few Mutational Paths to Fitter Proteins. Science, 312(5770), 111–114.\url{https://dx.doi.org/10.1126/science.1123539}) supplementary material, p. 4): \(s_{i \rightarrow j}\) "the selection coefficient for the mutation that carries allele i to allele j"\footnote{Selection coefficient has the usual textbook definition. For example, Gillespie, 2004 (Population genetics: a concise guide, 2nd. Baltimore, Md: The Johns Hopkins University Press.), p. 63. But here we write \(W_{AB} = W_A \ (1 + s_B)\), and thus if \(s_B > 0\) AB is fitter than A; see also p.7 of the supplementary material of Weinreich et al., 2006}.
 \begin{itemize}
-\item See their S5b, which shows the relationship between the expected value of the conditioned probability of fixation in a mutation from \(i\) to \(j\) and the expected value of the ratio of the selection coefficient for the mutation that turns \(i\) to \(j\) over the sum of selection coefficients of beneficial mutations that turn \(i\) into all other alleles; see also their figure S1 in p.~ 7 that shows the accuracy of their expression.
+\item Specifically, see equation S5b in the supplementary material of Weinreich et al., 2006, which shows the relationship between the expected value of the conditioned probability of fixation in a mutation from \(i\) to \(j\) and the expected value of the ratio of the selection coefficient for the mutation that turns \(i\) to \(j\) over the sum of selection coefficients of beneficial mutations that turn \(i\) into all other alleles; see also their figure S1 in p.~7 of the supplementary material that shows the accuracy of their expression.
 \end{itemize}
 
-\item Note: In Gerstung et al., 2011 (Gerstung, M., Eriksson, N., Lin, J., Vogelstein, B., \& Beerenwinkel, N. (2011). The Temporal Order of Genetic and Pathway Alterations in Tumorigenesis. PLoS ONE, 6(11), 27136. \url{https://dx.doi.org/10.1371/journal.pone.0027136}), PLoS ONE (p.8) the relationship between \(\lambda_i\) and \(s_i\) is also discussed.
+\item Additional note: In Gerstung et al., 2011 (Gerstung, M., Eriksson, N., Lin, J., Vogelstein, B., \& Beerenwinkel, N. (2011). The Temporal Order of Genetic and Pathway Alterations in Tumorigenesis. PLoS ONE, 6(11), 27136. \url{https://dx.doi.org/10.1371/journal.pone.0027136}), PLoS ONE (p.8) the relationship between \(\lambda_i\) and \(s_i\) is also discussed.
 
 \item And why the fitness difference with respect to the ancestor and not just a  ratio of fitnesses? Suppose \(W_{AC} < W_A < W_{AB}\). The procedure above  correctly would say that we always transition from A to AB.
 
@@ -122,7 +127,7 @@ Is the above correct for OT? Strictly not as OT are untimed oncogenetic trees. (
 \begin{itemize}
 \item We compute fitness above assuming that only one of two things can happen: a mutation provides a fitness benefit or it leads to death. When the requirements are satisfied, a mutation conveys a fitness increase (\(\lambda_i\)); otherwise, the cell with the mutation has fitness 0.
 
-\item Strictly, mutations without dependencies satisfied might not be lethal, but they should not confer any fitness advantage, so that we will never observe them (Gerstung et al., 2009, p. 2810, say "(\ldots{}) mutations that need to be present before mutation i can fixate." and Gerstung and Beerenwinkel, 2010, , p. 126, "with steps including both mutation and clonal expansion occurring at effective rates k j").
+\item Strictly, mutations without dependencies satisfied might not be lethal, but they should not confer any fitness advantage, so that we will never observe them (Gerstung et al., 2009, p.~2810, say "(\ldots{}) mutations that need to be present before mutation i can fixate." and Gerstung and Beerenwinkel, 2010, p.~ 126, "with steps including both mutation and clonal expansion occurring at effective rates k j").
 
 \item In OncoSimulR, in addition to the \(s_i\), it is possible to set \texttt{sh = 0}, meaning there is no penalty for not respecting the restrictions. When \texttt{sh = 0} there is also no fitness gain, either, so fitness for those genotypes ends up being the fitness of the immediate parent (there is no contribution from the gen without restrictions satisfied to the fitness of the parent genotype). Regardless, when \texttt{sh = 0}, the transition matrix does not change compared to the transition matrix we obtain if we assume that mutations to genotypes with non-satisfied dependencies lead to a fitness of 0.
 \end{itemize}
@@ -149,7 +154,7 @@ Is the above correct for OT? Strictly not as OT are untimed oncogenetic trees. (
 
 \item Using the DAG, if the restriction is not satisfied, i.e., for genotype with only \(j\): \(W_j = (1 + s_h)\). If the restriction is satisfied, \(W_{ij} = (1 + s_i) (1 + s_j)\). So the meaning of the \(s\) is different.
 
-\item To fully elaborate here, and give a more complex example, suppose C depends on both A and B, according to the DAG. 
+\item To fully elaborate here, and to give a more complex example, suppose C depends on both A and B, according to the DAG. 
 
 \begin{itemize}
 \item When using the DAG, then, these are
@@ -189,13 +194,19 @@ where \(increase\_in\_fitness\_from\_acquiring\_B\) would include the effect of 
 
 \item This shows we can directly use the DAG fitness specification where we take the \(s_i\) as the selection coefficient from gene \(i\) with its restrictions satisfied.
 
-\item And why do we do what we do with CBN? Because it simplifies everything and fitness can be written as \(\prod (1 + s_i)\) for any genotype with its restrictions satisfied. 
+\item And why do we do what we do with CBN? Because it simplifies everything and fitness can be written as \(\prod (1 + s_i)\) for any genotype with its restrictions satisfied.
+  \begin{itemize}
 
-If neither A nor B depend on anything, then the expression for fitness is \((1 + s_A)\ (1 + s_B)\) because, under CBN, there is no epistasis here so \(s_{AB} = 0\) (look, for example, at the transition rate matrix in Montazeri et al., 2016, Figure 1, for the transition from genotype 1 to genotype 1,2 or from genotype 2 to genotype 1,2). 
+\item If neither A nor B depend on anything, then the expression for fitness is \((1 + s_A)\ (1 + s_B)\) because, under CBN, there is no epistasis here so \(s_{AB} = 0\) (look, for example, at the transition rate matrix in Montazeri et al., 2016, Figure 1, for the transition from genotype 1 to genotype 1,2 or from genotype 2 to genotype 1,2). 
 
-If B depends on A, when we consider the transition from A to B, we can use a single term, \((1 + s_X)\) to multiply \((1 + s_A)\), and that \(s_X = \lambda_B\). That \(\lambda_B\) is the (relative) increase in fitness due to B, when B's restrictions are satisfied (for example, in Example 1 in Montazeri et al., 2016 (Large-scale inference of conjunctive Bayesian networks. Bioinformatics, 32(17), 727–735. \url{https://dx.doi.org/10.1093/bioinformatics/btw459}), see the transition rate matrix from genotype 2 to genotype 2,4 ---notice that Figure 1 is correct, but the matrix in Example 1 has a typo, and is missing the entry for \(\lambda_4\); or look at the transition from 1,2 to 1,2,3 and 1,2,4). You can think of this \(s_X\) as the joint combination of the effect of B on its own and the epistasis of A and B; but thinking of B on its own is a moot point, since B on its own (i.e., without A, without its restrictions satisfied) is not a genotype that can be observed. 
+\item If B depends on A, when we consider the transition from A to B, we can use a single term, \((1 + s_X)\) to multiply \((1 + s_A)\), and that \(s_X = \lambda_B\). That \(\lambda_B\) is the (relative) increase in fitness due to B, when B's restrictions are satisfied (for example, in Example 1 in Montazeri et al., 2016 (Large-scale inference of conjunctive Bayesian networks. Bioinformatics, 32(17), 727–735. \url{https://dx.doi.org/10.1093/bioinformatics/btw459}), see the transition rate matrix from genotype 2 to genotype 2,4\footnote{Notice that Figure 1 is correct, but the matrix in Example 1 has a typo, and is missing the entry for \(\lambda_4\); or look at the transition from 1,2 to 1,2,3 and 1,2,4}). You can think of this \(s_X\) as the joint combination of the effect of B on its own and the epistasis of A and B; but thinking of B on its own is a moot point, since B on its own (i.e., without A, without its restrictions satisfied) is not a genotype that can be observed. 
 
-Thus, for any genotype, do \(\prod (1 + s_i)\), where \(s_i = \lambda_i\) when the restrictions are satisfied.
+  \item  Thus, for any genotype, do \(\prod (1 + s_i)\), where \(s_i = \lambda_i\) when the restrictions are satisfied.
+
+
+
+  \end{itemize}
+
 \end{itemize}
 
 \subsubsection{Even more details about CBN, \(s\), \(\lambda\)}
@@ -469,25 +480,41 @@ What about OncoBN, the method described in Nicol, P. B., Coombes, K. R., Deaver,
 
 OncoBN can fit both conjunctive (AND) and disjunctive (OR, not XOR) models; for the first you specify \texttt{model = ``CBN''} and for the second \texttt{model = ``DBN''}. So it resembles CBN and HESBCN. However, the $\theta$s returned by OncoBN are not rates, as in CBN, HESBCN, or MHN, but rather probabilities of seeing specific alterations at the time of observation as in OT. So probably a better way to think of OncoBN is as an extension of OT, where nodes can have multiple parents, and the relationship of dependence can be AND or OR (but not both).
 
-We deal with OncoBN as we do with any other method, but as we do with OT, we do not interpret the parameters as rates. This also means that our transition matrices (again, transition matrices, not transition rate matrices: no transition rate matrices are returned for OT or OncoBN), as for OT, are really an abuse of the untimed oncogenetic model.
+We deal with OncoBN as with any other method, but as we do with OT, we do not interpret the parameters as rates. This also means that our transition matrices (again, transition matrices, not transition rate matrices: no transition rate matrices are returned for OT or OncoBN), as for OT, are really an abuse of the untimed oncogenetic model.
 
-When using OncoSimulR, there is nothing new. If OncoBN was fitted specifying  ``CBN'', we use ANDs, if it used ``DBN'' we use ORs when computing fitness. 
+When using OncoSimulR to represent OncoBN models, there is nothing new. If OncoBN was fitted specifying  ``CBN'', we use ANDs, if it used ``DBN'' we use ORs when computing fitness. 
 
 
 
 \section{MHN}\label{MHN}
 
-MHN has been described in Schill, R., Solbrig, S., Wettig, T., \& Spang, R. (2020). Modelling cancer progression using Mutual Hazard Networks. Bioinformatics, 36(1), 241–249. \url{http://dx.doi.org/10.1093/bioinformatics/btz513}. We cannot use OncoSimulR directly, because the MHN model is rather peculiar if taken at face value as an evolutionary model (see Diaz-Colunga, J., \& Diaz-Uriarte, R (2021). Conditional prediction of consecutive tumor evolution using cancer progression models: What genotype comes next? PLOS Computational Biology, 17(12), 1009055. http://dx.doi.org/10.1371/journal.pcbi.1009055 ; in particular, see section 1.7 of the Supporting Information: \url{https://doi.org/10.1371/journal.pcbi.1009055.s001}).
+MHN has been described in Schill, R., Solbrig, S., Wettig, T., \& Spang, R. (2020). Modelling cancer progression using Mutual Hazard Networks. Bioinformatics, 36(1), 241–249. \url{http://dx.doi.org/10.1093/bioinformatics/btz513}.
 
-To express MHN in terms of fitness of genotypes, we would need to express it as a model where order of acquisition of mutations matters. This is possible with OncoSimulR, but it does not provide any additional intuition, and can lead to a huge number of fitnesses for a genotype (a genotype with $k$ mutated loci could possibly have $k!$ different fitnesses, one for each of its $k!$ different ways of mutation its $k$ loci).
+We cannot use OncoSimulR as for the rest of the modes, because the MHN model is rather peculiar if taken at face value as an evolutionary model (see Diaz-Colunga, J., \& Diaz-Uriarte, R (2021). Conditional prediction of consecutive tumor evolution using cancer progression models: What genotype comes next? PLOS Computational Biology, 17(12), 1009055. http://dx.doi.org/10.1371/journal.pcbi.1009055 ; in particular, see section 1.7 of the Supporting Information: \url{https://doi.org/10.1371/journal.pcbi.1009055.s001}).
+
+To express MHN in terms of fitness of genotypes, we would need to express it as a model where order of acquisition of mutations matters. This is possible with OncoSimulR\footnote{We would need to use ``order effects'' for the fitness specification. See the vignette for OncoSimulR  \url{https://rdiaz02.github.io/OncoSimul/OncoSimulR.html\#36\_Order\_effects},  and the help for function \texttt{allFitnessEffects}.
+}, but it does not provide any additional intuition, and can lead to a huge number of fitnesses for a genotype (a genotype with $k$ mutated loci could possibly have $k!$ different fitnesses, one for each of its $k!$ different ways of mutation its $k$ loci).
 
 
 \section{Benefits of this exercise with OncoSimulR}
 \label{sec:org4a55091}
 \begin{itemize}
 \item We make the fitness model explicit.
-\item We can double check the code for getting fitness graphs and transition
-probabilities as some critical computations are being done with very
-different code.
+\item We can double check the code in \texttt{evamtools} for obtaining fitness graphs and transition probabilities as some critical computations are being done with very different code.
 \end{itemize}
+
+
+
+\section{License and copyright}
+This work is Copyright, \copyright, 2021, Ramon Diaz-Uriarte.
+
+Like the rest of this package (EvAM-Tools), this work is licensed under the GNU Affero General Public License. You can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License along with this program. If not, see \url{https://www.gnu.org/licenses/}. 
+
+The source of this document and the EvAM-Tools package is at \url{https://github.com/rdiaz02/EvAM-Tools}.
+
+
 \end{document}

@@ -5,15 +5,14 @@
 \usepackage[a4paper, total={6.5in, 9in}]{geometry}
 \usepackage{natbib}
 \usepackage{authblk} % author affiliations
-%% \usepackage[UKenglish]{isodate}
-\usepackage[style=iso]{datetime2}
+\usepackage[iso,english]{isodate}
 \usepackage{nameref}
 \newcommand*{\qref}[1]{\hyperref[{#1}]{\textit{``\nameref*{#1}'' (section \ref*{#1})}}}
 \newcommand*{\qrefP}[1]{\hyperref[{#1}]{\textit{``\nameref*{#1}'', section \ref*{#1}}}}
 \newcommand*{\qrefS}[1]{\hyperref[{#1}]{section \textit{\ref*{#1},
       ``\nameref*{#1}''}}}
-
 \usepackage{hyperref}
+\usepackage{latexgit}
 
 \hypersetup{
   colorlinks = true,
@@ -32,9 +31,11 @@
   (UAM-CSIC), Madrid, Spain}
 \affil[$\dagger$]{To whom correspondence should be addressed: \normalfont r.diaz@uam.es}
 
-
+\date{\today \\ Version \gitcommithash}
 \begin{document}
 \maketitle
+
+
 
 This PDF is the concatenation of three different files:
 
