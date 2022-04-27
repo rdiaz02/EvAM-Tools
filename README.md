@@ -173,7 +173,7 @@ You can also [build your own Docker image](#build-your-own-docker-image) and you
 	
 	  
 ### Docker images 
-We provide two docker images, one for running the Shiny app, and another with  RStudio to run the evamtools package directly.  They are available from
+We provide two Docker images, one for running the Shiny app, and another with  RStudio to run the evamtools package directly.  They are available from
 https://hub.docker.com/r/rdiaz02/evamshiny
 and 
 https://hub.docker.com/r/rdiaz02/evamrstudio ; the first for running the Shiny app, the second for using the package from RStudio. Pull the one you need (`docker pull rdiaz02/evamshiny` or `docker pull rdiaz02/evamrstudio`).
@@ -228,7 +228,7 @@ Some additional notes:
 docker run -d -p 4080:3000 --memory="2g" --name EVAM1 rdiaz02/evamshiny
 ```
 
-This runs the `evamshiny` docker image, mapping port 3000 of the container to port 4080 of the host  (so if you want to use the usual port 80, write 80 instead of 4080). You can use whatever you want instead of "EVAM1"; it is just a name to make other operations  (like stopping the container) simpler. In this example, we also limit the maximum memory to 2 GB. 
+This runs the `evamshiny` Docker image, mapping port 3000 of the container to port 4080 of the host  (so if you want to use the usual port 80, write 80 instead of 4080). You can use whatever you want instead of "EVAM1"; it is just a name to make other operations  (like stopping the container) simpler. In this example, we also limit the maximum memory to 2 GB. 
 
 This is a *non-interactive run*, and we use the "-d" or "--detach" option, so it runs in detached mode. You can point your browser to 0.0.0.0:4080 and the Shiny app should be there.  (If you want to keep the container running, you might want to add `tail -f /dev/null` to the above command).
 
