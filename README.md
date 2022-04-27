@@ -125,7 +125,7 @@ What can EvAM-Tools be used for?
 ### Overview
 
 If you just want to run the Shiny app:
-  * Go to http://evamtools.iib.uam.es .
+  * Go to http://iib.uam.es/evamtools .
 
 
 You can install on your machines:
