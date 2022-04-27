@@ -10,7 +10,7 @@
   * [Copyright and origin of files under evamtools/R](#copyright-and-origin-of-files-under-evamtoolsr)
   * [ct-cbn](#ct-cbn)
 - [Installing and running](#installing-and-running)
-  * [Overview](#overview)
+  * [Overview of options](#overview-of-options)
   * [How to install the R package](#how-to-install-the-r-package)
   * [Docker images](#docker-images)
   * [How to run the R package and the shiny app locally without Docker](#how-to-run-the-r-package-and-the-shiny-app-locally-without-docker)
@@ -33,7 +33,7 @@
 ## EvAM Tools: purpose
 Tools for evolutionary accumulation, or event accumulation, models. We use code from what are usually referred to as "Cancer Progression Models" (CPM) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost).
 
-We provide an R package, evamtools, and a Shiny (https://shiny.rstudio.com/) app (running on https://www.iib.uam.es/evamtools/) that allows you to:
+We provide an R package, evamtools, that can also launch a GUI as a Shiny (https://shiny.rstudio.com/) web app (running on https://www.iib.uam.es/evamtools/) that allows you to:
 
   * Run state-of-the-art CPM methods, including Conjuntive Bayesian Networks (CBN ---and their MC-CBN version---), Oncogenetic trees (OT), Mutual Hazard Networks (MHN), Hidden Extended Suppes-Bayes Causal Networks (H-ESBCNs ---PMCE---), and Disjunctive Bayesian Networks (DBN, from the OncoBN package) with a single function call.
   * From the fitted models, represent, graphically, the fitted models (DAGs of restrictions or matrix of hazards, as appropriate), the transition matrices and transition rate matrices (where appropriate) between genotypes and show frequencies of genotypes sampled from the fitted models.
@@ -122,7 +122,10 @@ What can EvAM-Tools be used for?
 ---
 ## Installing and running ##
 
-### Overview
+EvAM-Tools is available as an R package, evamtools, that can launch a GUI as a Shiny web app.
+
+
+### Overview of options
 
 If you just want to run the Shiny app:
   * Go to http://iib.uam.es/evamtools .
@@ -179,6 +182,9 @@ https://hub.docker.com/r/rdiaz02/evamrstudio ; the first for running the Shiny a
 
 Details about Docker are available here: https://docs.docker.com/get-docker/ .
 Details about R with Docker and Rocker project here: https://www.rocker-project.org/ . Our images are based on the r-ver (https://hub.docker.com/r/rocker/r-ver) and rstudio (https://hub.docker.com/r/rocker/rstudio) Docker images from the Rocker project (https://www.rocker-project.org/).
+
+
+More details about building and modifying the Docker images are provided in the Additional documentation: https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_doc_all.pdf .
 
 
 ### How to run the R package and the shiny app locally without Docker
