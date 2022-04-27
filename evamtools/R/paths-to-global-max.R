@@ -15,7 +15,7 @@
 
 
 ## The code that follows is tested, and is the basis of much simplified
-## code in wrapper-run-all-methods.R
+## code in evam-wrapper.R
 ## But this code itself is not actually used here.
 ## This was used in Diaz-Uriarte and Vasallo, 2019
 ## This was used to obtain paths to the global maximum from the CPMs
