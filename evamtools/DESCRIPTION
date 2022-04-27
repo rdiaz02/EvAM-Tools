@@ -1,8 +1,8 @@
 Package: evamtools
 Type: Package
 Title: Tools for evolutionary accumulation models or event accumulation models (evam), for now mainly cancer progression models
-Version: 1.1.1
-Date: 2022-04-24
+Version: 1.1.2
+Date: 2022-04-27
 Authors@R: c(
             person("Ramon", "Diaz-Uriarte",			      
 	    	    email = "r.diaz@uam.es", role = c("cre", "aut")),	      
@@ -18,7 +18,7 @@ Author: Ramon Diaz-Uriarte [aut, cre]
 	Rudolf Schill [ctb]
 Maintainer: Ramon Diaz-Uriarte <r.diaz@uam.es>
 Description: Wrappers to run cancer progression models (CPMs) on
-    cross-sectional data, including Conjuntive Bayesian Networks (CBN ---and their MC-CBN version---), Oncogenetic trees (OT), Mutual Hazard Networks (MHN), Hidden Extended Suppes-Bayes Causal Networks (H-ESBCNs ---PMCE---), and Disjunctive Bayesian Networks (DBN, from the OncoBN package). Tools to represent, graphically, the fitted models (DAGs of restrictions or matrix of hazards, as appropriate), the transition matrices and transition rate matrices (where appropriate) between genotypes and to show frequencies of genotypes sampled from the fitted models. Functions to sample from the fitted models or from random models to facilitate comparing different methods. An interactive Shiny app allows users to easily visualize the effects of changes in genotype composition and to interactively modify and create datasets from models defined from scratch.
+    cross-sectional data, including Conjuntive Bayesian Networks (CBN ---and their MC-CBN version---), Oncogenetic trees (OT), Mutual Hazard Networks (MHN), Hidden Extended Suppes-Bayes Causal Networks (H-ESBCNs ---PMCE---), and Disjunctive Bayesian Networks (DBN, from the OncoBN package). Tools to represent, graphically, the fitted models (DAGs of restrictions or matrix of hazards, as appropriate), the transition matrices and transition rate matrices (where appropriate) between genotypes and to show frequencies of genotypes sampled from the fitted models. Functions to sample from the fitted models or from random models to facilitate comparing different methods. An interactive Shiny web app allows users to easily visualize the effects of changes in genotype composition and to interactively modify and create datasets from models defined from scratch.
 URL: https://github.com/rdiaz02/EvAM-Tools
 BugReports: https://github.com/rdiaz02/EvAM-Tools/issues
 Depends: R (>= 4.0.0)
