@@ -66,7 +66,7 @@ evam(x,
   (i.e., the number of threads for OMP for MHN and MCCBN should be 1).}
 
 \item{paths_max}{If TRUE, return all paths to the maxim/maxima, with
-  their log probabilities.}
+  their probabilities.}
 
 \item{mhn_opts}{A list with two named arguments.
   \itemize{
@@ -239,9 +239,9 @@ multiple evams in parallel.}
   
   \item{Removing genes with no mutations: }{Any column that has value of 0 for all observations is removed.}
 
-  \item{Merging identical columns: }{Any identical columns are replaced by a single one (with a new identifier, the result of pasting the names of the fused columns separated by a _). 
+  \item{Merging identical columns: }{Any identical columns are replaced by a single one (with a new identifier, the result of pasting the names of the fused columns separated by a _).} 
 
-  \item{No more than max_cols: }{If the \dQuote{max_cols} argument is not NULL, and if the data set has more columns that max_cols, we keep only max_cols columns of data, those with the largest number of mutations.}} 
+  \item{No more than max_cols: }{If the \dQuote{max_cols} argument is not NULL, and if the data set has more columns that max_cols, we keep only max_cols columns of data, those with the largest number of mutations.}
  }
 
 \strong{Changing only some options:} Often, you will want to change only
@@ -257,8 +257,8 @@ matrix of thetas for MHN is much smaller than the reported time here,
 which also includes building the transition rate matrix).
 
 
-You can \strong{convert paths and their probabilities} to a data frame
-easily; see example below. By default, we do not return paths, as their number can grow very quickly with number of genotypes and you only need if, well, you care about them.
+By default, we do not return paths to maximum/maxima, as their number
+can grow very quickly with number of genotypes and you only need them if, well, you care about them.
 
 }
 
@@ -351,6 +351,7 @@ Executes all CPMS given a cross sectional data set.
 
 \examples{
 data(every_which_way_data)
+## Use a small data set for speed.
 Dat1 <- every_which_way_data[[16]][1:40, 2:6]
 out1 <- evam(Dat1,
             methods = c("CBN", "OT", "OncoBN",
@@ -377,5 +378,6 @@ out3 <- evam(Dat1,
             paths_max = TRUE)
 
 out3$OncoBN_paths_max
+out3$MHN_paths_max
 
 }

@@ -9,16 +9,14 @@ sample_evam(cpm_output,  N,
                 output = c("sampled_genotype_counts"),
                 obs_noise = 0,
                 genotype_freqs_as_data = TRUE
-
-)
+            )
 
 sample_CPMs(cpm_output,  N,
                 methods = NULL, 
                 output = c("sampled_genotype_counts"),
                 obs_noise = 0,
                 genotype_freqs_as_data = TRUE
-
-)
+            )
 }
 \arguments{
 \item{cpm_output}{Output from calling all_methods2trans_mat}
@@ -42,7 +40,7 @@ sample_CPMs(cpm_output,  N,
 
 
 \value{
-  A list, with a many entries as methods times number of components requested. If all, then for each method among CBN, MCCBN, HESBCN, and MHN:
+  A list, with a many entries as methods times number of components requested. For each method among CBN, MCCBN, HESBCN, and MHN:
    \itemize{
     \item{sampled_genotype_counts: }{Counts, or absolute genotype frequencies,
   obtained by sampling from the predicted frequencies. See also
@@ -55,7 +53,8 @@ sample_CPMs(cpm_output,  N,
   
   Observed genotype transitions are not the way to obtain estimates of transition probabilities. The transition probabilities given by each method are already available from the output of evam itself. These genotype transitions are the observed transitions during the simulation of the sampling process and, thus, have additional noise.
 
-  For OT and OncoBN, only the \code{sampled_genotype_counts} component is available (the other two are not available).
+  For OT and OncoBN, only the \code{sampled_genotype_counts} and
+  \code{sampled_genotype_counts_as_data} components are available (the other two are not available).
   
 }
 

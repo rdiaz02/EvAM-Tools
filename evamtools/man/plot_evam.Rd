@@ -2,6 +2,9 @@
 \alias{plot_evam}
 \alias{plot_CPMs}
 \title{Plot results from EvAMs (CPMs)}
+\description{Plots fitted EvAMs (CPMs), both fitted model and custom
+  plots for transition rates and transition probabilities.}
+
 \usage{
 plot_evam(
   cpm_output,
@@ -66,22 +69,18 @@ plot_CPMs(
 will plot all paths. See below, Description, for details about relevance.}
 }
 
-\note{
-\strong{plot_CPMs has been deprecated}. Use plot_evam.
-}
-
-\description{
-By default it creates a top row with the DAG of the CPM 
-or the transtionRateMatrix for MHN
-The bottom row has a custom plot for trans_mat, trans_rate_mat, or
-obs_genotype_transitions.
+\value{
+By default this function creates a top row with the DAG of the CPM 
+or the log-Theta matrix for MHN.
+The bottom row has a custom plot for the transition matrix, or the transition
+rate matrix, or the observed genotype transitions.
 
  In the bottom row plots, unless \code{fixed_vertex_size = TRUE}, the size of genotype nodes is proportional to
 the observed frequency of genotypes for all plots except for
 \code{plot_type = 'obs_genotype_transitions'}, where it is
 proportional to the genotype frequency as obtained by the sampling from
 the predictions of each method; if a node (genotype) has no observations,
-its size is of a fixed size. Thus, for all plots except \code{plot_type = 'obs_genotype_transitions'} the size of the genotype nodes is
+its size is of fixed size. Thus, for all plots except \code{plot_type = 'obs_genotype_transitions'} the size of the genotype nodes is
 the same among methods, but the size of the genotype nodes can differ
 between methods for \code{plot_type = 'obs_genotype_transitions'}. 
 
@@ -99,21 +98,7 @@ green, to differentiate them from the observed genotypes (shown in orange).
 
 
 
-The criteria to decide which are the most relevant paths with the
-top_paths option is the following:
-1) Get all the leaves from the graph.
-2) Calculate all the paths leading from "WT" to all leaves.
-3) Select n paths with highest cumulative weight sum.
 
-The weights used depend on the plot_type: for trans_mat it will be
-log probabilities (so the most relevant paths are the most likely paths), for trans_rate_mat it will be
-rates, and for obs_genotype_transitions it will be raw counts.  
-
-
-Plots can be more readable with a combination of top_paths and
-label_type. If \code{label_type = 'acquisition'} node labels will dissapear
-and edge label will be shown instead. They will display the information of
-the last gene mutated.
 
 
 }
@@ -128,6 +113,25 @@ the last gene mutated.
   It is easy to get the plots to display poorly (overlapping names in
   nodes, overlapping labels between plots, etc) if you use long gene
   names. For best results, try to use short gene names.
+
+
+The criteria to decide which are the most relevant paths with the
+top_paths option is the following:
+1) Get all the leaves from the graph.
+2) Calculate all the paths leading from "WT" to all leaves.
+3) Select n paths with highest cumulative weighted sum. The weights used
+depend on the type of plot (\code{plot_type}): for trans_mat it will be
+log probabilities (so the most relevant paths are the most likely
+paths), for trans_rate_mat it will be rates, and for obs_genotype_transitions it will be raw counts.  
+
+
+Plots can be more readable with a combination of top_paths and
+label_type. If \code{label_type = 'acquisition'} node labels will dissapear
+and edge label will be shown instead. They will display the information of
+the last gene mutated.
+  
+
+\strong{plot_CPMs has been deprecated}. Use plot_evam.
 
 }
 

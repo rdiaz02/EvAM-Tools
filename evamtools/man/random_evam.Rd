@@ -41,7 +41,8 @@ random_evam(ngenes = NULL,
 Random model, with the same structure as returned by function \code{\link{evam}}. Thus, a named list with all the returned entries from \code{\link{evam}} for a given method.}
 
 
-\details{The purpose of this function is to allow easy simulation of data under a specific mode. Details follow for specific models, with explanation of parameters.
+\details{The purpose of this function is to allow easy simulation of
+  data under a specific model. Details follow for specific models, with explanation of parameters.
 
   For MHN we use the same procedure as available in the original code of Schill et al. \code{graph_density} is \code{1 - sparsity}. A matrix of random thetas (from a normal 0, 1, distribution) is generated, where the number of non-zero entries is controlled by \code{graph_density}.
 
@@ -56,10 +57,10 @@ Random model, with the same structure as returned by function \code{\link{evam}}
 
   For OT we use a procedure similar to the one for CBN, but edge weights are uniformly distributed between \code{ot_oncobn_weight_min} and \code{ot_oncobn_weight_max}. Since under OT a node can have only one parent, for all nodes that have two or more parents, we randomly keep one of the parents. Thus, \code{graph_density} is often larger than the actual number of non-zero connections in the adjacency matrix.
 
-  For OncoBN we do as for CBN. If you specify \code{oncobn_model} to be DBN, all dependencies on two or more parents are  OR dependencies; if you specify CBN dependencies are AND dependencies. As for OT, thetas are uniformly distributed between \code{ot_oncobn_weight_min} and \code{ot_oncobn_weight_max}.
+  For OncoBN we do as for CBN. If you specify \code{oncobn_model} to be DBN, all dependencies on two or more parents are  OR dependencies; if you specify CBN, dependencies are AND dependencies. As for OT, thetas are uniformly distributed between \code{ot_oncobn_weight_min} and \code{ot_oncobn_weight_max}.
   
 
-  For both OT and OncoBN model, the \code{ot_oncobn_epos} controls the probability that a gene can mutate if its requirements are not satisfied. (This is thus intrinsic to the model, and independent of observation error; see next).
+  For both OT and OncoBN model, \code{ot_oncobn_epos} controls the probability that a gene can mutate if its requirements are not satisfied. (This is thus intrinsic to the model, and independent of observation error; see next).
   
   In all cases, the predicted distribution of genotypes for a model is done assuming perfect compliance with the model. See the additional documentation for details about the error models. Adding observation error can be done using \code{obs_error > 0} when calling \code{\link{sample_evam}}.
 
