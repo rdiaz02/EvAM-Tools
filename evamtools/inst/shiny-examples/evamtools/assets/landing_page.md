@@ -242,11 +242,12 @@ The complete source code for the package and the shiny app, as well information 
 This app is free to use. Confidentiality and security: ff you have confidential data, you might want not to upload it here, and instead install the package locally. 
 
 
+&nbsp;
+#### Authors, contact and bug reports<a id="authors"></a>
+
 Most of the files for this app (and the package) are copyright Ramon Diaz-Uriarte and Pablo Herrera-Nieto (and released under the Affero GPL v3 license ---https://www.gnu.org/licenses/agpl-3.0.html) except some files for HESBCN, MHN, and the CBN code; see full details in https://github.com/rdiaz02/EvAM-Tools#copyright-and-origin-of-files.
 
 
-&nbsp;
-#### Authors, contact and bug reports<a id="authors"></a>
 Please, use the repository (https://github.com/rdiaz02/EvAM-Tools) and submit bug reports there. 
 
 
