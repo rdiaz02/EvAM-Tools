@@ -66,7 +66,7 @@ evam(x,
   (i.e., the number of threads for OMP for MHN and MCCBN should be 1).}
 
 \item{paths_max}{If TRUE, return all paths to the maxim/maxima, with
-  their probabilities.}
+  their probabilities. See details for how they are computed.}
 
 \item{mhn_opts}{A list with two named arguments.
   \itemize{
@@ -262,7 +262,12 @@ can grow very quickly with number of genotypes and you only need them if, well, 
 
 }
 
+\details{
 
+  \bold{Probabilities of evolutionary paths or paths of tumor progression}
+
+  Details and examples on how probabilities of paths are computed are given in Diaz-Uriarte and Vasallo, 2019 (specifically, see section 3 of file S4_Text, \url{https://doi.org/10.1371/journal.pcbi.1007246.s006}); see also Hosseini et al., 2019. The models used in those papers all had a single local maximum. Here we follow the same procedure also for models with possibly more than one maximum, such as H-ESBCN. Note that in all cases we assume evolution can only move uphill in fitness and never crosses fitness valleys (which excludes, for example, the scenarios considered in Weinreich and Chao, 2005).
+}
 
 \description{
 Executes all CPMS given a cross sectional data set.
@@ -340,7 +345,11 @@ Executes all CPMS given a cross sectional data set.
   comes next? PLOS Computational Biology, 17(12),
   1009055. \url{http://dx.doi.org/10.1371/journal.pcbi.1009055}
 
- 
+  
+\bold{Reference in details}
+  
+-  Weinreich, D. M., \& Chao, L. (2005). Rapid evolutionary escape by large populations from local fitness peaks is likely in nature. Evolution, 59(6),   1175–1182. \url{http://dx.doi.org/10.1111/j.0014-3820.2005.tb01769.x} 
+  
 }
 
 \seealso{
