@@ -30,7 +30,7 @@
 }
 
 \author[1,2,$\dagger$]{Ramon Diaz-Uriarte}
-\affil[1]{Dpt. of Biochemistry, School of Medicine, Universidad Autónoma de Madrid, Madrid, Spain}
+\affil[1]{Dept. of Biochemistry, School of Medicine, Universidad Autónoma de Madrid, Madrid, Spain}
 \affil[2]{Instituto de Investigaciones Biomédicas `Alberto Sols'
   (UAM-CSIC), Madrid, Spain}
 \affil[$\dagger$]{To whom correspondence should be addressed: \normalfont r.diaz@uam.es \qquad \texttt{https://ligarto.org/rdiaz}}
@@ -74,9 +74,12 @@ fitness 0).
 \item Evaluate the fitness of genotypes.
 \item Call function "genots\_2\_fgraph\_and\_trans\_mat".
 \begin{itemize}
-\item This is a general function.
-\item In particular, it does not assume that mutations that do not kill a
-genotype always increase fitness or at least do not decrease it.
+\item This is a general function, not linked to any specific cancer progression model. In other words, given a fitness landscape (a mapping from genotypes to fitness) find the accessible genotypes and the transition matrices (not transition rate matrices) between genotypes.
+\item For example, this procedure does not assume that mutations that do not kill a genotype always increase fitness or at least do not decrease it. A mutation might increase fitness in some contexts (with some other mutations) and decrease in other contexts, such as with sign and reciprocal sign epistasis.
+\item This procedure \textbf{assumes SSWM (strong selection, weak mutation)}. Moreover, \textbf{we assume evolution can only move uphill in fitness}. For example, a genotype is considered not accessible if its fitness is less than, or equal to (note the ``or equal to'') that of its immediate ancestor, and we cannot cross fitness valleys\footnote{This excludes, for example, the scenarios studied in  Weinreich, D. M., \& Chao, L. (2005). Rapid evolutionary escape by large
+  populations from local fitness peaks is likely in nature. Evolution;
+  international journal of organic evolution, 59(6),
+  1175–1182. http://dx.doi.org/10.1111/j.0014-3820.2005.tb01769.x .}.
 \item This function returns accessible genotypes, fitness graph, and transition matrices directly from the fitness of the genotypes.
 \end{itemize}
 \end{itemize}
@@ -88,37 +91,48 @@ genotype always increase fitness or at least do not decrease it.
 \begin{itemize}
 \item Again, to emphasize the above: \(s_i\), when using OncoSimulR with a DAG, is  the selection coefficient from gene \(i\) \textbf{with its restrictions satisfied.}
 \end{itemize}
-\item Recall that the transition probabilities can be computed from competing   exponentials. For example, suppose from genotype A we can go to enotypes AB and AC. The probability of going to AB should be \(\lambda_B/(\lambda_B +  \lambda_C)\).
-\item As explained in Hosseini et al., 2019 (Hosseini, S., Diaz-Uriarte, Ramon, Markowetz, F., \& Beerenwinkel, N. (2019). Estimating the predictability of cancer evolution. Bioinformatics,   35(14), 389–397. \url{https://dx.doi.org/10.1093/bioinformatics/btz332}), p. i392, let us define the selective  coefficient of a mutation \(i\) as the fitness difference that it causes along the mutational pathway.
+\item Recall that for CBN the transition probabilities can be computed from competing   exponentials. For example, suppose from genotype A we can go to enotypes AB and AC. The probability of going to AB should be \(\lambda_B/(\lambda_B +  \lambda_C)\).
 
-\begin{itemize}
-\item Using our previous example, that would be \(Pr(A \rightarrow AB) = \frac{W_{AB}- W_{A}}{(W_{AB} - W_A) + (W_{AC} - W_A)}\), where \(W_x\) is fitness of  genotype \(x\).
+  
+\item As in p.~7 of the supplementary material of Weinreich et al., 2006, (Weinreich, D. M., Delaney, N. F., DePristo, M. A., \& Hartl, D. L. (2006). Darwinian Evolution Can Follow Only Very Few Mutational Paths to Fitter Proteins. Science, 312(5770), 111–114.\url{https://dx.doi.org/10.1126/science.1123539}), let us define the selective  coefficient of a mutation \(i\) as the relative fitness difference that it causes along the mutational pathway.
 
-\item If we write, as is common, \(W_{AB} = W_A \  (1 + s_B)\), we get from the above \(Pr(A \rightarrow AB) = \frac{s_B}{s_B + s_C}\).
+  \begin{itemize}
+    \item  \(W_{AB} = W_A \  (1 + s_B)\) or \(s_B = \frac{W_{AB} - W_A}{W_A}\). 
 
-\item (So, actually, the \(s_i\) are the relative differences, not just
-differences, in fitness: \(s_B = \frac{W_{AB} - W_A}{W_A}\), as shown also in p.7 of the supplementary material of Weinreich, D. M., Delaney, N. F., DePristo, M. A., \& Hartl, D. L. (2006). Darwinian Evolution Can Follow Only Very Few Mutational Paths to Fitter Proteins. Science, 312(5770), 111–114.\url{https://dx.doi.org/10.1126/science.1123539} .)
+    \item Using our previous example, \(Pr(A \rightarrow AB) = \frac{W_{AB}- W_{A}}{(W_{AB} - W_A) + (W_{AC} - W_A)}\), where \(W_x\) is fitness of  genotype \(x\).
 
-\item (We wrote \(W_{AB} = W_A \ (1 + s_B)\). This we can do as we explained what the meaning of the \(s_i\) are: selection coefficient from gene \(i\) with its restrictions satisfied. See below: \hyperref[sec:orge68f649]{Transition probabilities using an epistatic specification}.)
+    \item Thus, we get from the above \(Pr(A \rightarrow AB) = \frac{s_B}{s_B + s_C}\).
+  \item (We wrote \(W_{AB} = W_A \ (1 + s_B)\). This we can do as we explained what the meaning of the \(s_i\) are: selection coefficient from gene \(i\) with its restrictions satisfied. See below: \hyperref[sec:orge68f649]{Transition probabilities using an epistatic specification}.)    
 \end{itemize}
+      
+
 
 \item Note that this is the same procedure as in Weinreich et al., 2006, (Weinreich, D. M., Delaney, N. F., DePristo, M. A., \& Hartl, D. L. (2006). Darwinian Evolution Can Follow Only Very Few Mutational Paths to Fitter Proteins. Science, 312(5770), 111–114.\url{https://dx.doi.org/10.1126/science.1123539}) supplementary material, p. 4): \(s_{i \rightarrow j}\) "the selection coefficient for the mutation that carries allele i to allele j"\footnote{Selection coefficient has the usual textbook definition. For example, Gillespie, 2004 (Population genetics: a concise guide, 2nd. Baltimore, Md: The Johns Hopkins University Press.), p. 63. But here we write \(W_{AB} = W_A \ (1 + s_B)\), and thus if \(s_B > 0\) AB is fitter than A; see also p.7 of the supplementary material of Weinreich et al., 2006}.
-\begin{itemize}
+
 \item Specifically, see equation S5b in the supplementary material of Weinreich et al., 2006, which shows the relationship between the expected value of the conditioned probability of fixation in a mutation from \(i\) to \(j\) and the expected value of the ratio of the selection coefficient for the mutation that turns \(i\) to \(j\) over the sum of selection coefficients of beneficial mutations that turn \(i\) into all other alleles; see also their figure S1 in p.~7 of the supplementary material that shows the accuracy of their expression.
-\end{itemize}
 
-\item Additional note: In Gerstung et al., 2011 (Gerstung, M., Eriksson, N., Lin, J., Vogelstein, B., \& Beerenwinkel, N. (2011). The Temporal Order of Genetic and Pathway Alterations in Tumorigenesis. PLoS ONE, 6(11), 27136. \url{https://dx.doi.org/10.1371/journal.pone.0027136}), PLoS ONE (p.8) the relationship between \(\lambda_i\) and \(s_i\) is also discussed.
 
-\item And why the fitness difference with respect to the ancestor and not just a  ratio of fitnesses? Suppose \(W_{AC} < W_A < W_{AB}\). The procedure above  correctly would say that we always transition from A to AB.
+\item Note that this is similar to what is done in Hosseini et al., 2019 (Hosseini, S., Diaz-Uriarte, Ramon, Markowetz, F., \& Beerenwinkel, N. (2019). Estimating the predictability of cancer evolution. Bioinformatics,   35(14), 389–397. \url{https://dx.doi.org/10.1093/bioinformatics/btz332}), p. i392. The difference is that in Hosseini et al.~ the $s_i$ is defined as the fitness difference, not the relative fitness difference (and in Hosseini et al there is a normalizing constant, as given by eq.~8).
 
-\item So we do as follows:
+
+\item Additional note: In Gerstung et al., 2011 (Gerstung, M., Eriksson, N., Lin, J., Vogelstein, B., \& Beerenwinkel, N. (2011). The Temporal Order of Genetic and Pathway Alterations in Tumorigenesis. PLoS ONE, 6(11), 27136. \url{https://dx.doi.org/10.1371/journal.pone.0027136}), PLoS ONE (p.8) the relationship between \(\lambda_i\) and \(s_i\) is also discussed, with additional references given.
+
+  
+% \item And why the fitness difference with respect to the ancestor and not just a  ratio of fitnesses? Suppose \(W_{AC} < W_A < W_{AB}\). The procedure above  correctly would say that we always transition from A to AB.
+
+\item So when using OncoSimulR we do as follows:
 \begin{itemize}
 \item Set \(s_i = \lambda_i\) (for OT, we use edgeWeight instead of \(\lambda\)).
 \item Obtain the fitness of all genotypes from OncoSimulR.
-\item If so desired (e.g., to ensure the maximum fitness is a specific number),  multiply all fitness values (not the WT, which is kept at 1) by the appropriate scaling factor.
+\item If so desired (e.g., to ensure the maximum fitness is a specific number),  scale all fitnesses by the appropriate factor (that also ensures that WT is kept at one; see, for instance, function \texttt{scale\_fitness\_2} in file \texttt{access\_genots\_from\_oncosimul.R}.
 \end{itemize}
 
-Is the above correct for OT? Strictly not as OT are untimed oncogenetic trees. (And, yes, we are aware that under OT if you have, say, both A and B descend from root, the probability of genotype A is $p_a (1 - p_b)$).
+\item Is the above correct for OT? Strictly not as OT are untimed oncogenetic trees. (And, yes, we are aware that under OT if you have, say, both A and B descend from root, the probability of genotype A is $p_a (1 - p_b)$).
+
+\item It is important to emphasize that we are not claiming $\lambda_i$ should be taken as equal to $s_i$. We are using this procedure to obtain accessible genotypes and transition probabilities between genotypes, but not transition rate matrices. For example, as mentioned above, multiplying all $s_i$ by the same constant leaves these transition probabilities unchanged\footnote{
+    We can scale all fitness with a function like $W^* = 1 + (W - 1)\ \alpha$. \\
+    $W_A = 1 + s_A$. $W_A^*= 1 + s_A^*$. Thus $s_A^*= (W_A - 1)\ \alpha = s_A\  \alpha$.}. But even if multiples of the $\lambda_i$ result in the same transition probabilities, the transition rate matrices are different (the evolutionary process is faster or slower).
+  
 \end{itemize}
 
 
@@ -127,9 +141,15 @@ Is the above correct for OT? Strictly not as OT are untimed oncogenetic trees. (
 \begin{itemize}
 \item We compute fitness above assuming that only one of two things can happen: a mutation provides a fitness benefit or it leads to death. When the requirements are satisfied, a mutation conveys a fitness increase (\(\lambda_i\)); otherwise, the cell with the mutation has fitness 0.
 
-\item Strictly, mutations without dependencies satisfied might not be lethal, but they should not confer any fitness advantage, so that we will never observe them (Gerstung et al., 2009, p.~2810, say "(\ldots{}) mutations that need to be present before mutation i can fixate." and Gerstung and Beerenwinkel, 2010, p.~ 126, "with steps including both mutation and clonal expansion occurring at effective rates k j").
+\item Strictly, mutations without dependencies satisfied might not be lethal, but they should not confer any fitness advantage, so that we will not observe them become fixated in the population (Gerstung et al., 2009, p.~2810: "(\ldots{}) mutations that need to be present before mutation i can fixate.". Gerstung and Beerenwinkel, 2010, Waiting time models of cancer
+  progression. Mathematical Population Studies, 17, 115–135;  p.~ 126: "with steps including both mutation and clonal expansion occurring at effective rates $\lambda_j$". Beerenwinkel, N., \& Sullivant, S. (2009). Markov models for accumulating mutations. Biometrika, 96(3), 645, p.~659: ``In an evolutionary process, this waiting time includes the generation of the mutation plus the time it takes for the allele to reach fixation in the population'' and p.~660 ``The parameters $\lambda$ correspond to the rate of evolution, i.e. the product of population size, mutation rate and fixation probability'').
 
-\item In OncoSimulR, in addition to the \(s_i\), it is possible to set \texttt{sh = 0}, meaning there is no penalty for not respecting the restrictions. When \texttt{sh = 0} there is also no fitness gain, either, so fitness for those genotypes ends up being the fitness of the immediate parent (there is no contribution from the gen without restrictions satisfied to the fitness of the parent genotype). Regardless, when \texttt{sh = 0}, the transition matrix does not change compared to the transition matrix we obtain if we assume that mutations to genotypes with non-satisfied dependencies lead to a fitness of 0.
+
+
+
+  
+\item In OncoSimulR, in addition to the \(s_i\), it is possible to set \texttt{sh = 0}, meaning there is no penalty for not respecting the restrictions. When \texttt{sh = 0} there is also no fitness gain, either, so fitness for those genotypes ends up being the fitness of the immediate parent (there is no contribution from the gen without restrictions satisfied to the fitness of the parent genotype). Regardless, when \texttt{sh = 0}, the transition matrix does not change compared to the transition matrix we obtain if we assume that mutations to genotypes with non-satisfied dependencies lead to a fitness of 0: we said above that a genotype is considered
+not accessible if its fitness is less than, or equal to (note the ``or equal to'') that of its immediate ancestor.
 \end{itemize}
 
 
@@ -140,7 +160,7 @@ Is the above correct for OT? Strictly not as OT are untimed oncogenetic trees. (
 \end{itemize}
 
 
-\subsection{A detail about the fitness specification with OncoSimulR's DAGs and epistatic fitness specifications}
+\subsection{Fitness specification with OncoSimulR: DAGs vs.\ epistatic fitness specifications}
 \label{sec:orgcea5033}
 
 \begin{itemize}
@@ -209,7 +229,7 @@ where \(increase\_in\_fitness\_from\_acquiring\_B\) would include the effect of 
 
 \end{itemize}
 
-\subsubsection{Even more details about CBN, \(s\), \(\lambda\)}
+\subsubsection{Another example about the relationship between \(s\), \(\lambda\), $s_h$}
 \label{sec:orgcc4dcbe}
 \begin{itemize}
 \item Remember that having \(\lambda_i < 0\) makes no sense.

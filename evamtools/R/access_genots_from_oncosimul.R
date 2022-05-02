@@ -25,7 +25,7 @@
 ## inst/miscell/Using_OncoSimulR_to_get_accessible_genotypes_trans_mats.tex
 
 ## Additionally, since we compute and output fitness, can be used for simulations
-## (and shows the equivalence between lambdas and selection coefficients).
+## (and shows the relationship between lambdas and selection coefficients).
 
 ## For CBN, MCCBN, should allow to use time discretization.
 ##   But this requires proper definition of this process.
