@@ -161,8 +161,9 @@ You can also [build your own Docker image](#build-your-own-docker-image) and you
 	
   * Install MC-CBN
     - Go to https://github.com/cbg-ethz/MC-CBN and follow the installation instructions: https://github.com/cbg-ethz/MC-CBN#installation
-    - If you have all dependencies installed, and the correct version of libboost, then from R this should work: `install.packages("https://github.com/cbg-ethz/MC-CBN/releases/download/v2.1.0/mccbn_2.1.0.tar.gz", repos=NULL)`
-    - If it fails, make sure to review the installation instructions and then install manually: https://github.com/cbg-ethz/MC-CBN#installation-from-source 
+    <!-- - If you have all dependencies installed, and the correct version of libboost, then from R this should work: `install.packages("https://github.com/cbg-ethz/MC-CBN/releases/download/v2.1.0/mccbn_2.1.0.tar.gz", repos=NULL)` -->
+    - Review the installation instructions and then install manually: https://github.com/cbg-ethz/MC-CBN#installation-from-source 
+      (We suggest that at least for now you install manually, which what we do in the Dockefiles, instead of `install.packages("https://github.com/cbg-ethz/MC-CBN/releases/download/v2.1.0/mccbn_2.1.0.tar.gz", repos=NULL)` because file `mccbn_2.1.0.tar.gz` is from December 2020, and thus it does not incorporate several bug fixes, including changes to the NAMESPACE).
   
   * Install the evamtools package
      - Make sure you have the required dependencies and imports, as listed in the DESCRIPTION file: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree , gtools , plot.matrix , DT, shinyjs, shiny, RhpcBLASctl, Rlinsolve, fastmatrix, graph, Rgraphviz, R.utils.
