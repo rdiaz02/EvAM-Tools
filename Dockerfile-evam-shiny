@@ -82,7 +82,8 @@ RUN cd /app/Sources && \
     apt-get install -y dh-autoreconf autoconf automake autotools-dev autoconf autoconf-archive && \
     autoreconf -vif -I m4  && \
     R CMD build . && \
-    R CMD INSTALL mccbn_*.tar.gz
+    V_MCCBN=$(cat DESCRIPTION | grep Version | cut -d' ' -f2) && \
+    R CMD INSTALL mccbn_$V_MCCBN.tar.gz
     
 ## Install cbn
 COPY ct-cbn-0.1.04b-RDU.tar.gz /app/Sources/
