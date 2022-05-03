@@ -774,10 +774,10 @@ user_input <- function() {
                 )
               # )
             # ),
-            ),
-            plotOutput("plot")
-            ,
-            plotOutput("dag_plot")
+                )
+            ## FIXME: zz2
+            ,  plotOutput("plot")
+          , plotOutput("dag_plot")
 
           )
         )

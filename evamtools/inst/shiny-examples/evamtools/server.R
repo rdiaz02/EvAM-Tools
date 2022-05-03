@@ -13,7 +13,7 @@
 ## You should have received a copy of the GNU Affero General Public License along
 ## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
+counter <<- 0
 
 
 ## #'  I followed this link to structure the shiny app whithin the package
@@ -131,9 +131,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     )
 
     display_freqs <- reactive({
+        message("    counter inside display_freqs = ", counter)
         evamtools:::get_display_freqs(data$csd_counts, input$gene_number,
                                       data$gene_names)
     })
+
+  
+ 
+   
 
     ## Force resample on gene number changes
     ## Can I comment the next block entirely?
@@ -142,9 +147,49 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## but makes this less interactive: you must click
     ## "Sample".
     ## FIXME.
+   ##  observeEvent(input$gene_number, {
+   ##      datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
+   ##          input$gene_number
+   ##      if (input$input2build == "dag") {
+   ##          if (dag_more_genes_than_set_genes(input, dag_data())) {
+   ##              data$csd_counts <- NULL
+   ##              shinyjs::disable("analysis")
+   ##              dag_stop_more_genes_than_set_genes()
+   ##          }
+   ##          shinyjs::click("resample_dag")
+   ##      }
+   ##      if (input$input2build == "matrix") {
+   ##          shinyjs::click("resample_mhn")
+   ##      }
+   ##  })
+    
+   ##  ## Force resample on data set changes
+   ## observeEvent(input$select_csd, {
+   ##      if (input$input2build == "dag") {
+   ##       shinyjs::click("resample_dag")
+   ##      }
+   ##      if (input$input2build == "matrix") {
+   ##          shinyjs::click("resample_mhn")
+   ##      }
+   ##  })
+
+
+  
+
     observeEvent(input$gene_number, {
+         message("at resample_trigger_0")
         datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
             input$gene_number
+         
+         if (input$input2build == "matrix") {
+            shinyjs::click("resample_mhn")
+        }
+    })
+    
+    observeEvent(input$select_csd,  {
+        ## datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
+    ##     input$gene_number
+     message("at resample_trigger")
         if (input$input2build == "dag") {
             if (dag_more_genes_than_set_genes(input, dag_data())) {
                 data$csd_counts <- NULL
@@ -156,18 +201,38 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         if (input$input2build == "matrix") {
             shinyjs::click("resample_mhn")
         }
-    })
+        datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
+            input$gene_number
+    },
+    ignoreInit = FALSE
+    )
+
     
-    ## Force resample on data set changes
-   observeEvent(input$select_csd, {
-        if (input$input2build == "dag") {
-         shinyjs::click("resample_dag")
-        }
-        if (input$input2build == "matrix") {
-            shinyjs::click("resample_mhn")
-        }
-    })
+    ## resample_trigger <- reactive({
+    ##     list(input$gene_number, input$select_csd)
+    ## })
     
+    ## observeEvent(resample_trigger(),  {
+   
+    ##  message("at resample_trigger")
+    ##     if (input$input2build == "dag") {
+    ##         if (dag_more_genes_than_set_genes(input, dag_data())) {
+    ##             data$csd_counts <- NULL
+    ##             shinyjs::disable("analysis")
+    ##             dag_stop_more_genes_than_set_genes()
+    ##         }
+    ##         shinyjs::click("resample_dag")
+    ##     }
+    ##     if (input$input2build == "matrix") {
+    ##         shinyjs::click("resample_mhn")
+    ##     }
+    ##     if (!is.null(input$select_csd))
+    ##         datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
+    ##             input$gene_number
+    ## },
+    ## ignoreInit = FALSE ## set to TRUE if using resample_trigger
+    ## )
+
     
     ## Upload data
     observeEvent(input$csd, {
@@ -1090,16 +1155,43 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         })
     })
 
-    ## Plot histogram of genotypes
+    ## ## ## Plot histogram of genotypes
+    ## ## This leads to three calls
     output$plot <- renderPlot({
         tryCatch({
             ## FIXME
+            ## message("called now")
+            ## message("    counter = ", counter)
             evamtools:::plot_genotype_counts(display_freqs())
+            
         }, error = function(e){
             showModal(dataModal(e[[1]]))
         })
     })
 
+## ## This leads to two calls, but not called even manually from MHN
+##  output$plot <- renderPlot({
+##      list(input$gene_number,
+##           input$select_csd)
+##      message("new renderPlot")
+## ##     isolate({
+##             tryCatch({
+##                 message("    called now, isolated")
+##                 evamtools:::plot_genotype_counts(
+##                                 evamtools:::get_display_freqs(data$csd_counts,
+##                                                               input$gene_number,
+##                                                               data$gene_names)  
+##                             )
+##         }, error = function(e){
+##             showModal(dataModal(e[[1]]))
+##         })
+##  ##       })
+##  })
+
+
+
+
+    
     ## Plot dag of dataset
     output$dag_plot <- renderPlot({
         data2plot <- NULL
@@ -1504,3 +1596,16 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
     )
 }
+
+
+
+## What must be checked when dealing with the reactive
+## MHN
+##  - changing data set resamples and plots
+##  - changing number of genes resamples and plots
+
+## DAG:
+##  - as for MHN
+##  - as for MHN
+##  - Can go from linear to User to Linear to User and same with AND_OR_XOR
+##    without error message of number of genes.
