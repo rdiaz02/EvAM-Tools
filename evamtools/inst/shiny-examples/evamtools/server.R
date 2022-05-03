@@ -26,8 +26,7 @@ dataModal <- function(error_message, type="Error: ") {
     )
 }
 
-## Next four functions are created for DRY
-## though gene_names and number_of_genes are also
+## For DRY though gene_names and number_of_genes are also
 ## obtained for other purposes right before these
 ## are called in a couple of places. Oh well; would need
 ## more serious refactoring.
@@ -47,30 +46,6 @@ dag_more_genes_than_set_genes <- function(input, dag_data = dag_data(),
         return(FALSE)
 }
 
-## dag_fewer_genes_than_set_genes <- function(input, 
-##                                            dag_data = dag_data()
-##                                            ) {
-##     gene_names <- setdiff(unique(c(dag_data$From, dag_data$To)),
-##                           "Root")
-##     number_of_genes <- length(gene_names)
-##     if (!is.null(input$gene_number) &&
-##         (number_of_genes < input$gene_number))
-##         return(TRUE)
-##     else
-##         return(FALSE)
-## }
-
-## dag_stop_more_genes_than_set_genes <- function() {
-##     showModal(dataModal(
-##         paste("The DAG contains more genes that the number ",
-##               "of genes you have set under ",
-##               "'Set the number of genes'. ",
-##               "Remove edges as needed ",
-##               "(you will need to increase the slider ",
-##               "of number of genes under 'Set the number of genes' ",
-##               "for the DAG editor to show all gene names), ",
-##               "and then decrease number of genes.")))
-## }
 
 dag_message_more_genes_than_set_genes <- function() {
     showModal(modalDialog(
@@ -81,18 +56,6 @@ dag_message_more_genes_than_set_genes <- function() {
               "and then decrease number of genes."),
         easyClose = TRUE))
 }
-
-## dag_message_fewer_genes_than_set_genes <- function() {
-##     showModal(modalDialog(
-##         paste("The number of genes in the DAG is smaller ",
-##               "than the genes selected under ",
-##               "'Set the number of genes'.",
-##               "The genes that will be used are those from the DAG.",
-##               "(This is not an error; just alerting you ",
-##               "of a possible inconsistency in your desires :-). )"),
-##         easyClose = TRUE)) 
-## }
-
 
 do_gc <- function(n = 5) {
     print("doing gc")

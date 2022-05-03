@@ -221,11 +221,6 @@ results_simple <- function(){
                                     "evam and sample_evam; 2. the tabular data ",
                                     "Analyzed data in ",
                                     " object$cpm_output$analyzed_data")),
-                # tags$div(id = "noprogress",
-                # fileInput("output_cpms", "Load your results"
-                #   , multiple = FALSE,
-                #   accept = c(".Rdata", ".rds", ".RDS"))
-                # ),
                 tags$div(class = "download_button",
                   downloadButton("download_cpm", "Download")
                 )
