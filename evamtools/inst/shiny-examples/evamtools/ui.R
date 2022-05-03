@@ -692,7 +692,7 @@ user_input <- function() {
                 tags$h4("MHN options"),
                 numericInput("MHN_lambda", "Lambdas: ", NULL, min=0),
                 tags$h5("Penalty term; default: 1/number of rows of data set. ",
-                        "(Do not enter anything, unless you want to a value ",
+                        "(Do not enter anything, unless you want to use a value ",
                         "different from the default)."),
                 tags$hr(style="border-color: darkgrey;"),
                 tags$h4("OT options"),
