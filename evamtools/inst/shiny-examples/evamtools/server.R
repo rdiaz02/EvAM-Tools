@@ -128,7 +128,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
        } else if (input$input2build == "matrix") {
            shinyjs::click("resample_mhn")
        }
-    }, ignoreInit = FALSE
+    }
     )
 
    observeEvent(input$gene_number, {
@@ -143,8 +143,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
        else if (input$input2build == "matrix") {
            shinyjs::click("resample_mhn")
        }
-    },
-    ignoreInit = FALSE
+    }
     )
 
 
@@ -1045,8 +1044,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }, error = function(e){
             showModal(dataModal(e[[1]]))
         })
-    },
-    ignoreInit = FALSE)
+    })
 
     ## Plot dag of dataset
     output$dag_plot <- renderPlot({
