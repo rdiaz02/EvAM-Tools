@@ -135,22 +135,24 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                       data$gene_names)
     })
 
-    ## ## Force resample on gene number changes
-    ## observeEvent(input$gene_number, {
-    ##     datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
-    ##         input$gene_number
-    ##     if (input$input2build == "dag") {
-    ##         if (dag_more_genes_than_set_genes(input, dag_data())) {
-    ##             data$csd_counts <- NULL
-    ##             shinyjs::disable("analysis")
-    ##             dag_stop_more_genes_than_set_genes()
-    ##         }
-    ##         shinyjs::click("resample_dag")
-    ##     }
-    ##     if (input$input2build == "matrix") {
-    ##         shinyjs::click("resample_mhn")
-    ##     }
-    ## })
+    ## Force resample on gene number changes
+    ## Can I comment the next block entirely?
+    ## FIXME.
+    observeEvent(input$gene_number, {
+        datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
+            input$gene_number
+        if (input$input2build == "dag") {
+            if (dag_more_genes_than_set_genes(input, dag_data())) {
+                data$csd_counts <- NULL
+                shinyjs::disable("analysis")
+                dag_stop_more_genes_than_set_genes()
+            }
+            shinyjs::click("resample_dag")
+        }
+        if (input$input2build == "matrix") {
+            shinyjs::click("resample_mhn")
+        }
+    })
     
     ## Force resample on data set changes
    observeEvent(input$select_csd, {
@@ -1315,7 +1317,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                        ifelse(length(input$cpm2show) <=4, 4, length(input$cpm2show)))
             if(!(is.null(selected_plot_type))){
                 lapply(input$cpm2show, function(met){
-                    method_data <- evamtools:::process_data(tmp_data, met, plot_type = selected_plot_type)
+                    method_data <- evamtools:::process_data(tmp_data, met,
+                                                            plot_type = selected_plot_type)
                     output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
                         pl <- evamtools:::plot_genot_fg(method_data$data2plot,
                                                         observations = tmp_data$original_data, # We use it to define "Observed" and "Not Observed" genotypes
