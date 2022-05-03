@@ -153,50 +153,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## That removes the plotting twice issue
     ## but makes this less interactive: you must click
     ## "Sample".
-    ## FIXME.
-   ##  observeEvent(input$gene_number, {
-   ##      datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
-   ##          input$gene_number
-   ##      if (input$input2build == "dag") {
-   ##          if (dag_more_genes_than_set_genes(input, dag_data())) {
-   ##              data$csd_counts <- NULL
-   ##              shinyjs::disable("analysis")
-   ##              dag_stop_more_genes_than_set_genes()
-   ##          }
-   ##          shinyjs::click("resample_dag")
-   ##      }
-   ##      if (input$input2build == "matrix") {
-   ##          shinyjs::click("resample_mhn")
-   ##      }
-   ##  })
-    
-   ##  ## Force resample on data set changes
-   ## observeEvent(input$select_csd, {
-   ##      if (input$input2build == "dag") {
-   ##       shinyjs::click("resample_dag")
-   ##      }
-   ##      if (input$input2build == "matrix") {
-   ##          shinyjs::click("resample_mhn")
-   ##      }
-   ##  })
-
 
     ## Can't make it depend on gene_number too
     ## or we get the "DAG contains more genes ..."
     observeEvent(input$select_csd, {
-        ## FIXME
-        ## message("at resample_trigger")
-       
-        if (input$input2build == "dag") {
+       if (input$input2build == "dag") {
             shinyjs::click("resample_dag")
-        }
-        if (input$input2build == "matrix") {
-            shinyjs::click("resample_mhn")
-        }
-    },
-    ignoreInit = FALSE
+       } else if (input$input2build == "matrix") {
+           shinyjs::click("resample_mhn")
+       }
+    }, ignoreInit = FALSE
     )
-
 
    observeEvent(input$gene_number, {
        message("at gene number_trigger")
@@ -207,7 +174,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                dag_message_more_genes_than_set_genes()
            }
        }
-       if (input$input2build == "matrix") {
+       else if (input$input2build == "matrix") {
            shinyjs::click("resample_mhn")
        }
     },
@@ -336,12 +303,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             updateRadioButtons(session, "select_csd",
                                selected = input$dataset_name)
 
-            if (input$input2build == "dag") {
-                shinyjs::click("resample_dag")
-            }
-            if (input$input2build == "matrix") {
-                shinyjs::click("resample_mhn")
-            }
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
         })
