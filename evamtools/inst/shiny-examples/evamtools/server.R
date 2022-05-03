@@ -181,35 +181,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
    ##  })
 
 
-  
-
-    observeEvent(input$gene_number, {
-        message("at gene number_trigger")
-        datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
-            input$gene_number
-         if (input$input2build == "dag") {
-            if (dag_more_genes_than_set_genes(input, dag_data(), session)) {
-                dag_message_more_genes_than_set_genes()
-            }
-        }
-         if (input$input2build == "matrix") {
-            shinyjs::click("resample_mhn")
-        }
-    },
-    ignoreInit = FALSE
-    )
-
     ## Can't make it depend on gene_number too
     ## or we get the "DAG contains more genes ..."
     observeEvent(input$select_csd, {
-        message("at resample_trigger")
+        ## FIXME
+        ## message("at resample_trigger")
        
         if (input$input2build == "dag") {
-            ## if (dag_more_genes_than_set_genes(input, dag_data())) {
-            ##     data$csd_counts <- NULL
-            ##     shinyjs::disable("analysis")
-            ##     dag_stop_more_genes_than_set_genes()
-            ## }
             shinyjs::click("resample_dag")
         }
         if (input$input2build == "matrix") {
@@ -218,6 +196,24 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     },
     ignoreInit = FALSE
     )
+
+
+   observeEvent(input$gene_number, {
+       message("at gene number_trigger")
+       datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
+           input$gene_number
+       if (input$input2build == "dag") {
+           if (dag_more_genes_than_set_genes(input, dag_data(), session)) {
+               dag_message_more_genes_than_set_genes()
+           }
+       }
+       if (input$input2build == "matrix") {
+           shinyjs::click("resample_mhn")
+       }
+    },
+    ignoreInit = FALSE
+    )
+
 
     
     ## resample_trigger <- reactive({
@@ -337,7 +333,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 datasets$fixed_examples[[input$input2build]][[input$select_csd]]
 
             ## 3 update selected entry
-            updateRadioButtons(session, "select_csd", selected = input$dataset_name)
+            updateRadioButtons(session, "select_csd",
+                               selected = input$dataset_name)
 
             if (input$input2build == "dag") {
                 shinyjs::click("resample_dag")
@@ -345,7 +342,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             if (input$input2build == "matrix") {
                 shinyjs::click("resample_mhn")
             }
-        }, error=function(e){
+        }, error = function(e) {
             showModal(dataModal(e[[1]]))
         })
     })
@@ -1169,25 +1166,25 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
     pgc <- function(x) {
-        message("called pgc")
-        message("   with x = ", x)
+        ## message("called pgc")
+        ## message("   with x = ", x)
         evamtools:::plot_genotype_counts(x)
     }
     
-    ## ## ## Plot histogram of genotypes
-    ## ## Sometimes this leads to three calls or even four calls
+    ## ## Plot histogram of genotypes
+    ## Sometimes this leads to three calls or even four calls
     ## Some with an object with 0 rows
     output$plot <- renderPlot({
         tryCatch({
             ## evamtools:::plot_genotype_counts(display_freqs())
-            pgc(display_freqs())
+                pgc(display_freqs())
         }, error = function(e){
             showModal(dataModal(e[[1]]))
         })
     },
     ignoreInit = FALSE)
 
-    
+
 
 
     
@@ -1612,3 +1609,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
 ## Both:
 ##   -plot in the very first data (before any changes)
+
+
+## Things that could avoid repeating, but I give up
+## With DAGs, if we do a resample trigger, no need for a gene number trigger.
+##  but it is cheap, since no resampling when we do number trigger.
+##  Problem is it creates another figure.
+
+## In many DAGs, calling the plot function twice or even thrice.

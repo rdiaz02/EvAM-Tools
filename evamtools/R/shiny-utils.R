@@ -19,17 +19,19 @@ get_display_freqs <- function(freqs, n_genes, gene_names){
   if (nrow(freqs) == 0) return(.ev_SHINY_dflt$template_data$csd_counts)
   valid_gene_names <- c("WT", gene_names[1:n_genes])
 
-  ## ## Why would this be necessary?
-  ## browser()
-  ## selected_rows <- sapply(freqs$Genotype, function(x) {
-  ##   genes <- strsplit(x, ", ")[[1]]
-  ##   return(all(genes %in% valid_gene_names))
-  ## })
-  ## return(freqs[selected_rows, ])
-
+  ## Why would this be necessary?
+  ##    To make sure size of data reduced when changing number of gens
+  ##    and we use genotype freqs.
+  selected_rows <- vapply(freqs$Genotype,
+                          function(x) {
+                              genes <- strsplit(x, ", ")[[1]]
+                              return(all(genes %in% valid_gene_names))
+                          },
+                          logical(1))
+  
+  freqs <- freqs[selected_rows, , drop = FALSE]
   ## Remove 0 count rows
-  freqs <- freqs[freqs$Counts > 0, ]
-  return(freqs[, ])
+  return(freqs[freqs$Counts > 0, , drop = FALSE])
 }
 
 get_csd <- function(complete_csd,
