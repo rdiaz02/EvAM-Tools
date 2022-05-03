@@ -135,17 +135,33 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                       data$gene_names)
     })
 
-    observeEvent(input$gene_number, {
+    ## ## Force resample on gene number changes
+    ## observeEvent(input$gene_number, {
+    ##     datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
+    ##         input$gene_number
+    ##     if (input$input2build == "dag") {
+    ##         if (dag_more_genes_than_set_genes(input, dag_data())) {
+    ##             data$csd_counts <- NULL
+    ##             shinyjs::disable("analysis")
+    ##             dag_stop_more_genes_than_set_genes()
+    ##         }
+    ##         shinyjs::click("resample_dag")
+    ##     }
+    ##     if (input$input2build == "matrix") {
+    ##         shinyjs::click("resample_mhn")
+    ##     }
+    ## })
+    
+    ## Force resample on data set changes
+   observeEvent(input$select_csd, {
         if (input$input2build == "dag") {
-            if (dag_more_genes_than_set_genes(input, dag_data())) {
-                data$csd_counts <- NULL
-                shinyjs::disable("analysis")
-                dag_stop_more_genes_than_set_genes()
-            }
+         shinyjs::click("resample_dag")
+        }
+        if (input$input2build == "matrix") {
+            shinyjs::click("resample_mhn")
         }
     })
-
-
+    
     
     ## Upload data
     observeEvent(input$csd, {
@@ -182,16 +198,16 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     observeEvent(input$input2build, {
         ## I think keep_dataset_name is always FALSE
         ## message("keep_dataset_name is", keep_dataset_name)
-        ## if (keep_dataset_name %in% names(datasets$all_csd)) {
-        ##     updateRadioButtons(session, "select_csd",
-        ##                        selected = keep_dataset_name)
-        ##     keep_dataset_name <- FALSE
-        ## } else {
-        ##     updateRadioButtons(session, "select_csd",
-        ##                        selected = last_visited_pages[[input$input2build]])
-        ## }
-        updateRadioButtons(session, "select_csd",
+        if (keep_dataset_name %in% names(datasets$all_csd)) {
+            updateRadioButtons(session, "select_csd",
+                               selected = keep_dataset_name)
+            keep_dataset_name <- FALSE
+        } else {
+            updateRadioButtons(session, "select_csd",
                                selected = last_visited_pages[[input$input2build]])
+        }
+        ## updateRadioButtons(session, "select_csd",
+        ##                        selected = last_visited_pages[[input$input2build]])
     })
 
     ## Define dataset name
@@ -240,6 +256,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## 3 update selected entry
             updateRadioButtons(session, "select_csd", selected = input$dataset_name)
 
+            if (input$input2build == "dag") {
+                shinyjs::click("resample_dag")
+            }
+            if (input$input2build == "matrix") {
+                shinyjs::click("resample_mhn")
+            }
         }, error=function(e){
             showModal(dataModal(e[[1]]))
         })
@@ -377,9 +399,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         })
     })
 
-    observeEvent(input$gene_number, {
-        datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <- input$gene_number
-    })
+    ## observeEvent(input$gene_number, {
+    ##     datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <- input$gene_number
+    ## })
 
     
 
@@ -602,7 +624,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                step = 100, width = "50%"),
                                   tags$h3(HTML("<br/>")),
                                   numericInput("mhn_noise", HTML("Noise"),
-                                               value = 0.05, min = 0, max = 1,
+                                               value = 0, min = 0, max = 1,
                                                step = 0.025, width = "50%"),
                                   tags$h5("Observational noise (e.g., genotyping error). ",
                                           "Added during sampling, ",
@@ -803,9 +825,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      "in the DAG.")
             gene_names <- setdiff(unique(c(dag_data()$From, dag_data()$To)),
                           "Root")
-            if (dag_more_genes_than_set_genes(input, dag_data())) {
-                dag_stop_more_genes_than_set_genes()
-            } else {
+            ## if (dag_more_genes_than_set_genes(input, dag_data())) {
+            ##     dag_stop_more_genes_than_set_genes()
+            ## } else {
                 ## Annoying when modifying a DAG.
                 ## if (dag_fewer_genes_than_set_genes(input, dag_data()))
                 ##     dag_message_fewer_genes_than_set_genes()
@@ -825,7 +847,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 datasets$all_csd[[input$input2build]][[input$select_csd]]$lambdas <- data$lambdas
                 datasets$all_csd[[input$input2build]][[input$select_csd]]$dag_parent_set <- data$dag_parent_set
                 shinyjs::enable("analysis")
-            }
+           ## }
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
         })
@@ -1063,6 +1085,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Plot histogram of genotypes
     output$plot <- renderPlot({
         tryCatch({
+            browser()
             evamtools:::plot_genotype_counts(display_freqs())
         }, error = function(e){
             showModal(dataModal(e[[1]]))

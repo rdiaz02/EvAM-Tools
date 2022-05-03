@@ -15,16 +15,21 @@
 
 
 get_display_freqs <- function(freqs, n_genes, gene_names){
-  if(is.null(freqs)) return(.ev_SHINY_dflt$template_data$csd_counts)
-  if(nrow(freqs) == 0) return(.ev_SHINY_dflt$template_data$csd_counts)
+  if (is.null(freqs)) return(.ev_SHINY_dflt$template_data$csd_counts)
+  if (nrow(freqs) == 0) return(.ev_SHINY_dflt$template_data$csd_counts)
   valid_gene_names <- c("WT", gene_names[1:n_genes])
 
-  selected_rows <- sapply(freqs$Genotype, function(x){
-    genes <- strsplit(x, ", ")[[1]]
-    return(all(genes %in% valid_gene_names))
-  })
+  ## ## Why would this be necessary?
+  ## browser()
+  ## selected_rows <- sapply(freqs$Genotype, function(x) {
+  ##   genes <- strsplit(x, ", ")[[1]]
+  ##   return(all(genes %in% valid_gene_names))
+  ## })
+  ## return(freqs[selected_rows, ])
 
-  return(freqs[selected_rows, ])
+  ## Remove 0 count rows
+  freqs <- freqs[freqs$Counts > 0, ]
+  return(freqs[, ])
 }
 
 get_csd <- function(complete_csd,
@@ -246,7 +251,7 @@ get_mhn_data <- function(thetas, noise = 0, N = 10000){
 get_dag_data <- function(data, parent_set, noise = 0, N = 10000,
                          dag_model = "HESBCN", epos = 0.01) {
 
-  if(nrow(data) == 0) stop("The DAG does not contain any edge.")
+  if (nrow(data) == 0) stop("The DAG does not contain any edge.")
   if (any(is.null(data))) stop("Data should be defined")
 
   gene_names <- names(parent_set)
@@ -272,7 +277,6 @@ get_dag_data <- function(data, parent_set, noise = 0, N = 10000,
   data_with_noise <- genotypeCounts_to_data(tmp_samples_as_vector,
     e = noise)
   csd_counts <- data_to_counts(data_with_noise, out="data.frame")
-
   return(list(csd_counts = csd_counts,
               data = data_with_noise))
 }
