@@ -137,6 +137,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     ## Force resample on gene number changes
     ## Can I comment the next block entirely?
+    ## And the next?
+    ## That removes the plotting twice issue
+    ## but makes this less interactive: you must click
+    ## "Sample".
     ## FIXME.
     observeEvent(input$gene_number, {
         datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
@@ -571,7 +575,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   tags$h5(HTML("If you want to decrease the number of genes ",
                                                "first remove edges and nodes from the DAG ", 
                                                "and only then modify ",
-                                               "'Set the number of genes'.")),
+                                               "'Set the number of genes'.",
+                                               "(We cannot know which edges/nodes ",
+                                               "you want to remove).")),
                                   tags$h5(HTML("If you want to increase the number of genes ",
                                                "increase the number of nodes in the DAG")),
                                   tags$h3(HTML("<br/>DAG table")),
@@ -1087,7 +1093,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Plot histogram of genotypes
     output$plot <- renderPlot({
         tryCatch({
-            browser()
+            ## FIXME
             evamtools:::plot_genotype_counts(display_freqs())
         }, error = function(e){
             showModal(dataModal(e[[1]]))
