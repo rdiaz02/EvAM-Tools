@@ -120,7 +120,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     default_csd_samples <- .ev_SHINY_dflt$csd_samples
     default_cpm_samples <- .ev_SHINY_dflt$cpm_samples
     default_dag_model <- .ev_SHINY_dflt$dag_model
-    keep_dataset_name <- FALSE
+    ## keep_dataset_name <- FALSE
 
     last_visited_pages <- list(csd = "User", dag = "User", matrix = "User")
 
@@ -242,18 +242,18 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
     observeEvent(input$input2build, {
-        ## I think keep_dataset_name is always FALSE
-        ## message("keep_dataset_name is", keep_dataset_name)
-        if (keep_dataset_name %in% names(datasets$all_csd)) {
-            updateRadioButtons(session, "select_csd",
-                               selected = keep_dataset_name)
-            keep_dataset_name <- FALSE
-        } else {
-            updateRadioButtons(session, "select_csd",
-                               selected = last_visited_pages[[input$input2build]])
-        }
-        ## updateRadioButtons(session, "select_csd",
+        ## ## I think keep_dataset_name is always FALSE
+        ## ## message("keep_dataset_name is", keep_dataset_name)
+        ## if (keep_dataset_name %in% names(datasets$all_csd)) {
+        ##     updateRadioButtons(session, "select_csd",
+        ##                        selected = keep_dataset_name)
+        ##     keep_dataset_name <- FALSE
+        ## } else {
+        ##     updateRadioButtons(session, "select_csd",
         ##                        selected = last_visited_pages[[input$input2build]])
+        ## }
+        updateRadioButtons(session, "select_csd",
+                               selected = last_visited_pages[[input$input2build]])
     })
 
     ## Define dataset name
