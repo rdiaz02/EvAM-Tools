@@ -180,16 +180,26 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
          message("at resample_trigger_0")
         datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
             input$gene_number
-         
+         if (input$input2build == "dag") {
+            if (dag_more_genes_than_set_genes(input, dag_data())) {
+                data$csd_counts <- NULL
+                shinyjs::disable("analysis")
+                dag_stop_more_genes_than_set_genes()
+            }
+            shinyjs::click("resample_dag")
+        }
          if (input$input2build == "matrix") {
             shinyjs::click("resample_mhn")
         }
-    })
-    
-    observeEvent(input$select_csd,  {
-        ## datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
-    ##     input$gene_number
-     message("at resample_trigger")
+    },
+    ignoreInit = FALSE
+    )
+
+    ## Can't make it depend on gene_number too
+    ## or we get the "DAG contains more genes ..."
+    observeEvent(input$select_csd, {
+        message("at resample_trigger")
+       
         if (input$input2build == "dag") {
             if (dag_more_genes_than_set_genes(input, dag_data())) {
                 data$csd_counts <- NULL
@@ -201,8 +211,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         if (input$input2build == "matrix") {
             shinyjs::click("resample_mhn")
         }
-        datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
-            input$gene_number
     },
     ignoreInit = FALSE
     )
@@ -1158,6 +1166,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## ## ## Plot histogram of genotypes
     ## ## This leads to three calls
     output$plot <- renderPlot({
+        list(input$gene_number,
+             input$select_csd)
         tryCatch({
             ## FIXME
             ## message("called now")
@@ -1167,7 +1177,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }, error = function(e){
             showModal(dataModal(e[[1]]))
         })
-    })
+    },
+    ignoreInit = FALSE)
 
 ## ## This leads to two calls, but not called even manually from MHN
 ##  output$plot <- renderPlot({
@@ -1609,3 +1620,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 ##  - as for MHN
 ##  - Can go from linear to User to Linear to User and same with AND_OR_XOR
 ##    without error message of number of genes.
+
+
+## Both:
+##   -plot in the very first data (before any changes)
