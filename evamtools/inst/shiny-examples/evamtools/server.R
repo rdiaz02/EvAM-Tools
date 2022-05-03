@@ -13,9 +13,6 @@
 ## You should have received a copy of the GNU Affero General Public License along
 ## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-counter <<- 0
-
-
 ## #'  I followed this link to structure the shiny app whithin the package
 ## #'  https://deanattali.com/2015/04/21/r-package-shiny-app/
 
@@ -34,13 +31,18 @@ dataModal <- function(error_message, type="Error: ") {
 ## obtained for other purposes right before these
 ## are called in a couple of places. Oh well; would need
 ## more serious refactoring.
-dag_more_genes_than_set_genes <- function(input, dag_data = dag_data()) {
+
+## We reset the number of genes back to an OK number
+dag_more_genes_than_set_genes <- function(input, dag_data = dag_data(),
+                                          session = session) {
     gene_names <- setdiff(unique(c(dag_data$From, dag_data$To)),
                           "Root")
     number_of_genes <- length(gene_names)
     if (!is.null(input$gene_number) &&
-        (number_of_genes > input$gene_number))
+        (number_of_genes > input$gene_number)) {
+        updateNumericInput(session, "gene_number", value = number_of_genes)
         return(TRUE)
+        }
     else
         return(FALSE)
 }
@@ -56,16 +58,26 @@ dag_fewer_genes_than_set_genes <- function(input, dag_data = dag_data()) {
         return(FALSE)
 }
 
-dag_stop_more_genes_than_set_genes <- function() {
-    showModal(dataModal(
+## dag_stop_more_genes_than_set_genes <- function() {
+##     showModal(dataModal(
+##         paste("The DAG contains more genes that the number ",
+##               "of genes you have set under ",
+##               "'Set the number of genes'. ",
+##               "Remove edges as needed ",
+##               "(you will need to increase the slider ",
+##               "of number of genes under 'Set the number of genes' ",
+##               "for the DAG editor to show all gene names), ",
+##               "and then decrease number of genes.")))
+## }
+
+dag_message_more_genes_than_set_genes <- function() {
+    showModal(modalDialog(
         paste("The DAG contains more genes that the number ",
               "of genes you have set under ",
               "'Set the number of genes'. ",
               "Remove edges as needed ",
-              "(you will need to increase the slider ",
-              "of number of genes under 'Set the number of genes' ",
-              "for the DAG editor to show all gene names), ",
-              "and then decrease number of genes.")))
+              "and then decrease number of genes."),
+        easyClose = TRUE))
 }
 
 dag_message_fewer_genes_than_set_genes <- function() {
@@ -131,14 +143,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     )
 
     display_freqs <- reactive({
-        message("    counter inside display_freqs = ", counter)
         evamtools:::get_display_freqs(data$csd_counts, input$gene_number,
                                       data$gene_names)
     })
-
-  
- 
-   
 
     ## Force resample on gene number changes
     ## Can I comment the next block entirely?
@@ -177,16 +184,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
   
 
     observeEvent(input$gene_number, {
-         message("at resample_trigger_0")
+        message("at gene number_trigger")
         datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
             input$gene_number
          if (input$input2build == "dag") {
-            if (dag_more_genes_than_set_genes(input, dag_data())) {
-                data$csd_counts <- NULL
-                shinyjs::disable("analysis")
-                dag_stop_more_genes_than_set_genes()
+            if (dag_more_genes_than_set_genes(input, dag_data(), session)) {
+                dag_message_more_genes_than_set_genes()
             }
-            shinyjs::click("resample_dag")
         }
          if (input$input2build == "matrix") {
             shinyjs::click("resample_mhn")
@@ -201,11 +205,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         message("at resample_trigger")
        
         if (input$input2build == "dag") {
-            if (dag_more_genes_than_set_genes(input, dag_data())) {
-                data$csd_counts <- NULL
-                shinyjs::disable("analysis")
-                dag_stop_more_genes_than_set_genes()
-            }
+            ## if (dag_more_genes_than_set_genes(input, dag_data())) {
+            ##     data$csd_counts <- NULL
+            ##     shinyjs::disable("analysis")
+            ##     dag_stop_more_genes_than_set_genes()
+            ## }
             shinyjs::click("resample_dag")
         }
         if (input$input2build == "matrix") {
@@ -360,9 +364,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                           "Root")
                 number_of_genes <- length(gene_names)
                 
-                if (dag_more_genes_than_set_genes(input, dag_data())) {
-                    dag_stop_more_genes_than_set_genes()
-                } else {
+                ## if (dag_more_genes_than_set_genes(input, dag_data())) {
+                ##     This can never happen now
+                ##     dag_stop_more_genes_than_set_genes()
+                ## } else {
                     if (dag_fewer_genes_than_set_genes(input, dag_data()))
                         dag_message_fewer_genes_than_set_genes()
                     ## data2save <- list(
@@ -380,7 +385,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                       , dag = tmp_data$dag[1:(number_of_genes + 1),
                                            1:(number_of_genes + 1)])
                     saveRDS(data2save, file=file)
-                }
+                ## }
             } else if (input$input2build == "matrix") {
                 data2save <- list(data = tmp_data$data[,1:input$gene_number]
                                 , log_Theta_matrix = tmp_data$thetas[1:input$gene_number, 1:input$gene_number])
@@ -1163,43 +1168,26 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         })
     })
 
+    pgc <- function(x) {
+        message("called pgc")
+        message("   with x = ", x)
+        evamtools:::plot_genotype_counts(x)
+    }
+    
     ## ## ## Plot histogram of genotypes
-    ## ## This leads to three calls
+    ## ## Sometimes this leads to three calls or even four calls
+    ## Some with an object with 0 rows
     output$plot <- renderPlot({
-        list(input$gene_number,
-             input$select_csd)
         tryCatch({
-            ## FIXME
-            ## message("called now")
-            ## message("    counter = ", counter)
-            evamtools:::plot_genotype_counts(display_freqs())
-            
+            ## evamtools:::plot_genotype_counts(display_freqs())
+            pgc(display_freqs())
         }, error = function(e){
             showModal(dataModal(e[[1]]))
         })
     },
     ignoreInit = FALSE)
 
-## ## This leads to two calls, but not called even manually from MHN
-##  output$plot <- renderPlot({
-##      list(input$gene_number,
-##           input$select_csd)
-##      message("new renderPlot")
-## ##     isolate({
-##             tryCatch({
-##                 message("    called now, isolated")
-##                 evamtools:::plot_genotype_counts(
-##                                 evamtools:::get_display_freqs(data$csd_counts,
-##                                                               input$gene_number,
-##                                                               data$gene_names)  
-##                             )
-##         }, error = function(e){
-##             showModal(dataModal(e[[1]]))
-##         })
-##  ##       })
-##  })
-
-
+    
 
 
     
