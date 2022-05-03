@@ -168,7 +168,8 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
     & new_lambdas > 0]
   info_from <- info[info["col"] == 0,"value"]
   info_to <- info[info["col"] == 1,"value"]
-  if(!(all(c(info_from, info_to, dag_data$To, dag_data$From) %in% c("Root", names(lambdas))))){
+  if (!(all(c(info_from, info_to, dag_data$To, dag_data$From) %in%
+            c("Root", names(lambdas))))) {
     stop("There are unkown genes")
   }
   changed_lambdas <- new_lambdas[new_lambdas != old_lambdas
@@ -180,13 +181,11 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
   if (dag_model %in% c("OT", "OncoBN")
     & (any(tmp_lambdas < 0) | any(tmp_lambdas > 1))){
       stop("thetas/probabilities should be between 0 and 1")
-    # tmp_lambdas[tmp_lambdas > 1] <- 1
-    # tmp_lambdas[tmp_lambdas < 0] <- 1
   }
 
   ##Relationships
   number_of_parents <- colSums(dag)[-1]
-  if(dag_model %in% c("HESBCN")){
+  if (dag_model %in% c("HESBCN")){
     tmp_parent_set <- parent_set
     number_of_parents <- number_of_parents[number_of_parents > 0]
     new_relationships <- info[info["col"] == 2,"value"]
