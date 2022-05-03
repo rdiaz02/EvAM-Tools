@@ -1324,12 +1324,14 @@ counts_to_data_no_e <- function(x) {
 ## From the identically named function in OncoSimulR
 add_noise <- function(x, properr) {
     stopifnot(is.matrix(x))
-    if (properr <= 0) {
+    if (properr == 0) {
         return(x)
     }
     else {
         if (properr > 1)
-            stop("Proportion with error cannot be > 1")
+            stop("Noise or proportion of observations with error cannot be > 1")
+        if (properr < 0)
+            stop("Noise or proportion of observations with error cannot be < 0")
         nn <- prod(dim(x))
         flipped <- sample(nn, round(nn * properr))
         x[flipped] <- as.integer(!x[flipped])
@@ -1345,7 +1347,7 @@ add_noise <- function(x, properr) {
 ## e: noise error, as fraction (i.e., 0 to 1)
 genotypeCounts_to_data <- function(x, e) {
     d <- counts_to_data_no_e(x)
-    if (e > 0) d <- add_noise(d, e)
+    if (e != 0.0) d <- add_noise(d, e)
     return(d)
 }
 
