@@ -140,7 +140,7 @@ You can run on your machines:
   * The [package in an RStudio session from the Docker image](#run-the-r-package-from-the-docker-image)
   * The [Shiny app from a Docker image](#run-the-shiny-app-from-the-docker-image)
   
-You can also [build your own Docker image](#build-your-own-docker-image) and you might want to [run the Shiny app in a local intranet](#how-to-run-the-shiny-app-in-a-local-intranet).
+You can also build your own Docker image and you might want to run the Shiny app in a local intranet, possibly after modifying some settings. See the [Additional documentation](https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_doc_all.pdf), in the FAQ, for details. 
 
 
 ### How to install the R package 
