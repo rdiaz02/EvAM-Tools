@@ -76,7 +76,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         cat("\n Finishing")
         do_gc(5)
     })
-    
+
+    ## Make these deps explicit. Needed for shinytests
+    data("examples_csd", package = "evamtools")
+    data("SHINY_DEFAULTS", package = "evamtools")
+    ## FIXME
+    ## Eh? Why would we do this. Use a different name, do not overwrite.
     examples_csd$csd <- examples_csd$csd[1:5]
     examples_csd$dag <- examples_csd$dag[1:6]
     all_csd_data <- evamtools:::to_stnd_csd_all_datasets(examples_csd)
