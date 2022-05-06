@@ -735,8 +735,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         tryCatch({
             tmp_data <- evamtools:::modify_dag(data$dag, NULL, NULL, operation = "clear")
             tmp_dag <- tmp_data$dag
-            colnames(tmp_dag) <- rownames(tmp_dag) <- c("WT", data$gene_names)
-            tmp_dag["WT", data$gene_names[1]] <- 1
+            colnames(tmp_dag) <- rownames(tmp_dag) <- c("Root", data$gene_names)
+            tmp_dag["Root", data$gene_names[1]] <- 1
             data$dag <- tmp_dag
             data$csd_counts <- .ev_SHINY_dflt$template_data$csd_counts
             data$data <- .ev_SHINY_dflt$template_data$data
@@ -838,8 +838,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             "Relation (the program will force this)."),
                      tags$p(HTML("4. Modify, if you want, the <strong>size of the sample</strong> "),
                             "('Number of genotypes to sample') and ",
-                            "click on 'Sample from DAG' to generate a sample. "),
-                     tags$p("5. Possible random noise when sampling is controlled under 'Advanced options'.")
+                            HTML("the <strong>Noise</strong> (observation error) "),
+                            HTML("and click on <strong>'Sample from DAG'</strong> to generate a sample. ")),
+                     tags$p("After the sample is generated for the first time, ",
+                            "the sample should be generated again automatically ",
+                            "whenever you change the model ",
+                            "(add or remove edges, change lambdas, etc).")
                  )
         )
         )
@@ -930,10 +934,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             HTML("You <strong>must</strong> save the changes.")),
                      tags$p("5. Modify, if you want, the size of the sample ",
                             "('Number of genotypes to sample') and ",
-                            "click on 'Sample from MHN' to generate a sample. ",
-                            "The sample is also updated as soon as you save an entry."),
-                     tags$p("6. Possible random noise when sampling is controlled under 'Advanced options'."),
-                     tags$p(HTML("Make sure <b>the &theta;s have been updated</b> "),
+                            HTML("the <strong>Noise</strong> (observation error) "),
+                            HTML("and click on <strong>'Sample from DAG'</strong> to generate a sample. "),
+                            "The sample is also updated as soon as you save an entry ",
+                            "in the matrix or change the number of genes."),
+                     tags$p(HTML("You can make sure <b>the &theta;s have been updated</b> "),
                             "by checking the figure of the matrix on the right.")
                  )
         )
