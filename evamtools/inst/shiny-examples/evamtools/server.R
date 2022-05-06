@@ -816,7 +816,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                              "set the lambda of the relationship to 0."),
                      tags$li(HTML("Removing edges might restructure the DAG."),
                              "If a node has no parent, " ,
-                             "it will be assigned as descendant of WT."),
+                             "it will be assigned as descendant of Root."),
                      tags$p(HTML("</ul>")),
                      tags$p(HTML("2. To <strong>change the value of a lambda</strong> "),
                             "click on the cell, ",
