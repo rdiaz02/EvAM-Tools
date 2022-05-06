@@ -671,10 +671,12 @@ user_input <- function() {
                              "slower than simply obtaining a sample of genotypes. ",
                              "For this to have an effect, set ",
                              "'Sample genotypes' to true."),
-                     numericInput("sample_size", "Number of samples",
-                                  .ev_SHINY_dflt$cpm_samples
-                                , min = 0, max = 100000, step = 100,
-                                  width = "100%"),
+                numericInput("sample_size", "Number of samples",
+                             10000
+                             ## next fails with shinytest, so give the number
+                             ## .ev_SHINY_dflt$cpm_samples
+                           , min = 0, max = 100000, step = 100,
+                             width = "100%"),
                      tags$h5("Number of genotypes to generate ",
                              "when generating a sample of genotypes ",
                              "according to the predicted frequencies of ",
