@@ -64,6 +64,8 @@ do_gc <- function(n = 5) {
 
 
 server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
+    require(evamtools)
+    
     ## Just in case
     do_gc(2)
     ## And be paranoid about making sure memory is released on disconnect
