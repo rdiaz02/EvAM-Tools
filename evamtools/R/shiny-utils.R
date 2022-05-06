@@ -160,7 +160,7 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
   } else if (dag_model == "OT"){
     old_lambdas <- dag_data$Weight
   } else if (dag_model == "OncoBN"){
-    old_lambdas <- dag_data$Theta
+    old_lambdas <- dag_data$theta
   }
   
   all_genes <- dag_data$To
@@ -185,7 +185,7 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
 
   ##Relationships
   number_of_parents <- colSums(dag)[-1]
-  if (dag_model %in% c("HESBCN")){
+  if (dag_model %in% c("HESBCN", "OncoBN")) {
     tmp_parent_set <- parent_set
     number_of_parents <- number_of_parents[number_of_parents > 0]
     new_relationships <- info[info["col"] == 2,"value"]
@@ -196,35 +196,28 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
     freq_genes_in_relationships <- table(genes_in_relationships)
 
     old_relationships <- stats::setNames(dag_data$Relation, dag_data$To)
-    new_relationships[!(new_relationships %in% c("Single", "AND", "OR", "XOR"))] <- "AND"
+    if (dag_model %in% c("HESBCN"))  
+        new_relationships[!(new_relationships %in% c("Single", "AND", "OR", "XOR"))] <- "AND"
+    if (dag_model %in% c("OncoBN"))  
+        new_relationships[!(new_relationships %in% c("Single", "AND", "OR"))] <- "OR"
+    
     new_relationships[names(number_of_parents[number_of_parents<2])] <- "Single"
     new_relationships[setdiff(unique(genes_in_relationships), 
       names(freq_genes_in_relationships[freq_genes_in_relationships > 1]))] <- "Single"
     
     multiple_parents <- names(number_of_parents[number_of_parents > 1])
 
-    for(i in multiple_parents){
+    for (i in multiple_parents){
       changed_relationships <- setdiff(new_relationships[genes_in_relationships == i], c(parent_set[i]))
       if (length(changed_relationships) > 0){
         tmp_parent_set[i] <- changed_relationships[[1]]
       }
     }
-  } else if (dag_model == "OncoBN"){
-    tmp_parent_set <- parent_set
-    old_relationships <- dag_data$Relation
-    new_relationships <- info[info["col"] == 2,"value"]
-    new_relationship <- setdiff(new_relationships, old_relationships)
-
-    if(!(new_relationship %in% c("AND", "OR"))){
-      new_relationship <- "OR"
-    }
-    tmp_parent_set[number_of_parents > 1] <- new_relationship
-    # if(length(relationships)>1 && )
-    tmp_parent_set[number_of_parents <= 1] <- "Single"
-  } else if (dag_model == "OT"){
+  } else if (dag_model == "OT") {
     tmp_parent_set <- parent_set
     tmp_parent_set[1:length(tmp_parent_set)] <- "Single"
-  }
+  } 
+  
 
   return(list(lambdas = tmp_lambdas, parent_set = tmp_parent_set))
 }
