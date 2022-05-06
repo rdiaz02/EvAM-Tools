@@ -19,9 +19,13 @@ get_display_freqs <- function(freqs, n_genes, gene_names){
   if (nrow(freqs) == 0) return(.ev_SHINY_dflt$template_data$csd_counts)
   valid_gene_names <- c("WT", gene_names[1:n_genes])
 
-  ## Why would this be necessary?
-  ##    To make sure size of data reduced when changing number of gens
-  ##    and we use genotype freqs.
+  ## Why would this be necessary?  To make sure size of data reduced when
+  ##    changing number of gens and we use genotype freqs.  But this works poorly
+  ##    with DAGs; it leads to incorrect behavior like having in dag only A and C,
+  ##    and asking for two genes. Only A would be shown.
+  ##  This now works because of how we pass n_genes and gene_names
+  ##  when using a DAG
+  
   selected_rows <- vapply(freqs$Genotype,
                           function(x) {
                               genes <- strsplit(x, ", ")[[1]]
@@ -120,9 +124,10 @@ modify_dag <-
            "all nodes except Root must have an ancestor.")
   }
   g2 <- igraph::graph_from_adjacency_matrix(tmp_dag2, mode = "directed")
-  if(dag_model %in% c("HESBCN", "OncoBN") && !igraph::is_dag(g2)){
-    stop("This relationship breaks the DAG. Revise it.")
-  } else if(dag_model %in% c("OT") && any(number_of_parents > 1)){
+  if (dag_model %in% c("HESBCN", "OncoBN") && !igraph::is_dag(g2)) {
+      stop("This relationship breaks the DAG. Revise it.",
+           "For example, did you introduce a cycle?")
+  } else if (dag_model %in% c("OT") && any(number_of_parents > 1)) {
       stop("This operation does not give a tree. ",
            "With OT nodes cannot have multiple parents.")
   }
@@ -155,11 +160,11 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
   if (any(is.na(new_lambdas))) {
     stop("There are missing lambdas")
   }
-  if(dag_model == "HESBCN"){
+  if(dag_model == "HESBCN") {
     old_lambdas <- dag_data$Lambdas
-  } else if (dag_model == "OT"){
+  } else if (dag_model == "OT") {
     old_lambdas <- dag_data$Weight
-  } else if (dag_model == "OncoBN"){
+  } else if (dag_model == "OncoBN") {
     old_lambdas <- dag_data$theta
   }
   

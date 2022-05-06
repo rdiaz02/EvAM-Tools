@@ -115,8 +115,36 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     )
 
     display_freqs <- reactive({
+        ## Remember this is called whenever changes in many places
+        ## happen.
+        ## message("at display_freqs")
+
+        ## FIXME: change logic here. This is slightly twisted.
+        ## Change get_display_freqs. What I do when this is a DAG
+        ## is twisting things to fit the get_display_freqs function.
+        
+        if (input$input2build == "dag") {
+            dagdat <- dag_data()
+            present_genes <- setdiff(unique(c(dagdat$From, dagdat$To)),
+                                     "Root")
+            if (!is.null(input$gene_number)) {
+                ## We might be coming from, say, MHN after setting
+                ## number of genes to 2, but the default DAG has three
+                ## Prevent a negative number
+                these_gene_names <-
+                    c(present_genes,
+                      rep("",
+                          max(input$gene_number - length(present_genes),
+                              0)))
+            } else {
+                these_gene_names <- data$gene_names
+            }
+        } else {
+            these_gene_names <- data$gene_names
+        }
+        
         evamtools:::get_display_freqs(data$csd_counts, input$gene_number,
-                                      data$gene_names)
+                                      these_gene_names)
     })
 
     ## Force resample on gene number changes
@@ -136,6 +164,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
            shinyjs::click("resample_mhn")
        }
     }
+    ## And now, display_freqs will likely be called
     )
 
    observeEvent(input$gene_number, {
@@ -150,8 +179,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
        else if (input$input2build == "matrix") {
            shinyjs::click("resample_mhn")
        }
-    }
-    )
+   }
+   ## And now, display_freqs will likely be called
+   )
 
 
     
@@ -375,6 +405,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                ),
                      tags$h3(HTML("<br/>")),
                      tags$h4("Separate you gene names with a ','. ",
+                             "Do no use 'WT' for any gene name. ",
                              "Use only alphanumeric characters ",
                              "(of course, do not use comma as part of a gene name), ",
                              "and do not start ",
@@ -707,9 +738,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data$dag_parent_set <- tmp_data$parent_set
             datasets$all_csd[[input$input2build]][[input$select_csd]] <-
                 evamtools:::to_stnd_csd_dataset(data)
-            if(default_dag_model != "OT"){
-                shinyjs::click("resample_dag")
-            }
+            shinyjs::click("resample_dag")
         },error=function(e){
             showModal(dataModal(e[[1]]))
         })
@@ -727,9 +756,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data$dag <- tmp_data$dag
             data$dag_parent_set <- tmp_data$parent_set
             datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
-            if(sum(data$dag) == 0) {
+            if (sum(data$dag) == 0) {
                 data$csd_counts <- datasets$all_csd[[input$input2build]][[input$select_csd]]$csd_counts
-            } else if (default_dag_model != "OT"){
+            } else {
                 shinyjs::click("resample_dag")
             }
         },error=function(e){
