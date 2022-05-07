@@ -92,10 +92,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     default_csd_samples <- .ev_SHINY_dflt$csd_samples
     default_cpm_samples <- .ev_SHINY_dflt$cpm_samples
     default_dag_model <- .ev_SHINY_dflt$dag_model
-    
 
-    ## last_visited_pages <- list(csd = "User", dag = "User", matrix = "User")
-    last_visited_pages <- list(csd = "User", dag = "User", matrix = "MHN_Ex_1")
+    last_visited_pages <- list(csd = "Empty", dag = "Fork_3", matrix = "MHN_all_0")
 
     last_visited_cpm <- ""
     

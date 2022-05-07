@@ -395,7 +395,7 @@ rownames(mhn_example_lambdas2) <- colnames(mhn_example_lambdas2) <-
 
 examples_csd <- list(
   "csd" = list(
-    User = list(data = NULL, name = "User"),
+    Empty = list(data = NULL, name = "Empty"),
     Linear = list(data = dB_linear,  name = "Linear", dag = dag_linear), 
     AND = list(data = dB_AND, name = "AND", dag = dag_or, dag_parent_set = and_parent_set), 
     OR = list(data = dB_OR, name = "OR", dag = dag_or, dag_parent_set = or_parent_set), 
@@ -414,7 +414,7 @@ examples_csd <- list(
     d4gc3 = list(data = dB_4g_3, name = "Four genes, third example", dag = dag_4g)
   ),
   "dag" = list(
-      User = list(dag = template_dag, name = "User"),
+      Fork_3 = list(dag = template_dag, name = "Fork_3"),
       Linear = list(data = NULL,  name = "Linear", dag = dag_linear,
                     dag_parent_set = linear_parent_set,
                     lambdas = linear_lambdas
@@ -433,7 +433,7 @@ examples_csd <- list(
                       lambdas = and_or_xor_lambdas)
   ),
   "matrix" = list(
-      User = list(thetas = template_thetas, name = "User"),
+     MHN_all_0 = list(thetas = template_thetas, name = "MHN_all_0"),
      MHN_Ex_1 = list(thetas = mhn_example_lambdas2, name = "MHN_Ex_1")      
   )
 )
