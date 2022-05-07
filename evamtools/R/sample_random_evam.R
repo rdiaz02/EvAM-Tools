@@ -30,17 +30,17 @@
 ## }
 indiv_sample_from_trm <- function(trm, T_sampling, ngenots = NULL,
                             genot_names = NULL) {
-    if(is.null(ngenots)) ngenots <- ncol(trm)
-    if(is.null(genot_names)) genot_names <- colnames(trm)
+    if (is.null(ngenots)) ngenots <- ncol(trm)
+    if (is.null(genot_names)) genot_names <- colnames(trm)
     row <- 1
     t_accum <- 0
-    genotype <- "WT" 
+    genotype <- "WT"
     trajectory <- "WT"
 
     while(TRUE) {
         qii <- sum(trm[row, ]) ## Or qs in Gotovos et al terminology
         ## Special case of genotype that does not transition to anything
-        if(qii == 0.0) break 
+        if (qii == 0.0) break
         t_transition <- rexp(n = 1, rate = qii)
         t_accum <- t_accum + t_transition
         if(t_accum >= T_sampling ) break
@@ -84,13 +84,13 @@ indiv_sample_from_trm_pre <- function(trmstd,
                                       genot_names) {
     row <- 1
     t_accum <- 0
-    genotype <- "WT" 
+    genotype <- "WT"
     trajectory <- "WT"
     
     while (TRUE) {
         ## qii <- diag[row] ## Or qs in Gotovos et al terminology
         ## Special case of genotype that does not transition to anything
-        if (diag[row] == 0.0) break 
+        if (diag[row] == 0.0) break
         t_transition <- rexp(n = 1, rate = diag[row])
         t_accum <- t_accum + t_transition
         if(t_accum >= T_sampling ) break
@@ -128,26 +128,25 @@ population_sample_from_trm <- function(trm, n_samples = 10,
                                        T_sampling = NULL,
                                        pre_compute = TRUE,
                                        cores = detectCores()) {
-    if(is.null(T_sampling) && is.null(n_samples)) {
+    if (is.null(T_sampling) && is.null(n_samples)) {
         stop("Pass either n_samples or T_sampling vector")
     }
-    if(!is.null(T_sampling) && !is.null(n_samples)) {
+    if (!is.null(T_sampling) && !is.null(n_samples)) {
         message("Ignoring n_samples as passing T_sampling")
     }
-    if(is.null(T_sampling) && !is.null(n_samples)) {
+    if (is.null(T_sampling) && !is.null(n_samples)) {
         T_sampling <- rexp(n = n_samples, rate = 1)
     }
 
     ngenots <- ncol(trm)
     genot_names <- colnames(trm)
-    if(pre_compute) {
+    if (pre_compute) {
         ## Like code in trans_rate_to_trans_mat
         sx <- rowSums(trm)
         ii <- which(sx > 0)
-        for(i in ii) {
+        for (i in ii) {
             trm[i, ] <- trm[i, ]/sx[i]
         }
-        
         out <- mclapply(T_sampling,
                function(x)
                    indiv_sample_from_trm_pre(trmstd = trm,
@@ -156,7 +155,6 @@ population_sample_from_trm <- function(trm, n_samples = 10,
                                              ngenots = ngenots,
                                              genot_names = genot_names),
                mc.cores = cores)  
-        
     } else {
         out <- mclapply(T_sampling,
                function(x)
@@ -238,7 +236,7 @@ process_samples <- function(sim, n_genes,
 
     if (any(!(output %in% valid_output ))) stop("Incorrect output specified")
     if (length(output) == 0) stop("No output specified")
-    
+
     ## Set up
     retval <- list()
     ## n_states <- 2^n_genes
@@ -256,7 +254,7 @@ process_samples <- function(sim, n_genes,
     ## But really, why do we want this? The expected number of transitions is
     ## already known. What does this give us? A way of testing, but that is
     ## all. To see the sampling variability?
-    
+
     ## This assumes that genotypes, as given by
     ## sorted_genotypes, correspond to the genotypes as they exist
     ## in sim$trajectory (thus sim$obs_events).
@@ -264,7 +262,7 @@ process_samples <- function(sim, n_genes,
     ## of gene names. But the transition rate matrices might not unless
     ## they have been computed that way. They are now, though.
 
-    ## This is the slowest part. Two implementations. 
+    ## This is the slowest part. Two implementations.
     if ("obs_genotype_transitions" %in% output) { ## observed genotype transitions
         unlisted_trajectories <- unlist(sim$trajectory)
         ## ## Implementation 1
@@ -282,7 +280,6 @@ process_samples <- function(sim, n_genes,
         ##   and assign the entries in the sparse matrix
         ##   Creating  matrix of indeces can use mclapply
 
-        
         tt2 <- sparse_transM_from_genotypes(unique(unlisted_trajectories))
         tindex <-  seq_along(rownames(tt2))
         names(tindex) <- rownames(tt2)
@@ -321,8 +318,7 @@ process_samples <- function(sim, n_genes,
             tt2[apso[last, 1], apso[last, 2]] <- 1
         else ## no change between last two ones
             tt2[apso[last, 1], apso[last, 2]] <- sum
-        
-        ## stopifnot(identical(tt, tt2))
+
         retval$obs_genotype_transitions <- tt2
     }
 
@@ -399,12 +395,12 @@ sample_CPMs <- function(cpm_output
                       , genotype_freqs_as_data = TRUE) {
     .Deprecated("sample_evam")
     sample_evam(
-        cpm_output = cpm_output, 
-        N = N, 
-        methods = methods,  
-        output = output,  
-        obs_noise = obs_noise,  
-        genotype_freqs_as_data = genotype_freqs_as_data  
+        cpm_output = cpm_output,
+        N = N,
+        methods = methods,
+        output = output,
+        obs_noise = obs_noise,
+        genotype_freqs_as_data = genotype_freqs_as_data
         )
 }
 
@@ -429,7 +425,7 @@ sample_evam <- function(cpm_output
                                     }, logical(1)
                                     )
         available_methods <- names(which(available_methods))
-        
+
         l_methods <- length(available_methods)
         if (l_methods < length(methods)) {
             warning("At least one method you asked to be sampled ",
@@ -468,9 +464,6 @@ sample_evam <- function(cpm_output
 
     some_pred <- cpm_output[[paste0(methods[1], "_predicted_genotype_freqs")]]
     
-    ## gene_names <- sort(setdiff(unique(unlist(strsplit(names(some_pred),
-    ##                                                   split = ", "))),
-    ##                            "WT"))
     gene_names <- stringi::stri_sort(setdiff(unique(unlist(strsplit(names(some_pred),
                                                       split = ", "))),
                                              "WT"),
@@ -484,9 +477,11 @@ sample_evam <- function(cpm_output
             genots_pred <- cpm_output[[paste0(method, "_predicted_genotype_freqs")]]
 
             retval[[sprintf("%s_sampled_genotype_counts", method)]] <-
-                genot_probs_2_pD_ordered_sample(genots_pred,
-                                                n_genes, gene_names, N,
-                                                "vector")
+                genot_probs_2_pD_ordered_sample(x = genots_pred,
+                                                ngenes = n_genes,
+                                                gene_names = gene_names,
+                                                N = N,
+                                                out = "vector")
             retval[[sprintf("%s_obs_genotype_transitions", method)]] <- NULL
         } else {
             ## evam always returns the method_trans_rate_mat
@@ -498,17 +493,6 @@ sample_evam <- function(cpm_output
                 if ((length(trm) == 1) && is.na(trm)) {
                     ## I think this is dead code. Unreachable now
                     stop("How are we here??!! (length(trm) == 1) && is.na(trm)")
-                    ## retval[[sprintf("%s_obs_genotype_transitions", method)]] <- NULL
-
-                    ## ogt <- cpm_output[[sprintf("%s_predicted_genotype_freqs",
-                    ##                            method)]]
-                    ## if ((length(ogt) == 1) && is.na(ogt)) {
-                    ##     retval[[sprintf("%s_sampled_genotype_counts", method)]] <- NULL
-                    ## } else {
-                    ##     ## Yes, we could sample. But this should never happen.
-                    ##     stop("No transition rate matrix in output ",
-                    ##          "but predicted_genotype_freqs")
-                    ## }
                 } else { ## transition rate matrix present
                     sims <- population_sample_from_trm(trm, n_samples = N)
 
@@ -517,7 +501,7 @@ sample_evam <- function(cpm_output
                                         n_genes,
                                         gene_names,
                                         output = output)
-                    
+
                     for (reqout in valid_output) {
                         if (reqout %in% output)
                             retval[[paste0(method, "_", reqout)]] <-
@@ -539,9 +523,10 @@ sample_evam <- function(cpm_output
                     ##                 method)]] <- NULL
                 } else {
                     retval[[sprintf("%s_sampled_genotype_counts", method)]] <-
-                        genot_probs_2_pD_ordered_sample(genots_pred,
-                                                        n_genes,
-                                                        gene_names,
+                        genot_probs_2_pD_ordered_sample(x = genots_pred,
+                                                        ngenes = n_genes,
+                                                        gene_names = gene_names,
+                                                        N = N,
                                                         out = "vector")
                 }
             }
@@ -560,7 +545,7 @@ sample_evam <- function(cpm_output
             ##                           - add noise to data
             ##                           - data as freqs and overwrite the object
             ##                           - rm data
-            
+
             ## obs_noise >  0  && genotype_freqs_as_data : as former,
             ##                                             returning data
 
@@ -614,7 +599,6 @@ sample_to_pD_order <- function(x, ngenes, gene_names = NULL) {
     rm(gene_names_in_x)
 
     x <- as.data.frame(table(x), stringsAsFactors = FALSE)
-    ## gene_names <- sort(gene_names)
     gene_names <- evam_string_sort(gene_names)
     genot_int <- x[, 1]
     genot_int <- gsub("^WT$", "", genot_int, fixed = "FALSE")
@@ -718,7 +702,9 @@ reorder_to_standard_order <- function(x) {
 ## Given a matrix of 0/1 return the genotypes in canonicalized way
 genot_matrix_2_vector <- function(x) {
     gn <- colnames(x)
-    gt1 <- apply(x, 1, function(v) paste(evam_string_sort(gn[v == 1]), collapse = ", "))
+    gt1 <- apply(x, 1,
+                 function(v) paste(evam_string_sort(gn[v == 1]),
+                                   collapse = ", "))
     gt1[gt1 == ""] <- "WT"
     return(gt1)
 }
@@ -786,8 +772,10 @@ probs_from_trm <- function(x,
     if (!all_genotypes) return(p)
 
     ## Get genes and from them number genotypes and identity genotypes
-    gene_names <- evam_string_sort(setdiff(unique(unlist(strsplit(colnames(x), split = ", "))),
-                          "WT"))
+    gene_names <- evam_string_sort(
+        setdiff(unique(unlist(strsplit(colnames(x),
+                                       split = ", "))),
+                "WT"))
     number_genes <- length(gene_names)
     num_genots <- 2^number_genes
 
@@ -804,17 +792,17 @@ probs_from_trm <- function(x,
 random_evam <- function(ngenes = NULL, gene_names = NULL,
                                  model = c("OT", "CBN", "HESBCN", "MHN",
                                            "OncoBN")
-                               , graph_density = 0.35
-                               , cbn_hesbcn_lambda_min = 1/3
-                               , cbn_hesbcn_lambda_max = 3
-                               , hesbcn_probs = c("AND" = 1/3,
-                                                  "OR" = 1/3,
-                                                  "XOR" = 1/3)
-                               , ot_oncobn_weight_min = 0
-                               , ot_oncobn_weight_max = 1
-                               , ot_oncobn_epos = 0.1
-                               , oncobn_model = "DBN"
-                                 ) {
+                      , graph_density = 0.35
+                      , cbn_hesbcn_lambda_min = 1/3
+                      , cbn_hesbcn_lambda_max = 3
+                      , hesbcn_probs = c("AND" = 1/3,
+                                         "OR" = 1/3,
+                                         "XOR" = 1/3)
+                      , ot_oncobn_weight_min = 0
+                      , ot_oncobn_weight_max = 1
+                      , ot_oncobn_epos = 0.1
+                      , oncobn_model = "DBN"
+                        ) {
     stopifnot((graph_density <= 1) && (graph_density >= 0))
     if (!(xor(is.null(ngenes), is.null(gene_names))))
         stop("Give exactly one of ngenes XOR gene_names")
@@ -899,14 +887,14 @@ MHN_from_thetas <- function(thetas) {
                                 method = "uniformization",
                                 paranoidCheck = TRUE)
     output[["MHN_exp_theta"]] <- exp(thetas)
-    # output[["MHN_exp_theta"]] <- exp(thetas)
     return(output)
 }
 
 ## poset as adjacency matrix and vector of lambdas
 ## both named -> all of the cbn output
 CBN_from_poset_lambdas <- function(poset, lambdas) {
-    stopifnot(identical(evam_string_sort(colnames(poset)), evam_string_sort(names(lambdas))))
+    stopifnot(identical(evam_string_sort(colnames(poset)),
+                        evam_string_sort(names(lambdas))))
     poset_as_data_frame <- poset_2_data_frame(poset)
     output <- list()
     output[["CBN_model"]] <- CBN_model_from_edges_lambdas(poset_as_data_frame,
@@ -964,7 +952,8 @@ poset_2_data_frame <- function(poset) {
 ## poset as adjac. matrix, vector of lambdas, parent_set -> full HESBCN output
 HESBCN_from_poset_lambdas_relation_probs <- function(poset, lambdas,
                                                      hesbcn_probs) {
-    stopifnot(identical(evam_string_sort(colnames(poset)), evam_string_sort(names(lambdas))))
+    stopifnot(identical(evam_string_sort(colnames(poset)),
+                        evam_string_sort(names(lambdas))))
     poset_as_data_frame <- poset_2_data_frame(poset)
 
     ## Assign type of relationship randomly to nodes with >= 2 parents
@@ -979,10 +968,10 @@ HESBCN_from_poset_lambdas_relation_probs <- function(poset, lambdas,
                             prob = hesbcn_probs, replace = TRUE)
         parent_set[which(num_parents > 1)] <- ps_values
     }
-    
+
     stopifnot(identical(evam_string_sort(names(parent_set)),
                         evam_string_sort(names(lambdas))))
-    
+
     output <- list()
     output[["HESBCN_parent_set"]] <- parent_set
     output[["HESBCN_model"]] <-
@@ -1188,7 +1177,7 @@ OncoBN_from_poset_thetas_epsilon_model <- function(poset,
         }
         parent_set[which(num_parents > 1)] <- ps_value
     }
-    
+
     stopifnot(identical(evam_string_sort(names(parent_set)),
                         evam_string_sort(names(thetas))))
 
@@ -1218,7 +1207,7 @@ OncoBN_model_from_edges_thetas_parent_set <- function(edges,
 }
 
 
-## Pablo
+
 OncoBN_model_2_output <- function(model, epsilon) {
     ## We need to go back to the DAG representation
  
@@ -1420,9 +1409,9 @@ sample_to_named_pD_ordered_out <- function(the_sample, ngenes, gene_names,
     counts <- sample_to_pD_order(the_sample, ngenes, gene_names)
     pD_sorted_genotypes <- generate_pD_sorted_genotypes(ngenes,
                                                         gene_names)
-    
+
     ordered_vector <- stats::setNames(counts, pD_sorted_genotypes)
-    
+
     if (out == "vector") {
         return(ordered_vector)
     } else if (out == "data.frame") {
@@ -1432,6 +1421,3 @@ sample_to_named_pD_ordered_out <- function(the_sample, ngenes, gene_names,
         stop("Incorrect out option")
     }
 }
-
-
-

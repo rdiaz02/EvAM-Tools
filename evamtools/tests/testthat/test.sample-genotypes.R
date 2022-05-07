@@ -75,22 +75,33 @@ test_that("We get requested output, by the specified means", {
 })
 
 
-test_that("Exercise random_evam and sampling", {
-    for(i in 1:5) {
-    rmhn <- random_evam(model = "MHN", ngenes = 5)
-    rcbn <- random_evam(model = "CBN", ngenes = 5,
-                             graph_density = 0.5)
-    
-    sample_mhn <- sample_evam(rmhn, N = 1000)
-    sample_cbn <- sample_evam(rcbn, N = 40)
+test_that("Exercise random_evam and sampling and check N is respected", {
+    for (i in 1:5) {
+        rmhn <- random_evam(model = "MHN", ngenes = 5)
+        rcbn <- random_evam(model = "CBN", ngenes = 5,
+                            graph_density = 0.5)
+        rot <- random_evam(model = "OT", ngenes = 5,
+                           graph_density = 0.5)
+        robn <- random_evam(model = "OncoBN", ngenes = 5,
+                            graph_density = 0.5)
+        rhe <- random_evam(model = "HESBCN", ngenes = 5,
+                           graph_density = 0.325)
+        
+        sample_mhn <- sample_evam(rmhn, N = 1000)
+        sample_cbn <- sample_evam(rcbn, N = 40)
+        sample_ot <- sample_evam(rot, N = 55)
+        sample_obn <- sample_evam(robn, N = 71)
+        sample_he <- sample_evam(rhe, N = 102)
 
-    sample_mhne <- sample_evam(rmhn, N = 1000, obs_noise = 0.2)
-    sample_cbne <- sample_evam(rcbn, N = 40, obs_noise = 0.1)
+        expect_equal(nrow(sample_mhn$MHN_sampled_genotype_counts_as_data), 1000)
+        expect_equal(nrow(sample_cbn$CBN_sampled_genotype_counts_as_data), 40)
+        expect_equal(nrow(sample_ot$OT_sampled_genotype_counts_as_data), 55)
+        expect_equal(nrow(sample_obn$OncoBN_sampled_genotype_counts_as_data), 71)
+        expect_equal(nrow(sample_he$HESBCN_sampled_genotype_counts_as_data), 102)
 
-    ## d1 <- genotypeCounts_to_data(sample_mhn$MHN_sampled_genotype_counts, 0)
-    ## d2 <- genotypeCounts_to_data(sample_cbn$CBN_sampled_genotype_counts, 0)
-
-}
+        sample_mhne <- sample_evam(rmhn, N = 1000, obs_noise = 0.2)
+        sample_cbne <- sample_evam(rcbn, N = 40, obs_noise = 0.1)
+    }
 })
 
 cat("\n Done test.sample-genotypes.R. Seconds = ",
