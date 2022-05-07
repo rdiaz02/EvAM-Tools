@@ -24,7 +24,6 @@ template_csd_data <- matrix(0, ncol = 3, nrow = 0)
   csd_samples = 1000,
   dag_model = "HESBCN",
   all_cpms = c("OT", "CBN", "OncoBN", "MHN", "MCCBN", "HESBCN"),
-  ## cpms2run = c("OT", "CBN", "OncoBN", "MHN"), ## , "HESBCN"),
   template_data = list(
       csd_counts =  template_csd_counts
     , data = NULL

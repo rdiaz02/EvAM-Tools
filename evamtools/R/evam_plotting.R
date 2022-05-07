@@ -795,11 +795,37 @@ plot_genotype_counts <- function(data) {
         , names = names(data2)
         , ylab="Counts", main="Absolute\n Genotype Frequencies"
         , horiz = FALSE)
-
     grid(nx = NA, ny = NULL, col='gray', lwd = 2)
     par(op)
 }
 
+## Yea, violating DRY
+plot_genotype_counts_plly <- function(data) {
+    if (nrow(data) == 0) return(invisible(NULL))
+    largest_genot_name <- max(vapply(data$Genotype, nchar, 1))
+    bottom_mar <- min(25, max(5, (2/3) * largest_genot_name))
+    if ("Freq" %in% colnames(data)) {
+        data2 <- stats::setNames(data[, "Freq"], nm = data[, "Genotype"])
+    } else if ("Counts" %in% colnames(data)) {
+        data2 <- stats::setNames(data[, "Counts"], nm = data[, "Genotype"])
+    }
+    data2 <- na.omit(reorder_to_standard_order(data2))
+
+    fig <- plot_ly(
+        x =  names(data2),
+        y = as.vector(data2),
+        type = "bar",
+        marker = list(color =
+                          ## "rgb(154, 154, 154)" ## gray
+                          ## "rgb(255, 165, 0)" ## organge
+                          "rgb(255, 132, 0)" ## tangerine
+                          ## "rgb(0, 128, 128)" ## teal
+                      )
+    ) %>% plotly::layout(xaxis = list(tickangle = 270, categoryorder = "trace"),
+                 yaxis = list(gridcolor ="darkgray"),
+                 margin = list(pad = 10))
+    fig
+}
 
 
 

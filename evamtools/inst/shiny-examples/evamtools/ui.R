@@ -236,8 +236,8 @@ results_simple <- function(){
             )
             ,
             column(4,
-              uiOutput("original_data")
-              
+                   ## FIXME zzply
+                   uiOutput("original_data")
             ),
             column(6,
               uiOutput("tabular_data")
@@ -529,7 +529,7 @@ user_input <- function() {
                                  HTML("DAG and <br> rates/probs."),
                                  "MHN thetas"),
                              choiceValues = list("csd", "dag", "matrix"),
-                selected = "csd"
+                selected = "dag"
               )
             ),
             tags$h4("Examples and user's data"),
@@ -772,9 +772,10 @@ user_input <- function() {
               # )
             # ),
                 )
-            ## FIXME: zz2
-            ,  plotOutput("plot")
-          , plotOutput("dag_plot")
+            ## FIXME zzply
+            , plotly::plotlyOutput("plot") ## and this calls output$plot
+         ## ,  plotOutput("plot")
+         , plotOutput("dag_plot")
 
           )
         )

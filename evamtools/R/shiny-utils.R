@@ -23,8 +23,7 @@ get_display_freqs <- function(freqs, n_genes, gene_names){
   ##    changing number of gens and we use genotype freqs.  But this works poorly
   ##    with DAGs; it leads to incorrect behavior like having in dag only A and C,
   ##    and asking for two genes. Only A would be shown.
-  ##  This now works because of how we pass n_genes and gene_names
-  ##  when using a DAG
+  ## So don't use this function with DAGs :-)
   
   selected_rows <- vapply(freqs$Genotype,
                           function(x) {

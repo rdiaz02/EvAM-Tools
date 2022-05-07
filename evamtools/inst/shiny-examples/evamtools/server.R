@@ -94,7 +94,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     default_dag_model <- .ev_SHINY_dflt$dag_model
     
 
-    last_visited_pages <- list(csd = "User", dag = "User", matrix = "User")
+    ## last_visited_pages <- list(csd = "User", dag = "User", matrix = "User")
+    last_visited_pages <- list(csd = "User", dag = "User", matrix = "MHN_Ex_1")
 
     last_visited_cpm <- ""
     
@@ -122,29 +123,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         ## FIXME: change logic here. This is slightly twisted.
         ## Change get_display_freqs. What I do when this is a DAG
         ## is twisting things to fit the get_display_freqs function.
-        
+        ## 
         if (input$input2build == "dag") {
-            dagdat <- dag_data()
-            present_genes <- setdiff(unique(c(dagdat$From, dagdat$To)),
-                                     "Root")
-            if (!is.null(input$gene_number)) {
-                ## We might be coming from, say, MHN after setting
-                ## number of genes to 2, but the default DAG has three
-                ## Prevent a negative number
-                these_gene_names <-
-                    c(present_genes,
-                      rep("",
-                          max(input$gene_number - length(present_genes),
-                              0)))
-            } else {
-                these_gene_names <- data$gene_names
-            }
+            ## With the DAG we always return all the genotypes
+            ## Other code ensures that gene number is never smaller
+            ## than genes in the DAG.
+            return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
         } else {
-            these_gene_names <- data$gene_names
+            return(evamtools:::get_display_freqs(data$csd_counts,
+                                                 input$gene_number,
+                                                 data$gene_names))
         }
-        
-        evamtools:::get_display_freqs(data$csd_counts, input$gene_number,
-                                      these_gene_names)
     })
 
     ## Force resample on gene number changes
@@ -153,9 +142,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## That removes the plotting twice issue
     ## but makes this less interactive: you must click
     ## "Sample".
-
+    
     ## Can't make it depend on gene_number too
     ## or we get the "DAG contains more genes ..."
+   
     observeEvent(input$select_csd, {
         ## message("at select_csd_trigger")
        if (input$input2build == "dag") {
@@ -166,7 +156,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     }
     ## And now, display_freqs will likely be called
     )
+    
 
+    
    observeEvent(input$gene_number, {
        ## message("at gene number_trigger")
        datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
@@ -175,8 +167,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
            if (dag_more_genes_than_set_genes(input, dag_data(), session)) {
                dag_message_more_genes_than_set_genes()
            }
-       }
-       else if (input$input2build == "matrix") {
+       } else if (input$input2build == "matrix") {
            shinyjs::click("resample_mhn")
        }
    }
@@ -490,7 +481,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     output$define_genotype <- renderUI({
         n_genes <- ifelse(is.null(input$gene_number), 3, input$gene_number)
-        options <- data$gene_names[1:n_genes]
+        gene_options <- data$gene_names[1:n_genes]
         if (input$input2build == "csd") {
             
             tags$div(
@@ -514,7 +505,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$div(class = "inline",
                               checkboxGroupInput(inputId = "genotype",
                                                  label = "Mutations",
-                                                 choices = options)
+                                                 choices = gene_options)
                               ),
                      tags$div(id="fr",
                               numericInput(label = "Counts", value = NA, min = 0,
@@ -523,6 +514,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               ),
                      )
         } else if (input$input2build == "dag") {
+            ## Make sure all genes currently in the DAG are in
+            ## the To and From to add/remove
+            genes_in_dag <- setdiff(unique(c(dag_data()$From, dag_data()$To)),
+                                    "Root")
+            if (length(genes_in_dag) < n_genes) {
+                genes_not_in_dag <- setdiff(gene_options, genes_in_dag)
+                dag_gene_options <- c(genes_in_dag,
+                                      genes_not_in_dag[1:(n_genes - length(genes_in_dag))])
+            } else {
+                dag_gene_options <- genes_in_dag
+            }
             tags$div(
                      tags$div(class = "flex",
                               tags$h3("2. Define a Directed Acyclic Graph (DAG)"),
@@ -545,13 +547,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                            radioButtons(inputId = "dag_from",
                                                         label = "From (parent node)",
                                                         inline = TRUE,
-                                                        choices =  c("Root", options))
+                                                        choices =  c("Root", dag_gene_options))
                                            ),
                                   tags$div(class = "inline",
                                            radioButtons(inputId = "dag_to",
                                                         label = " To (child node)",
                                                         inline = TRUE,
-                                                        choices =  options)
+                                                        choices =  dag_gene_options)
                                            ),
                                   tags$h5(HTML("<p></p>")),
                                   actionButton("add_edge", "Add edge"),
@@ -606,7 +608,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                       HTML("matrix (log-&Theta;):")),
                               actionButton("how2build_matrix", "Help")
                               ),
-                     if(!is.null(data$thetas)){
+                     if (!is.null(data$thetas)){
                          tags$div(
                                   tags$h3("Entries are ",
                                           "lower case thetas, ",
@@ -1088,9 +1090,18 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## ## Plot histogram of genotypes
     ## Sometimes this leads to three calls or even four calls
     ## Some with an object with 0 rows
-    output$plot <- renderPlot({
+    ## FIXME zzply
+    ## output$plot <- renderPlot({
+    ##     tryCatch({
+    ##         evamtools:::plot_genotype_counts(display_freqs())
+    ##     }, error = function(e){
+    ##         showModal(dataModal(e[[1]]))
+    ##     })
+    ## })
+
+    output$plot <- plotly::renderPlotly({
         tryCatch({
-            evamtools:::plot_genotype_counts(display_freqs())
+            evamtools:::plot_genotype_counts_plly(display_freqs())
         }, error = function(e){
             showModal(dataModal(e[[1]]))
         })
@@ -1411,10 +1422,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                           ),
 
                  tags$p(HTML("<strong>Number of most relevant paths to show</strong> "),
-                        "(set it to 0 to show all paths):"),
+                        "(set it to 0 to show all paths or ",
+                        "all genotype labels):"),
                  tags$div(id="freq2label-wrap",
                           sliderInput("freq2label", "", width = "500px",
-                                      value = 3, max = 5, min = 0, step = 1)
+                                      value = 5, max = 10, min = 0, step = 1)
                           )
                  )
     })
@@ -1440,23 +1452,42 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
     })
 
-    output$csd <- renderPlot({
-        evamtools:::plot_genotype_counts(evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data))
-    })
+    ## FIXME zzplyt
+    ## output$csd <- renderPlot({
+    ##     evamtools:::plot_genotype_counts(evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data))
+    ## })
+
+    ## FIXME zzply
+    ## output$original_data <- renderUI({
+    ##     ## To see if I disable original data
+    ##     if(length(names(all_cpm_out)) > 0){
+    ##         tags$div(class="frame max_height",
+    ##                  tags$h3("Original data"),
+    ##                  plotOutput("csd"),
+    ##                  tags$div(class = "download_button",
+    ##                           actionButton("modify_data", "Modify data")
+    ##                           )
+    ##                  )
+    ##     }
+    ## })
+
 
     output$original_data <- renderUI({
-        ## To see if I disable original data
-        if(length(names(all_cpm_out)) > 0){
+        ## To see if I disable original data        
+        if (length(names(all_cpm_out)) > 0) {
             tags$div(class="frame max_height",
                      tags$h3("Original data"),
-                     plotOutput("csd"),
+                     plotly::renderPlotly(
+                                 evamtools:::plot_genotype_counts_plly(
+                                                 evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data))
+                             ),
                      tags$div(class = "download_button",
                               actionButton("modify_data", "Modify data")
                               )
                      )
         }
     })
-
+    
     output$cpm_freqs <- DT::renderDT(all_cpm_out[[input$select_cpm]]$tabular_data[[input$tabular_data2show]],
                                      selection = 'none', server = TRUE
                                    , rownames = FALSE

@@ -56,3 +56,5 @@ importFrom("graph", "plot", "graphAM", "graph.par")
 importFrom("Rgraphviz", "layoutGraph", "renderGraph")
 
 importFrom("R.utils", "withTimeout")
+importFrom("plotly", "plot_ly", "layout", "plotlyOutput", "renderPlotly")
+importFrom("magrittr", "%>%")
