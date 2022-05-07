@@ -98,7 +98,8 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
     
     nodes_in_top_paths <- unique(unlist(as.vector(sapply(paths_from_graph,
         function(x) x$name
-    ))))
+        ))))
+    
     if (type == "genotype"){
         vertex_labels <- sapply(igraph::V(graph)$name,
             function(x){
