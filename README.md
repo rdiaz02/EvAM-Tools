@@ -136,9 +136,9 @@ You can install on your machines:
   * A [Docker image](#docker-images)
 	
 You can run on your machines:
-  * The [package from R and the Shiny app](#how-to-run-the-r-package-and-the-shiny-app-locally)
-  * The [package in an RStudio session from the Docker image](#run-the-r-package-from-the-docker-image)
-  * The [Shiny app from a Docker image](#run-the-shiny-app-from-the-docker-image)
+  * The [R package, which includes the Shiny app](#how-to-run-the-r-package-and-the-shiny-app-locally-without-docker)
+  * The [R package in an RStudio session from the Docker image](#how-to-run-the-r-package-from-the-docker-image)
+  * The [Shiny app from a Docker image](#how-to-run-the-shiny-app-from-the-docker-image)
   
 You can also build your own Docker image and you might want to run the Shiny app in a local intranet, possibly after modifying some settings. See the FAQ in the [Additional documentation](https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_doc_all.pdf) for details. 
 
