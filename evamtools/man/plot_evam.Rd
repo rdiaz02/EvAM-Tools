@@ -66,7 +66,10 @@ plot_CPMs(
   size; otherwise, scale them proportional to frequencies of observed data.}
 
 \item{top_paths}{Number of most relevant paths to plot. Default NULL 
-will plot all paths. See below, Description, for details about relevance.}
+will plot all paths. See below, Description, for details about
+relevance. With many genes, and particularly for MHN (or other methods,
+when there are no restrictions in the order of accumulation of
+mutations), using NULL can lead to a very long time to plot.}
 }
 
 \value{

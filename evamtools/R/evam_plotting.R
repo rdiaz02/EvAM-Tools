@@ -633,7 +633,11 @@ plot_method <- function(method_info, parent_set, edges, method = "") {
                    seg.len = 0.5)
         }
     } else if (is.matrix(method_info)) { ## Plotting matrix, for MHN
-        op <- par(mar=c(7, 7, 7, 3), las = 1)
+        max_gene_name <- max(nchar(colnames(method_info)))
+        min_width <- 3
+        max_width <- 7
+        pwh <- min(max_width, max(max_gene_name, min_width))
+        op <- par(mar = c(pwh, pwh, 7, 3), las = 1)
         ## ##### The plot is from library plot.matrix
         ##  Color scale, centered in white at 0
         range_colors <- 7 ## if you change this, might need to change max.col
