@@ -572,7 +572,8 @@ DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
             ## Ugly hack to move them sideways
             the_num_funct <- function(x) {
                 if (x == 0) return("0")
-                else if (x < 0.01) return(format(x, scientific = TRUE))
+                else if (x < 0.01) return(formatC(x, format = "e", digits = 0))
+                ##format(x, scientific = TRUE)); nope, sometimes ugly
                 else return(as.character(round(x, 2)))
             }
             
@@ -632,7 +633,7 @@ plot_method <- function(method_info, parent_set, edges, method = "") {
                    seg.len = 0.5)
         }
     } else if (is.matrix(method_info)) { ## Plotting matrix, for MHN
-        op <- par(mar=c(3, 3, 7, 3), las = 1)
+        op <- par(mar=c(7, 7, 7, 3), las = 1)
         ## ##### The plot is from library plot.matrix
         ##  Color scale, centered in white at 0
         range_colors <- 7 ## if you change this, might need to change max.col
@@ -641,8 +642,8 @@ plot_method <- function(method_info, parent_set, edges, method = "") {
         mmi <- max(abs(method_info))
         pmbreaks <- seq(from = -mmi, to = mmi, length.out = range_colors + 1)
         plot(method_info, cex = 1.5, digits = 2, key = NULL
-           , axis.col = list(side = 1)
-           , axis.row = list(side = 2)
+           , axis.col = list(side = 1, las = 2)
+           , axis.row = list(side = 2, las = 1)
            , xlab = "" # "Effect of this (effector)"
            , ylab = "" # " on this (affected)"
            , main = "" # method
@@ -652,7 +653,8 @@ plot_method <- function(method_info, parent_set, edges, method = "") {
            , max.col = 180 ## turn black to white in dark cells. 
            , mgp = c(2, 3, 3)
            , cex.axis = 1.5
-             , cex.lab = 1.5
+           , cex.lab = 1.5
+             
              )
         mtext(side = 3, "Effect of this (effector)", line = 1)
         mtext(side = 4, " on this (affected)", srt = 90, las = 0, line = 1)
