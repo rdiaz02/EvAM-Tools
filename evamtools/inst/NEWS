@@ -1,7 +1,8 @@
 Changes in version 1.1.5 (2022-07-04):
-	- MHN matrix figure: can handle just fine gene names up to seven letters
+	- MHN matrix figure: can handle just fine gene names up to seven letters.
 	- Better formating of small edge probs/lambdas (e.g., 2.998111e-3)
-
+	- Clarified top_paths = NULL possible problems with many genes.
+	
 Changes in version 1.1.4 (2022-05-03):
 	- Shiny web app: consistent behavior when changing number of genes for DAGs and MHN.
 	
