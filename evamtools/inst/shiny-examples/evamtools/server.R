@@ -385,7 +385,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     observeEvent(input$change_gene_names, {
         showModal(modalDialog(
-            easyClose = TRUE,
             title = tags$h3("Change gene names"),
             tags$div(class = "inlin2",
                      textInput(inputId = "new_gene_names", "Gene names",
@@ -404,7 +403,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$div(class = "download_button",
                               actionButton("action_gene_names", "Change genes names"),
                               )
-                     )
+                     ),
+            easyClose = TRUE
         ))
     })
 
@@ -1110,7 +1110,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         data2plot <- NULL
         edges <- NULL
 
-        if (input$input2build %in% c("csd", "dag")
+        if (input$input2build %in% c("dag")
             && sum(data$dag)>0
             && !is.null(input$gene_number)
             ){
