@@ -456,7 +456,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     observeEvent(input$action_gene_names,{
         tryCatch({
             new_gene_names <-
-                unique(strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]])
+                strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]]
+            if (isTRUE(any(duplicated(new_gene_names)))) {
+                stop("Duplicated new gene names.")
+            }
+            if (length(data$gene_names[1:input$gene_number]) !=
+                length(new_gene_names)) {
+                stop("Number of old and new gene names differs.")
+            }
+            
             data$gene_names <- c(
                 new_gene_names
               , LETTERS[(length(new_gene_names) + 1):max_genes]

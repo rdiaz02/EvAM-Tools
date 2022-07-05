@@ -387,6 +387,7 @@ to_stnd_csd_dataset <- function(data,
                                default_max_genes = .ev_SHINY_dflt$max_genes,
                                default_template_data = .ev_SHINY_dflt$template_data
                                ) {
+
     ## Be completely explicit upfront!!!
     default_data <- default_template_data$data
     default_lambdas <- default_template_data$lambdas
