@@ -1,8 +1,14 @@
+Changes in version 1.1.7 (2022-07-06):
+	- Additional error check for gene name changes.
+	- Cleaner and consistent data set renaming, with additional checks.
+	- Clarifications sampling error in the strings of the web app.
+	- Wider margins for MHN plots.
+
 Changes in version 1.1.6 (2022-07-05):
 	- User provides dataset name for uploaded data.
 	- Avoid identical names in DAG and cross-sectional examples.
 	- Better handling of repeated and empty user inputed dataset names.
-	- Do not draw DAG on rename of genes in cross-sectinal data.
+	- Do not draw DAG on rename of genes in cross-sectional data.
 
 Changes in version 1.1.5 (2022-07-04):
 	- MHN matrix figure: can handle just fine gene names up to seven letters.
