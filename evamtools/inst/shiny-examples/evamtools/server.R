@@ -78,7 +78,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         cat("\n Finishing")
         do_gc(5)
     })
-
+    
+    
     ## Make these deps explicit. Needed for shinytests
     data("examples_csd", package = "evamtools")
     data("SHINY_DEFAULTS", package = "evamtools")
@@ -93,7 +94,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     default_cpm_samples <- .ev_SHINY_dflt$cpm_samples
     default_dag_model <- .ev_SHINY_dflt$dag_model
 
-    last_visited_pages <- list(csd = "Empty", dag = "Fork_3", matrix = "MHN_all_0")
+    last_visited_pages <- list(csd = "Empty", dag = "DAG_Fork_3", matrix = "MHN_all_0")
 
     last_visited_cpm <- ""
     
