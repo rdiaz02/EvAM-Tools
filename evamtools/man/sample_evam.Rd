@@ -36,7 +36,7 @@ sample_CPMs(cpm_output,  N,
   noise (for example, genotyping error) to the data?   If larger than 0,
   this \code{obs_noise} proportion of entries in the sampled matrix
   will be flipped (i.e., 0s turned to 1s and 1s turned to 0s).}
-}
+
 
 \item{genotype_freqs_as_data}{If TRUE, return a matrix where each row is a "sampled genotype", where 0 denotes no alteration and 1 alteration in the gene of the corresponding column.}
 
