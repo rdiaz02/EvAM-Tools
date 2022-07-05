@@ -180,13 +180,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         if(grepl(".csv", input$csd$datapath)){
             ## dataset_name <-
             ##     strsplit(strsplit(input$csd$name, ".csv")[[1]], "_")[[1]][[1]]
-            dataset_name <- input$name_uploaded
-                      
-            tmp_data <- list()
-            tmp_data$data <- read.csv(input$csd$datapath)
-
             tryCatch({
-                ## repeated from obserEvent(input$Save_csd_data
+                dataset_name <- input$name_uploaded
+                ## repeated from obserEvent(input$save_csd_data
                 if (gsub(" ", "", dataset_name, fixed = TRUE) == "") {
                     stop("Name of dataset cannot be an empty string")
                 }
@@ -202,27 +198,40 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                          "of the others); that can be confusing. ",
                          "Use a different name for the uploaded data.")
                 }
+                tmp_data <- list()
+                tmp_data$data <- read.csv(input$csd$datapath)
+                tmp_data$name <- dataset_name
+                
                 datasets$all_csd[["csd"]][[dataset_name]] <-
                     evamtools:::to_stnd_csd_dataset(tmp_data)
                 datasets$all_csd[["csd"]][[dataset_name]]$name <- dataset_name
+
+                ## zz_dupl
+                ## this forces creating copy so name sticks forever
+                ## but gives error later. And actually being able to change
+                ## name via (Re)name the data is nice. 
+                ## datasets$fixed_examples[["csd"]][[dataset_name]] <- tmp_data
+                
+                ## zz_dupl. Why is this here?
                 last_visited_pages["csd"] <<- dataset_name
                 updateRadioButtons(session, "input2build", selected = "csd")
                 updateRadioButtons(session, "select_csd", selected = dataset_name)
             }, error = function(e){
                showModal(dataModal(e[[1]]))
             })
-        } else if(grepl(".rds", input$csd$datapath, ignore.case = TRUE)){
-            tmp_data <- readRDS(input$csd$datapath)
-            tryCatch({
-                new_data <- evamtools:::to_stnd_csd_dataset(tmp_data)
-                datasets$all_csd[[tmp_data$type]][[new_data$name]] <- new_data
-                last_visited_pages[tmp_data$type] <<- tmp_data$name
-                updateRadioButtons(session, "input2build", selected = tmp_data$type)
-                updateRadioButtons(session, "select_csd", selected = tmp_data$name)
-            }, error = function(e){
-                showModal(dataModal(e[[1]]))
-            })
-        }
+        } ## else if(grepl(".rds", input$csd$datapath, ignore.case = TRUE)){
+        ## We do not accept input as rds. Nope.
+        ##     tmp_data <- readRDS(input$csd$datapath)
+        ##     tryCatch({
+        ##         new_data <- evamtools:::to_stnd_csd_dataset(tmp_data)
+        ##         datasets$all_csd[[tmp_data$type]][[new_data$name]] <- new_data
+        ##         last_visited_pages[tmp_data$type] <<- tmp_data$name
+        ##         updateRadioButtons(session, "input2build", selected = tmp_data$type)
+        ##         updateRadioButtons(session, "select_csd", selected = tmp_data$name)
+        ##     }, error = function(e){
+        ##         showModal(dataModal(e[[1]]))
+        ##     })
+        ## }
     })
 
     observeEvent(input$input2build, {
@@ -243,7 +252,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     ## Saving dataset
     observeEvent(input$save_csd_data, {
-        
         tryCatch({
             ## 1 save dataset to list after user data
             if (gsub(" ", "", input$dataset_name, fixed = TRUE) == "") {
@@ -276,8 +284,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 datasets$fixed_examples[[input$input2build]][[input$dataset_name]] <- tmp_data
             }
 
+            ## Like 205 and 207
             datasets$all_csd[[input$input2build]][[input$dataset_name]] <- tmp_data
-
             datasets$all_csd[[input$input2build]][[input$dataset_name]]$name <-
                 input$dataset_name
 
@@ -710,12 +718,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                             ".csv"))),
                      tags$h5(HTML("If you want to give your dataset a specific ",
                                   "name, set it in the box below ",
-                                  "before uploading the data.")),
+                                  "before uploading the data, ",
+                                  "or modify it afterwards  with '(Re)name ",
+                                  "the data'")),
                      tags$div(class = "inlin3",
                               textInput(inputId = "name_uploaded",
                                         label = "Name for dataset",
                                         value = "Uploaded_data"
-                                        ## strsplit(strsplit(input$csd$name, ".csv")[[1]], "_")[[1]][[1]]
                                         )
                               ),
                      tags$h5(HTML("<br/>")),
