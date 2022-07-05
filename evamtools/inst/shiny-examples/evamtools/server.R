@@ -300,7 +300,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                             e = 0)
                 ddtmp2 <- data$data[, colnames(ddtmp)]
                 stopifnot(all.equal(colSums(ddtmp2), colSums(ddtmp)))
-                c_ddtmp2 <- data_to_counts(ddtmp2, "data.frame", omit_0 = TRUE)
+                c_ddtmp2 <- evamtools:::data_to_counts(ddtmp2, "data.frame", omit_0 = TRUE)
                 rownames(c_ddtmp2) <- c_ddtmp2$Genotype
                 csdc_clean <- data$csd_counts[data$csd_counts$Counts > 0, ]
                 rownames(csdc_clean) <- csdc_clean$Genotype
