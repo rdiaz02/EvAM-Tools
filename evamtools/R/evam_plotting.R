@@ -634,8 +634,8 @@ plot_method <- function(method_info, parent_set, edges, method = "") {
         }
     } else if (is.matrix(method_info)) { ## Plotting matrix, for MHN
         max_gene_name <- max(nchar(colnames(method_info)))
-        min_width <- 3
-        max_width <- 7
+        min_width <- 4
+        max_width <- 8
         pwh <- min(max_width, max(max_gene_name, min_width))
         op <- par(mar = c(pwh, pwh, 7, 3), las = 1)
         ## ##### The plot is from library plot.matrix
