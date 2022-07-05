@@ -206,13 +206,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     evamtools:::to_stnd_csd_dataset(tmp_data)
                 datasets$all_csd[["csd"]][[dataset_name]]$name <- dataset_name
 
+                tmp_data$gene_names <- colnames(tmp_data$data)
+                tmp_data$n_genes <- ncol(tmp_data$data)
+                ## We are not filling up
+                ## dag, dag_parent_set, lambdas, thetas, trm. So what?
                 ## zz_dupl
+                ## Compare with observeEvent(input$save_csd_data
                 ## this forces creating copy so name sticks forever
                 ## but gives error later. And actually being able to change
                 ## name via (Re)name the data is nice. 
-                ## datasets$fixed_examples[["csd"]][[dataset_name]] <- tmp_data
+                datasets$fixed_examples[["csd"]][[dataset_name]] <- tmp_data
                 
-                ## zz_dupl. Why is this here?
                 last_visited_pages["csd"] <<- dataset_name
                 updateRadioButtons(session, "input2build", selected = "csd")
                 updateRadioButtons(session, "select_csd", selected = dataset_name)
@@ -269,6 +273,43 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      "of the others); that can be confusing. ",
                      "Use a different name.")
             }
+
+
+            ## I do not understand why this would ever be needed
+            ## except maybe for genotype data.
+            ## But it is not assumed we only have csd_counts, as we use
+            ## data$data.
+            ## This can possibly change order of columns in data
+            ## and thus gene_names from data$gene_names would not longer match
+            ## gene names in columns of this new data
+            ## if (nrow(data$csd_counts) > 0) {
+            ##     datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <-
+            ##         evamtools:::genotypeCounts_to_data(data$csd_counts,
+            ##                                            e = 0)
+            ## }
+
+            ## Is this ever possible?
+            if( (nrow(data$csd_counts) > 0 ) &&
+                (is.null(data$data) || (all(is.na(data$data))))) {
+                stop("This should not be possible")
+            }
+
+            ## A couple of paranoid consistency checks
+            if (nrow(data$csd_counts) > 0) {
+                ddtmp <- evamtools:::genotypeCounts_to_data(data$csd_counts,
+                                                            e = 0)
+                ddtmp2 <- data$data[, colnames(ddtmp)]
+                stopifnot(all.equal(colSums(ddtmp2), colSums(ddtmp)))
+                c_ddtmp2 <- data_to_counts(ddtmp2, "data.frame", omit_0 = TRUE)
+                rownames(c_ddtmp2) <- c_ddtmp2$Genotype
+                csdc_clean <- data$csd_counts[data$csd_counts$Counts > 0, ]
+                rownames(csdc_clean) <- csdc_clean$Genotype
+                stopifnot(all.equal(c_ddtmp2[csdc_clean[, "Genotype"], ],
+                                    csdc_clean))
+                rm(ddtmp2, ddtmp)
+            }
+
+            
             tmp_data <- list(
                 data = data$data
               , dag = data$dag
@@ -280,27 +321,21 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
               , n_genes = input$gene_number
               , name = input$dataset_name)
 
-            if (!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))){
-                datasets$fixed_examples[[input$input2build]][[input$dataset_name]] <- tmp_data
-            }
+            ## We should always enter here, since you can no longer use
+            ## an existing name
+               if (!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))){
+                   datasets$fixed_examples[[input$input2build]][[input$dataset_name]] <- tmp_data
+               }
 
-            ## Like 205 and 207
-            datasets$all_csd[[input$input2build]][[input$dataset_name]] <- tmp_data
-            datasets$all_csd[[input$input2build]][[input$dataset_name]]$name <-
-                input$dataset_name
+               ## Like 205 and 207. Assigning name not needed
+               datasets$all_csd[[input$input2build]][[input$dataset_name]] <- tmp_data
 
-            if (nrow(data$csd_counts) > 0) {
-                datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <-
-                    evamtools:::genotypeCounts_to_data(data$csd_counts,
-                                                       e = 0)
-            }
+               datasets$all_csd[[input$input2build]][[input$select_csd]] <-
+                   datasets$fixed_examples[[input$input2build]][[input$select_csd]]
 
-            datasets$all_csd[[input$input2build]][[input$select_csd]] <-
-                datasets$fixed_examples[[input$input2build]][[input$select_csd]]
-
-            ## 3 update selected entry
-            updateRadioButtons(session, "select_csd",
-                               selected = input$dataset_name)
+               ## 3 update selected entry
+               updateRadioButtons(session, "select_csd",
+                                  selected = input$dataset_name)
 
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
@@ -455,6 +490,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Updating gene names
     observeEvent(input$action_gene_names,{
         tryCatch({
+
             new_gene_names <-
                 strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]]
             if (isTRUE(any(duplicated(new_gene_names)))) {
