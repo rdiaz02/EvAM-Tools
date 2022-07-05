@@ -216,15 +216,32 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         tags$div(class = "inlin2",
                  textInput(inputId = "dataset_name",
                            "Give your dataset a name",
-                           value = input$select_csd)
+                           value = input$select_csd
+                           )
                  )
     })
 
 
     ## Saving dataset
     observeEvent(input$save_csd_data, {
+        
         tryCatch({
             ## 1 save dataset to list after user data
+            if (gsub(" ", "", input$dataset_name, fixed = TRUE) == "") {
+                stop("Name of dataset cannot be an empty string")
+            }
+            if (grepl(" ", input$dataset_name, fixed = TRUE)) {
+                stop("Name of dataset should not contain spaces")
+            }
+            existing_names <- c(names(datasets$all_csd$csd),
+                                names(datasets$all_csd$dag),
+                                names(datasets$all_csd$matrix))
+            if (input$dataset_name %in% existing_names) {
+                stop("That dataset name is already in use ",
+                     "(if not in this input type, maybe in one ",
+                     "of the others); that can be confusing. ",
+                     "Use a different name.")
+            }
             tmp_data <- list(
                 data = data$data
               , dag = data$dag
