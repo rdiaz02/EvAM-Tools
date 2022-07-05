@@ -328,6 +328,11 @@ user_input <- function() {
         width: 15%; 
       }
 
+     div.inlin3 label { 
+        width: 100%;
+        text-align: left;
+        vertical-align: middle; 
+      }
       div.inlin2 label { 
         width: 100%; 
       }

@@ -434,7 +434,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                              "(of course, do not use comma as part of a gene name), ",
                              "and do not start ",
                              "a gene name with a number; ",
-                             "keep gene names short (for figures)." 
+                             "keep gene names short (for figures)."
                              ),
                      tags$div(class = "download_button",
                               actionButton("action_gene_names", "Change genes names"),
@@ -695,22 +695,25 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$h5(paste0("Format: csv ---comma separated values---,",
                                     " with first row with gene names."
                                     )),
-                     tags$h5(paste0("Use only alphanumeric characters ",
-                                    "for gene names, and do not start ",
-                                    "a gene name with a number; ",
-                                    "keep gene names short (for figures). ",
-                                    "Use 0 or 1 for ",
-                                    "altered/not-altered (mutated/not-mutated)."
-                                    )),
+                     tags$h5(HTML("Use only alphanumeric characters ",
+                                  "for gene names, and do not start ",
+                                  "a gene name with a number; ",
+                                  "keep gene names short (for figures). ",
+                                  "Use 0 or 1 for ",
+                                  "altered/not-altered (mutated/not-mutated)."                  
+                                  )),
                      tags$div(class = "upload_file",
                               fileInput("csd", "Load Data",
                                         multiple = FALSE,
                                         accept = c(
                                             "text/csv",
                                             ".csv"))),
-                     tags$div(class = "inlin2",
+                     tags$h5(HTML("If you want to give your dataset a specific ",
+                                  "name, set it in the box below ",
+                                  "before uploading the data.")),
+                     tags$div(class = "inlin3",
                               textInput(inputId = "name_uploaded",
-                                        "Name for dataset",
+                                        label = "Name for dataset",
                                         value = "Uploaded_data"
                                         ## strsplit(strsplit(input$csd$name, ".csv")[[1]], "_")[[1]][[1]]
                                         )
