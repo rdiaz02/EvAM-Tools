@@ -178,12 +178,30 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Upload data
     observeEvent(input$csd, {
         if(grepl(".csv", input$csd$datapath)){
-            dataset_name <-
-                strsplit(strsplit(input$csd$name, ".csv")[[1]], "_")[[1]][[1]]
+            ## dataset_name <-
+            ##     strsplit(strsplit(input$csd$name, ".csv")[[1]], "_")[[1]][[1]]
+            dataset_name <- input$name_uploaded
+                      
             tmp_data <- list()
             tmp_data$data <- read.csv(input$csd$datapath)
 
             tryCatch({
+                ## repeated from obserEvent(input$Save_csd_data
+                if (gsub(" ", "", dataset_name, fixed = TRUE) == "") {
+                    stop("Name of dataset cannot be an empty string")
+                }
+                if (grepl(" ", dataset_name, fixed = TRUE)) {
+                    stop("Name of dataset should not contain spaces")
+                }
+                existing_names <- c(names(datasets$all_csd$csd),
+                                    names(datasets$all_csd$dag),
+                                    names(datasets$all_csd$matrix))
+                if (dataset_name %in% existing_names) {
+                    stop("That dataset name is already in use ",
+                         "(if not in this input type, maybe in one ",
+                         "of the others); that can be confusing. ",
+                         "Use a different name for the uploaded data.")
+                }
                 datasets$all_csd[["csd"]][[dataset_name]] <-
                     evamtools:::to_stnd_csd_dataset(tmp_data)
                 datasets$all_csd[["csd"]][[dataset_name]]$name <- dataset_name
@@ -690,6 +708,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                         accept = c(
                                             "text/csv",
                                             ".csv"))),
+                     tags$div(class = "inlin2",
+                              textInput(inputId = "name_uploaded",
+                                        "Name for dataset",
+                                        value = "Uploaded_data"
+                                        ## strsplit(strsplit(input$csd$name, ".csv")[[1]], "_")[[1]][[1]]
+                                        )
+                              ),
                      tags$h5(HTML("<br/>")),
                      )
         }
