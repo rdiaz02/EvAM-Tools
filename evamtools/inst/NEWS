@@ -1,6 +1,12 @@
+Changes in version 1.1.6 (2022-07-05):
+	- User provides dataset name for uploaded data.
+	- Avoid identical names in DAG and cross-sectional examples.
+	- Better handling of repeated and empty user inputed dataset names.
+	- Do not draw DAG on rename of genes in cross-sectinal data.
+
 Changes in version 1.1.5 (2022-07-04):
 	- MHN matrix figure: can handle just fine gene names up to seven letters.
-	- Better formating of small edge probs/lambdas (e.g., 2.998111e-3)
+	- Better formating of small edge probs/lambdas (e.g., 2.998111e-3).
 	- Clarified top_paths = NULL possible problems with many genes.
 	
 Changes in version 1.1.4 (2022-05-03):
