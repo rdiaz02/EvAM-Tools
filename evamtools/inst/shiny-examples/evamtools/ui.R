@@ -537,6 +537,14 @@ user_input <- function() {
                 selected = "dag"
               )
             ),
+            tags$footer(tags$script(HTML("
+              tmp_label = document.createElement('p');
+              tmp_label.innerHTML = 'Raw data';
+              document.querySelector('#input2build div.radio').before(tmp_label)
+              tmp_label = document.createElement('p');
+              tmp_label.innerHTML = 'CPM types';
+              document.querySelector('#input2build div.radio').after(tmp_label)
+              "))),
             tags$h4("Examples and user's data"),
             ## How many to show is controlled from server function
             ## in server.R, examples_csd$dag, etc
