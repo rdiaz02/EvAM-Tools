@@ -1363,11 +1363,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             , dag = data$dag, dag_parent_set = data$dag_parent_set)
 
             tabular_data <- evamtools:::create_tabular_data(c(cpm_output, sampled_from_CPMs))
-
             all_evam_output <- list("cpm_output" = c(cpm_output, sampled_from_CPMs)
                                   , "orig_data" = orig_data
-                                  , "tabular_data" = tabular_data 
-                                    )
+                                  , "tabular_data" = tabular_data
+                                  , "do_sampling" = do_sampling
+                                    ) 
 
             ##CPM output name
             result_index <- length(grep(sprintf("^%s", input$select_csd),
@@ -1430,23 +1430,56 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             number_of_columns <- floor(12 /
                                        ifelse(length(input$cpm2show) <=0, 1, length(input$cpm2show)))
             if(!(is.null(selected_plot_type))){
-                lapply(input$cpm2show, function(met){
-                    method_data <- evamtools:::process_data(tmp_data, met,
+                if(selected_plot_type %in% c("trans_mat", "trans_rate_mat")){
+                    lapply(input$cpm2show, function(met){
+                        method_data <- evamtools:::process_data(tmp_data, met,
+                                                                plot_type = selected_plot_type)
+                        output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
+                            pl <- evamtools:::plot_genot_fg(method_data$data2plot,
+                                                            observations = tmp_data$original_data, # We use it to define "Observed" and "Not Observed" genotypes
+                                                            sampled_counts = method_data$sampled_genotype_counts,
+                                                            top_paths = input$freq2label,
+                                                            label_type = input$label2plot,
                                                             plot_type = selected_plot_type)
-                    output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
-                        pl <- evamtools:::plot_genot_fg(method_data$data2plot,
-                                                        observations = tmp_data$original_data, # We use it to define "Observed" and "Not Observed" genotypes
-                                                        sampled_counts = method_data$sampled_genotype_counts,
-                                                        top_paths = input$freq2label,
-                                                        label_type = input$label2plot,
-                                                        plot_type = selected_plot_type)
-                                        # , freq2label = input$freq2label)
+                                            # , freq2label = input$freq2label)
+                        })
+                        return(
+                            column(number_of_columns,
+                                plotOutput(sprintf("plot_sims2_%s", met)))
+                        )
                     })
-                    return(
-                        column(number_of_columns,
-                               plotOutput(sprintf("plot_sims2_%s", met)))
-                    )
-                })
+                } else if(selected_plot_type %in% c("predicted_genotype_freqs", "sampled_genotype_counts")){
+                   lapply(input$cpm2show, function(met){
+                        # browser()
+                        method_data <- evamtools:::process_data(tmp_data, met,
+                                                                plot_type = selected_plot_type)$data2plot
+
+                        if(selected_plot_type %in% c("predicted_genotype_freqs")){
+                            data2plot <- data.frame("Genotype" = names(method_data), 
+                                "Freq" = as.vector(method_data))
+
+                        }
+                        if(selected_plot_type %in% c("sampled_genotype_counts")){
+                                data2plot <- data.frame("Genotype" = names(method_data), 
+                                "Counts" = as.vector(method_data))
+                        }
+                        # output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
+                        #     pl <- evamtools:::plot_genot_fg(method_data$data2plot,
+                        #                                     observations = tmp_data$original_data, # We use it to define "Observed" and "Not Observed" genotypes
+                        #                                     sampled_counts = method_data$sampled_genotype_counts,
+                        #                                     top_paths = input$freq2label,
+                        #                                     label_type = input$label2plot,
+                        #                                     plot_type = selected_plot_type)
+                                            # , freq2label = input$freq2label)
+                        output[[sprintf("plot_sims2_%s", met)]] <- renderPlot(
+                           pl <- evamtools:::plot_genotype_counts(data2plot)
+                        )
+                        return(
+                            column(number_of_columns,
+                                plotOutput(sprintf("plot_sims2_%s", met)))
+                        )
+                    })
+                    } 
             } else {
                 ## Disabling donwload button
                 shinyjs::disable(selector = "#download_cpm")
@@ -1482,54 +1515,66 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
     output$customize <- renderUI({
-        tags$div(class = "frame",
-                 tags$h3("Customize the visualization"),
-                 tags$div(class = "inline",
-                          checkboxGroupInput(inputId = "cpm2show",
-                                             label = "CPMs to show",
-                                             choices = c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
-                                             selected = c("OT", "OncoBN", "CBN", "MHN")),
+        do_sampling <- ifelse(is.null(all_cpm_out[[input$select_cpm]]$do_sampling), FALSE, 
+          all_cpm_out[[input$select_cpm]]$do_sampling)
+        tagList(
+            tags$div(class = "frame",
+                    tags$h3("Customize the visualization"),
+                    tags$div(class = "inline",
+                            checkboxGroupInput(inputId = "cpm2show",
+                                                label = "CPMs to show",
+                                                choices = c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
+                                                selected = c("OT", "OncoBN", "CBN", "MHN")),
 
-                          tags$div(class = "inline",
-                                   radioButtons(inputId = "data2plot",
-                                                label = "Data to show",
-                                                choiceNames =  if (input$do_genotype_transitions) {
-                                                                   c("Transition probabilities", 
-                                                                     "Transition Rate Matrix",
-                                                                     "Observed genotype transitions")
-                                                               } else {         
-                                                                   c("Transition probabilities", 
-                                                                     "Transition Rate Matrix")
-                                                               },
-                                                choiceValues = if (input$do_genotype_transitions) {
-                                                                   c("trans_mat", 
-                                                                     "trans_rate_mat",
-                                                                     "obs_genotype_transitions")
-                                                               } else {
-                                                                   c("trans_mat", 
-                                                                     "trans_rate_mat")
-                                                               },
-                                                selected = "trans_mat"
-                                                )
-                                   ),
-                          tags$div(class = "inline",
-                                   radioButtons(inputId = "label2plot",
-                                                label = "Type of label",
-                                                choiceNames =  c("Genotype", "Last gene mutated"),
-                                                choiceValues = c("genotype", "acquisition"),
-                                                selected = "genotype"
-                                                )
-                                   ),
-                          ),
+                            tags$div(class = "inline",
+                                    radioButtons(inputId = "data2plot",
+                                                    label = "Data to show",
+                                                    choiceNames = 
+                                                     if (do_sampling) {
+                                                                    c("Transition probabilities", 
+                                                                        "Transition Rate Matrix",
+                                                                        "Predicted genotype relative frequencies",
+                                                                        "Sampled genotype counts")
+                                                                   } else {         
+                                                                       c("Transition probabilities", 
+                                                                         "Transition Rate Matrix",
+                                                                         "Predicted genotype relative frequencies")
+                                                                   }
+                                                                ,
+                                                    choiceValues = 
+                                                    if (do_sampling) {
+                                                                    c("trans_mat", 
+                                                                        "trans_rate_mat",
+                                                                        "predicted_genotype_freqs",
+                                                                        "sampled_genotype_counts")
+                                                                   } else {
+                                                                       c("trans_mat", 
+                                                                         "trans_rate_mat",
+                                                                         "predicted_genotype_freqs")
+                                                                   }
+                                                                ,
+                                                    selected = "trans_mat"
+                                                    )
+                                    ),
+                            tags$div(class = "inline",
+                                    radioButtons(inputId = "label2plot",
+                                                    label = "Type of label",
+                                                    choiceNames =  c("Genotype", "Last gene mutated"),
+                                                    choiceValues = c("genotype", "acquisition"),
+                                                    selected = "genotype"
+                                                    )
+                                    ),
+                            ),
 
-                 tags$p(HTML("<strong>Number of most relevant paths to show</strong> "),
-                        "(set it to 0 to show all paths or ",
-                        "all genotype labels):"),
-                 tags$div(id="freq2label-wrap",
-                          sliderInput("freq2label", "", width = "500px",
-                                      value = 5, max = 10, min = 0, step = 1)
-                          )
-                 )
+                    tags$p(HTML("<strong>Number of most relevant paths to show</strong> "),
+                            "(set it to 0 to show all paths or ",
+                            "all genotype labels):"),
+                    tags$div(id="freq2label-wrap",
+                            sliderInput("freq2label", "", width = "500px",
+                                        value = 5, max = 10, min = 0, step = 1)
+                            )
+                    )
+        )
     })
 
     output$cpm_list <- renderUI({
@@ -1589,7 +1634,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
     })
     
-    output$cpm_freqs <- DT::renderDT(all_cpm_out[[input$select_cpm]]$tabular_data[[input$tabular_data2show]],
+    output$cpm_freqs <- DT::renderDT(all_cpm_out[[input$select_cpm]]$tabular_data[[input$data2plot]],
                                      selection = 'none', server = TRUE
                                    , rownames = FALSE
                                    , options = list(
@@ -1600,22 +1645,22 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         if(length(names(all_cpm_out)) > 0){
             tags$div(class="frame max_height",
                      tags$h3("Tabular output"),
-                     radioButtons(inputId = "tabular_data2show",
-                                  label = "",
-                                  inline = TRUE,
-                                  choiceNames =  c( "Transition probabilities",
-                                                   "Transition rates",
-                                                   "Predicted genotype relative frequencies",
-                                                   "Sampled genotype counts",
-                                                   "Observed genotype transitions (counts)"
-                                                   ),
-                                  choiceValues =  c("trans_mat",
-                                                    "trans_rate_mat",
-                                                    "predicted_genotype_freqs",
-                                                    "sampled_genotype_counts",
-                                                    "obs_genotype_transitions"),
-                                  selected = "trans_mat"
-                                  ),
+                    #  radioButtons(inputId = "tabular_data2show",
+                    #               label = "",
+                    #               inline = TRUE,
+                    #               choiceNames =  c( "Transition probabilities",
+                    #                                "Transition rates",
+                    #                                "Predicted genotype relative frequencies",
+                    #                                "Sampled genotype counts",
+                    #                                "Observed genotype transitions (counts)"
+                    #                                ),
+                    #               choiceValues =  c("trans_mat",
+                    #                                 "trans_rate_mat",
+                    #                                 "predicted_genotype_freqs",
+                    #                                 "sampled_genotype_counts",
+                    #                                 "obs_genotype_transitions"),
+                    #               selected = "trans_mat"
+                    #               ),
                      tags$div(
                               DT::DTOutput("cpm_freqs")
                           )

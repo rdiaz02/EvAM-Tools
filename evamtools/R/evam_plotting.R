@@ -489,7 +489,10 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
     }
 
     accepted_plot_types <- c("trans_mat",
-                             "obs_genotype_transitions", "trans_rate_mat")
+                             "obs_genotype_transitions", 
+                             "trans_rate_mat",
+                             "sampled_genotype_counts",
+                             "predicted_genotype_freqs")
     
     if (!(plot_type %in% accepted_plot_types))
         stop("Incorrect plot_type. plot_type must be one of ",
@@ -800,7 +803,7 @@ plot_genotype_counts <- function(data) {
 
     barplot(height = as.vector(data2)
         , names = names(data2)
-        , ylab="Counts", main="Absolute\n Genotype Frequencies"
+        # , ylab="Counts", main="Absolute\n Genotype Frequencies"
         , horiz = FALSE)
     grid(nx = NA, ny = NULL, col='gray', lwd = 2)
     par(op)
