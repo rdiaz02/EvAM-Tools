@@ -1398,7 +1398,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
 
             number_of_columns <- floor(12 /
-                                       ifelse(length(input$cpm2show) <=4, 4, length(input$cpm2show)))
+                                        ifelse(length(input$cpm2show) <=0, 1, length(input$cpm2show)))
+                                    #    ifelse(length(input$cpm2show) <=4, 4, length(input$cpm2show)))
 
             lapply(input$cpm2show, function(met){
                 method_data <- evamtools:::process_data(tmp_data, met,
@@ -1427,7 +1428,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             selected_plot_type <- input$data2plot
 
             number_of_columns <- floor(12 /
-                                       ifelse(length(input$cpm2show) <=4, 4, length(input$cpm2show)))
+                                       ifelse(length(input$cpm2show) <=0, 1, length(input$cpm2show)))
             if(!(is.null(selected_plot_type))){
                 lapply(input$cpm2show, function(met){
                     method_data <- evamtools:::process_data(tmp_data, met,
