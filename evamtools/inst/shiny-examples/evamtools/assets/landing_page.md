@@ -74,7 +74,8 @@ The results include:
         * Remember: these are DAGs that have *genes (not genotypes) as nodes*. They represent the order restrictions of the events.
     * On the bottom row, the transition probabilities between genotypes or the transition rate matrix (for the models that return it); what is represented is chosen on the left, ```Customize the visualization```.
         * These plots have *genotypes (not genes) as nodes*.
-        * (If you choose to *Sample for observed genotype transitions*, under  ```Advanced options and CPMs to use```, for models that return a transition rate matrix (CBN, H-ESBCN, MHN), you can also represent the observed genotype transitions.)
+        <!-- * (If you choose to *Sample for observed genotype transitions*, under  ```Advanced options and CPMs to use```, for models that return a transition rate matrix (CBN, H-ESBCN, MHN), you can also represent the observed genotype transitions.) -->
+		<!-- This was not used, and likely to be confusing.  This is removal_note_sogt_1 -->
         * You can show, for the bottom plots, only some of the most relevant paths; again, modify options under ```Customize the visualization```.
         * The bottom plots might include genotypes never observed in the sample; these are shown in light green.
         * For easier visualization, in very busy plots, instead of the Genotypes you might want to show the last gene mutated.
@@ -85,7 +86,8 @@ The results include:
     * Transition rates: for models that provide them (CBN, H-ESBCN, MHN) transition rates.
     * Predicted genotype relative frequencies: the predicted genotype frequencies from the fitted models.
     * Sampled genotype counts: the counts from obtaining a finite sample (of the size you chose) with the probabilities given by the predicted genotype frequencies. If you add noise, they include observational (e.g., genotyping) noise.
-    * Observed genotype transitions (counts): if you choose to *Sample for observed genotype transitions* (under ```Advanced options and CPMs to use```), for models that return a transition rate matrix (CBN, H-ESBCN, MHN), we obtain the observed sampled of genotypes by simulating sampling from the continuous-time Markov chain; this provides also observed transition counts between genotypes.
+    <!-- * Observed genotype transitions (counts): if you choose to *Sample for observed genotype transitions* (under ```Advanced options and CPMs to use```), for models that return a transition rate matrix (CBN, H-ESBCN, MHN), we obtain the observed sampled of genotypes by simulating sampling from the continuous-time Markov chain; this provides also observed transition counts between genotypes. -->
+	<!-- See remove_note_sogt_1 -->
 &nbsp;		
 * Original data: to help interpret the results, a histogram of the genotype counts is also provided.
 &nbsp;

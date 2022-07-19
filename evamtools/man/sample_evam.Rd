@@ -80,7 +80,11 @@ sample_CPMs(cpm_output,  N,
   state counts and observed genotype transitions, we use this same
   sampling to obtain the absolute genotype frequencies. (The results
   are, of course, equivalent, but sampling directly from the predicted
-  frequencies is much faster).
+  frequencies is much faster). Note that the option to request
+  obs_genotype_transitions was removed from the web app, as it was
+  rarely used, but lead to confusion and could increase without good
+  reason running times. So, from the web app, we sample
+  without using obs_genotype_transitions.
  
   Observed genotype transitions, if requested, are obtained by counting the transitions between pairs of genotypes when simulating from the continuous-time Markov Chain. State counts are also obtained by counting from this process how many times a genotype was visited.
 }

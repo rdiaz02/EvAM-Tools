@@ -671,20 +671,22 @@ user_input <- function() {
                      selectInput("do_sampling", "Sample genotypes: ",
                                  c(TRUE, FALSE),
                                  selected = FALSE),
-                     tags$h5("Generate a sample of genotypes ",
+                     tags$h5("Generate a finite sample of genotypes ",
                              "according to the predicted frequencies of ",
                              "the model."),
-                     selectInput("do_genotype_transitions",
-                                 "Sample for observed genotype transitions",
-                                 c("True" = TRUE, "False" = FALSE),
-                                 selected = FALSE
-                                 ),
-                     tags$h5("Obtain observed genotype transitions? ",
-                             "Requires simulating sampling from the  ",
-                             "continuous time Markov chain and is ",
-                             "slower than simply obtaining a sample of genotypes. ",
-                             "For this to have an effect, set ",
-                             "'Sample genotypes' to true."),
+                ## selectInput("do_genotype_transitions",
+                ##             "Sample for observed genotype transitions",
+                ##             c("True" = TRUE, "False" = FALSE),
+                ##             selected = FALSE
+                ##             ),
+                ## tags$h5("Obtain observed genotype transitions? ",
+                ##         "Requires simulating sampling from the  ",
+                ##         "continuous time Markov chain and is ",
+                ##         "slower than simply obtaining a sample of genotypes. ",
+                ##         "For this to have an effect, set ",
+                ##         "'Sample genotypes' to true."),
+                ##  This is removal_note_sogt_1
+                ## The functionality is still present in the R package itself
                 numericInput("sample_size", "Number of samples",
                              10000
                              ## next fails with shinytest, so give the number
@@ -692,7 +694,7 @@ user_input <- function() {
                            , min = 0, max = 100000, step = 100,
                              width = "100%"),
                      tags$h5("Number of genotypes to generate ",
-                             "when generating a sample of genotypes ",
+                             "when generating a finite sample of genotypes ",
                              "according to the predicted frequencies of ",
                              "from model."),                     
                 numericInput("sample_noise", "Observation noise", 0

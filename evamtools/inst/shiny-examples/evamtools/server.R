@@ -1339,19 +1339,22 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     n_samples <- .ev_SHINY_dflt$cpm_samples
                 }
                 progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
-                if (input$do_genotype_transitions) {
-                    sout <- c("sampled")
-                }
+                ## if (input$do_genotype_transitions) {
+                ##     ## disabled when removal_note_sogt_1
+                ##     sout <- c("sampled")
+                ## }
                 
                 sampled_from_CPMs <-
-                    sample_evam(cpm_output, n_samples , methods,
-                                out = if (input$do_genotype_transitions) { 
-                                          c("sampled_genotype_counts",
-                                            "obs_genotype_transitions")
-                                      } else {
-                                          "sampled_genotype_counts"
-                                      },
-                              , obs_noise = input$sample_noise)
+                    sample_evam(cpm_output, N = n_samples, methods = methods,
+                                output = "sampled_genotype_counts",
+                                ## ## disabled when removal_note_sogt_1
+                                ## if (input$do_genotype_transitions) { 
+                                ##     c("sampled_genotype_counts",
+                                ##       "obs_genotype_transitions")
+                                ##                                } else {
+                                ##           "sampled_genotype_counts"
+                                ##       },
+                                obs_noise = input$sample_noise)
             }
             
             progress$inc(4/5, detail = "Post processing data")
