@@ -256,7 +256,7 @@ Please, use the repository (https://github.com/rdiaz02/EvAM-Tools) and submit bu
 ## Funding<a id="funding"></a>
 ***
 
-Supported by grant PID2019-111256RB-I00 funded by MCIN/AEI/10.13039/501100011033 and Comunidad de Madrid's PEJ-2019-AI/BMD-13961. 
+Supported by grant PID2019-111256RB-I00 funded by MCIN/AEI/10.13039/501100011033 and Comunidad de Madrid's PEJ-2019-AI/BMD-13961 to R. Diaz-Uriarte.
 <center>
 <img src="micin-aei.png" alt="micin-aei logo" width=200>
 </center>
