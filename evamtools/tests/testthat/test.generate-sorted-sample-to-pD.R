@@ -445,8 +445,13 @@ test_that("Test with same order of genes", {
                    function(u)
                        paste(evam_string_sort(strsplit(u, split = ", ", fixed = TRUE)[[1]]),
                              collapse = ", "), "something"))
-        
-        sx <- sample(genotypes_resorted, N, prob = ag[, "Fitness"], replace = TRUE)
+
+        ## In newer OncoSimulR, column names for Fitness can now be called Birth
+
+        fitness_birth_column <- ifelse("Fitness" %in% colnames(ag),
+                                       "Fitness", "Birth") 
+        sx <- sample(genotypes_resorted, N, prob = ag[, fitness_birth_column],
+                     replace = TRUE)
 
         outgs <- generate_pD_sorted_genotypes(ngenes, gn)
         outgpd <-  sample_to_pD_order(sx, ngenes, gn)

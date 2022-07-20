@@ -98,10 +98,22 @@ cpm_to_fitness_genots <- function(x, max_f = NULL, sh = -Inf, max_genots = 2^15)
     x1 <- cpm_out_to_oncosimul(x, sh)
     x1 <- evalAllGenotypes(fitnessEffects = allFitnessEffects(rT = x1),
                            addwt = TRUE, max = max_genots)
-    if(!is.null(max_f)) {
-        if(max_f < 1) stop("max_f must be larger than min_f")
-        x1$Fitness[x1$Fitness > 0.0] <-
-            scale_fitness_2(x1$Fitness[x1$Fitness > 0.0], max_f)
+
+    ## In newer OncoSimulR, column names for Fitness can now be called Birth
+    fitness_birth_column <- ifelse("Fitness" %in% colnames(x1),
+                                   "Fitness", "Birth")
+    if (!is.null(max_f)) {
+        if (max_f < 1) stop("max_f must be larger than min_f")
+
+        if (fitness_birth_column == "Fitness") {
+            x1$Fitness[x1$Fitness > 0.0] <-
+                scale_fitness_2(x1$Fitness[x1$Fitness > 0.0], max_f)
+        } else if (fitness_birth_column == "Birth") {
+            x1$Birth[x1$Birth > 0.0] <-
+                scale_fitness_2(x1$Birth[x1$Birth > 0.0], max_f)
+        } else {
+            stop("The column should be called Birth or Fitness")
+        }
     }
     return(x1)
 }
@@ -230,8 +242,13 @@ cpm_to_trans_mat_oncosimul <- function(x, max_f = NULL, sh = -Inf,
     
     fitness_mat <- evam_allGenotypes_to_matrix(fitness_all)
     access_genots <- evam_wrap_accessibleGenotypes(fitness_mat, th = 0)
+
+    ## In newer OncoSimulR, column names for Fitness can now be called Birth
+
+    fitness_birth_column <- ifelse("Fitness" %in% colnames(fitness_all),
+                                   "Fitness", "Birth") 
     
-    access_genots_fitness <- fitness_all[access_genots, "Fitness"]
+    access_genots_fitness <- fitness_all[access_genots, fitness_birth_column]
     names(access_genots_fitness) <- fitness_all[access_genots, "Genotype"]
 
     
