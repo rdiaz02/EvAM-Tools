@@ -1446,47 +1446,46 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                                 plot_type = selected_plot_type)
                         output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
                             pl <- evamtools:::plot_genot_fg(method_data$data2plot,
-                                                            observations = tmp_data$original_data, # We use it to define "Observed" and "Not Observed" genotypes
+                                        # We use it to define "Observed" and "Not Observed" genotypes
+                                                            observations = tmp_data$original_data, 
                                                             sampled_counts = method_data$sampled_genotype_counts,
                                                             top_paths = input$freq2label,
                                                             label_type = input$label2plot,
                                                             plot_type = selected_plot_type)
-                                            # , freq2label = input$freq2label)
                         })
                         return(
                             column(number_of_columns,
-                                plotOutput(sprintf("plot_sims2_%s", met)))
+                                   plotOutput(sprintf("plot_sims2_%s", met)))
                         )
                     })
                 } else if(selected_plot_type %in% c("predicted_genotype_freqs", "sampled_genotype_counts")){
-                   lapply(input$cpm2show, function(met){
-                        # browser()
+                    lapply(input$cpm2show, function(met){
                         method_data <- evamtools:::process_data(tmp_data, met,
                                                                 plot_type = selected_plot_type)$data2plot
 
                         if(selected_plot_type %in% c("predicted_genotype_freqs")){
                             data2plot <- data.frame("Genotype" = names(method_data), 
-                                "Freq" = as.vector(method_data))
+                                                    "Freq" = as.vector(method_data))
 
                         }
                         if(selected_plot_type %in% c("sampled_genotype_counts")){
-                                data2plot <- data.frame("Genotype" = names(method_data), 
-                                "Counts" = as.vector(method_data))
+                            data2plot <- data.frame("Genotype" = names(method_data), 
+                                                    "Counts" = as.vector(method_data))
                         }
-                        # output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
-                        #     pl <- evamtools:::plot_genot_fg(method_data$data2plot,
-                        #                                     observations = tmp_data$original_data, # We use it to define "Observed" and "Not Observed" genotypes
-                        #                                     sampled_counts = method_data$sampled_genotype_counts,
-                        #                                     top_paths = input$freq2label,
-                        #                                     label_type = input$label2plot,
-                        #                                     plot_type = selected_plot_type)
-                                            # , freq2label = input$freq2label)
+                                        # output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
+                                        #     pl <- evamtools:::plot_genot_fg(method_data$data2plot,
+                                        #                                     observations = tmp_data$original_data, # We use it to define "Observed" and "Not Observed" genotypes
+                                        #                                     sampled_counts = method_data$sampled_genotype_counts,
+                                        #                                     top_paths = input$freq2label,
+                                        #                                     label_type = input$label2plot,
+                                        #                                     plot_type = selected_plot_type)
+                                        # , freq2label = input$freq2label)
                         output[[sprintf("plot_sims2_%s", met)]] <- renderPlot(
-                           pl <- evamtools:::plot_genotype_counts(data2plot)
+                            pl <- evamtools:::plot_genotype_counts(data2plot)
                         )
                         return(
                             column(number_of_columns,
-                                plotOutput(sprintf("plot_sims2_%s", met)))
+                                   plotOutput(sprintf("plot_sims2_%s", met)))
                         )
                     })
                     } 

@@ -434,7 +434,8 @@ plot_genot_fg <- function(trans_mat
         , edge.label.dist = 3
         , edge.arrow.size = 0
        , edge.width = w2
-       ## , xlab = "Number of features acquired"
+       , asp = 0
+         ## , xlab = "Number of features acquired"
          )
 
     margin <- -1.15
