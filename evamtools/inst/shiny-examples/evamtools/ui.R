@@ -251,9 +251,10 @@ results_simple <- function(){
 
 user_input <- function() {
   fluidPage(
-    shinyjs::useShinyjs(),
-    tags$head(
-      tags$style(HTML("
+
+      shinyjs::useShinyjs(),
+      tags$head(
+               tags$style(HTML("
       body{
         font-size: 15px;
       }
@@ -519,25 +520,25 @@ user_input <- function() {
       }
 
         ") # end HTML
-      ) # end tags$style
-    ),
-    column(width = 12,
-      
-           sidebarLayout(
-        column(width = 1,
-               tags$div(
-            tags$h3("Input to build"),
-            tagList(
-                radioButtons(inputId = "input2build", label = "",
-                             choiceNames = list(
-                                 HTML("Cross-sectional <br> data"),
-                                 HTML("DAG and <br> rates/probs."),
-                                 "MHN thetas"),
-                             choiceValues = list("csd", "dag", "matrix"),
-                selected = "dag"
-              )
-            ),
-            tags$footer(tags$script(HTML("
+     ) # end tags$style
+     ),
+     column(width = 12,
+            
+            sidebarLayout(
+                column(width = 1,
+                       tags$div(
+                                tags$h3("Input to build"),
+                                tagList(
+                                    radioButtons(inputId = "input2build", label = "",
+                                                 choiceNames = list(
+                                                     HTML("Cross-sectional <br> data"),
+                                                     HTML("DAG and <br> rates/probs."),
+                                                     "MHN thetas"),
+                                                 choiceValues = list("csd", "dag", "matrix"),
+                                                 selected = "dag"
+                                                 )
+                                ),
+                                tags$footer(tags$script(HTML("
               tmp_label = document.createElement('p');
               tmp_label.innerHTML = 'Raw data';
               document.querySelector('#input2build div.radio').before(tmp_label)
@@ -545,136 +546,136 @@ user_input <- function() {
               tmp_label.innerHTML = 'CPM types';
               document.querySelector('#input2build div.radio').after(tmp_label)
               "))),
-            tags$h4("Examples and user's data"),
-            ## How many to show is controlled from server function
-            ## in server.R, examples_csd$dag, etc
-            uiOutput("csd_list"),
+              tags$h4("Examples and user's data"),
+              ## How many to show is controlled from server function
+              ## in server.R, examples_csd$dag, etc
+              uiOutput("csd_list"),
 
-            tags$h3(HTML("<br/>")),
-            tags$h5(paste("evamtools version: ",
-                          packageVersion("evamtools")))
-            
-          )
-          ## do it with a render UI
-        ),
-
-        column(width = 11,
-          titlePanel(HTML("&ensp; Cross-sectional data input")),
-          column(width = 6,
-                 column(width = 12,
-                        ## Upload
-            tags$div(class = "frame",
-                     tags$h3(" Define your data interactively"),
-            ## Save/Download/Rename/Use
-            tags$div(class = "frame",
-                     tags$h3("(Re)name the data"),
-                     tags$h5(HTML("Give the modified data a name ",
-                                  "that will also be used to save the CPM ",
-                                  "output.")),
-                     tags$div(class = "download_button",
-                              ),
-                     uiOutput("dataset_name"),
-                     actionButton("save_csd_data", "Use this name"),
+              tags$h3(HTML("<br/>")),
+              tags$h5(paste("evamtools version: ",
+                            packageVersion("evamtools")))
+              
+              )
+              ## do it with a render UI
               ),
-            
-            tags$div(class = "frame",
-                     uiOutput("upload_data"),
-                tags$div(class = "flex",
-                         tags$h3("1. Set the number of genes"),
-                         tags$h5("(Using 7 or more genes can lead ",
-                                 "to very long execution times for some methods ",
-                                 "and crowded figures.)"),
-                    actionButton("change_gene_names", "Change gene names")
-                    
-                  ),
-                uiOutput("gene_number")),
-            tags$div(class = "frame",
-              uiOutput("define_genotype"),
-            ),
-            uiOutput("change_counts"),
 
-             tags$div(
-                      class = "frame",
-                      tags$h3("Download the data"),
+              column(width = 11,
+                     titlePanel(HTML("&ensp; Cross-sectional data input")),
+                     column(width = 6,
+                            column(width = 12,
+                                   ## Upload
+                                   tags$div(class = "frame",
+                                            tags$h3(" Define your data interactively"),
+                                            ## Save/Download/Rename/Use
+                                            tags$div(class = "frame",
+                                                     tags$h3("(Re)name the data"),
+                                                     tags$h5(HTML("Give the modified data a name ",
+                                                                  "that will also be used to save the CPM ",
+                                                                  "output.")),
+                                                     tags$div(class = "download_button",
+                                                              ),
+                                                     uiOutput("dataset_name"),
+                                                     actionButton("save_csd_data", "Use this name"),
+                                                     ),
+                                            
+                                            tags$div(class = "frame",
+                                                     uiOutput("upload_data"),
+                                                     tags$div(class = "flex",
+                                                              tags$h3("1. Set the number of genes"),
+                                                              tags$h5("(Using 7 or more genes can lead ",
+                                                                      "to very long execution times for some methods ",
+                                                                      "and crowded figures.)"),
+                                                              actionButton("change_gene_names", "Change gene names")
+                                                              
+                                                              ),
+                                                     uiOutput("gene_number")),
+                                            tags$div(class = "frame",
+                                                     uiOutput("define_genotype"),
+                                                     ),
+                                            uiOutput("change_counts"),
+
+                                            tags$div(
+                                                     class = "frame",
+                                                     tags$h3("Download the data"),
+                                                     tags$div(class = "download_button",
+                                                              tags$h5(HTML("Contents of saved file: ",
+                                                                           "the data as data frame; ",
+                                                                           "if you built a DAG or MHN model, ",
+                                                                           "also the model built."
+                                                                           )),  
+                                                              downloadButton("download_csd", "Download your data")
+                                                              )
+                                                 )
+                                            )
+
+                                   )
+                            ), 
+                     column(width = 6,
+                            
+                            tags$div(class = "download_button submit_button",
+                                     actionButton("analysis", "Run evamtools")
+                                     ),
                             tags$div(class = "download_button",
-                         tags$h5(HTML("Contents of saved file: ",
-                                      "the data as data frame; ",
-                                      "if you built a DAG or MHN model, ",
-                                      "also the model built."
-                                      )),  
-                  downloadButton("download_csd", "Download your data")
-                )
-             )
-            )
+                                     actionButton("advanced_options", "Advanced options and CPMs to use")
+                                     ),
+                            tags$div(id="all_advanced_options", 
+                                     ## title = tags$h3("Advanced options"),
+                                     tags$div(class="inlin",
+                                              tags$h5(HTML("(See additional details for all options ",
+                                                           "in the help of the <tt>evam</tt> and <tt>sample_evam</tt> functions ",
+                                                           "available from the 'Package evamtools' ",
+                                                           "help files in the ",
+                                                           "<a href='https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_doc_all.pdf'>",
+                                                           "Additional documentation</a>).")),
+                                              tags$hr(style="border-color: darkgrey;"),
+                                              checkboxGroupInput("cpm_methods",
+                                                                 "CPMs to use", 
+                                                                 width = "100%",
+                                                                 choiceNames = c(
+                                                                     "CBN",
+                                                                     "OT",
+                                                                     "OncoBN",
+                                                                     "MHN",
+                                                                     "MCCBN",
+                                                                     "H-ESBCN"),
+                                                                 choiceValues = c(
+                                                                     "CBN",
+                                                                     "OT",
+                                                                     "OncoBN",
+                                                                     "MHN",
+                                                                     "MCCBN",
+                                                                     "HESBCN"
+                                                                 ),
+                                                                 selected = c(
+                                                                     "CBN",
+                                                                     "OT",
+                                                                     "OncoBN",
+                                                                     "MHN"
+                                                                 ),
+                                                                 inline = FALSE),
+                                              tags$h5("Beware: MCCBN may take hours to run. ",
+                                                      "H-ESBCN often takes much longer than the ",
+                                                      " remaining methods (often > 20 seconds)."),
+                                              tags$hr(style="border-color: darkgrey;"),
 
-            )
-          ), 
-          column(width = 6,
-          
-            tags$div(class = "download_button submit_button",
-              actionButton("analysis", "Run evamtools")
-            ),
-            tags$div(class = "download_button",
-              actionButton("advanced_options", "Advanced options and CPMs to use")
-            ),
-            tags$div(id="all_advanced_options", 
-                     ## title = tags$h3("Advanced options"),
-                     tags$div(class="inlin",
-                              tags$h5(HTML("(See additional details for all options ",
-                             "in the help of the <tt>evam</tt> and <tt>sample_evam</tt> functions ",
-                             "available from the 'Package evamtools' ",
-                             "help files in the ",
-                             "<a href='https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_doc_all.pdf'>",
-                             "Additional documentation</a>).")),
-                     tags$hr(style="border-color: darkgrey;"),
-                     checkboxGroupInput("cpm_methods",
-                                        "CPMs to use", 
-                                        width = "100%",
-                                        choiceNames = c(
-                                            "CBN",
-                                            "OT",
-                                            "OncoBN",
-                                            "MHN",
-                                            "MCCBN",
-                                            "H-ESBCN"),
-                                        choiceValues = c(
-                                            "CBN",
-                                            "OT",
-                                            "OncoBN",
-                                            "MHN",
-                                            "MCCBN",
-                                            "HESBCN"
-                                            ),
-                                        selected = c(
-                                            "CBN",
-                                            "OT",
-                                            "OncoBN",
-                                            "MHN"
-                                        ),
-                                        inline = FALSE),
-                tags$h5("Beware: MCCBN may take hours to run. ",
-                        "H-ESBCN often takes much longer than the ",
-                        " remaining methods (often > 20 seconds)."),
-                tags$hr(style="border-color: darkgrey;"),
-
-                     selectInput("return_paths_max",
-                                 "Return paths to maximum(a)",
-                                 c(TRUE, FALSE),
-                                 selected = FALSE),
-                     tags$h5("(Paths to the maximum/maxima and their ",
-                             " probabilities. ",
-                             "These are not part of the tabular output ",
-                             "(because of their possibly huge number) ",
-                             "but if requested are included in the result object ",
-                             "you can download)"),
-                     tags$hr(style="border-color: darkgrey;"),
-                     selectInput("do_sampling", "Sample genotypes: ",
-                                 c(TRUE, FALSE),
-                                 selected = FALSE),
-                     tags$h5("Generate a finite sample of genotypes ",
-                             "according to the predicted frequencies of ",
-                             "the model."),
-                ## selectInput("do_genotype_transitions",
+                                              selectInput("return_paths_max",
+                                                          "Return paths to maximum(a)",
+                                                          c(TRUE, FALSE),
+                                                          selected = FALSE),
+                                              tags$h5("(Paths to the maximum/maxima and their ",
+                                                      " probabilities. ",
+                                                      "These are not part of the tabular output ",
+                                                      "(because of their possibly huge number) ",
+                                                      "but if requested are included in the result object ",
+                                                      "you can download)"),
+                                              tags$hr(style="border-color: darkgrey;"),
+                                              selectInput("do_sampling", "Sample genotypes: ",
+                                                          c(TRUE, FALSE),
+                                                          selected = FALSE),
+                                              tags$h5("Generate a finite sample of genotypes ",
+                                                      "according to the predicted frequencies of ",
+                                                      "the model."),
+                                              ## selectInput("do_genotype_transitions",
                 ##             "Sample for observed genotype transitions",
                 ##             c("True" = TRUE, "False" = FALSE),
                 ##             selected = FALSE
