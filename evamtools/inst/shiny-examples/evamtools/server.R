@@ -1524,66 +1524,76 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         })
     })
 
+
     output$customize <- renderUI({
-        do_sampling <- ifelse(is.null(all_cpm_out[[input$select_cpm]]$do_sampling), FALSE, 
-          all_cpm_out[[input$select_cpm]]$do_sampling)
+        do_sampling <- tryCatch({
+            sampling <- ifelse(
+                is.null(all_cpm_out[[input$select_cpm]]$do_sampling), FALSE, 
+                all_cpm_out[[input$select_cpm]]$do_sampling)
+            sampling
+        }, error = function(e){
+            return(FALSE)
+        })
+
+
+        ## The other thing would be to always show the 4 options and that's it
         tagList(
             tags$div(class = "frame",
-                    tags$h3("Customize the visualization"),
-                    tags$div(class = "inline",
-                            checkboxGroupInput(inputId = "cpm2show",
-                                                label = "CPMs to show",
-                                                choices = c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
-                                                selected = c("OT", "OncoBN", "CBN", "MHN")),
+                     tags$h3("Customize the visualization"),
+                     tags$div(class = "inline",
+                              checkboxGroupInput(inputId = "cpm2show",
+                                                 label = "CPMs to show",
+                                                 choices = c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
+                                                 selected = c("OT", "OncoBN", "CBN", "MHN")),
 
-                            tags$div(class = "inline",
-                                    radioButtons(inputId = "data2plot",
+                              tags$div(class = "inline",
+                                       radioButtons(inputId = "data2plot",
                                                     label = "Data to show",
                                                     choiceNames = 
-                                                     if (do_sampling) {
-                                                                    c("Transition probabilities", 
-                                                                        "Transition Rate Matrix",
-                                                                        "Predicted genotype relative frequencies",
-                                                                        "Sampled genotype counts")
-                                                                   } else {         
-                                                                       c("Transition probabilities", 
-                                                                         "Transition Rate Matrix",
-                                                                         "Predicted genotype relative frequencies")
-                                                                   }
-                                                                ,
+                                                        if (do_sampling) {
+                                                            c("Transition probabilities", 
+                                                              "Transition Rate Matrix",
+                                                              "Predicted genotype relative frequencies",
+                                                              "Sampled genotype counts")
+                                                        } else {         
+                                                            c("Transition probabilities", 
+                                                              "Transition Rate Matrix",
+                                                              "Predicted genotype relative frequencies")
+                                                        }
+                                                   ,
                                                     choiceValues = 
-                                                    if (do_sampling) {
-                                                                    c("trans_mat", 
-                                                                        "trans_rate_mat",
-                                                                        "predicted_genotype_freqs",
-                                                                        "sampled_genotype_counts")
-                                                                   } else {
-                                                                       c("trans_mat", 
-                                                                         "trans_rate_mat",
-                                                                         "predicted_genotype_freqs")
-                                                                   }
-                                                                ,
+                                                        if (do_sampling) {
+                                                            c("trans_mat", 
+                                                              "trans_rate_mat",
+                                                              "predicted_genotype_freqs",
+                                                              "sampled_genotype_counts")
+                                                        } else {
+                                                            c("trans_mat", 
+                                                              "trans_rate_mat",
+                                                              "predicted_genotype_freqs")
+                                                        }
+                                                   ,
                                                     selected = "trans_mat"
                                                     )
-                                    ),
-                            tags$div(class = "inline",
-                                    radioButtons(inputId = "label2plot",
+                                       ),
+                              tags$div(class = "inline",
+                                       radioButtons(inputId = "label2plot",
                                                     label = "Type of label",
                                                     choiceNames =  c("Genotype", "Last gene mutated"),
                                                     choiceValues = c("genotype", "acquisition"),
                                                     selected = "genotype"
                                                     )
-                                    ),
-                            ),
+                                       ),
+                              ),
 
-                    tags$p(HTML("<strong>Number of most relevant paths to show</strong> "),
+                     tags$p(HTML("<strong>Number of most relevant paths to show</strong> "),
                             "(set it to 0 to show all paths or ",
                             "all genotype labels):"),
-                    tags$div(id="freq2label-wrap",
-                            sliderInput("freq2label", "", width = "500px",
-                                        value = 5, max = 10, min = 0, step = 1)
-                            )
-                    )
+                     tags$div(id="freq2label-wrap",
+                              sliderInput("freq2label", "", width = "500px",
+                                          value = 5, max = 10, min = 0, step = 1)
+                              )
+                     )
         )
     })
 
