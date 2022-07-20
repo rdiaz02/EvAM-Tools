@@ -250,11 +250,11 @@ results_simple <- function(){
 }
 
 user_input <- function() {
-  fluidPage(
-
-      shinyjs::useShinyjs(),
-      tags$head(
-               tags$style(HTML("
+    fluidPage(
+        prompter::use_prompt(),
+        shinyjs::useShinyjs(),
+        tags$head(
+                 tags$style(HTML("
       body{
         font-size: 15px;
       }
@@ -537,6 +537,13 @@ user_input <- function() {
                                                  choiceValues = list("csd", "dag", "matrix"),
                                                  selected = "dag"
                                                  )
+                                    |> prompter::add_prompt(
+                                                     position = "bottom",
+                                                   bounce = "TRUE",
+                                                                     message = "a text for input2build from add_prompt")
+                                    ## If we wanted shinyBS, comment above and use something like
+                                    ## shinyBS::bsTooltip("input2build", "Working example of a tooltip on server.R",
+                                    ##                    "right", options = list(container = "body")),
                                 ),
                                 tags$footer(tags$script(HTML("
               tmp_label = document.createElement('p');
@@ -558,7 +565,7 @@ user_input <- function() {
               )
               ## do it with a render UI
               ),
-      
+              
 
               
               column(width = 11,
@@ -738,68 +745,68 @@ user_input <- function() {
                                               tags$hr(style="border-color: darkgrey;"),
                                               tags$h4("OncoBN options"),
                                               selectInput("OncoBN_model", "Model: ",
-c("Disjunctive (DBN)" = "DBN",
-                                              "Conjunctive (CBN)" = "CBN"),
-                                            selected = "DBN"
-                                            ),
-                                selectInput("OncoBN_algorithm", "Algorithm: ",
-                                            c("Dynamic programming (DP)" = "DP",
-                                              "Genetic algorithm (GA)" = "GA"),
-                                            selected = "DP"),
-                                numericInput("OncoBN_k",
-                                             "k: In-degree bound on the estimated network: ",
-                                             3, min = 0),
-                                numericInput("OncoBN_epsilon", "Epsilon: ", NULL, min=0),
-                                tags$h5("Penalty term for mutations not conformig ",
-                                        "to estimated network.",
-                                        "Default is min(colMeans(data)/2). ",
-                                        "(Do not enter anything, unless you want to a value ",
-                                        "different from the default)."),
-                                tags$hr(style="border-color: darkgrey;"),
-                                tags$h4("MCCBN options"),
-                                selectInput("MCCBN_model", "Model: ",
-                                            c("OT-CBN" = "OT-CBN", "H-CBN2" = "H-CBN2"),
-                                            selected = "OT-CBN"),
-                                numericInput("MCCBN_L",
-                                             "L: Number of samples to be drawn from the proposal in the E-step: ", 100, min=0),
-                                selectInput("MCCBN_sampling", "Sampling: ", c("forward", "add-remove", "backward", "bernoulli", "pool"), selected = "forward"),
-                                numericInput("MCCBN_max_iter",
-                                             "max.iter: Maximum number of EM iterations: ", 100, min=0, max=100000),
-                                numericInput("MCCBN_update_step_size",
-                                             "update.step.size: Number of EM steps after which the number of samples, ‘L’, is doubled: ", 20L, min=0, max=100000),
-                                numericInput("MCCBN_tol",
-                                             "tol: Convergence tolerance: ", 0.001, min=0, max=100),
-                                numericInput("MCCBN_max_lambda_val",
-                                             "max.lambda.val: Upper bound on the value of the rate parameters: ", 1e6, min=0, max=1e9),
-                                numericInput("MCCBN_T0",
-                                             "T0: Initial value of the temperature: ", 50, min=0, max=1000),
-                                numericInput("MCCBN_adapt_rate",
-                                             "adap.rate: Constant adaptation rate: ", 0.3, min=0, max=1000),
-                                numericInput("MCCBN_acceptance_rate",
-                                             "acceptance.rate: Desirable acceptance rate: (if NULL, defaults to 1/number of mutations)",
-                                             NULL, min=0, max=1000),
-                numericInput("MCCBN_step_size",
-                             "step.size: Number of iterations after which the temperature should be updated: (if NULL, defaults to 50)", NULL, min=0, max=1000),
-                  numericInput("MCCBN_max_iter_asa", "max.iter.asa: Maximun number of iterations: ", 10000L, min=0, max=1000000L),
-                  numericInput("MCCBN_neighborhood_dist", "neighborhood.dist: Hamming distance between the observation and the samples generated by backward sampling: ", 1L, min=0, max=1000000L),
-                  selectInput("MCCBN_adaptive", "adaptive: Use an adaptive
+                                                          c("Disjunctive (DBN)" = "DBN",
+                                                            "Conjunctive (CBN)" = "CBN"),
+                                                          selected = "DBN"
+                                                          ),
+                                              selectInput("OncoBN_algorithm", "Algorithm: ",
+                                                          c("Dynamic programming (DP)" = "DP",
+                                                            "Genetic algorithm (GA)" = "GA"),
+                                                          selected = "DP"),
+                                              numericInput("OncoBN_k",
+                                                           "k: In-degree bound on the estimated network: ",
+                                                           3, min = 0),
+                                              numericInput("OncoBN_epsilon", "Epsilon: ", NULL, min=0),
+                                              tags$h5("Penalty term for mutations not conformig ",
+                                                      "to estimated network.",
+                                                      "Default is min(colMeans(data)/2). ",
+                                                      "(Do not enter anything, unless you want to a value ",
+                                                      "different from the default)."),
+                                              tags$hr(style="border-color: darkgrey;"),
+                                              tags$h4("MCCBN options"),
+                                              selectInput("MCCBN_model", "Model: ",
+                                                          c("OT-CBN" = "OT-CBN", "H-CBN2" = "H-CBN2"),
+                                                          selected = "OT-CBN"),
+                                              numericInput("MCCBN_L",
+                                                           "L: Number of samples to be drawn from the proposal in the E-step: ", 100, min=0),
+                                              selectInput("MCCBN_sampling", "Sampling: ", c("forward", "add-remove", "backward", "bernoulli", "pool"), selected = "forward"),
+                                              numericInput("MCCBN_max_iter",
+                                                           "max.iter: Maximum number of EM iterations: ", 100, min=0, max=100000),
+                                              numericInput("MCCBN_update_step_size",
+                                                           "update.step.size: Number of EM steps after which the number of samples, ‘L’, is doubled: ", 20L, min=0, max=100000),
+                                              numericInput("MCCBN_tol",
+                                                           "tol: Convergence tolerance: ", 0.001, min=0, max=100),
+                                              numericInput("MCCBN_max_lambda_val",
+                                                           "max.lambda.val: Upper bound on the value of the rate parameters: ", 1e6, min=0, max=1e9),
+                                              numericInput("MCCBN_T0",
+                                                           "T0: Initial value of the temperature: ", 50, min=0, max=1000),
+                                              numericInput("MCCBN_adapt_rate",
+                                                           "adap.rate: Constant adaptation rate: ", 0.3, min=0, max=1000),
+                                              numericInput("MCCBN_acceptance_rate",
+                                                           "acceptance.rate: Desirable acceptance rate: (if NULL, defaults to 1/number of mutations)",
+                                                           NULL, min=0, max=1000),
+                                              numericInput("MCCBN_step_size",
+                                                           "step.size: Number of iterations after which the temperature should be updated: (if NULL, defaults to 50)", NULL, min=0, max=1000),
+                                              numericInput("MCCBN_max_iter_asa", "max.iter.asa: Maximun number of iterations: ", 10000L, min=0, max=1000000L),
+                                              numericInput("MCCBN_neighborhood_dist", "neighborhood.dist: Hamming distance between the observation and the samples generated by backward sampling: ", 1L, min=0, max=1000000L),
+                                              selectInput("MCCBN_adaptive", "adaptive: Use an adaptive
                     annealing schedule?: ", c(TRUE, FALSE), selected = TRUE),
-                  numericInput("MCCBN_seed", "Seed: ", NULL, min=0, width="50%")
-                  # tags$h4("DISCLAIMER: Both HyperTraps and MCCBN may take hours to run")
-                  # )
-                )
-              # )
-            # ),
-                )
-            ## FIXME zzply
-            , plotly::plotlyOutput("plot") ## and this calls output$plot
-         ## ,  plotOutput("plot")
-         , plotOutput("dag_plot")
+                    numericInput("MCCBN_seed", "Seed: ", NULL, min=0, width="50%")
+                                        # tags$h4("DISCLAIMER: Both HyperTraps and MCCBN may take hours to run")
+                                        # )
+                    )
+                                        # )
+                                        # ),
+                    )
+                    ## FIXME zzply
+                  , plotly::plotlyOutput("plot") ## and this calls output$plot
+                    ## ,  plotOutput("plot")
+                  , plotOutput("dag_plot")
 
-          )
-        )
-      )
-      )
+                    )
+                    )
+            )
+            )
   )
 }
 ui <- 

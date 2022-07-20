@@ -57,4 +57,9 @@ importFrom("Rgraphviz", "layoutGraph", "renderGraph")
 
 importFrom("R.utils", "withTimeout")
 importFrom("plotly", "plot_ly", "layout", "plotlyOutput", "renderPlotly")
-importFrom("magrittr", "%>%")
+importFrom(magrittr, "%>%")
+## Needed for using it with prompter. Oh man, this sucks badly
+## No, we can use the now built-in "|>"
+## export("%>%")
+importFrom("prompter", "add_prompt", "use_prompt")
+
