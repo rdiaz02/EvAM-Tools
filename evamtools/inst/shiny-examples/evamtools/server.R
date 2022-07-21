@@ -819,7 +819,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
     output$change_counts <- renderUI({
-        if (input$input2build == "csd") {
+        if (input$input2build %in% c("csd", "dag", "matrix")) {
             tags$div(class = "frame",
                      tags$div(class = "flex",
                               tags$h3("3. Change genotype's counts"),
