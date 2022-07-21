@@ -1510,17 +1510,26 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     all_cpm_out <- reactiveValues()
 
+    ## To increase lag in the redrawing of output, change the number
+    ## Values less than 500 can break the app. Larger values might break
+    ## with complex plots. Deactivate this completely commenting the debounce
     plot2show <- debounce(reactive({
         input$cpm2show
-    }), 750)
+    }),  900)
 
+    ## ## No delay showing plots. 
+    ## plot2show <- reactive({
+    ##     input$cpm2show
+    ## })
+
+    
     output$sims <- renderUI({
         if ((length(names(all_cpm_out)) > 0) && (!is.null(input$select_cpm))) {
             tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
 
             number_of_columns <- floor(12 /
                                        ifelse(length(plot2show()) <=0, 1, length(plot2show())))
-                                    #    ifelse(length(input$cpm2show) <=4, 4, length(input$cpm2show)))
+                                        #    ifelse(length(input$cpm2show) <=4, 4, length(input$cpm2show)))
 
             lapply(plot2show(), function(met){
                 method_data <- evamtools:::process_data(tmp_data, met,
@@ -1539,7 +1548,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
     })
 
-   
+    
 
     output$sims2 <- renderUI({
         if ((length(names(all_cpm_out)) > 0)  && (!is.null(input$select_cpm))) {
