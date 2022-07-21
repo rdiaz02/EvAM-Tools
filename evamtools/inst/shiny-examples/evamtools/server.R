@@ -819,41 +819,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
     })
 
-    ## Without data modification for upload.
-    output$change_counts <- renderUI({
-        if (input$input2build %in% c("csd", "dag", "matrix")) {
-            tags$div(class = "frame",
-                     tags$div(class = "flex",
-                              tags$h3("3. Change genotype's counts"),
-                              actionButton("display_help", "Help"),
-                              tags$h3(HTML("<br/>")),
-                              ),
-                     tags$div(id = "csd_table",
-                              DT::DTOutput("csd_counts")
-                              ),
-                     tags$h5(HTML("<br/>")),
-                     if (input$input2build %in% c("csd"))
-                         actionButton("clear_genotype", "Delete all genotype data")
-                     else if (input$input2build %in% c("matrix"))
-                         tags$h5(HTML("To delete genotype data, use",
-                                      "'Reset log-&Theta; matrix and delete genotype data'",
-                                      "above."))
-                     else if (input$input2build %in% c("dag"))
-                         tags$h5(HTML("To delete genotype data, use",
-                                      "'Reset DAG and delete genotype data'",
-                                      "above."))
-                     
-                     )
-        }
-    })
-
-    ## ## With data modification for upload
+    ## ## Without data modification for upload.
     ## output$change_counts <- renderUI({
-    ##     if (input$input2build %in% c("upload", "csd", "dag", "matrix")) {
-    ##         menu_num <- ifelse(input$input2build == "upload", "2", "3")
+    ##     if (input$input2build %in% c("csd", "dag", "matrix")) {
     ##         tags$div(class = "frame",
     ##                  tags$div(class = "flex",
-    ##                           tags$h3(paste0(menu_num, " . Change genotype's counts")),
+    ##                           tags$h3("3. Change genotype's counts"),
     ##                           actionButton("display_help", "Help"),
     ##                           tags$h3(HTML("<br/>")),
     ##                           ),
@@ -861,7 +832,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##                           DT::DTOutput("csd_counts")
     ##                           ),
     ##                  tags$h5(HTML("<br/>")),
-    ##                  if (input$input2build %in% c("upload", "csd"))
+    ##                  if (input$input2build %in% c("csd"))
     ##                      actionButton("clear_genotype", "Delete all genotype data")
     ##                  else if (input$input2build %in% c("matrix"))
     ##                      tags$h5(HTML("To delete genotype data, use",
@@ -871,9 +842,38 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##                      tags$h5(HTML("To delete genotype data, use",
     ##                                   "'Reset DAG and delete genotype data'",
     ##                                   "above."))
+    
     ##                  )
     ##     }
     ## })
+
+    ## With data modification for upload
+    output$change_counts <- renderUI({
+        if (input$input2build %in% c("upload", "csd", "dag", "matrix")) {
+            menu_num <- ifelse(input$input2build == "upload", "2", "3")
+            tags$div(class = "frame",
+                     tags$div(class = "flex",
+                              tags$h3(paste0(menu_num, " . Change genotype's counts")),
+                              actionButton("display_help", "Help"),
+                              tags$h3(HTML("<br/>")),
+                              ),
+                     tags$div(id = "csd_table",
+                              DT::DTOutput("csd_counts")
+                              ),
+                     tags$h5(HTML("<br/>")),
+                     if (input$input2build %in% c("upload", "csd"))
+                         actionButton("clear_genotype", "Delete all genotype data")
+                     else if (input$input2build %in% c("matrix"))
+                         tags$h5(HTML("To delete genotype data, use",
+                                      "'Reset log-&Theta; matrix and delete genotype data'",
+                                      "above."))
+                     else if (input$input2build %in% c("dag"))
+                         tags$h5(HTML("To delete genotype data, use",
+                                      "'Reset DAG and delete genotype data'",
+                                      "above."))
+                     )
+        }
+    })
 
     
 
