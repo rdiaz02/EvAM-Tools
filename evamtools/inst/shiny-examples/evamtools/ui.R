@@ -531,10 +531,11 @@ user_input <- function() {
                                 tagList(
                                     radioButtons(inputId = "input2build", label = "",
                                                  choiceNames = list(
-                                                     HTML("Cross-sectional <br> data"),
+                                                     HTML("Upload data"),
+                                                     HTML("Create data <br> interactively"),
                                                      HTML("DAG and <br> rates/probs."),
                                                      "MHN thetas"),
-                                                 choiceValues = list("csd", "dag", "matrix"),
+                                                 choiceValues = list("upload", "csd", "dag", "matrix"),
                                                  selected = "dag"
                                                  )
                                     |> prompter::add_prompt(
@@ -547,11 +548,10 @@ user_input <- function() {
                                 ),
                                 tags$footer(tags$script(HTML("
               tmp_label = document.createElement('p');
-              tmp_label.innerHTML = 'Raw data';
-              document.querySelector('#input2build div.radio').before(tmp_label)
-              tmp_label = document.createElement('p');
-              tmp_label.innerHTML = 'CPM types';
-              document.querySelector('#input2build div.radio').after(tmp_label)
+              tmp_label.innerHTML = 'Generate data from CPM models';
+              document.querySelectorAll('#input2build div.radio')[1].after(tmp_label)
+              tmp_label = document.createElement('hr');
+              document.querySelectorAll('#input2build div.radio')[1].after(tmp_label)
               "))),
               tags$h4("Examples and user's data"),
               ## How many to show is controlled from server function
@@ -569,35 +569,36 @@ user_input <- function() {
 
               
               column(width = 11,
-                     titlePanel(HTML("&ensp; Cross-sectional data input")),
+                    #  titlePanel(HTML("&ensp; Cross-sectional data input")),
                      column(width = 6,
                             column(width = 12,
                                    ## Upload
-                                   tags$div(class = "frame",
-                                            tags$h3(" Define your data interactively"),
+                                  #  tags$div(class = "frame",
+                                            # tags$h3(" Define your data interactively"),
                                             ## Save/Download/Rename/Use
-                                            tags$div(class = "frame",
-                                                     tags$h3("(Re)name the data"),
-                                                     tags$h5(HTML("Give the modified data a name ",
-                                                                  "that will also be used to save the CPM ",
-                                                                  "output.")),
-                                                     tags$div(class = "download_button",
-                                                              ),
+                                            # tags$div(class = "frame",
+                                                    #  tags$h3("(Re)name the data"),
+                                                    #  tags$h5(HTML("Give the modified data a name ",
+                                                    #               "that will also be used to save the CPM ",
+                                                    #               "output.")),
+                                                    #  tags$div(class = "download_button",
+                                                    #           ),
                                                      uiOutput("dataset_name"),
-                                                     actionButton("save_csd_data", "Use this name"),
-                                                     ),
+                                                    #  actionButton("save_csd_data", "Use this name"),
+                                                    #  ),
                                             
-                                            tags$div(class = "frame",
-                                                     uiOutput("upload_data"),
-                                                     tags$div(class = "flex",
-                                                              tags$h3("1. Set the number of genes"),
-                                                              tags$h5("(Using 7 or more genes can lead ",
-                                                                      "to very long execution times for some methods ",
-                                                                      "and crowded figures.)"),
-                                                              actionButton("change_gene_names", "Change gene names")
+                                            # tags$div(class = "frame",
+                                                    #  uiOutput("upload_data"),
+                                                    #  tags$div(class = "flex",
+                                                    #           tags$h3("1. Set the number of genes"),
+                                                    #           tags$h5("(Using 7 or more genes can lead ",
+                                                    #                   "to very long execution times for some methods ",
+                                                    #                   "and crowded figures.)"),
+                                                    #           actionButton("change_gene_names", "Change gene names")
                                                               
-                                                              ),
-                                                     uiOutput("gene_number")),
+                                                    #           ),
+                                                     uiOutput("gene_number_slider"),
+                                                    #  ),
                                             tags$div(class = "frame",
                                                      uiOutput("define_genotype"),
                                                      ),
@@ -615,7 +616,7 @@ user_input <- function() {
                                                               downloadButton("download_csd", "Download your data")
                                                               )
                                                  )
-                                            )
+                                            # )
 
                                    )
                             ), 

@@ -87,6 +87,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Eh? Why would we do this. Use a different name, do not overwrite.
     examples_csd$csd <- examples_csd$csd[1:5]
     examples_csd$dag <- examples_csd$dag[1:6]
+    examples_csd$upload <- examples_csd$upload
     all_csd_data <- evamtools:::to_stnd_csd_all_datasets(examples_csd)
     min_genes <- .ev_SHINY_dflt$min_genes
     max_genes <- .ev_SHINY_dflt$max_genes
@@ -94,7 +95,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     default_cpm_samples <- .ev_SHINY_dflt$cpm_samples
     default_dag_model <- .ev_SHINY_dflt$dag_model
 
-    last_visited_pages <- list(csd = "Empty", dag = "DAG_Fork_3", matrix = "MHN_all_0")
+    last_visited_pages <- list(upload="Empty", csd = "Empty", dag = "DAG_Fork_3", matrix = "MHN_all_0")
 
     last_visited_cpm <- ""
     
@@ -129,6 +130,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## than genes in the DAG.
             return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
         } else {
+            # n_genes <- ifelse(input$input2build == "upload", 
+            #     data$n_genes, input$gene_number)
             return(evamtools:::get_display_freqs(data$csd_counts,
                                                  input$gene_number,
                                                  data$gene_names))
@@ -189,7 +192,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 if (grepl(" ", dataset_name, fixed = TRUE)) {
                     stop("Name of dataset should not contain spaces")
                 }
-                existing_names <- c(names(datasets$all_csd$csd),
+                existing_names <- c(names(datasets$all_csd$upload),
+                                    names(datasets$all_csd$csd),
                                     names(datasets$all_csd$dag),
                                     names(datasets$all_csd$matrix))
                 if (dataset_name %in% existing_names) {
@@ -202,10 +206,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 tmp_data$data <- read.csv(input$csd$datapath)
                 tmp_data$name <- dataset_name
                 
-                datasets$all_csd[["csd"]][[dataset_name]] <-
+                datasets$all_csd[["upload"]][[dataset_name]] <-
                     evamtools:::to_stnd_csd_dataset(tmp_data)
-                datasets$all_csd[["csd"]][[dataset_name]]$name <- dataset_name
-
+                datasets$all_csd[["upload"]][[dataset_name]]$name <- dataset_name
                 tmp_data$gene_names <- colnames(tmp_data$data)
                 tmp_data$n_genes <- ncol(tmp_data$data)
                 ## We are not filling up
@@ -215,10 +218,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ## this forces creating copy so name sticks forever
                 ## but gives error later. And actually being able to change
                 ## name via (Re)name the data is nice. 
-                datasets$fixed_examples[["csd"]][[dataset_name]] <- tmp_data
+                # datasets$fixed_examples[["upload"]][[dataset_name]] <- tmp_data
+                datasets$all_csd[["upload"]][[dataset_name]] <- tmp_data
                 
-                last_visited_pages["csd"] <<- dataset_name
-                updateRadioButtons(session, "input2build", selected = "csd")
+                last_visited_pages["upload"] <<- dataset_name
+                updateRadioButtons(session, "input2build", selected = "upload")
                 updateRadioButtons(session, "select_csd", selected = dataset_name)
             }, error = function(e){
                showModal(dataModal(e[[1]]))
@@ -245,12 +249,21 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     ## Define dataset name
     output$dataset_name <- renderUI({
-        tags$div(class = "inlin2",
-                 textInput(inputId = "dataset_name",
-                           "Give your dataset a name",
-                           value = input$select_csd
-                           )
-                 )
+        if(input$input2build %in% c("csd", "dag", "matrix")){
+            tags$div(class = "frame inlin2",
+                tags$h3("(Re)name the data"),
+                tags$h5(HTML("Give the modified data a name ",
+                            "that will also be used to save the CPM ",
+                            "output.")),
+                tags$div(class = "download_button",
+                        ),
+                textInput(inputId = "dataset_name",
+                        "Give your dataset a name",
+                        value = input$select_csd
+                        ),
+                actionButton("save_csd_data", "Use this name")
+                )
+        }
     })
 
 
@@ -454,16 +467,18 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 n_genes <- ncol(data$data)
                 ## Never show DAGs here.
                 data$dag[] <- 0
-            } else if (input$input2build == "csd" && is.null(data$data)) {
+            } else if (input$input2build %in% c("csd", "upload") && is.null(data$data)) {
                 n_genes <- .ev_SHINY_dflt$ngenes
                 data$dag[] <- 0
-            }
+            } 
 
-            updateNumericInput(session, "gene_number", value = n_genes)
-            updateNumericInput(session, "genotype_freq", value = NA)
-            updateCheckboxGroupInput(session, "genotype", label = "Mutations",
-                                     choices = lapply(1:n_genes, function(i)data$gene_names[i]),
-                                     selected = NULL)
+            if (input$input2build %in% c("csd", "dag", "matrix")){
+                updateNumericInput(session, "gene_number", value = n_genes)
+                updateNumericInput(session, "genotype_freq", value = NA)
+                updateCheckboxGroupInput(session, "genotype", label = "Mutations",
+                                        choices = lapply(1:n_genes, function(i)data$gene_names[i]),
+                                        selected = NULL)
+            }
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
         })
@@ -548,14 +563,27 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
     ## Define number of genes
-    output$gene_number <- renderUI({
+    output$gene_number_slider <- renderUI({
         val <- ifelse(is.null(data$n_genes), 3, data$n_genes)
-        tags$div(class="inlin",
-                 tags$h3(HTML("<br/>")),
-                 sliderInput("gene_number", "Number of genes",
-                             value = val, max = max_genes, min = min_genes,
-                             step = 1)
-                 )
+        # tag$div(class="frame",
+        if (input$input2build %in% c("csd", "dag", "matrix")){
+
+            tags$div(class = "frame flex",
+                tags$h3("1. Set the number of genes"),
+                tags$h5("(Using 7 or more genes can lead ",
+                        "to very long execution times for some methods ",
+                        "and crowded figures.)"),
+                actionButton("change_gene_names", "Change gene names"),
+                
+            tags$div(class="inlin",
+                    tags$h3(HTML("<br/>")),
+                    sliderInput("gene_number", "Number of genes",
+                                value = val, max = max_genes, min = min_genes,
+                                step = 1)
+                )
+                )
+        }
+        # )
     })
 
     ## Define new genotype
@@ -619,6 +647,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 dag_gene_options <- genes_in_dag
             }
             tags$div(
+                # uiOutput("gene_number_slider"),
                      tags$div(class = "flex",
                               tags$h3("2. Define a Directed Acyclic Graph (DAG)"),
                               actionButton("how2build_dag", "Help")
@@ -730,6 +759,38 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               )
                      }
                  )
+        } else if (input$input2build == "upload") {
+            tags$div(## class = "frame",
+                     tags$h4("Upload your own data"),
+                     tags$h5(HTML("If you want to give your dataset a specific ",
+                                  "name, set it in the box below ",
+                                  "before uploading the data, ",
+                                  "or modify it afterwards  with '(Re)name ",
+                                  "the data'")),
+                     tags$div(class = "inlin3",
+                              textInput(inputId = "name_uploaded",
+                                        label = "Name for dataset",
+                                        value = "Uploaded_data"
+                                        )
+                              ),
+                     tags$h5(paste0("Format: csv ---comma separated values---,",
+                                    " with first row with gene names."
+                                    )),
+                     tags$h5(HTML("Use only alphanumeric characters ",
+                                  "for gene names, and do not start ",
+                                  "a gene name with a number; ",
+                                  "keep gene names short (for figures). ",
+                                  "Use 0 or 1 for ",
+                                  "altered/not-altered (mutated/not-mutated)."                  
+                                  )),
+                     tags$div(class = "upload_file",
+                              fileInput("csd", "Load Data",
+                                        multiple = FALSE,
+                                        accept = c(
+                                            "text/csv",
+                                            ".csv"))),
+                     tags$h5(HTML("<br/>")),
+                     )
         }
     })
 
@@ -750,41 +811,41 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
     })
 
-    output$upload_data <- renderUI({
-        if (input$input2build == "csd") {
-            tags$div(## class = "frame",
-                     tags$h4("0. Upload your own data"),
-                     tags$h5(paste0("Format: csv ---comma separated values---,",
-                                    " with first row with gene names."
-                                    )),
-                     tags$h5(HTML("Use only alphanumeric characters ",
-                                  "for gene names, and do not start ",
-                                  "a gene name with a number; ",
-                                  "keep gene names short (for figures). ",
-                                  "Use 0 or 1 for ",
-                                  "altered/not-altered (mutated/not-mutated)."                  
-                                  )),
-                     tags$div(class = "upload_file",
-                              fileInput("csd", "Load Data",
-                                        multiple = FALSE,
-                                        accept = c(
-                                            "text/csv",
-                                            ".csv"))),
-                     tags$h5(HTML("If you want to give your dataset a specific ",
-                                  "name, set it in the box below ",
-                                  "before uploading the data, ",
-                                  "or modify it afterwards  with '(Re)name ",
-                                  "the data'")),
-                     tags$div(class = "inlin3",
-                              textInput(inputId = "name_uploaded",
-                                        label = "Name for dataset",
-                                        value = "Uploaded_data"
-                                        )
-                              ),
-                     tags$h5(HTML("<br/>")),
-                     )
-        }
-    })
+    # output$upload_data <- renderUI({
+        # if (input$input2build == "csd") {
+        #     tags$div(## class = "frame",
+        #              tags$h4("0. Upload your own data"),
+        #              tags$h5(paste0("Format: csv ---comma separated values---,",
+        #                             " with first row with gene names."
+        #                             )),
+        #              tags$h5(HTML("Use only alphanumeric characters ",
+        #                           "for gene names, and do not start ",
+        #                           "a gene name with a number; ",
+        #                           "keep gene names short (for figures). ",
+        #                           "Use 0 or 1 for ",
+        #                           "altered/not-altered (mutated/not-mutated)."                  
+        #                           )),
+        #              tags$div(class = "upload_file",
+        #                       fileInput("csd", "Load Data",
+        #                                 multiple = FALSE,
+        #                                 accept = c(
+        #                                     "text/csv",
+        #                                     ".csv"))),
+        #              tags$h5(HTML("If you want to give your dataset a specific ",
+        #                           "name, set it in the box below ",
+        #                           "before uploading the data, ",
+        #                           "or modify it afterwards  with '(Re)name ",
+        #                           "the data'")),
+        #              tags$div(class = "inlin3",
+        #                       textInput(inputId = "name_uploaded",
+        #                                 label = "Name for dataset",
+        #                                 value = "Uploaded_data"
+        #                                 )
+        #                       ),
+        #              tags$h5(HTML("<br/>")),
+        #              )
+        # }
+    # })
 
     ## DAG builder
     ## Controling dag builder
