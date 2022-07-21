@@ -818,6 +818,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
     })
 
+    ## Without data modification for upload.
     output$change_counts <- renderUI({
         if (input$input2build %in% c("csd", "dag", "matrix")) {
             tags$div(class = "frame",
@@ -835,41 +836,62 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
     })
 
-    # output$upload_data <- renderUI({
-        # if (input$input2build == "csd") {
-        #     tags$div(## class = "frame",
-        #              tags$h4("0. Upload your own data"),
-        #              tags$h5(paste0("Format: csv ---comma separated values---,",
-        #                             " with first row with gene names."
-        #                             )),
-        #              tags$h5(HTML("Use only alphanumeric characters ",
-        #                           "for gene names, and do not start ",
-        #                           "a gene name with a number; ",
-        #                           "keep gene names short (for figures). ",
-        #                           "Use 0 or 1 for ",
-        #                           "altered/not-altered (mutated/not-mutated)."                  
-        #                           )),
-        #              tags$div(class = "upload_file",
-        #                       fileInput("csd", "Load Data",
-        #                                 multiple = FALSE,
-        #                                 accept = c(
-        #                                     "text/csv",
-        #                                     ".csv"))),
-        #              tags$h5(HTML("If you want to give your dataset a specific ",
-        #                           "name, set it in the box below ",
-        #                           "before uploading the data, ",
-        #                           "or modify it afterwards  with '(Re)name ",
-        #                           "the data'")),
-        #              tags$div(class = "inlin3",
-        #                       textInput(inputId = "name_uploaded",
-        #                                 label = "Name for dataset",
-        #                                 value = "Uploaded_data"
-        #                                 )
-        #                       ),
-        #              tags$h5(HTML("<br/>")),
-        #              )
-        # }
-    # })
+    ## ## With data modification for upload
+    ## output$change_counts <- renderUI({
+    ##     if (input$input2build %in% c("upload", "csd", "dag", "matrix")) {
+    ##         menu_num <- ifelse(input$input2build == "upload", "2", "3")
+    ##         tags$div(class = "frame",
+    ##                  tags$div(class = "flex",
+    ##                           tags$h3(paste0(menu_num, " . Change genotype's counts")),
+    ##                           actionButton("display_help", "Help"),
+    ##                           tags$h3(HTML("<br/>")),
+    ##                           ),
+    ##                  tags$div(id = "csd_table",
+    ##                           DT::DTOutput("csd_counts")
+    ##                           ),
+    ##                  tags$h5(HTML("<br/>")),
+    ##                  actionButton("clear_genotype", "Clear genotype data")  
+    ##                  )
+    ##     }
+    ## })
+
+    
+
+                                        # output$upload_data <- renderUI({
+                                        # if (input$input2build == "csd") {
+                                        #     tags$div(## class = "frame",
+                                        #              tags$h4("0. Upload your own data"),
+                                        #              tags$h5(paste0("Format: csv ---comma separated values---,",
+                                        #                             " with first row with gene names."
+                                        #                             )),
+                                        #              tags$h5(HTML("Use only alphanumeric characters ",
+                                        #                           "for gene names, and do not start ",
+                                        #                           "a gene name with a number; ",
+                                        #                           "keep gene names short (for figures). ",
+                                        #                           "Use 0 or 1 for ",
+                                        #                           "altered/not-altered (mutated/not-mutated)."                  
+                                        #                           )),
+                                        #              tags$div(class = "upload_file",
+                                        #                       fileInput("csd", "Load Data",
+                                        #                                 multiple = FALSE,
+                                        #                                 accept = c(
+                                        #                                     "text/csv",
+                                        #                                     ".csv"))),
+                                        #              tags$h5(HTML("If you want to give your dataset a specific ",
+                                        #                           "name, set it in the box below ",
+                                        #                           "before uploading the data, ",
+                                        #                           "or modify it afterwards  with '(Re)name ",
+                                        #                           "the data'")),
+                                        #              tags$div(class = "inlin3",
+                                        #                       textInput(inputId = "name_uploaded",
+                                        #                                 label = "Name for dataset",
+                                        #                                 value = "Uploaded_data"
+                                        #                                 )
+                                        #                       ),
+                                        #              tags$h5(HTML("<br/>")),
+                                        #              )
+                                        # }
+                                        # })
 
     ## DAG builder
     ## Controling dag builder
