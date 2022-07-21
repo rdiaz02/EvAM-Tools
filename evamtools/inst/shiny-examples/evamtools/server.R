@@ -1488,15 +1488,19 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     all_cpm_out <- reactiveValues()
 
+    plot2show <- debounce(reactive({
+        input$cpm2show
+    }), 750)
+
     output$sims <- renderUI({
         if ((length(names(all_cpm_out)) > 0) && (!is.null(input$select_cpm))) {
             tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
 
             number_of_columns <- floor(12 /
-                                        ifelse(length(input$cpm2show) <=0, 1, length(input$cpm2show)))
+                                       ifelse(length(plot2show()) <=0, 1, length(plot2show())))
                                     #    ifelse(length(input$cpm2show) <=4, 4, length(input$cpm2show)))
 
-            lapply(input$cpm2show, function(met){
+            lapply(plot2show(), function(met){
                 method_data <- evamtools:::process_data(tmp_data, met,
                                                         plot_type = "trans_mat")
                 output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
@@ -1513,6 +1517,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
     })
 
+   
+
     output$sims2 <- renderUI({
         if ((length(names(all_cpm_out)) > 0)  && (!is.null(input$select_cpm))) {
             tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
@@ -1523,10 +1529,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             selected_plot_type <- input$data2plot
 
             number_of_columns <- floor(12 /
-                                       ifelse(length(input$cpm2show) <=0, 1, length(input$cpm2show)))
+                                       ifelse(length(plot2show()) <=0, 1, length(plot2show())))
             if(!(is.null(selected_plot_type))){
                 if(selected_plot_type %in% c("trans_mat", "trans_rate_mat")){
-                    lapply(input$cpm2show, function(met){
+                    lapply(plot2show(), function(met){
                         method_data <- evamtools:::process_data(tmp_data, met,
                                                                 plot_type = selected_plot_type)
                         output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
@@ -1544,7 +1550,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                         )
                     })
                 } else if(selected_plot_type %in% c("predicted_genotype_freqs", "sampled_genotype_counts")){
-                    lapply(input$cpm2show, function(met){
+                    lapply(plot2show(), function(met){
                         method_data <- evamtools:::process_data(tmp_data, met,
                                                                 plot_type = selected_plot_type)$data2plot
 
