@@ -69,6 +69,76 @@ cpm_info <- function(){
   )
 }
 
+
+tutorial <- function(){
+  tags$div(id = "background",
+    tags$head(
+      tags$style(HTML("
+        html, body{
+          margin: 0;
+        }
+        #background{
+          background-color: #f1f5f8;
+          margin: 0;
+          padding: 0;
+          width: 100%;
+          # height: 100vh;
+          top: 0;
+          left: 0;
+          position: absolute;
+        }
+
+        #cpm_info{
+          background: white;
+          padding: 10px 50px;
+          width: 75%;
+          margin: auto;
+          margin-top: 100px;
+          border: 5px solid white;
+          border-radius: 5px;
+          box-shadow: 0 0 10px 5px rgba(160,160,160, 0.5);
+        }
+
+        #cpm_info hr{
+          border-top: 3px solid #0892d0;
+        }
+
+        #cpm_info table{
+          width: 50%;
+          text-align: center;
+        }
+
+        #cpm_info h1{
+          color: #0892d0;
+          margin-top: 0;
+          margin-bottom: 0;
+        }
+
+        #cpm_info td, #cpm_info th {
+          border: 1px solid #ddd;
+          padding: 8px;
+        }
+
+        #cpm_info tr:nth-child(even){background-color: #08B5FF;}
+
+        #cpm_info th {
+          padding-top: 12px;
+          padding-bottom: 12px;
+          text-align: center;
+          background-color: #08B5FF;
+          color: white;
+        }
+        .container-fluid{
+          padding:0;
+        }
+        "
+    ))),
+    tags$div(id = "cpm_info",
+      includeMarkdown("assets/tutorial.md")
+    )
+  )
+}
+
 results_simple <- function(){
     fluidPage(
         tags$head(
@@ -850,6 +920,9 @@ ui <-
     tabPanel("Results",
       value = "result_viewer",
       results_simple()
+    ),
+    tabPanel("Tutorial",
+      tutorial()
     )
 )
 
