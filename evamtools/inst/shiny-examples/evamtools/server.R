@@ -674,7 +674,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 # uiOutput("gene_number_slider"),
                      tags$div(class = "flex",
                               tags$h3("2. Define a Directed Acyclic Graph (DAG)"),
-                              actionButton("how2build_dag", "Help")
+                              actionButton("how2build_dag", "Help", class = "btn-info")
                               ),
                      if(!is.null(data$lambdas)){
                          tags$div(
