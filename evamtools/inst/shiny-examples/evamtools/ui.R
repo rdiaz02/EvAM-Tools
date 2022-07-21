@@ -674,18 +674,9 @@ user_input <- function() {
                                                      ),
                                             uiOutput("change_counts"),
 
-                                            tags$div(
-                                                     class = "frame",
-                                                     tags$h3("Download the data"),
-                                                     tags$div(class = "download_button",
-                                                              tags$h5(HTML("Contents of saved file: ",
-                                                                           "the data as data frame; ",
-                                                                           "if you built a DAG or MHN model, ",
-                                                                           "also the model built."
-                                                                           )),  
-                                                              downloadButton("download_csd", "Download your data")
-                                                              )
-                                                 )
+                                            uiOutput("downlaod_data")
+
+                                          
                                             # )
 
                                    )

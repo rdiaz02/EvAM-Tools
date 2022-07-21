@@ -129,9 +129,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## Other code ensures that gene number is never smaller
             ## than genes in the DAG.
             return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
-        } else {
-            # n_genes <- ifelse(input$input2build == "upload", 
-            #     data$n_genes, input$gene_number)
+        } else if (input$input2build == "upload"){
+            return(evamtools:::get_display_freqs(data$csd_counts,
+                                                 data$n_genes,
+                                                 data$gene_names))
+        } 
+        else {
             return(evamtools:::get_display_freqs(data$csd_counts,
                                                  input$gene_number,
                                                  data$gene_names))
@@ -266,6 +269,23 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
     })
 
+    output$downlaod_data <- renderUI({
+        if(input$input2build %in% c("csd", "dag", "matrix")){
+        tags$div(
+                class = "frame",
+                tags$h3("Download the data"),
+                tags$div(class = "download_button",
+                        tags$h5(HTML("Contents of saved file: ",
+                                    "the data as data frame; ",
+                                    "if you built a DAG or MHN model, ",
+                                    "also the model built."
+                                    )),  
+                        downloadButton("download_csd", "Download your data")
+                        )
+            )
+        }
+    })
+
 
     ## Saving dataset
     observeEvent(input$save_csd_data, {
@@ -396,30 +416,34 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     ## Display List of availabe CSD
     output$csd_list <- renderUI({
-        all_names <- c()
-        all_choice_names <- c()
-        for (i in names(datasets$all_csd[[input$input2build]])){
-            tmp_data <- datasets$all_csd[[input$input2build]][[i]]
-            all_names <- c(all_names, i)
-            all_choice_names <- c(all_choice_names, tmp_data$name)
-        }
+        if(length(names(datasets$all_csd[[input$input2build]]))>0){
+            all_names <- c()
+            all_choice_names <- c()
+            for (i in names(datasets$all_csd[[input$input2build]])){
+                tmp_data <- datasets$all_csd[[input$input2build]][[i]]
+                all_names <- c(all_names, i)
+                all_choice_names <- c(all_choice_names, tmp_data$name)
+            }
 
-        tagList(
-            radioButtons(
-                inputId = "select_csd",
-                label = "",
-                selected = last_visited_pages[[input$input2build]],
-                choiceNames = all_choice_names,
-                choiceValues = all_names
+            tagList(
+                radioButtons(
+                    inputId = "select_csd",
+                    label = "",
+                    selected = last_visited_pages[[input$input2build]],
+                    choiceNames = all_choice_names,
+                    choiceValues = all_names
+                )
+                |> prompter::add_prompt(
+                                position = "bottom",
+                        bounce = "TRUE",
+                        message = "a text from add_prompt")
+                ## If we wanted to use shinyBS, we can do
+                ## shinyBS::bsTooltip("select_csd", "Working example of a tooltip on server.R",
+                ##                    "right", options = list(container = "body")),
             )
-            |> prompter::add_prompt(
-                             position = "bottom",
-                    bounce = "TRUE",
-                    message = "a text from add_prompt")
-            ## If we wanted to use shinyBS, we can do
-            ## shinyBS::bsTooltip("select_csd", "Working example of a tooltip on server.R",
-            ##                    "right", options = list(container = "body")),
-        )
+        } else {
+            tags$p("Empty... for the moment")
+        }
     })
 
     toListen <- reactive({

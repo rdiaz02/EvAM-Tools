@@ -395,7 +395,7 @@ rownames(mhn_example_lambdas2) <- colnames(mhn_example_lambdas2) <-
 
 examples_csd <- list(
   "upload" = list(
-    Empty = list(data = NULL, name = "Empty")
+    # Empty = list(data = NULL, name = "Empty")
   ),
   "csd" = list(
     Empty = list(data = NULL, name = "Empty"),
