@@ -789,8 +789,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$h5(HTML("If you want to give your dataset a specific ",
                                   "name, set it in the box below ",
                                   "before uploading the data. "
-                                ## , "or modify it afterwards  with '(Re)name "
-                                ## , "the data'"
+                                  ## , "or modify it afterwards  with '(Re)name "
+                                  ## , "the data'"
                                   )),
                      tags$div(class = "inlin3",
                               textInput(inputId = "name_uploaded",
