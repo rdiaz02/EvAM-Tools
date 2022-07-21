@@ -496,7 +496,7 @@ to_stnd_csd_dataset <- function(data,
 
 to_stnd_csd_all_datasets <- function(datasets){
   all_new_data <- list()
-  for(i in c("csd", "dag", "matrix")){
+  for(i in c("upload", "csd", "dag", "matrix")){
     tmp_data <- datasets[[i]] 
     for(j in names(tmp_data)) all_new_data[[i]][[j]] <-     
       to_stnd_csd_dataset(tmp_data[[j]])
