@@ -779,7 +779,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   tags$h3(HTML("<br/>")),
                                   actionButton("resample_mhn", "Sample from MHN"),
                                   actionButton("clear_mhn",
-                                               HTML("Clear log-&Theta; matrix and genotype data"))
+                                               HTML("Reset log-&Theta; matrix and delete genotype data"))
                               )
                      }
                  )
@@ -832,7 +832,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               DT::DTOutput("csd_counts")
                               ),
                      tags$h5(HTML("<br/>")),
-                     actionButton("clear_genotype", "Clear genotype data")  
+                     if (input$input2build %in% c("csd"))
+                         actionButton("clear_genotype", "Delete all genotype data")
+                     else if (input$input2build %in% c("matrix"))
+                         tags$h5(HTML("To delete genotype data, use",
+                                      "'Reset log-&Theta; matrix and delete genotype data'",
+                                      "above."))
+                     else if (input$input2build %in% c("dag"))
+                         tags$h5(HTML("To delete genotype data, use",
+                                      "'Reset DAG and delete genotype data'",
+                                      "above."))
+                     
                      )
         }
     })
@@ -851,7 +861,16 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##                           DT::DTOutput("csd_counts")
     ##                           ),
     ##                  tags$h5(HTML("<br/>")),
-    ##                  actionButton("clear_genotype", "Clear genotype data")  
+    ##                  if (input$input2build %in% c("upload", "csd"))
+    ##                      actionButton("clear_genotype", "Delete all genotype data")
+    ##                  else if (input$input2build %in% c("matrix"))
+    ##                      tags$h5(HTML("To delete genotype data, use",
+    ##                                   "'Reset log-&Theta; matrix and delete genotype data'",
+    ##                                   "above."))
+    ##                  else if (input$input2build %in% c("dag"))
+    ##                      tags$h5(HTML("To delete genotype data, use",
+    ##                                   "'Reset DAG and delete genotype data'",
+    ##                                   "above."))
     ##                  )
     ##     }
     ## })
