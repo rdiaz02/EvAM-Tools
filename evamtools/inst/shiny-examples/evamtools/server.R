@@ -865,16 +865,20 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               DT::DTOutput("csd_counts")
                               ),
                      tags$h5(HTML("<br/>")),
-                     if (input$input2build %in% c("upload", "csd", "dag"))
+                     ## We could include upload and dag here, but it makes no sense
+                     if (input$input2build %in% c("csd"))
                          actionButton("clear_genotype", "Delete all genotype data")
                      else if (input$input2build %in% c("matrix"))
                          tags$h5(HTML("To delete genotype data, use",
                                       "'Reset log-&Theta; matrix and delete genotype data'",
                                       "above."))
                      else if (input$input2build %in% c("dag"))
-                         tags$h5(HTML("To delete genotype data, use",
+                         tags$h5(HTML("To delete genotype data, use ",
                                       "'Reset DAG and delete genotype data'",
                                       "above."))
+                     else if (input$input2build %in% c("upload"))
+                         tags$h5(HTML("To delete the genotype data to start all over,",
+                                      "upload a new (or the same) data set."))
                      )
         }
     })
