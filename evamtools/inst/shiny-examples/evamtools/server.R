@@ -437,10 +437,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     choiceNames = all_choice_names,
                     choiceValues = all_names
                 )
-                |> prompter::add_prompt(
-                                position = "bottom",
-                        bounce = "TRUE",
-                        message = "a text from add_prompt")
+                ## |> prompter::add_prompt(
+                ##                 position = "bottom",
+                ##         bounce = "TRUE",
+                ##         message = "a text from add_prompt")
                 ## If we wanted to use shinyBS, we can do
                 ## shinyBS::bsTooltip("select_csd", "Working example of a tooltip on server.R",
                 ##                    "right", options = list(container = "body")),

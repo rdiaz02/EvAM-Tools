@@ -321,7 +321,7 @@ results_simple <- function(){
 
 user_input <- function() {
     fluidPage(
-        prompter::use_prompt(),
+        ## prompter::use_prompt(),
         shinyjs::useShinyjs(),
         tags$head(
                  tags$style(HTML("
@@ -608,10 +608,10 @@ user_input <- function() {
                                                  choiceValues = list("upload", "csd", "dag", "matrix"),
                                                  selected = "dag"
                                                  )
-                                    |> prompter::add_prompt(
-                                                     position = "bottom",
-                                                   bounce = "TRUE",
-                                                                     message = "a text for input2build from add_prompt")
+                                    ## |> prompter::add_prompt(
+                                    ##                  position = "bottom",
+                                    ##                bounce = "TRUE",
+                                    ##                                  message = "a text for input2build from add_prompt")
                                     ## If we wanted shinyBS, comment above and use something like
                                     ## shinyBS::bsTooltip("input2build", "Working example of a tooltip on server.R",
                                     ##                    "right", options = list(container = "body")),
