@@ -212,7 +212,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 datasets$all_csd[["upload"]][[dataset_name]] <-
                     evamtools:::to_stnd_csd_dataset(tmp_data)
                 datasets$all_csd[["upload"]][[dataset_name]]$name <- dataset_name
-                tmp_data$gene_names <- colnames(tmp_data$data)
+                tmp_data$gene_names <- c(
+                    colnames(tmp_data$data)
+                , LETTERS[(length(colnames(tmp_data$data)) + 1):max_genes]
+                )
+                # tmp_data$gene_names <- colnames(tmp_data$data)
                 tmp_data$n_genes <- ncol(tmp_data$data)
                 ## We are not filling up
                 ## dag, dag_parent_set, lambdas, thetas, trm. So what?
@@ -755,7 +759,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               ## tags$h3("2. Define input with a Matrix"),
                               tags$h3("2. Define MHN's log-Theta",
                                       HTML("matrix (log-&Theta;):")),
-                              actionButton("how2build_matrix", "Help")
+                              actionButton("how2build_matrix", "Help", class = "btn-info")
                               ),
                      if (!is.null(data$thetas)){
                          tags$div(
@@ -785,7 +789,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                  )
         } else if (input$input2build == "upload") {
             tags$div(## class = "frame",
-                     tags$h4("Upload your own data"),
+                     tags$h4("1. Upload your own data"),
                      tags$h5(HTML("If you want to give your dataset a specific ",
                                   "name, set it in the box below ",
                                   "before uploading the data. "
@@ -854,14 +858,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tags$div(class = "frame",
                      tags$div(class = "flex",
                               tags$h3(paste0(menu_num, " . Change genotype's counts")),
-                              actionButton("display_help", "Help"),
+                              actionButton("display_help", "Help", class = "btn-info"),
                               tags$h3(HTML("<br/>")),
                               ),
                      tags$div(id = "csd_table",
                               DT::DTOutput("csd_counts")
                               ),
                      tags$h5(HTML("<br/>")),
-                     if (input$input2build %in% c("upload", "csd"))
+                     if (input$input2build %in% c("upload", "csd", "dag"))
                          actionButton("clear_genotype", "Delete all genotype data")
                      else if (input$input2build %in% c("matrix"))
                          tags$h5(HTML("To delete genotype data, use",
@@ -916,6 +920,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## DAG builder
     ## Controling dag builder
     dag_data <- reactive({
+        # browser()
         input$dag_model
         input$dag_table_cell_edit
         all_gene_names <- c("Root", data$gene_names)
@@ -1243,7 +1248,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tmp_dag <- .ev_SHINY_dflt$template_data$dag
             colnames(tmp_dag) <- rownames(tmp_dag) <- c("WT", data$gene_names)
             tmp_dag["WT", data$gene_names[1]] <- 1
-            data$dag <- NULL
+            # data$dag <- NULL
+            data$dag <- tmp_dag
             data$csd_counts <- .ev_SHINY_dflt$template_data$csd_counts
             data$data <- .ev_SHINY_dflt$template_data$data
             data$dag_parent_set <- .ev_SHINY_dflt$template_data$dag_parent_set
