@@ -256,7 +256,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     ## Define dataset name
     output$dataset_name <- renderUI({
-        if(input$input2build %in% c("csd", "dag", "matrix")){
+        if(input$input2build %in% c("upload", "csd", "dag", "matrix")){
             tags$div(class = "frame inlin2",
                 tags$h3("(Re)name the data"),
                 tags$h5(HTML("Give the modified data a name ",
