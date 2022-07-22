@@ -263,11 +263,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             "that will also be used to save the CPM ",
                             "output.")),
                 tags$div(class = "download_button",
-                        ),
+                         ),
+                random_name <- paste0("", ##"Random_name_",
+                                      paste(sample(c(letters, 0:9), 8), collapse = "")),
                 textInput(inputId = "dataset_name",
-                        "Give your dataset a name",
-                        value = input$select_csd
-                        ),
+                          "Give your dataset a name",
+                          value = random_name
+                          ## value = input$select_csd
+                          ),
                 actionButton("save_csd_data", "Use this name")
                 )
         }
@@ -869,15 +872,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      if (input$input2build %in% c("csd"))
                          actionButton("clear_genotype", "Delete all genotype data")
                      else if (input$input2build %in% c("matrix"))
-                         tags$h5(HTML("To delete genotype data, use",
+                         tags$h5(HTML("To delete all genotype data, use",
                                       "'Reset log-&Theta; matrix and delete genotype data'",
                                       "above."))
                      else if (input$input2build %in% c("dag"))
-                         tags$h5(HTML("To delete genotype data, use ",
+                         tags$h5(HTML("To delete all genotype data, use ",
                                       "'Reset DAG and delete genotype data'",
                                       "above."))
                      else if (input$input2build %in% c("upload"))
-                         tags$h5(HTML("To delete the genotype data to start all over,",
+                         tags$h5(HTML("To delete (or reset) all genotype data",
                                       "upload a new (or the same) data set."))
                      )
         }
