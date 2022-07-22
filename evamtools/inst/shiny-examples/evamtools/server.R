@@ -150,34 +150,36 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     
     ## Can't make it depend on gene_number too
     ## or we get the "DAG contains more genes ..."
-   
-    observeEvent(input$select_csd, {
-        ## message("at select_csd_trigger")
-       if (input$input2build == "dag") {
-            shinyjs::click("resample_dag")
-       } else if (input$input2build == "matrix") {
-           shinyjs::click("resample_mhn")
-       }
-    }
-    ## And now, display_freqs will likely be called
-    )
+
+    ## ## Comment this out so that no resampling when renaming?
+    ## ## FIXME clarify: issue_11
+    ## observeEvent(input$select_csd, {
+    ##     ## message("at select_csd_trigger")
+    ##    if (input$input2build == "dag") {
+    ##         shinyjs::click("resample_dag")
+    ##    } else if (input$input2build == "matrix") {
+    ##        shinyjs::click("resample_mhn")
+    ##    }
+    ## }
+    ## ## And now, display_freqs will likely be called
+    ## )
     
 
     
-   observeEvent(input$gene_number, {
-       ## message("at gene number_trigger")
-       datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
-           input$gene_number
-       if (input$input2build == "dag") {
-           if (dag_more_genes_than_set_genes(input, dag_data(), session)) {
-               dag_message_more_genes_than_set_genes()
-           }
-       } else if (input$input2build == "matrix") {
-           shinyjs::click("resample_mhn")
-       }
-   }
-   ## And now, display_freqs will likely be called
-   )
+    observeEvent(input$gene_number, {
+        ## message("at gene number_trigger")
+        datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
+            input$gene_number
+        if (input$input2build == "dag") {
+            if (dag_more_genes_than_set_genes(input, dag_data(), session)) {
+                dag_message_more_genes_than_set_genes()
+            }
+        } else if (input$input2build == "matrix") {
+            shinyjs::click("resample_mhn")
+        }
+    }
+    ## And now, display_freqs will likely be called
+    )
 
 
     
