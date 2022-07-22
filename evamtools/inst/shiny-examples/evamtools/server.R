@@ -351,7 +351,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 rm(ddtmp2, ddtmp)
             }
 
-            
+            n_genes <- ifelse(input$input2build == "upload", ncol(data$data), input$gene_number)
             tmp_data <- list(
                 data = data$data
               , dag = data$dag
@@ -360,7 +360,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
               , lambdas = data$lambdas
               , thetas = data$thetas
               , trm = data$trm
-              , n_genes = input$gene_number
+              , n_genes = n_genes
               , name = input$dataset_name)
 
             ## We should always enter here, since you can no longer use
