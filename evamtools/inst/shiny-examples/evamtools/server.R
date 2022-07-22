@@ -930,39 +930,41 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Controling dag builder
     dag_data <- reactive({
         # browser()
-        input$dag_model
-        input$dag_table_cell_edit
-        all_gene_names <- c("Root", data$gene_names)
-        edges <- which(data$dag == 1, arr.ind = TRUE)
-        tmp_dag_parent_set <- data$dag_parent_set
-        x <- length(tmp_dag_parent_set)
-        
-        ## I have to this weird thing because using data$gene_names does not work
-        ## for some unkown reason. Eh??!!!
-        names(tmp_dag_parent_set) <- all_gene_names[seq(2, x + 1)]
-        dag_data <- data.frame(From = all_gene_names[edges[, "row"]]
-                             , To = all_gene_names[edges[, "col"]]
-                             , Relation = tmp_dag_parent_set[edges[, "col"] - 1]
-                             , Lambdas = data$lambdas[edges[, "col"] - 1])
-        
-        if ((default_dag_model %in% c("OT", "OncoBN"))
-            & (any(dag_data$Lambdas < 0) | any(dag_data$Lambdas > 1))){
-            showModal(dataModal("thetas/probabilities should be between 0 and 1"))
-            updateRadioButtons(session, "dag_model", selected = "HESBCN")
-        }
-
-        if (default_dag_model %in% c("OT")) {
-            colnames(dag_data) <- c("From", "To", "Relation", "Weight")
-            dag_data$Relation <- NULL
-        } else if (default_dag_model %in% c("OncoBN")) {
-            if (length(unique(dag_data$Relation)) > 2) {
-                showModal(dataModal("OncoBN model must only include one type of relationship"))
+        if(input$input2build == "dag"){
+            input$dag_model
+            input$dag_table_cell_edit
+            all_gene_names <- c("Root", data$gene_names)
+            edges <- which(data$dag == 1, arr.ind = TRUE)
+            tmp_dag_parent_set <- data$dag_parent_set
+            x <- length(tmp_dag_parent_set)
+            
+            ## I have to this weird thing because using data$gene_names does not work
+            ## for some unkown reason. Eh??!!!
+            names(tmp_dag_parent_set) <- all_gene_names[seq(2, x + 1)]
+            dag_data <- data.frame(From = all_gene_names[edges[, "row"]]
+                                , To = all_gene_names[edges[, "col"]]
+                                , Relation = tmp_dag_parent_set[edges[, "col"] - 1]
+                                , Lambdas = data$lambdas[edges[, "col"] - 1])
+            
+            if ((default_dag_model %in% c("OT", "OncoBN"))
+                & (any(dag_data$Lambdas < 0) | any(dag_data$Lambdas > 1))){
+                showModal(dataModal("thetas/probabilities should be between 0 and 1"))
                 updateRadioButtons(session, "dag_model", selected = "HESBCN")
             }
-            colnames(dag_data) <- c("From", "To", "Relation", "theta")
-            
+
+            if (default_dag_model %in% c("OT")) {
+                colnames(dag_data) <- c("From", "To", "Relation", "Weight")
+                dag_data$Relation <- NULL
+            } else if (default_dag_model %in% c("OncoBN")) {
+                if (length(unique(dag_data$Relation)) > 2) {
+                    showModal(dataModal("OncoBN model must only include one type of relationship"))
+                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                }
+                colnames(dag_data) <- c("From", "To", "Relation", "theta")
+                
+            }
+            return(dag_data)
         }
-        return(dag_data)
     })
 
     output$dag_table <-
