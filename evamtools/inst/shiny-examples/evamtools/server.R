@@ -72,11 +72,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     session$onSessionEnded(
                 function() {
                     message("From onSessionEnded")
-                    do_gc(5)}
+                    do_gc(1)}
             )
     onStop(function() {
         cat("\n Finishing")
-        do_gc(5)
+        do_gc(1)
     })
     
     
