@@ -125,6 +125,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     display_freqs <- reactive({
         ## Remember this is called whenever changes in many places
         ## happen.
+        
+        ## This is often called when there is no need for it. So when you change
+        ## the type of data entering (go from MHN to upload, for example) this is
+        ## called again and returns the data but for nothing since what we will
+        ## want to display are the new data.
+
         ## message("at display_freqs")
 
         ## FIXME: change logic here. This is slightly twisted.
@@ -136,7 +142,16 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## Other code ensures that gene number is never smaller
             ## than genes in the DAG.
             return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
-        } else if (input$input2build == "upload"){
+        } else if (input$input2build == "upload") {
+            ## browser()
+            ## FIXME. The 
+            ## If data$n_genes is NULL, return an empty data frame
+            ## But what we should really do is avoid calling
+            ## this unnecessarily
+            if (is.null(data$n_genes))
+                return(evamtools:::get_display_freqs(NULL,
+                                                     data$n_genes,
+                                                     data$gene_names)) 
             return(evamtools:::get_display_freqs(data$csd_counts,
                                                  data$n_genes,
                                                  data$gene_names))
@@ -191,7 +206,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     
     ## Upload data
     observeEvent(input$csd, {
-        if(grepl(".csv", input$csd$datapath)){
+        if (grepl(".csv", input$csd$datapath)) {
             ## dataset_name <-
             ##     strsplit(strsplit(input$csd$name, ".csv")[[1]], "_")[[1]][[1]]
             tryCatch({
@@ -283,7 +298,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
     output$downlaod_data <- renderUI({
-        if(input$input2build %in% c("csd", "dag", "matrix")){
+        if(input$input2build %in% c("upload", "csd", "dag", "matrix")){
             tags$div(
                      class = "frame",
                      tags$h3("Download the data"),
@@ -355,7 +370,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 rm(ddtmp2, ddtmp)
             }
 
-            n_genes <- ifelse(input$input2build == "upload", ncol(data$data), input$gene_number)
+            n_genes <- ifelse(input$input2build == "upload", ncol(data$data),
+                              input$gene_number)
             tmp_data <- list(
                 data = data$data
               , dag = data$dag
@@ -1435,191 +1451,191 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         })
     })
 
-    ## Plot dag of dataset
-            output$dag_plot <- renderPlot({
-                data2plot <- NULL
-                edges <- NULL
+    ## Plot dag or MHN of dataset
+    output$dag_plot <- renderPlot({
+        data2plot <- NULL
+        edges <- NULL
 
-                if (input$input2build %in% c("dag")
-                    && sum(data$dag)>0
-                    && !is.null(input$gene_number)
-                    ){
-                    data2plot <- igraph::graph_from_adjacency_matrix(data$dag)
-                    data2plot <- igraph::decompose(data2plot)[[1]]
-                    edges <- igraph::as_data_frame(data2plot)
-                    colnames(edges) <- c("From", "To")
-                    if(!is.null(data$dag_parent_set)) edges$Relation <- data$dag_parent_set[edges$To]
-                } else if (input$input2build %in% c("matrix") 
-                           && !is.null(data$thetas)
-                           && !is.null(input$gene_number)
-                           && length(data$thetas[1:input$gene_number, 1:input$gene_number])>0
-                           ) {
-                    data2plot <- data$thetas[1:input$gene_number, 1:input$gene_number]
-                }
-                evamtools:::plot_method(data2plot, data$dag_parent_set, edges)
-            })
+        if (input$input2build %in% c("dag")
+            && sum(data$dag)>0
+            && !is.null(input$gene_number)
+            ){
+            data2plot <- igraph::graph_from_adjacency_matrix(data$dag)
+            data2plot <- igraph::decompose(data2plot)[[1]]
+            edges <- igraph::as_data_frame(data2plot)
+            colnames(edges) <- c("From", "To")
+            if(!is.null(data$dag_parent_set)) edges$Relation <- data$dag_parent_set[edges$To]
+        } else if (input$input2build %in% c("matrix") 
+                   && !is.null(data$thetas)
+                   && !is.null(input$gene_number)
+                   && length(data$thetas[1:input$gene_number, 1:input$gene_number])>0
+                   ) {
+            data2plot <- data$thetas[1:input$gene_number, 1:input$gene_number]
+        }
+        evamtools:::plot_method(data2plot, data$dag_parent_set, edges)
+    })
 
                                         # ## Run CPMs
-            observeEvent(input$analysis, {
-                ## Calculate TRM for DAG and for matrices
+    observeEvent(input$analysis, {
+        ## Calculate TRM for DAG and for matrices
 
-                tryCatch({
-                    if (input$gene_number >= 7) {
-                        showModal(dataModal("Beware! You are running a dataset with 7 genes or more. This can take longer than usual and plots may be crowded. We recommend using top_paths options in the Results' tab.", type = "Warning: "))
-                    }
+        tryCatch({
+            if (input$gene_number >= 7) {
+                showModal(dataModal("Beware! You are running a dataset with 7 genes or more. This can take longer than usual and plots may be crowded. We recommend using top_paths options in the Results' tab.", type = "Warning: "))
+            }
 
-                    if (is.null(input$cpm_methods) ||
-                        (length(input$cpm_methods) ==1 && is.na(input$cpm_methods)))
-                        stop("You must use at least one method ",
-                             "(check 'CPMs to use' under 'Advanced options ",
-                             "and CPMs to use).")
+            if (is.null(input$cpm_methods) ||
+                (length(input$cpm_methods) ==1 && is.na(input$cpm_methods)))
+                stop("You must use at least one method ",
+                     "(check 'CPMs to use' under 'Advanced options ",
+                     "and CPMs to use).")
 
-                    
-                    shinyjs::disable("analysis")
+            
+            shinyjs::disable("analysis")
                                         # Create a Progress object
-                    progress <- shiny::Progress$new()
+            progress <- shiny::Progress$new()
                                         # Make sure it closes when we exit this reactive, even if there's an error
-                    on.exit(progress$close())
+            on.exit(progress$close())
 
-                    progress$set(message = "Running evamtools", value = 0)
+            progress$set(message = "Running evamtools", value = 0)
 
-                    mhn_opts <- list()
-                    if(!is.na(input$MHN_lambda)) mhn_opts$lambda <- input$MHN_lambda
-                    
-                    ot_opts <- list()
-                    if(input$OT_with_error == "TRUE"){
-                        ot_opts$with_errors_dist_ot <- TRUE
-                    } else ot_opts$with_errors_dist_ot <- FALSE
+            mhn_opts <- list()
+            if(!is.na(input$MHN_lambda)) mhn_opts$lambda <- input$MHN_lambda
+            
+            ot_opts <- list()
+            if(input$OT_with_error == "TRUE"){
+                ot_opts$with_errors_dist_ot <- TRUE
+            } else ot_opts$with_errors_dist_ot <- FALSE
 
-                    cbn_opts <- list(init_poset = input$CBN_init_poset,
-                                     omp_threads = input$CBN_omp_threads)
-                    hesbcn_opts <- list(
-                        steps = input$HESBCN_steps,
-                        reg = input$HESBCN_reg
-                    ) 
-                    if(!is.na(input$HESBCN_seed)) hesbcn_opts$seed <- input$HESBCN_seed
+            cbn_opts <- list(init_poset = input$CBN_init_poset,
+                             omp_threads = input$CBN_omp_threads)
+            hesbcn_opts <- list(
+                steps = input$HESBCN_steps,
+                reg = input$HESBCN_reg
+            ) 
+            if(!is.na(input$HESBCN_seed)) hesbcn_opts$seed <- input$HESBCN_seed
 
-                    oncobn_opts <- list(
-                        model = input$OncoBN_model,
-                        algorithm = input$OncoBN_algorithm,
-                        k = input$OncoBN_k
-                    ) 
-                    if(!is.na(input$OncoBN_epsilon)) oncobn_opts$epsilon <- input$OncoBN_epsilon
+            oncobn_opts <- list(
+                model = input$OncoBN_model,
+                algorithm = input$OncoBN_algorithm,
+                k = input$OncoBN_k
+            ) 
+            if(!is.na(input$OncoBN_epsilon)) oncobn_opts$epsilon <- input$OncoBN_epsilon
 
-                    mccbn_opts <- list(
-                        model = input$MCCBN_model,
-                        L = input$MCCBN_L,
-                        sampling = input$MCCBN_sampling,
-                        max.iter = input$MCCBN_max_iter,
-                        update.step.size = input$MCCBN_update_step_size,
-                        tol = input$MCCBN_tol,
-                        max.lambda.val = input$MCCBN_max_lambda_val,
-                        T0 = input$MCCBN_T0,
-                        adap.rate = input$MCCBN_adapt_rate,
-                        max.iter.asa = input$MCCBN_max_iter_asa,
-                        neighborhood.dist = input$MCCBN_neighborhood_dist
-                    )
-                    if(!is.na(input$MCCBN_seed)) mccbn_opts$seed <- input$MCCBN_seed
-                    if(!is.na(input$MCCBN_acceptance_rate)) mccbn_opts$acceptance.rate <-  input$MCCBN_acceptance_rate
-                    if(!is.na(input$MCCBN_step_size)) mccbn_opts$step.size <-  input$MCCBN_acceptance_rate
-                    if(input$MCCBN_adaptive == "TRUE"){
-                        mccbn_opts$adaptive <- TRUE
-                    } else mccbn_opts$adaptive <- FALSE
+            mccbn_opts <- list(
+                model = input$MCCBN_model,
+                L = input$MCCBN_L,
+                sampling = input$MCCBN_sampling,
+                max.iter = input$MCCBN_max_iter,
+                update.step.size = input$MCCBN_update_step_size,
+                tol = input$MCCBN_tol,
+                max.lambda.val = input$MCCBN_max_lambda_val,
+                T0 = input$MCCBN_T0,
+                adap.rate = input$MCCBN_adapt_rate,
+                max.iter.asa = input$MCCBN_max_iter_asa,
+                neighborhood.dist = input$MCCBN_neighborhood_dist
+            )
+            if(!is.na(input$MCCBN_seed)) mccbn_opts$seed <- input$MCCBN_seed
+            if(!is.na(input$MCCBN_acceptance_rate)) mccbn_opts$acceptance.rate <-  input$MCCBN_acceptance_rate
+            if(!is.na(input$MCCBN_step_size)) mccbn_opts$step.size <-  input$MCCBN_acceptance_rate
+            if(input$MCCBN_adaptive == "TRUE"){
+                mccbn_opts$adaptive <- TRUE
+            } else mccbn_opts$adaptive <- FALSE
 
-                    data2run <- evamtools:::genotypeCounts_to_data(display_freqs(),
-                                                                   e = 0)
-                    
-                    progress$inc(1/5, detail = "Setting up data")
-                    Sys.sleep(0.5)
-                    progress$inc(2/5, detail = "Running CPMs")
+            data2run <- evamtools:::genotypeCounts_to_data(display_freqs(),
+                                                           e = 0)
+            
+            progress$inc(1/5, detail = "Setting up data")
+            Sys.sleep(0.5)
+            progress$inc(2/5, detail = "Running CPMs")
 
-                    ## methods <- .ev_SHINY_dflt$cpms2run
-                    if (!is.null(input$cpm_methods)) {
-                        methods <- unique(input$cpm_methods)
-                    }
-                    
-                    
-                    cpm_output <- R.utils::withTimeout({evam(data2run
-                                                           , methods = methods
-                                                           , paths_max = input$return_paths_max
-                                                           , mhn_opts = mhn_opts
-                                                           , ot_opts = ot_opts
-                                                           , cbn_opts = cbn_opts
-                                                           , hesbcn_opts = hesbcn_opts
-                                                           , oncobn_opts = oncobn_opts
-                                                           , mccbn_opts = mccbn_opts)},
-                                                       elapsed = EVAM_MAX_ELAPSED, 
-                                                       timeout = EVAM_MAX_ELAPSED, 
-                                                       cpu = Inf,
-                                                       onTimeout = "silent")
+            ## methods <- .ev_SHINY_dflt$cpms2run
+            if (!is.null(input$cpm_methods)) {
+                methods <- unique(input$cpm_methods)
+            }
+            
+            
+            cpm_output <- R.utils::withTimeout({evam(data2run
+                                                   , methods = methods
+                                                   , paths_max = input$return_paths_max
+                                                   , mhn_opts = mhn_opts
+                                                   , ot_opts = ot_opts
+                                                   , cbn_opts = cbn_opts
+                                                   , hesbcn_opts = hesbcn_opts
+                                                   , oncobn_opts = oncobn_opts
+                                                   , mccbn_opts = mccbn_opts)},
+                                               elapsed = EVAM_MAX_ELAPSED, 
+                                               timeout = EVAM_MAX_ELAPSED, 
+                                               cpu = Inf,
+                                               onTimeout = "silent")
 
-                    if (is.null(cpm_output)) stop("Error running evam. ",
-                                                  "Most likely you exceeded maximum ",
-                                                  "allowed time (EVAM_MAX_ELAPSED).")
+            if (is.null(cpm_output)) stop("Error running evam. ",
+                                          "Most likely you exceeded maximum ",
+                                          "allowed time (EVAM_MAX_ELAPSED).")
 
-                    sampled_from_CPMs <- NULL
-                    do_sampling <- input$do_sampling == "TRUE"
-                    if (do_sampling) {
-                        n_samples <- input$sample_size
-                        if ((is.null(n_samples)) ||
-                            (!is.numeric(n_samples)) ||
-                            (n_samples < 100)) {
-                            n_samples <- .ev_SHINY_dflt$cpm_samples
-                        }
-                        progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
-                        ## if (input$do_genotype_transitions) {
-                        ##     ## disabled when removal_note_sogt_1
-                        ##     sout <- c("sampled")
-                        ## }
-                        
-                        sampled_from_CPMs <-
-                            sample_evam(cpm_output, N = n_samples, methods = methods,
-                                        output = "sampled_genotype_counts",
-                                        ## ## disabled when removal_note_sogt_1
-                                        ## if (input$do_genotype_transitions) { 
-                                        ##     c("sampled_genotype_counts",
-                                        ##       "obs_genotype_transitions")
-                                        ##                                } else {
-                                        ##           "sampled_genotype_counts"
-                                        ##       },
-                                        obs_noise = input$sample_noise)
-                    }
-                    
-                    progress$inc(4/5, detail = "Post processing data")
-                    Sys.sleep(0.5)
+            sampled_from_CPMs <- NULL
+            do_sampling <- input$do_sampling == "TRUE"
+            if (do_sampling) {
+                n_samples <- input$sample_size
+                if ((is.null(n_samples)) ||
+                    (!is.numeric(n_samples)) ||
+                    (n_samples < 100)) {
+                    n_samples <- .ev_SHINY_dflt$cpm_samples
+                }
+                progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
+                ## if (input$do_genotype_transitions) {
+                ##     ## disabled when removal_note_sogt_1
+                ##     sout <- c("sampled")
+                ## }
+                
+                sampled_from_CPMs <-
+                    sample_evam(cpm_output, N = n_samples, methods = methods,
+                                output = "sampled_genotype_counts",
+                                ## ## disabled when removal_note_sogt_1
+                                ## if (input$do_genotype_transitions) { 
+                                ##     c("sampled_genotype_counts",
+                                ##       "obs_genotype_transitions")
+                                ##                                } else {
+                                ##           "sampled_genotype_counts"
+                                ##       },
+                                obs_noise = input$sample_noise)
+            }
+            
+            progress$inc(4/5, detail = "Post processing data")
+            Sys.sleep(0.5)
 
-                    orig_data <- list(data = data2run, name = data$name
-                                    , type = input$input2build, gene_names = data$gene_names
-                                    , thetas = data$thetas, lambdas = data$lambdas
-                                    , dag = data$dag, dag_parent_set = data$dag_parent_set)
+            orig_data <- list(data = data2run, name = data$name
+                            , type = input$input2build, gene_names = data$gene_names
+                            , thetas = data$thetas, lambdas = data$lambdas
+                            , dag = data$dag, dag_parent_set = data$dag_parent_set)
 
-                    tabular_data <- evamtools:::create_tabular_data(c(cpm_output, sampled_from_CPMs))
-                    all_evam_output <- list("cpm_output" = c(cpm_output, sampled_from_CPMs)
-                                          , "orig_data" = orig_data
-                                          , "tabular_data" = tabular_data
-                                          , "do_sampling" = do_sampling
-                                            ) 
+            tabular_data <- evamtools:::create_tabular_data(c(cpm_output, sampled_from_CPMs))
+            all_evam_output <- list("cpm_output" = c(cpm_output, sampled_from_CPMs)
+                                  , "orig_data" = orig_data
+                                  , "tabular_data" = tabular_data
+                                  , "do_sampling" = do_sampling
+                                    ) 
 
-                    ##CPM output name
-                    result_index <- length(grep(sprintf("^%s", input$select_csd),
-                                                names(all_cpm_out)))
-                    result_name <- ifelse(result_index == 0
-                                        , input$select_csd
-                                        , sprintf("%s__%s", input$select_csd, result_index))
+            ##CPM output name
+            result_index <- length(grep(sprintf("^%s", input$select_csd),
+                                        names(all_cpm_out)))
+            result_name <- ifelse(result_index == 0
+                                , input$select_csd
+                                , sprintf("%s__%s", input$select_csd, result_index))
 
-                    all_cpm_out[[result_name]] <- all_evam_output
-                    last_visited_cpm <<- result_name
-                    updateRadioButtons(session, "select_cpm", selected = result_name)
-                    progress$inc(5/5, detail = "You can see your result by going to the Results tab")
-                    Sys.sleep(1)
-                    shinyjs::enable("analysis")
+            all_cpm_out[[result_name]] <- all_evam_output
+            last_visited_cpm <<- result_name
+            updateRadioButtons(session, "select_cpm", selected = result_name)
+            progress$inc(5/5, detail = "You can see your result by going to the Results tab")
+            Sys.sleep(1)
+            shinyjs::enable("analysis")
 
-                    updateTabsetPanel(session, "navbar", selected = "result_viewer")
-                    updateRadioButtons(session, "select_cpm", selected = result_name)
+            updateTabsetPanel(session, "navbar", selected = "result_viewer")
+            updateRadioButtons(session, "select_cpm", selected = result_name)
 
-                }, error = function(e){
-                    showModal(dataModal(e[[1]]))
-                })
+        }, error = function(e){
+            showModal(dataModal(e[[1]]))
+        })
             })
 
             all_cpm_out <- reactiveValues()
