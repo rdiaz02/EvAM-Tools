@@ -1662,14 +1662,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                     data2plot <- data.frame("Genotype" = names(method_data), 
                                                             "Counts" = as.vector(method_data))
                                 }
-                                        # output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
-                                        #     pl <- evamtools:::plot_genot_fg(method_data$data2plot,
-                                        #                                     observations = tmp_data$original_data, # We use it to define "Observed" and "Not Observed" genotypes
-                                        #                                     sampled_counts = method_data$sampled_genotype_counts,
-                                        #                                     top_paths = input$freq2label,
-                                        #                                     label_type = input$label2plot,
-                                        #                                     plot_type = selected_plot_type)
-                                        # , freq2label = input$freq2label)
                                 output[[sprintf("plot_sims2_%s", met)]] <- renderPlot(
                                     pl <- evamtools:::plot_genotype_counts(data2plot)
                                 )
@@ -1677,6 +1669,18 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                     column(number_of_columns,
                                            plotOutput(sprintf("plot_sims2_%s", met)))
                                 )
+                                ## Trying to use plotly. Does not work. I give up
+                                ## Anyway, not really needed: would be slower, and the
+                                ## numbers can be easily seen in the table.
+                                ## output[[sprintf("plot_sims2_%s", met)]] <-
+                                ##     plotly::renderPlotly(
+                                ##                 pl <- evamtools:::plot_genotype_counts_plly(data2plot)
+                                ##             )
+                                ## return(
+                                ##     column(number_of_columns,
+                                ##            plotly::plotlyOutput(sprintf("plot_sims2_%s", met)))
+                                ## )
+
                             })
                         } 
                     } else {
@@ -1859,7 +1863,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 if (length(names(all_cpm_out)) > 0) {
                     tags$div(class="frame max_height",
                              tags$h3(paste("Tabular output of predictions from models: ",
-                                           switch(input$data2plot,
+                                           switch(ifelse(is.null(input$data2plot),
+                                                         "not_valid_or_not_yet_existent",
+                                                         input$data2plot),
                                                   "trans_mat" = "Transition probabilities.",
                                                   "trans_rate_mat" = "Transition rates.",
                                                   "predicted_genotype_freqs" = "Predicted genotype relative frequencies.",
