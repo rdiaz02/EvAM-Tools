@@ -202,17 +202,20 @@ ot_proc <- function(datax, nboot = 1000,
         obs_genots <- NA
         obs2way <- NA
     }
-    
-    return(list(edges = data.frame(From = edges.matrix[, "parent"],
-                      To = edges.matrix[, "child"],
-                      edge = paste(edges.matrix[, "parent"],
-                                   edges.matrix[, "child"],
-                                   sep = " -> "),
-                      OT_edgeBootFreq = boot.freq,
-                      OT_edgeWeight = edge.weights,
-                      OT_obsMarginal = obs_marginal[edges.matrix[, "child"]],
-                      OT_predMarginal = pred_marginal[edges.matrix[, "child"]],
-                      stringsAsFactors = FALSE),
+
+    ## Sort output, starting with Root as the first node(s)
+    the_edges <- data.frame(From = edges.matrix[, "parent"],
+                            To = edges.matrix[, "child"],
+                        edge = paste(edges.matrix[, "parent"],
+                                     edges.matrix[, "child"],
+                                     sep = " -> "),
+                        OT_edgeBootFreq = boot.freq,
+                        OT_edgeWeight = edge.weights,
+                        OT_obsMarginal = obs_marginal[edges.matrix[, "child"]],
+                        OT_predMarginal = pred_marginal[edges.matrix[, "child"]],
+                        stringsAsFactors = FALSE)
+
+    return(list(edges = model_ordered_by_depth(the_edges),
                 eps = ot.fit$eps,
                 consensus = consensus,
                 OT_error.fun  = error.fun,
@@ -222,7 +225,7 @@ ot_proc <- function(datax, nboot = 1000,
                 ## , genots_observed = obs_genots,
                 ## , two_way_predicted = est2way,
                 ## , two_way_observed = obs2way
-                      ))
+                ))
 }
 
 ## Give a named vector for the predicted freqs of genotypes
@@ -244,3 +247,31 @@ dist_oncotree_output_2_named_genotypes <- function(odt) {
 
 # library(codetools)
 # checkUsageEnv(env = .GlobalEnv)
+
+## Given model with From and To, return it sorted
+## so that Root nodes on top, and the rest ordered
+## by depth
+model_ordered_by_depth <- function(model_edges) {
+    g1 <- igraph::graph_from_data_frame(model_edges[, c("From", "To")])
+    children <- evam_string_sort(setdiff(V(g1)$name, "Root"))
+    node_depth <-
+        unlist(lapply(children,
+                      function(node)
+                          max(unlist(lapply(all_simple_paths(g1,
+                                                             from = "Root",
+                                                             to = node),
+                                            length)))
+                      ))
+    names(node_depth) <- children
+    node_depth <- c("Root" = 0, node_depth)
+
+    To_depth <- node_depth[model_edges$To]
+    From_depth <- node_depth[model_edges$From]
+    Is_Root <- (model_edges$From == "Root")
+
+    new_ind <- order(-Is_Root, To_depth, From_depth,
+                     model_edges$From,
+                     model_edges$To)
+
+    return(model_edges[new_ind, ])
+}
