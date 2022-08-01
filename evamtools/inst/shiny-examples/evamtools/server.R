@@ -297,7 +297,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
     })
 
-    output$downlaod_data <- renderUI({
+    output$download_data <- renderUI({
         if(input$input2build %in% c("upload", "csd", "dag", "matrix")){
             tags$div(
                      class = "frame",

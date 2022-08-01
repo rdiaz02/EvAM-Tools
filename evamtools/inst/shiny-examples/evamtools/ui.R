@@ -682,7 +682,7 @@ user_input <- function() {
                                                      ),
                                             uiOutput("change_counts"),
 
-                                            uiOutput("downlaod_data")
+                                            uiOutput("download_data")
 
                                           
                                             # )
