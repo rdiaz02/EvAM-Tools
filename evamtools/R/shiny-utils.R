@@ -14,27 +14,27 @@
 ## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-get_display_freqs <- function(freqs, n_genes, gene_names){
-  if (is.null(freqs)) return(.ev_SHINY_dflt$template_data$csd_counts)
-  if (nrow(freqs) == 0) return(.ev_SHINY_dflt$template_data$csd_counts)
-  valid_gene_names <- c("WT", gene_names[1:n_genes])
+get_display_freqs <- function(freqs, n_genes, gene_names) {
+    if (is.null(freqs)) return(.ev_SHINY_dflt$template_data$csd_counts)
+    if (nrow(freqs) == 0) return(.ev_SHINY_dflt$template_data$csd_counts)
+    valid_gene_names <- c("WT", gene_names[1:n_genes])
 
-  ## Why would this be necessary?  To make sure size of data reduced when
-  ##    changing number of gens and we use genotype freqs.  But this works poorly
-  ##    with DAGs; it leads to incorrect behavior like having in dag only A and C,
-  ##    and asking for two genes. Only A would be shown.
-  ## So don't use this function with DAGs :-)
-  
-  selected_rows <- vapply(freqs$Genotype,
-                          function(x) {
-                              genes <- strsplit(x, ", ")[[1]]
-                              return(all(genes %in% valid_gene_names))
-                          },
-                          logical(1))
-  
-  freqs <- freqs[selected_rows, , drop = FALSE]
-  ## Remove 0 count rows
-  return(freqs[freqs$Counts > 0, , drop = FALSE])
+    ## Why would this be necessary?  To make sure size of data reduced when
+    ##    changing number of gens and we use genotype freqs.  But this works poorly
+    ##    with DAGs; it leads to incorrect behavior like having in dag only A and C,
+    ##    and asking for two genes. Only A would be shown.
+    ## So don't use this function with DAGs :-)
+    
+    selected_rows <- vapply(freqs$Genotype,
+                            function(x) {
+                                genes <- strsplit(x, ", ")[[1]]
+                                return(all(genes %in% valid_gene_names))
+                            },
+                            logical(1))
+    
+    freqs <- freqs[selected_rows, , drop = FALSE]
+    ## Remove 0 count rows
+    return(freqs[freqs$Counts > 0, , drop = FALSE])
 }
 
 get_csd <- function(complete_csd,

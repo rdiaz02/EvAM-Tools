@@ -821,7 +821,6 @@ plot_genotype_counts_plly <- function(data) {
         data2 <- stats::setNames(data[, "Counts"], nm = data[, "Genotype"])
     }
     data2 <- na.omit(reorder_to_standard_order(data2))
-
     fig <- plot_ly(
         x =  names(data2),
         y = as.vector(data2),
