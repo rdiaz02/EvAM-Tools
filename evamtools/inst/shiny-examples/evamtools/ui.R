@@ -912,8 +912,8 @@ ui <-
       value = "result_viewer",
       results_simple()
     ),
-    tabPanel("Tutorial",
-      tutorial()
-    )
+    ## tabPanel("Tutorial",
+    ##   tutorial()
+    ## )
 )
 
