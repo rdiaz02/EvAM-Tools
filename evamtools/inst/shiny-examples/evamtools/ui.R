@@ -288,7 +288,7 @@ results_simple <- function(){
                        tags$h5(HTML("Format and contents: rds file with ",
                                     "two lists: 1. cpm_output, ",
                                     "the concatenated output from ",
-                                    "evam and sample_evam; 2. the tabular data ",
+                                    "evam and sample_evam; 2. the tabular data.   ",
                                     "Analyzed data in ",
                                     " object$cpm_output$analyzed_data")),
                 tags$div(class = "download_button",
@@ -597,7 +597,10 @@ user_input <- function() {
             sidebarLayout(
                 column(width = 1,
                        tags$div(
-                                tags$h3("Input to build"),
+                                tags$h3(HTML("<h3 style=\"margin-left:-5px\">Cross-sectional data. Upload, create, generate, modify: </h3>")),
+                                ## tags$h3(HTML('<hr style="height:4px;background-color:black;width:100%; text-align:left;margin-left:0">')),
+                                tags$h4(HTML("<hr style=\"height:1px; width:70px; background-color:black;text-align:left;margin-left:5px\">")),
+                                tags$h4(HTML("<h4 style=\"margin-left:-18px\"> Enter data directly: </h4>")),
                                 tagList(
                                     radioButtons(inputId = "input2build", label = "",
                                                  choiceNames = list(
@@ -612,23 +615,27 @@ user_input <- function() {
                                     ##                  position = "bottom",
                                     ##                bounce = "TRUE",
                                     ##                                  message = "a text for input2build from add_prompt")
-                                    ## If we wanted shinyBS, comment above and use something like
-                                    ## shinyBS::bsTooltip("input2build", "Working example of a tooltip on server.R",
-                                    ##                    "right", options = list(container = "body")),
-                                ),
-                                tags$footer(tags$script(HTML("
+                                            ## If we wanted shinyBS, comment above and use something like
+                                            ## shinyBS::bsTooltip("input2build", "Working example of a tooltip on server.R",
+                                            ##                    "right", options = list(container = "body")),
+                                        ),
+                                        
+                                        tags$footer(tags$script(HTML("
               tmp_label = document.createElement('p');
-              tmp_label.innerHTML = 'Generate data from CPM models';
+              tmp_label.innerHTML = '<hr style=\"height:1px; width:70px; background-color:black;text-align:left;margin-left:-10px\"> <h4 style=\"margin-left:-28px\">Generate data from CPM models:</h4>';
               document.querySelectorAll('#input2build div.radio')[1].after(tmp_label)
-              tmp_label = document.createElement('hr');
               document.querySelectorAll('#input2build div.radio')[1].after(tmp_label)
               "))),
-              tags$h4("Examples and user's data"),
+              tags$h3(HTML('<hr style="height:4px;background-color:black;width:100%;margin-left:-18px">')),
+              tags$h4(HTML("<br/>")),
+              tags$h4(HTML("Examples and user's data:")),
+              tags$h5(HTML("<br/>")),
               ## How many to show is controlled from server function
               ## in server.R, examples_csd$dag, etc
               uiOutput("csd_list"),
 
               tags$h3(HTML("<br/>")),
+              tags$h3(HTML('<hr style="height:1px;background-color:black;margin-left:-18px">')),
               tags$h5(paste("evamtools version: ",
                             packageVersion("evamtools")))
               
@@ -911,9 +918,9 @@ ui <-
     tabPanel("Results",
       value = "result_viewer",
       results_simple()
-    ),
+      ),
     ## tabPanel("Tutorial",
     ##   tutorial()
     ## )
-)
+    )
 

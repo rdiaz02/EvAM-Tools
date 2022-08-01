@@ -451,7 +451,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ##                    "right", options = list(container = "body")),
             )
         } else {
-            tags$p("Empty... for the moment")
+            tags$p("Empty until you upload a data set")
         }
     })
 
@@ -794,7 +794,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                  )
         } else if (input$input2build == "upload") {
             tags$div(## class = "frame",
-                     tags$h4("1. Upload your own data"),
+                     tags$h4("1. Upload data (CSV format)"),
                      tags$h5(HTML("If you want to give your dataset a specific ",
                                   "name, set it in the box below ",
                                   "before uploading the data. "
