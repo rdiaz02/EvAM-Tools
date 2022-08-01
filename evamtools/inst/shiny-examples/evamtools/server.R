@@ -63,8 +63,9 @@ do_gc <- function(n = 5) {
 }
 
 random_dataset_name <- function() {
-    paste0("", ##"Random_name_",
-           paste(sample(c(letters, 0:9), 8), collapse = ""))
+    paste(c(sample(letters, 1),
+            sample(c(letters, 0:9), 8, replace = TRUE)),
+          collapse = "")
 }
 
 server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
@@ -137,8 +138,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             return(evamtools:::get_display_freqs(data$csd_counts,
                                                  data$n_genes,
                                                  data$gene_names))
-        } 
-        else {
+        } else {
             return(evamtools:::get_display_freqs(data$csd_counts,
                                                  input$gene_number,
                                                  data$gene_names))
@@ -618,7 +618,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               )
                      )
         }
-                                        # )
     })
 
     ## Define new genotype
@@ -642,9 +641,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             
             tags$div(
                      tags$h3("2. Add genotypes"),
-                     tags$h5("WT is added by not clicking on any mutations; ",
-                             "but the WT genotype should not be the first one added ",
-                             "(or you'll get an innocuous error message)."),
+                     tags$h5("WT is added by not clicking on any mutations. "),
+                     ## "but the WT genotype should not be the first one added ",
+                     ##         "(or you'll get an innocuous error message)."),
                      tags$h5("Any gene without mutations is excluded from the data, ",
                              "regardless of the setting for number of genes. "),
                      tags$h5("If any gene is always observed mutated ",
@@ -774,6 +773,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   tags$h3("Entries are ",
                                           "lower case thetas, ",
                                           HTML("&theta;s, range &plusmn; &infin;"),),
+                                  tags$h4(HTML("Remember to hit Ctrl-Enter when you are done editing the matrix for changes to take effect.")),
                                   DT::DTOutput("thetas_table"),
                                   tags$h3(HTML("<br/>")),
                                   numericInput("mhn_samples", "Number of genotypes to sample",
@@ -1328,7 +1328,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             updateNumericInput(session, "genotype_freq", value = NA)
             updateCheckboxGroupInput(session, "genotype", label = "Mutations",
                                      choices = lapply(1:input$gene_number,
-                                                      function(i)data$gene_names[i]),
+                                                      function(i) data$gene_names[i]),
                                      selected = NULL)
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
