@@ -62,6 +62,10 @@ do_gc <- function(n = 5) {
     for (i in 1:n) print(gc())
 }
 
+random_dataset_name <- function() {
+    paste0("", ##"Random_name_",
+           paste(sample(c(letters, 0:9), 8), collapse = ""))
+}
 
 server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     require(evamtools)
@@ -216,9 +220,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 datasets$all_csd[["upload"]][[dataset_name]]$name <- dataset_name
                 tmp_data$gene_names <- c(
                     colnames(tmp_data$data)
-                , LETTERS[(length(colnames(tmp_data$data)) + 1):max_genes]
+                  , LETTERS[(length(colnames(tmp_data$data)) + 1):max_genes]
                 )
-                # tmp_data$gene_names <- colnames(tmp_data$data)
+                                        # tmp_data$gene_names <- colnames(tmp_data$data)
                 tmp_data$n_genes <- ncol(tmp_data$data)
                 ## We are not filling up
                 ## dag, dag_parent_set, lambdas, thetas, trm. So what?
@@ -227,14 +231,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ## this forces creating copy so name sticks forever
                 ## but gives error later. And actually being able to change
                 ## name via (Re)name the data is nice. 
-                # datasets$fixed_examples[["upload"]][[dataset_name]] <- tmp_data
+                                        # datasets$fixed_examples[["upload"]][[dataset_name]] <- tmp_data
                 datasets$all_csd[["upload"]][[dataset_name]] <- tmp_data
                 
                 last_visited_pages["upload"] <<- dataset_name
                 updateRadioButtons(session, "input2build", selected = "upload")
                 updateRadioButtons(session, "select_csd", selected = dataset_name)
             }, error = function(e){
-               showModal(dataModal(e[[1]]))
+                showModal(dataModal(e[[1]]))
             })
         } ## else if(grepl(".rds", input$csd$datapath, ignore.case = TRUE)){
         ## We do not accept input as rds. Nope.
@@ -253,45 +257,43 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     observeEvent(input$input2build, {
         updateRadioButtons(session, "select_csd",
-                               selected = last_visited_pages[[input$input2build]])
+                           selected = last_visited_pages[[input$input2build]])
     })
 
     ## Define dataset name
     output$dataset_name <- renderUI({
         if(input$input2build %in% c("upload", "csd", "dag", "matrix")){
             tags$div(class = "frame inlin2",
-                tags$h3("(Re)name the data"),
-                tags$h5(HTML("Give the modified data a name ",
-                            "that will also be used to save the CPM ",
-                            "output.")),
-                tags$div(class = "download_button",
-                         ),
-                random_name <- paste0("", ##"Random_name_",
-                                      paste(sample(c(letters, 0:9), 8), collapse = "")),
-                textInput(inputId = "dataset_name",
-                          "Give your dataset a name",
-                          value = random_name
-                          ## value = input$select_csd
-                          ),
-                actionButton("save_csd_data", "Use this name")
-                )
+                     tags$h3("(Re)name the data"),
+                     tags$h5(HTML("Give the modified data a name ",
+                                  "that will also be used to save the CPM ",
+                                  "output.")),
+                     tags$div(class = "download_button",
+                              ),
+                     textInput(inputId = "dataset_name",
+                               "Give your dataset a name",
+                               value = random_dataset_name()
+                               ## value = input$select_csd
+                               ),
+                     actionButton("save_csd_data", "Use this name")
+                     )
         }
     })
 
     output$downlaod_data <- renderUI({
         if(input$input2build %in% c("csd", "dag", "matrix")){
-        tags$div(
-                class = "frame",
-                tags$h3("Download the data"),
-                tags$div(class = "download_button",
-                        tags$h5(HTML("Contents of saved file: ",
-                                    "the data as data frame; ",
-                                    "if you built a DAG or MHN model, ",
-                                    "also the model built."
-                                    )),  
-                        downloadButton("download_csd", "Download your data")
-                        )
-            )
+            tags$div(
+                     class = "frame",
+                     tags$h3("Download the data"),
+                     tags$div(class = "download_button",
+                              tags$h5(HTML("Contents of saved file: ",
+                                           "the data as data frame; ",
+                                           "if you built a DAG or MHN model, ",
+                                           "also the model built."
+                                           )),  
+                              downloadButton("download_csd", "Download your data")
+                              )
+                 )
         }
     })
 
@@ -365,19 +367,19 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
             ## We should always enter here, since you can no longer use
             ## an existing name
-               if (!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))){
-                   datasets$fixed_examples[[input$input2build]][[input$dataset_name]] <- tmp_data
-               }
+            if (!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))){
+                datasets$fixed_examples[[input$input2build]][[input$dataset_name]] <- tmp_data
+            }
 
-               ## Like 205 and 207. Assigning name not needed
-               datasets$all_csd[[input$input2build]][[input$dataset_name]] <- tmp_data
+            ## Like 205 and 207. Assigning name not needed
+            datasets$all_csd[[input$input2build]][[input$dataset_name]] <- tmp_data
 
-               datasets$all_csd[[input$input2build]][[input$select_csd]] <-
-                   datasets$fixed_examples[[input$input2build]][[input$select_csd]]
+            datasets$all_csd[[input$input2build]][[input$select_csd]] <-
+                datasets$fixed_examples[[input$input2build]][[input$select_csd]]
 
-               ## 3 update selected entry
-               updateRadioButtons(session, "select_csd",
-                                  selected = input$dataset_name)
+            ## 3 update selected entry
+            updateRadioButtons(session, "select_csd",
+                               selected = input$dataset_name)
 
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
@@ -394,7 +396,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 saveRDS(tmp_data$data, file=file)
             } else if(input$input2build == "dag") {
                 gene_names <- setdiff(unique(c(dag_data()$From, dag_data()$To)),
-                          "Root")
+                                      "Root")
                 number_of_genes <- length(gene_names)
                 stopifnot(number_of_genes == input$gene_number)
                 data2save <- list(
@@ -404,7 +406,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                   , dag_parent_set = tmp_data$dag_parent_set[1:number_of_genes]
                   , dag = tmp_data$dag[1:(number_of_genes + 1),
                                        1:(number_of_genes + 1)])
-                    saveRDS(data2save, file=file)
+                saveRDS(data2save, file=file)
             } else if (input$input2build == "matrix") {
                 data2save <-
                     list(data = tmp_data$data[,1:input$gene_number],
@@ -485,7 +487,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data$name <- tmp_data$name
             data$n_genes <- tmp_data$n_genes
 
-           
+            
             if (input$input2build == "dag") {
                 number_of_parents <- colSums(data$dag)
                 to_keep <- sum(number_of_parents > 0)
@@ -509,8 +511,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 updateNumericInput(session, "gene_number", value = n_genes)
                 updateNumericInput(session, "genotype_freq", value = NA)
                 updateCheckboxGroupInput(session, "genotype", label = "Mutations",
-                                        choices = lapply(1:n_genes, function(i)data$gene_names[i]),
-                                        selected = NULL)
+                                         choices = lapply(1:n_genes, function(i)data$gene_names[i]),
+                                         selected = NULL)
             }
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
@@ -598,25 +600,25 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Define number of genes
     output$gene_number_slider <- renderUI({
         val <- ifelse(is.null(data$n_genes), 3, data$n_genes)
-        # tag$div(class="frame",
+                                        # tag$div(class="frame",
         if (input$input2build %in% c("csd", "dag", "matrix")){
 
             tags$div(class = "frame flex",
-                tags$h3("1. Set the number of genes"),
-                tags$h5("(Using 7 or more genes can lead ",
-                        "to very long execution times for some methods ",
-                        "and crowded figures.)"),
-                actionButton("change_gene_names", "Change gene names"),
-                
-            tags$div(class="inlin",
-                    tags$h3(HTML("<br/>")),
-                    sliderInput("gene_number", "Number of genes",
-                                value = val, max = max_genes, min = min_genes,
-                                step = 1)
-                )
-                )
+                     tags$h3("1. Set the number of genes"),
+                     tags$h5("(Using 7 or more genes can lead ",
+                             "to very long execution times for some methods ",
+                             "and crowded figures.)"),
+                     actionButton("change_gene_names", "Change gene names"),
+                     
+                     tags$div(class="inlin",
+                              tags$h3(HTML("<br/>")),
+                              sliderInput("gene_number", "Number of genes",
+                                          value = val, max = max_genes, min = min_genes,
+                                          step = 1)
+                              )
+                     )
         }
-        # )
+                                        # )
     })
 
     ## Define new genotype
@@ -680,7 +682,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 dag_gene_options <- genes_in_dag
             }
             tags$div(
-                # uiOutput("gene_number_slider"),
+                                        # uiOutput("gene_number_slider"),
                      tags$div(class = "flex",
                               tags$h3("2. Define a Directed Acyclic Graph (DAG)"),
                               actionButton("how2build_dag", "Help", class = "btn-info")
@@ -724,6 +726,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                "the available gene labels, and then ",
                                                "increase the number of nodes in the DAG")),
                                   tags$h3(HTML("<br/>DAG table")),
+                                  tags$h4(HTML("Remember to hit Ctrl-Enter when you are done editing the DAG table for changes to take effect.")),
                                   DT::DTOutput("dag_table"),
                                   tags$h3(HTML("<br/>")),
                                   numericInput("dag_epos",
@@ -743,15 +746,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                step = 0.025, width = "50%"),
                                   tags$h5(
                                            "A proportion between 0 and 1. ", 
-                                          "Observational noise (e.g., genotyping error) ",
-                                          "for all models. ",
-                                          "Added during sampling, ",
-                                          "after predictions from model ",
-                                          "have been obtained; ",
-                                          "predicted probabilities are not affected.",
-                                          "If larger than 0, this proportion of entries ",
-                                          "in the sampled matrix will be flipped ",
-                                          "(i.e., 0s turned to 1s and 1s turned to 0s)."                                               ),
+                                           "Observational noise (e.g., genotyping error) ",
+                                           "for all models. ",
+                                           "Added during sampling, ",
+                                           "after predictions from model ",
+                                           "have been obtained; ",
+                                           "predicted probabilities are not affected.",
+                                           "If larger than 0, this proportion of entries ",
+                                           "in the sampled matrix will be flipped ",
+                                           "(i.e., 0s turned to 1s and 1s turned to 0s)."                                               ),
                                   tags$h3(HTML("<br/>")),
                                   actionButton("resample_dag", "Sample from DAG"),
                                   actionButton("clear_dag", "Reset DAG and delete genotype data"),
@@ -1088,6 +1091,32 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         })
     })
 
+    ## Help for output of downloaded CPM results
+    observeEvent(input$how2downloadcpm, {
+        showModal(modalDialog(
+            easyClose = TRUE,
+            title = tags$h3("Downloading CPMs results and analyzed data"),
+            ## tags$h4(HTML("Format and contents: rds file with ",
+            ##              "two lists: 1. cpm_output, ",
+            ##              "the concatenated output from ",
+            ##              "evam and sample_evam; 2. the tabular data.   ",
+            ##              "Analyzed data in ",
+            ##              " object$cpm_output$analyzed_data"))
+            tags$div(
+                     tags$p(HTML("Format and contents: rds file with ",
+                                 "two lists: <ul>")),
+                     tags$li(" cpm_output:  ", 
+                             "the concatenated output from ",
+                             "evam and sample_evam. ",
+                             "The analyzed data are in ",
+                             " object$cpm_output$analyzed_data ."
+                             ),
+                     tags$li("tabular_data: the tabular data output.   "),
+                     tags$p(HTML("</ul>")),
+                     )
+        ))
+    }
+    )
     ## Help for DAG building
     observeEvent(input$how2build_dag, {
         showModal(modalDialog(
@@ -1259,7 +1288,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tmp_dag <- .ev_SHINY_dflt$template_data$dag
             colnames(tmp_dag) <- rownames(tmp_dag) <- c("WT", data$gene_names)
             tmp_dag["WT", data$gene_names[1]] <- 1
-            # data$dag <- NULL
+                                        # data$dag <- NULL
             data$dag <- tmp_dag
             data$csd_counts <- .ev_SHINY_dflt$template_data$csd_counts
             data$data <- .ev_SHINY_dflt$template_data$data
@@ -1359,278 +1388,278 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
     ## Plot dag of dataset
-    output$dag_plot <- renderPlot({
-        data2plot <- NULL
-        edges <- NULL
+            output$dag_plot <- renderPlot({
+                data2plot <- NULL
+                edges <- NULL
 
-        if (input$input2build %in% c("dag")
-            && sum(data$dag)>0
-            && !is.null(input$gene_number)
-            ){
-            data2plot <- igraph::graph_from_adjacency_matrix(data$dag)
-            data2plot <- igraph::decompose(data2plot)[[1]]
-            edges <- igraph::as_data_frame(data2plot)
-            colnames(edges) <- c("From", "To")
-            if(!is.null(data$dag_parent_set)) edges$Relation <- data$dag_parent_set[edges$To]
-        } else if (input$input2build %in% c("matrix") 
-                   && !is.null(data$thetas)
-                   && !is.null(input$gene_number)
-                   && length(data$thetas[1:input$gene_number, 1:input$gene_number])>0
-                   ) {
-            data2plot <- data$thetas[1:input$gene_number, 1:input$gene_number]
-        }
-        evamtools:::plot_method(data2plot, data$dag_parent_set, edges)
-    })
+                if (input$input2build %in% c("dag")
+                    && sum(data$dag)>0
+                    && !is.null(input$gene_number)
+                    ){
+                    data2plot <- igraph::graph_from_adjacency_matrix(data$dag)
+                    data2plot <- igraph::decompose(data2plot)[[1]]
+                    edges <- igraph::as_data_frame(data2plot)
+                    colnames(edges) <- c("From", "To")
+                    if(!is.null(data$dag_parent_set)) edges$Relation <- data$dag_parent_set[edges$To]
+                } else if (input$input2build %in% c("matrix") 
+                           && !is.null(data$thetas)
+                           && !is.null(input$gene_number)
+                           && length(data$thetas[1:input$gene_number, 1:input$gene_number])>0
+                           ) {
+                    data2plot <- data$thetas[1:input$gene_number, 1:input$gene_number]
+                }
+                evamtools:::plot_method(data2plot, data$dag_parent_set, edges)
+            })
 
                                         # ## Run CPMs
-    observeEvent(input$analysis, {
-        ## Calculate TRM for DAG and for matrices
+            observeEvent(input$analysis, {
+                ## Calculate TRM for DAG and for matrices
 
-        tryCatch({
-            if (input$gene_number >= 7) {
-                showModal(dataModal("Beware! You are running a dataset with 7 genes or more. This can take longer than usual and plots may be crowded. We recommend using top_paths options in the Results' tab.", type = "Warning: "))
-            }
+                tryCatch({
+                    if (input$gene_number >= 7) {
+                        showModal(dataModal("Beware! You are running a dataset with 7 genes or more. This can take longer than usual and plots may be crowded. We recommend using top_paths options in the Results' tab.", type = "Warning: "))
+                    }
 
-            if (is.null(input$cpm_methods) ||
-                (length(input$cpm_methods) ==1 && is.na(input$cpm_methods)))
-                stop("You must use at least one method ",
-                     "(check 'CPMs to use' under 'Advanced options ",
-                     "and CPMs to use).")
+                    if (is.null(input$cpm_methods) ||
+                        (length(input$cpm_methods) ==1 && is.na(input$cpm_methods)))
+                        stop("You must use at least one method ",
+                             "(check 'CPMs to use' under 'Advanced options ",
+                             "and CPMs to use).")
 
-            
-            shinyjs::disable("analysis")
+                    
+                    shinyjs::disable("analysis")
                                         # Create a Progress object
-            progress <- shiny::Progress$new()
+                    progress <- shiny::Progress$new()
                                         # Make sure it closes when we exit this reactive, even if there's an error
-            on.exit(progress$close())
+                    on.exit(progress$close())
 
-            progress$set(message = "Running evamtools", value = 0)
+                    progress$set(message = "Running evamtools", value = 0)
 
-            mhn_opts <- list()
-            if(!is.na(input$MHN_lambda)) mhn_opts$lambda <- input$MHN_lambda
+                    mhn_opts <- list()
+                    if(!is.na(input$MHN_lambda)) mhn_opts$lambda <- input$MHN_lambda
+                    
+                    ot_opts <- list()
+                    if(input$OT_with_error == "TRUE"){
+                        ot_opts$with_errors_dist_ot <- TRUE
+                    } else ot_opts$with_errors_dist_ot <- FALSE
+
+                    cbn_opts <- list(init_poset = input$CBN_init_poset,
+                                     omp_threads = input$CBN_omp_threads)
+                    hesbcn_opts <- list(
+                        steps = input$HESBCN_steps,
+                        reg = input$HESBCN_reg
+                    ) 
+                    if(!is.na(input$HESBCN_seed)) hesbcn_opts$seed <- input$HESBCN_seed
+
+                    oncobn_opts <- list(
+                        model = input$OncoBN_model,
+                        algorithm = input$OncoBN_algorithm,
+                        k = input$OncoBN_k
+                    ) 
+                    if(!is.na(input$OncoBN_epsilon)) oncobn_opts$epsilon <- input$OncoBN_epsilon
+
+                    mccbn_opts <- list(
+                        model = input$MCCBN_model,
+                        L = input$MCCBN_L,
+                        sampling = input$MCCBN_sampling,
+                        max.iter = input$MCCBN_max_iter,
+                        update.step.size = input$MCCBN_update_step_size,
+                        tol = input$MCCBN_tol,
+                        max.lambda.val = input$MCCBN_max_lambda_val,
+                        T0 = input$MCCBN_T0,
+                        adap.rate = input$MCCBN_adapt_rate,
+                        max.iter.asa = input$MCCBN_max_iter_asa,
+                        neighborhood.dist = input$MCCBN_neighborhood_dist
+                    )
+                    if(!is.na(input$MCCBN_seed)) mccbn_opts$seed <- input$MCCBN_seed
+                    if(!is.na(input$MCCBN_acceptance_rate)) mccbn_opts$acceptance.rate <-  input$MCCBN_acceptance_rate
+                    if(!is.na(input$MCCBN_step_size)) mccbn_opts$step.size <-  input$MCCBN_acceptance_rate
+                    if(input$MCCBN_adaptive == "TRUE"){
+                        mccbn_opts$adaptive <- TRUE
+                    } else mccbn_opts$adaptive <- FALSE
+
+                    data2run <- evamtools:::genotypeCounts_to_data(display_freqs(),
+                                                                   e = 0)
+                    
+                    progress$inc(1/5, detail = "Setting up data")
+                    Sys.sleep(0.5)
+                    progress$inc(2/5, detail = "Running CPMs")
+
+                    ## methods <- .ev_SHINY_dflt$cpms2run
+                    if (!is.null(input$cpm_methods)) {
+                        methods <- unique(input$cpm_methods)
+                    }
+                    
+                    
+                    cpm_output <- R.utils::withTimeout({evam(data2run
+                                                           , methods = methods
+                                                           , paths_max = input$return_paths_max
+                                                           , mhn_opts = mhn_opts
+                                                           , ot_opts = ot_opts
+                                                           , cbn_opts = cbn_opts
+                                                           , hesbcn_opts = hesbcn_opts
+                                                           , oncobn_opts = oncobn_opts
+                                                           , mccbn_opts = mccbn_opts)},
+                                                       elapsed = EVAM_MAX_ELAPSED, 
+                                                       timeout = EVAM_MAX_ELAPSED, 
+                                                       cpu = Inf,
+                                                       onTimeout = "silent")
+
+                    if (is.null(cpm_output)) stop("Error running evam. ",
+                                                  "Most likely you exceeded maximum ",
+                                                  "allowed time (EVAM_MAX_ELAPSED).")
+
+                    sampled_from_CPMs <- NULL
+                    do_sampling <- input$do_sampling == "TRUE"
+                    if (do_sampling) {
+                        n_samples <- input$sample_size
+                        if ((is.null(n_samples)) ||
+                            (!is.numeric(n_samples)) ||
+                            (n_samples < 100)) {
+                            n_samples <- .ev_SHINY_dflt$cpm_samples
+                        }
+                        progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
+                        ## if (input$do_genotype_transitions) {
+                        ##     ## disabled when removal_note_sogt_1
+                        ##     sout <- c("sampled")
+                        ## }
+                        
+                        sampled_from_CPMs <-
+                            sample_evam(cpm_output, N = n_samples, methods = methods,
+                                        output = "sampled_genotype_counts",
+                                        ## ## disabled when removal_note_sogt_1
+                                        ## if (input$do_genotype_transitions) { 
+                                        ##     c("sampled_genotype_counts",
+                                        ##       "obs_genotype_transitions")
+                                        ##                                } else {
+                                        ##           "sampled_genotype_counts"
+                                        ##       },
+                                        obs_noise = input$sample_noise)
+                    }
+                    
+                    progress$inc(4/5, detail = "Post processing data")
+                    Sys.sleep(0.5)
+
+                    orig_data <- list(data = data2run, name = data$name
+                                    , type = input$input2build, gene_names = data$gene_names
+                                    , thetas = data$thetas, lambdas = data$lambdas
+                                    , dag = data$dag, dag_parent_set = data$dag_parent_set)
+
+                    tabular_data <- evamtools:::create_tabular_data(c(cpm_output, sampled_from_CPMs))
+                    all_evam_output <- list("cpm_output" = c(cpm_output, sampled_from_CPMs)
+                                          , "orig_data" = orig_data
+                                          , "tabular_data" = tabular_data
+                                          , "do_sampling" = do_sampling
+                                            ) 
+
+                    ##CPM output name
+                    result_index <- length(grep(sprintf("^%s", input$select_csd),
+                                                names(all_cpm_out)))
+                    result_name <- ifelse(result_index == 0
+                                        , input$select_csd
+                                        , sprintf("%s__%s", input$select_csd, result_index))
+
+                    all_cpm_out[[result_name]] <- all_evam_output
+                    last_visited_cpm <<- result_name
+                    updateRadioButtons(session, "select_cpm", selected = result_name)
+                    progress$inc(5/5, detail = "You can see your result by going to the Results tab")
+                    Sys.sleep(1)
+                    shinyjs::enable("analysis")
+
+                    updateTabsetPanel(session, "navbar", selected = "result_viewer")
+                    updateRadioButtons(session, "select_cpm", selected = result_name)
+
+                }, error = function(e){
+                    showModal(dataModal(e[[1]]))
+                })
+            })
+
+            all_cpm_out <- reactiveValues()
+
+            ## To increase lag in the redrawing of output, change the number
+            ## Values less than 500 can break the app. Larger values might break
+            ## with complex plots. Deactivate this completely commenting the debounce
+            plot2show <- debounce(reactive({
+                input$cpm2show
+            }),  900)
+
+            ## ## No delay showing plots. 
+            ## plot2show <- reactive({
+            ##     input$cpm2show
+            ## })
+
             
-            ot_opts <- list()
-            if(input$OT_with_error == "TRUE"){
-                ot_opts$with_errors_dist_ot <- TRUE
-            } else ot_opts$with_errors_dist_ot <- FALSE
+            output$sims <- renderUI({
+                if ((length(names(all_cpm_out)) > 0) && (!is.null(input$select_cpm))) {
+                    tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
 
-            cbn_opts <- list(init_poset = input$CBN_init_poset,
-                             omp_threads = input$CBN_omp_threads)
-            hesbcn_opts <- list(
-                steps = input$HESBCN_steps,
-                reg = input$HESBCN_reg
-            ) 
-            if(!is.na(input$HESBCN_seed)) hesbcn_opts$seed <- input$HESBCN_seed
-
-            oncobn_opts <- list(
-                model = input$OncoBN_model,
-                algorithm = input$OncoBN_algorithm,
-                k = input$OncoBN_k
-            ) 
-            if(!is.na(input$OncoBN_epsilon)) oncobn_opts$epsilon <- input$OncoBN_epsilon
-
-            mccbn_opts <- list(
-                model = input$MCCBN_model,
-                L = input$MCCBN_L,
-                sampling = input$MCCBN_sampling,
-                max.iter = input$MCCBN_max_iter,
-                update.step.size = input$MCCBN_update_step_size,
-                tol = input$MCCBN_tol,
-                max.lambda.val = input$MCCBN_max_lambda_val,
-                T0 = input$MCCBN_T0,
-                adap.rate = input$MCCBN_adapt_rate,
-                max.iter.asa = input$MCCBN_max_iter_asa,
-                neighborhood.dist = input$MCCBN_neighborhood_dist
-            )
-            if(!is.na(input$MCCBN_seed)) mccbn_opts$seed <- input$MCCBN_seed
-            if(!is.na(input$MCCBN_acceptance_rate)) mccbn_opts$acceptance.rate <-  input$MCCBN_acceptance_rate
-            if(!is.na(input$MCCBN_step_size)) mccbn_opts$step.size <-  input$MCCBN_acceptance_rate
-            if(input$MCCBN_adaptive == "TRUE"){
-                mccbn_opts$adaptive <- TRUE
-            } else mccbn_opts$adaptive <- FALSE
-
-            data2run <- evamtools:::genotypeCounts_to_data(display_freqs(),
-                                                           e = 0)
-            
-            progress$inc(1/5, detail = "Setting up data")
-            Sys.sleep(0.5)
-            progress$inc(2/5, detail = "Running CPMs")
-
-            ## methods <- .ev_SHINY_dflt$cpms2run
-            if (!is.null(input$cpm_methods)) {
-                methods <- unique(input$cpm_methods)
-            }
-            
-            
-            cpm_output <- R.utils::withTimeout({evam(data2run
-                                                   , methods = methods
-                                                   , paths_max = input$return_paths_max
-                                                   , mhn_opts = mhn_opts
-                                                   , ot_opts = ot_opts
-                                                   , cbn_opts = cbn_opts
-                                                   , hesbcn_opts = hesbcn_opts
-                                                   , oncobn_opts = oncobn_opts
-                                                   , mccbn_opts = mccbn_opts)},
-                                               elapsed = EVAM_MAX_ELAPSED, 
-                                               timeout = EVAM_MAX_ELAPSED, 
-                                               cpu = Inf,
-                                               onTimeout = "silent")
-
-            if (is.null(cpm_output)) stop("Error running evam. ",
-                                          "Most likely you exceeded maximum ",
-                                          "allowed time (EVAM_MAX_ELAPSED).")
-
-            sampled_from_CPMs <- NULL
-            do_sampling <- input$do_sampling == "TRUE"
-            if (do_sampling) {
-                n_samples <- input$sample_size
-                if ((is.null(n_samples)) ||
-                    (!is.numeric(n_samples)) ||
-                    (n_samples < 100)) {
-                    n_samples <- .ev_SHINY_dflt$cpm_samples
-                }
-                progress$inc(3/5, detail = paste("Running ", n_samples, " samples"))
-                ## if (input$do_genotype_transitions) {
-                ##     ## disabled when removal_note_sogt_1
-                ##     sout <- c("sampled")
-                ## }
-                
-                sampled_from_CPMs <-
-                    sample_evam(cpm_output, N = n_samples, methods = methods,
-                                output = "sampled_genotype_counts",
-                                ## ## disabled when removal_note_sogt_1
-                                ## if (input$do_genotype_transitions) { 
-                                ##     c("sampled_genotype_counts",
-                                ##       "obs_genotype_transitions")
-                                ##                                } else {
-                                ##           "sampled_genotype_counts"
-                                ##       },
-                                obs_noise = input$sample_noise)
-            }
-            
-            progress$inc(4/5, detail = "Post processing data")
-            Sys.sleep(0.5)
-
-            orig_data <- list(data = data2run, name = data$name
-                            , type = input$input2build, gene_names = data$gene_names
-                            , thetas = data$thetas, lambdas = data$lambdas
-                            , dag = data$dag, dag_parent_set = data$dag_parent_set)
-
-            tabular_data <- evamtools:::create_tabular_data(c(cpm_output, sampled_from_CPMs))
-            all_evam_output <- list("cpm_output" = c(cpm_output, sampled_from_CPMs)
-                                  , "orig_data" = orig_data
-                                  , "tabular_data" = tabular_data
-                                  , "do_sampling" = do_sampling
-                                    ) 
-
-            ##CPM output name
-            result_index <- length(grep(sprintf("^%s", input$select_csd),
-                                        names(all_cpm_out)))
-            result_name <- ifelse(result_index == 0
-                                , input$select_csd
-                                , sprintf("%s__%s", input$select_csd, result_index))
-
-            all_cpm_out[[result_name]] <- all_evam_output
-            last_visited_cpm <<- result_name
-            updateRadioButtons(session, "select_cpm", selected = result_name)
-            progress$inc(5/5, detail = "You can see your result by going to the Results tab")
-            Sys.sleep(1)
-            shinyjs::enable("analysis")
-
-            updateTabsetPanel(session, "navbar", selected = "result_viewer")
-            updateRadioButtons(session, "select_cpm", selected = result_name)
-
-        }, error = function(e){
-            showModal(dataModal(e[[1]]))
-        })
-    })
-
-    all_cpm_out <- reactiveValues()
-
-    ## To increase lag in the redrawing of output, change the number
-    ## Values less than 500 can break the app. Larger values might break
-    ## with complex plots. Deactivate this completely commenting the debounce
-    plot2show <- debounce(reactive({
-        input$cpm2show
-    }),  900)
-
-    ## ## No delay showing plots. 
-    ## plot2show <- reactive({
-    ##     input$cpm2show
-    ## })
-
-    
-    output$sims <- renderUI({
-        if ((length(names(all_cpm_out)) > 0) && (!is.null(input$select_cpm))) {
-            tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
-
-            number_of_columns <- floor(12 /
-                                       ifelse(length(plot2show()) <=0, 1, length(plot2show())))
+                    number_of_columns <- floor(12 /
+                                               ifelse(length(plot2show()) <=0, 1, length(plot2show())))
                                         #    ifelse(length(input$cpm2show) <=4, 4, length(input$cpm2show)))
 
-            lapply(plot2show(), function(met){
-                method_data <- evamtools:::process_data(tmp_data, met,
-                                                        plot_type = "trans_mat")
-                output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
-                    pl <- evamtools:::plot_method(method_data$method_info
-                                                , method_data$parent_set
-                                                , method_data$edges
-                                                , met)
-                })
-                return(
-                    column(number_of_columns,
-                           plotOutput(sprintf("plot_sims_%s", met)))
-                )
-            })
-        }
-    })
-
-    
-
-    output$sims2 <- renderUI({
-        if ((length(names(all_cpm_out)) > 0)  && (!is.null(input$select_cpm))) {
-            tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
-            ## Enabling donwload button
-            shinyjs::enable(selector = "#download_cpm")
-
-            ## Main display
-            selected_plot_type <- input$data2plot
-
-            number_of_columns <- floor(12 /
-                                       ifelse(length(plot2show()) <=0, 1, length(plot2show())))
-            if(!(is.null(selected_plot_type))){
-                if(selected_plot_type %in% c("trans_mat", "trans_rate_mat")){
                     lapply(plot2show(), function(met){
                         method_data <- evamtools:::process_data(tmp_data, met,
-                                                                plot_type = selected_plot_type)
-                        output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
-                            pl <- evamtools:::plot_genot_fg(method_data$data2plot,
-                                        # We use it to define "Observed" and "Not Observed" genotypes
-                                                            observations = tmp_data$original_data, 
-                                                            sampled_counts = method_data$sampled_genotype_counts,
-                                                            top_paths = input$freq2label,
-                                                            label_type = input$label2plot,
-                                                            plot_type = selected_plot_type)
+                                                                plot_type = "trans_mat")
+                        output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
+                            pl <- evamtools:::plot_method(method_data$method_info
+                                                        , method_data$parent_set
+                                                        , method_data$edges
+                                                        , met)
                         })
                         return(
                             column(number_of_columns,
-                                   plotOutput(sprintf("plot_sims2_%s", met)))
+                                   plotOutput(sprintf("plot_sims_%s", met)))
                         )
                     })
-                } else if(selected_plot_type %in% c("predicted_genotype_freqs", "sampled_genotype_counts")){
-                    lapply(plot2show(), function(met){
-                        method_data <- evamtools:::process_data(tmp_data, met,
-                                                                plot_type = selected_plot_type)$data2plot
+                }
+            })
 
-                        if(selected_plot_type %in% c("predicted_genotype_freqs")){
-                            data2plot <- data.frame("Genotype" = names(method_data), 
-                                                    "Freq" = as.vector(method_data))
+            
 
-                        }
-                        if(selected_plot_type %in% c("sampled_genotype_counts")){
-                            data2plot <- data.frame("Genotype" = names(method_data), 
-                                                    "Counts" = as.vector(method_data))
-                        }
+            output$sims2 <- renderUI({
+                if ((length(names(all_cpm_out)) > 0)  && (!is.null(input$select_cpm))) {
+                    tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
+                    ## Enabling donwload button
+                    shinyjs::enable(selector = "#download_cpm")
+
+                    ## Main display
+                    selected_plot_type <- input$data2plot
+
+                    number_of_columns <- floor(12 /
+                                               ifelse(length(plot2show()) <=0, 1, length(plot2show())))
+                    if(!(is.null(selected_plot_type))){
+                        if(selected_plot_type %in% c("trans_mat", "trans_rate_mat")){
+                            lapply(plot2show(), function(met){
+                                method_data <- evamtools:::process_data(tmp_data, met,
+                                                                        plot_type = selected_plot_type)
+                                output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
+                                    pl <- evamtools:::plot_genot_fg(method_data$data2plot,
+                                        # We use it to define "Observed" and "Not Observed" genotypes
+                                                                    observations = tmp_data$original_data, 
+                                                                    sampled_counts = method_data$sampled_genotype_counts,
+                                                                    top_paths = input$freq2label,
+                                                                    label_type = input$label2plot,
+                                                                    plot_type = selected_plot_type)
+                                })
+                                return(
+                                    column(number_of_columns,
+                                           plotOutput(sprintf("plot_sims2_%s", met)))
+                                )
+                            })
+                        } else if(selected_plot_type %in% c("predicted_genotype_freqs", "sampled_genotype_counts")){
+                            lapply(plot2show(), function(met){
+                                method_data <- evamtools:::process_data(tmp_data, met,
+                                                                        plot_type = selected_plot_type)$data2plot
+
+                                if(selected_plot_type %in% c("predicted_genotype_freqs")){
+                                    data2plot <- data.frame("Genotype" = names(method_data), 
+                                                            "Freq" = as.vector(method_data))
+
+                                }
+                                if(selected_plot_type %in% c("sampled_genotype_counts")){
+                                    data2plot <- data.frame("Genotype" = names(method_data), 
+                                                            "Counts" = as.vector(method_data))
+                                }
                                         # output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
                                         #     pl <- evamtools:::plot_genot_fg(method_data$data2plot,
                                         #                                     observations = tmp_data$original_data, # We use it to define "Observed" and "Not Observed" genotypes
@@ -1639,221 +1668,221 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                         #                                     label_type = input$label2plot,
                                         #                                     plot_type = selected_plot_type)
                                         # , freq2label = input$freq2label)
-                        output[[sprintf("plot_sims2_%s", met)]] <- renderPlot(
-                            pl <- evamtools:::plot_genotype_counts(data2plot)
-                        )
-                        return(
-                            column(number_of_columns,
-                                   plotOutput(sprintf("plot_sims2_%s", met)))
-                        )
-                    })
-                    } 
-            } else {
-                ## Disabling donwload button
-                shinyjs::disable(selector = "#download_cpm")
+                                output[[sprintf("plot_sims2_%s", met)]] <- renderPlot(
+                                    pl <- evamtools:::plot_genotype_counts(data2plot)
+                                )
+                                return(
+                                    column(number_of_columns,
+                                           plotOutput(sprintf("plot_sims2_%s", met)))
+                                )
+                            })
+                        } 
+                    } else {
+                        ## Disabling donwload button
+                        shinyjs::disable(selector = "#download_cpm")
 
-                return(tags$h3("There are not results to show yet. Go to the input tab, select a dataset and hit the 'Run evamtools' button"))
-            }
-        }
-    })
+                        return(tags$h3("There are not results to show yet. Go to the input tab, select a dataset and hit the 'Run evamtools' button"))
+                    }
+                }
+            })
 
-    ## Go back to input to work again with the data
-    observeEvent(input$modify_data, {
-        tryCatch({
-            if(length(all_cpm_out) > 0){
-                tmp_data <- all_cpm_out[[input$select_cpm]]$orig_data
-                dataset_name <- strsplit(input$select_cpm, "__")[[1]][[1]]
-                dataset_type <- tmp_data$type
-                last_visited_pages[[tmp_data$type]] <<- dataset_name
-                tmp_data <- datasets$all_csd[[tmp_data$type]][[dataset_name]] <- evamtools:::to_stnd_csd_dataset(tmp_data)
+            ## Go back to input to work again with the data
+            observeEvent(input$modify_data, {
+                tryCatch({
+                    if(length(all_cpm_out) > 0){
+                        tmp_data <- all_cpm_out[[input$select_cpm]]$orig_data
+                        dataset_name <- strsplit(input$select_cpm, "__")[[1]][[1]]
+                        dataset_type <- tmp_data$type
+                        last_visited_pages[[tmp_data$type]] <<- dataset_name
+                        tmp_data <- datasets$all_csd[[tmp_data$type]][[dataset_name]] <- evamtools:::to_stnd_csd_dataset(tmp_data)
 
-                data <- tmp_data
-                data$csd_counts <- evamtools:::get_csd(tmp_data$data)
-                data$n_genes <- ncol(data$data)
+                        data <- tmp_data
+                        data$csd_counts <- evamtools:::get_csd(tmp_data$data)
+                        data$n_genes <- ncol(data$data)
 
-                updateNumericInput(session, "gene_number", value = data$n_genes)
-                updateTabsetPanel(session, "navbar",
-                                  selected = "csd_builder")
-                updateRadioButtons(session, "input2build", selected = dataset_type)
-                updateRadioButtons(session, "select_csd", selected = dataset_name)
-            }
-        }, error = function(e){
-            showModal(dataModal(e[[1]]))
-        })
-    })
-
-
-    output$customize <- renderUI({
-        do_sampling <- tryCatch({
-            sampling <- ifelse(
-                is.null(all_cpm_out[[input$select_cpm]]$do_sampling), FALSE, 
-                all_cpm_out[[input$select_cpm]]$do_sampling)
-            sampling
-        }, error = function(e){
-            return(FALSE)
-        })
+                        updateNumericInput(session, "gene_number", value = data$n_genes)
+                        updateTabsetPanel(session, "navbar",
+                                          selected = "csd_builder")
+                        updateRadioButtons(session, "input2build", selected = dataset_type)
+                        updateRadioButtons(session, "select_csd", selected = dataset_name)
+                    }
+                }, error = function(e){
+                    showModal(dataModal(e[[1]]))
+                })
+            })
 
 
-        ## The other thing would be to always show the 4 options and that's it
-        tagList(
-            tags$div(class = "frame",
-                     tags$h3("Customize the visualization"),
-                     tags$div(class = "inline",
-                              checkboxGroupInput(inputId = "cpm2show",
-                                                 label = "CPMs to show",
-                                                 choices = c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
-                                                 selected = c("OT", "OncoBN", "CBN", "MHN")),
+            output$customize <- renderUI({
+                do_sampling <- tryCatch({
+                    sampling <- ifelse(
+                        is.null(all_cpm_out[[input$select_cpm]]$do_sampling), FALSE, 
+                        all_cpm_out[[input$select_cpm]]$do_sampling)
+                    sampling
+                }, error = function(e){
+                    return(FALSE)
+                })
 
-                              tags$div(class = "inline",
-                                       radioButtons(inputId = "data2plot",
-                                                    label = "Data to show",
-                                                    choiceNames = 
-                                                        if (do_sampling) {
-                                                            c("Transition probabilities", 
-                                                              "Transition Rate Matrix",
-                                                              "Predicted genotype relative frequencies",
-                                                              "Sampled genotype counts")
-                                                        } else {         
-                                                            c("Transition probabilities", 
-                                                              "Transition Rate Matrix",
-                                                              "Predicted genotype relative frequencies")
-                                                        }
-                                                   ,
-                                                    choiceValues = 
-                                                        if (do_sampling) {
-                                                            c("trans_mat", 
-                                                              "trans_rate_mat",
-                                                              "predicted_genotype_freqs",
-                                                              "sampled_genotype_counts")
-                                                        } else {
-                                                            c("trans_mat", 
-                                                              "trans_rate_mat",
-                                                              "predicted_genotype_freqs")
-                                                        }
-                                                   ,
-                                                    selected = "trans_mat"
-                                                    )
-                                       ),
-                              tags$div(class = "inline",
-                                       radioButtons(inputId = "label2plot",
-                                                    label = "Type of label",
-                                                    choiceNames =  c("Genotype", "Last gene mutated"),
-                                                    choiceValues = c("genotype", "acquisition"),
-                                                    selected = "genotype"
-                                                    )
-                                       ),
-                              ),
 
-                     tags$p(HTML("<strong>Number of most relevant paths to show</strong> "),
-                            "(set it to 0 to show all paths or ",
-                            "all genotype labels):"),
-                     tags$div(id="freq2label-wrap",
-                              sliderInput("freq2label", "", width = "500px",
-                                          value = 5, max = 10, min = 0, step = 1)
-                              )
-                     )
-        )
-    })
+                ## The other thing would be to always show the 4 options and that's it
+                tagList(
+                    tags$div(class = "frame",
+                             tags$h3("Customize the visualization"),
+                             tags$div(class = "inline",
+                                      checkboxGroupInput(inputId = "cpm2show",
+                                                         label = "CPMs to show",
+                                                         choices = c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
+                                                         selected = c("OT", "OncoBN", "CBN", "MHN")),
 
-    output$cpm_list <- renderUI({
-        all_names <- c()
-        for (i in names(all_cpm_out)) {
-            all_names <- c(all_names, all_cpm_out[[i]]$orig_data$name)
-        }
+                                      tags$div(class = "inline",
+                                               radioButtons(inputId = "data2plot",
+                                                            label = "Data to show",
+                                                            choiceNames = 
+                                                                if (do_sampling) {
+                                                                    c("Transition probabilities", 
+                                                                      "Transition Rate Matrix",
+                                                                      "Predicted genotype relative frequencies",
+                                                                      "Sampled genotype counts")
+                                                                } else {         
+                                                                    c("Transition probabilities", 
+                                                                      "Transition Rate Matrix",
+                                                                      "Predicted genotype relative frequencies")
+                                                                }
+                                                           ,
+                                                            choiceValues = 
+                                                                if (do_sampling) {
+                                                                    c("trans_mat", 
+                                                                      "trans_rate_mat",
+                                                                      "predicted_genotype_freqs",
+                                                                      "sampled_genotype_counts")
+                                                                } else {
+                                                                    c("trans_mat", 
+                                                                      "trans_rate_mat",
+                                                                      "predicted_genotype_freqs")
+                                                                }
+                                                           ,
+                                                            selected = "trans_mat"
+                                                            )
+                                               ),
+                                      tags$div(class = "inline",
+                                               radioButtons(inputId = "label2plot",
+                                                            label = "Type of label",
+                                                            choiceNames =  c("Genotype", "Last gene mutated"),
+                                                            choiceValues = c("genotype", "acquisition"),
+                                                            selected = "genotype"
+                                                            )
+                                               ),
+                                      ),
 
-        if ((length(all_names) > 0) && (last_visited_cpm != "")) {
-            selected <- names(all_cpm_out)
-            
-            tagList(
-                radioButtons(
-                    inputId = "select_cpm",
-                    label = "",
-                    selected = last_visited_cpm,
-                    choiceNames = names(all_cpm_out),
-                    choiceValues = names(all_cpm_out)
+                             tags$p(HTML("<strong>Number of most relevant paths to show</strong> "),
+                                    "(set it to 0 to show all paths or ",
+                                    "all genotype labels):"),
+                             tags$div(id="freq2label-wrap",
+                                      sliderInput("freq2label", "", width = "500px",
+                                                  value = 5, max = 10, min = 0, step = 1)
+                                      )
+                             )
                 )
+            })
+
+            output$cpm_list <- renderUI({
+                all_names <- c()
+                for (i in names(all_cpm_out)) {
+                    all_names <- c(all_names, all_cpm_out[[i]]$orig_data$name)
+                }
+
+                if ((length(all_names) > 0) && (last_visited_cpm != "")) {
+                    selected <- names(all_cpm_out)
+                    
+                    tagList(
+                        radioButtons(
+                            inputId = "select_cpm",
+                            label = "",
+                            selected = last_visited_cpm,
+                            choiceNames = names(all_cpm_out),
+                            choiceValues = names(all_cpm_out)
+                        )
+                    )
+                }
+            })
+
+            ## FIXME zzplyt
+            ## output$csd <- renderPlot({
+            ##     evamtools:::plot_genotype_counts(evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data))
+            ## })
+
+            ## FIXME zzply
+            ## output$original_data <- renderUI({
+            ##     ## To see if I disable original data
+            ##     if(length(names(all_cpm_out)) > 0){
+            ##         tags$div(class="frame max_height",
+            ##                  tags$h3("Original data"),
+            ##                  plotOutput("csd"),
+            ##                  tags$div(class = "download_button",
+            ##                           actionButton("modify_data", "Modify data")
+            ##                           )
+            ##                  )
+            ##     }
+            ## })
+
+
+            output$original_data <- renderUI({
+                ## To see if I disable original data        
+                if (length(names(all_cpm_out)) > 0) {
+                    tags$div(class="frame max_height",
+                             tags$h3("Original data"),
+                             plotly::renderPlotly(
+                                         evamtools:::plot_genotype_counts_plly(
+                                                         evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data))
+                                     ),
+                             tags$div(class = "download_button",
+                                      actionButton("modify_data", "Modify data")
+                                      )
+                             )
+                }
+            })
+            
+            output$cpm_freqs <- DT::renderDT(all_cpm_out[[input$select_cpm]]$tabular_data[[input$data2plot]],
+                                             selection = 'none', server = TRUE
+                                           , rownames = FALSE
+                                           , options = list(
+                                                 columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE)
+                                             )
+
+            output$tabular_data <- renderUI({
+                if(length(names(all_cpm_out)) > 0){
+                    tags$div(class="frame max_height",
+                             tags$h3("Tabular output"),
+                                        #  radioButtons(inputId = "tabular_data2show",
+                                        #               label = "",
+                                        #               inline = TRUE,
+                                        #               choiceNames =  c( "Transition probabilities",
+                                        #                                "Transition rates",
+                                        #                                "Predicted genotype relative frequencies",
+                                        #                                "Sampled genotype counts",
+                                        #                                "Observed genotype transitions (counts)"
+                                        #                                ),
+                                        #               choiceValues =  c("trans_mat",
+                                        #                                 "trans_rate_mat",
+                                        #                                 "predicted_genotype_freqs",
+                                        #                                 "sampled_genotype_counts",
+                                        #                                 "obs_genotype_transitions"),
+                                        #               selected = "trans_mat"
+                                        #               ),
+                             tags$div(
+                                      DT::DTOutput("cpm_freqs")
+                                  )
+                             )
+                }
+            })
+
+            ## Download button
+            output$download_cpm <- downloadHandler(
+                filename = function() sprintf("%s_cpm.RDS", input$select_cpm),
+                content = function(file) {
+                    saveRDS(all_cpm_out[[input$select_cpm]][c("cpm_output", "tabular_data")],
+                            file)
+                }
             )
-        }
-    })
-
-    ## FIXME zzplyt
-    ## output$csd <- renderPlot({
-    ##     evamtools:::plot_genotype_counts(evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data))
-    ## })
-
-    ## FIXME zzply
-    ## output$original_data <- renderUI({
-    ##     ## To see if I disable original data
-    ##     if(length(names(all_cpm_out)) > 0){
-    ##         tags$div(class="frame max_height",
-    ##                  tags$h3("Original data"),
-    ##                  plotOutput("csd"),
-    ##                  tags$div(class = "download_button",
-    ##                           actionButton("modify_data", "Modify data")
-    ##                           )
-    ##                  )
-    ##     }
-    ## })
-
-
-    output$original_data <- renderUI({
-        ## To see if I disable original data        
-        if (length(names(all_cpm_out)) > 0) {
-            tags$div(class="frame max_height",
-                     tags$h3("Original data"),
-                     plotly::renderPlotly(
-                                 evamtools:::plot_genotype_counts_plly(
-                                                 evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data))
-                             ),
-                     tags$div(class = "download_button",
-                              actionButton("modify_data", "Modify data")
-                              )
-                     )
-        }
-    })
-    
-    output$cpm_freqs <- DT::renderDT(all_cpm_out[[input$select_cpm]]$tabular_data[[input$data2plot]],
-                                     selection = 'none', server = TRUE
-                                   , rownames = FALSE
-                                   , options = list(
-                                         columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE)
-                                     )
-
-    output$tabular_data <- renderUI({
-        if(length(names(all_cpm_out)) > 0){
-            tags$div(class="frame max_height",
-                     tags$h3("Tabular output"),
-                    #  radioButtons(inputId = "tabular_data2show",
-                    #               label = "",
-                    #               inline = TRUE,
-                    #               choiceNames =  c( "Transition probabilities",
-                    #                                "Transition rates",
-                    #                                "Predicted genotype relative frequencies",
-                    #                                "Sampled genotype counts",
-                    #                                "Observed genotype transitions (counts)"
-                    #                                ),
-                    #               choiceValues =  c("trans_mat",
-                    #                                 "trans_rate_mat",
-                    #                                 "predicted_genotype_freqs",
-                    #                                 "sampled_genotype_counts",
-                    #                                 "obs_genotype_transitions"),
-                    #               selected = "trans_mat"
-                    #               ),
-                     tags$div(
-                              DT::DTOutput("cpm_freqs")
-                          )
-                     )
-        }
-    })
-
-    ## Download button
-    output$download_cpm <- downloadHandler(
-        filename = function() sprintf("%s_cpm.RDS", input$select_cpm),
-        content = function(file) {
-            saveRDS(all_cpm_out[[input$select_cpm]][c("cpm_output", "tabular_data")],
-                    file)
-        }
-    )
 }
 
 
