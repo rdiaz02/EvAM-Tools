@@ -743,7 +743,7 @@ user_input <- function() {
                                                           selected = FALSE),
                                               tags$h5("(Paths to the maximum/maxima and their ",
                                                       " probabilities. ",
-                                                      "These are not part of the tabular output ",
+                                                      "These are not part of the tabular or graphical output ",
                                                       "(because of their possibly huge number) ",
                                                       "but if requested are included in the result object ",
                                                       "you can download)"),

@@ -68,6 +68,8 @@ random_dataset_name <- function() {
           collapse = "")
 }
 
+
+
 server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     require(evamtools)
     
@@ -1732,19 +1734,21 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                          label = "CPMs to show",
                                                          choices = c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
                                                          selected = c("OT", "OncoBN", "CBN", "MHN")),
-
+                                      tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
+                                      tags$h4(HTML("<br/>")),
                                       tags$div(class = "inline",
                                                radioButtons(inputId = "data2plot",
-                                                            label = "Data to show",
+                                                            label = HTML("Predictions from models to display",
+                                                                         "<h5>(This output is also displayed in tabular form on the bottom right.)</h5>"),
                                                             choiceNames = 
                                                                 if (do_sampling) {
                                                                     c("Transition probabilities", 
-                                                                      "Transition Rate Matrix",
+                                                                      "Transition rates",
                                                                       "Predicted genotype relative frequencies",
                                                                       "Sampled genotype counts")
                                                                 } else {         
                                                                     c("Transition probabilities", 
-                                                                      "Transition Rate Matrix",
+                                                                      "Transition rates",
                                                                       "Predicted genotype relative frequencies")
                                                                 }
                                                            ,
@@ -1763,16 +1767,19 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                             selected = "trans_mat"
                                                             )
                                                ),
+                                      tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
+                                      tags$h4(HTML("<br/>")),
                                       tags$div(class = "inline",
                                                radioButtons(inputId = "label2plot",
-                                                            label = "Type of label",
+                                                            label = HTML("Type of label<h5>(for transition [rate] plots).</h5>"),
                                                             choiceNames =  c("Genotype", "Last gene mutated"),
                                                             choiceValues = c("genotype", "acquisition"),
                                                             selected = "genotype"
                                                             )
                                                ),
                                       ),
-
+                             tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
+                             tags$h4(HTML("<br/>")),
                              tags$p(HTML("<strong>Number of most relevant paths to show</strong> "),
                                     "(set it to 0 to show all paths or ",
                                     "all genotype labels):"),
@@ -1849,9 +1856,19 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                              )
 
             output$tabular_data <- renderUI({
-                if(length(names(all_cpm_out)) > 0){
+                if (length(names(all_cpm_out)) > 0) {
                     tags$div(class="frame max_height",
-                             tags$h3("Tabular output"),
+                             tags$h3(paste("Tabular output of predictions from models: ",
+                                           switch(input$data2plot,
+                                                  "trans_mat" = "Transition probabilities.",
+                                                  "trans_rate_mat" = "Transition rates.",
+                                                  "predicted_genotype_freqs" = "Predicted genotype relative frequencies.",
+                                                  "sampled_genotype_counts" = "Sampled genotype counts.",
+                                                  "Not a valid input$data2plot"
+                                                  ))),
+                             tags$h4("(This output is also displayed as the second row of figures. ",
+                                     "Choose the output to display from the left radio buttons ",
+                                     "'Predictions from models to display')"),
                                         #  radioButtons(inputId = "tabular_data2show",
                                         #               label = "",
                                         #               inline = TRUE,
