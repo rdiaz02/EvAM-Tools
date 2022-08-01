@@ -529,7 +529,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                value = paste(data$gene_names[1:input$gene_number],
                                              collapse = ", ")
                                ),
-                     tags$h3(HTML("<br/>")),
+                     tags$h4(HTML("<br/>")),
                      tags$h4("Separate you gene names with a ','. ",
                              "Do no use 'WT' for any gene name. ",
                              "Use only alphanumeric characters ",
@@ -1190,10 +1190,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             "Single and OR ",
                             "(and terms not among Single, AND, OR ",
                             "will be converted to ORs).",
-                            "H-ESBCN, CBN models can be specified with ",
+                            "'CBN/H-ESBCN' models can be specified with ",
                             "AND, OR, XOR, Single, or combinations of the above ",
                             "(and terms not among Single, AND, OR, XOR ",
-                            "will be converted to ANDs). ",
+                            "will be converted to ANDs)[1]. ",
                             "Edit the cell's content and press Ctrl+Enter. ",
                             "All incoming edges to a node must have the same ",
                             "Relation (the program will force this)."),
@@ -1204,7 +1204,20 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$p("After the sample is generated for the first time, ",
                             "the sample should be generated again automatically ",
                             "whenever you change the model ",
-                            "(add or remove edges, change lambdas, etc).")
+                            "(add or remove edges, change lambdas, etc) ",
+                            "if you hit Ctrl-Enter after you are done editing ",
+                            "the DAG table."),
+                     tags$h3(HTML("<br/>")),
+                     tags$p(HTML("<h5>[1] The models fitted by CBN contain only ANDs, but the ",
+                                 "specification of a model for data simulation from H-ESBCN and CBN is ",
+                                 "the same, except for the type of relationship; ",
+                                 "both H-ESBCN and CBN can contain ANDs, but ",
+                                 "only H-ESBCN can contain ORs and XORs. ",
+                                 "In both cases, the DAG specification is used to ",
+                                 "obtain the transition rate matrix ",
+                                 "that respects the encoded AND/OR/XOR.",
+                                 "The data are generated from this ",
+                                 "transition rate matrix.</h5>"))
                  )
         )
         )
