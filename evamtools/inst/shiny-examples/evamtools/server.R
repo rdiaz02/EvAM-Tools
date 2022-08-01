@@ -759,7 +759,23 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   tags$h3(HTML("<br/>")),
                                   actionButton("resample_dag", "Sample from DAG"),
                                   actionButton("clear_dag", "Reset DAG and delete genotype data"),
-                                  )
+                                  shinyBS::bsTooltip("clear_dag",
+                                                     paste("Resetting the DAG will replace the ",
+                                                           "contents of the named object by ",
+                                                           "those of the default one ",
+                                                           "(a three-gene fork with lambdas = 0.5)"),
+                                                     "right", options = list(container = "body")
+                                                     )
+                                  ## |> prompter::add_prompt(
+                                  ##                  position = "right",
+                                  ##                  message =
+                                  ##                      paste("Resetting the DAG will replace the ",
+                                  ##                            "contents of the named object by ",
+                                  ##                            "those of the default one ",
+                                  ##                            "(a three-gene fork with lambdas = 0.5)"),
+                                  ##                  bounce = TRUE
+                                  ##              )
+                              )
                      }
                  )
         } else if (input$input2build == "matrix") {
@@ -793,7 +809,24 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   tags$h3(HTML("<br/>")),
                                   actionButton("resample_mhn", "Sample from MHN"),
                                   actionButton("clear_mhn",
-                                               HTML("Reset log-&Theta; matrix and delete genotype data"))
+                                               HTML("Reset log-&Theta; matrix and delete genotype data")),
+                                  shinyBS::bsTooltip("clear_mhn",
+                                                     HTML("Resetting the log-&Theta; matrix will replace the ",
+                                                          "contents of the named object by ",
+                                                          "those of the default one ",
+                                                          "(a three-gene matrix filled with 0s)."),
+                                                     "right", options = list(container = "body")
+                                                     )
+                                  ## Prompter does not render the "log-&Theta"
+                                  ## |> prompter::add_prompt(
+                                  ##                  position = "right",
+                                  ##                  message = "the log-&Theta; matrix",
+                                  ##                  ## HTML("Resetting the log-&Theta; matrix will replace the ",
+                                  ##                  ##      "contents of the named object by ",
+                                  ##                  ##      "those of the default one ",
+                                  ##                  ##      "(a three-gene matrix filled with 0s)."),
+                                  ##                  bounce = TRUE
+                                  ##              )
                               )
                      }
                  )
