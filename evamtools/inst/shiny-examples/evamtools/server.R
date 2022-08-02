@@ -615,7 +615,27 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         })
     })
 
-   
+    observeEvent(input$display_help_change_genotype_counts, {
+        showModal(modalDialog(
+            easyClose = TRUE,
+            title = tags$h3("Changing genotype's counts"),
+            tags$div(
+                     tags$p("1. Double click in a Counts cell to edit it"),
+                     tags$p("2. Press Tab to move to the next row"),
+                     tags$p("3. Use Ctrl + Enter to save changes"),
+                     tags$p("4. Set a frequency to 0 to remove a genotype"),
+                     tags$p("5. Type in the Search bar to filter genotypes"),
+                     tags$h4(HTML("<br/>")),
+                     tags$p("Genotypes with count 0 are removed from the table. ",
+                            "Thus, if you remove a genotype when editing ",
+                            "genotype's counts in the DAG, MHN, or Upload data ",
+                            "entries, you will need to regenerate the data ",
+                            "to be able to modify those genotypes again.")
+                 )
+        )
+        )
+    })
+
 
     ## Updating gene names
     observeEvent(input$action_gene_names,{
@@ -693,27 +713,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         })
     })
 
-    observeEvent(input$display_help_change_genotype_counts, {
-        showModal(modalDialog(
-            easyClose = TRUE,
-            title = tags$h3("Changing genotype's counts"),
-            tags$div(
-                     tags$p("1. Double click in a Counts cell to edit it"),
-                     tags$p("2. Press Tab to move to the next row"),
-                     tags$p("3. Use Ctrl + Enter to save changes"),
-                     tags$p("4. Set a frequency to 0 to remove a genotype"),
-                     tags$p("5. Type in the Search bar to filter genotypes"),
-                     tags$h4(HTML("<br/>")),
-                     tags$p("Genotypes with count 0 are removed from the table. ",
-                            "Thus, if you remove a genotype when editing ",
-                            "genotype's counts in the DAG, MHN, or Upload data ",
-                            "entries, you will need to regenerate the data ",
-                            "to be able to modify those genotypes again.")
-                 )
-        )
-        )
-    })
-
+ 
     ## Advanced option for running evamtools
     observeEvent(input$advanced_options, {
         shinyjs::toggle("all_advanced_options")
