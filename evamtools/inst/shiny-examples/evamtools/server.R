@@ -1953,7 +1953,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         })
 
 
-        ## The other thing would be to always show the 4 options and that's it
         tagList(
             tags$div(class = "frame",
                      tags$h3("Customize the visualization"),
@@ -1961,7 +1960,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               checkboxGroupInput(inputId = "cpm2show",
                                                  label = "CPMs to show",
                                                  choices = c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
-                                                 selected = c("OT", "OncoBN", "CBN", "MHN")),
+                                                 selected = input$cpm_methods),
                               tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
                               tags$h4(HTML("<br/>")),
                               tags$div(class = "inline",
