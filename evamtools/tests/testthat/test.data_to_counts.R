@@ -2,6 +2,8 @@ t1 <- Sys.time()
 
 
 test_that("data_to_counts correct output, including WT", {
+
+    m00 <- matrix(nrow = 12, ncol = 0)
     m0_2c <- matrix(0, nrow = 4, ncol = 2)
     m0_2c_named <- m0_2c
     colnames(m0_2c_named) <- c("cucu", "coco")
@@ -18,6 +20,7 @@ test_that("data_to_counts correct output, including WT", {
     out_both <- c(3, 1)
     names(out_both) <- c("WT", "aei")
 
+    expect_equal(data_to_counts(m00, "vector"), out_wt)
     expect_equal(data_to_counts(m0_2c, "vector"), out_wt)
     expect_equal(data_to_counts(m0_1c, "vector"), out_wt)
     expect_equal(data_to_counts(m0_2c_named, "vector"), out_wt)
