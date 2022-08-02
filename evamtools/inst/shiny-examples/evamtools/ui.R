@@ -650,43 +650,13 @@ user_input <- function() {
                     #  titlePanel(HTML("&ensp; Cross-sectional data input")),
                      column(width = 6,
                             column(width = 12,
-                                   ## Upload
-                                  #  tags$div(class = "frame",
-                                            # tags$h3(" Define your data interactively"),
-                                            ## Save/Download/Rename/Use
-                                            # tags$div(class = "frame",
-                                                    #  tags$h3("(Re)name the data"),
-                                                    #  tags$h5(HTML("Give the modified data a name ",
-                                                    #               "that will also be used to save the CPM ",
-                                                    #               "output.")),
-                                                    #  tags$div(class = "download_button",
-                                                    #           ),
-                                                     uiOutput("dataset_name"),
-                                                    #  actionButton("save_csd_data", "Use this name"),
-                                                    #  ),
-                                            
-                                            # tags$div(class = "frame",
-                                                    #  uiOutput("upload_data"),
-                                                    #  tags$div(class = "flex",
-                                                    #           tags$h3("1. Set the number of genes"),
-                                                    #           tags$h5("(Using 7 or more genes can lead ",
-                                                    #                   "to very long execution times for some methods ",
-                                                    #                   "and crowded figures.)"),
-                                                    #           actionButton("change_gene_names", "Change gene names")
-                                                              
-                                                    #           ),
-                                                     uiOutput("gene_number_slider"),
-                                                    #  ),
-                                            tags$div(class = "frame",
-                                                     uiOutput("define_genotype"),
-                                                     ),
-                                            uiOutput("change_counts"),
-
-                                            uiOutput("download_data")
-
-                                          
-                                            # )
-
+                                   uiOutput("dataset_name"),
+                                   uiOutput("gene_number_slider"),
+                                   tags$div(class = "frame",
+                                            uiOutput("define_genotype"),
+                                            ),
+                                   uiOutput("change_counts"),
+                                   uiOutput("download_data")
                                    )
                             ), 
                      column(width = 6,

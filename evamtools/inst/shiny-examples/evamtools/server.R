@@ -298,7 +298,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      textInput(inputId = "dataset_name",
                                "Give your dataset a name",
                                value = random_dataset_name()
-                               ## value = input$select_csd
                                ),
                      actionButton("save_csd_data", "Use this name")
                      )
@@ -616,30 +615,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         })
     })
 
-    observeEvent(input$change_gene_names, {
-        showModal(modalDialog(
-            title = tags$h3("Change gene names"),
-            tags$div(class = "inlin2",
-                     textInput(inputId = "new_gene_names", "Gene names",
-                               value = paste(data$gene_names[1:input$gene_number],
-                                             collapse = ", ")
-                               ),
-                     tags$h4(HTML("<br/>")),
-                     tags$h4("Separate you gene names with a ','. ",
-                             "Do no use 'WT' for any gene name. ",
-                             "Use only alphanumeric characters ",
-                             "(of course, do not use comma as part of a gene name), ",
-                             "and do not start ",
-                             "a gene name with a number; ",
-                             "keep gene names short (for figures)."
-                             ),
-                     tags$div(class = "download_button",
-                              actionButton("action_gene_names", "Change genes names"),
-                              )
-                     ),
-            easyClose = TRUE
-        ))
-    })
+   
 
     ## Updating gene names
     observeEvent(input$action_gene_names,{
@@ -754,18 +730,46 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$h5("(Using 7 or more genes can lead ",
                              "to very long execution times for some methods ",
                              "and crowded figures.)"),
-                     actionButton("change_gene_names", "Change gene names"),
-                     
+                                        
                      tags$div(class="inlin",
                               tags$h3(HTML("<br/>")),
                               sliderInput("gene_number", "Number of genes",
                                           value = val, max = max_genes, min = min_genes,
                                           step = 1)
-                              )
+                              ),
+                     tags$h4(HTML("<br/>")),
+                     actionButton("change_gene_names", "Change gene names"),
                      )
         }
     })
 
+    observeEvent(input$change_gene_names, {
+        showModal(modalDialog(
+            title = tags$h3("Change gene names"),
+            tags$div(class = "inlin2",
+                     textInput(inputId = "new_gene_names", "Gene names",
+                               value = paste(data$gene_names[1:input$gene_number],
+                                             collapse = ", ")
+                               ),
+                     tags$h4(HTML("<br/>")),
+                     tags$h4("Separate you gene names with a ','. ",
+                             "Do no use 'WT' for any gene name. ",
+                             "Use only alphanumeric characters ",
+                             "(of course, do not use comma as part of a gene name), ",
+                             "and do not start ",
+                             "a gene name with a number; ",
+                             "keep gene names short (for figures)."
+                             ),
+                     tags$h4(HTML("<br/>")),
+                     tags$div(class = "download_button",
+                              tags$h4(HTML("<br/>")),
+                              actionButton("action_gene_names", "Change genes names"),
+                              )
+                     ),
+            easyClose = TRUE
+        ))
+    })
+    
     ## Define new genotype
     observeEvent(input$dag_model, {
         number_of_parents <- colSums(data$dag)
