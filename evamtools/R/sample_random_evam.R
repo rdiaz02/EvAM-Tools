@@ -1349,32 +1349,45 @@ genotypeCounts_to_data <- function(x, e) {
 ## data: 0/1 data, in a data.frame or matrix
 ## out: one of vector or data.frame
 ## omit_0: if genotypes with 0 counts should be omitted
+##         note that many genotypes will always be omitted
+##         e.g., if one of the columns has no entries with a 1,
+##         no genotypes with that name are displayed even with omit_0 = FALSE.
 data_to_counts <- function(data, out,
                            omit_0 = FALSE) {
     stopifnot(out %in% c("vector", "data.frame"))
-
     if (is.data.frame(data)) data <- data.matrix(data)
 
-    stopifnot(!is.null(colnames(data)))
-    stopifnot(length(colnames(data)) == ncol(data))
     stopifnot(isTRUE(all(data %in% c(0, 1))))
-    t_genots_string <- table(genot_matrix_2_vector(data))
-    v_genots_string <- as.vector(t_genots_string)
-    names(v_genots_string) <- names(t_genots_string)
 
-    o_genots_string <- reorder_to_standard_order(v_genots_string)
-
-    if (omit_0) {
-        o_genots_string <- na.omit(o_genots_string)
-        attributes(o_genots_string)$na.action <- NULL
+    ## Deal with the limit cases of just WT. Two cases:
+    ## a) a matrix with a single column; named or not is irrelevant
+    ## b) a matrix with column names and only 0
+    ## But this is much simpler: if sum of data is 0, just WT.
+    if (sum(data) == 0) {
+        o_genots_string <- nrow(data)
+        names(o_genots_string) <- "WT"
     } else {
-        o_genots_string[is.na(o_genots_string)] <- 0
-    }
-    stopifnot(nrow(data) == sum(o_genots_string))
+        ## Back to the rest of the cases
+        stopifnot(!is.null(colnames(data)))
+        stopifnot(length(colnames(data)) == ncol(data))
 
+        t_genots_string <- table(genot_matrix_2_vector(data))
+        v_genots_string <- as.vector(t_genots_string)
+        names(v_genots_string) <- names(t_genots_string)
+
+        o_genots_string <- reorder_to_standard_order(v_genots_string)
+
+        if (omit_0) {
+            o_genots_string <- na.omit(o_genots_string)
+            attributes(o_genots_string)$na.action <- NULL
+        } else {
+            o_genots_string[is.na(o_genots_string)] <- 0
+        }
+        stopifnot(nrow(data) == sum(o_genots_string))
+    }
     
     if (out == "vector") {
-            return(o_genots_string)
+        return(o_genots_string)
     } else if (out == "data.frame") {
         df <- data.frame(Genotype = names(o_genots_string),
                          Counts   = o_genots_string)
