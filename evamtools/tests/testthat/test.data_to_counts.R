@@ -20,7 +20,7 @@ test_that("data_to_counts correct output, including WT", {
     out_both <- c(3, 1)
     names(out_both) <- c("WT", "aei")
 
-    expect_equal(data_to_counts(m00, "vector"), out_wt)
+    expect_equal(data_to_counts(m00, "vector"), c(WT = 12))
     expect_equal(data_to_counts(m0_2c, "vector"), out_wt)
     expect_equal(data_to_counts(m0_1c, "vector"), out_wt)
     expect_equal(data_to_counts(m0_2c_named, "vector"), out_wt)
