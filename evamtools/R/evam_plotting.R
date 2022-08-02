@@ -832,8 +832,10 @@ plot_genotype_counts_plly <- function(data) {
                           ## "rgb(0, 128, 128)" ## teal
                       )
     ) %>% plotly::layout(xaxis = list(tickangle = 270, categoryorder = "trace"),
-                 yaxis = list(gridcolor ="darkgray"),
-                 margin = list(pad = 10))
+                         yaxis = list(gridcolor ="darkgray"
+                                    ## , griddash = "dash", minorgriddash = "dot"
+                                      ),
+                         margin = list(pad = 10))
     fig
 }
 
