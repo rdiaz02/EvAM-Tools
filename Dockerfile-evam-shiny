@@ -68,6 +68,7 @@ RUN R -e "install.packages('igraph')"
 RUN R -e "BiocManager::install('OncoSimulR')"
 RUN R -e "library(devtools);devtools::install_github('phillipnicol/OncoBN')"
 RUN R -e "install.packages('prompter')"
+RUN R -e "install.packages('shinyBS')"
 
 RUN mkdir -p /app/Sources/
 
