@@ -155,7 +155,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  input$gene_number,
                                                  data$gene_names,
                                                  input$input2build))
+
         }
+
     })
 
     ## Force resample on gene number changes
@@ -577,8 +579,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
             if (input$input2build %in% c("csd")) {
                 ## Where we "Add genotypes" manually. This selects mutation (genotype)
+                ##         If we only have WT, n_genes is 0, and it breaks
+                ##         and we have set minimum number of genes to 2
                 updateCheckboxGroupInput(session, "genotype", label = "Mutations",
-                                         choices = lapply(1:n_genes, function(i)data$gene_names[i]),
+                                         choices = lapply(1:(max(2, n_genes)),
+                                                          function(i) data$gene_names[i]),
                                          selected = NULL)
                 ## Where we "Add genotypes" manually. This sets the count
                 updateNumericInput(session, "genotype_freq", value = NA)
