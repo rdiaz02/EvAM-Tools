@@ -137,8 +137,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## With the DAG we always return all the genotypes
             ## Other code ensures that gene number is never smaller
             ## than genes in the DAG.
+            message("      dag")
             return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
         } else if (input$input2build == "upload") {
+            message("      upload")
             ## With upload, we do not use number of genes
             ## Return the data we have
             return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
@@ -151,6 +153,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ##                                      data$n_genes,
             ##                                      data$gene_names))
         } else {
+            message("      mhn or csd")
             return(evamtools:::get_display_freqs(data$csd_counts,
                                                  input$gene_number,
                                                  data$gene_names,
@@ -229,7 +232,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 tmp_data <- list()
                 tmp_data$data <- read.csv(input$csd$datapath)
                 tmp_data$name <- dataset_name
-                
+
                 datasets$all_csd[["upload"]][[dataset_name]] <-
                     evamtools:::to_stnd_csd_dataset(tmp_data)
                 datasets$all_csd[["upload"]][[dataset_name]]$name <- dataset_name
@@ -246,7 +249,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ## this forces creating copy so name sticks forever
                 ## but gives error later. And actually being able to change
                 ## name via (Re)name the data is nice. 
-                                        # datasets$fixed_examples[["upload"]][[dataset_name]] <- tmp_data
+                ## datasets$fixed_examples[["upload"]][[dataset_name]] <- tmp_data
                 datasets$all_csd[["upload"]][[dataset_name]] <- tmp_data
                 
                 last_visited_pages["upload"] <<- dataset_name
@@ -543,7 +546,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 } ## Next lines: FIXME zz23. ## ## FIXME zz23: proposed changes
             } else if (input$input2build %in% c("csd", "upload")) {
                 ## Never show DAGs here.
-                data$dag[] <- 0
+                ## FIXME zz:41: should not be needed.
+                ## data$dag[] <- 0
+                
                 if (!is.null(data$data))  {
                     n_genes <- ncol(data$data)  
                 } else { ## data$data is null
@@ -762,7 +767,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         } else if (input$input2build == "dag") {
             ## Make sure all genes currently in the DAG are in
             ## the To and From to add/remove
-            genes_in_dag <- setdiff(unique(c(dag_data()$From, dag_data()$To)),
+            message("At output$define_genotype, DAG")
+            current_dag_data <- dag_data()
+            ## genes_in_dag <- setdiff(unique(c(dag_data()$From, dag_data()$To)),
+            ##                         "Root")
+            if (is.null(current_dag_data)) message("   current_dag_data is NULL")
+            genes_in_dag <- setdiff(unique(c(current_dag_data$From,
+                                             current_dag_data$To)),
                                     "Root")
             if (length(genes_in_dag) < n_genes) {
                 genes_not_in_dag <- setdiff(gene_options, genes_in_dag)
@@ -1057,22 +1068,37 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## DAG builder
     ## Controling dag builder
     dag_data <- reactive({
-        # browser()
-        if(input$input2build == "dag"){
+        if (input$input2build == "dag") {
+            message("At dag_data reactive call")
             input$dag_model
             input$dag_table_cell_edit
             all_gene_names <- c("Root", data$gene_names)
             edges <- which(data$dag == 1, arr.ind = TRUE)
             tmp_dag_parent_set <- data$dag_parent_set
             x <- length(tmp_dag_parent_set)
+
+            ## The code below could fail (without sever consequences)
+            ## if we have moved back and forth between DAG and upload, for example
+            ## as we have not yet update the DAG data. The plot will ask for
+            ## the dag data, but those are not available.
+            ## Be more elegant
+            ## FIXME: what should really happen is that the work that happens
+            ## in "At observeEvent toListen" happened before this
+            ## But this is part of the UI and the other is listening. I guess
+            ## this must come first?
+            dag_dataset_names <- unlist(lapply(all_csd_data$dag, function(x) x$name))
+            if (!(data$name %in% dag_dataset_names)) {
+                message("    data$name not in dag_dataset_names. Returning a NULL")
+                return(NULL)
+            }
             
             ## I have to this weird thing because using data$gene_names does not work
             ## for some unkown reason. Eh??!!!
             names(tmp_dag_parent_set) <- all_gene_names[seq(2, x + 1)]
             dag_data <- data.frame(From = all_gene_names[edges[, "row"]]
-                                , To = all_gene_names[edges[, "col"]]
-                                , Relation = tmp_dag_parent_set[edges[, "col"] - 1]
-                                , Lambdas = data$lambdas[edges[, "col"] - 1])
+                                 , To = all_gene_names[edges[, "col"]]
+                                 , Relation = tmp_dag_parent_set[edges[, "col"] - 1]
+                                 , Lambdas = data$lambdas[edges[, "col"] - 1])
             
             if ((default_dag_model %in% c("OT", "OncoBN"))
                 & (any(dag_data$Lambdas < 0) | any(dag_data$Lambdas > 1))){
@@ -1556,6 +1582,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         ## Calculate TRM for DAG and for matrices
 
         tryCatch({
+
             if (input$gene_number >= 7) {
                 showModal(dataModal("Beware! You are running a dataset with 7 genes or more. This can take longer than usual and plots may be crowded. We recommend using top_paths options in the Results' tab.", type = "Warning: "))
             }
@@ -1620,6 +1647,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
             data2run <- evamtools:::genotypeCounts_to_data(display_freqs(),
                                                            e = 0)
+            if (ncol(data2run) < 1) {
+                stop("Your data contains less than one column (genes, events). ",
+                     "Do you have a single genotype? Maybe only WT?")
+                
+            }
+
             
             progress$inc(1/5, detail = "Setting up data")
             Sys.sleep(0.5)
@@ -1833,12 +1866,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Go back to input to work again with the data
     observeEvent(input$modify_data, {
         tryCatch({
-            if(length(all_cpm_out) > 0){
+            
+            if (length(all_cpm_out) > 0){
                 tmp_data <- all_cpm_out[[input$select_cpm]]$orig_data
                 dataset_name <- strsplit(input$select_cpm, "__")[[1]][[1]]
                 dataset_type <- tmp_data$type
                 last_visited_pages[[tmp_data$type]] <<- dataset_name
-                tmp_data <- datasets$all_csd[[tmp_data$type]][[dataset_name]] <- evamtools:::to_stnd_csd_dataset(tmp_data)
+
+                tmp_data <- datasets$all_csd[[tmp_data$type]][[dataset_name]] <-
+                    evamtools:::to_stnd_csd_dataset(tmp_data)
 
                 data <- tmp_data
                 data$csd_counts <- evamtools:::get_csd(tmp_data$data)
