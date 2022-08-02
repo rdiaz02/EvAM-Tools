@@ -14,7 +14,12 @@
 ## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-get_display_freqs <- function(freqs, n_genes, gene_names) {
+get_display_freqs <- function(freqs, n_genes, gene_names, input2build) {
+    if (input2build %in% c("upload", "dag"))
+        stop("get_display_freqs should not be called when ",
+             "input is either dag or upload; ",
+             "DAG has a different procedure for dealing with number of genes ",
+             "and upload does not use that setting at all.")
     if (is.null(freqs)) return(.ev_SHINY_dflt$template_data$csd_counts)
     if (nrow(freqs) == 0) return(.ev_SHINY_dflt$template_data$csd_counts)
     valid_gene_names <- c("WT", gene_names[1:n_genes])
