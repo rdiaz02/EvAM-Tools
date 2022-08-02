@@ -1,3 +1,19 @@
+Changes in version 2.1.0 (2022-08-02):
+	- Most of the changes affect the web app.
+	- Clearer, cleaner interface for input.
+	- Clearer, cleaner output, with table and plots synced.
+	- igraph output resizes now.
+	- Better use of the output screen real state as a function of models
+	  being displayed.
+	- Genotype frequency can be modified for all types of input (upload,
+	  and generated from models ---DAGs, MHN).
+	- Data sets wiht only WT can be created and dealt with (not analzed,
+	  though, as that would make no sense).
+	- Fixed many occasional bugs: renaming genes, renaming data sets,
+	  changing genotype counts.
+	- Improved help and some tooltips.
+	
+
 Changes in version 1.1.7 (2022-07-06):
 	- Additional error check for gene name changes.
 	- Cleaner and consistent data set renaming, with additional checks.
