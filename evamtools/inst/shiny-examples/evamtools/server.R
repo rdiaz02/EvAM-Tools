@@ -481,8 +481,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     observeEvent(toListen(), {
         tryCatch({
             ## FIXME zz2s: the next two we are observing on
-            input$select_csd
-            input$input2build
+            ## input$select_csd
+            ## input$input2build
 
             ## browser()
             ## Cleaning stuff
@@ -517,69 +517,58 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 n_genes <- data$n_genes
                 if (is.null(n_genes)) {
                     n_genes <- .ev_SHINY_dflt$ngenes
-                } ## Next lines: FIXME zz23
-            } else if (input$input2build == "csd" && !is.null(data$data)) {
-                    n_genes <- ncol(data$data)
-                    ## Never show DAGs here.
-                    data$dag[] <- 0
-            } else if (input$input2build %in% c("csd", "upload") && is.null(data$data)) {
-                    n_genes <- .ev_SHINY_dflt$ngenes
-                    data$dag[] <- 0
-            } 
-            
-            ## ## FIXME zz23: proposed changes
-            ## else if (input$input2build %in% c("csd", "upload")) {
-            ##     ## Never show DAGs here.
-            ##     data$dag[] <- 0
-            ##     if (!is.null(data$data))  {
-            ##         n_genes <- ncol(data$data)  
-            ##     } else { ## data$data is null
-            ##         if (input$input2build == "csd") {
-            ##             n_genes <- .ev_SHINY_dflt$ngenes
-            ##         } else { ## if (input$input2build == "upload")
-            ##             n_genes <- NULL
-            ##         }
-            ##     }
-            ## } else {
-            ##     stop("No appropriate input2build")
-            ## }
-            
-            ## FIXME zz23
-            ## else if (input$input2build == "csd" && !is.null(data$data)) {
-            ##     n_genes <- ncol(data$data)
-            ##     ## Never show DAGs here.
-            ##     data$dag[] <- 0
-            ## } else if (input$input2build %in% c("csd", "upload") && is.null(data$data)) {
-            ##     n_genes <- .ev_SHINY_dflt$ngenes
-            ##     data$dag[] <- 0
-            ## } 
-
-
-            ## FIXME zz24
-            if (input$input2build %in% c("csd", "dag", "matrix")) {
-                ## number of genes, in the "Set the number of genes"
-                updateNumericInput(session, "gene_number", value = n_genes)
-                updateCheckboxGroupInput(session, "genotype", label = "Mutations",
-                                         choices = lapply(1:n_genes, function(i)data$gene_names[i]),
-                                         selected = NULL)
-                ## Where we "Add genotypes" manually. This sets the count
-                updateNumericInput(session, "genotype_freq", value = NA)
+                } ## Next lines: FIXME zz23. ## ## FIXME zz23: proposed changes
+            } else if (input$input2build %in% c("csd", "upload")) {
+                ## Never show DAGs here.
+                data$dag[] <- 0
+                if (!is.null(data$data))  {
+                    n_genes <- ncol(data$data)  
+                } else { ## data$data is null
+                    if (input$input2build == "csd") {
+                        n_genes <- .ev_SHINY_dflt$ngenes
+                    } else { ## if (input$input2build == "upload")
+                        n_genes <- NULL
+                    }
+                }
+            } else {
+                stop("No appropriate input2build")
             }
-
-            ## ## FIXME zz24: proposed change
+            ## FIXME zz23: old
+            ## else if (input$input2build == "csd" && !is.null(data$data)) {
+            ##         n_genes <- ncol(data$data)
+            ##         ## Never show DAGs here.
+            ##         data$dag[] <- 0
+            ## } else if (input$input2build %in% c("csd", "upload") && is.null(data$data)) {
+            ##         n_genes <- .ev_SHINY_dflt$ngenes
+            ##         data$dag[] <- 0
+            ## } 
+            
+   
+            ## ## FIXME zz24
             ## if (input$input2build %in% c("csd", "dag", "matrix")) {
             ##     ## number of genes, in the "Set the number of genes"
             ##     updateNumericInput(session, "gene_number", value = n_genes)
-            ## }
-
-            ## if (input$input2build %in% c("csd")) {
-            ##     ## Where we "Add genotypes" manually. This selects mutation (genotype)
             ##     updateCheckboxGroupInput(session, "genotype", label = "Mutations",
             ##                              choices = lapply(1:n_genes, function(i)data$gene_names[i]),
             ##                              selected = NULL)
             ##     ## Where we "Add genotypes" manually. This sets the count
             ##     updateNumericInput(session, "genotype_freq", value = NA)
             ## }
+
+            ## FIXME zz24: proposed change
+            if (input$input2build %in% c("csd", "dag", "matrix")) {
+                ## number of genes, in the "Set the number of genes"
+                updateNumericInput(session, "gene_number", value = n_genes)
+            }
+
+            if (input$input2build %in% c("csd")) {
+                ## Where we "Add genotypes" manually. This selects mutation (genotype)
+                updateCheckboxGroupInput(session, "genotype", label = "Mutations",
+                                         choices = lapply(1:n_genes, function(i)data$gene_names[i]),
+                                         selected = NULL)
+                ## Where we "Add genotypes" manually. This sets the count
+                updateNumericInput(session, "genotype_freq", value = NA)
+            }
             
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
