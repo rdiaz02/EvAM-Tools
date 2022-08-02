@@ -143,22 +143,23 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## than genes in the DAG.
             return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
         } else if (input$input2build == "upload") {
-            ## browser()
-            ## FIXME. The 
-            ## If data$n_genes is NULL, return an empty data frame
-            ## But what we should really do is avoid calling
-            ## this unnecessarily
-            if (is.null(data$n_genes))
-                return(evamtools:::get_display_freqs(NULL,
-                                                     data$n_genes,
-                                                     data$gene_names)) 
-            return(evamtools:::get_display_freqs(data$csd_counts,
-                                                 data$n_genes,
-                                                 data$gene_names))
+            browser()
+            ## with upload, we do not use number of genes
+            ## Return the data we have
+            return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
+            ## ## If data$n_genes is NULL, return an empty data frame
+            ## if (is.null(data$n_genes))
+            ##     return(evamtools:::get_display_freqs(NULL,
+            ##                                          data$n_genes,
+            ##                                          data$gene_names)) 
+            ## return(evamtools:::get_display_freqs(data$csd_counts,
+            ##                                      data$n_genes,
+            ##                                      data$gene_names))
         } else {
             return(evamtools:::get_display_freqs(data$csd_counts,
                                                  input$gene_number,
-                                                 data$gene_names))
+                                                 data$gene_names,
+                                                 input$input2build))
         }
     })
 
