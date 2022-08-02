@@ -42,6 +42,7 @@ get_display_freqs <- function(freqs, n_genes, gene_names, input2build) {
     return(freqs[freqs$Counts > 0, , drop = FALSE])
 }
 
+## From one-row-per-subject, as matrix of 0/1, to grouped counts of genotypes
 get_csd <- function(complete_csd,
                     default_counts = .ev_SHINY_dflt$template_data$csd_counts){
     if (is.null(complete_csd)) return(default_counts)
@@ -389,10 +390,9 @@ create_tabular_data <- function(data) {
 
 ## Yes, could have passed all default_* as part of a single list. Whatever.
 to_stnd_csd_dataset <- function(data,
-                               default_max_genes = .ev_SHINY_dflt$max_genes,
-                               default_template_data = .ev_SHINY_dflt$template_data
-                               ) {
-
+                                default_max_genes = .ev_SHINY_dflt$max_genes,
+                                default_template_data = .ev_SHINY_dflt$template_data
+                                ) {
     ## Be completely explicit upfront!!!
     default_data <- default_template_data$data
     default_lambdas <- default_template_data$lambdas
@@ -401,102 +401,102 @@ to_stnd_csd_dataset <- function(data,
     default_thetas <- default_template_data$thetas
     
     
-  if(is.null(data)) return(default_template_data)
+    if(is.null(data)) return(default_template_data)
 
-  if(typeof(data) != "list"){
-    stop("Input data should be a list")
-  }
-  
-  new_data <- list()
-
-  if(!is.null(data$gene_names)){
-    tmp_names <- data$gene_names
-  } else if(!is.null(colnames(data$data))){
-    tmp_names <- colnames(data$data)
-  } else if(!is.null(colnames(data$dag))){
-    tmp_names <- colnames(data$dag)[-1]
-  } else if(!is.null(colnames(data$thetas))){
-    tmp_names <- colnames(data$thetas)
-  } else {
-    tmp_names <- c()
-  }
-
-  new_data$gene_names <- c(tmp_names 
-    , LETTERS[(length(tmp_names) + 1) : default_max_genes ])[1:default_max_genes]
-  
-  new_data$name <- data$name  
-
-  if(is.null(data$lambdas)) {
-    new_data$lambdas <- default_lambdas
-  }else{
-    if(!is.numeric(data$lambdas)){
-      stop("Lambdas should only contain numbers")
+    if(typeof(data) != "list"){
+        stop("Input data should be a list")
     }
-    new_lambdas <- default_lambdas
-    new_lambdas[1:length(data$lambdas)] <- data$lambdas
-    new_data$lambdas <- new_lambdas
-  }
-  names(new_data$lambdas) <- new_data$gene_names
-
-  if(is.null(data$dag_parent_set)) {
-    new_data$dag_parent_set <- default_dag_parent_set
-  }else {
-    if(!all(data$dag_parent_set %in% c("Single", "AND", "OR", "XOR")))
-      stop("Parent set must include only 'Single', 'AND', 'OR' or 'XOR'")
-    new_parent_set <- default_dag_parent_set
-    new_parent_set[1:length(data$dag_parent_set)] <- data$dag_parent_set
-    new_data$dag_parent_set <- new_parent_set
-  }
-  names(new_data$dag_parent_set ) <- new_data$gene_names
-
-  if(is.null(data$dag)) {
-    new_data$dag <- default_dag
-  } else {
-    if(!all(unique(data$dag) %in% c(0, 1))){
-      stop("Adjacency matrix should be binary: only 0 and 1")
+    
+    new_data <- list()
+    
+    if(!is.null(data$gene_names)){
+        tmp_names <- data$gene_names
+    } else if(!is.null(colnames(data$data))){
+        tmp_names <- colnames(data$data)
+    } else if(!is.null(colnames(data$dag))){
+        tmp_names <- colnames(data$dag)[-1]
+    } else if(!is.null(colnames(data$thetas))){
+        tmp_names <- colnames(data$thetas)
+    } else {
+        tmp_names <- c()
     }
-    to_keep <- which(colSums(data$dag)>0 | rowSums(data$dag)>0)
-    tmp_dag <- data$dag[to_keep, to_keep]
-    n_genes <- ncol(data$dag)
-    new_dag <- default_dag 
-    new_dag[to_keep, to_keep] <- tmp_dag
-    new_data$dag <- new_dag
+    new_data$gene_names <-
+        c(tmp_names,
+          LETTERS[(length(tmp_names) + 1) : default_max_genes ])[1:default_max_genes]
+    
+    new_data$name <- data$name  
 
-    if(!is_dag(graph_from_adjacency_matrix(tmp_dag, mode="directed"))){
-      stop("The graph is not a DAG")
+    if(is.null(data$lambdas)) {
+        new_data$lambdas <- default_lambdas
+    }else{
+        if(!is.numeric(data$lambdas)){
+            stop("Lambdas should only contain numbers")
+        }
+        new_lambdas <- default_lambdas
+        new_lambdas[1:length(data$lambdas)] <- data$lambdas
+        new_data$lambdas <- new_lambdas
+    }
+    names(new_data$lambdas) <- new_data$gene_names
+
+    if(is.null(data$dag_parent_set)) {
+        new_data$dag_parent_set <- default_dag_parent_set
+    }else {
+        if(!all(data$dag_parent_set %in% c("Single", "AND", "OR", "XOR")))
+            stop("Parent set must include only 'Single', 'AND', 'OR' or 'XOR'")
+        new_parent_set <- default_dag_parent_set
+        new_parent_set[1:length(data$dag_parent_set)] <- data$dag_parent_set
+        new_data$dag_parent_set <- new_parent_set
+    }
+    names(new_data$dag_parent_set ) <- new_data$gene_names
+
+    if(is.null(data$dag)) {
+        new_data$dag <- default_dag
+    } else {
+        if(!all(unique(data$dag) %in% c(0, 1))){
+            stop("Adjacency matrix should be binary: only 0 and 1")
+        }
+        to_keep <- which(colSums(data$dag)>0 | rowSums(data$dag)>0)
+        tmp_dag <- data$dag[to_keep, to_keep]
+        n_genes <- ncol(data$dag)
+        new_dag <- default_dag 
+        new_dag[to_keep, to_keep] <- tmp_dag
+        new_data$dag <- new_dag
+
+        if(!is_dag(graph_from_adjacency_matrix(tmp_dag, mode="directed"))){
+            stop("The graph is not a DAG")
+        }
+
+        ## Revising parent set
+        ## Only genes with multiple parent can have something different from "Single" relationship
+        new_data$dag_parent_set[colSums(new_dag)[-1] <= 1] <- "Single"
     }
 
-    ## Revising parent set
-    ## Only genes with multiple parent can have something different from "Single" relationship
-    new_data$dag_parent_set[colSums(new_dag)[-1] <= 1] <- "Single"
-  }
+    rownames(new_data$dag) <- colnames(new_data$dag) <- c("Root", new_data$gene_names)
 
-  rownames(new_data$dag) <- colnames(new_data$dag) <- c("Root", new_data$gene_names)
-
-  if(is.null(data$thetas)) {
-    new_data$thetas <- default_thetas
-  } else {
-    if(!is.numeric(data$thetas)){
-      stop("Theta matrix should only contain numbers")
+    if(is.null(data$thetas)) {
+        new_data$thetas <- default_thetas
+    } else {
+        if(!is.numeric(data$thetas)){
+            stop("Theta matrix should only contain numbers")
+        }
+        n_genes <- ncol(data$thetas)
+        new_thetas <- default_thetas 
+        new_thetas[1:n_genes, 1:n_genes] <- data$thetas
+        new_data$thetas <- new_thetas
     }
-    n_genes <- ncol(data$thetas)
-    new_thetas <- default_thetas 
-    new_thetas[1:n_genes, 1:n_genes] <- data$thetas
-    new_data$thetas <- new_thetas
-  }
-  rownames(new_data$thetas) <- colnames(new_data$thetas) <- new_data$gene_names
+    rownames(new_data$thetas) <- colnames(new_data$thetas) <- new_data$gene_names
 
-  if (is.null(data$data)) {
-    new_data$data <- default_data
-  } else {
-      if(!all(unique(unlist(data$data)) %in% c(0, 1))){
-      stop("Data should be binary: only 0 and 1")
+    if (is.null(data$data)) {
+        new_data$data <- default_data
+    } else {
+        if(!all(unique(unlist(data$data)) %in% c(0, 1))){
+            stop("Data should be binary: only 0 and 1")
+        }
+        new_data$data <- data$data
+        colnames(new_data$data) <- new_data$gene_names[1:ncol(new_data$data)]
     }
-    new_data$data <- data$data
-    colnames(new_data$data) <- new_data$gene_names[1:ncol(new_data$data)]
-  }
-  new_data$csd_counts <- get_csd(new_data$data)
-  return(new_data)
+    new_data$csd_counts <- get_csd(new_data$data)
+    return(new_data)
 }
 
 to_stnd_csd_all_datasets <- function(datasets){

@@ -26,6 +26,13 @@ dataModal <- function(error_message, type="Error: ") {
     )
 }
 
+
+## I have left a bunch of messages. To make it easier to dis/enable them
+## mymessage <- function(...) message(...)
+mymessage <- function(...) invisible(NULL)
+
+
+
 ## For DRY though gene_names and number_of_genes are also
 ## obtained for other purposes right before these
 ## are called in a couple of places. Oh well; would need
@@ -41,7 +48,7 @@ dag_more_genes_than_set_genes <- function(input, dag_data = dag_data(),
         (number_of_genes > input$gene_number)) {
         updateNumericInput(session, "gene_number", value = number_of_genes)
         return(TRUE)
-        }
+    }
     else
         return(FALSE)
 }
@@ -58,7 +65,7 @@ dag_message_more_genes_than_set_genes <- function() {
 }
 
 do_gc <- function(n = 5) {
-    print("doing gc")
+    mymessage("doing gc")
     for (i in 1:n) print(gc())
 }
 
@@ -78,7 +85,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## And be paranoid about making sure memory is released on disconnect
     session$onSessionEnded(
                 function() {
-                    message("From onSessionEnded")
+                    mymessage("From onSessionEnded")
                     do_gc(1)}
             )
     onStop(function() {
@@ -131,16 +138,16 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         ## called again and returns the data but for nothing since what we will
         ## want to display are the new data.
 
-        message("At display_freqs")
+        mymessage("At display_freqs")
 
         if (input$input2build == "dag") {
             ## With the DAG we always return all the genotypes
             ## Other code ensures that gene number is never smaller
             ## than genes in the DAG.
-            message("      dag")
+            mymessage("      dag")
             return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
         } else if (input$input2build == "upload") {
-            message("      upload")
+            mymessage("      upload")
             ## With upload, we do not use number of genes
             ## Return the data we have
             return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
@@ -153,7 +160,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ##                                      data$n_genes,
             ##                                      data$gene_names))
         } else {
-            message("      mhn or csd")
+            mymessage("      mhn or csd")
             return(evamtools:::get_display_freqs(data$csd_counts,
                                                  input$gene_number,
                                                  data$gene_names,
@@ -176,7 +183,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## ## Comment this out so that no resampling when renaming?
     ## ## FIXME clarify: issue_11
     ## observeEvent(input$select_csd, {
-    ##     ## message("at select_csd_trigger")
+    ##     ## mymessage("at select_csd_trigger")
     ##    if (input$input2build == "dag") {
     ##         shinyjs::click("resample_dag")
     ##    } else if (input$input2build == "matrix") {
@@ -189,7 +196,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     
     observeEvent(input$gene_number, {
-        message("at gene number_trigger")
+        mymessage("at gene number_trigger")
         datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
             input$gene_number
         if (input$input2build == "dag") {
@@ -357,7 +364,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             }
             if ( (nrow(data$csd_counts) > 0 ) && all(is.na(data$data)) ) {
                 if (data$csd_counts["Genotype"] == "WT") {
-                    message("Data set with only WT")
+                    mymessage("Data set with only WT")
                 }  else {
                     stop("This should not be possible",
                          "Not a data set with only WT and yet ",
@@ -476,7 +483,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ## |> prompter::add_prompt(
                 ##                 position = "bottom",
                 ##         bounce = "TRUE",
-                ##         message = "a text from add_prompt")
+                ##         mymessage = "a text from add_prompt")
                 ## If we wanted to use shinyBS, we can do
                 ## shinyBS::bsTooltip("select_csd", "Working example of a tooltip on server.R",
                 ##                    "right", options = list(container = "body")),
@@ -510,7 +517,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## input$select_csd
             ## input$input2build
 
-            message("At observeEvent toListen")
+            mymessage("At observeEvent toListen")
             ## Cleaning stuff
             selected <- last_visited_pages[[input$input2build]]
             tmp_data <- datasets$all_csd[[input$input2build]][[selected]]
@@ -647,21 +654,64 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 length(new_gene_names)) {
                 stop("Number of old and new gene names differs.")
             }
+
+            ## ## Rename stuff
+            ## new_data <- evamtools:::to_stnd_csd_dataset(data)
+            ## data$data <- new_data$data
+            ## data$dag <- new_data$dag
+            ## data$dag_parent_set <- new_data$dag_parent_set
+            ## data$thetas <- new_data$thetas
+            ## data$lambdas <- new_data$lambdas
+            ## data$csd_counts <- new_data$csd_counts
+
+            ## datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
+
             
-            data$gene_names <- c(
-                new_gene_names
-              , LETTERS[(length(new_gene_names) + 1):max_genes]
-            )
-            ## Rename stuff
-            new_data <- evamtools:::to_stnd_csd_dataset(data)
+            
+            ## Simple lookup-dictionary.
+            ## to_stnd_csd_dataset is a function from hell.
+            old_gene_names <- data$gene_names
+            new_gene_names <- c(new_gene_names,
+                                LETTERS[(length(new_gene_names) + 1):max_genes]
+                                )
+            names_dict <- new_gene_names
+            names(names_dict) <- old_gene_names
+            ## For the DAG
+            names_dict <- c(names_dict, "Root" = "Root")
+            
+            new_data <- list()
+            new_data$gene_names <- new_gene_names
+            new_data$name <- data$name
+            new_data$lambdas <- data$lambdas
+            new_data$dag_parent_set <- data$dag_parent_set
+            new_data$dag <- data$dag
+            new_data$thetas <- data$thetas
+            new_data$data <- data$data
+
+            ## To rename, use lookup
+            names(new_data$lambdas) <- names_dict[names(new_data$lambdas)]
+            names(new_data$dag_parent_set) <- names_dict[names(new_data$dag_parent_set)]
+            colnames(new_data$dag) <- names_dict[colnames(new_data$dag)]
+            rownames(new_data$dag) <- names_dict[rownames(new_data$dag)]
+            colnames(new_data$thetas) <- names_dict[colnames(new_data$thetas)]
+            rownames(new_data$thetas) <- names_dict[rownames(new_data$thetas)]
+            if (!is.null(new_data$data)) {
+                colnames(new_data$data) <- names_dict[colnames(new_data$data)]
+            }
+            ## To create
+            new_data$csd_counts <- get_csd(new_data$data)
+            
+            ## Assign to the correct places
+            data$gene_names <- new_gene_names
             data$data <- new_data$data
             data$dag <- new_data$dag
             data$dag_parent_set <- new_data$dag_parent_set
             data$thetas <- new_data$thetas
             data$lambdas <- new_data$lambdas
             data$csd_counts <- new_data$csd_counts
-
+            
             datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
+            
         }, error = function(e){
             showModal(dataModal(e[[1]]))
         })
@@ -767,11 +817,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         } else if (input$input2build == "dag") {
             ## Make sure all genes currently in the DAG are in
             ## the To and From to add/remove
-            message("At output$define_genotype, DAG")
+            mymessage("At output$define_genotype, DAG")
             current_dag_data <- dag_data()
             ## genes_in_dag <- setdiff(unique(c(dag_data()$From, dag_data()$To)),
             ##                         "Root")
-            if (is.null(current_dag_data)) message("   current_dag_data is NULL")
+            if (is.null(current_dag_data)) mymessage("   current_dag_data is NULL")
             genes_in_dag <- setdiff(unique(c(current_dag_data$From,
                                              current_dag_data$To)),
                                     "Root")
@@ -1069,7 +1119,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Controling dag builder
     dag_data <- reactive({
         if (input$input2build == "dag") {
-            message("At dag_data reactive call")
+            mymessage("At dag_data reactive call")
             input$dag_model
             input$dag_table_cell_edit
             all_gene_names <- c("Root", data$gene_names)
@@ -1088,7 +1138,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## this must come first?
             dag_dataset_names <- unlist(lapply(all_csd_data$dag, function(x) x$name))
             if (!(data$name %in% dag_dataset_names)) {
-                message("    data$name not in dag_dataset_names. Returning a NULL")
+                mymessage("    data$name not in dag_dataset_names. Returning a NULL")
                 return(NULL)
             }
             
@@ -1546,7 +1596,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     output$plot <- plotly::renderPlotly({
         tryCatch({
-            message("At output$plot")
+            mymessage("At output$plot")
             evamtools:::plot_genotype_counts_plly(display_freqs())
         }, error = function(e){
             showModal(dataModal(e[[1]]))
@@ -1559,7 +1609,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         edges <- NULL
 
         if (input$input2build %in% c("dag")
-            && sum(data$dag)>0
+            && sum(data$dag) > 0
             && !is.null(input$gene_number)
             ){
             data2plot <- igraph::graph_from_adjacency_matrix(data$dag)
