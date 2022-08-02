@@ -348,11 +348,21 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## }
 
             ## Is this ever possible?
-            if( (nrow(data$csd_counts) > 0 ) &&
-                (is.null(data$data) || (all(is.na(data$data))))) {
-                stop("This should not be possible")
+            if ( (nrow(data$csd_counts) > 0 ) &&  (is.null(data$data))) {
+                stop("This should not be possible: ",
+                     "(nrow(data$csd_counts) > 0 ) &&  (is.null(data$data))")
             }
-
+            if ( (nrow(data$csd_counts) > 0 ) && all(is.na(data$data)) ) {
+                if (data$csd_counts["Genotype"] == "WT") {
+                    message("Data set with only WT")
+                }  else {
+                    stop("This should not be possible",
+                         "Not a data set with only WT and yet ",
+                         "(nrow(data$csd_counts) > 0 ) && all(is.na(data$data))"
+                         ) 
+                }
+            }
+            
             ## A couple of paranoid consistency checks
             if (nrow(data$csd_counts) > 0) {
                 ddtmp <- evamtools:::genotypeCounts_to_data(data$csd_counts,
