@@ -131,7 +131,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         ## called again and returns the data but for nothing since what we will
         ## want to display are the new data.
 
-        ## message("at display_freqs")
+        message("At display_freqs")
 
         if (input$input2build == "dag") {
             ## With the DAG we always return all the genotypes
@@ -184,7 +184,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     
     observeEvent(input$gene_number, {
-        ## message("at gene number_trigger")
+        message("at gene number_trigger")
         datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
             input$gene_number
         if (input$input2build == "dag") {
@@ -473,18 +473,29 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
 
     toListen <- reactive({
-        list(input$select_csd, input$input2build)
+        list(input$input2build, input$select_csd)
     })
 
     ## This is probably abusing observeEvent? And mixing what would be
     ## better served with eventReactive?
+
+    ## Notes about the logic, and the update of display_freqs.  display_freqs
+    ## needs to be updated whenever we make changes that need to be replotted. It
+    ## is called from output$plot. That is much more often than the events below
+    ## need to be watched. That is also why the following happens:
+    ## - you are at MHN
+    ## - you change to upload
+    ##     The first thing that gets called is display_freqs (as output$plot is called)
+    ##     Then, the block below.
+    ## I've left some messages (commented now), so that one can see what is happening.
+    
     observeEvent(toListen(), {
         tryCatch({
             ## FIXME zz2s: the next two we are observing on
             ## input$select_csd
             ## input$input2build
 
-            ## browser()
+            message("At observeEvent toListen")
             ## Cleaning stuff
             selected <- last_visited_pages[[input$input2build]]
             tmp_data <- datasets$all_csd[[input$input2build]][[selected]]
@@ -507,7 +518,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data$name <- tmp_data$name
             data$n_genes <- tmp_data$n_genes
 
-            
+
             if (input$input2build == "dag") {
                 number_of_parents <- colSums(data$dag)
                 to_keep <- sum(number_of_parents > 0)
@@ -542,8 +553,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ##         n_genes <- .ev_SHINY_dflt$ngenes
             ##         data$dag[] <- 0
             ## } 
-            
-   
+
+
             ## ## FIXME zz24
             ## if (input$input2build %in% c("csd", "dag", "matrix")) {
             ##     ## number of genes, in the "Set the number of genes"
@@ -559,6 +570,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             if (input$input2build %in% c("csd", "dag", "matrix")) {
                 ## number of genes, in the "Set the number of genes"
                 updateNumericInput(session, "gene_number", value = n_genes)
+            } else if (input$input2build == "upload") {
+                ## FIXME zz26: set gene_number to NULL. Never used for upload
+                updateNumericInput(session, "gene_number", value = NULL)
             }
 
             if (input$input2build %in% c("csd")) {
@@ -569,7 +583,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ## Where we "Add genotypes" manually. This sets the count
                 updateNumericInput(session, "genotype_freq", value = NA)
             }
-            
+
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
         })
@@ -1483,6 +1497,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     output$plot <- plotly::renderPlotly({
         tryCatch({
+            message("At output$plot")
             evamtools:::plot_genotype_counts_plly(display_freqs())
         }, error = function(e){
             showModal(dataModal(e[[1]]))
