@@ -662,7 +662,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         })
     })
 
-    observeEvent(input$display_help, {
+    observeEvent(input$display_help_change_genotype_counts, {
         showModal(modalDialog(
             easyClose = TRUE,
             title = tags$h3("Changing genotype's counts"),
@@ -671,7 +671,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$p("2. Press Tab to move to the next row"),
                      tags$p("3. Use Ctrl + Enter to save changes"),
                      tags$p("4. Set a frequency to 0 to remove a genotype"),
-                     tags$p("5. Type in the Search bar to filter genotypes")
+                     tags$p("5. Type in the Search bar to filter genotypes"),
+                     tags$h4(HTML("<br/>")),
+                     tags$p("Genotypes with count 0 are removed from the table. ",
+                            "Thus, if you remove a genotype when editing ",
+                            "genotype's counts in the DAG, MHN, or Upload data ",
+                            "entries, you will need to regenerate the data ",
+                            "to be able to modify those genotypes again.")
                  )
         )
         )
@@ -955,7 +961,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##         tags$div(class = "frame",
     ##                  tags$div(class = "flex",
     ##                           tags$h3("3. Change genotype's counts"),
-    ##                           actionButton("display_help", "Help"),
+    ##                           actionButton("display_help_change_genotype_counts", "Help"),
     ##                           tags$h3(HTML("<br/>")),
     ##                           ),
     ##                  tags$div(id = "csd_table",
@@ -984,7 +990,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tags$div(class = "frame",
                      tags$div(class = "flex",
                               tags$h3(paste0(menu_num, " . Change genotype's counts")),
-                              actionButton("display_help", "Help", class = "btn-info"),
+                              actionButton("display_help_change_genotype_counts",
+                                           "Help", class = "btn-info"),
                               tags$h3(HTML("<br/>")),
                               ),
                      tags$div(id = "csd_table",
@@ -1485,13 +1492,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             info[ , "col"] <- 2
             data$csd_counts <- DT::editData(data$csd_counts, info, "csd_counts")
             ## Filtering out non-positive counts
-            if (any(data$csd_counts[, 2]) < 0)
+            if (any(data$csd_counts[, 2] < 0))
                 showModal(modalDialog(paste("Counts < 0 present. ",
                                             "They will be removed.")))
-            data$csd_counts <- data$csd_counts[data$csd_counts[, 2] >= 0,]
-            data$data <-
-                datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
-                    evamtools:::genotypeCounts_to_data(data$csd_counts, e = 0)
+                ## FIXME: zz33 We want to purge 0 entries
+                data$csd_counts <- data$csd_counts[data$csd_counts[, 2] > 0, ]
+                data$data <-
+                    datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
+                        evamtools:::genotypeCounts_to_data(data$csd_counts, e = 0)
 
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
@@ -1822,189 +1830,189 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 }
             })
 
-            ## Go back to input to work again with the data
-            observeEvent(input$modify_data, {
-                tryCatch({
-                    if(length(all_cpm_out) > 0){
-                        tmp_data <- all_cpm_out[[input$select_cpm]]$orig_data
-                        dataset_name <- strsplit(input$select_cpm, "__")[[1]][[1]]
-                        dataset_type <- tmp_data$type
-                        last_visited_pages[[tmp_data$type]] <<- dataset_name
-                        tmp_data <- datasets$all_csd[[tmp_data$type]][[dataset_name]] <- evamtools:::to_stnd_csd_dataset(tmp_data)
+    ## Go back to input to work again with the data
+    observeEvent(input$modify_data, {
+        tryCatch({
+            if(length(all_cpm_out) > 0){
+                tmp_data <- all_cpm_out[[input$select_cpm]]$orig_data
+                dataset_name <- strsplit(input$select_cpm, "__")[[1]][[1]]
+                dataset_type <- tmp_data$type
+                last_visited_pages[[tmp_data$type]] <<- dataset_name
+                tmp_data <- datasets$all_csd[[tmp_data$type]][[dataset_name]] <- evamtools:::to_stnd_csd_dataset(tmp_data)
 
-                        data <- tmp_data
-                        data$csd_counts <- evamtools:::get_csd(tmp_data$data)
-                        data$n_genes <- ncol(data$data)
+                data <- tmp_data
+                data$csd_counts <- evamtools:::get_csd(tmp_data$data)
+                data$n_genes <- ncol(data$data)
 
-                        updateNumericInput(session, "gene_number", value = data$n_genes)
-                        updateTabsetPanel(session, "navbar",
-                                          selected = "csd_builder")
-                        updateRadioButtons(session, "input2build", selected = dataset_type)
-                        updateRadioButtons(session, "select_csd", selected = dataset_name)
-                    }
-                }, error = function(e){
-                    showModal(dataModal(e[[1]]))
-                })
-            })
-
-
-            output$customize <- renderUI({
-                do_sampling <- tryCatch({
-                    sampling <- ifelse(
-                        is.null(all_cpm_out[[input$select_cpm]]$do_sampling), FALSE, 
-                        all_cpm_out[[input$select_cpm]]$do_sampling)
-                    sampling
-                }, error = function(e){
-                    return(FALSE)
-                })
+                updateNumericInput(session, "gene_number", value = data$n_genes)
+                updateTabsetPanel(session, "navbar",
+                                  selected = "csd_builder")
+                updateRadioButtons(session, "input2build", selected = dataset_type)
+                updateRadioButtons(session, "select_csd", selected = dataset_name)
+            }
+        }, error = function(e){
+            showModal(dataModal(e[[1]]))
+        })
+    })
 
 
-                ## The other thing would be to always show the 4 options and that's it
-                tagList(
-                    tags$div(class = "frame",
-                             tags$h3("Customize the visualization"),
-                             tags$div(class = "inline",
-                                      checkboxGroupInput(inputId = "cpm2show",
-                                                         label = "CPMs to show",
-                                                         choices = c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
-                                                         selected = c("OT", "OncoBN", "CBN", "MHN")),
-                                      tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
-                                      tags$h4(HTML("<br/>")),
-                                      tags$div(class = "inline",
-                                               radioButtons(inputId = "data2plot",
-                                                            label = HTML("Predictions from models to display",
-                                                                         "<h5>(This output is also displayed in tabular form on the bottom right.)</h5>"),
-                                                            choiceNames = 
-                                                                if (do_sampling) {
-                                                                    c("Transition probabilities", 
-                                                                      "Transition rates",
-                                                                      "Predicted genotype relative frequencies",
-                                                                      "Sampled genotype counts")
-                                                                } else {         
-                                                                    c("Transition probabilities", 
-                                                                      "Transition rates",
-                                                                      "Predicted genotype relative frequencies")
-                                                                }
-                                                           ,
-                                                            choiceValues = 
-                                                                if (do_sampling) {
-                                                                    c("trans_mat", 
-                                                                      "trans_rate_mat",
-                                                                      "predicted_genotype_freqs",
-                                                                      "sampled_genotype_counts")
-                                                                } else {
-                                                                    c("trans_mat", 
-                                                                      "trans_rate_mat",
-                                                                      "predicted_genotype_freqs")
-                                                                }
-                                                           ,
-                                                            selected = "trans_mat"
-                                                            )
-                                               ),
-                                      tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
-                                      tags$h4(HTML("<br/>")),
-                                      tags$div(class = "inline",
-                                               radioButtons(inputId = "label2plot",
-                                                            label = HTML("Type of label<h5>(for transition [rate] plots).</h5>"),
-                                                            choiceNames =  c("Genotype", "Last gene mutated"),
-                                                            choiceValues = c("genotype", "acquisition"),
-                                                            selected = "genotype"
-                                                            )
-                                               ),
-                                      ),
-                             tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
-                             tags$h4(HTML("<br/>")),
-                             tags$p(HTML("<strong>Number of most relevant paths to show</strong> "),
-                                    "(set it to 0 to show all paths or ",
-                                    "all genotype labels):"),
-                             tags$div(id="freq2label-wrap",
-                                      sliderInput("freq2label", "", width = "500px",
-                                                  value = 5, max = 10, min = 0, step = 1)
-                                      )
-                             )
-                )
-            })
-
-            output$cpm_list <- renderUI({
-                all_names <- c()
-                for (i in names(all_cpm_out)) {
-                    all_names <- c(all_names, all_cpm_out[[i]]$orig_data$name)
-                }
-
-                if ((length(all_names) > 0) && (last_visited_cpm != "")) {
-                    selected <- names(all_cpm_out)
-                    
-                    tagList(
-                        radioButtons(
-                            inputId = "select_cpm",
-                            label = "",
-                            selected = last_visited_cpm,
-                            choiceNames = names(all_cpm_out),
-                            choiceValues = names(all_cpm_out)
-                        )
-                    )
-                }
-            })
-
-            ## FIXME zzplyt
-            ## output$csd <- renderPlot({
-            ##     evamtools:::plot_genotype_counts(evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data))
-            ## })
-
-            ## FIXME zzply
-            ## output$original_data <- renderUI({
-            ##     ## To see if I disable original data
-            ##     if(length(names(all_cpm_out)) > 0){
-            ##         tags$div(class="frame max_height",
-            ##                  tags$h3("Original data"),
-            ##                  plotOutput("csd"),
-            ##                  tags$div(class = "download_button",
-            ##                           actionButton("modify_data", "Modify data")
-            ##                           )
-            ##                  )
-            ##     }
-            ## })
+    output$customize <- renderUI({
+        do_sampling <- tryCatch({
+            sampling <- ifelse(
+                is.null(all_cpm_out[[input$select_cpm]]$do_sampling), FALSE, 
+                all_cpm_out[[input$select_cpm]]$do_sampling)
+            sampling
+        }, error = function(e){
+            return(FALSE)
+        })
 
 
-            output$original_data <- renderUI({
-                ## To see if I disable original data        
-                if (length(names(all_cpm_out)) > 0) {
-                    tags$div(class="frame max_height",
-                             tags$h3("Original data"),
-                             plotly::renderPlotly(
-                                         evamtools:::plot_genotype_counts_plly(
-                                                         evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data))
-                                     ),
-                             tags$div(class = "download_button",
-                                      actionButton("modify_data", "Modify data")
-                                      )
-                             )
-                }
-            })
+        ## The other thing would be to always show the 4 options and that's it
+        tagList(
+            tags$div(class = "frame",
+                     tags$h3("Customize the visualization"),
+                     tags$div(class = "inline",
+                              checkboxGroupInput(inputId = "cpm2show",
+                                                 label = "CPMs to show",
+                                                 choices = c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
+                                                 selected = c("OT", "OncoBN", "CBN", "MHN")),
+                              tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
+                              tags$h4(HTML("<br/>")),
+                              tags$div(class = "inline",
+                                       radioButtons(inputId = "data2plot",
+                                                    label = HTML("Predictions from models to display",
+                                                                 "<h5>(This output is also displayed in tabular form on the bottom right.)</h5>"),
+                                                    choiceNames = 
+                                                        if (do_sampling) {
+                                                            c("Transition probabilities", 
+                                                              "Transition rates",
+                                                              "Predicted genotype relative frequencies",
+                                                              "Sampled genotype counts")
+                                                        } else {         
+                                                            c("Transition probabilities", 
+                                                              "Transition rates",
+                                                              "Predicted genotype relative frequencies")
+                                                        }
+                                                   ,
+                                                    choiceValues = 
+                                                        if (do_sampling) {
+                                                            c("trans_mat", 
+                                                              "trans_rate_mat",
+                                                              "predicted_genotype_freqs",
+                                                              "sampled_genotype_counts")
+                                                        } else {
+                                                            c("trans_mat", 
+                                                              "trans_rate_mat",
+                                                              "predicted_genotype_freqs")
+                                                        }
+                                                   ,
+                                                    selected = "trans_mat"
+                                                    )
+                                       ),
+                              tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
+                              tags$h4(HTML("<br/>")),
+                              tags$div(class = "inline",
+                                       radioButtons(inputId = "label2plot",
+                                                    label = HTML("Type of label<h5>(for transition [rate] plots).</h5>"),
+                                                    choiceNames =  c("Genotype", "Last gene mutated"),
+                                                    choiceValues = c("genotype", "acquisition"),
+                                                    selected = "genotype"
+                                                    )
+                                       ),
+                              ),
+                     tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
+                     tags$h4(HTML("<br/>")),
+                     tags$p(HTML("<strong>Number of most relevant paths to show</strong> "),
+                            "(set it to 0 to show all paths or ",
+                            "all genotype labels):"),
+                     tags$div(id="freq2label-wrap",
+                              sliderInput("freq2label", "", width = "500px",
+                                          value = 5, max = 10, min = 0, step = 1)
+                              )
+                     )
+        )
+    })
+
+    output$cpm_list <- renderUI({
+        all_names <- c()
+        for (i in names(all_cpm_out)) {
+            all_names <- c(all_names, all_cpm_out[[i]]$orig_data$name)
+        }
+
+        if ((length(all_names) > 0) && (last_visited_cpm != "")) {
+            selected <- names(all_cpm_out)
             
-            output$cpm_freqs <- DT::renderDT(all_cpm_out[[input$select_cpm]]$tabular_data[[input$data2plot]],
-                                             selection = 'none', server = TRUE
-                                           , rownames = FALSE
-                                           , options = list(
-                                                 columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE)
-                                             )
+            tagList(
+                radioButtons(
+                    inputId = "select_cpm",
+                    label = "",
+                    selected = last_visited_cpm,
+                    choiceNames = names(all_cpm_out),
+                    choiceValues = names(all_cpm_out)
+                )
+            )
+        }
+    })
 
-            output$tabular_data <- renderUI({
-                if (length(names(all_cpm_out)) > 0) {
-                    tags$div(class="frame max_height",
-                             tags$h3(paste("Tabular output of predictions from models: ",
-                                           switch(ifelse(is.null(input$data2plot),
-                                                         "not_valid_or_not_yet_existent",
-                                                         input$data2plot),
-                                                  "trans_mat" = "Transition probabilities.",
-                                                  "trans_rate_mat" = "Transition rates.",
-                                                  "predicted_genotype_freqs" = "Predicted genotype relative frequencies.",
-                                                  "sampled_genotype_counts" = "Sampled genotype counts.",
-                                                  "Not a valid input$data2plot"
-                                                  ))),
-                             tags$h4("(This output is also displayed as the second row of figures. ",
-                                     "Choose the output to display from the left radio buttons ",
-                                     "'Predictions from models to display')"),
+    ## FIXME zzplyt
+    ## output$csd <- renderPlot({
+    ##     evamtools:::plot_genotype_counts(evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data))
+    ## })
+
+    ## FIXME zzply
+    ## output$original_data <- renderUI({
+    ##     ## To see if I disable original data
+    ##     if(length(names(all_cpm_out)) > 0){
+    ##         tags$div(class="frame max_height",
+    ##                  tags$h3("Original data"),
+    ##                  plotOutput("csd"),
+    ##                  tags$div(class = "download_button",
+    ##                           actionButton("modify_data", "Modify data")
+    ##                           )
+    ##                  )
+    ##     }
+    ## })
+
+
+    output$original_data <- renderUI({
+        ## To see if I disable original data        
+        if (length(names(all_cpm_out)) > 0) {
+            tags$div(class="frame max_height",
+                     tags$h3("Original data"),
+                     plotly::renderPlotly(
+                                 evamtools:::plot_genotype_counts_plly(
+                                                 evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data))
+                             ),
+                     tags$div(class = "download_button",
+                              actionButton("modify_data", "Modify data")
+                              )
+                     )
+        }
+    })
+    
+    output$cpm_freqs <- DT::renderDT(all_cpm_out[[input$select_cpm]]$tabular_data[[input$data2plot]],
+                                     selection = 'none', server = TRUE
+                                   , rownames = FALSE
+                                   , options = list(
+                                         columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE)
+                                     )
+
+    output$tabular_data <- renderUI({
+        if (length(names(all_cpm_out)) > 0) {
+            tags$div(class="frame max_height",
+                     tags$h3(paste("Tabular output of predictions from models: ",
+                                   switch(ifelse(is.null(input$data2plot),
+                                                 "not_valid_or_not_yet_existent",
+                                                 input$data2plot),
+                                          "trans_mat" = "Transition probabilities.",
+                                          "trans_rate_mat" = "Transition rates.",
+                                          "predicted_genotype_freqs" = "Predicted genotype relative frequencies.",
+                                          "sampled_genotype_counts" = "Sampled genotype counts.",
+                                          "Not a valid input$data2plot"
+                                          ))),
+                     tags$h4("(This output is also displayed as the second row of figures. ",
+                             "Choose the output to display from the left radio buttons ",
+                             "'Predictions from models to display')"),
                                         #  radioButtons(inputId = "tabular_data2show",
                                         #               label = "",
                                         #               inline = TRUE,
@@ -2021,21 +2029,21 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                         #                                 "obs_genotype_transitions"),
                                         #               selected = "trans_mat"
                                         #               ),
-                             tags$div(
-                                      DT::DTOutput("cpm_freqs")
-                                  )
-                             )
-                }
-            })
+                     tags$div(
+                              DT::DTOutput("cpm_freqs")
+                          )
+                     )
+        }
+    })
 
-            ## Download button
-            output$download_cpm <- downloadHandler(
-                filename = function() sprintf("%s_cpm.RDS", input$select_cpm),
-                content = function(file) {
-                    saveRDS(all_cpm_out[[input$select_cpm]][c("cpm_output", "tabular_data")],
-                            file)
-                }
-            )
+    ## Download button
+    output$download_cpm <- downloadHandler(
+        filename = function() sprintf("%s_cpm.RDS", input$select_cpm),
+        content = function(file) {
+            saveRDS(all_cpm_out[[input$select_cpm]][c("cpm_output", "tabular_data")],
+                    file)
+        }
+    )
 }
 
 
