@@ -28,8 +28,8 @@ dataModal <- function(error_message, type="Error: ") {
 
 
 ## I have left a bunch of messages. To make it easier to dis/enable them
-mymessage <- function(...) message(...)
-## mymessage <- function(...) invisible(NULL)
+## mymessage <- function(...) message(...)
+mymessage <- function(...) invisible(NULL)
 
 
 
@@ -79,7 +79,7 @@ random_dataset_name <- function() {
 
 server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     require(evamtools)
-    
+    require(shinyBS)
     ## Just in case
     do_gc(2)
     ## And be paranoid about making sure memory is released on disconnect
@@ -150,21 +150,22 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## than genes in the DAG.
             mymessage("      dag")
             ## FIXME zz: elegant2
-            ## dag_dataset_names <- unlist(lapply(datasets$all_csd$dag, function(x) x$name))
-            ## if (!(data$name %in% dag_dataset_names)) {
-            ##     mymessage("       data$name not in dag_dataset_names. Returning a NULL")
-            ##     return(NULL)
-            ## }
+            dag_dataset_names <- unlist(lapply(datasets$all_csd$dag, function(x) x$name))
+            if (!(data$name %in% dag_dataset_names)) {
+                mymessage("       data$name not in dag_dataset_names. ",
+                          "Returning a 0-rows data frame")
+                return(data.frame(Genotype = character(), Counts = integer()))
+            }
             return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
         } else if (input$input2build == "upload") {
             mymessage("      upload")
-
             ## FIXME zz: elegant2
-            ## upl_dataset_names <- unlist(lapply(datasets$all_csd$upload, function(x) x$name))
-            ## if (!(data$name %in% upl_dataset_names)) {
-            ##     mymessage("       data$name not in upl_dataset_names. Returning a NULL")
-            ##     return(NULL)
-            ## }
+            upl_dataset_names <- unlist(lapply(datasets$all_csd$upload, function(x) x$name))
+            if (is.null(data$name) || !(data$name %in% upl_dataset_names)) {
+                mymessage("       data$name not in upl_dataset_names.",
+                          "Returning a 0-rows data frame")
+                return(data.frame(Genotype = character(), Counts = integer()))
+            }
             
             ## With upload, we do not use number of genes
             ## Return the data we have
@@ -180,13 +181,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         } else {
             mymessage("      mhn or csd")
             ## FIXME zz: elegant2
-            ## thisd <- input$input2build
-            ## thisd_dataset_names <- unlist(lapply(datasets$all_csd[[thisd]],
-            ##                                      function(x) x$name))
-            ## if (!(data$name %in% thisd_dataset_names)) {
-            ##     mymessage("       data$name not in thisd_dataset_names. Returning a NULL")
-            ##     return(NULL)
-            ## }
+            thisd <- input$input2build
+            thisd_dataset_names <- unlist(lapply(datasets$all_csd[[thisd]],
+                                                 function(x) x$name))
+            if (!(data$name %in% thisd_dataset_names)) {
+                mymessage("       data$name not in thisd_dataset_names. ",
+                          "Returning a 0-rows data frame")
+                return(data.frame(Genotype = character(), Counts = integer()))
+            }
             
             return(evamtools:::get_display_freqs(data$csd_counts,
                                                  input$gene_number,
@@ -418,9 +420,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             }
 
             if ((input$input2build == "upload") && is.null(data$data))
-                stop("When there is no data, ",
+                stop("When no data has been uploaded, ",
                      "it makes no sense to rename the data: ",
-                     "There is nothing you could do with them.")
+                     "there is nothing you could do with them, ",
+                     "since there are none.")
             
                 ## FIXME zz:rename-before-data
                 ## could just disallow renaming if there are no data. But why?
@@ -561,6 +564,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## input$input2build
 
             mymessage("At observeEvent toListen")
+
             ## Cleaning stuff
             selected <- last_visited_pages[[input$input2build]]
             tmp_data <- datasets$all_csd[[input$input2build]][[selected]]
@@ -976,14 +980,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                      ),
                                   tags$h5(HTML("<br/>")),
                                   actionButton("resample_dag", "Generate data from DAG"),
-                                  actionButton("clear_dag", "Reset DAG and delete genotype data"),
+                                  actionButton("clear_dag", HTML("Reset DAG and delete genotype data")),
                                   shinyBS::bsTooltip("clear_dag",
-                                                     paste("Resetting the DAG will replace the ",
-                                                           "contents of the named object by ",
+                                                     HTML("Resetting the DAG will replace the ",
+                                                          "contents of the named object by ",
                                                            "those of the default one ",
                                                            "(a three-gene fork with lambdas = 0.5)"),
                                                      "right", options = list(container = "body")
-                                                     )
+                                                     ),
+                                  shinyBS::removeTooltip(session, "clear_dag")
                               )
                      }
                  )
