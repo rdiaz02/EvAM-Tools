@@ -216,4 +216,6 @@ do_MCCBN_HCBN2 <- function(x
 ## libboost-locale1.74.0:amd64 
 ## libboost-thread1.74.0:amd64
 
-## sudo apt-get install libboost-filesystem1.67-dev libboost-graph-parallel1.67-dev libboost-iostreams1.67-dev libboost-locale1.67-dev libboost-regex1.67-dev libboost-serialization1.67-dev libboost-system1.67-dev libboost-test1.67-dev libboost1.67-dev libboost1.67-tools-dev libboost-graph1.67-dev libboost-graph1.67.0
+## sudo apt-get install libboost-filesystem1.67-dev libboost-graph-parallel1.67-dev libboost-iostreams1.67-dev libboost-locale1.67-dev libboost-regex1.67-dev libboost-serialization1.67-dev libboost-system1.67-dev libboost-test1.67-dev libboost1.67-dev libboost1.67-tools-dev libboost-graph1.67-dev libboost-graph1.67.0 libicu57 libboost-mpi1.67.0 libopenmpi2
+
+## you might need to install libicu57 and liopenmpi2 first. And a bunch of other things. This is clearly not sustainable.
