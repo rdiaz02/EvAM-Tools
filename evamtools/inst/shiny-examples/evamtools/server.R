@@ -880,14 +880,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             } else {
                 dag_gene_options <- genes_in_dag
             }
-            tags$div(
-                                        # uiOutput("gene_number_slider"),
+            tags$div(                    
                      tags$div(class = "flex",
-                              tags$h3("2. Define a Directed Acyclic Graph (DAG)"),
+                              tags$h3("2. Define a Directed Acyclic Graph (DAG) ",
+                                      "and generate data from it."),
                               actionButton("how2build_dag", "Help", class = "btn-info")
                               ),
                      if(!is.null(data$lambdas)){
                          tags$div(
+                                  tags$h4(HTML("<br/>")),
+                                  tags$h4(HTML("<u>2.1. Define DAG</u>")),
+                                  tags$h4(HTML("<br/>")),
                                   tags$h4("Type of model"),
                                   tags$div(class = "inline",
                                            radioButtons(inputId = "dag_model",
@@ -928,6 +931,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   tags$h4(HTML("Remember to hit Ctrl-Enter when you are done editing the DAG table for changes to take effect.")),
                                   DT::DTOutput("dag_table"),
                                   tags$h3(HTML("<br/>")),
+                                  tags$h4(HTML("<br/>")),
+                                  tags$h4(HTML("<u>2.2. Generate data from the DAG model</u>")),
+                                  tags$h4(HTML("<br/>")),
                                   numericInput("dag_epos",
                                                HTML("epos,&epsilon;"),
                                                value = 0.01, min = 0, max = 1,
@@ -936,26 +942,40 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                           "not allowed by model to occur. ",
                                           "(Affects predicted probabilities.) "),
                                   tags$h3(HTML("<br/>")),
-                                  numericInput("dag_samples", HTML("Number of genotypes to sample"),
-                                               value = default_csd_samples, min = 100, max = 10000,
-                                               step = 100, width = "50%"),
+                                  div(style = "white-space: nowrap;",
+                                      numericInput("dag_samples", HTML("Number of genotypes to sample"),
+                                                   value = default_csd_samples, min = 100, max = 10000,
+                                                   step = 100, width = "90%"),
+                                      ), 
                                   tags$h3(HTML("<br/>")),
-                                  numericInput("dag_noise", HTML("Noise"),
-                                               value = 0.0, min = 0, max = 1,
-                                               step = 0.025, width = "50%"),
-                                  tags$h5(
-                                           "A proportion between 0 and 1. ", 
-                                           "Observational noise (e.g., genotyping error) ",
-                                           "for all models. ",
-                                           "Added during sampling, ",
-                                           "after predictions from model ",
-                                           "have been obtained; ",
-                                           "predicted probabilities are not affected.",
-                                           "If larger than 0, this proportion of entries ",
-                                           "in the sampled matrix will be flipped ",
-                                           "(i.e., 0s turned to 1s and 1s turned to 0s)."                                               ),
-                                  tags$h3(HTML("<br/>")),
-                                  actionButton("resample_dag", "Sample from DAG"),
+                                  div(style = "white-space: nowrap;", 
+                                      numericInput("dag_noise",
+                                                   HTML("Observational noise (genotyping error)"),
+                                                   ## HTML("Noise ",
+                                                   ##      "<h5>Observational noise (genotyping error), ",
+                                                   ##      "a proportion between 0 and 1.</h5>"),
+                                                   value = 0.0, min = 0, max = 1,
+                                                   step = 0.025, width = "90%"),
+                                      ),
+                                  ## tags$h5("Observational noise (e.g., genotyping error); ",
+                                  ##         "a proportion between 0 and 1."),
+                                  shinyBS::bsTooltip("dag_noise",
+                                                     paste("A proportion between 0 and 1. ", 
+                                                           "Observational noise (e.g., genotyping error) ",
+                                                           "for all models. ",
+                                                           "Added during sampling, ",
+                                                           "after predictions from model ",
+                                                           "have been obtained; ",
+                                                           "predicted probabilities are not affected.",
+                                                           "If larger than 0, this proportion of entries ",
+                                                           "in the sampled matrix will be flipped ",
+                                                           "(i.e., 0s turned to 1s and 1s turned to 0s)."
+                                                           ),
+                                                     "right"
+                                                   , options = list(container = "body")
+                                                     ),
+                                  tags$h5(HTML("<br/>")),
+                                  actionButton("resample_dag", "Generate data from DAG"),
                                   actionButton("clear_dag", "Reset DAG and delete genotype data"),
                                   shinyBS::bsTooltip("clear_dag",
                                                      paste("Resetting the DAG will replace the ",
@@ -964,15 +984,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                            "(a three-gene fork with lambdas = 0.5)"),
                                                      "right", options = list(container = "body")
                                                      )
-                                  ## |> prompter::add_prompt(
-                                  ##                  position = "right",
-                                  ##                  message =
-                                  ##                      paste("Resetting the DAG will replace the ",
-                                  ##                            "contents of the named object by ",
-                                  ##                            "those of the default one ",
-                                  ##                            "(a three-gene fork with lambdas = 0.5)"),
-                                  ##                  bounce = TRUE
-                                  ##              )
                               )
                      }
                  )
@@ -981,31 +992,57 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$div(class = "flex",
                               ## tags$h3("2. Define input with a Matrix"),
                               tags$h3("2. Define MHN's log-Theta",
-                                      HTML("matrix (log-&Theta;):")),
+                                      HTML("matrix (log-&Theta;) ",
+                                           "and generate data from it.")),
                               actionButton("how2build_matrix", "Help", class = "btn-info")
                               ),
                      if (!is.null(data$thetas)){
                          tags$div(
-                                  tags$h3("Entries are ",
+                                  tags$h3(HTML("<br/>")),
+                                  tags$h4(HTML("<u>2.1. Define MHN's &theta;s</u>")),
+                                  tags$h4("Entries are ",
                                           "lower case thetas, ",
                                           HTML("&theta;s, range &plusmn; &infin;"),),
                                   tags$h4(HTML("Remember to hit Ctrl-Enter when you are done editing the matrix for changes to take effect.")),
                                   DT::DTOutput("thetas_table"),
                                   tags$h3(HTML("<br/>")),
-                                  numericInput("mhn_samples", "Number of genotypes to sample",
-                                               value = default_csd_samples, min = 100, max = 10000,
-                                               step = 100, width = "50%"),
+                                  tags$h4(HTML("<u>2.2. Generate data from the MHN model</u>")),
+                                  tags$h4(HTML("<br/>")),
+                                  div(style = "white-space: nowrap;", 
+                                      numericInput("mhn_samples", "Number of genotypes to sample",
+                                                   value = default_csd_samples, min = 100, max = 10000,
+                                                   step = 100, width = "90%"),
+                                      ),
                                   tags$h3(HTML("<br/>")),
-                                  numericInput("mhn_noise", HTML("Noise"),
-                                               value = 0, min = 0, max = 1,
-                                               step = 0.025, width = "50%"),
-                                  tags$h5("Observational noise (e.g., genotyping error). ",
-                                          "Added during sampling, ",
-                                          "after predictions from model ",
-                                          "have been obtained; ",
-                                          "predicted probabilities are not affected."),
-                                  tags$h3(HTML("<br/>")),
-                                  actionButton("resample_mhn", "Sample from MHN"),
+                                  div(style = "white-space: nowrap;",
+                                      numericInput("mhn_noise",
+                                                   HTML("Observational noise (genotyping error)"),
+                                                   ## HTML("Noise"),
+                                                   value = 0, min = 0, max = 1,
+                                                   step = 0.025, width = "90%"),
+                                      ),
+                                  shinyBS::bsTooltip("mhn_noise",
+                                                     paste("A proportion between 0 and 1. ", 
+                                                           "Observational noise (e.g., genotyping error) ",
+                                                           "for all models. ",
+                                                           "Added during sampling, ",
+                                                           "after predictions from model ",
+                                                           "have been obtained; ",
+                                                           "predicted probabilities are not affected.",
+                                                           "If larger than 0, this proportion of entries ",
+                                                           "in the sampled matrix will be flipped ",
+                                                           "(i.e., 0s turned to 1s and 1s turned to 0s)."
+                                                           ),
+                                                     "right"
+                                                   , options = list(container = "body")
+                                                     ),
+                                  ## tags$h5("Observational noise (e.g., genotyping error). ",
+                                  ##         "Added during sampling, ",
+                                  ##         "after predictions from model ",
+                                  ##         "have been obtained; ",
+                                  ##         "predicted probabilities are not affected."),
+                                  tags$h5(HTML("<br/>")),
+                                  actionButton("resample_mhn", "Generate data from MHN model"),
                                   actionButton("clear_mhn",
                                                HTML("Reset log-&Theta; matrix and delete genotype data")),
                                   shinyBS::bsTooltip("clear_mhn",
@@ -1020,18 +1057,18 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   ##                  position = "right",
                                   ##                  message = "the log-&Theta; matrix",
                                   ##                  ## HTML("Resetting the log-&Theta; matrix will replace the ",
-                                  ##                  ##      "contents of the named object by ",
-                                  ##                  ##      "those of the default one ",
-                                  ##                  ##      "(a three-gene matrix filled with 0s)."),
-                                  ##                  bounce = TRUE
-                                  ##              )
+                                      ##                  ##      "contents of the named object by ",
+                                      ##                  ##      "those of the default one ",
+                                      ##                  ##      "(a three-gene matrix filled with 0s)."),
+                                      ##                  bounce = TRUE
+                                      ##              )
                               )
                      }
                  )
         } else if (input$input2build == "upload") {
             tags$div(## class = "frame",
                      tags$h4("1. Upload data (CSV format)"),
-                     tags$h5(HTML("If you want to give your dataset a specific ",
+                     tags$h5(HTML("If you want to give your data a specific ",
                                   "name, set it in the box below ",
                                   "before uploading the data. "
                                   ## , "or modify it afterwards  with '(Re)name "
@@ -1416,8 +1453,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             "Relation (the program will force this)."),
                      tags$p(HTML("4. Modify, if you want, the <strong>size of the sample</strong> "),
                             "('Number of genotypes to sample') and ",
-                            HTML("the <strong>Noise</strong> (observation error) "),
-                            HTML("and click on <strong>'Sample from DAG'</strong> to generate a sample. ")),
+                            HTML("the <strong>Observational noise</strong> (genotyping error) "),
+                            HTML("and click on <strong>'Generate data from DAG'</strong> to generate a sample. ")),
                      tags$p("After the sample is generated for the first time, ",
                             "the sample should be generated again automatically ",
                             "whenever you change the model ",
@@ -1525,8 +1562,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             HTML("You <strong>must</strong> save the changes.")),
                      tags$p("5. Modify, if you want, the size of the sample ",
                             "('Number of genotypes to sample') and ",
-                            HTML("the <strong>Noise</strong> (observation error) "),
-                            HTML("and click on <strong>'Sample from DAG'</strong> to generate a sample. "),
+                            HTML("the <strong>Observational noise</strong> (genotyping error) "),
+                            HTML("and click on <strong>'Generate data from MHN model'</strong> to generate a sample. "),
                             "The sample is also updated as soon as you save an entry ",
                             "in the matrix or change the number of genes."),
                      tags$p(HTML("You can make sure <b>the &theta;s have been updated</b> "),
@@ -1685,7 +1722,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         tryCatch({
 
             if (input$gene_number >= 7) {
-                showModal(dataModal("Beware! You are running a dataset with 7 genes or more. This can take longer than usual and plots may be crowded. We recommend using top_paths options in the Results' tab.", type = "Warning: "))
+                showModal(
+                    dataModal("Beware! You are analyzing data ",
+                              "with 7 or more genes. ",
+                              "This can take longer than usual ",
+                              "and plots may be crowded. ",
+                              "We recommend using top_paths options in ",
+                              "the Results' tab.",
+                              type = "Warning: "))
             }
 
             if (is.null(input$cpm_methods) ||
@@ -1896,7 +1940,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     ## Enabling donwload button
                     shinyjs::enable(selector = "#download_cpm")
 
-                    ## Main display
+    ## Main display
                     selected_plot_type <- input$data2plot
 
                     number_of_columns <- floor(12 /
