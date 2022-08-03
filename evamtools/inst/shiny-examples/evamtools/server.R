@@ -99,9 +99,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     data("SHINY_DEFAULTS", package = "evamtools")
     ## FIXME
     ## Eh? Why would we do this. Use a different name, do not overwrite.
+    ## We subset, as lots of the examples are not really worth it for the web app.
     examples_csd$csd <- examples_csd$csd[1:5]
-    examples_csd$dag <- examples_csd$dag[1:6]
-    examples_csd$upload <- examples_csd$upload
+    ## examples_csd$dag <- examples_csd$dag
+    ## examples_csd$upload <- examples_csd$upload
+    ## The next is (one of) the functions from hell.
+    ## And the "upload" component disappears. Oh well. It was an empty list anyway.
     all_csd_data <- evamtools:::to_stnd_csd_all_datasets(examples_csd)
     min_genes <- .ev_SHINY_dflt$min_genes
     max_genes <- .ev_SHINY_dflt$max_genes
@@ -112,10 +115,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     last_visited_pages <- list(upload="Empty", csd = "Empty", dag = "DAG_Fork_3", matrix = "MHN_all_0")
 
     last_visited_cpm <- ""
-    
+
+    ## This is a mess. Why two different things with the same components?
     datasets <- reactiveValues(
-        all_csd = all_csd_data,
-        fixed_examples = all_csd_data
+        all_csd = all_csd_data
+        ## fixed_examples = all_csd_data
     )
 
     data <- reactiveValues(
@@ -145,20 +149,22 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## Other code ensures that gene number is never smaller
             ## than genes in the DAG.
             mymessage("      dag")
-            dag_dataset_names <- unlist(lapply(all_csd_data$dag, function(x) x$name))
-            if (!(data$name %in% dag_dataset_names)) {
-                mymessage("       data$name not in dag_dataset_names. Returning a NULL")
-                return(NULL)
-            }
+            ## FIXME zz: elegant2
+            ## dag_dataset_names <- unlist(lapply(datasets$all_csd$dag, function(x) x$name))
+            ## if (!(data$name %in% dag_dataset_names)) {
+            ##     mymessage("       data$name not in dag_dataset_names. Returning a NULL")
+            ##     return(NULL)
+            ## }
             return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
         } else if (input$input2build == "upload") {
             mymessage("      upload")
 
-            upl_dataset_names <- unlist(lapply(all_csd_data$upload, function(x) x$name))
-            if (!(data$name %in% upl_dataset_names)) {
-                mymessage("       data$name not in upl_dataset_names. Returning a NULL")
-                return(NULL)
-            }
+            ## FIXME zz: elegant2
+            ## upl_dataset_names <- unlist(lapply(datasets$all_csd$upload, function(x) x$name))
+            ## if (!(data$name %in% upl_dataset_names)) {
+            ##     mymessage("       data$name not in upl_dataset_names. Returning a NULL")
+            ##     return(NULL)
+            ## }
             
             ## With upload, we do not use number of genes
             ## Return the data we have
@@ -173,14 +179,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ##                                      data$gene_names))
         } else {
             mymessage("      mhn or csd")
-
-            thisd <- input$input2build
-            thisd_dataset_names <- unlist(lapply(all_csd_data[[thisd]],
-                                                 function(x) x$name))
-            if (!(data$name %in% thisd_dataset_names)) {
-                mymessage("       data$name not in thisd_dataset_names. Returning a NULL")
-                return(NULL)
-            }
+            ## FIXME zz: elegant2
+            ## thisd <- input$input2build
+            ## thisd_dataset_names <- unlist(lapply(datasets$all_csd[[thisd]],
+            ##                                      function(x) x$name))
+            ## if (!(data$name %in% thisd_dataset_names)) {
+            ##     mymessage("       data$name not in thisd_dataset_names. Returning a NULL")
+            ##     return(NULL)
+            ## }
             
             return(evamtools:::get_display_freqs(data$csd_counts,
                                                  input$gene_number,
@@ -411,34 +417,48 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 rm(ddtmp2, ddtmp)
             }
 
-            n_genes <- ifelse(input$input2build == "upload", ncol(data$data),
-                              input$gene_number)
-            tmp_data <- list(
-                data = data$data
-              , dag = data$dag
-              , gene_names = data$gene_names
-              , dag_parent_set = data$dag_parent_set
-              , lambdas = data$lambdas
-              , thetas = data$thetas
-              , trm = data$trm
-              , n_genes = n_genes
-              , name = input$dataset_name)
+            if ((input$input2build == "upload") && is.null(data$data))
+                stop("When there is no data, ",
+                     "it makes no sense to rename the data: ",
+                     "There is nothing you could do with them.")
+            
+                ## FIXME zz:rename-before-data
+                ## could just disallow renaming if there are no data. But why?
+                n_genes <- ifelse(input$input2build == "upload",
+                           ifelse(is.null(data$data), 0, ncol(data$data)),
+                           input$gene_number)
+                
+                tmp_data <- list(
+                    data = data$data
+                  , dag = data$dag
+                  , gene_names = data$gene_names
+                  , dag_parent_set = data$dag_parent_set
+                  , lambdas = data$lambdas
+                  , thetas = data$thetas
+                  , trm = data$trm
+                  , n_genes = n_genes
+                  , name = input$dataset_name)
 
-            ## We should always enter here, since you can no longer use
-            ## an existing name
-            if (!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))) {
-                datasets$fixed_examples[[input$input2build]][[input$dataset_name]] <- tmp_data
-            }
+                
+                ## We should always enter here, since you can no longer use
+                ## an existing name
+                ## if (!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))) {
+                ##     ## FIXME zz:fixed_examples_mess
+                ##     ## datasets$fixed_examples[[input$input2build]][[input$dataset_name]] <- tmp_data
+                ##     datasets$all_csd[[input$input2build]][[input$dataset_name]] <- tmp_data
+                ## }
 
-            ## Like 205 and 207. Assigning name not needed
-            datasets$all_csd[[input$input2build]][[input$dataset_name]] <- tmp_data
+                ## Like 205 and 207. Assigning name not needed
+                datasets$all_csd[[input$input2build]][[input$dataset_name]] <- tmp_data
 
-            datasets$all_csd[[input$input2build]][[input$select_csd]] <-
-                datasets$fixed_examples[[input$input2build]][[input$select_csd]]
+                ## ## FIXME zz:fixed_examples_mess. No idea why this would be a sensible
+                ## ## thing. Not anymore, since no longer fixed_examples
+                ## datasets$all_csd[[input$input2build]][[input$select_csd]] <-
+                ##     datasets$fixed_examples[[input$input2build]][[input$select_csd]]
 
-            ## 3 update selected entry
-            updateRadioButtons(session, "select_csd",
-                               selected = input$dataset_name)
+                ## 3 update selected entry
+                updateRadioButtons(session, "select_csd",
+                                   selected = input$dataset_name)
 
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
@@ -512,7 +532,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ##                    "right", options = list(container = "body")),
             )
         } else {
-            tags$p("Empty until you upload a data set")
+            tags$p("Empty until you upload a data file.")
         }
     })
 
@@ -1146,7 +1166,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## DAG builder
     ## Controling dag builder
     dag_data <- reactive({
-        browser()
         if (input$input2build == "dag") {
             mymessage("At dag_data reactive call")
             input$dag_model
@@ -1164,7 +1183,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## in "At observeEvent toListen" happened before this
             ## But this is part of the UI and the other is listening. I guess
             ## this must come first?
-            dag_dataset_names <- unlist(lapply(all_csd_data$dag, function(x) x$name))
+            
+            ## dag_dataset_names <- unlist(lapply(all_csd_data$dag, function(x) x$name))
+            dag_dataset_names <- unlist(lapply(datasets$all_csd$dag, function(x) x$name))
+
             if (!(data$name %in% dag_dataset_names)) {
                 mymessage("    data$name not in dag_dataset_names. Returning a NULL")
                 return(NULL)
@@ -1297,15 +1319,16 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             if (sum(colSums(data$dag) > 0) < 2)
                 stop("The must be at least two genes ",
                      "in the DAG.")
-            gene_names <- setdiff(unique(c(dag_data()$From, dag_data()$To)),
-                          "Root")
+            the_dag_data <- dag_data()
+            gene_names <- setdiff(unique(c(the_dag_data$From, the_dag_data$To)),
+                                  "Root")
             tmp_dag_data <-
-                    evamtools:::get_dag_data(dag_data()
-                                           , data$dag_parent_set[gene_names]
-                                           , noise = input$dag_noise
-                                           , N = input$dag_samples
-                                           , dag_model = default_dag_model
-                                           , epos = input$dag_epos)
+                evamtools:::get_dag_data(the_dag_data
+                                       , data$dag_parent_set[gene_names]
+                                       , noise = input$dag_noise
+                                       , N = input$dag_samples
+                                       , dag_model = default_dag_model
+                                       , epos = input$dag_epos)
                 
                 data$csd_counts <- tmp_dag_data$csd_counts
                 data$data <- tmp_dag_data$data
