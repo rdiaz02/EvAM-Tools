@@ -1926,9 +1926,24 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$h3("Customize the visualization"),
                      tags$div(class = "inline",
                               checkboxGroupInput(inputId = "cpm2show",
-                                                 label = "CPMs to show",
-                                                 choices = c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
+                                                 label = HTML("CPMs to show"),
+                                                 ## "<h5>(Some or all of those used to analyze the data; ",
+                                                 ##              "use 'Modify data' ---below--- to go back ",
+                                                 ##              "and click on 'Advanced options' if you",
+                                                 ##              "want to use other methods)</h5>"), 
+                                                 choices = input$cpm_methods,
+                                                 ## c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
                                                  selected = input$cpm_methods),
+                              shinyBS::bsTooltip("cpm2show",
+                                                 ## text",
+                                                 HTML("Show graphical output of the CPMs used to analyze the data.  "
+                                                    , "Use \"Modify data\" (below) to go back "
+                                                    , "and click on \"Advanced options\" if you"
+                                                    , "want to use other methods."
+                                                      ),
+                                                 "right"
+                                               , options = list(container = "body")
+                                                 ),
                               tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
                               tags$h4(HTML("<br/>")),
                               tags$div(class = "inline",
