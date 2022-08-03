@@ -252,8 +252,8 @@ get_mhn_data <- function(thetas, noise = 0, N = 10000){
               data = data_with_noise))
 }
 
-get_dag_data <- function(data, parent_set, noise = 0, N = 10000,
-                         dag_model = "HESBCN", epos = 0.01) {
+generate_sample_from_dag <- function(data, parent_set, noise = 0, N = 10000,
+                                     dag_model = "HESBCN", epos = 0.01) {
 
   if (nrow(data) == 0) stop("The DAG does not contain any edge.")
   if (any(is.null(data))) stop("Data should be defined")
