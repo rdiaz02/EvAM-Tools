@@ -242,17 +242,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 dataset_name <- input$name_uploaded
                 ## repeated from obserEvent(input$save_csd_data
                 if (gsub(" ", "", dataset_name, fixed = TRUE) == "") {
-                    stop("Name of dataset cannot be an empty string")
+                    stop("Name of data cannot be an empty string")
                 }
                 if (grepl(" ", dataset_name, fixed = TRUE)) {
-                    stop("Name of dataset should not contain spaces")
+                    stop("Name of data should not contain spaces")
                 }
                 existing_names <- c(names(datasets$all_csd$upload),
                                     names(datasets$all_csd$csd),
                                     names(datasets$all_csd$dag),
                                     names(datasets$all_csd$matrix))
                 if (dataset_name %in% existing_names) {
-                    stop("That dataset name is already in use ",
+                    stop("That name is already in use for other data ",
                          "(if not in this input type, maybe in one ",
                          "of the others); that can be confusing. ",
                          "Use a different name for the uploaded data.")
@@ -317,7 +317,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$div(class = "download_button",
                               ),
                      textInput(inputId = "dataset_name",
-                               "Give your dataset a name",
+                               "Give your data a name",
                                value = random_dataset_name()
                                ),
                      actionButton("save_csd_data", "Use this name")
@@ -345,19 +345,22 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     ## Saving dataset
     observeEvent(input$save_csd_data, {
+
         tryCatch({
             ## 1 save dataset to list after user data
             if (gsub(" ", "", input$dataset_name, fixed = TRUE) == "") {
-                stop("Name of dataset cannot be an empty string")
+                stop("Name of data cannot be an empty string")
             }
             if (grepl(" ", input$dataset_name, fixed = TRUE)) {
-                stop("Name of dataset should not contain spaces")
+                stop("Name of data should not contain spaces")
             }
-            existing_names <- c(names(datasets$all_csd$csd),
+            existing_names <- c(names(datasets$all_csd$upload),
+                                names(datasets$all_csd$csd),
                                 names(datasets$all_csd$dag),
                                 names(datasets$all_csd$matrix))
+            
             if (input$dataset_name %in% existing_names) {
-                stop("That dataset name is already in use ",
+                stop("That name is already in use for other data ",
                      "(if not in this input type, maybe in one ",
                      "of the others); that can be confusing. ",
                      "Use a different name.")
@@ -384,10 +387,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             }
             if ( (nrow(data$csd_counts) > 0 ) && all(is.na(data$data)) ) {
                 if (data$csd_counts["Genotype"] == "WT") {
-                    mymessage("Data set with only WT")
+                    mymessage("Data with only WT")
                 }  else {
                     stop("This should not be possible",
-                         "Not a data set with only WT and yet ",
+                         "These are not data with only WT and yet ",
                          "(nrow(data$csd_counts) > 0 ) && all(is.na(data$data))"
                          ) 
                 }
@@ -1016,7 +1019,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   )),
                      tags$div(class = "inlin3",
                               textInput(inputId = "name_uploaded",
-                                        label = "Name for dataset",
+                                        label = "Name for data",
                                         value = "Uploaded_data"
                                         )
                               ),
@@ -1097,7 +1100,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                       "above."))
                      else if (input$input2build %in% c("upload"))
                          tags$h5(HTML("To delete (or reset) all genotype data",
-                                      "upload a new (or the same) data set."))
+                                      "upload a new (or the same) data file."))
                      )
         }
     })
