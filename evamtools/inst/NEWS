@@ -3,8 +3,9 @@ Changes in version 2.1.2 (2022-08-03):
 	  order.
 	- The former fixes strange bugs when changing genotype counts
 	  in some DAGs and with weirdly ordered manually entered data.
-	- Methods to show graphical output: only those used for analyses.  
-	  
+	- Methods to show graphical output: only those used for analyses.
+	- Miscell improvements of the look of the "Results" tab (moved
+	  help text to tooltips, etc).	  
 	
 Changes in version 2.1.1 (2022-08-03):
 	- Input now clearly differentiates creating DAG/MHN from

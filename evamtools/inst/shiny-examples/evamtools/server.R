@@ -1935,7 +1935,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  ## c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
                                                  selected = input$cpm_methods),
                               shinyBS::bsTooltip("cpm2show",
-                                                 ## text",
                                                  HTML("Show graphical output of the CPMs used to analyze the data.  "
                                                     , "Use \"Modify data\" (below) to go back "
                                                     , "and click on \"Advanced options\" if you"
@@ -1948,8 +1947,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               tags$h4(HTML("<br/>")),
                               tags$div(class = "inline",
                                        radioButtons(inputId = "data2plot",
-                                                    label = HTML("Predictions from models to display",
-                                                                 "<h5>(This output is also displayed in tabular form on the bottom right.)</h5>"),
+                                                    label = HTML("Predictions from models to display"
+                                                                 ## , "<h5>(This output is also displayed in tabular form on the bottom right.)</h5>"
+                                                                 ),
                                                     choiceNames = 
                                                         if (do_sampling) {
                                                             c("Transition probabilities", 
@@ -1975,27 +1975,49 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                         }
                                                    ,
                                                     selected = "trans_mat"
-                                                    )
+                                                    ),
+                                       shinyBS::bsTooltip("data2plot",
+                                                          HTML("This output is also displayed in tabular form on the bottom right."
+                                                               ),
+                                                          "right"
+                                                        , options = list(container = "body")
+                                                          ),
                                        ),
                               tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
                               tags$h4(HTML("<br/>")),
                               tags$div(class = "inline",
                                        radioButtons(inputId = "label2plot",
-                                                    label = HTML("Type of label<h5>(for transition [rate] plots).</h5>"),
+                                                    label = HTML("Type of label"), ## <h5>(for transition [rate] plots).</h5>"),
                                                     choiceNames =  c("Genotype", "Last gene mutated"),
                                                     choiceValues = c("genotype", "acquisition"),
                                                     selected = "genotype"
-                                                    )
+                                                    ),
+                                       shinyBS::bsTooltip("label2plot",
+                                                          HTML("Type of label for transition [rate] plots."
+                                                               ),
+                                                          "right"
+                                                        , options = list(container = "body")
+                                                          ),
                                        ),
                               ),
                      tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
                      tags$h4(HTML("<br/>")),
-                     tags$p(HTML("<strong>Number of most relevant paths to show</strong> "),
-                            "(set it to 0 to show all paths or ",
-                            "all genotype labels):"),
+                     ## tags$p(HTML("<strong>Number of most relevant paths to show</strong> "),
+                     ##        ## "(set it to 0 to show all paths or ",
+                     ##        ## "all genotype labels):"
+                     ##        ),
                      tags$div(id="freq2label-wrap",
-                              sliderInput("freq2label", "", width = "500px",
-                                          value = 5, max = 10, min = 0, step = 1)
+                              tags$p(HTML("<strong>Number of most relevant paths to show</strong> ")),
+                              sliderInput("freq2label",
+                                          "",
+                                          width = "500px",
+                                          value = 5, max = 10, min = 0, step = 1),
+                              shinyBS::bsTooltip("freq2label-wrap",
+                                                 HTML("Set it to 0 to show all paths or all genotype labels"
+                                                      ),
+                                                 "right"
+                                               , options = list(container = "body")
+                                                 ),
                               )
                      )
         )
@@ -2048,22 +2070,44 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     output$tabular_data <- renderUI({
         if (length(names(all_cpm_out)) > 0) {
             tags$div(class="frame max_height",
-                     tags$h3(paste("Tabular output of predictions from models: ",
-                                   switch(ifelse(is.null(input$data2plot),
-                                                 "not_valid_or_not_yet_existent",
-                                                 input$data2plot),
-                                          "trans_mat" = "Transition probabilities.",
-                                          "trans_rate_mat" = "Transition rates.",
-                                          "predicted_genotype_freqs" = "Predicted genotype relative frequencies.",
-                                          "sampled_genotype_counts" = "Sampled genotype counts.",
-                                          "Not a valid input$data2plot"
-                                          ))),
-                     tags$h4("(This output is also displayed as the second row of figures. ",
-                             "Choose the output to display from the left radio buttons ",
-                             "'Predictions from models to display')"),
-                     tags$div(
-                              DT::DTOutput("cpm_freqs")
-                          )
+                     id = "table_out1",
+                     tags$div(class=" max_height",
+                              ## A hack to get the tooltip to only show on hover
+                              ## over heading of table
+                              id = "table_out3", 
+                              tags$h3(paste("Tabular output of predictions from models: ",
+                                            switch(ifelse(is.null(input$data2plot),
+                                                          "not_valid_or_not_yet_existent",
+                                                          input$data2plot),
+                                                   "trans_mat" = "Transition probabilities.",
+                                                   "trans_rate_mat" = "Transition rates.",
+                                                   "predicted_genotype_freqs" = "Predicted genotype relative frequencies.",
+                                                   "sampled_genotype_counts" = "Sampled genotype counts.",
+                                                   "Not a valid input$data2plot"
+                                                   ))),
+                              shinyBS::bsTooltip("table_out3",
+                                                 HTML("This output is also displayed as the second row of figures. "
+                                                    , "Choose the output to display from the left radio buttons "
+                                                      ##                                                    , "\"Predictions from models to display\""
+                                                      ),
+                                                 "top"
+                                               , options = list(container = "body")
+                                                 )
+                              ),
+                     ## tags$h4("(This output is also displayed as the second row of figures. ",
+                     ##         "Choose the output to display from the left radio buttons ",
+                     ##         "'Predictions from models to display')"),
+                     tags$div(id = "table_out2",
+                              DT::DTOutput("cpm_freqs"),
+                              ## shinyBS::bsTooltip("table_out2",
+                              ##                    HTML("This output is also displayed as the second row of figures. "
+                              ##                       , "Choose the output to display from the left radio buttons "
+                              ##                         ##                                                    , "\"Predictions from models to display\""
+                              ##                         ),
+                              ##                    "top"
+                              ##                  , options = list(container = "body")
+                              ##                    )
+                              )
                      )
         }
     })
