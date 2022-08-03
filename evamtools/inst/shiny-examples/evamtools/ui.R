@@ -322,7 +322,7 @@ results_simple <- function(){
 
 user_input <- function() {
     fluidPage(
-        require(shinyBS),
+        ## require(shinyBS),
         ## prompter::use_prompt(),
         shinyjs::useShinyjs(),
         tags$head(
