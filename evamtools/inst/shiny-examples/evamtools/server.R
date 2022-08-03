@@ -28,8 +28,8 @@ dataModal <- function(error_message, type="Error: ") {
 
 
 ## I have left a bunch of messages. To make it easier to dis/enable them
-## mymessage <- function(...) message(...)
-mymessage <- function(...) invisible(NULL)
+mymessage <- function(...) message(...)
+## mymessage <- function(...) invisible(NULL)
 
 
 
@@ -145,9 +145,21 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## Other code ensures that gene number is never smaller
             ## than genes in the DAG.
             mymessage("      dag")
+            dag_dataset_names <- unlist(lapply(all_csd_data$dag, function(x) x$name))
+            if (!(data$name %in% dag_dataset_names)) {
+                mymessage("       data$name not in dag_dataset_names. Returning a NULL")
+                return(NULL)
+            }
             return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
         } else if (input$input2build == "upload") {
             mymessage("      upload")
+
+            upl_dataset_names <- unlist(lapply(all_csd_data$upload, function(x) x$name))
+            if (!(data$name %in% upl_dataset_names)) {
+                mymessage("       data$name not in upl_dataset_names. Returning a NULL")
+                return(NULL)
+            }
+            
             ## With upload, we do not use number of genes
             ## Return the data we have
             return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
@@ -161,6 +173,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ##                                      data$gene_names))
         } else {
             mymessage("      mhn or csd")
+
+            thisd <- input$input2build
+            thisd_dataset_names <- unlist(lapply(all_csd_data[[thisd]],
+                                                 function(x) x$name))
+            if (!(data$name %in% thisd_dataset_names)) {
+                mymessage("       data$name not in thisd_dataset_names. Returning a NULL")
+                return(NULL)
+            }
+            
             return(evamtools:::get_display_freqs(data$csd_counts,
                                                  input$gene_number,
                                                  data$gene_names,
@@ -402,7 +423,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
             ## We should always enter here, since you can no longer use
             ## an existing name
-            if (!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))){
+            if (!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))) {
                 datasets$fixed_examples[[input$input2build]][[input$dataset_name]] <- tmp_data
             }
 
@@ -1122,6 +1143,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## DAG builder
     ## Controling dag builder
     dag_data <- reactive({
+        browser()
         if (input$input2build == "dag") {
             mymessage("At dag_data reactive call")
             input$dag_model
@@ -1130,7 +1152,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             edges <- which(data$dag == 1, arr.ind = TRUE)
             tmp_dag_parent_set <- data$dag_parent_set
             x <- length(tmp_dag_parent_set)
-
             ## The code below could fail (without sever consequences)
             ## if we have moved back and forth between DAG and upload, for example
             ## as we have not yet update the DAG data. The plot will ask for
