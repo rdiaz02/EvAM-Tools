@@ -694,9 +694,12 @@ evam <- function(x,
                      min.freq = 0, max.cols = max_cols)
 
     if (ncol(x) < 2) {
-        stop("Fewer than 2 columns in data set. ",
+        stop("Fewer than 2 columns in the data. ",
              "There must be at least two genes ",
-             "and two different genotypes to run evam.")
+             "and two different genotypes to run evam ",
+             "(and remember that any genes that are ",
+             "completely aliased, i.e., indistinguishable, ",
+             "are regarded as a single gene).")
     }
     
     
