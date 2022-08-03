@@ -13,6 +13,19 @@
 ## You should have received a copy of the GNU Affero General Public License along
 ## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+## Given the Genotype, Count data.frame, return it in standard order.
+## If single row, or empty, do nothing.
+reorder_to_standard_order_count_df <- function(x) {
+    x <- x[x$Counts > 0, ]
+    if (nrow(x) <= 1) return(x)
+    counts_tmp <- x$Counts
+    names(counts_tmp) <- x$Genotype
+    counts_tmp <- reorder_to_standard_order(counts_tmp)
+    ret_tmp <- na.omit(data.frame(Genotype = names(counts_tmp),
+                                  Counts = counts_tmp))
+    stopifnot(nrow(ret_tmp) == nrow(x))
+    return(ret_tmp)
+}
 
 get_display_freqs <- function(freqs, n_genes, gene_names, input2build) {
     if (input2build %in% c("upload", "dag"))

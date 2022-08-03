@@ -137,6 +137,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         ## want to display are the new data. We now elegantly return a
         ## 0-rows data frame when nothing should be returned. Explicit and clean.
 
+        ## For paranoia, we return always things in standard order Probably
+        ## unnecessary, but just in case.
         mymessage("At display_freqs")
 
         if (input$input2build == "dag") {
@@ -150,7 +152,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                           "Returning a 0-rows data frame")
                 return(data.frame(Genotype = character(), Counts = integer()))
             }
-            return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
+            return(
+                evamtools:::reorder_to_standard_order_count_df(
+                                data$csd_counts[data$csd_counts$Counts > 0, ,
+                                                drop = FALSE]))
         } else if (input$input2build == "upload") {
             mymessage("      upload")
             upl_dataset_names <- unlist(lapply(datasets$all_csd$upload, function(x) x$name))
@@ -161,7 +166,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             }
             ## With upload, we do not use number of genes
             ## Return the data we have
-            return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
+            return(
+                evamtools:::reorder_to_standard_order_count_df(
+                                data$csd_counts[data$csd_counts$Counts > 0, ,
+                                                drop = FALSE]))
         } else {
             mymessage("      mhn or csd")
             thisd <- input$input2build
@@ -172,14 +180,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                           "Returning a 0-rows data frame")
                 return(data.frame(Genotype = character(), Counts = integer()))
             }
-            
-            return(evamtools:::get_display_freqs(data$csd_counts,
-                                                 input$gene_number,
+            return(
+                evamtools:::reorder_to_standard_order_count_df(
+                                evamtools:::get_display_freqs(data$csd_counts,
+                                                              input$gene_number,
                                                  data$gene_names,
                                                  input$input2build))
-
+            )
         }
-
     })
 
     ## Force resample on gene number changes
@@ -1509,7 +1517,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     ## Genotypes table
     ## This was wrong: display_freqs removes rows of 0 count
-    ## but the data$csd_counts data frame could contain those
+    ## but the data$csd_counts data frame could contain those. Not anymore
     output$csd_counts <- DT::renderDT(display_freqs(),
                                       selection = 'none', server = TRUE,
                                       editable = list(target = "column",
