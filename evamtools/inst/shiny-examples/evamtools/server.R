@@ -710,43 +710,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$h4(HTML("<br/>")),
                      actionButton("change_gene_names", "Change gene names"),
                      )
-        } ## too much for a tooltip
-        ## else if (input$input2build %in% c("dag", "matrix")) {
-        ##   tags$div(class = "frame flex",
-        ##            tags$h3("Set the number of genes"),
-        ##            tags$h5("(Using 7 or more genes can lead ",
-        ##                    "to very long execution times for some methods ",
-        ##                    "and crowded figures.)"),
-        
-        ##            tags$div(class="inlin",
-        ##                     tags$h3(HTML("<br/>")),
-        ##                     sliderInput("gene_number", "Number of genes",
-        ##                                 value = val, max = max_genes, min = min_genes,
-        ##                                 step = 1),
-        ##                     shinyBS::bsTooltip("gene_number",
-        ##                                        paste("With MHN (but not DAG) ",
-        ##                                              "changing number of genes forces ",
-        ##                                              "the generation of data from the model ",
-        ##                                              "to prevent inconsistent states between ",
-        ##                                              "the data and the model. This is on purpose. ",
-        ##                                              "(Under MHN, adding a gene amounts to adding a row ",
-        ##                                              "and a column, and removing a gene ",
-        ##                                              "removing a row and a column; if we ",
-        ##                                              "did not force a resample and you ",
-        ##                                              "forgot to do it, the genotype data ",
-        ##                                              "could be left in a state completely ",
-        ##                                              "inconsistent with the model. ",
-        ##                                              "In contrast, with DAGs, changing ",
-        ##                                              "gene number has no effect on the ",
-        ##                                              "model until you add/remove edges.)"),
-        ##                                        "right"
-        ##                                      , options = list(container = "body")),
-        ##                     ),
-        ##            tags$h4(HTML("<br/>")),
-        ##            actionButton("change_gene_names", "Change gene names"),
-        ##            )
-        ##   }
-        
+        } 
     })
 
     observeEvent(input$change_gene_names, {
