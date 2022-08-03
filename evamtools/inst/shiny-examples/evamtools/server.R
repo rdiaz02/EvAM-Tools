@@ -2003,7 +2003,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                         ## Disabling donwload button
                         shinyjs::disable(selector = "#download_cpm")
 
-                        return(tags$h3("There are not results to show yet. Go to the input tab, select a dataset and hit the 'Run evamtools' button"))
+                        return(tags$h3("There are not results to show yet. ",
+                                       "Go to the input tab, select ",
+                                       "the data to analyze and ",
+                                       "hit the 'Run evamtools' button."))
                     }
                 }
             })
