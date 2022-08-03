@@ -247,7 +247,18 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                          "Use a different name for the uploaded data.")
                 }
                 tmp_data <- list()
-                tmp_data$data <- read.csv(input$csd$datapath)
+                tmp_data$data <- try(read.csv(input$csd$datapath))
+                if (inherits(tmp_data$data, "try-error")) {
+                    if (grepl("no lines available in input", tmp_data$data)) {
+                        stop("The uploaded data contains no valid input. ",
+                             "Did you upload an empty file?")
+                    } else {
+                        stop("Error reading the uploaded data. ",
+                             "Please ensure the file is of the correct format ",
+                             "and it contains valid data.")
+                    }
+                }
+
                 tmp_data$name <- dataset_name
 
                 datasets$all_csd[["upload"]][[dataset_name]] <-
@@ -1224,21 +1235,22 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             gene_names <- setdiff(unique(c(the_dag_data$From, the_dag_data$To)),
                                   "Root")
             tmp_dag_data <-
-                evamtools:::get_dag_data(the_dag_data
-                                       , data$dag_parent_set[gene_names]
-                                       , noise = input$dag_noise
-                                       , N = input$dag_samples
-                                       , dag_model = default_dag_model
-                                       , epos = input$dag_epos)
+                evamtools:::generate_sample_from_dag(the_dag_data
+                                                   , data$dag_parent_set[gene_names]
+                                                   , noise = input$dag_noise
+                                                   , N = input$dag_samples
+                                                   , dag_model = default_dag_model
+                                                   , epos = input$dag_epos)
                 
-                data$csd_counts <- tmp_dag_data$csd_counts
-                data$data <- tmp_dag_data$data
-                
-                datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- data$data
-                datasets$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$dag
-                datasets$all_csd[[input$input2build]][[input$select_csd]]$lambdas <- data$lambdas
-                datasets$all_csd[[input$input2build]][[input$select_csd]]$dag_parent_set <- data$dag_parent_set
-                shinyjs::enable("analysis")
+            data$csd_counts <-
+                tmp_dag_data$csd_counts[tmp_dag_data$csd_counts[, 2] > 0, ]
+            data$data <- tmp_dag_data$data
+            
+            datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- data$data
+            datasets$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$dag
+            datasets$all_csd[[input$input2build]][[input$select_csd]]$lambdas <- data$lambdas
+            datasets$all_csd[[input$input2build]][[input$select_csd]]$dag_parent_set <- data$dag_parent_set
+            shinyjs::enable("analysis")
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
         })
@@ -1469,7 +1481,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             genot_count <- ifelse(is.na(input$genotype_freq), -1,
                                   input$genotype_freq)
 
-            if (genot_count >= 0) {
+            if (genot_count > 0) {
                 data$csd_counts[genotype, ] <- c(genotype, genot_count)
                 rownames(data$csd_counts) <- data$csd_counts$Genotype
                 data$csd_counts[, 2] <- as.numeric(data$csd_counts[, 2])
@@ -1496,6 +1508,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
     ## Genotypes table
+    ## This was wrong: display_freqs removes rows of 0 count
+    ## but the data$csd_counts data frame could contain those
     output$csd_counts <- DT::renderDT(display_freqs(),
                                       selection = 'none', server = TRUE,
                                       editable = list(target = "column",
