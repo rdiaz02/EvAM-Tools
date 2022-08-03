@@ -770,7 +770,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         if (input$input2build %in% c("csd", "dag", "matrix")){
 
             tags$div(class = "frame flex",
-                     tags$h3("1. Set the number of genes"),
+                     tags$h3("Set the number of genes"),
                      tags$h5("(Using 7 or more genes can lead ",
                              "to very long execution times for some methods ",
                              "and crowded figures.)"),
@@ -834,7 +834,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         if (input$input2build == "csd") {
             
             tags$div(
-                     tags$h3("2. Add genotypes"),
+                     tags$h3("Add genotypes"),
                      tags$h5("WT is added by not clicking on any mutations. "),
                      ## "but the WT genotype should not be the first one added ",
                      ##         "(or you'll get an innocuous error message)."),
@@ -882,14 +882,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             }
             tags$div(                    
                      tags$div(class = "flex",
-                              tags$h3("2. Define a Directed Acyclic Graph (DAG) ",
+                              tags$h3("Define a Directed Acyclic Graph (DAG) ",
                                       "and generate data from it."),
                               actionButton("how2build_dag", "Help", class = "btn-info")
                               ),
                      if(!is.null(data$lambdas)){
                          tags$div(
                                   tags$h4(HTML("<br/>")),
-                                  tags$h4(HTML("<u>2.1. Define DAG</u>")),
+                                  tags$h4(HTML("<u>1. Define DAG</u>")),
                                   tags$h4(HTML("<br/>")),
                                   tags$h4("Type of model"),
                                   tags$div(class = "inline",
@@ -932,7 +932,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   DT::DTOutput("dag_table"),
                                   tags$h3(HTML("<br/>")),
                                   tags$h4(HTML("<br/>")),
-                                  tags$h4(HTML("<u>2.2. Generate data from the DAG model</u>")),
+                                  tags$h4(HTML("<u>2. Generate data from the DAG model</u>")),
                                   tags$h4(HTML("<br/>")),
                                   numericInput("dag_epos",
                                                HTML("epos,&epsilon;"),
@@ -991,7 +991,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tags$div(
                      tags$div(class = "flex",
                               ## tags$h3("2. Define input with a Matrix"),
-                              tags$h3("2. Define MHN's log-Theta",
+                              tags$h3("Define MHN's log-Theta",
                                       HTML("matrix (log-&Theta;) ",
                                            "and generate data from it.")),
                               actionButton("how2build_matrix", "Help", class = "btn-info")
@@ -999,14 +999,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      if (!is.null(data$thetas)){
                          tags$div(
                                   tags$h3(HTML("<br/>")),
-                                  tags$h4(HTML("<u>2.1. Define MHN's &theta;s</u>")),
+                                  tags$h4(HTML("<u>1. Define MHN's &theta;s</u>")),
                                   tags$h4("Entries are ",
                                           "lower case thetas, ",
                                           HTML("&theta;s, range &plusmn; &infin;"),),
                                   tags$h4(HTML("Remember to hit Ctrl-Enter when you are done editing the matrix for changes to take effect.")),
                                   DT::DTOutput("thetas_table"),
                                   tags$h3(HTML("<br/>")),
-                                  tags$h4(HTML("<u>2.2. Generate data from the MHN model</u>")),
+                                  tags$h4(HTML("<u>2. Generate data from the MHN model</u>")),
                                   tags$h4(HTML("<br/>")),
                                   div(style = "white-space: nowrap;", 
                                       numericInput("mhn_samples",
@@ -1068,7 +1068,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                  )
         } else if (input$input2build == "upload") {
             tags$div(## class = "frame",
-                     tags$h4("1. Upload data (CSV format)"),
+                     tags$h3("Upload data (CSV format)"),
                      tags$h5(HTML("If you want to give your data a specific ",
                                   "name, set it in the box below ",
                                   "before uploading the data. "
@@ -1136,7 +1136,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             menu_num <- ifelse(input$input2build == "upload", "2", "3")
             tags$div(class = "frame",
                      tags$div(class = "flex",
-                              tags$h3(paste0(menu_num, " . Change genotype's counts")),
+                              ## tags$h3(paste0(menu_num, " . Change genotype's counts")),
+                              tags$h3("Change genotype's counts"),
                               actionButton("display_help_change_genotype_counts",
                                            "Help", class = "btn-info"),
                               tags$h3(HTML("<br/>")),

@@ -651,12 +651,12 @@ user_input <- function() {
                     #  titlePanel(HTML("&ensp; Cross-sectional data input")),
                      column(width = 6,
                             column(width = 12,
-                                   uiOutput("dataset_name"),
                                    uiOutput("gene_number_slider"),
                                    tags$div(class = "frame",
                                             uiOutput("define_genotype"),
                                             ),
                                    uiOutput("change_counts"),
+                                   uiOutput("dataset_name"),
                                    uiOutput("download_data")
                                    )
                             ), 
