@@ -279,7 +279,7 @@ results_simple <- function(){
           # column(11,
             column(2,
               tags$div(class = "frame",
-                       tags$h3("Active data set"),
+                       tags$h3("Active data"),
                 uiOutput("cpm_list")
               ),
               uiOutput("customize"),
@@ -322,6 +322,7 @@ results_simple <- function(){
 
 user_input <- function() {
     fluidPage(
+        require(shinyBS),
         ## prompter::use_prompt(),
         shinyjs::useShinyjs(),
         tags$head(
