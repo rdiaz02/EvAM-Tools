@@ -1,3 +1,12 @@
+Changes in version 2.1.1 (2022-08-03):
+	- Input now clearly differentiates creating DAG/MHN from
+	  generating data from them.
+	- More consistent help and miscell typos fixed.  
+	- Return gracefully instead of giving errors when renaming
+	  not yet loaded data sets.
+	- Cleaner, more elegant handling of not-yet-created data.
+	- Code clean up.
+	
 Changes in version 2.1.0 (2022-08-02):
 	- Most of the changes affect the web app.
 	- Clearer, cleaner interface for input.
@@ -12,6 +21,7 @@ Changes in version 2.1.0 (2022-08-02):
 	- Fixed many occasional bugs: renaming genes, renaming data sets,
 	  changing genotype counts.
 	- Improved help and some tooltips.
+	
 	
 
 Changes in version 1.1.7 (2022-07-06):

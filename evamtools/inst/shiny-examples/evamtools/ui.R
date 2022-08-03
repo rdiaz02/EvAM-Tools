@@ -286,16 +286,10 @@ results_simple <- function(){
               tags$div(class = "frame",
                        tags$h3(HTML("Download CPM results <br> and analyzed data")),
                        actionButton("how2downloadcpm", "Help", class = "btn-info"),
-                       ## tags$h5(HTML("Format and contents: rds file with ",
-                       ##              "two lists: 1. cpm_output, ",
-                       ##              "the concatenated output from ",
-                       ##              "evam and sample_evam; 2. the tabular data.   ",
-                       ##              "Analyzed data in ",
-                       ##              " object$cpm_output$analyzed_data")),
-                tags$div(class = "download_button",
-                  downloadButton("download_cpm", "Download")
-                )
-                ),
+                       tags$div(class = "download_button",
+                                downloadButton("download_cpm", "Download")
+                                )
+                       ),
               tags$div(
                        tags$h5(paste("evamtools version: ",
                           packageVersion("evamtools")))
@@ -669,7 +663,6 @@ user_input <- function() {
                                      actionButton("advanced_options", "Advanced options and CPMs to use")
                                      ),
                             tags$div(id="all_advanced_options", 
-                                     ## title = tags$h3("Advanced options"),
                                      tags$div(class="inlin",
                                               tags$h5(HTML("(See additional details for all options ",
                                                            "in the help of the <tt>evam</tt> and <tt>sample_evam</tt> functions ",
@@ -833,17 +826,10 @@ user_input <- function() {
                                               selectInput("MCCBN_adaptive", "adaptive: Use an adaptive
                     annealing schedule?: ", c(TRUE, FALSE), selected = TRUE),
                     numericInput("MCCBN_seed", "Seed: ", NULL, min=0, width="50%")
-                                        # tags$h4("DISCLAIMER: Both HyperTraps and MCCBN may take hours to run")
-                                        # )
                     )
-                                        # )
-                                        # ),
                     )
-                    ## FIXME zzply
                   , plotly::plotlyOutput("plot") ## and this calls output$plot
-                    ## ,  plotOutput("plot")
                   , plotOutput("dag_plot")
-
                     )
                     )
             )

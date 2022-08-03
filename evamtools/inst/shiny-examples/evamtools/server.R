@@ -97,14 +97,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Make these deps explicit. Needed for shinytests
     data("examples_csd", package = "evamtools")
     data("SHINY_DEFAULTS", package = "evamtools")
-    ## FIXME
-    ## Eh? Why would we do this. Use a different name, do not overwrite.
     ## We subset, as lots of the examples are not really worth it for the web app.
     examples_csd$csd <- examples_csd$csd[1:5]
-    ## examples_csd$dag <- examples_csd$dag
-    ## examples_csd$upload <- examples_csd$upload
     ## The next is (one of) the functions from hell.
-    ## And the "upload" component disappears. Oh well. It was an empty list anyway.
+    ## And the "upload" component disappears; it was an empty list anyway.
     all_csd_data <- evamtools:::to_stnd_csd_all_datasets(examples_csd)
     min_genes <- .ev_SHINY_dflt$min_genes
     max_genes <- .ev_SHINY_dflt$max_genes
@@ -116,10 +112,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     last_visited_cpm <- ""
 
-    ## This is a mess. Why two different things with the same components?
     datasets <- reactiveValues(
         all_csd = all_csd_data
-        ## fixed_examples = all_csd_data
     )
 
     data <- reactiveValues(
@@ -140,7 +134,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         ## This is often called when there is no need for it. So when you change
         ## the type of data entering (go from MHN to upload, for example) this is
         ## called again and returns the data but for nothing since what we will
-        ## want to display are the new data.
+        ## want to display are the new data. We now elegantly return a
+        ## 0-rows data frame when nothing should be returned. Explicit and clean.
 
         mymessage("At display_freqs")
 
@@ -149,7 +144,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## Other code ensures that gene number is never smaller
             ## than genes in the DAG.
             mymessage("      dag")
-            ## FIXME zz: elegant2
             dag_dataset_names <- unlist(lapply(datasets$all_csd$dag, function(x) x$name))
             if (!(data$name %in% dag_dataset_names)) {
                 mymessage("       data$name not in dag_dataset_names. ",
@@ -159,28 +153,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
         } else if (input$input2build == "upload") {
             mymessage("      upload")
-            ## FIXME zz: elegant2
             upl_dataset_names <- unlist(lapply(datasets$all_csd$upload, function(x) x$name))
             if (is.null(data$name) || !(data$name %in% upl_dataset_names)) {
                 mymessage("       data$name not in upl_dataset_names.",
                           "Returning a 0-rows data frame")
                 return(data.frame(Genotype = character(), Counts = integer()))
             }
-            
             ## With upload, we do not use number of genes
             ## Return the data we have
             return(data$csd_counts[data$csd_counts$Counts > 0, , drop = FALSE])
-            ## ## If data$n_genes is NULL, return an empty data frame
-            ## if (is.null(data$n_genes))
-            ##     return(evamtools:::get_display_freqs(NULL,
-            ##                                          data$n_genes,
-            ##                                          data$gene_names)) 
-            ## return(evamtools:::get_display_freqs(data$csd_counts,
-            ##                                      data$n_genes,
-            ##                                      data$gene_names))
         } else {
             mymessage("      mhn or csd")
-            ## FIXME zz: elegant2
             thisd <- input$input2build
             thisd_dataset_names <- unlist(lapply(datasets$all_csd[[thisd]],
                                                  function(x) x$name))
@@ -244,8 +227,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Upload data
     observeEvent(input$csd, {
         if (grepl(".csv", input$csd$datapath)) {
-            ## dataset_name <-
-            ##     strsplit(strsplit(input$csd$name, ".csv")[[1]], "_")[[1]][[1]]
             tryCatch({
                 dataset_name <- input$name_uploaded
                 ## repeated from obserEvent(input$save_csd_data
@@ -278,14 +259,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 )
                                         # tmp_data$gene_names <- colnames(tmp_data$data)
                 tmp_data$n_genes <- ncol(tmp_data$data)
-                ## We are not filling up
-                ## dag, dag_parent_set, lambdas, thetas, trm. So what?
-                ## zz_dupl
-                ## Compare with observeEvent(input$save_csd_data
-                ## this forces creating copy so name sticks forever
-                ## but gives error later. And actually being able to change
-                ## name via (Re)name the data is nice. 
-                ## datasets$fixed_examples[["upload"]][[dataset_name]] <- tmp_data
                 datasets$all_csd[["upload"]][[dataset_name]] <- tmp_data
                 
                 last_visited_pages["upload"] <<- dataset_name
@@ -374,20 +347,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      "Use a different name.")
             }
 
-
-            ## I do not understand why this would ever be needed
-            ## except maybe for genotype data.
-            ## But it is not assumed we only have csd_counts, as we use
-            ## data$data.
-            ## This can possibly change order of columns in data
-            ## and thus gene_names from data$gene_names would not longer match
-            ## gene names in columns of this new data
-            ## if (nrow(data$csd_counts) > 0) {
-            ##     datasets$all_csd[[input$input2build]][[input$dataset_name]]$data <-
-            ##         evamtools:::genotypeCounts_to_data(data$csd_counts,
-            ##                                            e = 0)
-            ## }
-
             ## Is this ever possible?
             if ( (nrow(data$csd_counts) > 0 ) &&  (is.null(data$data))) {
                 stop("This should not be possible: ",
@@ -419,49 +378,33 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 rm(ddtmp2, ddtmp)
             }
 
-            if ((input$input2build == "upload") && is.null(data$data))
+            if ((input$input2build == "upload") && is.null(data$data)) {
                 stop("When no data has been uploaded, ",
                      "it makes no sense to rename the data: ",
                      "there is nothing you could do with them, ",
                      "since there are none.")
+            }
             
-                ## FIXME zz:rename-before-data
-                ## could just disallow renaming if there are no data. But why?
-                n_genes <- ifelse(input$input2build == "upload",
-                           ifelse(is.null(data$data), 0, ncol(data$data)),
-                           input$gene_number)
-                
-                tmp_data <- list(
-                    data = data$data
-                  , dag = data$dag
-                  , gene_names = data$gene_names
-                  , dag_parent_set = data$dag_parent_set
-                  , lambdas = data$lambdas
-                  , thetas = data$thetas
-                  , trm = data$trm
-                  , n_genes = n_genes
-                  , name = input$dataset_name)
+            n_genes <- ifelse(input$input2build == "upload",
+                       ifelse(is.null(data$data), 0, ncol(data$data)),
+                       input$gene_number)
+            
+            tmp_data <- list(
+                data = data$data
+              , dag = data$dag
+              , gene_names = data$gene_names
+              , dag_parent_set = data$dag_parent_set
+              , lambdas = data$lambdas
+              , thetas = data$thetas
+              , trm = data$trm
+              , n_genes = n_genes
+              , name = input$dataset_name)
 
-                
-                ## We should always enter here, since you can no longer use
-                ## an existing name
-                ## if (!(input$dataset_name %in% names(datasets$all_csd[[input$input2build]]))) {
-                ##     ## FIXME zz:fixed_examples_mess
-                ##     ## datasets$fixed_examples[[input$input2build]][[input$dataset_name]] <- tmp_data
-                ##     datasets$all_csd[[input$input2build]][[input$dataset_name]] <- tmp_data
-                ## }
+            datasets$all_csd[[input$input2build]][[input$dataset_name]] <- tmp_data
 
-                ## Like 205 and 207. Assigning name not needed
-                datasets$all_csd[[input$input2build]][[input$dataset_name]] <- tmp_data
-
-                ## ## FIXME zz:fixed_examples_mess. No idea why this would be a sensible
-                ## ## thing. Not anymore, since no longer fixed_examples
-                ## datasets$all_csd[[input$input2build]][[input$select_csd]] <-
-                ##     datasets$fixed_examples[[input$input2build]][[input$select_csd]]
-
-                ## 3 update selected entry
-                updateRadioButtons(session, "select_csd",
-                                   selected = input$dataset_name)
+            ## 3 update selected entry
+            updateRadioButtons(session, "select_csd",
+                               selected = input$dataset_name)
 
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
@@ -559,7 +502,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     
     observeEvent(toListen(), {
         tryCatch({
-            ## FIXME zz2s: the next two we are observing on
+            ## The next two we are observing on
             ## input$select_csd
             ## input$input2build
 
@@ -597,12 +540,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 n_genes <- data$n_genes
                 if (is.null(n_genes)) {
                     n_genes <- .ev_SHINY_dflt$ngenes
-                } ## Next lines: FIXME zz23. ## ## FIXME zz23: proposed changes
+                } 
             } else if (input$input2build %in% c("csd", "upload")) {
-                ## Never show DAGs here.
-                ## FIXME zz:41: should not be needed.
-                ## data$dag[] <- 0
-                
                 if (!is.null(data$data))  {
                     n_genes <- ncol(data$data)  
                 } else { ## data$data is null
@@ -615,34 +554,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             } else {
                 stop("No appropriate input2build")
             }
-            ## FIXME zz23: old
-            ## else if (input$input2build == "csd" && !is.null(data$data)) {
-            ##         n_genes <- ncol(data$data)
-            ##         ## Never show DAGs here.
-            ##         data$dag[] <- 0
-            ## } else if (input$input2build %in% c("csd", "upload") && is.null(data$data)) {
-            ##         n_genes <- .ev_SHINY_dflt$ngenes
-            ##         data$dag[] <- 0
-            ## } 
 
-
-            ## ## FIXME zz24
-            ## if (input$input2build %in% c("csd", "dag", "matrix")) {
-            ##     ## number of genes, in the "Set the number of genes"
-            ##     updateNumericInput(session, "gene_number", value = n_genes)
-            ##     updateCheckboxGroupInput(session, "genotype", label = "Mutations",
-            ##                              choices = lapply(1:n_genes, function(i)data$gene_names[i]),
-            ##                              selected = NULL)
-            ##     ## Where we "Add genotypes" manually. This sets the count
-            ##     updateNumericInput(session, "genotype_freq", value = NA)
-            ## }
-
-            ## FIXME zz24: proposed change
             if (input$input2build %in% c("csd", "dag", "matrix")) {
                 ## number of genes, in the "Set the number of genes"
                 updateNumericInput(session, "gene_number", value = n_genes)
             } else if (input$input2build == "upload") {
-                ## FIXME zz26: set gene_number to NULL. Never used for upload
+                ## Set gene_number to NULL. Never used for upload
                 updateNumericInput(session, "gene_number", value = NULL)
             }
 
@@ -698,22 +615,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 length(new_gene_names)) {
                 stop("Number of old and new gene names differs.")
             }
-
-            ## ## Rename stuff
-            ## new_data <- evamtools:::to_stnd_csd_dataset(data)
-            ## data$data <- new_data$data
-            ## data$dag <- new_data$dag
-            ## data$dag_parent_set <- new_data$dag_parent_set
-            ## data$thetas <- new_data$thetas
-            ## data$lambdas <- new_data$lambdas
-            ## data$csd_counts <- new_data$csd_counts
-
-            ## datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
-
             
-            
-            ## Simple lookup-dictionary.
-            ## to_stnd_csd_dataset is a function from hell.
+            ## Use a simple lookup-dictionary and 
+            ## avoid to_stnd_csd_dataset which is a function from hell.
             old_gene_names <- data$gene_names
             new_gene_names <- c(new_gene_names,
                                 LETTERS[(length(new_gene_names) + 1):max_genes]
@@ -840,8 +744,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tags$div(
                      tags$h3("Add genotypes"),
                      tags$h5("WT is added by not clicking on any mutations. "),
-                     ## "but the WT genotype should not be the first one added ",
-                     ##         "(or you'll get an innocuous error message)."),
                      tags$h5("Any gene without mutations is excluded from the data, ",
                              "regardless of the setting for number of genes. "),
                      tags$h5("If any gene is always observed mutated ",
@@ -1042,11 +944,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                      "right"
                                                    , options = list(container = "body")
                                                      ),
-                                  ## tags$h5("Observational noise (e.g., genotyping error). ",
-                                  ##         "Added during sampling, ",
-                                  ##         "after predictions from model ",
-                                  ##         "have been obtained; ",
-                                  ##         "predicted probabilities are not affected."),
                                   tags$h5(HTML("<br/>")),
                                   actionButton("resample_mhn", "Generate data from MHN model"),
                                   actionButton("clear_mhn",
@@ -1077,8 +974,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$h5(HTML("If you want to give your data a specific ",
                                   "name, set it in the box below ",
                                   "before uploading the data. "
-                                  ## , "or modify it afterwards  with '(Re)name "
-                                  ## , "the data'"
                                   )),
                      tags$div(class = "inlin3",
                               textInput(inputId = "name_uploaded",
@@ -1169,43 +1064,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
     })
 
-    
-
-                                        # output$upload_data <- renderUI({
-                                        # if (input$input2build == "csd") {
-                                        #     tags$div(## class = "frame",
-                                        #              tags$h4("0. Upload your own data"),
-                                        #              tags$h5(paste0("Format: csv ---comma separated values---,",
-                                        #                             " with first row with gene names."
-                                        #                             )),
-                                        #              tags$h5(HTML("Use only alphanumeric characters ",
-                                        #                           "for gene names, and do not start ",
-                                        #                           "a gene name with a number; ",
-                                        #                           "keep gene names short (for figures). ",
-                                        #                           "Use 0 or 1 for ",
-                                        #                           "altered/not-altered (mutated/not-mutated)."                  
-                                        #                           )),
-                                        #              tags$div(class = "upload_file",
-                                        #                       fileInput("csd", "Load Data",
-                                        #                                 multiple = FALSE,
-                                        #                                 accept = c(
-                                        #                                     "text/csv",
-                                        #                                     ".csv"))),
-                                        #              tags$h5(HTML("If you want to give your dataset a specific ",
-                                        #                           "name, set it in the box below ",
-                                        #                           "before uploading the data, ",
-                                        #                           "or modify it afterwards  with '(Re)name ",
-                                        #                           "the data'")),
-                                        #              tags$div(class = "inlin3",
-                                        #                       textInput(inputId = "name_uploaded",
-                                        #                                 label = "Name for dataset",
-                                        #                                 value = "Uploaded_data"
-                                        #                                 )
-                                        #                       ),
-                                        #              tags$h5(HTML("<br/>")),
-                                        #              )
-                                        # }
-                                        # })
 
     ## DAG builder
     ## Controling dag builder
@@ -1228,7 +1086,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## But this is part of the UI and the other is listening. I guess
             ## this must come first?
             
-            ## dag_dataset_names <- unlist(lapply(all_csd_data$dag, function(x) x$name))
             dag_dataset_names <- unlist(lapply(datasets$all_csd$dag, function(x) x$name))
 
             if (!(data$name %in% dag_dataset_names)) {
@@ -1237,7 +1094,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             }
             
             ## I have to this weird thing because using data$gene_names does not work
-            ## for some unkown reason. Eh??!!!
+            ## for some unkown reason. Eh??!!! What weird thing?
             names(tmp_dag_parent_set) <- all_gene_names[seq(2, x + 1)]
             dag_data <- data.frame(From = all_gene_names[edges[, "row"]]
                                  , To = all_gene_names[edges[, "col"]]
@@ -1392,12 +1249,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         showModal(modalDialog(
             easyClose = TRUE,
             title = tags$h3("Downloading CPMs results and analyzed data"),
-            ## tags$h4(HTML("Format and contents: rds file with ",
-            ##              "two lists: 1. cpm_output, ",
-            ##              "the concatenated output from ",
-            ##              "evam and sample_evam; 2. the tabular data.   ",
-            ##              "Analyzed data in ",
-            ##              " object$cpm_output$analyzed_data"))
             tags$div(
                      tags$p(HTML("Format and contents: rds file with ",
                                  "two lists: <ul>")),
@@ -1666,7 +1517,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             if (any(data$csd_counts[, 2] < 0))
                 showModal(modalDialog(paste("Counts < 0 present. ",
                                             "They will be removed.")))
-                ## FIXME: zz33 We want to purge 0 entries
+                ## We want to purge 0 entries
                 data$csd_counts <- data$csd_counts[data$csd_counts[, 2] > 0, ]
                 data$data <-
                     datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
@@ -1678,17 +1529,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
     ## ## Plot histogram of genotypes
-    ## Sometimes this leads to three calls or even four calls
-    ## Some with an object with 0 rows
-    ## FIXME zzply
-    ## output$plot <- renderPlot({
-    ##     tryCatch({
-    ##         evamtools:::plot_genotype_counts(display_freqs())
-    ##     }, error = function(e){
-    ##         showModal(dataModal(e[[1]]))
-    ##     })
-    ## })
-
     output$plot <- plotly::renderPlotly({
         tryCatch({
             mymessage("At output$plot")
@@ -1941,81 +1781,81 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
             
 
-            output$sims2 <- renderUI({
-                if ((length(names(all_cpm_out)) > 0)  && (!is.null(input$select_cpm))) {
-                    tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
-                    ## Enabling donwload button
-                    shinyjs::enable(selector = "#download_cpm")
+    output$sims2 <- renderUI({
+        if ((length(names(all_cpm_out)) > 0)  && (!is.null(input$select_cpm))) {
+            tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
+            ## Enabling donwload button
+            shinyjs::enable(selector = "#download_cpm")
 
-    ## Main display
-                    selected_plot_type <- input$data2plot
+            ## Main display
+            selected_plot_type <- input$data2plot
 
-                    number_of_columns <- floor(12 /
-                                               ifelse(length(plot2show()) <=0, 1, length(plot2show())))
-                    if(!(is.null(selected_plot_type))){
-                        if(selected_plot_type %in% c("trans_mat", "trans_rate_mat")){
-                            lapply(plot2show(), function(met){
-                                method_data <- evamtools:::process_data(tmp_data, met,
-                                                                        plot_type = selected_plot_type)
-                                output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
-                                    pl <- evamtools:::plot_genot_fg(method_data$data2plot,
+            number_of_columns <- floor(12 /
+                                       ifelse(length(plot2show()) <=0, 1, length(plot2show())))
+            if(!(is.null(selected_plot_type))){
+                if(selected_plot_type %in% c("trans_mat", "trans_rate_mat")){
+                    lapply(plot2show(), function(met){
+                        method_data <- evamtools:::process_data(tmp_data, met,
+                                                                plot_type = selected_plot_type)
+                        output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
+                            pl <- evamtools:::plot_genot_fg(method_data$data2plot,
                                         # We use it to define "Observed" and "Not Observed" genotypes
-                                                                    observations = tmp_data$original_data, 
-                                                                    sampled_counts = method_data$sampled_genotype_counts,
-                                                                    top_paths = input$freq2label,
-                                                                    label_type = input$label2plot,
-                                                                    plot_type = selected_plot_type)
-                                })
-                                return(
-                                    column(number_of_columns,
-                                           plotOutput(sprintf("plot_sims2_%s", met)))
-                                )
-                            })
-                        } else if(selected_plot_type %in% c("predicted_genotype_freqs", "sampled_genotype_counts")){
-                            lapply(plot2show(), function(met){
-                                method_data <- evamtools:::process_data(tmp_data, met,
-                                                                        plot_type = selected_plot_type)$data2plot
+                                                            observations = tmp_data$original_data, 
+                                                            sampled_counts = method_data$sampled_genotype_counts,
+                                                            top_paths = input$freq2label,
+                                                            label_type = input$label2plot,
+                                                            plot_type = selected_plot_type)
+                        })
+                        return(
+                            column(number_of_columns,
+                                   plotOutput(sprintf("plot_sims2_%s", met)))
+                        )
+                    })
+                } else if(selected_plot_type %in% c("predicted_genotype_freqs", "sampled_genotype_counts")){
+                    lapply(plot2show(), function(met){
+                        method_data <- evamtools:::process_data(tmp_data, met,
+                                                                plot_type = selected_plot_type)$data2plot
 
-                                if(selected_plot_type %in% c("predicted_genotype_freqs")){
-                                    data2plot <- data.frame("Genotype" = names(method_data), 
-                                                            "Freq" = as.vector(method_data))
+                        if(selected_plot_type %in% c("predicted_genotype_freqs")){
+                            data2plot <- data.frame("Genotype" = names(method_data), 
+                                                    "Freq" = as.vector(method_data))
 
-                                }
-                                if(selected_plot_type %in% c("sampled_genotype_counts")){
-                                    data2plot <- data.frame("Genotype" = names(method_data), 
-                                                            "Counts" = as.vector(method_data))
-                                }
-                                output[[sprintf("plot_sims2_%s", met)]] <- renderPlot(
-                                    pl <- evamtools:::plot_genotype_counts(data2plot)
-                                )
-                                return(
-                                    column(number_of_columns,
-                                           plotOutput(sprintf("plot_sims2_%s", met)))
-                                )
-                                ## Trying to use plotly. Does not work. I give up
-                                ## Anyway, not really needed: would be slower, and the
-                                ## numbers can be easily seen in the table.
-                                ## output[[sprintf("plot_sims2_%s", met)]] <-
-                                ##     plotly::renderPlotly(
-                                ##                 pl <- evamtools:::plot_genotype_counts_plly(data2plot)
-                                ##             )
-                                ## return(
-                                ##     column(number_of_columns,
-                                ##            plotly::plotlyOutput(sprintf("plot_sims2_%s", met)))
-                                ## )
+                        }
+                        if(selected_plot_type %in% c("sampled_genotype_counts")){
+                            data2plot <- data.frame("Genotype" = names(method_data), 
+                                                    "Counts" = as.vector(method_data))
+                        }
+                        output[[sprintf("plot_sims2_%s", met)]] <- renderPlot(
+                            pl <- evamtools:::plot_genotype_counts(data2plot)
+                        )
+                        return(
+                            column(number_of_columns,
+                                   plotOutput(sprintf("plot_sims2_%s", met)))
+                        )
+                        ## Trying to use plotly. Does not work. I give up
+                        ## Anyway, not really needed: would be slower, and the
+                        ## numbers can be easily seen in the table.
+                        ## output[[sprintf("plot_sims2_%s", met)]] <-
+                        ##     plotly::renderPlotly(
+                        ##                 pl <- evamtools:::plot_genotype_counts_plly(data2plot)
+                        ##             )
+                        ## return(
+                        ##     column(number_of_columns,
+                        ##            plotly::plotlyOutput(sprintf("plot_sims2_%s", met)))
+                        ## )
 
-                            })
-                        } 
-                    } else {
-                        ## Disabling donwload button
-                        shinyjs::disable(selector = "#download_cpm")
+                    })
+                } 
+            } else {
+                ## Disabling donwload button
+                shinyjs::disable(selector = "#download_cpm")
 
-                        return(tags$h3("There are not results to show yet. ",
-                                       "Go to the input tab, select ",
-                                       "the data to analyze and ",
-                                       "hit the 'Run evamtools' button."))
-                    }
-                }
+                return(tags$h3("There are not results to show yet. ",
+                               "Go to the input tab, select ",
+                               "the data to analyze and ",
+                               "hit the 'Run evamtools' button."))
+            }
+        }
             })
 
     ## Go back to input to work again with the data
@@ -2144,26 +1984,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
     })
 
-    ## FIXME zzplyt
-    ## output$csd <- renderPlot({
-    ##     evamtools:::plot_genotype_counts(evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data))
-    ## })
-
-    ## FIXME zzply
-    ## output$original_data <- renderUI({
-    ##     ## To see if I disable original data
-    ##     if(length(names(all_cpm_out)) > 0){
-    ##         tags$div(class="frame max_height",
-    ##                  tags$h3("Original data"),
-    ##                  plotOutput("csd"),
-    ##                  tags$div(class = "download_button",
-    ##                           actionButton("modify_data", "Modify data")
-    ##                           )
-    ##                  )
-    ##     }
-    ## })
-
-
     output$original_data <- renderUI({
         ## To see if I disable original data        
         if (length(names(all_cpm_out)) > 0) {
@@ -2203,22 +2023,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$h4("(This output is also displayed as the second row of figures. ",
                              "Choose the output to display from the left radio buttons ",
                              "'Predictions from models to display')"),
-                                        #  radioButtons(inputId = "tabular_data2show",
-                                        #               label = "",
-                                        #               inline = TRUE,
-                                        #               choiceNames =  c( "Transition probabilities",
-                                        #                                "Transition rates",
-                                        #                                "Predicted genotype relative frequencies",
-                                        #                                "Sampled genotype counts",
-                                        #                                "Observed genotype transitions (counts)"
-                                        #                                ),
-                                        #               choiceValues =  c("trans_mat",
-                                        #                                 "trans_rate_mat",
-                                        #                                 "predicted_genotype_freqs",
-                                        #                                 "sampled_genotype_counts",
-                                        #                                 "obs_genotype_transitions"),
-                                        #               selected = "trans_mat"
-                                        #               ),
                      tags$div(
                               DT::DTOutput("cpm_freqs")
                           )
