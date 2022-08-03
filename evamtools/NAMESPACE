@@ -62,4 +62,4 @@ importFrom(magrittr, "%>%")
 ## No, we can use the now built-in "|>"
 ## export("%>%")
 ## importFrom("prompter", "add_prompt", "use_prompt")
-importFrom("shinyBS", "bsTooltip")
+importFrom("shinyBS", "bsTooltip", "removeTooltip")
