@@ -53,6 +53,21 @@ dag_more_genes_than_set_genes <- function(input, dag_data = dag_data(),
         return(FALSE)
 }
 
+## For assumption A1_gnn
+## x: the big data object's matrix
+set_gene_names_after_resize <- function(x, n_genes, gene_names) {
+    gene_names_num <- length(gene_names)
+    gene_names_in_freqs <- sort(colnames(x))
+    if (length(gene_names_in_freqs) == 0) {
+        ## Only WT
+        return(gene_names)
+    } else {
+        gene_names_wo_current <- sort(setdiff(gene_names, gene_names_in_freqs))
+        gene_names <-
+            c(gene_names_in_freqs, gene_names_wo_current)[1:gene_names_num]
+        return(gene_names)
+    }
+}
 
 dag_message_more_genes_than_set_genes <- function() {
     showModal(modalDialog(
@@ -180,12 +195,29 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                           "Returning a 0-rows data frame")
                 return(data.frame(Genotype = character(), Counts = integer()))
             }
+
+            
+            ## The code in A1_gnn is not updating data$etc.
+            ## input$gene_number has been changed but has not triggered
+            ## changing data. I do not understand it.
+            ## It does not happen in the single observeEvent for input$gene_number
+            ## and not in the updateNumericInput for input$gene_number
+            ## So force it here if there have been changes in input$gene_number
+            if (!is.null(data$n_genes) &&
+                input$gene_number != data$n_genes) {
+                mymessage("Updating gene names in data")
+                new_gnames2 <- set_gene_names_after_resize(data$data,
+                                                           input$gene_number,
+                                                           data$gene_names)
+                data$gene_names <- new_gnames2
+            }
+
             return(
                 evamtools:::reorder_to_standard_order_count_df(
                                 evamtools:::get_display_freqs(data$csd_counts,
                                                               input$gene_number,
-                                                 data$gene_names,
-                                                 input$input2build))
+                                                              data$gene_names,
+                                                              input$input2build))
             )
         }
     })
@@ -219,7 +251,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         mymessage("at gene number_trigger")
         datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
             input$gene_number
-        if (input$input2build == "dag") {
+        if (input$input2build == "csd") {
+            ## Set gene names correctly if there have been changes
+            ## Counterpart to check A1_gnn in get_display_freqs
+            new_gnames <-
+                set_gene_names_after_resize(datasets$all_csd[[input$input2build]][[input$select_csd]]$data,
+                                            datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes,
+                                            datasets$all_csd[[input$input2build]][[input$select_csd]]$gene_names)
+            datasets$all_csd[[input$input2build]][[input$select_csd]]$gene_names <- new_gnames
+        } else if (input$input2build == "dag") {
             if (dag_more_genes_than_set_genes(input, dag_data(), session)) {
                 dag_message_more_genes_than_set_genes()
             }
@@ -345,7 +385,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     ## Saving dataset
     observeEvent(input$save_csd_data, {
-
         tryCatch({
             ## 1 save dataset to list after user data
             if (gsub(" ", "", input$dataset_name, fixed = TRUE) == "") {
@@ -386,9 +425,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             if (nrow(data$csd_counts) > 0) {
                 ddtmp <- evamtools:::genotypeCounts_to_data(data$csd_counts,
                                                             e = 0)
-                ddtmp2 <- data$data[, colnames(ddtmp)]
+                ddtmp2 <- data$data[, colnames(ddtmp), drop = FALSE]
                 stopifnot(all.equal(colSums(ddtmp2), colSums(ddtmp)))
-                c_ddtmp2 <- evamtools:::data_to_counts(ddtmp2, "data.frame", omit_0 = TRUE)
+                c_ddtmp2 <- evamtools:::data_to_counts(ddtmp2, "data.frame",
+                                                       omit_0 = TRUE)
                 rownames(c_ddtmp2) <- c_ddtmp2$Genotype
                 csdc_clean <- data$csd_counts[data$csd_counts$Counts > 0, ]
                 rownames(csdc_clean) <- csdc_clean$Genotype
@@ -403,7 +443,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      "there is nothing you could do with them, ",
                      "since there are none.")
             }
-            
             n_genes <- ifelse(input$input2build == "upload",
                        ifelse(is.null(data$data), 0, ncol(data$data)),
                        input$gene_number)
@@ -1897,7 +1936,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 data <- tmp_data
                 data$csd_counts <- evamtools:::get_csd(tmp_data$data)
                 data$n_genes <- ncol(data$data)
-
                 updateNumericInput(session, "gene_number", value = data$n_genes)
                 updateTabsetPanel(session, "navbar",
                                   selected = "csd_builder")

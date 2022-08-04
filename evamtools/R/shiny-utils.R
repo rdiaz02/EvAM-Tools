@@ -23,6 +23,7 @@ reorder_to_standard_order_count_df <- function(x) {
     counts_tmp <- reorder_to_standard_order(counts_tmp)
     ret_tmp <- na.omit(data.frame(Genotype = names(counts_tmp),
                                   Counts = counts_tmp))
+    attributes(ret_tmp)$na.action <- NULL
     stopifnot(nrow(ret_tmp) == nrow(x))
     return(ret_tmp)
 }
@@ -35,8 +36,28 @@ get_display_freqs <- function(freqs, n_genes, gene_names, input2build) {
              "and upload does not use that setting at all.")
     if (is.null(freqs)) return(.ev_SHINY_dflt$template_data$csd_counts)
     if (nrow(freqs) == 0) return(.ev_SHINY_dflt$template_data$csd_counts)
+    
+    ## Assumes genes in the order given
     valid_gene_names <- c("WT", gene_names[1:n_genes])
+    ## Verify assumption. This is an assumption about input.
+    ##  gene_names must have been set correctly
+    ##  This is check A1_gnn
 
+    gene_names_in_freqs <- setdiff(unlist(strsplit(freqs$Genotype, ", ")), "WT")
+    if (length(gene_names_in_freqs)) {
+        if (n_genes >= (length(gene_names_in_freqs))) {
+            stopifnot(all(gene_names_in_freqs %in% valid_gene_names))
+        } else {
+            stopifnot(sort(gene_names_in_freqs)[1:n_genes] %in% valid_gene_names)
+        }
+    }
+    
+    ## valid_gene_names <- unique(c("WT", unlist(strsplit(freqs$Genotype, ", "))))
+    ## gene_names_in_freqs <- setdiff(unlist(strsplit(freqs$Genotype, ", ")), "WT")
+    ## other_gene_names <- setdiff(gene_names, gene_names_in_freqs)
+    ## possible_gene_names <- c(gene_names_in_freqs, )
+    ## valid_gene_names <- c("WT", gn_in_freqs)
+    
     ## Why would this be necessary?  To make sure size of data reduced when
     ##    changing number of gens and we use genotype freqs.  But this works poorly
     ##    with DAGs; it leads to incorrect behavior like having in dag only A and C,
