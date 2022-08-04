@@ -711,67 +711,67 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
 
-    ## Updating gene names
-    observeEvent(input$action_gene_names,{
-        tryCatch({
-            new_gene_names <-
-                strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]]
-            if (isTRUE(any(duplicated(new_gene_names)))) {
-                stop("Duplicated new gene names.")
-            }
-            if (length(data$gene_names[1:input$gene_number]) !=
-                length(new_gene_names)) {
-                stop("Number of old and new gene names differs.")
-            }
-            
-            ## Use a simple lookup-dictionary and 
-            ## avoid to_stnd_csd_dataset which is a function from hell.
-            old_gene_names <- data$gene_names
-            new_gene_names <- c(new_gene_names,
-                                LETTERS[(length(new_gene_names) + 1):max_genes]
-                                )
-            names_dict <- new_gene_names
-            names(names_dict) <- old_gene_names
-            ## For the DAG
-            names_dict <- c(names_dict, "Root" = "Root")
-            
-            new_data <- list()
-            new_data$gene_names <- new_gene_names
-            new_data$name <- data$name
-            new_data$lambdas <- data$lambdas
-            new_data$dag_parent_set <- data$dag_parent_set
-            new_data$dag <- data$dag
-            new_data$thetas <- data$thetas
-            new_data$data <- data$data
+    ## ## Updating gene names
+    ## observeEvent(input$action_gene_names,{
+    ##     tryCatch({
+    ##         new_gene_names <-
+    ##             strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]]
+    ##         if (isTRUE(any(duplicated(new_gene_names)))) {
+    ##             stop("Duplicated new gene names.")
+    ##         }
+    ##         if (length(data$gene_names[1:input$gene_number]) !=
+    ##             length(new_gene_names)) {
+    ##             stop("Number of old and new gene names differs.")
+    ##         }
+    
+    ##         ## Use a simple lookup-dictionary and 
+    ##         ## avoid to_stnd_csd_dataset which is a function from hell.
+    ##         old_gene_names <- data$gene_names
+    ##         new_gene_names <- c(new_gene_names,
+    ##                             LETTERS[(length(new_gene_names) + 1):max_genes]
+    ##                             )
+    ##         names_dict <- new_gene_names
+    ##         names(names_dict) <- old_gene_names
+    ##         ## For the DAG
+    ##         names_dict <- c(names_dict, "Root" = "Root")
+    
+    ##         new_data <- list()
+    ##         new_data$gene_names <- new_gene_names
+    ##         new_data$name <- data$name
+    ##         new_data$lambdas <- data$lambdas
+    ##         new_data$dag_parent_set <- data$dag_parent_set
+    ##         new_data$dag <- data$dag
+    ##         new_data$thetas <- data$thetas
+    ##         new_data$data <- data$data
 
-            ## To rename, use lookup
-            names(new_data$lambdas) <- names_dict[names(new_data$lambdas)]
-            names(new_data$dag_parent_set) <- names_dict[names(new_data$dag_parent_set)]
-            colnames(new_data$dag) <- names_dict[colnames(new_data$dag)]
-            rownames(new_data$dag) <- names_dict[rownames(new_data$dag)]
-            colnames(new_data$thetas) <- names_dict[colnames(new_data$thetas)]
-            rownames(new_data$thetas) <- names_dict[rownames(new_data$thetas)]
-            if (!is.null(new_data$data)) {
-                colnames(new_data$data) <- names_dict[colnames(new_data$data)]
-            }
-            ## To create
-            new_data$csd_counts <- get_csd(new_data$data)
-            
-            ## Assign to the correct places
-            data$gene_names <- new_gene_names
-            data$data <- new_data$data
-            data$dag <- new_data$dag
-            data$dag_parent_set <- new_data$dag_parent_set
-            data$thetas <- new_data$thetas
-            data$lambdas <- new_data$lambdas
-            data$csd_counts <- new_data$csd_counts
-            
-            datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
-            
-        }, error = function(e){
-            showModal(dataModal(e[[1]]))
-        })
-    })
+    ##         ## To rename, use lookup
+    ##         names(new_data$lambdas) <- names_dict[names(new_data$lambdas)]
+    ##         names(new_data$dag_parent_set) <- names_dict[names(new_data$dag_parent_set)]
+    ##         colnames(new_data$dag) <- names_dict[colnames(new_data$dag)]
+    ##         rownames(new_data$dag) <- names_dict[rownames(new_data$dag)]
+    ##         colnames(new_data$thetas) <- names_dict[colnames(new_data$thetas)]
+    ##         rownames(new_data$thetas) <- names_dict[rownames(new_data$thetas)]
+    ##         if (!is.null(new_data$data)) {
+    ##             colnames(new_data$data) <- names_dict[colnames(new_data$data)]
+    ##         }
+    ##         ## To create
+    ##         new_data$csd_counts <- get_csd(new_data$data)
+    
+    ##         ## Assign to the correct places
+    ##         data$gene_names <- new_gene_names
+    ##         data$data <- new_data$data
+    ##         data$dag <- new_data$dag
+    ##         data$dag_parent_set <- new_data$dag_parent_set
+    ##         data$thetas <- new_data$thetas
+    ##         data$lambdas <- new_data$lambdas
+    ##         data$csd_counts <- new_data$csd_counts
+    
+    ##         datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
+    
+    ##     }, error = function(e){
+    ##         showModal(dataModal(e[[1]]))
+    ##     })
+    ## })
 
     
     ## Advanced option for running evamtools
