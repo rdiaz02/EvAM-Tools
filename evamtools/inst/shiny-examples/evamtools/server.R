@@ -55,7 +55,7 @@ dag_more_genes_than_set_genes <- function(input, dag_data = dag_data(),
 
 ## For assumption A1_gnn
 ## x: the big data object's matrix
-set_gene_names_after_resize <- function(x, n_genes, gene_names) {
+set_gene_names_after_resize <- function(x, gene_names) {
     gene_names_num <- length(gene_names)
     gene_names_in_freqs <- sort(colnames(x))
     if (length(gene_names_in_freqs) == 0) {
@@ -89,6 +89,32 @@ random_dataset_name <- function() {
             sample(c(letters, 0:9), 8, replace = TRUE)),
           collapse = "")
 }
+
+## More code to solve the pervasive silly assumption that we add genes in
+## order. Now this affects the DAG
+## We want to obtain the actual gene names in the DAG
+## And no, this does not affect MHN because it ALWAYS uses all the genes
+## Somewhat similar in purpose to set_gene_names_after_resize
+
+## x: the "data" object (man, what a name!)
+gene_names_from_genes_in_DAG <- function(x, gene_names) {
+    gene_names_num <- length(gene_names)
+    the_dag <- x$data
+    in_dag <- (which(colSums(the_dag) > 0))
+    if (length(in_dag) == 0) {
+        return(gene_names)
+    } else {
+        genes_in_dag <- colnames(the_dag)[in_dag]
+        gene_names_wo_current <- sort(setdiff(gene_names, genes_in_dag))
+        gene_names <-
+            c(genes_in_dag, gene_names_wo_current)[1:gene_names_num]
+        return(gene_names)
+    }
+}
+
+
+## new_data_after_change_gene_names <- function() {}
+
 
 
 
@@ -167,6 +193,16 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                           "Returning a 0-rows data frame")
                 return(data.frame(Genotype = character(), Counts = integer()))
             }
+
+            ## FIXME: See comment below  A1_gnn_bisfix
+            ## if (!is.null(data$n_genes) &&
+            ##     input$gene_number != data$n_genes) {
+            ##     mymessage("      DAG: Updating gene names in data")
+            ##     browser()
+            ##     new_gnames2 <- set_gene_names_after_resize(data$data,
+            ##                                                data$gene_names)
+            ##     data$gene_names <- new_gnames2
+            ## }
             return(
                 evamtools:::reorder_to_standard_order_count_df(
                                 data$csd_counts[data$csd_counts$Counts > 0, ,
@@ -196,7 +232,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 return(data.frame(Genotype = character(), Counts = integer()))
             }
 
-            
+            ## FIXME: A1_gnn_bisfix
             ## The code in A1_gnn is not updating data$etc.
             ## input$gene_number has been changed but has not triggered
             ## changing data. I do not understand it.
@@ -205,9 +241,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## So force it here if there have been changes in input$gene_number
             if (!is.null(data$n_genes) &&
                 input$gene_number != data$n_genes) {
-                mymessage("Updating gene names in data")
+                mymessage("       CSD: Updating gene names in data")
                 new_gnames2 <- set_gene_names_after_resize(data$data,
-                                                           input$gene_number,
                                                            data$gene_names)
                 data$gene_names <- new_gnames2
             }
@@ -254,12 +289,19 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         if (input$input2build == "csd") {
             ## Set gene names correctly if there have been changes
             ## Counterpart to check A1_gnn in get_display_freqs
+            ## FIXME: is this really necessary? Or is the similar code
+            ## in display_freqs enough?
             new_gnames <-
                 set_gene_names_after_resize(datasets$all_csd[[input$input2build]][[input$select_csd]]$data,
-                                            datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes,
                                             datasets$all_csd[[input$input2build]][[input$select_csd]]$gene_names)
             datasets$all_csd[[input$input2build]][[input$select_csd]]$gene_names <- new_gnames
         } else if (input$input2build == "dag") {
+            ## FIXME: is this really necessary? Or is the similar code
+            ## in display_freqs enough? A1_gnn
+            ## new_gnames <-
+            ##     set_gene_names_after_resize(datasets$all_csd[[input$input2build]][[input$select_csd]]$data,
+            ##                                 datasets$all_csd[[input$input2build]][[input$select_csd]]$gene_names)
+            ## datasets$all_csd[[input$input2build]][[input$select_csd]]$gene_names <- new_gnames
             if (dag_more_genes_than_set_genes(input, dag_data(), session)) {
                 dag_message_more_genes_than_set_genes()
             }
@@ -443,6 +485,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      "there is nothing you could do with them, ",
                      "since there are none.")
             }
+
             n_genes <- ifelse(input$input2build == "upload",
                        ifelse(is.null(data$data), 0, ncol(data$data)),
                        input$gene_number)
@@ -663,7 +706,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Updating gene names
     observeEvent(input$action_gene_names,{
         tryCatch({
-
             new_gene_names <-
                 strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]]
             if (isTRUE(any(duplicated(new_gene_names)))) {
@@ -723,7 +765,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         })
     })
 
- 
+    
     ## Advanced option for running evamtools
     observeEvent(input$advanced_options, {
         shinyjs::toggle("all_advanced_options")
@@ -753,11 +795,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
     observeEvent(input$change_gene_names, {
+        if (input$input2build == "dag") {
+            gene_names_00 <- gene_names_from_genes_in_DAG(data, data$gene_names)
+        } else {
+            gene_names_00 <- data$gene_names
+        }
+
         showModal(modalDialog(
             title = tags$h3("Change gene names"),
             tags$div(class = "inlin2",
                      textInput(inputId = "new_gene_names", "Gene names",
-                               value = paste(data$gene_names[1:input$gene_number],
+                               value = paste(gene_names_00[1:input$gene_number],
                                              collapse = ", ")
                                ),
                      tags$h4(HTML("<br/>")),
@@ -943,8 +991,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   shinyBS::bsTooltip("clear_dag",
                                                      HTML("Resetting the DAG will replace the ",
                                                           "contents of the named object by ",
-                                                           "those of the default one ",
-                                                           "(a three-gene fork with lambdas = 0.5)"),
+                                                          "those of the default one ",
+                                                          "(a three-gene fork with lambdas = 0.5)"),
                                                      "right", options = list(container = "body")
                                                      ),
                                   shinyBS::removeTooltip(session, "clear_dag")
@@ -1017,11 +1065,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   ##                  position = "right",
                                   ##                  message = "the log-&Theta; matrix",
                                   ##                  ## HTML("Resetting the log-&Theta; matrix will replace the ",
-                                      ##                  ##      "contents of the named object by ",
-                                      ##                  ##      "those of the default one ",
-                                      ##                  ##      "(a three-gene matrix filled with 0s)."),
-                                      ##                  bounce = TRUE
-                                      ##              )
+                                  ##                  ##      "contents of the named object by ",
+                                  ##                  ##      "those of the default one ",
+                                  ##                  ##      "(a three-gene matrix filled with 0s)."),
+                                  ##                  bounce = TRUE
+                                  ##              )
                               )
                      }
                  )
