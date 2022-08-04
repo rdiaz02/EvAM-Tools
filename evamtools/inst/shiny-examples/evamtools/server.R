@@ -28,8 +28,8 @@ dataModal <- function(error_message, type="Error: ") {
 
 
 ## I have left a bunch of messages. To make it easier to dis/enable them
-## mymessage <- function(...) message(...)
-mymessage <- function(...) invisible(NULL)
+mymessage <- function(...) message(...)
+## mymessage <- function(...) invisible(NULL)
 
 
 
@@ -248,7 +248,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                            data$gene_names)
                 data$gene_names <- new_gnames2
             }
-            
+            mymessage("These are data$gene_names here ", data$gene_names)
             return(
                 evamtools:::reorder_to_standard_order_count_df(
                                 evamtools:::get_display_freqs(data$csd_counts,
@@ -676,10 +676,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ## id_change_genotype_muts
                 gene_options <- set_gene_names_after_resize(data$data,
                                                             data$gene_names)[1:n_genes]
-                updateCheckboxGroupInput(session, "genotype", label = "Mutations",
-                                         choices = lapply(1:(max(2, n_genes)),
-                                                          function(i) gene_options[i]),
+                ## FIXME Why the strange lapply and not just gene_options[1:input$gene_number]
+                updateCheckboxGroupInput(session,
+                                         "genotype",
+                                         label = "Mutations",
+                                         choices =
+                                             lapply(1:(max(2, n_genes)),
+                                                    function(i) gene_options[i]),
                                          selected = NULL)
+                mymessage("after updateCheckboxGroupInput, line 687")
                 ## Where we "Add genotypes" manually. This sets the count
                 updateNumericInput(session, "genotype_freq", value = NA)
             }
@@ -768,11 +773,23 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             
             datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
             
+            gene_options <- set_gene_names_after_resize(data$data,
+                                                        data$gene_names)[1:input$gene_number]
+
+            ## Why doesn't it update it!!!???
+            mymessage("These are gene_options ", gene_options)
+            updateCheckboxGroupInput(session, "genotype",
+                                     label = "Mutations",
+                                     choices = gene_options,
+                                     selected = NULL)
+            mymessage("after updateCheckboxGroupInput, line 785")
+            mymessage("   These were gene_options ", gene_options)
         }, error = function(e){
             showModal(dataModal(e[[1]]))
         })
     })
 
+    
     
     ## Advanced option for running evamtools
     observeEvent(input$advanced_options, {
@@ -799,7 +816,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               ## id: here_we_change_gene_number
                               ),
                      tags$h4(HTML("<br/>")),
-                     ## actionButton("change_gene_names", "Change gene names"),
+                     actionButton("change_gene_names", "Change gene names"),
                      )
         } 
     })
@@ -868,6 +885,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
 
         if (input$input2build == "csd") {
+            mymessage("before checkboxGroupInput, line 908")
+            this_would_be_choices <- set_gene_names_after_resize(data$data,
+                                                                 data$gene_names)[1:n_genes]
+            mymessage("    These would be choices in 908 ", this_would_be_choices)
             tags$div(
                      tags$h3("Add genotypes"),
                      tags$h5("WT is added by not clicking on any mutations. "),
@@ -889,14 +910,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  label = "Mutations",
                                                  choices = set_gene_names_after_resize(data$data,
                                                                                        data$gene_names)[1:n_genes])
-                              ## gene_options)
                               ),
                      tags$div(id="fr",
                               numericInput(label = "Counts", value = NA, min = 0,
                                            inputId = "genotype_freq", width = NA),
                               actionButton("add_genotype", "Add genotype")
                               ),
-                     )
+                     )            
         } else if (input$input2build == "dag") {
             ## Make sure all genes currently in the DAG are in
             ## the To and From to add/remove
@@ -995,159 +1015,159 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   ## tags$h5("Observational noise (e.g., genotyping error); ",
                                   ##         "a proportion between 0 and 1."),
                                   shinyBS::bsTooltip("dag_noise",
-                                                     paste("A proportion between 0 and 1. ", 
-                                                           "Observational noise (e.g., genotyping error) ",
-                                                           "for all models. ",
-                                                           "Added during sampling, ",
-                                                           "after predictions from model ",
-                                                           "have been obtained; ",
-                                                           "predicted probabilities are not affected.",
-                                                           "If larger than 0, this proportion of entries ",
-                                                           "in the sampled matrix will be flipped ",
-                                                           "(i.e., 0s turned to 1s and 1s turned to 0s)."
-                                                           ),
-                                                     "right"
-                                                   , options = list(container = "body")
-                                                     ),
-                                  tags$h5(HTML("<br/>")),
-                                  actionButton("resample_dag", "Generate data from DAG"),
-                                  actionButton("clear_dag", HTML("Reset DAG and delete genotype data")),
-                                  shinyBS::bsTooltip("clear_dag",
-                                                     HTML("Resetting the DAG will replace the ",
-                                                          "contents of the named object by ",
-                                                          "those of the default one ",
-                                                          "(a three-gene fork with lambdas = 0.5)"),
-                                                     "right", options = list(container = "body")
-                                                     ),
-                                  shinyBS::removeTooltip(session, "clear_dag")
-                              )
-                     }
-                 )
-        } else if (input$input2build == "matrix") {
-            tags$div(
-                     tags$div(class = "flex",
-                              ## tags$h3("2. Define input with a Matrix"),
-                              tags$h3("Define MHN's log-Theta",
-                                      HTML("matrix (log-&Theta;) ",
-                                           "and generate data from it.")),
-                              actionButton("how2build_matrix", "Help", class = "btn-info")
-                              ),
-                     if (!is.null(data$thetas)){
-                         tags$div(
-                                  tags$h3(HTML("<br/>")),
-                                  tags$h4(HTML("<u>1. Define MHN's &theta;s</u>")),
-                                  tags$h4("Entries are ",
-                                          "lower case thetas, ",
-                                          HTML("&theta;s, range &plusmn; &infin;"),),
-                                  tags$h4(HTML("Remember to hit Ctrl-Enter when you are done editing the matrix for changes to take effect.")),
-                                  DT::DTOutput("thetas_table"),
-                                  tags$h3(HTML("<br/>")),
-                                  tags$h4(HTML("<u>2. Generate data from the MHN model</u>")),
-                                  tags$h4(HTML("<br/>")),
-                                  div(style = "white-space: nowrap;", 
-                                      numericInput("mhn_samples",
-                                                   HTML("Number of genotypes<br>to sample"),
-                                                   value = default_csd_samples, min = 100, max = 10000,
-                                                   step = 100, width = "70%"),
-                                      ),
-                                  tags$h3(HTML("<br/>")),
-                                  div(style = "white-space: nowrap;",
-                                      numericInput("mhn_noise",
-                                                   HTML("Observational noise<br>(genotyping error)"),
-                                                   ## HTML("Noise"),
-                                                   value = 0, min = 0, max = 1,
-                                                   step = 0.025, width = "70%"),
-                                      ),
-                                  shinyBS::bsTooltip("mhn_noise",
-                                                     paste("A proportion between 0 and 1. ", 
-                                                           "Observational noise (e.g., genotyping error) ",
-                                                           "for all models. ",
-                                                           "Added during sampling, ",
-                                                           "after predictions from model ",
-                                                           "have been obtained; ",
-                                                           "predicted probabilities are not affected.",
-                                                           "If larger than 0, this proportion of entries ",
-                                                           "in the sampled matrix will be flipped ",
-                                                           "(i.e., 0s turned to 1s and 1s turned to 0s)."
-                                                           ),
-                                                     "right"
-                                                   , options = list(container = "body")
-                                                     ),
-                                  tags$h5(HTML("<br/>")),
-                                  actionButton("resample_mhn", "Generate data from MHN model"),
-                                  actionButton("clear_mhn",
-                                               HTML("Reset log-&Theta; matrix and delete genotype data")),
-                                  shinyBS::bsTooltip("clear_mhn",
-                                                     HTML("Resetting the log-&Theta; matrix will replace the ",
-                                                          "contents of the named object by ",
-                                                          "those of the default one ",
-                                                          "(a three-gene matrix filled with 0s)."),
-                                                     "right", options = list(container = "body")
-                                                     )
-                                  ## Prompter does not render the "log-&Theta"
-                                  ## |> prompter::add_prompt(
-                                  ##                  position = "right",
-                                  ##                  message = "the log-&Theta; matrix",
-                                  ##                  ## HTML("Resetting the log-&Theta; matrix will replace the ",
-                                  ##                  ##      "contents of the named object by ",
-                                  ##                  ##      "those of the default one ",
-                                  ##                  ##      "(a three-gene matrix filled with 0s)."),
-                                  ##                  bounce = TRUE
-                                  ##              )
-                              )
-                     }
-                 )
-        } else if (input$input2build == "upload") {
-            tags$div(## class = "frame",
-                     tags$h3("Upload data (CSV format)"),
-                     tags$h5(HTML("If you want to give your data a specific ",
-                                  "name, set it in the box below ",
-                                  "before uploading the data. "
-                                  )),
-                     tags$div(class = "inlin3",
-                              textInput(inputId = "name_uploaded",
-                                        label = "Name for data",
-                                        value = "Uploaded_data"
-                                        )
-                              ),
-                     tags$h5(paste0("Format: csv ---comma separated values---,",
-                                    " with first row with gene names."
-                                    )),
-                     tags$h5(HTML("Use only alphanumeric characters ",
-                                  "for gene names, and do not start ",
-                                  "a gene name with a number; ",
-                                  "keep gene names short (for figures). ",
-                                  "Use 0 or 1 for ",
-                                  "altered/not-altered (mutated/not-mutated)."                  
-                                  )),
-                     tags$div(class = "upload_file",
-                              fileInput("csd", "Load Data",
-                                        multiple = FALSE,
-                                        accept = c(
-                                            "text/csv",
-                                            ".csv"))),
-                     tags$h5(HTML("<br/>")),
+                                                         paste("A proportion between 0 and 1. ", 
+                                                               "Observational noise (e.g., genotyping error) ",
+                                                               "for all models. ",
+                                                               "Added during sampling, ",
+                                                               "after predictions from model ",
+                                                               "have been obtained; ",
+                                                               "predicted probabilities are not affected.",
+                                                               "If larger than 0, this proportion of entries ",
+                                                               "in the sampled matrix will be flipped ",
+                                                               "(i.e., 0s turned to 1s and 1s turned to 0s)."
+                                                               ),
+                                                         "right"
+                                                       , options = list(container = "body")
+                                                         ),
+                                      tags$h5(HTML("<br/>")),
+                                      actionButton("resample_dag", "Generate data from DAG"),
+                                      actionButton("clear_dag", HTML("Reset DAG and delete genotype data")),
+                                      shinyBS::bsTooltip("clear_dag",
+                                                         HTML("Resetting the DAG will replace the ",
+                                                              "contents of the named object by ",
+                                                              "those of the default one ",
+                                                              "(a three-gene fork with lambdas = 0.5)"),
+                                                         "right", options = list(container = "body")
+                                                         ),
+                                      shinyBS::removeTooltip(session, "clear_dag")
+                                  )
+                         }
                      )
-        }
-    })
+            } else if (input$input2build == "matrix") {
+                tags$div(
+                         tags$div(class = "flex",
+                                  ## tags$h3("2. Define input with a Matrix"),
+                                  tags$h3("Define MHN's log-Theta",
+                                          HTML("matrix (log-&Theta;) ",
+                                               "and generate data from it.")),
+                                  actionButton("how2build_matrix", "Help", class = "btn-info")
+                                  ),
+                         if (!is.null(data$thetas)){
+                             tags$div(
+                                      tags$h3(HTML("<br/>")),
+                                      tags$h4(HTML("<u>1. Define MHN's &theta;s</u>")),
+                                      tags$h4("Entries are ",
+                                              "lower case thetas, ",
+                                              HTML("&theta;s, range &plusmn; &infin;"),),
+                                      tags$h4(HTML("Remember to hit Ctrl-Enter when you are done editing the matrix for changes to take effect.")),
+                                      DT::DTOutput("thetas_table"),
+                                      tags$h3(HTML("<br/>")),
+                                      tags$h4(HTML("<u>2. Generate data from the MHN model</u>")),
+                                      tags$h4(HTML("<br/>")),
+                                      div(style = "white-space: nowrap;", 
+                                          numericInput("mhn_samples",
+                                                       HTML("Number of genotypes<br>to sample"),
+                                                       value = default_csd_samples, min = 100, max = 10000,
+                                                       step = 100, width = "70%"),
+                                          ),
+                                      tags$h3(HTML("<br/>")),
+                                      div(style = "white-space: nowrap;",
+                                          numericInput("mhn_noise",
+                                                       HTML("Observational noise<br>(genotyping error)"),
+                                                       ## HTML("Noise"),
+                                                       value = 0, min = 0, max = 1,
+                                                       step = 0.025, width = "70%"),
+                                          ),
+                                      shinyBS::bsTooltip("mhn_noise",
+                                                         paste("A proportion between 0 and 1. ", 
+                                                               "Observational noise (e.g., genotyping error) ",
+                                                               "for all models. ",
+                                                               "Added during sampling, ",
+                                                               "after predictions from model ",
+                                                               "have been obtained; ",
+                                                               "predicted probabilities are not affected.",
+                                                               "If larger than 0, this proportion of entries ",
+                                                               "in the sampled matrix will be flipped ",
+                                                               "(i.e., 0s turned to 1s and 1s turned to 0s)."
+                                                               ),
+                                                         "right"
+                                                       , options = list(container = "body")
+                                                         ),
+                                      tags$h5(HTML("<br/>")),
+                                      actionButton("resample_mhn", "Generate data from MHN model"),
+                                      actionButton("clear_mhn",
+                                                   HTML("Reset log-&Theta; matrix and delete genotype data")),
+                                      shinyBS::bsTooltip("clear_mhn",
+                                                         HTML("Resetting the log-&Theta; matrix will replace the ",
+                                                              "contents of the named object by ",
+                                                              "those of the default one ",
+                                                              "(a three-gene matrix filled with 0s)."),
+                                                         "right", options = list(container = "body")
+                                                         )
+                                      ## Prompter does not render the "log-&Theta"
+                                      ## |> prompter::add_prompt(
+                                      ##                  position = "right",
+                                      ##                  message = "the log-&Theta; matrix",
+                                      ##                  ## HTML("Resetting the log-&Theta; matrix will replace the ",
+                                      ##                  ##      "contents of the named object by ",
+                                      ##                  ##      "those of the default one ",
+                                      ##                  ##      "(a three-gene matrix filled with 0s)."),
+                                      ##                  bounce = TRUE
+                                      ##              )
+                                  )
+                         }
+                     )
+            } else if (input$input2build == "upload") {
+                tags$div(## class = "frame",
+                         tags$h3("Upload data (CSV format)"),
+                         tags$h5(HTML("If you want to give your data a specific ",
+                                      "name, set it in the box below ",
+                                      "before uploading the data. "
+                                      )),
+                         tags$div(class = "inlin3",
+                                  textInput(inputId = "name_uploaded",
+                                            label = "Name for data",
+                                            value = "Uploaded_data"
+                                            )
+                                  ),
+                         tags$h5(paste0("Format: csv ---comma separated values---,",
+                                        " with first row with gene names."
+                                        )),
+                         tags$h5(HTML("Use only alphanumeric characters ",
+                                      "for gene names, and do not start ",
+                                      "a gene name with a number; ",
+                                      "keep gene names short (for figures). ",
+                                      "Use 0 or 1 for ",
+                                      "altered/not-altered (mutated/not-mutated)."                  
+                                      )),
+                         tags$div(class = "upload_file",
+                                  fileInput("csd", "Load Data",
+                                            multiple = FALSE,
+                                            accept = c(
+                                                "text/csv",
+                                                ".csv"))),
+                         tags$h5(HTML("<br/>")),
+                         )
+            }
+        })
 
-    ## ## Without data modification for upload.
-    ## output$change_counts <- renderUI({
-    ##     if (input$input2build %in% c("csd", "dag", "matrix")) {
-    ##         tags$div(class = "frame",
-    ##                  tags$div(class = "flex",
-    ##                           tags$h3("3. Change genotype's counts"),
-    ##                           actionButton("display_help_change_genotype_counts", "Help"),
-    ##                           tags$h3(HTML("<br/>")),
-    ##                           ),
-    ##                  tags$div(id = "csd_table",
-    ##                           DT::DTOutput("csd_counts")
-    ##                           ),
-    ##                  tags$h5(HTML("<br/>")),
-    ##                  if (input$input2build %in% c("csd"))
-    ##                      actionButton("clear_genotype", "Delete all genotype data")
-    ##                  else if (input$input2build %in% c("matrix"))
-    ##                      tags$h5(HTML("To delete genotype data, use",
+        ## ## Without data modification for upload.
+        ## output$change_counts <- renderUI({
+        ##     if (input$input2build %in% c("csd", "dag", "matrix")) {
+        ##         tags$div(class = "frame",
+        ##                  tags$div(class = "flex",
+        ##                           tags$h3("3. Change genotype's counts"),
+        ##                           actionButton("display_help_change_genotype_counts", "Help"),
+        ##                           tags$h3(HTML("<br/>")),
+        ##                           ),
+        ##                  tags$div(id = "csd_table",
+        ##                           DT::DTOutput("csd_counts")
+        ##                           ),
+        ##                  tags$h5(HTML("<br/>")),
+        ##                  if (input$input2build %in% c("csd"))
+        ##                      actionButton("clear_genotype", "Delete all genotype data")
+        ##                  else if (input$input2build %in% c("matrix"))
+        ##                      tags$h5(HTML("To delete genotype data, use",
     ##                                   "'Reset log-&Theta; matrix and delete genotype data'",
     ##                                   "above."))
     ##                  else if (input$input2build %in% c("dag"))
@@ -1594,7 +1614,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     observeEvent(input$add_genotype, {
         tryCatch({
-            genotype <- paste(evamtools:::evam_string_sort(input$genotype), collapse = ", ")
+            genotype <- paste(evamtools:::evam_string_sort(input$genotype),
+                              collapse = ", ")
             genotype <- ifelse(genotype == "", "WT", genotype)
             genot_count <- ifelse(is.na(input$genotype_freq), -1,
                                   input$genotype_freq)
@@ -1622,11 +1643,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## id_change_genotype_muts
             gene_options <- set_gene_names_after_resize(data$data,
                                                         data$gene_names)[1:input$gene_number]
+            ## FIXME Why the strange lapply and not just gene_options[1:input$gene_number]
             updateCheckboxGroupInput(session, "genotype", label = "Mutations",
                                      choices = lapply(1:input$gene_number,
                                                       function(i) gene_options[i]),
                                      selected = NULL)
-        ## updateCheckboxGroupInput(session, "genotype", label = "Mutations",
+            
+            mymessage("after updateCheckboxGroupInput, line 1646")
+            mymessage("     These were gene_options ", gene_options)
+            ## updateCheckboxGroupInput(session, "genotype", label = "Mutations",
             ##                          choices = lapply(1:input$gene_number,
             ##                                           function(i) data$gene_names[i]),
             ##                          selected = NULL)
