@@ -2046,32 +2046,32 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
             })
 
-    ## Go back to input to work again with the data
-    observeEvent(input$modify_data, {
-        tryCatch({
-            
-            if (length(all_cpm_out) > 0){
-                tmp_data <- all_cpm_out[[input$select_cpm]]$orig_data
-                dataset_name <- strsplit(input$select_cpm, "__")[[1]][[1]]
-                dataset_type <- tmp_data$type
-                last_visited_pages[[tmp_data$type]] <<- dataset_name
+    ## ## Go back to input to work again with the data
+    ## observeEvent(input$modify_data, {
+    ##     tryCatch({
+    
+    ##         if (length(all_cpm_out) > 0){
+    ##             tmp_data <- all_cpm_out[[input$select_cpm]]$orig_data
+    ##             dataset_name <- strsplit(input$select_cpm, "__")[[1]][[1]]
+    ##             dataset_type <- tmp_data$type
+    ##             last_visited_pages[[tmp_data$type]] <<- dataset_name
 
-                tmp_data <- datasets$all_csd[[tmp_data$type]][[dataset_name]] <-
-                    evamtools:::to_stnd_csd_dataset(tmp_data)
+    ##             tmp_data <- datasets$all_csd[[tmp_data$type]][[dataset_name]] <-
+    ##                 evamtools:::to_stnd_csd_dataset(tmp_data)
 
-                data <- tmp_data
-                data$csd_counts <- evamtools:::get_csd(tmp_data$data)
-                data$n_genes <- ncol(data$data)
-                updateNumericInput(session, "gene_number", value = data$n_genes)
-                updateTabsetPanel(session, "navbar",
-                                  selected = "csd_builder")
-                updateRadioButtons(session, "input2build", selected = dataset_type)
-                updateRadioButtons(session, "select_csd", selected = dataset_name)
-            }
-        }, error = function(e){
-            showModal(dataModal(e[[1]]))
-        })
-    })
+    ##             data <- tmp_data
+    ##             data$csd_counts <- evamtools:::get_csd(tmp_data$data)
+    ##             data$n_genes <- ncol(data$data)
+    ##             updateNumericInput(session, "gene_number", value = data$n_genes)
+    ##             updateTabsetPanel(session, "navbar",
+    ##                               selected = "csd_builder")
+    ##             updateRadioButtons(session, "input2build", selected = dataset_type)
+    ##             updateRadioButtons(session, "select_csd", selected = dataset_name)
+    ##         }
+    ##     }, error = function(e){
+    ##         showModal(dataModal(e[[1]]))
+    ##     })
+    ## })
 
 
     output$customize <- renderUI({
@@ -2100,7 +2100,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  selected = input$cpm_methods),
                               shinyBS::bsTooltip("cpm2show",
                                                  HTML("Show graphical output of the CPMs used to analyze the data.  "
-                                                    , "Use \"Modify data\" (below) to go back "
+                                                      ## , "Use \"Modify data\" (below) to go back "
+                                                    , "Go back to \"User input\" "
                                                     , "and click on \"Advanced options\" if you"
                                                     , "want to use other methods."
                                                       ),
@@ -2211,15 +2212,21 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     output$original_data <- renderUI({
         ## To see if I disable original data        
         if (length(names(all_cpm_out)) > 0) {
-            tags$div(class="frame max_height",
-                     tags$h3("Original data"),
+            tags$div(class="frame max_height", tags$h3("Original data"),
                      plotly::renderPlotly(
                                  evamtools:::plot_genotype_counts_plly(
                                                  evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data))
                              ),
-                     tags$div(class = "download_button",
-                              actionButton("modify_data", "Modify data")
-                              )
+                     ## Disable because it led to inconsistent behavior such as this
+                     ## Sample from a DAG, say Fork, and analyze
+                     ## Go back, and sample, but now sample only 10 cases. Analyze
+                     ## Go to first analysis, click on "Modify data" and .. you
+                     ## are shown the 10 samples.
+                     ## Even worse, you can modify the model in between.
+                     
+                     ## tags$div(class = "download_button",
+                     ##          actionButton("modify_data", "Modify data")
+                     ##          )
                      )
         }
     })
