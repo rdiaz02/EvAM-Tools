@@ -1671,17 +1671,31 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Genotypes table
     ## This was wrong: display_freqs removes rows of 0 count
     ## but the data$csd_counts data frame could contain those. Not anymore
-    output$csd_counts <- DT::renderDT(display_freqs(),
-                                      selection = 'none', server = TRUE,
-                                      editable = list(target = "column",
-                                                      disable = list(columns = c(0)))
-                                    , rownames = FALSE,
-                                      options = list(
-                                          columnDefs =
-                                              list(list(className = 'dt-center',
-                                                        targets = "_all")),
-                                          info = FALSE, paginate= FALSE),
-                                      )
+    output$csd_counts <- DT::renderDT( {
+        d1 <- display_freqs()
+        if (nrow(d1)) {
+            d1 <- data.frame(Index = 1:nrow(d1),
+                             d1)
+        } else {
+            d1 <- data.frame(Index = integer(),
+                             Genotype = character(),
+                             Counts = integer())
+        }
+        d1
+    }
+   ,
+    selection = 'none', server = TRUE,
+    editable = list(target = "column",
+                    disable = list(columns = c(0, 1)))
+  , rownames = FALSE,
+    options = list(
+        columnDefs =
+            list(list(
+                orderable = TRUE,
+                className = 'dt-center',
+                targets = "_all")),
+        info = FALSE, paginate= FALSE),
+    )
 
     observeEvent(input$csd_counts_cell_edit, {
         tryCatch({

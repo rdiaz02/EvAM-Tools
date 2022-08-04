@@ -25,6 +25,7 @@ reorder_to_standard_order_count_df <- function(x) {
                                   Counts = counts_tmp))
     attributes(ret_tmp)$na.action <- NULL
     stopifnot(nrow(ret_tmp) == nrow(x))
+    ## rownames(ret_tmp) <- 1:nrow(ret_tmp)
     return(ret_tmp)
 }
 
