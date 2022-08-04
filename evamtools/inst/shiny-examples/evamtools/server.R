@@ -804,42 +804,42 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         } 
     })
 
-    ## observeEvent(input$change_gene_names, {
-    ##     if (input$input2build == "dag") {
-    ##         gene_names_00 <- gene_names_from_genes_in_DAG(data, data$gene_names)
-    ##     } else if (input$input2build == "csd") {
-    ##         gene_names_00 <- set_gene_names_after_resize(data, data$gene_names)
-    ##         ## Or else, it is broken in other places
-    ##         data$gene_names <- gene_names_00
-    ##     } else {
-    ##         gene_names_00 <- data$gene_names
-    ##     }
+    observeEvent(input$change_gene_names, {
+        if (input$input2build == "dag") {
+            gene_names_00 <- gene_names_from_genes_in_DAG(data, data$gene_names)
+        } else if (input$input2build == "csd") {
+            gene_names_00 <- set_gene_names_after_resize(data, data$gene_names)
+            ## Or else, it is broken in other places
+            data$gene_names <- gene_names_00
+        } else {
+            gene_names_00 <- data$gene_names
+        }
 
-    ##     showModal(modalDialog(
-    ##         title = tags$h3("Change gene names"),
-    ##         tags$div(class = "inlin2",
-    ##                  textInput(inputId = "new_gene_names", "Gene names",
-    ##                            value = paste(gene_names_00[1:input$gene_number],
-    ##                                          collapse = ", ")
-    ##                            ),
-    ##                  tags$h4(HTML("<br/>")),
-    ##                  tags$h4("Separate you gene names with a ','. ",
-    ##                          "Do no use 'WT' for any gene name. ",
-    ##                          "Use only alphanumeric characters ",
-    ##                          "(of course, do not use comma as part of a gene name), ",
-    ##                          "and do not start ",
-    ##                          "a gene name with a number; ",
-    ##                          "keep gene names short (for figures)."
-    ##                          ),
-    ##                  tags$h4(HTML("<br/>")),
-    ##                  tags$div(class = "download_button",
-    ##                           tags$h4(HTML("<br/>")),
-    ##                           actionButton("action_gene_names", "Change genes names"),
-    ##                           )
-    ##                  ),
-    ##         easyClose = TRUE
-    ##     ))
-    ## })
+        showModal(modalDialog(
+            title = tags$h3("Change gene names"),
+            tags$div(class = "inlin2",
+                     textInput(inputId = "new_gene_names", "Gene names",
+                               value = paste(gene_names_00[1:input$gene_number],
+                                             collapse = ", ")
+                               ),
+                     tags$h4(HTML("<br/>")),
+                     tags$h4("Separate you gene names with a ','. ",
+                             "Do no use 'WT' for any gene name. ",
+                             "Use only alphanumeric characters ",
+                             "(of course, do not use comma as part of a gene name), ",
+                             "and do not start ",
+                             "a gene name with a number; ",
+                             "keep gene names short (for figures)."
+                             ),
+                     tags$h4(HTML("<br/>")),
+                     tags$div(class = "download_button",
+                              tags$h4(HTML("<br/>")),
+                              actionButton("action_gene_names", "Change genes names"),
+                              )
+                     ),
+            easyClose = TRUE
+        ))
+    })
 
     
     ## Define new genotype
