@@ -53,21 +53,7 @@ dag_more_genes_than_set_genes <- function(input, dag_data = dag_data(),
         return(FALSE)
 }
 
-## For assumption A1_gnn
-## x: the big data object's matrix
-set_gene_names_after_resize <- function(x, gene_names) {
-    gene_names_num <- length(gene_names)
-    gene_names_in_freqs <- sort(colnames(x))
-    if (length(gene_names_in_freqs) == 0) {
-        ## Only WT
-        return(gene_names)
-    } else {
-        gene_names_wo_current <- sort(setdiff(gene_names, gene_names_in_freqs))
-        gene_names <-
-            c(gene_names_in_freqs, gene_names_wo_current)[1:gene_names_num]
-        return(gene_names)
-    }
-}
+
 
 dag_message_more_genes_than_set_genes <- function() {
     showModal(modalDialog(
@@ -90,7 +76,25 @@ random_dataset_name <- function() {
           collapse = "")
 }
 
-## More code to solve the pervasive silly assumption that we add genes in
+
+
+## For assumption A1_gnn
+## x: the big data object's matrix
+set_gene_names_after_resize <- function(x, gene_names) {
+    gene_names_num <- length(gene_names)
+    gene_names_in_freqs <- sort(colnames(x))
+    if (length(gene_names_in_freqs) == 0) {
+        ## Only WT
+        return(gene_names)
+    } else {
+        gene_names_wo_current <- sort(setdiff(gene_names, gene_names_in_freqs))
+        gene_names <-
+            c(gene_names_in_freqs, gene_names_wo_current)[1:gene_names_num]
+        return(gene_names)
+    }
+}
+
+## More code to solve the pervasive and silly assumption that we add genes in
 ## order. Now this affects the DAG
 ## We want to obtain the actual gene names in the DAG
 ## And no, this does not affect MHN because it ALWAYS uses all the genes
@@ -187,7 +191,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## Other code ensures that gene number is never smaller
             ## than genes in the DAG.
             mymessage("      dag")
-            dag_dataset_names <- unlist(lapply(datasets$all_csd$dag, function(x) x$name))
+            dag_dataset_names <- unlist(lapply(datasets$all_csd$dag,
+                                               function(x) x$name))
             if (!(data$name %in% dag_dataset_names)) {
                 mymessage("       data$name not in dag_dataset_names. ",
                           "Returning a 0-rows data frame")
@@ -198,7 +203,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## if (!is.null(data$n_genes) &&
             ##     input$gene_number != data$n_genes) {
             ##     mymessage("      DAG: Updating gene names in data")
-            ##     browser()
             ##     new_gnames2 <- set_gene_names_after_resize(data$data,
             ##                                                data$gene_names)
             ##     data$gene_names <- new_gnames2
@@ -239,14 +243,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## It does not happen in the single observeEvent for input$gene_number
             ## and not in the updateNumericInput for input$gene_number
             ## So force it here if there have been changes in input$gene_number
-            if (!is.null(data$n_genes) &&
+            if ((input$input2build == "csd") &&
+                !is.null(data$n_genes) &&
                 input$gene_number != data$n_genes) {
                 mymessage("       CSD: Updating gene names in data")
                 new_gnames2 <- set_gene_names_after_resize(data$data,
                                                            data$gene_names)
                 data$gene_names <- new_gnames2
             }
-
+            
             return(
                 evamtools:::reorder_to_standard_order_count_df(
                                 evamtools:::get_display_freqs(data$csd_counts,
@@ -283,6 +288,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     
     observeEvent(input$gene_number, {
+        ## id: here_we_change_gene_number
         mymessage("at gene number_trigger")
         datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
             input$gene_number
@@ -291,10 +297,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## Counterpart to check A1_gnn in get_display_freqs
             ## FIXME: is this really necessary? Or is the similar code
             ## in display_freqs enough?
+            current_data <- datasets$all_csd[[input$input2build]][[input$select_csd]]
             new_gnames <-
-                set_gene_names_after_resize(datasets$all_csd[[input$input2build]][[input$select_csd]]$data,
-                                            datasets$all_csd[[input$input2build]][[input$select_csd]]$gene_names)
-            datasets$all_csd[[input$input2build]][[input$select_csd]]$gene_names <- new_gnames
+                set_gene_names_after_resize(current_data$data,
+                                            current_data$gene_names)
+            ## datasets$all_csd[[input$input2build]][[input$select_csd]]$gene_names <- new_gnames
+            ## FIXME: A1_gnn_maybe: maybe the one below, not the one above
+            data$gene_names <- new_gnames
         } else if (input$input2build == "dag") {
             ## FIXME: is this really necessary? Or is the similar code
             ## in display_freqs enough? A1_gnn
@@ -668,9 +677,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ## Where we "Add genotypes" manually. This selects mutation (genotype)
                 ##         If we only have WT, n_genes is 0, and it breaks
                 ##         and we have set minimum number of genes to 2
+                ## id_change_genotype_muts
+                gene_options <- set_gene_names_after_resize(data$data,
+                                                            data$gene_names)[1:n_genes]
                 updateCheckboxGroupInput(session, "genotype", label = "Mutations",
                                          choices = lapply(1:(max(2, n_genes)),
-                                                          function(i) data$gene_names[i]),
+                                                          function(i) gene_options[i]),
                                          selected = NULL)
                 ## Where we "Add genotypes" manually. This sets the count
                 updateNumericInput(session, "genotype_freq", value = NA)
@@ -787,6 +799,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               sliderInput("gene_number", "Number of genes",
                                           value = val, max = max_genes, min = min_genes,
                                           step = 1),
+                              ## The action that takes place is
+                              ## id: here_we_change_gene_number
                               ),
                      tags$h4(HTML("<br/>")),
                      actionButton("change_gene_names", "Change gene names"),
@@ -797,6 +811,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     observeEvent(input$change_gene_names, {
         if (input$input2build == "dag") {
             gene_names_00 <- gene_names_from_genes_in_DAG(data, data$gene_names)
+        } else if (input$input2build == "csd") {
+            gene_names_00 <- set_gene_names_after_resize(data, data$gene_names)
+            ## Or else, it is broken in other places
+            data$gene_names <- gene_names_00
         } else {
             gene_names_00 <- data$gene_names
         }
@@ -843,9 +861,16 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     output$define_genotype <- renderUI({
         n_genes <- ifelse(is.null(input$gene_number), 3, input$gene_number)
-        gene_options <- data$gene_names[1:n_genes]
+
+        ## Setting it here ain't enough
+        ## This can all be changed in other two lines at least too.
+        ##   Search for id_change_genotype_muts
+        ## gene_options <- data$gene_names[1:n_genes]
+        gene_options <- set_gene_names_after_resize(data$data,
+                                                    data$gene_names)[1:n_genes]
+
+
         if (input$input2build == "csd") {
-            
             tags$div(
                      tags$h3("Add genotypes"),
                      tags$h5("WT is added by not clicking on any mutations. "),
@@ -865,7 +890,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$div(class = "inline",
                               checkboxGroupInput(inputId = "genotype",
                                                  label = "Mutations",
-                                                 choices = gene_options)
+                                                 choices = set_gene_names_after_resize(data$data,
+                                                                                       data$gene_names)[1:n_genes])
+                              ## gene_options)
                               ),
                      tags$div(id="fr",
                               numericInput(label = "Counts", value = NA, min = 0,
@@ -1594,10 +1621,18 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                             "They will be removed.")))
             }
             updateNumericInput(session, "genotype_freq", value = NA)
+
+            ## id_change_genotype_muts
+            gene_options <- set_gene_names_after_resize(data$data,
+                                                        data$gene_names)[1:input$gene_number]
             updateCheckboxGroupInput(session, "genotype", label = "Mutations",
                                      choices = lapply(1:input$gene_number,
-                                                      function(i) data$gene_names[i]),
+                                                      function(i) gene_options[i]),
                                      selected = NULL)
+        ## updateCheckboxGroupInput(session, "genotype", label = "Mutations",
+            ##                          choices = lapply(1:input$gene_number,
+            ##                                           function(i) data$gene_names[i]),
+            ##                          selected = NULL)
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
         })
