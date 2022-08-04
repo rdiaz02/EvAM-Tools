@@ -46,6 +46,9 @@ get_display_freqs <- function(freqs, n_genes, gene_names, input2build) {
     gene_names_in_freqs <- setdiff(unlist(strsplit(freqs$Genotype, ", ")), "WT")
     if (length(gene_names_in_freqs)) {
         if (n_genes >= (length(gene_names_in_freqs))) {
+            ## if (!all(gene_names_in_freqs %in% valid_gene_names)) {
+            ##     browser()
+            ## }
             stopifnot(all(gene_names_in_freqs %in% valid_gene_names))
         } else {
             stopifnot(sort(gene_names_in_freqs)[1:n_genes] %in% valid_gene_names)

@@ -65,6 +65,28 @@ dag_message_more_genes_than_set_genes <- function() {
         easyClose = TRUE))
 }
 
+## data is the big object, with a $data inside. Yeah, great naming
+csd_more_genes_than_set_genes <- function(input, data,
+                                          session = session) {
+    number_of_genes <- sum(colSums(data$data) > 0)
+    if (!is.null(input$gene_number) &&
+        (number_of_genes > input$gene_number)) {
+        updateNumericInput(session, "gene_number", value = number_of_genes)
+        return(TRUE)
+    } else return(FALSE)
+}
+
+csd_message_more_genes_than_set_genes <- function() {
+    showModal(modalDialog(
+        paste("The genotype data contains more genes that the number ",
+              "of genes you have set under ",
+              "'Set the number of genes'. ",
+              "Remove genotypes as needed ",
+              "and then decrease number of genes."),
+        easyClose = TRUE))
+}
+
+
 do_gc <- function(n = 5) {
     mymessage("doing gc")
     for (i in 1:n) print(gc())
@@ -100,21 +122,21 @@ set_gene_names_after_resize <- function(x, gene_names) {
 ## And no, this does not affect MHN because it ALWAYS uses all the genes
 ## Somewhat similar in purpose to set_gene_names_after_resize
 
-## x: the "data" object (man, what a name!)
-gene_names_from_genes_in_DAG <- function(x, gene_names) {
-    gene_names_num <- length(gene_names)
-    the_dag <- x$data
-    in_dag <- (which(colSums(the_dag) > 0))
-    if (length(in_dag) == 0) {
-        return(gene_names)
-    } else {
-        genes_in_dag <- colnames(the_dag)[in_dag]
-        gene_names_wo_current <- sort(setdiff(gene_names, genes_in_dag))
-        gene_names <-
-            c(genes_in_dag, gene_names_wo_current)[1:gene_names_num]
-        return(gene_names)
-    }
-}
+## ## x: the "data" object (man, what a name!)
+## gene_names_from_genes_in_DAG <- function(x, gene_names) {
+##     gene_names_num <- length(gene_names)
+##     the_dag <- x$data
+##     in_dag <- (which(colSums(the_dag) > 0))
+##     if (length(in_dag) == 0) {
+##         return(gene_names)
+##     } else {
+##         genes_in_dag <- colnames(the_dag)[in_dag]
+##         gene_names_wo_current <- sort(setdiff(gene_names, genes_in_dag))
+##         gene_names <-
+##             c(genes_in_dag, gene_names_wo_current)[1:gene_names_num]
+##         return(gene_names)
+##     }
+## }
 
 
 
@@ -232,23 +254,30 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 return(data.frame(Genotype = character(), Counts = integer()))
             }
 
-            ## FIXME: A1_gnn_bisfix
-            ## The code in A1_gnn is not updating data$etc.
-            ## input$gene_number has been changed but has not triggered
-            ## changing data. I do not understand it.
+            ## FIXME: A1_gnn_bisfix The code in A1_gnn_0 is not updating
+            ## data$etc. That is triggered on gene number change, but not
+            ## necessarily on adding a genotype or removing a genotype, in ways
+            ## that change the genes, but not the gene number.
+            ## Though something I do not fully understand:
             ## It does not happen in the single observeEvent for input$gene_number
             ## and not in the updateNumericInput for input$gene_number
             ## So force it here if there have been changes in input$gene_number
+            ## and if they haven't, for some weird, hard to reproduce, cases.
             ## Yes, this seem necessary to prevent BUG_Create_Rename_Click_other
             if ((input$input2build == "csd") &&
-                !is.null(data$n_genes) &&
-                input$gene_number != data$n_genes) {
+                !is.null(data$n_genes) ) {
+                ## input$gene_number != data$n_genes) {
                 mymessage("       CSD: Updating gene names in data")
                 new_gnames2 <- set_gene_names_after_resize(data$data,
                                                            data$gene_names)
+                if (identical(new_gnames2, data$gene_names)) {
+                    message("A1_gnn_bisfix: identical")
+                } else {
+                    message("A1_gnn_bisfix: different")
+                }
                 data$gene_names <- new_gnames2
             }
-            
+
             return(
                 evamtools:::reorder_to_standard_order_count_df(
                                 evamtools:::get_display_freqs(data$csd_counts,
@@ -290,23 +319,27 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
             input$gene_number
         if (input$input2build == "csd") {
+            ## A1_gnn_0
             ## Set gene names correctly if there have been changes
             ## Counterpart to check A1_gnn in get_display_freqs
             ## FIXME: is this really necessary? Or is the similar code
             ## in display_freqs enough?
-            ## Needed to provent bug BUG_Create_Add_E_Decrease
+            ## Needed to prevent bug BUG_Create_Add_E_Decrease
+            ## DAG does not, as it continuously monitors genes in the DAG model
+            
             current_data <- datasets$all_csd[[input$input2build]][[input$select_csd]]
             new_gnames <-
                 set_gene_names_after_resize(current_data$data,
                                             current_data$gene_names)
             data$gene_names <- new_gnames
+
+            ## The next is not really necessary. And it is actually limiting what
+            ## users can do. But forcing this: a) decreases likelihood of bugs;
+            ## b) Makes behavior consistent with that of DAGs.
+            if (csd_more_genes_than_set_genes(input, data, session)) {
+                csd_message_more_genes_than_set_genes()
+            }
         } else if (input$input2build == "dag") {
-            ## FIXME: is this really necessary? Or is the similar code
-            ## in display_freqs enough? A1_gnn
-            ## new_gnames <-
-            ##     set_gene_names_after_resize(datasets$all_csd[[input$input2build]][[input$select_csd]]$data,
-            ##                                 datasets$all_csd[[input$input2build]][[input$select_csd]]$gene_names)
-            ## datasets$all_csd[[input$input2build]][[input$select_csd]]$gene_names <- new_gnames
             if (dag_more_genes_than_set_genes(input, dag_data(), session)) {
                 dag_message_more_genes_than_set_genes()
             }
@@ -397,8 +430,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     output$dataset_name <- renderUI({
         if(input$input2build %in% c("upload", "csd", "dag", "matrix")){
             tags$div(class = "frame inlin2",
-                     tags$h3("(Re)name the data"),
-                     tags$h5(HTML("Give the modified data a name ",
+                     tags$h3("Rename the data"),
+                     tags$h5(HTML("Give the (modified) data a different name ",
                                   "that will also be used to save the CPM ",
                                   "output.")),
                      tags$div(class = "download_button",
@@ -407,7 +440,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                "Give your data a name",
                                value = random_dataset_name()
                                ),
-                     actionButton("save_csd_data", "Use this name")
+                     actionButton("save_csd_data", "Rename the data")
                      )
         }
     })

@@ -699,6 +699,8 @@ evam <- function(x,
              "and two different genotypes to run evam ",
              "(and remember that any genes that are ",
              "completely aliased, i.e., indistinguishable, ",
+             "because they have identical patterns ",
+             "---i.e., identical columns in the data matrix--- ",
              "are regarded as a single gene).")
     }
     
