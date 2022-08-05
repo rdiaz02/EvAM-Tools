@@ -1920,7 +1920,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 shinyjs::enable("analysis")
                 shinyjs::disable("provide_gene_names")
             } else {
-                showModal(modalDialog(paste("Counts <= 0 present. ",
+                showModal(modalDialog(paste("Counts <= 0 ",
+                                            " (or non-numeric values) present. ",
                                             "They will be removed.")))
             }
             updateNumericInput(session, "genotype_freq", value = NA)
