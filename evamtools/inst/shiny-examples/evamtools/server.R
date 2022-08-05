@@ -140,6 +140,10 @@ set_gene_names_after_resize <- function(x, gene_names) {
 
 
 
+
+
+
+
 server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     require(evamtools)
     require(shinyBS)
@@ -1734,7 +1738,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         if (input$input2build %in% c("dag")
             && sum(data$dag) > 0
             && !is.null(input$gene_number)
-            ){
+            ) {
             data2plot <- igraph::graph_from_adjacency_matrix(data$dag)
             data2plot <- igraph::decompose(data2plot)[[1]]
             edges <- igraph::as_data_frame(data2plot)
@@ -1750,7 +1754,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         evamtools:::plot_method(data2plot, data$dag_parent_set, edges)
     })
 
-                                        # ## Run CPMs
+    ## Run CPMs
     observeEvent(input$analysis, {
         ## Calculate TRM for DAG and for matrices
 
@@ -1948,9 +1952,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
                     number_of_columns <- floor(12 /
                                                ifelse(length(plot2show()) <=0, 1, length(plot2show())))
-                                        #    ifelse(length(input$cpm2show) <=4, 4, length(input$cpm2show)))
 
-                    lapply(plot2show(), function(met){
+                    lapply(plot2show(), function(met) {
                         method_data <- evamtools:::process_data(tmp_data, met,
                                                                 plot_type = "trans_mat")
                         output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
@@ -1986,13 +1989,25 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                         method_data <- evamtools:::process_data(tmp_data, met,
                                                                 plot_type = selected_plot_type)
                         output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
-                            pl <- evamtools:::plot_genot_fg(method_data$data2plot,
-                                        # We use it to define "Observed" and "Not Observed" genotypes
-                                                            observations = tmp_data$original_data, 
-                                                            sampled_counts = method_data$sampled_genotype_counts,
-                                                            top_paths = input$freq2label,
-                                                            label_type = input$label2plot,
-                                                            plot_type = selected_plot_type)
+                            ## This occasionally fails for no reason
+                            ## so try up to max_plot_tries
+                            max_plot_tries <- 5
+                            for (i in 1:max_plot_tries) {
+                                pl <-
+                                    try(evamtools:::plot_genot_fg(method_data$data2plot,
+                                                                  ## We use it to define "Observed" and "Not Observed" genotypes
+                                                                  observations = tmp_data$original_data, 
+                                                                  sampled_counts = method_data$sampled_genotype_counts,
+                                                                  top_paths = input$freq2label,
+                                                                  label_type = input$label2plot,
+                                                                  plot_type = selected_plot_type))
+                                if (!inherits(pl, "try-error")) break
+                                if (i >= max_plot_tries) stop("Could not produce requested plot ",
+                                                              "after ", max_plot_tries, " attempts. ",
+                                                              "A problem with the data? ",
+                                                              "Can any of the other plot types be produced?")
+                            }
+
                         })
                         return(
                             column(number_of_columns,
