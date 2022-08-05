@@ -1,3 +1,12 @@
+Changes in version 2.1.4 (2022-08-05):
+	- Web-app: can provide gene names. Not the same as
+	  changing them, but it provides the important
+	  functionality (build models with arbitrarily
+	  named genes).
+	- Web-app: igraph: we use try, for the occsional error
+	  of igraph not displaying the plot.
+	- Web-app: more documentation in better tooltips.  
+	
 Changes in version 2.1.3 (2022-08-04):
 	- Web-app: no changing gene names. Was confusing and
 	  error and bug prone.
