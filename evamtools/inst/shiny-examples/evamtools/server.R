@@ -793,7 +793,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                     "Thus, if you remove a genotype when editing ",
                                     "genotype's counts in the DAG, MHN, or Upload data ",
                                     "entries, you will need to regenerate the data ",
-                                    "to be able to modify those genotypes again.")
+                                    "to be able to modify those genotypes again."),
+                             tags$p("The first column, 'Index' allows us to sort ",
+                                    "by 'standard order': by number of mutations first ",
+                                    "and then by alphabetical order of ",
+                                    "genotype names, where genotypes themselves ",
+                                    "have genes sorted alphabetically ",
+                                    "(actually, by what is often called 'natural order').")
                          )
                 )
                 )
