@@ -1575,7 +1575,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 dag_data$Relation <- NULL
             } else if (default_dag_model %in% c("OncoBN")) {
                 if (length(unique(dag_data$Relation)) > 2) {
-                    showModal(dataModal("OncoBN model must only include one type of relationship"))
+                    showModal(dataModal(HTML("The OncoBN model can only include ",
+                                             "one type of relationship",
+                                             "(conjunctive or disjunctive, ",
+                                             "as specified in \"Advanced options\")")))
                     updateRadioButtons(session, "dag_model", selected = "HESBCN")
                 }
                 colnames(dag_data) <- c("From", "To", "Relation", "theta")
@@ -2523,7 +2526,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                           width = "500px",
                                           value = 5, max = 10, min = 0, step = 1)
                               |> prompter::add_prompt(message = 
-                                                          HTML("Set it to 0 to show all paths or all genotype labels"
+                                                          HTML("Set it to 0 to show all paths or all genotype labels. "
+                                                               "You probably don't want to do that when there are many ",
+                                                               "genes, specially if you are also displaying the output ",
+                                                               "from MHN (where any genotype is connected to each of its ",
+                                                               "descendants) or from models for which the DAG is close to a star. "
                                                                ),
                                                       position = "right",
                                                       rounded = TRUE,
