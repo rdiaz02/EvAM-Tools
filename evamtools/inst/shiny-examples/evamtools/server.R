@@ -32,7 +32,28 @@ mymessage <- function(...) message(...)
 ## mymessage <- function(...) invisible(NULL)
 
 
+sanity_new_gene_names <- function(x) {
+    ## From similar code in evam-wrapper
+    gn_backslash <- stringi::stri_count_fixed(x, "\\") 
+    if (any(gn_backslash))
+        stop("At least one of your new gene names has a backslash. That is not allowed")
 
+    gn_space <- stringi::stri_count_regex(x, "[\\s]") 
+    if (any(gn_space))
+        stop("At least one of your new gene names has a space. That is not allowed")
+
+    gn_space <- stringi::stri_count_regex(x, "^\\d") 
+    if (any(gn_space))
+        stop("At least one of your new gene names starts with a number. That is not allowed")
+
+    gn_space <- stringi::stri_count_regex(x, "^[a-zA-z].*") 
+    if (any(gn_space))
+        stop("All gene names should start with a letter. Yours don't; that is not allowed")
+
+    
+    if (any(x == "WT"))
+        stop("One of your new gene names is called WT. That is not allowed")
+}
 ## For DRY though gene_names and number_of_genes are also
 ## obtained for other purposes right before these
 ## are called in a couple of places. Oh well; would need
@@ -662,8 +683,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             }
 
 
-            if (input$input2build %in% c("csd") &&
-                (!is.null(data$data) ||
+            if ((!is.null(data$data) ||
                  (nrow(data$csd_counts) > 0))) {
                 shinyjs::disable("provide_gene_names")
             } else {
@@ -838,35 +858,86 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                           step = 1),
                               ## The action that takes place is
                               ## id: here_we_change_gene_number
+                             
                               ),
                      tags$h4(HTML("<br/>")),
-                     actionButton("provide_gene_names", "Use different gene names"),
-                     )
+                     tags$div(class="inlin",
+                              actionButton("provide_gene_names", "Use different gene names"),
+                              ## Prompter is not opaque. Changing opacity possible?
+                              ## https://github.com/etiennebacher/prompter/issues/3
+                              shinyBS::bsTooltip("provide_gene_names",
+                                                 HTML("Create new models/new data using gene names you provide. ",
+                                                      "<br>",
+                                                      "<b>Can only be used for models/data that are empty. </b>",
+                                                      "Therefore, you might need to click on ",
+                                                      "\"Delete all genotype data\"",
+                                                      "\"Reset DAG and delete genotype data\"",
+                                      "or \"Reset log-&Theta; matrix and delete genotype data\" ",
+                                      "before being able to use this.",
+                                      "<br><br>",
+                                      "<b>IMPORTANT:</b> Do not think about this option as a way ",
+                                      "to rename genes in existing data or models. ",
+                                      "That becomes confusing very quickly. ",
+                                      "Instead, think of this as a way to build ",
+                                      "<b>new models from scratch</b> ",
+                                      "with the names that you want."
+                                      ),
+                                                 "right", options = list(container = "body")),
+                              ## |> prompter::add_prompt(message = 
+                                                 ##                             paste("Create new models/new data using gene names you provide. ",
+                                                 ##                                   "Can only be used for models/data that are empty. ",
+                                                 ##                                   "Therefore, you might need to click on ",
+                                                 ##                                   "'Delete all genotype data' ",
+                                                 ##                                   "'Reset DAG and delete genotype data' ",
+                                                 ##                                   "or 'Reset log-Θ matrix and delete genotype data' ",
+                                                 ##                                   "before being able to use this."
+                                                 ##                                   ),
+                                                 ##                         position = "bottom-right",
+                                                 ##                         type = "default",
+                                                 ##                         shadow = FALSE,
+                                                 ##                         rounded = TRUE,
+                                                 ##                         bounce = TRUE,
+                                                 ##                         size = "medium"
+                                                 ##                         )
+                                                 ),
+                              )
         }
     })
-
+    ## FIXME: different_gene: wording
     observeEvent(input$provide_gene_names, {
         showModal(modalDialog(
             title = tags$h3("Change gene names"),
             tags$div(class = "inlin2",
-                     textInput(inputId = "new_gene_names", "Gene names",
+                     textInput(inputId = "new_gene_names", "New gene names",
                                value = paste(LETTERS[1:max_genes],
                                              collapse = ", ")
                                ),
+                     tags$h4(HTML("<br/>")),
+                     tags$h4(paste("Provide up to ", max_genes,
+                                   " gene names that you then can use to build ",
+                                   "models or create data sets from scratch.")),
                      tags$h4(HTML("<br/>")),
                      tags$h4("Separate you gene names with a ','. ",
                              "Do no use 'WT' for any gene name. ",
                              "Use only alphanumeric characters ",
                              "(of course, do not use comma as part of a gene name), ",
-                             "and do not start ",
-                             "a gene name with a number; ",
+                             "and try not to start ",
+                             "a gene name with a number ---this will likely lead to problems; ",
                              "keep gene names short (for figures)."
                              ),
                      tags$h4(HTML("<br/>")),
+                     tags$h4(HTML("<b>IMPORTANT:</b> Do not think about this option as a way ",
+                                  "to rename genes in existing data or models. ",
+                             "That becomes confusing very quickly. ",
+                             "Instead, think of this as a way to build ",
+                             "<b>new models from scratch</b> ",
+                             "with the names that you want.")),
+                     
                      tags$div(class = "download_button",
                               tags$h4(HTML("<br/>")),
                               actionButton("action_provide_gene_names", "Use these gene names"),
-                              )
+                              ),
+                     
                      ),
             easyClose = TRUE
         ))  
@@ -876,15 +947,22 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Updating gene names
     observeEvent(input$action_provide_gene_names,{
         tryCatch({
+            mymessage("At action_provide_gene_names")
             old_gene_names <- data$gene_names
             new_gene_names <-
                 strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]]
             if (isTRUE(any(duplicated(new_gene_names)))) {
                 stop("Duplicated new gene names.")
             }
-            new_gene_names <- c(new_gene_names,
-                                LETTERS[(length(new_gene_names) + 1):max_genes]
-                                )
+            sanity_new_gene_names(new_gene_names)
+            if (length(new_gene_names) < max_genes) {
+                new_gene_names <- c(new_gene_names,
+                                    LETTERS[(length(new_gene_names) + 1):max_genes]
+                                    )
+                if (isTRUE(any(duplicated(new_gene_names)))) {
+                    stop("Duplicated gene names between new and old entries.")
+                }
+            }
             data$gene_names <- new_gene_names
             
             ## ## Use a simple lookup-dictionary and 
@@ -904,6 +982,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             new_data$thetas <- data$thetas
             new_data$data <- data$data
 
+            mymessage("        At action_provide_gene_names: 2")
             ## To rename, use lookup
             names(new_data$lambdas) <- names_dict[names(new_data$lambdas)]
             names(new_data$dag_parent_set) <- names_dict[names(new_data$dag_parent_set)]
@@ -925,7 +1004,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data$thetas <- new_data$thetas
             data$lambdas <- new_data$lambdas
             data$csd_counts <- new_data$csd_counts
-
+            mymessage("        At action_provide_gene_names: 3")
             datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
             
         }, error = function(e){
@@ -1359,6 +1438,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 mymessage("    data$name not in dag_dataset_names. Returning a NULL")
                 return(NULL)
             }
+            mymessage("    dag_data_reactive, position 3")
             
             ## I have to this weird thing because using data$gene_names does not work
             ## for some unkown reason. Eh??!!! What weird thing?
@@ -1385,6 +1465,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 colnames(dag_data) <- c("From", "To", "Relation", "theta")
                 
             }
+            mymessage("    dag_data_reactive, position 4")
             return(dag_data)
         }
     })
@@ -1413,6 +1494,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             datasets$all_csd[[input$input2build]][[input$select_csd]] <-
                 evamtools:::to_stnd_csd_dataset(data)
             shinyjs::click("resample_dag")
+            shinyjs::disable("provide_gene_names")
         },error=function(e){
             showModal(dataModal(e[[1]]))
         })
@@ -1443,6 +1525,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Clear DAG
     observeEvent(input$clear_dag, {
         tryCatch({
+            mymessage("At clear_dag")
             tmp_data <- evamtools:::modify_dag(data$dag, NULL, NULL, operation = "clear")
             tmp_dag <- tmp_data$dag
             colnames(tmp_dag) <- rownames(tmp_dag) <- c("Root", data$gene_names)
@@ -1455,6 +1538,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
             datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
             shinyjs::disable("analysis")
+            shinyjs::enable("provide_gene_names")
+            mymessage("       At clear_dag: exit")
         }, error=function(e){
             showModal(dataModal(e[[1]]))
         })
@@ -1507,6 +1592,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             datasets$all_csd[[input$input2build]][[input$select_csd]]$lambdas <- data$lambdas
             datasets$all_csd[[input$input2build]][[input$select_csd]]$dag_parent_set <- data$dag_parent_set
             shinyjs::enable("analysis")
+            ## The next is not really necessary, but we do it for consistency
+            shinyjs::disable("provide_gene_names")
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
         })
@@ -1625,6 +1712,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <- input$gene_number
             ## Resample based on changes
             shinyjs::click("resample_mhn")
+            shinyjs::disable("provide_gene_names")            
         }, error = function(e){
             showModal(dataModal(e[[1]]))
         })
@@ -1640,6 +1728,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data$data <- mhn_data$data
             datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- mhn_data$data
             shinyjs::enable("analysis")
+            ## The next is not really necessary, but we do it for consistency
+            shinyjs::disable("provide_gene_names")
         }, error = function(e){
             showModal(dataModal(e[[1]]))
         })
@@ -1658,6 +1748,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
             shinyjs::disable("analysis")
             datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
+            shinyjs::enable("provide_gene_names")
         }, error=function(e){
             showModal(dataModal(e[[1]]))
         })
@@ -1817,6 +1908,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
                     evamtools:::genotypeCounts_to_data(data$csd_counts, e = 0)
             ##}
+            shinyjs::disable("provide_gene_names")
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
         })
