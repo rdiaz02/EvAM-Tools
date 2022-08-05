@@ -598,7 +598,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         filename = function() sprintf("%s_data.rds", input$select_csd),
         content = function(file) {
             tmp_data <- datasets$all_csd[[input$input2build]][[input$select_csd]]
-            if (input$input2build == "csd") {
+            if (input$input2build %in%  c("csd", "upload")) {
                 saveRDS(tmp_data$data, file=file)
             } else if(input$input2build == "dag") {
                 gene_names <- setdiff(unique(c(dag_data()$From, dag_data()$To)),
