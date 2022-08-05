@@ -2440,8 +2440,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  ##              "want to use other methods)</h5>"), 
                                                  choices = input$cpm_methods,
                                                  ## c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
-                                                 selected = input$cpm_methods)
-                              |> prompter::add_prompt(message = 
+                                                 selected = intersect(input$cpm_methods,
+                                                                      c("OT", "CBN", "MHN", "OncoBN")
+                                                                      )
+                                                 |> prompter::add_prompt(message = 
                                                           HTML("Show graphical output of the CPMs used to analyze the data.  "
                                                              , "Go back to \"User input\" "
                                                              , "and click on \"Advanced options\" if you"
