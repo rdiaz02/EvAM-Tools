@@ -672,14 +672,18 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##     Then, the block below.
     ## I've left some messages (commented now), so that one can see what is happening.
 
-    ## toListen <- reactive({
-    ##     list(input$input2build, input$select_csd)
-    ## })
-    ##    observeEvent(toListen(), {
-    observeEvent(c(
-        input$input2build,
-        input$select_csd
-    ) , {
+    toListen <- reactive({
+        list(input$input2build, input$select_csd)
+    })
+
+    ## observeEvent(c(
+    ##     input$input2build,
+    ##     input$select_csd
+    ## ) , {
+
+        
+    observeEvent(toListen(), {
+            
         tryCatch({
             ## ## The next two we are observing on
             ## input$select_csd
@@ -706,7 +710,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             mymessage("    disabled provide_gene_names under toListen")
             shinyjs::disable("provide_gene_names")
             
-           
+            
             
             data$dag <- tmp_data$dag
             data$dag_parent_set <- tmp_data$dag_parent_set
@@ -754,7 +758,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ##         and we have set minimum number of genes to 2
                 ## id_change_genotype_muts
                 gene_options <- set_gene_names_after_resize(data$data,
-                                                            data$gene_names)[1:n_genes]
+                                                            data$gene_names)[1:max(2, n_genes)]
+
                 updateCheckboxGroupInput(session, "genotype", label = "Mutations",
                                          choices = lapply(1:(max(2, n_genes)),
                                                           function(i) gene_options[i]),
@@ -771,129 +776,129 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
         })
-    })
+        })
 
-    observeEvent(input$display_help_change_genotype_counts, {
-        showModal(modalDialog(
-            easyClose = TRUE,
-            title = tags$h3("Changing genotype's counts"),
-            tags$div(
-                     tags$p("1. Double click in a Counts cell to edit it"),
-                     tags$p("2. Press Tab to move to the next row"),
-                     tags$p("3. Use Ctrl + Enter to save changes"),
-                     tags$p("4. Set a frequency to 0 to remove a genotype"),
-                     tags$p("5. Type in the Search bar to filter genotypes"),
-                     tags$h4(HTML("<br/>")),
-                     tags$p("Genotypes with count 0 are removed from the table. ",
-                            "Thus, if you remove a genotype when editing ",
-                            "genotype's counts in the DAG, MHN, or Upload data ",
-                            "entries, you will need to regenerate the data ",
-                            "to be able to modify those genotypes again.")
-                 )
-        )
-        )
-    })
+            observeEvent(input$display_help_change_genotype_counts, {
+                showModal(modalDialog(
+                    easyClose = TRUE,
+                    title = tags$h3("Changing genotype's counts"),
+                    tags$div(
+                             tags$p("1. Double click in a Counts cell to edit it"),
+                             tags$p("2. Press Tab to move to the next row"),
+                             tags$p("3. Use Ctrl + Enter to save changes"),
+                             tags$p("4. Set a frequency to 0 to remove a genotype"),
+                             tags$p("5. Type in the Search bar to filter genotypes"),
+                             tags$h4(HTML("<br/>")),
+                             tags$p("Genotypes with count 0 are removed from the table. ",
+                                    "Thus, if you remove a genotype when editing ",
+                                    "genotype's counts in the DAG, MHN, or Upload data ",
+                                    "entries, you will need to regenerate the data ",
+                                    "to be able to modify those genotypes again.")
+                         )
+                )
+                )
+            })
 
 
-    ## ## Updating gene names
-    ## observeEvent(input$action_gene_names,{
-    ##     tryCatch({
-    ##         new_gene_names <-
-    ##             strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]]
-    ##         if (isTRUE(any(duplicated(new_gene_names)))) {
-    ##             stop("Duplicated new gene names.")
-    ##         }
-    ##         if (length(data$gene_names[1:input$gene_number]) !=
-    ##             length(new_gene_names)) {
-    ##             stop("Number of old and new gene names differs.")
-    ##         }
-    
-    ##         ## Use a simple lookup-dictionary and 
-    ##         ## avoid to_stnd_csd_dataset which is a function from hell.
-    ##         old_gene_names <- data$gene_names
-    ##         new_gene_names <- c(new_gene_names,
-    ##                             LETTERS[(length(new_gene_names) + 1):max_genes]
-    ##                             )
-    ##         names_dict <- new_gene_names
-    ##         names(names_dict) <- old_gene_names
-    ##         ## For the DAG
-    ##         names_dict <- c(names_dict, "Root" = "Root")
-    
-    ##         new_data <- list()
-    ##         new_data$gene_names <- new_gene_names
-    ##         new_data$name <- data$name
-    ##         new_data$lambdas <- data$lambdas
-    ##         new_data$dag_parent_set <- data$dag_parent_set
-    ##         new_data$dag <- data$dag
-    ##         new_data$thetas <- data$thetas
-    ##         new_data$data <- data$data
+            ## ## Updating gene names
+            ## observeEvent(input$action_gene_names,{
+            ##     tryCatch({
+            ##         new_gene_names <-
+            ##             strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]]
+            ##         if (isTRUE(any(duplicated(new_gene_names)))) {
+            ##             stop("Duplicated new gene names.")
+            ##         }
+            ##         if (length(data$gene_names[1:input$gene_number]) !=
+            ##             length(new_gene_names)) {
+            ##             stop("Number of old and new gene names differs.")
+            ##         }
+            
+            ##         ## Use a simple lookup-dictionary and 
+            ##         ## avoid to_stnd_csd_dataset which is a function from hell.
+            ##         old_gene_names <- data$gene_names
+            ##         new_gene_names <- c(new_gene_names,
+            ##                             LETTERS[(length(new_gene_names) + 1):max_genes]
+            ##                             )
+            ##         names_dict <- new_gene_names
+            ##         names(names_dict) <- old_gene_names
+            ##         ## For the DAG
+            ##         names_dict <- c(names_dict, "Root" = "Root")
+            
+            ##         new_data <- list()
+            ##         new_data$gene_names <- new_gene_names
+            ##         new_data$name <- data$name
+            ##         new_data$lambdas <- data$lambdas
+            ##         new_data$dag_parent_set <- data$dag_parent_set
+            ##         new_data$dag <- data$dag
+            ##         new_data$thetas <- data$thetas
+            ##         new_data$data <- data$data
 
-    ##         ## To rename, use lookup
-    ##         names(new_data$lambdas) <- names_dict[names(new_data$lambdas)]
-    ##         names(new_data$dag_parent_set) <- names_dict[names(new_data$dag_parent_set)]
-    ##         colnames(new_data$dag) <- names_dict[colnames(new_data$dag)]
-    ##         rownames(new_data$dag) <- names_dict[rownames(new_data$dag)]
-    ##         colnames(new_data$thetas) <- names_dict[colnames(new_data$thetas)]
-    ##         rownames(new_data$thetas) <- names_dict[rownames(new_data$thetas)]
-    ##         if (!is.null(new_data$data)) {
-    ##             colnames(new_data$data) <- names_dict[colnames(new_data$data)]
-    ##         }
-    ##         ## To create
-    ##         new_data$csd_counts <- get_csd(new_data$data)
-    
-    ##         ## Assign to the correct places
-    ##         data$gene_names <- new_gene_names
-    ##         data$data <- new_data$data
-    ##         data$dag <- new_data$dag
-    ##         data$dag_parent_set <- new_data$dag_parent_set
-    ##         data$thetas <- new_data$thetas
-    ##         data$lambdas <- new_data$lambdas
-    ##         data$csd_counts <- new_data$csd_counts
-    
-    ##         datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
-    
-    ##     }, error = function(e){
-    ##         showModal(dataModal(e[[1]]))
-    ##     })
-    ## })
+            ##         ## To rename, use lookup
+            ##         names(new_data$lambdas) <- names_dict[names(new_data$lambdas)]
+            ##         names(new_data$dag_parent_set) <- names_dict[names(new_data$dag_parent_set)]
+            ##         colnames(new_data$dag) <- names_dict[colnames(new_data$dag)]
+            ##         rownames(new_data$dag) <- names_dict[rownames(new_data$dag)]
+            ##         colnames(new_data$thetas) <- names_dict[colnames(new_data$thetas)]
+            ##         rownames(new_data$thetas) <- names_dict[rownames(new_data$thetas)]
+            ##         if (!is.null(new_data$data)) {
+            ##             colnames(new_data$data) <- names_dict[colnames(new_data$data)]
+            ##         }
+            ##         ## To create
+            ##         new_data$csd_counts <- get_csd(new_data$data)
+            
+            ##         ## Assign to the correct places
+            ##         data$gene_names <- new_gene_names
+            ##         data$data <- new_data$data
+            ##         data$dag <- new_data$dag
+            ##         data$dag_parent_set <- new_data$dag_parent_set
+            ##         data$thetas <- new_data$thetas
+            ##         data$lambdas <- new_data$lambdas
+            ##         data$csd_counts <- new_data$csd_counts
+            
+            ##         datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
+            
+            ##     }, error = function(e){
+            ##         showModal(dataModal(e[[1]]))
+            ##     })
+            ## })
 
-    
-    ## Advanced option for running evamtools
-    observeEvent(input$advanced_options, {
-        shinyjs::toggle("all_advanced_options")
-    })
+            
+            ## Advanced option for running evamtools
+            observeEvent(input$advanced_options, {
+                shinyjs::toggle("all_advanced_options")
+            })
 
-    ## Define number of genes
-    output$gene_number_slider <- renderUI({
-        val <- ifelse(is.null(data$n_genes), 3, data$n_genes)
-        if ((!is.null(data$data) ||
-             (nrow(data$csd_counts) > 0))) {
-            mymessage("    disabled provide_gene_names renderUI")
-            shinyjs::disable("provide_gene_names")
-        }
-        if (input$input2build %in% c("csd","dag", "matrix")) {
-            tags$div(class = "frame flex",
-                     tags$h3("Set the number of genes"),
-                     tags$h5("(Using 7 or more genes can lead ",
-                             "to very long execution times for some methods ",
-                             "and crowded figures.)"),
-                     
-                     tags$div(class="inlin",
-                              tags$h3(HTML("<br/>")),
-                              sliderInput("gene_number", "Number of genes",
-                                          value = val, max = max_genes, min = min_genes,
-                                          step = 1),
-                              ## The action that takes place is
-                              ## id: here_we_change_gene_number
-                              
-                              ),
-                     tags$h4(HTML("<br/>")),
-                     tags$div(class="inlin",
-                              actionButton("provide_gene_names", "Use different gene names"),
-                              ## Prompter is not opaque. Changing opacity possible?
-                              ## https://github.com/etiennebacher/prompter/issues/3
-                              ## But need to edit the CSS. PITA
-                              shinyBS::bsTooltip("provide_gene_names",
+            ## Define number of genes
+            output$gene_number_slider <- renderUI({
+                val <- ifelse(is.null(data$n_genes), 3, data$n_genes)
+                if ((!is.null(data$data) ||
+                     (nrow(data$csd_counts) > 0))) {
+                    mymessage("    disabled provide_gene_names renderUI")
+                    shinyjs::disable("provide_gene_names")
+                }
+                if (input$input2build %in% c("csd","dag", "matrix")) {
+                    tags$div(class = "frame flex",
+                             tags$h3("Set the number of genes"),
+                             tags$h5("(Using 7 or more genes can lead ",
+                                     "to very long execution times for some methods ",
+                                     "and crowded figures.)"),
+                             
+                             tags$div(class="inlin",
+                                      tags$h3(HTML("<br/>")),
+                                      sliderInput("gene_number", "Number of genes",
+                                                  value = val, max = max_genes, min = min_genes,
+                                                  step = 1),
+                                      ## The action that takes place is
+                                      ## id: here_we_change_gene_number
+                                      
+                                      ),
+                             tags$h4(HTML("<br/>")),
+                             tags$div(class="inlin",
+                                      actionButton("provide_gene_names", "Use different gene names"),
+                                      ## Prompter is not opaque. Changing opacity possible?
+                                      ## https://github.com/etiennebacher/prompter/issues/3
+                                      ## But need to edit the CSS. PITA
+                                      shinyBS::bsTooltip("provide_gene_names",
                                                  HTML("Create new models/new data using gene names you provide. ",
                                                       "<br>",
                                                       "<b>Can only be used for models/data that are empty. </b>",
@@ -1883,7 +1888,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             genotype <- ifelse(genotype == "", "WT", genotype)
             genot_count <- ifelse(is.na(input$genotype_freq), -1,
                                   input$genotype_freq)
-
             if (genot_count > 0) {
                 data$csd_counts[genotype, ] <- c(genotype, genot_count)
                 rownames(data$csd_counts) <- data$csd_counts$Genotype
@@ -1908,11 +1912,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## id_change_genotype_muts
             gene_options <- set_gene_names_after_resize(data$data,
                                                         data$gene_names)[1:input$gene_number]
+
             updateCheckboxGroupInput(session, "genotype", label = "Mutations",
                                      choices = lapply(1:input$gene_number,
                                                       function(i) gene_options[i]),
                                      selected = NULL)
-        ## updateCheckboxGroupInput(session, "genotype", label = "Mutations",
+            updateNumericInput(session, "gene_number", value = input$gene_number)
+            ## updateCheckboxGroupInput(session, "genotype", label = "Mutations",
             ##                          choices = lapply(1:input$gene_number,
             ##                                           function(i) data$gene_names[i]),
             ##                          selected = NULL)
