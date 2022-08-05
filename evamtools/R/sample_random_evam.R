@@ -1338,7 +1338,6 @@ add_noise <- function(x, properr) {
 ## with 0/1.
 ## e: noise error, as fraction (i.e., 0 to 1)
 genotypeCounts_to_data <- function(x, e) {
-    if (nrow(x) == 0) {return(matrix(nrow = 0, ncol = 0))}
     d <- counts_to_data_no_e(x)
     if (e != 0.0) d <- add_noise(d, e)
     return(d)
