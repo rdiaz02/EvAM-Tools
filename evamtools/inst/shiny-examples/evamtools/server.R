@@ -28,6 +28,7 @@ dataModal <- function(error_message, type="Error: ") {
 
 
 ## I have left a bunch of messages. To make it easier to dis/enable them
+## by turning them to a no-op (https://stackoverflow.com/a/10933721)
 mymessage <- function(...) message(...)
 ## mymessage <- function(...) invisible(NULL)
 
@@ -46,7 +47,7 @@ sanity_new_gene_names <- function(x) {
     if (any(gn_space))
         stop("At least one of your new gene names starts with a number. That is not allowed")
 
-    gn_space <- stringi::stri_count_regex(x, "^[a-zA-z].*") 
+    gn_space <- !(stringi::stri_count_regex(x, "^[a-zA-z].*"))
     if (any(gn_space))
         stop("All gene names should start with a letter. Yours don't; that is not allowed")
 
@@ -230,6 +231,19 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         ## unnecessary, but just in case.
         mymessage("At display_freqs")
 
+        ## provide_gene_names is being enabled somewhere I can't locate
+        ## So make sure we catch it right on the redisplay
+        if ((!is.null(data$data) ||
+             (nrow(data$csd_counts) > 0))) {
+            mymessage("    disabled provide_gene_names under display_freqs")
+            shinyjs::disable("provide_gene_names")
+        }  ## else {
+        ##     mymessage("    enabled provide_gene_names under display_freqs")
+        ##     shinyjs::enable("provide_gene_names")
+        ## }
+
+
+        
         if (input$input2build == "dag") {
             ## With the DAG we always return all the genotypes
             ## Other code ensures that gene number is never smaller
@@ -297,9 +311,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 new_gnames2 <- set_gene_names_after_resize(data$data,
                                                            data$gene_names)
                 if (identical(new_gnames2, data$gene_names)) {
-                    message("A1_gnn_bisfix: identical")
+                    mymessage("A1_gnn_bisfix: identical")
                 } else {
-                    message("A1_gnn_bisfix: different")
+                    mymessage("A1_gnn_bisfix: different")
                 }
                 data$gene_names <- new_gnames2
             }
@@ -609,6 +623,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     observeEvent(input$select_csd, {
         tryCatch({
+
+            if ((!is.null(data$data) ||
+                 (nrow(data$csd_counts) > 0))) {
+                mymessage("    disabled provide_gene_names under observeEvent select_csd")
+                shinyjs::disable("provide_gene_names")
+            } else {
+                mymessage("    enabled provide_gene_names under observeEvent select_csd")
+                shinyjs::enable("provide_gene_names")
+            }
             ## Ufff!!! <<-
             last_visited_pages[[input$input2build]] <<- input$select_csd
         }, error = function(e){
@@ -662,8 +685,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     observeEvent(toListen(), {
         tryCatch({
             ## The next two we are observing on
-            ## input$select_csd
-            ## input$input2build
+            input$select_csd
+            input$input2build
 
             mymessage("At observeEvent toListen")
 
@@ -682,11 +705,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 data$csd_counts <- .ev_SHINY_dflt$template_data$csd_counts
             }
 
-
+            mymessage("At observeEvent toListen2")
             if ((!is.null(data$data) ||
                  (nrow(data$csd_counts) > 0))) {
+                mymessage("    disabled provide_gene_names under toListen")
                 shinyjs::disable("provide_gene_names")
             } else {
+                mymessage("    enabled provide_gene_names under toListen")
                 shinyjs::enable("provide_gene_names")
             }
             
@@ -744,7 +769,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ## Where we "Add genotypes" manually. This sets the count
                 updateNumericInput(session, "genotype_freq", value = NA)
             }
-
+            
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
         })
@@ -900,7 +925,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  ##                         size = "medium"
                                                  ##                         )
                                                  ),
-                              )
+                     )
         }
     })
     ## FIXME: different_gene: wording
@@ -937,7 +962,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               tags$h4(HTML("<br/>")),
                               actionButton("action_provide_gene_names", "Use these gene names"),
                               ),
-                     
                      ),
             easyClose = TRUE
         ))  
@@ -1538,6 +1562,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
             datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
             shinyjs::disable("analysis")
+            mymessage("enable provide_gene_names under clear_dag")
             shinyjs::enable("provide_gene_names")
             mymessage("       At clear_dag: exit")
         }, error=function(e){
@@ -1748,6 +1773,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
             shinyjs::disable("analysis")
             datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
+            mymessage("    enabled provide_gene_names under clear_mhn")
             shinyjs::enable("provide_gene_names")
         }, error=function(e){
             showModal(dataModal(e[[1]]))
@@ -1814,6 +1840,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data$lambdas <- .ev_SHINY_dflt$template_data$lambdas
             names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
             shinyjs::disable("analysis")
+            mymessage("enabled provide_gene_names uder clear_genotype")
             shinyjs::enable("provide_gene_names")
             datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
         }, error=function(e){
@@ -1918,6 +1945,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     output$plot <- plotly::renderPlotly({
         tryCatch({
             mymessage("At output$plot")
+            ## provide_gene_names is being enabled somewhere I can't locate
+            ## So make sure we catch it right on the redisplay
+            if ((!is.null(data$data) ||
+                 (nrow(data$csd_counts) > 0))) {
+                mymessage("    disabled provide_gene_names under output_plot")
+                shinyjs::disable("provide_gene_names")
+            }
             evamtools:::plot_genotype_counts_plly(display_freqs())
         }, error = function(e){
             showModal(dataModal(e[[1]]))
