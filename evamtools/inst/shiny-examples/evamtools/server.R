@@ -68,7 +68,8 @@ dag_message_more_genes_than_set_genes <- function() {
 ## data is the big object, with a $data inside. Yeah, great naming
 csd_more_genes_than_set_genes <- function(input, data,
                                           session = session) {
-    number_of_genes <- sum(colSums(data$data) > 0)
+    number_of_genes <- ifelse(is.null(data$data),
+                              0, sum(colSums(data$data) > 0))
     if (!is.null(input$gene_number) &&
         (number_of_genes > input$gene_number)) {
         updateNumericInput(session, "gene_number", value = number_of_genes)
