@@ -674,9 +674,9 @@ user_input <- function() {
                                      actionButton("analysis", "Run evamtools")
                                      )
                             |> prompter::add_prompt(message = paste("Inactive unless data available. ",
-                                                                    "Even if button active ",
-                                                                    "run will be aborted if data ",
-                                                                    "contains fewer than two genes or two genotypes."),
+                                                                    "Even if the button is active, ",
+                                                                    "the run will be aborted if the data ",
+                                                                    "contain fewer than two genes or two genotypes."),
                                                    ,position = "bottom",
                                              rounded = TRUE,
                                              bounce = TRUE,
