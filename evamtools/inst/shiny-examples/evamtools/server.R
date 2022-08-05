@@ -1112,8 +1112,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   actionButton("clear_mhn",
                                                HTML("Reset log-&Theta; matrix and delete genotype data"))
                                   |> prompter::add_prompt(message = 
-                                                              HTML("Resetting the log-&Theta; matrix will replace the ",
-                                                                   "contents of the named object by ",
+                                                              paste("Resetting the log-Θ matrix will replace the ",
+                                                                    "contents of the named object by ",
                                                                    "those of the default one ",
                                                                    "(a three-gene matrix filled with 0s)."),
                                                           position = "right",
