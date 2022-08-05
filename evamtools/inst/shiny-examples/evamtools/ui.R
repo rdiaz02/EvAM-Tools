@@ -279,9 +279,23 @@ results_simple <- function(){
           # column(11,
             column(2,
               tags$div(class = "frame",
-                       tags$h3("Active data"),
-                uiOutput("cpm_list")
-              ),
+                       tags$h3("Data name"),
+                       uiOutput("cpm_list")
+                       |> prompter::add_prompt(message =
+                                                   paste("Analyzed data. ",
+                                                         "We cannot guarantee you have ",
+                                                         "not made additional changes ",
+                                                         "to the data ",
+                                                         "(model changes, genotype ",
+                                                         "frequencies changes) ",
+                                                         "in the corresponding \'User input\' ",
+                                                         " screen since ",
+                                                         "you analyzed them."),
+                                               position = "bottom",
+                                               rounded = TRUE,
+                                               bounce = TRUE,
+                                               size = "medium")
+                       ),
               uiOutput("customize"),
               tags$div(class = "frame",
                        tags$h3(HTML("Download CPM results <br> and analyzed data")),
@@ -317,7 +331,7 @@ results_simple <- function(){
 user_input <- function() {
     fluidPage(
         ## require(shinyBS),
-        ## prompter::use_prompt(),
+        prompter::use_prompt(),
         shinyjs::useShinyjs(),
         tags$head(
                  tags$style(HTML("
