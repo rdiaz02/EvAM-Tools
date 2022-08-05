@@ -283,7 +283,7 @@ results_simple <- function(){
                        uiOutput("cpm_list")
                        |> prompter::add_prompt(message =
                                                    paste("Analyzed data. ",
-                                                         "We cannot guarantee you have ",
+                                                         "Beware: we cannot guarantee you have ",
                                                          "not made additional changes ",
                                                          "to the data ",
                                                          "(model changes, genotype ",

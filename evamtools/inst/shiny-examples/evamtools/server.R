@@ -924,7 +924,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                              tags$h5("(Using 7 or more genes can lead ",
                                      "to very long execution times for some methods ",
                                      "and crowded figures.)"),
-                             
                              tags$div(class="inlin",
                                       tags$h3(HTML("<br/>")),
                                       sliderInput("gene_number", "Number of genes",
@@ -941,41 +940,41 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                       ## https://github.com/etiennebacher/prompter/issues/3
                                       ## But need to edit the CSS. PITA
                                       shinyBS::bsTooltip("provide_gene_names",
-                                                 HTML("Create new models/new data using gene names you provide. ",
-                                                      "<br>",
-                                                      "<b>Can only be used for models/data that are empty. </b>",
-                                                      "Therefore, you might need to click on ",
-                                                      "\"Delete all genotype data\"",
-                                                      "\"Reset DAG and delete genotype data\"",
-                                                      "or \"Reset log-&Theta; matrix and delete genotype data\" ",
-                                                      "before being able to use this.",
-                                                      "<br><br>",
-                                                      "<b>IMPORTANT:</b> Do not think about this option as a way ",
-                                                      "to rename genes in existing data or models. ",
-                                                      "That becomes confusing very quickly. ",
-                                                      "Instead, think of this as a way to build ",
-                                                      "<b>new models from scratch</b> ",
-                                                      "with the names that you want."
-                                                      ),
-                                                 "right", options = list(container = "body")),
-                              ## |> prompter::add_prompt(message = 
-                              ##                             paste("Create new models/new data using gene names you provide. ",
-                              ##                                   "Can only be used for models/data that are empty. ",
-                              ##                                   "Therefore, you might need to click on ",
-                              ##                                   "'Delete all genotype data' ",
-                              ##                                   "'Reset DAG and delete genotype data' ",
-                              ##                                   "or 'Reset log-Θ matrix and delete genotype data' ",
-                              ##                                   "before being able to use this."
-                              ##                                   ),
-                              ##                         position = "bottom-right",
-                              ##                         type = "default",
-                              ##                         shadow = FALSE,
-                              ##                         rounded = TRUE,
-                              ##                         bounce = TRUE,
-                              ##                         size = "medium"
-                              ##                         )
-                              ),
-                     )
+                                                         HTML("Create new models/new data using gene names you provide. ",
+                                                              "<br>",
+                                                              "<b>Can only be used for models/data that are empty. </b>",
+                                                              "Therefore, you might need to click on ",
+                                                              "\"Delete all genotype data\"",
+                                                              "\"Reset DAG and delete genotype data\"",
+                                                              "or \"Reset log-&Theta; matrix and delete genotype data\" ",
+                                                              "before being able to use this.",
+                                                              "<br><br>",
+                                                              "<b>IMPORTANT:</b> Do not think about this option as a way ",
+                                                              "to rename genes in existing data or models. ",
+                                                              "That becomes confusing very quickly. ",
+                                                              "Instead, think of this as a way to build ",
+                                                              "<b>new models from scratch</b> ",
+                                                              "with the names that you want."
+                                                              ),
+                                                         "right", options = list(container = "body")),
+                                      ## |> prompter::add_prompt(message = 
+                                      ##                             paste("Create new models/new data using gene names you provide. ",
+                                      ##                                   "Can only be used for models/data that are empty. ",
+                                      ##                                   "Therefore, you might need to click on ",
+                                      ##                                   "'Delete all genotype data' ",
+                                      ##                                   "'Reset DAG and delete genotype data' ",
+                                      ##                                   "or 'Reset log-Θ matrix and delete genotype data' ",
+                                      ##                                   "before being able to use this."
+                                      ##                                   ),
+                                      ##                         position = "bottom-right",
+                                      ##                         type = "default",
+                                      ##                         shadow = FALSE,
+                                      ##                         rounded = TRUE,
+                                      ##                         bounce = TRUE,
+                                      ##                         size = "medium"
+                                      ##                         )
+                                      ),
+                             )
         }
     })
 
@@ -2073,14 +2072,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
         tryCatch({
 
-            if (input$gene_number >= 7) {
+            if (ncol(data$data) >= 7) {
                 showModal(
-                    dataModal("Beware! You are analyzing data ",
-                              "with 7 or more genes. ",
-                              "This can take longer than usual ",
-                              "and plots may be crowded. ",
-                              "We recommend using top_paths options in ",
-                              "the Results' tab.",
+                    dataModal(paste("Beware! You are analyzing data ",
+                                    "with 7 or more genes. ",
+                                    "This can take longer than usual ",
+                                    "and plots may be crowded. "),
+                              ## "We recommend using top_paths options in ",
+                              ## "the Results' tab.",
                               type = "Warning: "))
             }
 
@@ -2092,9 +2091,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
             
             shinyjs::disable("analysis")
-                                        # Create a Progress object
+
             progress <- shiny::Progress$new()
-                                        # Make sure it closes when we exit this reactive, even if there's an error
+            ## Make sure it closes when we exit this reactive, even if there's an error
             on.exit(progress$close())
 
             progress$set(message = "Running evamtools", value = 0)
