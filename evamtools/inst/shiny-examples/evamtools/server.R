@@ -829,11 +829,101 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               ## id: here_we_change_gene_number
                               ),
                      tags$h4(HTML("<br/>")),
-                     ## actionButton("change_gene_names", "Change gene names"),
+                     actionButton("provide_gene_names", "Use different gene names"),
                      )
         } 
     })
 
+    observeEvent(input$provide_gene_names, {
+        showModal(modalDialog(
+            title = tags$h3("Change gene names"),
+            tags$div(class = "inlin2",
+                     textInput(inputId = "new_gene_names", "Gene names",
+                               value = paste(LETTERS[1:max_genes],
+                                             collapse = ", ")
+                               ),
+                     tags$h4(HTML("<br/>")),
+                     tags$h4("Separate you gene names with a ','. ",
+                             "Do no use 'WT' for any gene name. ",
+                             "Use only alphanumeric characters ",
+                             "(of course, do not use comma as part of a gene name), ",
+                             "and do not start ",
+                             "a gene name with a number; ",
+                             "keep gene names short (for figures)."
+                             ),
+                     tags$h4(HTML("<br/>")),
+                     tags$div(class = "download_button",
+                              tags$h4(HTML("<br/>")),
+                              actionButton("action_provide_gene_names", "Use these gene names"),
+                              )
+                     ),
+            easyClose = TRUE
+        ))  
+    })
+
+
+    ## Updating gene names
+    observeEvent(input$action_provide_gene_names,{
+        tryCatch({
+            old_gene_names <- data$gene_names
+            new_gene_names <-
+                strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]]
+            if (isTRUE(any(duplicated(new_gene_names)))) {
+                stop("Duplicated new gene names.")
+            }
+            new_gene_names <- c(new_gene_names,
+                                LETTERS[(length(new_gene_names) + 1):max_genes]
+                                )
+            data$gene_names <- new_gene_names
+            
+            ## ## Use a simple lookup-dictionary and 
+            ## ## avoid to_stnd_csd_dataset which is a function from hell.
+
+            names_dict <- new_gene_names
+            names(names_dict) <- old_gene_names
+            ## For the DAG
+            names_dict <- c(names_dict, "Root" = "Root")
+
+            new_data <- list()
+            new_data$gene_names <- new_gene_names
+            new_data$name <- data$name
+            new_data$lambdas <- data$lambdas
+            new_data$dag_parent_set <- data$dag_parent_set
+            new_data$dag <- data$dag
+            new_data$thetas <- data$thetas
+            new_data$data <- data$data
+
+            ## To rename, use lookup
+            names(new_data$lambdas) <- names_dict[names(new_data$lambdas)]
+            names(new_data$dag_parent_set) <- names_dict[names(new_data$dag_parent_set)]
+            colnames(new_data$dag) <- names_dict[colnames(new_data$dag)]
+            rownames(new_data$dag) <- names_dict[rownames(new_data$dag)]
+            colnames(new_data$thetas) <- names_dict[colnames(new_data$thetas)]
+            rownames(new_data$thetas) <- names_dict[rownames(new_data$thetas)]
+            if (!is.null(new_data$data)) {
+                colnames(new_data$data) <- names_dict[colnames(new_data$data)]
+            }
+            ## To create
+            new_data$csd_counts <- get_csd(new_data$data)
+
+            ## Assign to the correct places
+            data$gene_names <- new_gene_names
+            data$data <- new_data$data
+            data$dag <- new_data$dag
+            data$dag_parent_set <- new_data$dag_parent_set
+            data$thetas <- new_data$thetas
+            data$lambdas <- new_data$lambdas
+            data$csd_counts <- new_data$csd_counts
+
+            datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
+            
+        }, error = function(e){
+            showModal(dataModal(e[[1]]))
+        })
+    })
+
+
+    
     ## observeEvent(input$change_gene_names, {
     ##     if (input$input2build == "dag") {
     ##         gene_names_00 <- gene_names_from_genes_in_DAG(data, data$gene_names)
