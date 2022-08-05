@@ -2296,9 +2296,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tags$div(id = "table_out2",
                      DT::DTOutput("cpm_freqs"),
                      )
-            )  
+            )
         }
     })
+    ## sometimes the tooltip misbehaves
+    shinyBS::removeTooltip(session, "table_out3")
 
     ## Download button
     output$download_cpm <- downloadHandler(
