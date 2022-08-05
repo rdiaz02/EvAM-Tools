@@ -672,7 +672,15 @@ user_input <- function() {
                             
                             tags$div(class = "download_button submit_button",
                                      actionButton("analysis", "Run evamtools")
-                                     ),
+                                     )
+                            |> prompter::add_prompt(message = paste("Inactive unless data available. ",
+                                                                    "Even if button active ",
+                                                                    "run will be aborted if data ",
+                                                                    "contains fewer than two genes or two genotypes."),
+                                                   ,position = "bottom",
+                                             rounded = TRUE,
+                                             bounce = TRUE,
+                                             size = "medium"),
                             tags$div(class = "download_button",
                                      actionButton("advanced_options", "Advanced options and CPMs to use")
                                      ),
