@@ -1978,16 +1978,20 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
             ## Filtering out non-positive counts
             if (any(data$csd_counts[, 2] < 0))
-                        showModal(modalDialog(paste("Counts < 0 present. ",
-                                                    "They will be removed.")))
+                showModal(modalDialog(paste("Counts < 0 present. ",
+                                            "They will be removed.")))
             ## We want to purge 0 entries
             data$csd_counts <- data$csd_counts[data$csd_counts[, 2] > 0, ]
-            data$data <-
-                datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
-                    evamtools:::genotypeCounts_to_data(data$csd_counts, e = 0)
-            ##}
+
+            if (nrow(data$csd_counts) == 0) {
+                data$data <- NULL
+            } else {
+                data$data <-
+                    datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
+                        evamtools:::genotypeCounts_to_data(data$csd_counts, e = 0)
+            }
             shinyjs::disable("provide_gene_names")
-        }, error = function(e) {
+            }, error = function(e) {
             showModal(dataModal(e[[1]]))
         })
     })
