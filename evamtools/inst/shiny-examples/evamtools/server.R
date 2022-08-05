@@ -1088,7 +1088,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     colnames(new_data$data) <- names_dict[colnames(new_data$data)]
                 }
                 ## To create
-                new_data$csd_counts <- get_csd(new_data$data)
+                new_data$csd_counts <- evamtools:::get_csd(new_data$data)
 
                 ## Assign to the correct places
                 data$gene_names <- new_gene_names
