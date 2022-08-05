@@ -380,11 +380,12 @@ template_dag["WT", "A"] <- 1
 template_thetas <- matrix(0, ncol = 10, nrow = 10)
     rownames(template_thetas) <- colnames(template_thetas) <- LETTERS[1:10]
 
-mhn_example_lambdas <- matrix(c(
-  c(-0.4, -1.04, -2.53),
-  c(0.18, -0.92, -0.76),
-  c(-1.05, -0.53, 0.23)
-), ncol = 3, nrow = 3)
+## set.seed(1)
+## mhn_example_lambdas <- matrix(Random.Theta(4, sparsity = 0.5))
+mhn_example_lambdas <- matrix(
+    c(-0.21, 0.00, 0.45, -1.24, 0, 0.41, 0, 0, 0, -1.27, -0.07, -1.22,
+      0.62, 0, -0.01, -0.33), byrow = TRUE,
+    ncol = 4, nrow = 4)
 
 mhn_example_lambdas2 <- template_thetas
 mhn_example_lambdas2[1:ncol(mhn_example_lambdas)

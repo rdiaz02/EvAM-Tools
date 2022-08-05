@@ -14,13 +14,13 @@ names(template_lambdas) <- all_gene_names
 template_thetas <- matrix(0, ncol = max_genes, nrow = max_genes)
 rownames(template_thetas) <- colnames(template_thetas) <- all_gene_names
 template_csd_counts <- data.frame(Genotype = character(), Counts = integer())
-template_csd_data <- matrix(0, ncol = 3, nrow = 0)
+template_csd_data <- matrix(0, ncol = 4, nrow = 0)
 
 .ev_SHINY_dflt <- list(
   max_genes = 10,
   min_genes = 2,
   cpm_samples = 10000,
-  ngenes = 3,
+  ngenes = 4,
   csd_samples = 1000,
   dag_model = "HESBCN",
   all_cpms = c("OT", "CBN", "OncoBN", "MHN", "MCCBN", "HESBCN"),
