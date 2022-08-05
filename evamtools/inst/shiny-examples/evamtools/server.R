@@ -871,11 +871,27 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## Define number of genes
             output$gene_number_slider <- renderUI({
                 val <- ifelse(is.null(data$n_genes), 3, data$n_genes)
-                if ((!is.null(data$data) ||
-                     (nrow(data$csd_counts) > 0))) {
-                    mymessage("    disabled provide_gene_names renderUI")
-                    shinyjs::disable("provide_gene_names")
-                }
+                ## BEWARE!!! Never, ever, add this: it forces the slider
+                ## of Number of genes back. And creates a mess.
+                ## FIXME: but this suggests something in the logic is twisted
+                ## Why should it have this effect?
+                ## Even the code below screws things up. 
+                ## Yes, this is the gene number slider. 
+                ## if ((!is.null(data$data) ||
+                ##      (nrow(data$csd_counts) > 0))) {
+                ##     mymessage("    disabled provide_gene_names renderUI")
+                ##     shinyjs::disable("provide_gene_names")
+                ## }
+                ## if ((!is.null(data$data) ||
+                ##      (nrow(data$csd_counts) > 0))) {
+                ##     uu <- 3 + 2
+                ##     ## mymessage("    just a message from renderUI")
+                ##     ## shinyjs::disable("provide_gene_names")
+                ## }
+                ## ## Yes, the following seems inocuous
+                ## mymessage("    is this inocuous? another just a message from renderUI")
+                ## Preliminary conclusion: it seems to be the renderUI thing
+                
                 if (input$input2build %in% c("csd","dag", "matrix")) {
                     tags$div(class = "frame flex",
                              tags$h3("Set the number of genes"),
@@ -1917,7 +1933,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                      choices = lapply(1:input$gene_number,
                                                       function(i) gene_options[i]),
                                      selected = NULL)
-            updateNumericInput(session, "gene_number", value = input$gene_number)
             ## updateCheckboxGroupInput(session, "genotype", label = "Mutations",
             ##                          choices = lapply(1:input$gene_number,
             ##                                           function(i) data$gene_names[i]),
