@@ -28,8 +28,8 @@ dataModal <- function(error_message, type="Error: ") {
 
 
 ## I have left a bunch of messages. To make it easier to dis/enable them
-## mymessage <- function(...) message(...)
-mymessage <- function(...) invisible(NULL)
+mymessage <- function(...) message(...)
+## mymessage <- function(...) invisible(NULL)
 
 
 
@@ -68,7 +68,8 @@ dag_message_more_genes_than_set_genes <- function() {
 ## data is the big object, with a $data inside. Yeah, great naming
 csd_more_genes_than_set_genes <- function(input, data,
                                           session = session) {
-    number_of_genes <- sum(colSums(data$data) > 0)
+    number_of_genes <- ifelse(is.null(data$data),
+                              0, sum(colSums(data$data) > 0))
     if (!is.null(input$gene_number) &&
         (number_of_genes > input$gene_number)) {
         updateNumericInput(session, "gene_number", value = number_of_genes)
@@ -319,7 +320,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     
     observeEvent(input$gene_number, {
         ## id: here_we_change_gene_number
-        mymessage("at gene number_trigger")
+        mymessage("at gene_number trigger")
+        
         datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
             input$gene_number
         if (input$input2build == "csd") {
@@ -659,6 +661,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 data$csd_counts <- .ev_SHINY_dflt$template_data$csd_counts
             }
 
+
+            if (input$input2build %in% c("csd") &&
+                (!is.null(data$data) ||
+                 (nrow(data$csd_counts) > 0))) {
+                shinyjs::disable("provide_gene_names")
+            } else {
+                shinyjs::enable("provide_gene_names")
+            }
+            
             data$dag <- tmp_data$dag
             data$dag_parent_set <- tmp_data$dag_parent_set
             data$lambdas <- tmp_data$lambdas
@@ -831,7 +842,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$h4(HTML("<br/>")),
                      actionButton("provide_gene_names", "Use different gene names"),
                      )
-        } 
+        }
     })
 
     observeEvent(input$provide_gene_names, {
@@ -1705,7 +1716,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tmp_dag <- .ev_SHINY_dflt$template_data$dag
             colnames(tmp_dag) <- rownames(tmp_dag) <- c("WT", data$gene_names)
             tmp_dag["WT", data$gene_names[1]] <- 1
-                                        # data$dag <- NULL
             data$dag <- tmp_dag
             data$csd_counts <- .ev_SHINY_dflt$template_data$csd_counts
             data$data <- .ev_SHINY_dflt$template_data$data
@@ -1713,6 +1723,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data$lambdas <- .ev_SHINY_dflt$template_data$lambdas
             names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
             shinyjs::disable("analysis")
+            shinyjs::enable("provide_gene_names")
             datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
         }, error=function(e){
             showModal(dataModal(e[[1]]))
@@ -1740,6 +1751,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 
                 
                 shinyjs::enable("analysis")
+                shinyjs::disable("provide_gene_names")
             } else {
                 showModal(modalDialog(paste("Counts <= 0 present. ",
                                             "They will be removed.")))
