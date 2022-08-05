@@ -209,7 +209,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     default_csd_samples <- .ev_SHINY_dflt$csd_samples
     default_cpm_samples <- .ev_SHINY_dflt$cpm_samples
     default_dag_model <- .ev_SHINY_dflt$dag_model
-
+    default_number_genes <- 4
+    
     last_visited_pages <- list(upload="Empty",
                                csd = "Empty",
                                dag = "DAG_Fork_3",
@@ -228,7 +229,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       , dag_parent_set = .ev_SHINY_dflt$template_data$dag_parent_set
       , lambdas = .ev_SHINY_dflt$template_data$lambdas
       , thetas = .ev_SHINY_dflt$template_data$thetas
-      , n_genes = .ev_SHINY_dflt$ngenes
+      , n_genes = default_number_genes ## .ev_SHINY_dflt$ngenes
       , gene_names = LETTERS[1: max_genes]
     )
 
@@ -744,19 +745,19 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             if (input$input2build == "dag") {
                 number_of_parents <- colSums(data$dag)
                 to_keep <- sum(number_of_parents > 0)
-                n_genes <- ifelse(to_keep < 1, .ev_SHINY_dflt$ngenes, to_keep)
+                n_genes <- ifelse(to_keep < 1, default_number_genes, to_keep)
                 updateRadioButtons(session, "dag_model", selected = "HESBCN")
             } else if (input$input2build == "matrix") {
                 n_genes <- data$n_genes
                 if (is.null(n_genes)) {
-                    n_genes <- .ev_SHINY_dflt$ngenes
+                    n_genes <- default_number_genes
                 } 
             } else if (input$input2build %in% c("csd", "upload")) {
                 if (!is.null(data$data))  {
                     n_genes <- ncol(data$data)  
                 } else { ## data$data is null
                     if (input$input2build == "csd") {
-                        n_genes <- .ev_SHINY_dflt$ngenes
+                        n_genes <- default_number_genes
                     } else { ## if (input$input2build == "upload")
                         n_genes <- NULL
                     }
@@ -1009,10 +1010,19 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   "Instead, think of this as a way to build ",
                                   "<b>new models from scratch</b> ",
                                   "with the names that you want. ")),
-                     
+                     tags$h4(HTML("<br/>")),
+                     tags$h4(HTML("Likewise, enter all new names in one go ",
+                                  "(to try to enforce this, the button \"Use these gene names\" ",
+                                  "will be disabled as soon as you click it). ",
+                                  "Repeatedly editing the new gene names ",
+                                  "can easily lead to mismatch errors ",
+                                  "(that will be displayed in red, with text ",
+                                  "that contains \"all(gene_names_in_freqs %in% valid_gene_names \"). ",
+                                  "This is inconsequential; delete all genotype data, and start again.")),
                      tags$div(class = "download_button",
                               tags$h4(HTML("<br/>")),
-                              actionButton("action_provide_gene_names", "Use these gene names"),
+                              actionButton("action_provide_gene_names",
+                                           "Use these gene names"),
                               ),
                      ),
             easyClose = TRUE
@@ -1100,7 +1110,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 data$csd_counts <- new_data$csd_counts
                 mymessage("        At action_provide_gene_names: 3")
                 datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
-                
+                ## Disable as soon as clicked on "Use these genes"
+                shinyjs::disable("action_provide_gene_names")
             }, error = function(e){
                 showModal(dataModal(e[[1]]))
             })
@@ -1161,7 +1172,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
     output$define_genotype <- renderUI({
-        n_genes <- ifelse(is.null(input$gene_number), 3, input$gene_number)
+        n_genes <- ifelse(is.null(input$gene_number), default_number_genes,
+                          input$gene_number)
 
         ## Setting it here ain't enough
         ## This can all be changed in other two lines at least too.
