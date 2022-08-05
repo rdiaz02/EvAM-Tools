@@ -33,27 +33,40 @@ dataModal <- function(error_message, type="Error: ") {
 mymessage <- function(...) invisible(NULL)
 
 
+sanity_file_name <- function(x) {
+    gn_space <- !(stringi::stri_count_regex(x, "^[a-zA-Z].*"))
+    if (any(gn_space))
+        stop("All file and data names should start with a letter. ",
+             "Yours don't; that is not allowed.")
+
+    gn_space <- stringi::stri_count_regex(x,  "[^a-zA-z0-9_-]+")
+    if (any(gn_space))
+        stop("Use only letters, numbers, the hyphen - and the underscore _ .",
+             "The name you provided contains other characters.")
+}
+
+
 sanity_new_gene_names <- function(x) {
     ## From similar code in evam-wrapper
     gn_backslash <- stringi::stri_count_fixed(x, "\\") 
     if (any(gn_backslash))
-        stop("At least one of your new gene names has a backslash. That is not allowed")
+        stop("At least one of your new gene names has a backslash. That is not allowed.")
 
     gn_space <- stringi::stri_count_regex(x, "[\\s]") 
     if (any(gn_space))
-        stop("At least one of your new gene names has a space. That is not allowed")
+        stop("At least one of your new gene names has a space. That is not allowed.")
 
     gn_space <- stringi::stri_count_regex(x, "^\\d") 
     if (any(gn_space))
-        stop("At least one of your new gene names starts with a number. That is not allowed")
+        stop("At least one of your new gene names starts with a number. That is not allowed.")
 
-    gn_space <- !(stringi::stri_count_regex(x, "^[a-zA-z].*"))
+    gn_space <- !(stringi::stri_count_regex(x, "^[a-zA-Z].*"))
     if (any(gn_space))
-        stop("All gene names should start with a letter. Yours don't; that is not allowed")
+        stop("All gene names should start with a letter. Yours don't; that is not allowed.")
 
     
     if (any(x == "WT"))
-        stop("One of your new gene names is called WT. That is not allowed")
+        stop("One of your new gene names is called WT. That is not allowed.")
 }
 ## For DRY though gene_names and number_of_genes are also
 ## obtained for other purposes right before these
@@ -399,6 +412,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         if (grepl(".csv", input$csd$datapath)) {
             tryCatch({
                 dataset_name <- input$name_uploaded
+                sanity_file_name(input$name_uploaded)
                 ## repeated from obserEvent(input$save_csd_data
                 if (gsub(" ", "", dataset_name, fixed = TRUE) == "") {
                     stop("Name of data cannot be an empty string")
@@ -475,7 +489,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$h3("Rename the data"),
                      tags$h5(HTML("Give the (modified) data a different name ",
                                   "that will also be used to save the CPM ",
-                                  "output.")),
+                                  "output.",
+                                  "Names should start with a letter, ",
+                                  "and can contain only letters, numbers, ",
+                                  "hyphen, and underscore, but no ",
+                                  "other characters (no periods, spaces, etc.)"
+                                  )),
                      tags$div(class = "download_button",
                               ),
                      textInput(inputId = "dataset_name",
@@ -508,6 +527,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Saving dataset
     observeEvent(input$save_csd_data, {
         tryCatch({
+            sanity_file_name(input$dataset_name)
             ## 1 save dataset to list after user data
             if (gsub(" ", "", input$dataset_name, fixed = TRUE) == "") {
                 stop("Name of data cannot be an empty string")
@@ -1399,7 +1419,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$h3("Upload data (CSV format)"),
                      tags$h5(HTML("If you want to give your data a specific ",
                                   "name, set it in the box below ",
-                                  "before uploading the data. "
+                                  "before uploading the data. ",
+                                  "Names should start with a letter, ",
+                                  "and can contain only letters, numbers, ",
+                                  "hyphen, and underscore, but no ",
+                                  "other characters (no periods, spaces, etc)."
                                   )),
                      tags$div(class = "inlin3",
                               textInput(inputId = "name_uploaded",
