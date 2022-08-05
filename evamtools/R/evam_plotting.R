@@ -787,10 +787,19 @@ plot_evam <- function(cpm_output, samples = NULL, orientation = "horizontal",
     par(op1)
 }
 
+## select only the num_genots columns of largest frequency
+trim_data_to_plot <- function(data, num_genots) {
+    cn <- colnames(data)[2]
+    if (!(cn %in% c("Freq", "Counts"))) stop("Unrecognized format")
+    oi <- order(data[, 2], data[, 1], decreasing = TRUE)[seq.int(num_genots)]
+    return(data[oi, ])
+}
 
 ## called from the shiny code
-plot_genotype_counts <- function(data) {
+## max.num: largest number of genotypes to show
+plot_genotype_counts <- function(data, max.num = 20) {
     if (nrow(data) == 0) return(invisible(NULL))
+    if (nrow(data) > max.num) data <- trim_data_to_plot(data, max.num)
     largest_genot_name <- max(vapply(data$Genotype, nchar, 1))
     bottom_mar <- min(25, max(5, (2/3) * largest_genot_name))
     op <- par(las = 2, cex.main = 1.6, cex.lab = 1.5, cex.axis = 1.2,
@@ -803,9 +812,8 @@ plot_genotype_counts <- function(data) {
     data2 <- na.omit(reorder_to_standard_order(data2))
 
     barplot(height = as.vector(data2)
-        , names = names(data2)
-        # , ylab="Counts", main="Absolute\n Genotype Frequencies"
-        , horiz = FALSE)
+          , names = names(data2)
+          , horiz = FALSE)
     grid(nx = NA, ny = NULL, col='gray', lwd = 2)
     par(op)
 }
