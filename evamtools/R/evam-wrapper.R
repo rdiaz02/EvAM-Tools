@@ -700,7 +700,7 @@ evam <- function(x,
              "(and remember that any genes that are ",
              "completely aliased, i.e., indistinguishable, ",
              "because they have identical patterns ",
-             "---i.e., identical columns in the data matrix--- ",
+             "---identical columns in the data matrix--- ",
              "are regarded as a single gene).")
     }
     
