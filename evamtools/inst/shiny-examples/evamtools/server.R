@@ -29,8 +29,8 @@ dataModal <- function(error_message, type="Error: ") {
 
 ## I have left a bunch of messages. To make it easier to dis/enable them
 ## by turning them to a no-op (https://stackoverflow.com/a/10933721)
-mymessage <- function(...) message(...)
-## mymessage <- function(...) invisible(NULL)
+## mymessage <- function(...) message(...)
+mymessage <- function(...) invisible(NULL)
 
 
 sanity_new_gene_names <- function(x) {
@@ -183,7 +183,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         do_gc(1)
     })
     
-    
     ## Make these deps explicit. Needed for shinytests
     data("examples_csd", package = "evamtools")
     data("SHINY_DEFAULTS", package = "evamtools")
@@ -198,7 +197,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     default_cpm_samples <- .ev_SHINY_dflt$cpm_samples
     default_dag_model <- .ev_SHINY_dflt$dag_model
 
-    last_visited_pages <- list(upload="Empty", csd = "Empty", dag = "DAG_Fork_3", matrix = "MHN_all_0")
+    last_visited_pages <- list(upload="Empty",
+                               csd = "Empty",
+                               dag = "DAG_Fork_3",
+                               matrix = "MHN_all_0")
 
     last_visited_cpm <- ""
 
@@ -233,14 +235,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
         ## provide_gene_names is being enabled somewhere I can't locate
         ## So make sure we catch it right on the redisplay
+        ## There are a bunch of calls like this.
         if ((!is.null(data$data) ||
              (nrow(data$csd_counts) > 0))) {
             mymessage("    disabled provide_gene_names under display_freqs")
             shinyjs::disable("provide_gene_names")
-        }  ## else {
-        ##     mymessage("    enabled provide_gene_names under display_freqs")
-        ##     shinyjs::enable("provide_gene_names")
-        ## }
+        }  
 
 
         
@@ -256,7 +256,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                           "Returning a 0-rows data frame")
                 return(data.frame(Genotype = character(), Counts = integer()))
             }
-
+          
+            
             ## FIXME: See comment below  A1_gnn_bisfix
             ## if (!is.null(data$n_genes) &&
             ##     input$gene_number != data$n_genes) {
@@ -623,15 +624,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     observeEvent(input$select_csd, {
         tryCatch({
-
-            if ((!is.null(data$data) ||
-                 (nrow(data$csd_counts) > 0))) {
-                mymessage("    disabled provide_gene_names under observeEvent select_csd")
-                shinyjs::disable("provide_gene_names")
-            } else {
-                mymessage("    enabled provide_gene_names under observeEvent select_csd")
-                shinyjs::enable("provide_gene_names")
-            }
             ## Ufff!!! <<-
             last_visited_pages[[input$input2build]] <<- input$select_csd
         }, error = function(e){
@@ -641,7 +633,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     ## Display List of availabe CSD
     output$csd_list <- renderUI({
-        if(length(names(datasets$all_csd[[input$input2build]]))>0){
+        if (length(names(datasets$all_csd[[input$input2build]]))>0){
             all_names <- c()
             all_choice_names <- c()
             for (i in names(datasets$all_csd[[input$input2build]])){
@@ -665,9 +657,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
 
-    toListen <- reactive({
-        list(input$input2build, input$select_csd)
-    })
+    
 
     ## This is probably abusing observeEvent? And mixing what would be
     ## better served with eventReactive?
@@ -681,12 +671,19 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##     The first thing that gets called is display_freqs (as output$plot is called)
     ##     Then, the block below.
     ## I've left some messages (commented now), so that one can see what is happening.
-    
-    observeEvent(toListen(), {
+
+    ## toListen <- reactive({
+    ##     list(input$input2build, input$select_csd)
+    ## })
+    ##    observeEvent(toListen(), {
+    observeEvent(c(
+        input$input2build,
+        input$select_csd
+    ) , {
         tryCatch({
-            ## The next two we are observing on
-            input$select_csd
-            input$input2build
+            ## ## The next two we are observing on
+            ## input$select_csd
+            ## input$input2build
 
             mymessage("At observeEvent toListen")
 
@@ -706,14 +703,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             }
 
             mymessage("At observeEvent toListen2")
-            if ((!is.null(data$data) ||
-                 (nrow(data$csd_counts) > 0))) {
-                mymessage("    disabled provide_gene_names under toListen")
-                shinyjs::disable("provide_gene_names")
-            } else {
-                mymessage("    enabled provide_gene_names under toListen")
-                shinyjs::enable("provide_gene_names")
-            }
+            mymessage("    disabled provide_gene_names under toListen")
+            shinyjs::disable("provide_gene_names")
+            
+           
             
             data$dag <- tmp_data$dag
             data$dag_parent_set <- tmp_data$dag_parent_set
@@ -769,7 +762,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ## Where we "Add genotypes" manually. This sets the count
                 updateNumericInput(session, "genotype_freq", value = NA)
             }
-            
+
+            if (is.null(data$data) || (nrow(data$csd_counts) == 0)) {
+                mymessage("    enabled provide_gene_names at end of toListen")
+                shinyjs::enable("provide_gene_names")
+            }
+
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
         })
@@ -868,7 +866,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Define number of genes
     output$gene_number_slider <- renderUI({
         val <- ifelse(is.null(data$n_genes), 3, data$n_genes)
-
+        if ((!is.null(data$data) ||
+             (nrow(data$csd_counts) > 0))) {
+            mymessage("    disabled provide_gene_names renderUI")
+            shinyjs::disable("provide_gene_names")
+        }
         if (input$input2build %in% c("csd","dag", "matrix")) {
             tags$div(class = "frame flex",
                      tags$h3("Set the number of genes"),
@@ -883,13 +885,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                           step = 1),
                               ## The action that takes place is
                               ## id: here_we_change_gene_number
-                             
+                              
                               ),
                      tags$h4(HTML("<br/>")),
                      tags$div(class="inlin",
                               actionButton("provide_gene_names", "Use different gene names"),
                               ## Prompter is not opaque. Changing opacity possible?
                               ## https://github.com/etiennebacher/prompter/issues/3
+                              ## But need to edit the CSS. PITA
                               shinyBS::bsTooltip("provide_gene_names",
                                                  HTML("Create new models/new data using gene names you provide. ",
                                                       "<br>",
@@ -897,41 +900,42 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                       "Therefore, you might need to click on ",
                                                       "\"Delete all genotype data\"",
                                                       "\"Reset DAG and delete genotype data\"",
-                                      "or \"Reset log-&Theta; matrix and delete genotype data\" ",
-                                      "before being able to use this.",
-                                      "<br><br>",
-                                      "<b>IMPORTANT:</b> Do not think about this option as a way ",
-                                      "to rename genes in existing data or models. ",
-                                      "That becomes confusing very quickly. ",
-                                      "Instead, think of this as a way to build ",
-                                      "<b>new models from scratch</b> ",
-                                      "with the names that you want."
-                                      ),
+                                                      "or \"Reset log-&Theta; matrix and delete genotype data\" ",
+                                                      "before being able to use this.",
+                                                      "<br><br>",
+                                                      "<b>IMPORTANT:</b> Do not think about this option as a way ",
+                                                      "to rename genes in existing data or models. ",
+                                                      "That becomes confusing very quickly. ",
+                                                      "Instead, think of this as a way to build ",
+                                                      "<b>new models from scratch</b> ",
+                                                      "with the names that you want."
+                                                      ),
                                                  "right", options = list(container = "body")),
                               ## |> prompter::add_prompt(message = 
-                                                 ##                             paste("Create new models/new data using gene names you provide. ",
-                                                 ##                                   "Can only be used for models/data that are empty. ",
-                                                 ##                                   "Therefore, you might need to click on ",
-                                                 ##                                   "'Delete all genotype data' ",
-                                                 ##                                   "'Reset DAG and delete genotype data' ",
-                                                 ##                                   "or 'Reset log-Θ matrix and delete genotype data' ",
-                                                 ##                                   "before being able to use this."
-                                                 ##                                   ),
-                                                 ##                         position = "bottom-right",
-                                                 ##                         type = "default",
-                                                 ##                         shadow = FALSE,
-                                                 ##                         rounded = TRUE,
-                                                 ##                         bounce = TRUE,
-                                                 ##                         size = "medium"
-                                                 ##                         )
-                                                 ),
+                              ##                             paste("Create new models/new data using gene names you provide. ",
+                              ##                                   "Can only be used for models/data that are empty. ",
+                              ##                                   "Therefore, you might need to click on ",
+                              ##                                   "'Delete all genotype data' ",
+                              ##                                   "'Reset DAG and delete genotype data' ",
+                              ##                                   "or 'Reset log-Θ matrix and delete genotype data' ",
+                              ##                                   "before being able to use this."
+                              ##                                   ),
+                              ##                         position = "bottom-right",
+                              ##                         type = "default",
+                              ##                         shadow = FALSE,
+                              ##                         rounded = TRUE,
+                              ##                         bounce = TRUE,
+                              ##                         size = "medium"
+                              ##                         )
+                              ),
                      )
         }
     })
-    ## FIXME: different_gene: wording
+
     observeEvent(input$provide_gene_names, {
+       
         showModal(modalDialog(
-            title = tags$h3("Change gene names"),
+            title = tags$h3("Use different gene names"),
             tags$div(class = "inlin2",
                      textInput(inputId = "new_gene_names", "New gene names",
                                value = paste(LETTERS[1:max_genes],
@@ -946,17 +950,18 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                              "Do no use 'WT' for any gene name. ",
                              "Use only alphanumeric characters ",
                              "(of course, do not use comma as part of a gene name), ",
-                             "and try not to start ",
-                             "a gene name with a number ---this will likely lead to problems; ",
-                             "keep gene names short (for figures)."
+                             " and start gene names with letters ",
+                             "(i.e., do not start them with numbers ",
+                             "or other characters such as ._-, etc.). ",
+                             "Try to keep gene names short (for figures)."
                              ),
                      tags$h4(HTML("<br/>")),
-                     tags$h4(HTML("<b>IMPORTANT:</b> Do not think about this option as a way ",
+                     tags$h4(HTML("<b>IMPORTANT:</b> Again, do not think about this option as a way ",
                                   "to rename genes in existing data or models. ",
-                             "That becomes confusing very quickly. ",
-                             "Instead, think of this as a way to build ",
-                             "<b>new models from scratch</b> ",
-                             "with the names that you want.")),
+                                  "That becomes confusing very quickly. ",
+                                  "Instead, think of this as a way to build ",
+                                  "<b>new models from scratch</b> ",
+                                  "with the names that you want. ")),
                      
                      tags$div(class = "download_button",
                               tags$h4(HTML("<br/>")),
@@ -965,79 +970,97 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      ),
             easyClose = TRUE
         ))  
-    })
+         })
 
 
-    ## Updating gene names
-    observeEvent(input$action_provide_gene_names,{
-        tryCatch({
-            mymessage("At action_provide_gene_names")
-            old_gene_names <- data$gene_names
-            new_gene_names <-
-                strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]]
-            if (isTRUE(any(duplicated(new_gene_names)))) {
-                stop("Duplicated new gene names.")
-            }
-            sanity_new_gene_names(new_gene_names)
-            if (length(new_gene_names) < max_genes) {
-                new_gene_names <- c(new_gene_names,
-                                    LETTERS[(length(new_gene_names) + 1):max_genes]
-                                    )
-                if (isTRUE(any(duplicated(new_gene_names)))) {
-                    stop("Duplicated gene names between new and old entries.")
+        ## Updating gene names
+        observeEvent(input$action_provide_gene_names,{
+            tryCatch({
+                mymessage("At action_provide_gene_names")
+
+                ## The disabling of the option does not work well sometimes.
+                ## So instead of filling up the code with disables,
+                ## catch it here.
+                ## I still leave a bunch of them, as it would be ideal not to
+                ## end here.
+                if ((!is.null(data$data) ||
+                     (nrow(data$csd_counts) > 0))) {
+                    mymessage("    disabled provide_gene_names action_provide_gene_names")
+                    shinyjs::disable("provide_gene_names")
+                    stop("As the tooltip and box text explained, ",
+                         "you should ONLY try to ",
+                         "change gene names on empty models/data. ",
+                         "This data already has values; ",
+                         "you need to delete all data first. ",
+                         "We will abort this operation.")
                 }
-            }
-            data$gene_names <- new_gene_names
-            
-            ## ## Use a simple lookup-dictionary and 
-            ## ## avoid to_stnd_csd_dataset which is a function from hell.
+                
+                old_gene_names <- data$gene_names
+                new_gene_names <-
+                    strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]]
+                if (isTRUE(any(duplicated(new_gene_names)))) {
+                    stop("Duplicated new gene names.")
+                }
+                sanity_new_gene_names(new_gene_names)
+                if (length(new_gene_names) < max_genes) {
+                    new_gene_names <- c(new_gene_names,
+                                        LETTERS[(length(new_gene_names) + 1):max_genes]
+                                        )
+                    if (isTRUE(any(duplicated(new_gene_names)))) {
+                        stop("Duplicated gene names between new and old entries.")
+                    }
+                }
+                data$gene_names <- new_gene_names
+                
+                ## ## Use a simple lookup-dictionary and 
+                ## ## avoid to_stnd_csd_dataset which is a function from hell.
 
-            names_dict <- new_gene_names
-            names(names_dict) <- old_gene_names
-            ## For the DAG
-            names_dict <- c(names_dict, "Root" = "Root")
+                names_dict <- new_gene_names
+                names(names_dict) <- old_gene_names
+                ## For the DAG
+                names_dict <- c(names_dict, "Root" = "Root")
 
-            new_data <- list()
-            new_data$gene_names <- new_gene_names
-            new_data$name <- data$name
-            new_data$lambdas <- data$lambdas
-            new_data$dag_parent_set <- data$dag_parent_set
-            new_data$dag <- data$dag
-            new_data$thetas <- data$thetas
-            new_data$data <- data$data
+                new_data <- list()
+                new_data$gene_names <- new_gene_names
+                new_data$name <- data$name
+                new_data$lambdas <- data$lambdas
+                new_data$dag_parent_set <- data$dag_parent_set
+                new_data$dag <- data$dag
+                new_data$thetas <- data$thetas
+                new_data$data <- data$data
 
-            mymessage("        At action_provide_gene_names: 2")
-            ## To rename, use lookup
-            names(new_data$lambdas) <- names_dict[names(new_data$lambdas)]
-            names(new_data$dag_parent_set) <- names_dict[names(new_data$dag_parent_set)]
-            colnames(new_data$dag) <- names_dict[colnames(new_data$dag)]
-            rownames(new_data$dag) <- names_dict[rownames(new_data$dag)]
-            colnames(new_data$thetas) <- names_dict[colnames(new_data$thetas)]
-            rownames(new_data$thetas) <- names_dict[rownames(new_data$thetas)]
-            if (!is.null(new_data$data)) {
-                colnames(new_data$data) <- names_dict[colnames(new_data$data)]
-            }
-            ## To create
-            new_data$csd_counts <- get_csd(new_data$data)
+                mymessage("        At action_provide_gene_names: 2")
+                ## To rename, use lookup
+                names(new_data$lambdas) <- names_dict[names(new_data$lambdas)]
+                names(new_data$dag_parent_set) <- names_dict[names(new_data$dag_parent_set)]
+                colnames(new_data$dag) <- names_dict[colnames(new_data$dag)]
+                rownames(new_data$dag) <- names_dict[rownames(new_data$dag)]
+                colnames(new_data$thetas) <- names_dict[colnames(new_data$thetas)]
+                rownames(new_data$thetas) <- names_dict[rownames(new_data$thetas)]
+                if (!is.null(new_data$data)) {
+                    colnames(new_data$data) <- names_dict[colnames(new_data$data)]
+                }
+                ## To create
+                new_data$csd_counts <- get_csd(new_data$data)
 
-            ## Assign to the correct places
-            data$gene_names <- new_gene_names
-            data$data <- new_data$data
-            data$dag <- new_data$dag
-            data$dag_parent_set <- new_data$dag_parent_set
-            data$thetas <- new_data$thetas
-            data$lambdas <- new_data$lambdas
-            data$csd_counts <- new_data$csd_counts
-            mymessage("        At action_provide_gene_names: 3")
-            datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
-            
-        }, error = function(e){
-            showModal(dataModal(e[[1]]))
+                ## Assign to the correct places
+                data$gene_names <- new_gene_names
+                data$data <- new_data$data
+                data$dag <- new_data$dag
+                data$dag_parent_set <- new_data$dag_parent_set
+                data$thetas <- new_data$thetas
+                data$lambdas <- new_data$lambdas
+                data$csd_counts <- new_data$csd_counts
+                mymessage("        At action_provide_gene_names: 3")
+                datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
+                
+            }, error = function(e){
+                showModal(dataModal(e[[1]]))
+            })
         })
-    })
 
 
-    
+    ## From the older implementation. Will remove this commented code.
     ## observeEvent(input$change_gene_names, {
     ##     if (input$input2build == "dag") {
     ##         gene_names_00 <- gene_names_from_genes_in_DAG(data, data$gene_names)
@@ -1135,9 +1158,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## Make sure all genes currently in the DAG are in
             ## the To and From to add/remove
             mymessage("At output$define_genotype, DAG")
+
+            ## ## Otherwise, it gets enabled again occasionally.
+            if ((!is.null(data$data) ||
+                 (nrow(data$csd_counts) > 0))) {
+                mymessage("    disabled provide_gene_names under select_csd")
+                shinyjs::disable("provide_gene_names")
+            }
+            
             current_dag_data <- dag_data()
-            ## genes_in_dag <- setdiff(unique(c(dag_data()$From, dag_data()$To)),
-            ##                         "Root")
             if (is.null(current_dag_data)) mymessage("   current_dag_data is NULL")
             genes_in_dag <- setdiff(unique(c(current_dag_data$From,
                                              current_dag_data$To)),
@@ -1318,13 +1347,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   |> prompter::add_prompt(message = 
                                                               paste("Resetting the log-Θ matrix will replace the ",
                                                                     "contents of the named object by ",
-                                                                   "those of the default one ",
-                                                                   "(a three-gene matrix filled with 0s)."),
+                                                                    "those of the default one ",
+                                                                    "(a three-gene matrix filled with 0s)."),
                                                           position = "right",
                                                           rounded = TRUE,
                                                           bounce = TRUE,
                                                           size = "medium"
-                                                         )
+                                                          )
                                   ## An example of shinyBS::bsTooltip 
                                   ## shinyBS::bsTooltip("clear_mhn",
                                   ##                    HTML("Resetting the log-&Theta; matrix will replace the ",
@@ -1334,7 +1363,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   ##                    "right", options = list(container = "body")
                                   ##                    )
                                   ## Prompter does not render the "log-&Theta"
-                                 
+                                  
                               )
                      }
                  )
@@ -1947,11 +1976,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             mymessage("At output$plot")
             ## provide_gene_names is being enabled somewhere I can't locate
             ## So make sure we catch it right on the redisplay
-            if ((!is.null(data$data) ||
-                 (nrow(data$csd_counts) > 0))) {
-                mymessage("    disabled provide_gene_names under output_plot")
-                shinyjs::disable("provide_gene_names")
-            }
+            ## if ((!is.null(data$data) ||
+            ##      (nrow(data$csd_counts) > 0))) {
+            ##     mymessage("    disabled provide_gene_names under output_plot")
+            ##     shinyjs::disable("provide_gene_names")
+            ## }
             evamtools:::plot_genotype_counts_plly(display_freqs())
         }, error = function(e){
             showModal(dataModal(e[[1]]))
