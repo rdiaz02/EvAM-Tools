@@ -612,13 +612,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     choiceNames = all_choice_names,
                     choiceValues = all_names
                 )
-                ## |> prompter::add_prompt(
-                ##                 position = "bottom",
-                ##         bounce = "TRUE",
-                ##         mymessage = "a text from add_prompt")
-                ## If we wanted to use shinyBS, we can do
-                ## shinyBS::bsTooltip("select_csd", "Working example of a tooltip on server.R",
-                ##                    "right", options = list(container = "body")),
             )
         } else {
             tags$p("Empty until you upload a data file.")
@@ -1028,36 +1021,38 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                    ##      "a proportion between 0 and 1.</h5>"),
                                                    value = 0.0, min = 0, max = 1,
                                                    step = 0.025, width = "70%"),
-                                      ),
-                                  ## tags$h5("Observational noise (e.g., genotyping error); ",
-                                  ##         "a proportion between 0 and 1."),
-                                  shinyBS::bsTooltip("dag_noise",
-                                                     paste("A proportion between 0 and 1. ", 
-                                                           "Observational noise (e.g., genotyping error) ",
-                                                           "for all models. ",
-                                                           "Added during sampling, ",
-                                                           "after predictions from model ",
-                                                           "have been obtained; ",
-                                                           "predicted probabilities are not affected.",
-                                                           "If larger than 0, this proportion of entries ",
-                                                           "in the sampled matrix will be flipped ",
-                                                           "(i.e., 0s turned to 1s and 1s turned to 0s)."
-                                                           ),
-                                                     "right"
-                                                   , options = list(container = "body")
-                                                     ),
+                                      )
+                                  |> prompter::add_prompt(
+                                                   message = paste("A proportion between 0 and 1. ", 
+                                                                   "Observational noise (e.g., genotyping error) ",
+                                                                   "for all models. ",
+                                                                   "Added during sampling, ",
+                                                                   "after predictions from model ",
+                                                                   "have been obtained; ",
+                                                                   "predicted probabilities are not affected.",
+                                                                   "If larger than 0, this proportion of entries ",
+                                                                   "in the sampled matrix will be flipped ",
+                                                                   "(i.e., 0s turned to 1s and 1s turned to 0s)."
+                                                                   ),
+                                                   position = "right",
+                                                   rounded = TRUE,
+                                                   bounce = TRUE,
+                                                   size = "medium"
+                                               ),
                                   tags$h5(HTML("<br/>")),
                                   actionButton("resample_dag", "Generate data from DAG"),
-                                  actionButton("clear_dag", HTML("Reset DAG and delete genotype data")),
-                                  shinyBS::bsTooltip("clear_dag",
-                                                     HTML("Resetting the DAG will replace the ",
-                                                          "contents of the named object by ",
-                                                          "those of the default one ",
-                                                          "(a three-gene fork with lambdas = 0.5)"),
-                                                     "right", options = list(container = "body")
-                                                     ),
-                                  shinyBS::removeTooltip(session, "clear_dag")
-                              )
+                                  actionButton("clear_dag", HTML("Reset DAG and delete genotype data"))
+                                  |> prompter::add_prompt(message = 
+                                                              HTML("Resetting the DAG will replace the ",
+                                                                   "contents of the named object by ",
+                                                                   "those of the default one ",
+                                                                   "(a three-gene fork with lambdas = 0.5)"),
+                                                          position = "right",
+                                                          rounded = TRUE,
+                                                          bounce = TRUE,
+                                                          size = "medium"
+                                                          ),
+                                  )
                      }
                  )
         } else if (input$input2build == "matrix") {
@@ -1094,43 +1089,48 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                    ## HTML("Noise"),
                                                    value = 0, min = 0, max = 1,
                                                    step = 0.025, width = "70%"),
-                                      ),
-                                  shinyBS::bsTooltip("mhn_noise",
-                                                     paste("A proportion between 0 and 1. ", 
-                                                           "Observational noise (e.g., genotyping error) ",
-                                                           "for all models. ",
-                                                           "Added during sampling, ",
-                                                           "after predictions from model ",
-                                                           "have been obtained; ",
-                                                           "predicted probabilities are not affected.",
-                                                           "If larger than 0, this proportion of entries ",
-                                                           "in the sampled matrix will be flipped ",
-                                                           "(i.e., 0s turned to 1s and 1s turned to 0s)."
-                                                           ),
-                                                     "right"
-                                                   , options = list(container = "body")
-                                                     ),
+                                      )
+                                  |> prompter::add_prompt(message = 
+                                                              paste("A proportion between 0 and 1. ", 
+                                                                    "Observational noise (e.g., genotyping error) ",
+                                                                    "for all models. ",
+                                                                    "Added during sampling, ",
+                                                                    "after predictions from model ",
+                                                                    "have been obtained; ",
+                                                                    "predicted probabilities are not affected.",
+                                                                    "If larger than 0, this proportion of entries ",
+                                                                    "in the sampled matrix will be flipped ",
+                                                                    "(i.e., 0s turned to 1s and 1s turned to 0s)."
+                                                                    ),
+                                                          position = "right",
+                                                          rounded = TRUE,
+                                                          bounce = TRUE,
+                                                          size = "medium"
+                                                          ),
                                   tags$h5(HTML("<br/>")),
                                   actionButton("resample_mhn", "Generate data from MHN model"),
                                   actionButton("clear_mhn",
-                                               HTML("Reset log-&Theta; matrix and delete genotype data")),
-                                  shinyBS::bsTooltip("clear_mhn",
-                                                     HTML("Resetting the log-&Theta; matrix will replace the ",
-                                                          "contents of the named object by ",
-                                                          "those of the default one ",
-                                                          "(a three-gene matrix filled with 0s)."),
-                                                     "right", options = list(container = "body")
-                                                     )
+                                               HTML("Reset log-&Theta; matrix and delete genotype data"))
+                                  |> prompter::add_prompt(message = 
+                                                              HTML("Resetting the log-&Theta; matrix will replace the ",
+                                                                   "contents of the named object by ",
+                                                                   "those of the default one ",
+                                                                   "(a three-gene matrix filled with 0s)."),
+                                                          position = "right",
+                                                          rounded = TRUE,
+                                                          bounce = TRUE,
+                                                          size = "medium"
+                                                         )
+                                  ## An example of shinyBS::bsTooltip 
+                                  ## shinyBS::bsTooltip("clear_mhn",
+                                  ##                    HTML("Resetting the log-&Theta; matrix will replace the ",
+                                  ##                         "contents of the named object by ",
+                                  ##                         "those of the default one ",
+                                  ##                         "(a three-gene matrix filled with 0s)."),
+                                  ##                    "right", options = list(container = "body")
+                                  ##                    )
                                   ## Prompter does not render the "log-&Theta"
-                                  ## |> prompter::add_prompt(
-                                  ##                  position = "right",
-                                  ##                  message = "the log-&Theta; matrix",
-                                  ##                  ## HTML("Resetting the log-&Theta; matrix will replace the ",
-                                  ##                  ##      "contents of the named object by ",
-                                  ##                  ##      "those of the default one ",
-                                  ##                  ##      "(a three-gene matrix filled with 0s)."),
-                                  ##                  bounce = TRUE
-                                  ##              )
+                                 
                               )
                      }
                  )
@@ -2112,17 +2112,18 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  ##              "want to use other methods)</h5>"), 
                                                  choices = input$cpm_methods,
                                                  ## c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
-                                                 selected = input$cpm_methods),
-                              shinyBS::bsTooltip("cpm2show",
-                                                 HTML("Show graphical output of the CPMs used to analyze the data.  "
-                                                      ## , "Use \"Modify data\" (below) to go back "
-                                                    , "Go back to \"User input\" "
-                                                    , "and click on \"Advanced options\" if you"
-                                                    , "want to use other methods."
+                                                 selected = input$cpm_methods)
+                              |> prompter::add_prompt(message = 
+                                                          HTML("Show graphical output of the CPMs used to analyze the data.  "
+                                                             , "Go back to \"User input\" "
+                                                             , "and click on \"Advanced options\" if you"
+                                                             , "want to use other methods."
+                                                               ),
+                                                      position = "right",
+                                                      rounded = TRUE,
+                                                      bounce = TRUE,
+                                                      size = "medium"
                                                       ),
-                                                 "right"
-                                               , options = list(container = "body")
-                                                 ),
                               tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
                               tags$h4(HTML("<br/>")),
                               tags$div(class = "inline",
@@ -2155,13 +2156,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                         }
                                                    ,
                                                     selected = "trans_mat"
-                                                    ),
-                                       shinyBS::bsTooltip("data2plot",
-                                                          HTML("This output is also displayed in tabular form on the bottom right."
+                                                    )
+                                       |> prompter::add_prompt(message = 
+                                                                   HTML("This output is also displayed in tabular form on the bottom right."
+                                                                        ),
+                                                               position = "right",
+                                                               rounded = TRUE,
+                                                               bounce = TRUE,
+                                                               size = "medium"
                                                                ),
-                                                          "right"
-                                                        , options = list(container = "body")
-                                                          ),
                                        ),
                               tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
                               tags$h4(HTML("<br/>")),
@@ -2171,13 +2174,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                     choiceNames =  c("Genotype", "Last gene mutated"),
                                                     choiceValues = c("genotype", "acquisition"),
                                                     selected = "genotype"
-                                                    ),
-                                       shinyBS::bsTooltip("label2plot",
-                                                          HTML("Type of label for transition [rate] plots."
+                                                    )
+                                       |> prompter::add_prompt(message = 
+                                                                   HTML("Type of label for transition [rate] plots."
+                                                                        ),
+                                                               position = "right",
+                                                               rounded = TRUE,
+                                                               bounce = TRUE,
+                                                               size = "medium"
                                                                ),
-                                                          "right"
-                                                        , options = list(container = "body")
-                                                          ),
                                        ),
                               ),
                      tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
@@ -2191,13 +2196,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               sliderInput("freq2label",
                                           "",
                                           width = "500px",
-                                          value = 5, max = 10, min = 0, step = 1),
-                              shinyBS::bsTooltip("freq2label-wrap",
-                                                 HTML("Set it to 0 to show all paths or all genotype labels"
-                                                      ),
-                                                 "right"
-                                               , options = list(container = "body")
-                                                 ),
+                                          value = 5, max = 10, min = 0, step = 1)
+                              |> prompter::add_prompt(message = 
+                                                          HTML("Set it to 0 to show all paths or all genotype labels"
+                                                               ),
+                                                      position = "right",
+                                                      rounded = TRUE,
+                                                      bounce = TRUE,
+                                                      size = "medium"                                                 ),
                               )
                      )
         )
@@ -2270,31 +2276,27 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                    "predicted_genotype_freqs" = "Predicted genotype relative frequencies.",
                                                    "sampled_genotype_counts" = "Sampled genotype counts.",
                                                    "Not a valid input$data2plot"
-                                                   ))),
-                              shinyBS::bsTooltip("table_out3",
-                                                 HTML("This output is also displayed as the second row of figures. "
-                                                    , "Choose the output to display from the left radio buttons "
-                                                      ##                                                    , "\"Predictions from models to display\""
-                                                      ),
-                                                 "top"
-                                               , options = list(container = "body")
-                                                 )
-                              ),
+                                                   )))
+                              ) , ## prompter does not work here
+                     shinyBS::bsTooltip("table_out3",
+                                        ## message = 
+                                        HTML("This output is also displayed as the second row of figures. "
+                                           , "Choose the output to display from the left radio buttons "
+                                           , "\"Predictions from models to display\"."
+                                             ),
+                                        "bottom", options = list(container = "body")
+                                        ## position = "bottom",
+                                        ## rounded = TRUE,
+                                        ## bounce = TRUE,
+                                        ## size = "medium"
+                                        ),
                      ## tags$h4("(This output is also displayed as the second row of figures. ",
-                     ##         "Choose the output to display from the left radio buttons ",
-                     ##         "'Predictions from models to display')"),
-                     tags$div(id = "table_out2",
-                              DT::DTOutput("cpm_freqs"),
-                              ## shinyBS::bsTooltip("table_out2",
-                              ##                    HTML("This output is also displayed as the second row of figures. "
-                              ##                       , "Choose the output to display from the left radio buttons "
-                              ##                         ##                                                    , "\"Predictions from models to display\""
-                              ##                         ),
-                              ##                    "top"
-                              ##                  , options = list(container = "body")
-                              ##                    )
-                              )
+            ##         "Choose the output to display from the left radio buttons ",
+            ##         "'Predictions from models to display')"),
+            tags$div(id = "table_out2",
+                     DT::DTOutput("cpm_freqs"),
                      )
+            )  
         }
     })
 
