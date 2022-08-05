@@ -431,7 +431,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                          "Use a different name for the uploaded data.")
                 }
                 tmp_data <- list()
-                tmp_data$data <- try(read.csv(input$csd$datapath))
+                tmp_data$data <- try(read.csv(input$csd$datapath),
+                                     silent = TRUE)
                 if (inherits(tmp_data$data, "try-error")) {
                     if (grepl("no lines available in input", tmp_data$data)) {
                         stop("The uploaded data contains no valid input. ",
