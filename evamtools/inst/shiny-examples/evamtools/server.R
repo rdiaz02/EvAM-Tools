@@ -780,7 +780,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 number_of_parents <- colSums(data$dag)
                 to_keep <- sum(number_of_parents > 0)
                 n_genes <- ifelse(to_keep < 1, default_number_genes, to_keep)
-                updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                ## Why the next line?
+                ## updateRadioButtons(session, "dag_model", selected = "HESBCN")
             } else if (input$input2build == "matrix") {
                 n_genes <- data$n_genes
                 if (is.null(n_genes)) {
