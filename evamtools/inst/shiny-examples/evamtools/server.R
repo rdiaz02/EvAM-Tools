@@ -2803,7 +2803,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     ## Download button
     output$download_cpm <- downloadHandler(
-        filename = function() sprintf("%s_cpm.RDS", input$select_cpm),
+        filename = function() sprintf("%s_cpm.rds", input$select_cpm),
         content = function(file) {
             saveRDS(all_cpm_out[[input$select_cpm]][c("cpm_output", "tabular_data")],
                     file)
