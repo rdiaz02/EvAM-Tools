@@ -355,7 +355,8 @@ create_tabular_data <- function(data) {
         && !(is.null(data[i]))){
           attr_to_make_tabular <- c(attr_to_make_tabular
             , "sampled_genotype_counts"
-            , "obs_genotype_transitions")
+              ## , "obs_genotype_transitions"
+              )
       }
     }
 
@@ -387,7 +388,8 @@ create_tabular_data <- function(data) {
         tabular_data[[attr]] <- all_counts[order(all_counts$Index), ]
 
       } else if (attr %in% c("trans_rate_mat",
-                             "obs_genotype_transitions", "trans_mat")) {
+                             ## "obs_genotype_transitions",
+                             "trans_mat")) {
           df <- data.frame(From = character(),
                  To = character(), 
                  OT = numeric(), 
