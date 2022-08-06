@@ -219,6 +219,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     default_cpm_samples <- .ev_SHINY_dflt$cpm_samples
     default_dag_model <- .ev_SHINY_dflt$dag_model
     default_number_genes <- 4
+    default_csd_noise <- 0
+    new_default_csd_samples <- 1000
     
     last_visited_pages <- list(upload="Empty",
                                csd = "Empty",
@@ -1230,6 +1232,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         n_genes <- ifelse(is.null(input$gene_number), default_number_genes,
                           input$gene_number)
 
+        ## FIXME: no_reset. Yes, I need this
+        new_default_csd_samples <- ifelse(is.null(input$mhn_samples),
+                                          default_csd_samples,
+                                          input$mhn_samples)
+
+        
         ## Setting it here ain't enough
         ## This can all be changed in other two lines at least too.
         ##   Search for id_change_genotype_muts
@@ -1455,7 +1463,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   div(style = "white-space: nowrap;", 
                                       numericInput("mhn_samples",
                                                    HTML("Number of genotypes<br>to sample"),
-                                                   value = default_csd_samples, min = 100, max = 10000,
+                                                   value = new_default_csd_samples,
+                                                   min = 100,
+                                                   max = 10000,
                                                    step = 100, width = "22em"),
                                       ),
                                   tags$h3(HTML("<br/>")),
@@ -1463,7 +1473,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                       numericInput("mhn_noise",
                                                    HTML("Observational noise<br>(genotyping error)"),
                                                    ## HTML("Noise"),
-                                                   value = 0, min = 0, max = 1,
+                                                   value = default_csd_noise, min = 0, max = 1,
                                                    step = 0.025, width = "18em"),
                                       )
                                   |> prompter::add_prompt(message = 
@@ -1497,16 +1507,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                           bounce = TRUE,
                                                           size = "medium"
                                                           )
-                                  ## An example of shinyBS::bsTooltip 
-                                  ## shinyBS::bsTooltip("clear_mhn",
-                                  ##                    HTML("Resetting the log-&Theta; matrix will replace the ",
-                                  ##                         "contents of the named object by ",
-                                  ##                         "those of the default one ",
-                                  ##                         "(a three-gene matrix filled with 0s)."),
-                                  ##                    "right", options = list(container = "body")
-                                  ##                    )
-                                  ## Prompter does not render the "log-&Theta"
-                                  
                               )
                      }
                  )
@@ -1947,6 +1947,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data$csd_counts <- mhn_data$csd_counts
             data$data <- mhn_data$data
             datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- mhn_data$data
+
+            ## new_default_csd_samples <- input$mhn_samples
+            ## default_csd_samples <- input$mhn_samples
+            ## FIXME: terrible hack is to force updateNumericInput
+            ## using the current values. But clearing the model breaks it
+            ## so I'd need to add many of these.
             shinyjs::enable("analysis")
             ## The next is not really necessary, but we do it for consistency
             shinyjs::disable("provide_gene_names")
@@ -1955,6 +1961,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         })
     })
 
+
+
+    
     observeEvent(input$clear_mhn, {
         tryCatch({
             tmp_thetas <- .ev_SHINY_dflt$template_data$thetas
