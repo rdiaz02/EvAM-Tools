@@ -30,8 +30,8 @@ options(warnPartialMatchDollar = TRUE)
 
 ## I have left a bunch of messages. To make it easier to dis/enable them
 ## by turning them to a no-op (https://stackoverflow.com/a/10933721)
-mymessage <- function(...) message(...)
-## mymessage <- function(...) invisible(NULL)
+## mymessage <- function(...) message(...)
+mymessage <- function(...) invisible(NULL)
 
 
 sanity_file_name <- function(x) {
@@ -214,7 +214,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     
     last_visited_pages <- list(upload="Empty",
                                csd = "Empty",
-                               dag = "DAG_Fork_3",
+                               dag = "DAG_Fork_4",
                                matrix = "MHN_all_0")
 
     last_visited_cpm <- ""
