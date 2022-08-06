@@ -2498,6 +2498,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                                "show the 20 most frequent genotypes ", ## 20: argument to  plot_genotype_counts
                                                                "for reasons of figure size and legibility of genotype labels .",
                                                                "The table shows all the genotypes. </p>",
+                                                               "<br>",
+                                                               "<p>For <u>\"Predicted genotype relative frequencies\"</u> ",
+                                                               "we add, to the table, the relative frequencies of genotypes in the original data ",
+                                                               "to make it easier to visually asses how close predictions are to observed data. ",
+                                                               "(It would not be sensible to do this with \"Sampled genotype counts\" as ",
+                                                               "those include additional sampling noise.) For easier comparison, both genotypes ",
+                                                               "with no observed counts in the original data ",
+                                                               "and genotypes with predicted frequency exactly 0 are left as empty (not as 0) ",
+                                                               "in the displayed table.</p>"
                                                                ),
                                                           "right", options = list(container = "body")
                                                           )
@@ -2611,12 +2620,28 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
     })
     
-    output$cpm_freqs <- DT::renderDT(all_cpm_out[[input$select_cpm]]$tabular_data[[input$data2plot]],
-                                     selection = 'none', server = TRUE
-                                   , rownames = FALSE
-                                   , options = list(
-                                         columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE)
-                                     )
+    output$cpm_freqs <- DT::renderDT({
+        d1 <- all_cpm_out[[input$select_cpm]]$tabular_data[[input$data2plot]]
+
+        if (input$data2plot == "predicted_genotype_freqs") {
+            d2 <-
+                evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data)
+            d2$Counts <- d2$Counts/sum(d2$Counts)
+            colnames(d2)[2] <- "Original data"
+            ## Yes, set to NA for easier visualization.
+            ## They will also be NA in the Original data if not present
+            d1[d1 == 0] <- NA
+            d3 <- dplyr::full_join(d1, d2, by = "Genotype")
+            d3 <- evamtools:::reorder_to_standard_order_arbitrary_df(d3)
+            d1 <- d3
+        }
+        d1
+    },
+    selection = 'none', server = TRUE
+  , rownames = FALSE
+  , options = list(
+        columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE)
+    )
 
     output$tabular_data <- renderUI({
         if (length(names(all_cpm_out)) > 0) {

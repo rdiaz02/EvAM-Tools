@@ -29,6 +29,31 @@ reorder_to_standard_order_count_df <- function(x) {
     return(ret_tmp)
 }
 
+## Given a data.frame that contains column Genotype, return it in standard order.
+## This could be done much more efficiently (we could just put the genotypes
+## in standard order, instead of creating all, etc). 
+reorder_to_standard_order_arbitrary_df <- function(x) {
+    if (nrow(x) <= 1) return(x)
+    counts_tmp <- x$Genotype
+    names(counts_tmp) <- x$Genotype
+    counts_tmp <- na.omit(reorder_to_standard_order(counts_tmp))
+    ret_tmp <- data.frame(Genotype = names(counts_tmp), x)
+    stopifnot(isTRUE(all(ret_tmp$Genotype == ret_tmp$Genotype.1)))
+    rm_cols <- which(colnames(ret_tmp) == "Genotype.1")
+    ret_tmp <- ret_tmp[, -rm_cols]
+    ## There might, or might not, be an Index column. We create it/overwrite it
+    ret_tmp$Index <- seq_len(nrow(ret_tmp))
+    g_index <- which(colnames(ret_tmp) == "Genotype")
+    i_index <- which(colnames(ret_tmp) == "Index")
+    col_order <- c(i_index, g_index, (1:ncol(ret_tmp))[-c(i_index, g_index)])
+    ret_tmp <- ret_tmp[, col_order]
+    stopifnot(nrow(ret_tmp) == nrow(x))
+    return(ret_tmp)
+}
+
+
+
+
 get_display_freqs <- function(freqs, n_genes, gene_names, input2build) {
     if (input2build %in% c("upload", "dag"))
         stop("get_display_freqs should not be called when ",
