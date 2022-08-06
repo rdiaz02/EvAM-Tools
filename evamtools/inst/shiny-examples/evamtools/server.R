@@ -57,6 +57,10 @@ sanity_new_gene_names <- function(x) {
     if (any(gn_space))
         stop("At least one of your new gene names has a space. That is not allowed.")
 
+    gn_space <- stringi::stri_count_regex(x, "[-]") 
+    if (any(gn_space))
+        stop("At least one of your new gene names has a hyphen. That is not allowed.")
+
     gn_space <- stringi::stri_count_regex(x, "^\\d") 
     if (any(gn_space))
         stop("At least one of your new gene names starts with a number. That is not allowed.")
@@ -65,6 +69,10 @@ sanity_new_gene_names <- function(x) {
     if (any(gn_space))
         stop("All gene names should start with a letter. Yours don't; that is not allowed.")
 
+    gn_space <- stringi::stri_count_regex(x,  "[^a-zA-z0-9_]+")
+    if (any(gn_space))
+        stop("Use only letters, numbers, and the underscore _ .",
+             "The gene names you provided contain other characters.")
     
     if (any(x == "WT"))
         stop("One of your new gene names is called WT. That is not allowed.")
@@ -1015,9 +1023,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$h4(HTML("<br/>")),
                      tags$h4("Separate you gene names with a ','. ",
                              "Do no use 'WT' for any gene name. ",
-                             "Use only alphanumeric characters ",
-                             "(of course, do not use comma as part of a gene name), ",
-                             " and start gene names with letters ",
+                             "Use only letters, numbers, and underscore ",
+                             "but no other characters ",
+                             "(of course, do not use comma as part of a gene name). ",
+                             " Start gene names with letters ",
                              "(i.e., do not start them with numbers ",
                              "or other characters such as ._-, etc.). ",
                              "Try to keep gene names short (for figures)."
