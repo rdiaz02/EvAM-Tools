@@ -276,6 +276,19 @@ linear_lambdas <- c(2 ,1 ,4 ,3)
 names(linear_lambdas) <- c("A", "B", "C", "D")
 
 
+dag_fork_4 <- matrix(0, ncol=5, nrow=5)
+rownames(dag_fork_4) <- colnames(dag_fork_4) <- c("WT", "A", "B", "C", "D")
+dag_fork_4["WT", "A"] <- 1
+dag_fork_4["WT", "B"] <- 1
+dag_fork_4["A", "C"] <- 1
+dag_fork_4["B", "D"] <- 1
+
+fork_4_parent_set <- c("Single", "Single", "Single", "Single")
+names(fork_4_parent_set) <- c("A", "B", "C", "D")
+fork_4_lambdas <- c(.5, .7 , .9 ,.3)
+names(fork_4_lambdas) <- c("A", "B", "C", "D")
+
+
 dag_or <- matrix(0, ncol=5, nrow=5)
 rownames(dag_or) <- colnames(dag_or) <- c("WT", "A", "B", "C", "D")
 dag_or["WT", "A"] <- 1
@@ -419,6 +432,10 @@ examples_csd <- list(
   ),
   "dag" = list(
       DAG_Fork_3 = list(dag = template_dag, name = "DAG_Fork_3"),
+      DAG_Fork_4 = list(dag = dag_fork_4,
+                        DAG_parent_set = fork_4_parent_set,
+                        lambdas = fork_4_lambdas,
+                        name = "DAG_Fork_4"),
       DAG_Linear = list(data = NULL,  name = "DAG_Linear", dag = dag_linear,
                         DAG_parent_set = linear_parent_set,
                         lambdas = linear_lambdas
