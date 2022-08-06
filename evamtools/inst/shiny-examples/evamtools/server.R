@@ -26,11 +26,12 @@ dataModal <- function(error_message, type="Error: ") {
     )
 }
 
+options(warnPartialMatchDollar = TRUE)
 
 ## I have left a bunch of messages. To make it easier to dis/enable them
 ## by turning them to a no-op (https://stackoverflow.com/a/10933721)
-## mymessage <- function(...) message(...)
-mymessage <- function(...) invisible(NULL)
+mymessage <- function(...) message(...)
+## mymessage <- function(...) invisible(NULL)
 
 
 sanity_file_name <- function(x) {
@@ -1082,18 +1083,33 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 new_data$name <- data$name
                 new_data$lambdas <- data$lambdas
                 new_data$dag_parent_set <- data$dag_parent_set
-                new_data$dag <- data$dag
-                new_data$thetas <- data$thetas
+                ## BEWARE! If we do not do this, new_data$dag,
+                ## because of partial matching, gets dag_parent_set
+                if (!is.null(data$dag)) {
+                    new_data[["dag"]] <- data[["dag"]]
+                } else {
+                    new_data$dag <- NULL
+                }
+                if (!is.null(data$thetas)) {
+                    new_data$thetas <- data$thetas
+                } else {
+                    new_data$thetas <- NULL
+                }
                 new_data$data <- data$data
 
                 mymessage("        At action_provide_gene_names: 2")
                 ## To rename, use lookup
                 names(new_data$lambdas) <- names_dict[names(new_data$lambdas)]
                 names(new_data$dag_parent_set) <- names_dict[names(new_data$dag_parent_set)]
-                colnames(new_data$dag) <- names_dict[colnames(new_data$dag)]
-                rownames(new_data$dag) <- names_dict[rownames(new_data$dag)]
-                colnames(new_data$thetas) <- names_dict[colnames(new_data$thetas)]
-                rownames(new_data$thetas) <- names_dict[rownames(new_data$thetas)]
+
+                if (!is.null(new_data[["dag"]])) {
+                    colnames(new_data$dag) <- names_dict[colnames(new_data$dag)]
+                    rownames(new_data$dag) <- names_dict[rownames(new_data$dag)]
+                }
+                if (!is.null(new_data$thetas)) {
+                    colnames(new_data$thetas) <- names_dict[colnames(new_data$thetas)]
+                    rownames(new_data$thetas) <- names_dict[rownames(new_data$thetas)]
+                }
                 if (!is.null(new_data$data)) {
                     colnames(new_data$data) <- names_dict[colnames(new_data$data)]
                 }
