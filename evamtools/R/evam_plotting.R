@@ -641,6 +641,7 @@ plot_method <- function(method_info, parent_set, edges, method = "") {
         min_width <- 4
         max_width <- 8
         pwh <- min(max_width, max(max_gene_name, min_width))
+        pwh <- ifelse(is.na(pwh), 0, pwh)
         op <- par(mar = c(pwh, pwh, 7, 3), las = 1)
         ## ##### The plot is from library plot.matrix
         ##  Color scale, centered in white at 0
