@@ -267,15 +267,21 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
         ## If no data to display, return empty data frame
         thisd <- input$input2build
-        thisd_dataset_names <- unlist(lapply(datasets$all_csd[[thisd]],
-                                             function(x) x$name))
-        if (!(data$name %in% thisd_dataset_names)) {
-            mymessage("       data$name not in ", thisd_dataset_names, ". ",
+
+        if (is.null(data$name) ) {
+            mymessage("       NULL data ",
                       "Returning a 0-rows data frame")
             return(data.frame(Genotype = character(), Counts = integer()))
-        }
+        } else {
+            thisd_dataset_names <- unlist(lapply(datasets$all_csd[[thisd]],
+                                                 function(x) x$name))
+            if (!(data$name %in% thisd_dataset_names)) {
+                mymessage("       data$name not in ", thisd_dataset_names, ". ",
+                          "Returning a 0-rows data frame")
+                return(data.frame(Genotype = character(), Counts = integer()))
+            }
+        } 
 
-        
         if (input$input2build == "dag") {
             ## With the DAG we always return all the genotypes
             ## Other code ensures that gene number is never smaller
