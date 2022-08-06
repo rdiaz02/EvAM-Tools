@@ -2560,18 +2560,26 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               sliderInput("freq2label",
                                           "",
                                           width = "500px",
-                                          value = 5, max = 10, min = 0, step = 1)
-                              |> prompter::add_prompt(message = 
-                                                          HTML("Set it to 0 to show all paths or all genotype labels. ",
-                                                               "You probably don't want to do that when there are many ",
-                                                               "genes, specially if you are also displaying the output ",
-                                                               "from MHN (where any genotype is connected to each of its ",
-                                                               "descendants) or from models for which the DAG is close to a star. "
-                                                               ),
-                                                      position = "right",
-                                                      rounded = TRUE,
-                                                      bounce = TRUE,
-                                                      size = "medium"                                                 ),
+                                          value = 5, max = 10, min = 0, step = 1),
+                              shinyBS::bsTooltip("freq2label",
+                                                 HTML("<p>Set it to 0 to show all paths or all genotype labels. <p>",
+                                                      "<br><p>You probably <u>don't want to set it to 0</u> when there are many ",
+                                                      "genes, specially if you are also displaying the output ",
+                                                      "from MHN (where any genotype is connected to each of its ",
+                                                      "descendants) or from models for which the DAG is close to a star. "
+                                                      ),
+                                                 "right", options = list(container = "body"))
+                              ## |> prompter::add_prompt(message = 
+                              ##                             HTML("Set it to 0 to show all paths or all genotype labels. ",
+                              ##                                  "You probably don't want to do that when there are many ",
+                              ##                                  "genes, specially if you are also displaying the output ",
+                              ##                                  "from MHN (where any genotype is connected to each of its ",
+                              ##                                  "descendants) or from models for which the DAG is close to a star. "
+                              ##                                  ),
+                              ##                         position = "right",
+                              ##                         rounded = TRUE,
+                              ##                         bounce = TRUE,
+                              ##                         size = "medium"                                                 ),
                               )
                      )
         )
