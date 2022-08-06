@@ -899,7 +899,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
             ## Define number of genes
             output$gene_number_slider <- renderUI({
-                val <- ifelse(is.null(data$n_genes), 3, data$n_genes)
+                val <- ifelse(is.null(data$n_genes),
+                              default_number_genes,
+                              data$n_genes)
                 ## BEWARE!!! Never, ever, add this: it forces the slider
                 ## of Number of genes back. And creates a mess.
                 ## FIXME: but this suggests something in the logic is twisted
