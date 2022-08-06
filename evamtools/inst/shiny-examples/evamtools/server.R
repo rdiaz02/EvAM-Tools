@@ -1448,8 +1448,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                     )),
                      tags$h5(HTML("Use only alphanumeric characters ",
                                   "for gene names, and do not start ",
-                                  "a gene name with a number; ",
-                                  "keep gene names short (for figures). ",
+                                  "a gene name with a number. <br> ",
+                                  "Keep gene names short (for figures). <br>",
                                   "Use 0 or 1 for ",
                                   "altered/not-altered (mutated/not-mutated)."                  
                                   )),
@@ -2626,8 +2626,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         if (input$data2plot == "predicted_genotype_freqs") {
             d2 <-
                 evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data)
-            d2$Counts <- d2$Counts/sum(d2$Counts)
-            colnames(d2)[2] <- "Original data"
+            d2$Counts <- round(d2$Counts/sum(d2$Counts), 3)
+            colnames(d2)[2] <- "Original_data"
             ## Yes, set to NA for easier visualization.
             ## They will also be NA in the Original data if not present
             d1[d1 == 0] <- NA
