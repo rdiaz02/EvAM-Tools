@@ -1294,7 +1294,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   numericInput("dag_epos",
                                                HTML("epos,&epsilon;"),
                                                value = 0.01, min = 0, max = 1,
-                                               step = 0.005, width = "50%"),
+                                               step = 0.005, width = "12em"),
                                   tags$h5(HTML("For OT (epos) and OncoBN (&epsilon;) only: prob. of children "),
                                           "not allowed by model to occur. ",
                                           "(Affects predicted probabilities.) "),
@@ -1302,7 +1302,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   div(style = "white-space: nowrap;",
                                       numericInput("dag_samples", HTML("Number of genotypes<br>to sample"),
                                                    value = default_csd_samples, min = 100, max = 10000,
-                                                   step = 100, width = "70%"),
+                                                   step = 100, width = "22em"),
                                       ), 
                                   tags$h3(HTML("<br/>")),
                                   div(style = "white-space: nowrap;", 
@@ -1312,7 +1312,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                    ##      "<h5>Observational noise (genotyping error), ",
                                                    ##      "a proportion between 0 and 1.</h5>"),
                                                    value = 0.0, min = 0, max = 1,
-                                                   step = 0.025, width = "70%"),
+                                                   step = 0.02500, width = "18em"),
                                       )
                                   |> prompter::add_prompt(
                                                    message = paste("A proportion between 0 and 1. ", 
@@ -1372,7 +1372,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                       numericInput("mhn_samples",
                                                    HTML("Number of genotypes<br>to sample"),
                                                    value = default_csd_samples, min = 100, max = 10000,
-                                                   step = 100, width = "70%"),
+                                                   step = 100, width = "22em"),
                                       ),
                                   tags$h3(HTML("<br/>")),
                                   div(style = "white-space: nowrap;",
@@ -1380,7 +1380,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                    HTML("Observational noise<br>(genotyping error)"),
                                                    ## HTML("Noise"),
                                                    value = 0, min = 0, max = 1,
-                                                   step = 0.025, width = "70%"),
+                                                   step = 0.025, width = "18em"),
                                       )
                                   |> prompter::add_prompt(message = 
                                                               paste("A proportion between 0 and 1. ", 
