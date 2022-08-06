@@ -28,7 +28,7 @@ template_csd_data <- matrix(0, ncol = 4, nrow = 0)
       csd_counts =  template_csd_counts
     , data = NULL
     , dag = template_dag
-    , dag_parent_set = template_parent_set
+    , DAG_parent_set = template_parent_set
     , lambdas = template_lambdas
     , thetas = template_thetas
     , gene_names = LETTERS[1: max_genes]

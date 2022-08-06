@@ -227,7 +227,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         csd_counts = .ev_SHINY_dflt$template_data$csd_counts
       , data = .ev_SHINY_dflt$template_data$data
       , dag = .ev_SHINY_dflt$template_data$dag
-      , dag_parent_set = .ev_SHINY_dflt$template_data$dag_parent_set
+      , DAG_parent_set = .ev_SHINY_dflt$template_data$DAG_parent_set
       , lambdas = .ev_SHINY_dflt$template_data$lambdas
       , thetas = .ev_SHINY_dflt$template_data$thetas
       , n_genes = default_number_genes ## .ev_SHINY_dflt$ngenes
@@ -597,7 +597,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 data = data$data
               , dag = data$dag
               , gene_names = data$gene_names
-              , dag_parent_set = data$dag_parent_set
+              , DAG_parent_set = data$DAG_parent_set
               , lambdas = data$lambdas
               , thetas = data$thetas
               , trm = data$trm
@@ -632,7 +632,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     data = tmp_data$data[, 1:number_of_genes]
                   , model_edges = dag_data()
                   , model = default_dag_model
-                  , dag_parent_set = tmp_data$dag_parent_set[1:number_of_genes]
+                  , DAG_parent_set = tmp_data$DAG_parent_set[1:number_of_genes]
                   , dag = tmp_data$dag[1:(number_of_genes + 1),
                                        1:(number_of_genes + 1)])
                 saveRDS(data2save, file=file)
@@ -736,7 +736,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             
             
             data$dag <- tmp_data$dag
-            data$dag_parent_set <- tmp_data$dag_parent_set
+            data$DAG_parent_set <- tmp_data$DAG_parent_set
             data$lambdas <- tmp_data$lambdas
             data$thetas <- tmp_data$thetas
             data$name <- tmp_data$name
@@ -857,14 +857,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ##         new_data$gene_names <- new_gene_names
             ##         new_data$name <- data$name
             ##         new_data$lambdas <- data$lambdas
-            ##         new_data$dag_parent_set <- data$dag_parent_set
+            ##         new_data$DAG_parent_set <- data$DAG_parent_set
             ##         new_data$dag <- data$dag
             ##         new_data$thetas <- data$thetas
             ##         new_data$data <- data$data
 
             ##         ## To rename, use lookup
             ##         names(new_data$lambdas) <- names_dict[names(new_data$lambdas)]
-            ##         names(new_data$dag_parent_set) <- names_dict[names(new_data$dag_parent_set)]
+            ##         names(new_data$DAG_parent_set) <- names_dict[names(new_data$DAG_parent_set)]
             ##         colnames(new_data$dag) <- names_dict[colnames(new_data$dag)]
             ##         rownames(new_data$dag) <- names_dict[rownames(new_data$dag)]
             ##         colnames(new_data$thetas) <- names_dict[colnames(new_data$thetas)]
@@ -879,7 +879,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ##         data$gene_names <- new_gene_names
             ##         data$data <- new_data$data
             ##         data$dag <- new_data$dag
-            ##         data$dag_parent_set <- new_data$dag_parent_set
+            ##         data$DAG_parent_set <- new_data$DAG_parent_set
             ##         data$thetas <- new_data$thetas
             ##         data$lambdas <- new_data$lambdas
             ##         data$csd_counts <- new_data$csd_counts
@@ -1082,9 +1082,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 new_data$gene_names <- new_gene_names
                 new_data$name <- data$name
                 new_data$lambdas <- data$lambdas
-                new_data$dag_parent_set <- data$dag_parent_set
+                new_data$DAG_parent_set <- data$DAG_parent_set
                 ## BEWARE! If we do not do this, new_data$dag,
-                ## because of partial matching, gets dag_parent_set
+                ## because of partial matching, gets DAG_parent_set
                 if (!is.null(data$dag)) {
                     new_data[["dag"]] <- data[["dag"]]
                 } else {
@@ -1100,7 +1100,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 mymessage("        At action_provide_gene_names: 2")
                 ## To rename, use lookup
                 names(new_data$lambdas) <- names_dict[names(new_data$lambdas)]
-                names(new_data$dag_parent_set) <- names_dict[names(new_data$dag_parent_set)]
+                names(new_data$DAG_parent_set) <- names_dict[names(new_data$DAG_parent_set)]
 
                 if (!is.null(new_data[["dag"]])) {
                     colnames(new_data$dag) <- names_dict[colnames(new_data$dag)]
@@ -1120,7 +1120,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 data$gene_names <- new_gene_names
                 data$data <- new_data$data
                 data$dag <- new_data$dag
-                data$dag_parent_set <- new_data$dag_parent_set
+                data$DAG_parent_set <- new_data$DAG_parent_set
                 data$thetas <- new_data$thetas
                 data$lambdas <- new_data$lambdas
                 data$csd_counts <- new_data$csd_counts
@@ -1552,8 +1552,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             input$dag_table_cell_edit
             all_gene_names <- c("Root", data$gene_names)
             edges <- which(data$dag == 1, arr.ind = TRUE)
-            tmp_dag_parent_set <- data$dag_parent_set
-            x <- length(tmp_dag_parent_set)
+            tmp_DAG_parent_set <- data$DAG_parent_set
+            x <- length(tmp_DAG_parent_set)
             ## The code below could fail (without sever consequences)
             ## if we have moved back and forth between DAG and upload, for example
             ## as we have not yet update the DAG data. The plot will ask for
@@ -1574,10 +1574,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             
             ## I have to this weird thing because using data$gene_names does not work
             ## for some unkown reason. Eh??!!! What weird thing?
-            names(tmp_dag_parent_set) <- all_gene_names[seq(2, x + 1)]
+            names(tmp_DAG_parent_set) <- all_gene_names[seq(2, x + 1)]
             dag_data <- data.frame(From = all_gene_names[edges[, "row"]]
                                  , To = all_gene_names[edges[, "col"]]
-                                 , Relation = tmp_dag_parent_set[edges[, "col"] - 1]
+                                 , Relation = tmp_DAG_parent_set[edges[, "col"] - 1]
                                  , Lambdas = data$lambdas[edges[, "col"] - 1])
             
             if ((default_dag_model %in% c("OT", "OncoBN"))
@@ -1622,10 +1622,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         tryCatch({
             tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene,
                                                operation = "add",
-                                               parent_set = data$dag_parent_set,
+                                               parent_set = data$DAG_parent_set,
                                                dag_model = default_dag_model)
             data$dag <- tmp_data$dag
-            data$dag_parent_set <- tmp_data$parent_set
+            data$DAG_parent_set <- tmp_data$parent_set
             datasets$all_csd[[input$input2build]][[input$select_csd]] <-
                 evamtools:::to_stnd_csd_dataset(data)
             shinyjs::click("resample_dag")
@@ -1642,10 +1642,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         tryCatch({
             tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene,
                                                operation = "remove",
-                                               parent_set = data$dag_parent_set,
+                                               parent_set = data$DAG_parent_set,
                                                dag_model = default_dag_model)
             data$dag <- tmp_data$dag
-            data$dag_parent_set <- tmp_data$parent_set
+            data$DAG_parent_set <- tmp_data$parent_set
             datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
             if (sum(data$dag) == 0) {
                 data$csd_counts <- datasets$all_csd[[input$input2build]][[input$select_csd]]$csd_counts
@@ -1668,9 +1668,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data$dag <- tmp_dag
             data$csd_counts <- .ev_SHINY_dflt$template_data$csd_counts
             data$data <- .ev_SHINY_dflt$template_data$data
-            data$dag_parent_set <- tmp_data$dag_parent_set
+            data$DAG_parent_set <- tmp_data$DAG_parent_set
             data$lambdas <- .ev_SHINY_dflt$template_data$lambdas
-            names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
+            names(data$lambdas) <- names(data$DAG_parent_set) <- data$gene_names
             datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
             shinyjs::disable("analysis")
             mymessage("enable provide_gene_names under clear_dag")
@@ -1683,17 +1683,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     observeEvent(input$dag_table_cell_edit, {
         tryCatch({
-            names(data$dag_parent_set) <- data$gene_names[1:length(data$dag_parent_set)]
-            names(data$lambdas) <- data$gene_names[1:length(data$dag_parent_set)]
+            names(data$DAG_parent_set) <- data$gene_names[1:length(data$DAG_parent_set)]
+            names(data$lambdas) <- data$gene_names[1:length(data$DAG_parent_set)]
             info <- input$dag_table_cell_edit
             tmp_data <-
                 evamtools:::modify_lambdas_and_parent_set_from_table(dag_data(),
                                                                      info, data$lambdas
                                                                    , data$dag
-                                                                   , data$dag_parent_set
+                                                                   , data$DAG_parent_set
                                                                    , dag_model = default_dag_model)
             data$lambdas <- tmp_data$lambdas
-            data$dag_parent_set <- tmp_data$parent_set
+            data$DAG_parent_set <- tmp_data$parent_set
             datasets$all_csd[[input$input2build]][[input$select_csd]] <-
                 evamtools:::to_stnd_csd_dataset(data)
             shinyjs::click("resample_dag")
@@ -1713,7 +1713,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   "Root")
             tmp_dag_data <-
                 evamtools:::generate_sample_from_dag(the_dag_data
-                                                   , data$dag_parent_set[gene_names]
+                                                   , data$DAG_parent_set[gene_names]
                                                    , noise = input$dag_noise
                                                    , N = input$dag_samples
                                                    , dag_model = default_dag_model
@@ -1726,7 +1726,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- data$data
             datasets$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$dag
             datasets$all_csd[[input$input2build]][[input$select_csd]]$lambdas <- data$lambdas
-            datasets$all_csd[[input$input2build]][[input$select_csd]]$dag_parent_set <- data$dag_parent_set
+            datasets$all_csd[[input$input2build]][[input$select_csd]]$DAG_parent_set <- data$DAG_parent_set
             shinyjs::enable("analysis")
             ## The next is not really necessary, but we do it for consistency
             shinyjs::disable("provide_gene_names")
@@ -1879,9 +1879,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data$dag <- NULL
             data$csd_counts <- .ev_SHINY_dflt$template_data$csd_counts
             data$data <- .ev_SHINY_dflt$template_data$data
-            data$dag_parent_set <- .ev_SHINY_dflt$template_data$dag_parent_set
+            data$DAG_parent_set <- .ev_SHINY_dflt$template_data$DAG_parent_set
             data$lambdas <- .ev_SHINY_dflt$template_data$lambdas
-            names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
+            names(data$lambdas) <- names(data$DAG_parent_set) <- data$gene_names
             shinyjs::disable("analysis")
             datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
             mymessage("    enabled provide_gene_names under clear_mhn")
@@ -1947,9 +1947,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data$dag <- tmp_dag
             data$csd_counts <- .ev_SHINY_dflt$template_data$csd_counts
             data$data <- .ev_SHINY_dflt$template_data$data
-            data$dag_parent_set <- .ev_SHINY_dflt$template_data$dag_parent_set
+            data$DAG_parent_set <- .ev_SHINY_dflt$template_data$DAG_parent_set
             data$lambdas <- .ev_SHINY_dflt$template_data$lambdas
-            names(data$lambdas) <- names(data$dag_parent_set) <- data$gene_names
+            names(data$lambdas) <- names(data$DAG_parent_set) <- data$gene_names
             shinyjs::disable("analysis")
             mymessage("enabled provide_gene_names uder clear_genotype")
             shinyjs::enable("provide_gene_names")
@@ -2087,7 +2087,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data2plot <- igraph::decompose(data2plot)[[1]]
             edges <- igraph::as_data_frame(data2plot)
             colnames(edges) <- c("From", "To")
-            if(!is.null(data$dag_parent_set)) edges$Relation <- data$dag_parent_set[edges$To]
+            if(!is.null(data$DAG_parent_set)) edges$Relation <- data$DAG_parent_set[edges$To]
         } else if (input$input2build %in% c("matrix") 
                    && !is.null(data$thetas)
                    && !is.null(input$gene_number)
@@ -2095,7 +2095,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                    ) {
             data2plot <- data$thetas[1:input$gene_number, 1:input$gene_number]
         }
-        evamtools:::plot_method(data2plot, data$dag_parent_set, edges)
+        evamtools:::plot_method(data2plot, data$DAG_parent_set, edges)
     })
 
     ## Run CPMs
@@ -2244,7 +2244,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             orig_data <- list(data = data2run, name = data$name
                             , type = input$input2build, gene_names = data$gene_names
                             , thetas = data$thetas, lambdas = data$lambdas
-                            , dag = data$dag, dag_parent_set = data$dag_parent_set)
+                            , dag = data$dag, DAG_parent_set = data$DAG_parent_set)
 
             tabular_data <- evamtools:::create_tabular_data(c(cpm_output, sampled_from_CPMs))
             all_evam_output <- list("cpm_output" = c(cpm_output, sampled_from_CPMs)

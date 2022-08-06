@@ -42,7 +42,7 @@ generate_old <- function() {
             csd_counts =  template_csd_counts
           , data = NULL
           , dag = template_dag
-          , dag_parent_set = template_parent_set
+          , DAG_parent_set = template_parent_set
           , lambdas = template_lambdas
           , thetas = template_thetas
           , gene_names = LETTERS[1: max_genes]
@@ -78,7 +78,7 @@ test_that("Test standarize datasets works correctly", {
         ## that is not true by construction in most cases.
         expect_equal(standard_data$gene_names, colnames(standard_data$thetas))
         expect_equal(c("Root", standard_data$gene_names), colnames(standard_data$dag))
-        expect_equal(standard_data$gene_names, names(standard_data$dag_parent_set))
+        expect_equal(standard_data$gene_names, names(standard_data$DAG_parent_set))
         expect_equal(standard_data$gene_names, names(standard_data$lambdas))
         if(!is.null(standard_data$data)){
             expect_equal(standard_data$gene_names[1: ncol(standard_data$data)], 
@@ -123,7 +123,7 @@ test_that("Test standarize datasets works correctly", {
     lambdas_5 <- c(1, 2, 3)
     data5 <- list(dag = test_dag
                 , lambdas = lambdas_5
-                , dag_parent_set = parent_set_5
+                , DAG_parent_set = parent_set_5
                   )
 
     gene_names_5 <- c("A1", "B2", "C3", "D4", "E", "F", "G", "H", "I", "J")
@@ -138,7 +138,7 @@ test_that("Test standarize datasets works correctly", {
     names(expected_lambdas_5) <- gene_names_5
     expected_data_5 <- list(
         dag = expected_dag_5,
-        dag_parent_set = parent_set_5,
+        DAG_parent_set = parent_set_5,
         gene_names = gene_names_5,
         lambdas = expected_lambdas_5
     )
@@ -213,7 +213,7 @@ test_that("Test standarize datasets works correctly", {
     data <- list(dag = test_dag
                , data = tmp_data
                , lambdas = lambdas
-               , dag_parent_set = parent_set
+               , DAG_parent_set = parent_set
                , gene_names = gene_names 
                , thetas = test_thetas
                  )
@@ -238,7 +238,7 @@ test_that("Test standarize datasets works correctly", {
     expected_data <- list(
         data = expected_data,
         dag = expected_dag,
-        dag_parent_set = expected_parent_set,
+        DAG_parent_set = expected_parent_set,
         lambdas = expected_lambdas,
         gene_names = gene_names,
         thetas = expected_thetas
@@ -305,7 +305,7 @@ test_that("Standarize does not work with bad data", {
                , "Adjacency matrix should be binary: only 0 and 1")
     
     parent_set <- c("Single", "OR", "AND2", "AND") #Bad data relationships
-    test_parent_set <- list(dag_parent_set = parent_set)
+    test_parent_set <- list(DAG_parent_set = parent_set)
     expect_error(to_stnd_csd_dataset(test_parent_set, default_template_data = old$template_data,
                                     default_max_genes = old$max_genes)
                , "Parent set must include only 'Single', 'AND', 'OR' or 'XOR'")

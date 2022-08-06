@@ -118,13 +118,13 @@ modify_dag <-
     function(dag, from_node, to_node, operation, parent_set,
              dag_model="HESBCN",
              default_dag = .ev_SHINY_dflt$template_data$dag,
-             default_dag_parent_set = .ev_SHINY_dflt$template_data$dag_parent_set){
+             default_DAG_parent_set = .ev_SHINY_dflt$template_data$DAG_parent_set){
   value_from_operation <- c(1, 0)
   names(value_from_operation) <- c("add", "remove")
 
   if (operation == "clear") {
     return(list(dag = default_dag,
-                dag_parent_set = default_dag_parent_set)) 
+                DAG_parent_set = default_DAG_parent_set)) 
   }
 
   if (is.null(from_node) | is.null(to_node) | is.null(dag)){
@@ -459,7 +459,7 @@ to_stnd_csd_dataset <- function(data,
     ## Be completely explicit upfront!!!
     default_data <- default_template_data$data
     default_lambdas <- default_template_data$lambdas
-    default_dag_parent_set <- default_template_data$dag_parent_set
+    default_DAG_parent_set <- default_template_data$DAG_parent_set
     default_dag <- default_template_data$dag
     default_thetas <- default_template_data$thetas
     
@@ -501,16 +501,16 @@ to_stnd_csd_dataset <- function(data,
     }
     names(new_data$lambdas) <- new_data$gene_names
 
-    if(is.null(data$dag_parent_set)) {
-        new_data$dag_parent_set <- default_dag_parent_set
+    if(is.null(data$DAG_parent_set)) {
+        new_data$DAG_parent_set <- default_DAG_parent_set
     }else {
-        if(!all(data$dag_parent_set %in% c("Single", "AND", "OR", "XOR")))
+        if(!all(data$DAG_parent_set %in% c("Single", "AND", "OR", "XOR")))
             stop("Parent set must include only 'Single', 'AND', 'OR' or 'XOR'")
-        new_parent_set <- default_dag_parent_set
-        new_parent_set[1:length(data$dag_parent_set)] <- data$dag_parent_set
-        new_data$dag_parent_set <- new_parent_set
+        new_parent_set <- default_DAG_parent_set
+        new_parent_set[1:length(data$DAG_parent_set)] <- data$DAG_parent_set
+        new_data$DAG_parent_set <- new_parent_set
     }
-    names(new_data$dag_parent_set ) <- new_data$gene_names
+    names(new_data$DAG_parent_set ) <- new_data$gene_names
 
     if(is.null(data$dag)) {
         new_data$dag <- default_dag
@@ -531,7 +531,7 @@ to_stnd_csd_dataset <- function(data,
 
         ## Revising parent set
         ## Only genes with multiple parent can have something different from "Single" relationship
-        new_data$dag_parent_set[colSums(new_dag)[-1] <= 1] <- "Single"
+        new_data$DAG_parent_set[colSums(new_dag)[-1] <= 1] <- "Single"
     }
 
     rownames(new_data$dag) <- colnames(new_data$dag) <- c("Root", new_data$gene_names)

@@ -401,12 +401,12 @@ examples_csd <- list(
   "csd" = list(
     Empty = list(data = NULL, name = "Empty"),
     Linear = list(data = dB_linear,  name = "Linear", dag = dag_linear), 
-    AND = list(data = dB_AND, name = "AND", dag = dag_or, dag_parent_set = and_parent_set), 
-    OR = list(data = dB_OR, name = "OR", dag = dag_or, dag_parent_set = or_parent_set), 
-    XOR = list(data = dB_XOR,name = "XOR", dag = dag_or, dag_parent_set = xor_parent_set), 
+    AND = list(data = dB_AND, name = "AND", dag = dag_or, DAG_parent_set = and_parent_set), 
+    OR = list(data = dB_OR, name = "OR", dag = dag_or, DAG_parent_set = or_parent_set), 
+    XOR = list(data = dB_XOR,name = "XOR", dag = dag_or, DAG_parent_set = xor_parent_set), 
     two_ind = list(data = dB_two_ind, name = "Two indep. genes", dag = dag_2_ind), 
     two_ind_b = list(data = dB_two_ind_b, name = "Two indeo. genes, example b", dag = dag_2_ind), 
-    c1 = list(data = dB_c1, name = "A --> B ; C --> D; B XOR D for E", dag = dag_c1, dag_parent_set = c1_parent_set), 
+    c1 = list(data = dB_c1, name = "A --> B ; C --> D; B XOR D for E", dag = dag_c1, DAG_parent_set = c1_parent_set), 
     c2 = list(ata = dB_c2, name = "Missing: ((A AND B) or C) to reach D", dag = dag_c2), 
     c2_2c2 = list(data = dB_c2_2, name = "All: ((A AND B) or C) to reach D", dag = dag_c2), 
     c4c2 = list(data = dB_c4, name = "Parallel", dag = dag_c4), 
@@ -420,20 +420,20 @@ examples_csd <- list(
   "dag" = list(
       DAG_Fork_3 = list(dag = template_dag, name = "DAG_Fork_3"),
       DAG_Linear = list(data = NULL,  name = "DAG_Linear", dag = dag_linear,
-                        dag_parent_set = linear_parent_set,
+                        DAG_parent_set = linear_parent_set,
                         lambdas = linear_lambdas
                         ),
       DAG_AND = list(data = NULL, name = "DAG_AND",
-                     dag = dag_or, dag_parent_set = and_parent_set,
+                     dag = dag_or, DAG_parent_set = and_parent_set,
                lambdas = and_lambdas),
       DAG_OR = list(data = NULL, name = "DAG_OR", dag = dag_or,
-                    dag_parent_set = or_parent_set), 
+                    DAG_parent_set = or_parent_set), 
       DAG_XOR = list(data = NULL, name = "DAG_XOR", dag = dag_or,
-                     dag_parent_set = xor_parent_set),
+                     DAG_parent_set = xor_parent_set),
       DAG_A_O_X = list(data = NULL,
                        name = "DAG_A_O_X",
                        dag = dag_and_or_xor,
-                      dag_parent_set = and_or_xor_parent_set,
+                      DAG_parent_set = and_or_xor_parent_set,
                       lambdas = and_or_xor_lambdas)
   ),
   "matrix" = list(
@@ -443,6 +443,7 @@ examples_csd <- list(
 )
 
 ## If running from "something/EvAM-Tools/evamtools/inst/miscell/examples"
-save(examples_csd, file = "../../../data/examples_csd.RData")
-
+## save(examples_csd, file = "../../../data/examples_csd.RData")
+## If running from evamtools directory
+save(examples_csd, file = "./data/examples_csd.RData")
 

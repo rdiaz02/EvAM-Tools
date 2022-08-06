@@ -41,7 +41,7 @@ generate_old <- function() {
             csd_counts =  template_csd_counts
           , data = NULL
           , dag = template_dag
-          , dag_parent_set = template_parent_set
+          , DAG_parent_set = template_parent_set
           , lambdas = template_lambdas
           , thetas = template_thetas
           , gene_names = LETTERS[1: max_genes]
@@ -54,36 +54,36 @@ generate_old <- function() {
 
 test_that("Modify dags works correctly",{
     ## dag <- .ev_SHINY_dflt$template_data$dag
-    ## dag_parent_set <- .ev_SHINY_dflt$template_data$dag_parent_set
+    ## DAG_parent_set <- .ev_SHINY_dflt$template_data$DAG_parent_set
     old <- generate_old()
     dag <- old$template_data$dag
-    dag_parent_set <- old$template_data$dag_parent_set
+    DAG_parent_set <- old$template_data$DAG_parent_set
 
     
   mod1 <- dag
   mod1["Root", "A"] <- 1
-  expect_equal(modify_dag(dag, "Root", "A", "add", dag_parent_set,
+  expect_equal(modify_dag(dag, "Root", "A", "add", DAG_parent_set,
                           default_dag = old$template_data$dag)$dag,
                mod1)
-  expect_equal(modify_dag(mod1, "Root", "A", "remove", dag_parent_set, default_dag = old$template_data$dag)$dag, dag)
-  expect_error(modify_dag(NULL, "Root", "A", "remove", dag_parent_set, default_dag = old$template_data$dag)$dag, "From and To options and DAG have to be defined")
-  expect_error(modify_dag(dag, NULL, "A", "remove", dag_parent_set, default_dag = old$template_data$dag)$dag, "From and To options and DAG have to be defined")
-  expect_error(modify_dag(dag, "Root", NULL, "remove", dag_parent_set, default_dag = old$template_data$dag)$dag,"From and To options and DAG have to be defined")
-  expect_error(modify_dag(dag, "Root2", "A", "add", dag_parent_set, default_dag = old$template_data$dag)$dag, "Both From and To options have to be valid gene names")
-  expect_error(modify_dag(dag, "Root", "A2", "add", dag_parent_set, default_dag = old$template_data$dag)$dag, "Both From and To options have to be valid gene names")
+  expect_equal(modify_dag(mod1, "Root", "A", "remove", DAG_parent_set, default_dag = old$template_data$dag)$dag, dag)
+  expect_error(modify_dag(NULL, "Root", "A", "remove", DAG_parent_set, default_dag = old$template_data$dag)$dag, "From and To options and DAG have to be defined")
+  expect_error(modify_dag(dag, NULL, "A", "remove", DAG_parent_set, default_dag = old$template_data$dag)$dag, "From and To options and DAG have to be defined")
+  expect_error(modify_dag(dag, "Root", NULL, "remove", DAG_parent_set, default_dag = old$template_data$dag)$dag,"From and To options and DAG have to be defined")
+  expect_error(modify_dag(dag, "Root2", "A", "add", DAG_parent_set, default_dag = old$template_data$dag)$dag, "Both From and To options have to be valid gene names")
+  expect_error(modify_dag(dag, "Root", "A2", "add", DAG_parent_set, default_dag = old$template_data$dag)$dag, "Both From and To options have to be valid gene names")
 
   mod2 <- mod1
   mod2["A", "B"] <- 1
-  expect_error(modify_dag(mod2, "B", "A", "add", dag_parent_set, default_dag = old$template_data$dag)$dag, "Relationships cannot be bidirectional")
-  expect_error(modify_dag(mod2, "B", "B", "add", dag_parent_set, default_dag = old$template_data$dag)$dag, "Both From and To options must be different")
-  expect_error(modify_dag(mod2, "A", "B", "add", dag_parent_set, default_dag = old$template_data$dag)$dag,"That edge is already present")
-  expect_error(modify_dag(mod2, "A", "B", "add", dag_parent_set, default_dag = old$template_data$dag)$dag,"That edge is already present")
-  expect_error(modify_dag(mod2, "D", "A", "add", dag_parent_set, default_dag = old$template_data$dag)$dag, "A direct children of Root cannot have multiple parents")
-  expect_equal(modify_dag(mod2, "Root", "A", "clear", dag_parent_set, default_dag = old$template_data$dag)$dag,
+  expect_error(modify_dag(mod2, "B", "A", "add", DAG_parent_set, default_dag = old$template_data$dag)$dag, "Relationships cannot be bidirectional")
+  expect_error(modify_dag(mod2, "B", "B", "add", DAG_parent_set, default_dag = old$template_data$dag)$dag, "Both From and To options must be different")
+  expect_error(modify_dag(mod2, "A", "B", "add", DAG_parent_set, default_dag = old$template_data$dag)$dag,"That edge is already present")
+  expect_error(modify_dag(mod2, "A", "B", "add", DAG_parent_set, default_dag = old$template_data$dag)$dag,"That edge is already present")
+  expect_error(modify_dag(mod2, "D", "A", "add", DAG_parent_set, default_dag = old$template_data$dag)$dag, "A direct children of Root cannot have multiple parents")
+  expect_equal(modify_dag(mod2, "Root", "A", "clear", DAG_parent_set, default_dag = old$template_data$dag)$dag,
                ## .ev_SHINY_dflt$template_data$dag
                old$template_data$dag
                )
-  expect_equal(modify_dag(mod2, "Root", "A", "remove", dag_parent_set, default_dag = old$template_data$dag)$dag,
+  expect_equal(modify_dag(mod2, "Root", "A", "remove", DAG_parent_set, default_dag = old$template_data$dag)$dag,
                ##.ev_SHINY_dflt$template_data$dag
                old$template_data$dag
                )
@@ -95,10 +95,10 @@ test_that("Modify dags works correctly",{
   mod3["A", "C"] <- 1
   mod3["B", "D"] <- 1
   mod3["C", "D"] <- 1
-  tmp_parent_set3 <- dag_parent_set
+  tmp_parent_set3 <- DAG_parent_set
   tmp_parent_set3["D"] <- "AND"
   tmp_res1 <- modify_dag(mod3, "C", "D", "remove", tmp_parent_set3, default_dag = old$template_data$dag)
-  expect_equal(tmp_res1$parent_set, dag_parent_set)
+  expect_equal(tmp_res1$parent_set, DAG_parent_set)
   res_dag1 <- mod3
   res_dag1["C", "D"] <- 0
   expect_equal(tmp_res1$dag, res_dag1)
@@ -115,7 +115,7 @@ test_that("Modify dags works correctly",{
   mod5["E", "G"] <- 1
   mod5["F", "H"] <- 1
   mod5["G", "H"] <- 1
-  tmp_parent_set4 <- dag_parent_set
+  tmp_parent_set4 <- DAG_parent_set
   tmp_parent_set4["D"] <- "AND"
   tmp_parent_set5 <- tmp_parent_set4
   tmp_parent_set5["H"] <- "OR"
@@ -142,12 +142,12 @@ test_that("Modify dags works correctly",{
 
 test_that("Test that modify lambdas and parent set is correct", {
   ## dag <- .ev_SHINY_dflt$template_data$dag
-  ## dag_parent_set <- .ev_SHINY_dflt$template_data$dag_parent_set
+  ## DAG_parent_set <- .ev_SHINY_dflt$template_data$DAG_parent_set
   ## lambdas <- .ev_SHINY_dflt$template_data$lambdas
 
   old <- generate_old()
   dag <- old$template_data$dag
-  dag_parent_set <- old$template_data$dag_parent_set
+  DAG_parent_set <- old$template_data$DAG_parent_set
   lambdas <- old$template_data$lambdas
 
   
@@ -166,7 +166,7 @@ test_that("Test that modify lambdas and parent set is correct", {
   mod1["B", "D"] <- 1
   mod1["C", "D"] <- 1
 
-  parent_set1 <- dag_parent_set
+  parent_set1 <- DAG_parent_set
   parent_set1["D"] <- "AND"
   lambdas1 <- lambdas
   lambdas1[1:4] <- c(1:4)
@@ -256,13 +256,13 @@ test_that("Test that modify lambdas and parent set is correct", {
 test_that("Modify dags works correctly on a more comples example",{
     old <- generate_old()
     dag <- old$template_data$dag
-    dag_parent_set <- old$template_data$dag_parent_set
+    DAG_parent_set <- old$template_data$DAG_parent_set
 
 
   ##   dag <- .ev_SHINY_dflt$template_data$dag
-  ## dag_parent_set <- .ev_SHINY_dflt$template_data$dag_parent_set
+  ## DAG_parent_set <- .ev_SHINY_dflt$template_data$DAG_parent_set
 
-  x <- modify_dag(dag, "Root", "A", "add", dag_parent_set, default_dag = old$template_data$dag)
+  x <- modify_dag(dag, "Root", "A", "add", DAG_parent_set, default_dag = old$template_data$dag)
   x <- modify_dag(x$dag, "Root", "B", "add", x$parent_set, default_dag = old$template_data$dag)
   x <- modify_dag(x$dag, "A", "C", "add", x$parent_set, default_dag = old$template_data$dag)
   x <- modify_dag(x$dag, "B", "C", "add", x$parent_set)
@@ -271,10 +271,10 @@ test_that("Modify dags works correctly on a more comples example",{
 
     lambdas <- old$template_data$lambdas
     ## lambdas <- .ev_SHINY_dflt$template_data$lambdas
-    ## dag_parent_set <- .ev_SHINY_dflt$template_data$dag_parent_set
+    ## DAG_parent_set <- .ev_SHINY_dflt$template_data$DAG_parent_set
     
-  dag_parent_set["C"] <- "AND"
-  dag_parent_set["D"] <- "AND"
+  DAG_parent_set["C"] <- "AND"
+  DAG_parent_set["D"] <- "AND"
   dag_table <- data.frame(
     From = c("Root", "Root", "A", "B", "A", "B"),
     To = c("A", "B", "C", "C", "D", "D"),
