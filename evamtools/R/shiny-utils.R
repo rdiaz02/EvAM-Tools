@@ -53,57 +53,54 @@ reorder_to_standard_order_arbitrary_df <- function(x) {
 
 
 
+## ## No longer used. See A21_gnn_numfix. So in the future this might be useful
+## ## if we want to be more permissive. Thus DO NOT DELETE!
+## get_display_freqs <- function(freqs, n_genes, gene_names, input2build) {
+##     if (input2build %in% c("upload", "dag", "matrix"))
+##         stop("get_display_freqs should not be called when ",
+##              "input is either dag or upload or matrix (mhn); ",
+##              "DAG has a different procedure for dealing with number of genes ",
+##              "and upload does not use that setting at all.")
+##     if (is.null(freqs)) return(.ev_SHINY_dflt$template_data$csd_counts)
+##     if (nrow(freqs) == 0) return(.ev_SHINY_dflt$template_data$csd_counts)
 
-get_display_freqs <- function(freqs, n_genes, gene_names, input2build) {
-    if (input2build %in% c("upload", "dag"))
-        stop("get_display_freqs should not be called when ",
-             "input is either dag or upload; ",
-             "DAG has a different procedure for dealing with number of genes ",
-             "and upload does not use that setting at all.")
-    if (is.null(freqs)) return(.ev_SHINY_dflt$template_data$csd_counts)
-    if (nrow(freqs) == 0) return(.ev_SHINY_dflt$template_data$csd_counts)
-    
-    ## Assumes genes in the order given
-    valid_gene_names <- c("WT", gene_names[1:n_genes])
-    ## Verify assumption. This is an assumption about input.
-    ##  gene_names must have been set correctly
-    ##  This is check A1_gnn
 
-    gene_names_in_freqs <- setdiff(unlist(strsplit(freqs$Genotype, ", ")), "WT")
-    if (length(gene_names_in_freqs)) {
-        if (n_genes >= (length(gene_names_in_freqs))) {
-            ## if (!all(gene_names_in_freqs %in% valid_gene_names)) {
-            ##     browser()
-            ## }
-            stopifnot(all(gene_names_in_freqs %in% valid_gene_names))
-        } else {
-            stopifnot(sort(gene_names_in_freqs)[1:n_genes] %in% valid_gene_names)
-        }
-    }
-    
-    ## valid_gene_names <- unique(c("WT", unlist(strsplit(freqs$Genotype, ", "))))
-    ## gene_names_in_freqs <- setdiff(unlist(strsplit(freqs$Genotype, ", ")), "WT")
-    ## other_gene_names <- setdiff(gene_names, gene_names_in_freqs)
-    ## possible_gene_names <- c(gene_names_in_freqs, )
-    ## valid_gene_names <- c("WT", gn_in_freqs)
-    
-    ## Why would this be necessary?  To make sure size of data reduced when
-    ##    changing number of gens and we use genotype freqs.  But this works poorly
-    ##    with DAGs; it leads to incorrect behavior like having in dag only A and C,
-    ##    and asking for two genes. Only A would be shown.
-    ## So don't use this function with DAGs :-)
-    
-    selected_rows <- vapply(freqs$Genotype,
-                            function(x) {
-                                genes <- strsplit(x, ", ")[[1]]
-                                return(all(genes %in% valid_gene_names))
-                            },
-                            logical(1))
-    
-    freqs <- freqs[selected_rows, , drop = FALSE]
-    ## Remove 0 count rows
-    return(freqs[freqs$Counts > 0, , drop = FALSE])
-}
+##     ## Assumes genes in the order given
+##     valid_gene_names <- c("WT", gene_names[1:n_genes])
+##     ## Verify assumption. This is an assumption about input.
+##     ##  gene_names must have been set correctly
+##     ##  This is check A1_gnn
+
+##     gene_names_in_freqs <- setdiff(unlist(strsplit(freqs$Genotype, ", ")), "WT")
+##     if (length(gene_names_in_freqs)) {
+##         if (n_genes >= (length(gene_names_in_freqs))) {
+##             ## if (!all(gene_names_in_freqs %in% valid_gene_names)) {
+##             ##     browser()
+##             ## }
+##             stopifnot(all(gene_names_in_freqs %in% valid_gene_names))
+##         } else {
+##             stopifnot(sort(gene_names_in_freqs)[1:n_genes] %in% valid_gene_names)
+##         }
+##     }
+
+##     ## Why would this be necessary?  To make sure size of data reduced when
+##     ##    changing number of gens and we use genotype freqs.  But this works poorly
+##     ##    with DAGs; it leads to incorrect behavior like having in dag only A and C,
+##     ##    and asking for two genes. Only A would be shown.
+##     ## So don't use this function with DAGs :-)
+
+##     selected_rows <- vapply(freqs$Genotype,
+##                             function(x) {
+##                                 genes <- strsplit(x, ", ")[[1]]
+##                                 return(all(genes %in% valid_gene_names))
+##                             },
+##                             logical(1))
+
+##     freqs <- freqs[selected_rows, , drop = FALSE]
+##     ## Remove 0 count rows
+##     return(freqs[freqs$Counts > 0, , drop = FALSE])
+
+##     }
 
 ## From one-row-per-subject, as matrix of 0/1, to grouped counts of genotypes
 get_csd <- function(complete_csd,

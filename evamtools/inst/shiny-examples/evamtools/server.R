@@ -257,6 +257,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             shinyjs::disable("provide_gene_names")
         }  
 
+        ## If no data to display, return empty data frame
+        thisd <- input$input2build
+        thisd_dataset_names <- unlist(lapply(datasets$all_csd[[thisd]],
+                                             function(x) x$name))
+        if (!(data$name %in% thisd_dataset_names)) {
+            mymessage("       data$name not in ", thisd_dataset_names, ". ",
+                      "Returning a 0-rows data frame")
+            return(data.frame(Genotype = character(), Counts = integer()))
+        }
 
         
         if (input$input2build == "dag") {
@@ -264,14 +273,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## Other code ensures that gene number is never smaller
             ## than genes in the DAG.
             mymessage("      dag")
-            dag_dataset_names <- unlist(lapply(datasets$all_csd$dag,
-                                               function(x) x$name))
-            if (!(data$name %in% dag_dataset_names)) {
-                mymessage("       data$name not in dag_dataset_names. ",
-                          "Returning a 0-rows data frame")
-                return(data.frame(Genotype = character(), Counts = integer()))
-            }
-          
             
             ## FIXME: See comment below  A1_gnn_bisfix
             ## if (!is.null(data$n_genes) &&
@@ -285,62 +286,73 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 evamtools:::reorder_to_standard_order_count_df(
                                 data$csd_counts[data$csd_counts$Counts > 0, ,
                                                 drop = FALSE]))
+        } else if (input$input2build == "matrix") {
+            ## With the MHN we always return all the genotypes
+            ## The genotypes are given by the number of genes directly.
+            mymessage("      matrix (i.e., mhn)")
+            return(
+                evamtools:::reorder_to_standard_order_count_df(
+                                data$csd_counts[data$csd_counts$Counts > 0, ,
+                                                drop = FALSE]))
         } else if (input$input2build == "upload") {
             mymessage("      upload")
-            upl_dataset_names <- unlist(lapply(datasets$all_csd$upload, function(x) x$name))
-            if (is.null(data$name) || !(data$name %in% upl_dataset_names)) {
-                mymessage("       data$name not in upl_dataset_names.",
-                          "Returning a 0-rows data frame")
-                return(data.frame(Genotype = character(), Counts = integer()))
-            }
             ## With upload, we do not use number of genes
             ## Return the data we have
             return(
                 evamtools:::reorder_to_standard_order_count_df(
                                 data$csd_counts[data$csd_counts$Counts > 0, ,
                                                 drop = FALSE]))
-        } else {
-            mymessage("      mhn or csd")
-            thisd <- input$input2build
-            thisd_dataset_names <- unlist(lapply(datasets$all_csd[[thisd]],
-                                                 function(x) x$name))
-            if (!(data$name %in% thisd_dataset_names)) {
-                mymessage("       data$name not in thisd_dataset_names. ",
-                          "Returning a 0-rows data frame")
-                return(data.frame(Genotype = character(), Counts = integer()))
-            }
-
-            ## FIXME: A1_gnn_bisfix The code in A1_gnn_0 is not updating
-            ## data$etc. That is triggered on gene number change, but not
-            ## necessarily on adding a genotype or removing a genotype, in ways
-            ## that change the genes, but not the gene number.
-            ## Though something I do not fully understand:
-            ## It does not happen in the single observeEvent for input$gene_number
-            ## and not in the updateNumericInput for input$gene_number
-            ## So force it here if there have been changes in input$gene_number
-            ## and if they haven't, for some weird, hard to reproduce, cases.
-            ## Yes, this seem necessary to prevent BUG_Create_Rename_Click_other
-            if ((input$input2build == "csd") &&
-                !is.null(data$n_genes) ) {
-                ## input$gene_number != data$n_genes) {
-                mymessage("       CSD: Updating gene names in data")
-                new_gnames2 <- set_gene_names_after_resize(data$data,
-                                                           data$gene_names)
-                if (identical(new_gnames2, data$gene_names)) {
-                    mymessage("A1_gnn_bisfix: identical")
-                } else {
-                    mymessage("A1_gnn_bisfix: different")
-                }
-                data$gene_names <- new_gnames2
-            }
+        } else if (input$input2build == "csd") {
+            mymessage("      csd")
 
             return(
                 evamtools:::reorder_to_standard_order_count_df(
-                                evamtools:::get_display_freqs(data$csd_counts,
-                                                              input$gene_number,
-                                                              data$gene_names,
-                                                              input$input2build))
-            )
+                                data$csd_counts[data$csd_counts$Counts > 0, ,
+                                                drop = FALSE]))
+            
+            ## I think what follows is a relic from the past, when we could change
+            ## gene names on data sets with data already.
+            ## Also would play a role if we allowed decreasing number of genes
+            ## below those in use. Not anymore. Search for
+            ## csd_more_genes_than_set_genes
+            ## A21_gnn_numfix
+            ## I do not allow that
+            ## anymore. So all of this could just be the same as above, which
+            ## shows we always do the same thing
+
+            
+            ## ## FIXME: A1_gnn_bisfix The code in A1_gnn_0 is not updating
+            ## ## data$etc. That is triggered on gene number change, but not
+            ## ## necessarily on adding a genotype or removing a genotype, in ways
+            ## ## that change the genes, but not the gene number.
+            ## ## Though something I do not fully understand:
+            ## ## It does not happen in the single observeEvent for input$gene_number
+            ## ## and not in the updateNumericInput for input$gene_number
+            ## ## So force it here if there have been changes in input$gene_number
+            ## ## and if they haven't, for some weird, hard to reproduce, cases.
+            ## ## Yes, this seem necessary to prevent BUG_Create_Rename_Click_other
+
+            ## if ((input$input2build == "csd") &&
+            ##     !is.null(data$n_genes) ) {
+            ##     ## input$gene_number != data$n_genes) {
+            ##     mymessage("       CSD: Updating gene names in data")
+            ##     new_gnames2 <- set_gene_names_after_resize(data$data,
+            ##                                                data$gene_names)
+            ##     if (identical(new_gnames2, data$gene_names)) {
+            ##         mymessage("A1_gnn_bisfix: identical")
+            ##     } else {
+            ##         mymessage("A1_gnn_bisfix: different")
+            ##     }
+            ##     data$gene_names <- new_gnames2
+            ## }
+
+            ## return(
+            ##     evamtools:::reorder_to_standard_order_count_df(
+            ##                     evamtools:::get_display_freqs(data$csd_counts,
+            ##                                                   input$gene_number,
+            ##                                                   data$gene_names,
+            ##                                                   input$input2build))
+            ## )
         }
     })
 
@@ -393,6 +405,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## The next is not really necessary. And it is actually limiting what
             ## users can do. But forcing this: a) decreases likelihood of bugs;
             ## b) Makes behavior consistent with that of DAGs.
+            ## And we simplify a lot the display_freqs code: A21_gnn_numfix
+            ## BEWARE: if we were not to enforce the next lines, we would
+            ## need to go back to using the commented code in A21_gnn_numfix,
+            ## in display_freqs.
             if (csd_more_genes_than_set_genes(input, data, session)) {
                 csd_message_more_genes_than_set_genes()
             }
