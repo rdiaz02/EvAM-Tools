@@ -543,13 +543,16 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         if(input$input2build %in% c("upload", "csd", "dag", "matrix")){
             tags$div(
                      class = "frame",
-                     tags$h3("Download the data"),
+                     tags$div(class = "flex",
+                              tags$h3(HTML("Download the data")),
+                              actionButton("how2downloaddata", "Help", class = "btn-info"),
+                              ),
                      tags$div(class = "download_button",
-                              tags$h5(HTML("Contents of saved file: ",
-                                           "the data as data frame; ",
-                                           "if you built a DAG or MHN model, ",
-                                           "also the model built."
-                                           )),  
+                              ## tags$h5(HTML("Contents of saved file: ",
+                              ##              "the data as data frame; ",
+                              ##              "if you built a DAG or MHN model, ",
+                              ##              "also the model built."
+                              ##              )),  
                               downloadButton("download_csd", "Download your data")
                               )
                  )
@@ -1799,6 +1802,22 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         })
     })
 
+
+    ## Help for output of downloaded before results
+    observeEvent(input$how2downloaddata, {
+        showModal(modalDialog(
+            easyClose = TRUE,
+            title = tags$h3("Download data"),
+            tags$div(
+                     tags$h5(HTML("Contents of saved file: ",
+                                  "the data as an R data frame in an RDS file.  ",
+                                  "If you built a DAG or MHN model, ",
+                                  "also the model built."
+                                  )),
+                     )
+        ))
+    }
+    )
     ## Help for output of downloaded CPM results
     observeEvent(input$how2downloadcpm, {
         showModal(modalDialog(
