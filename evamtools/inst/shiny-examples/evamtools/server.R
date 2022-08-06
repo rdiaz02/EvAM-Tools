@@ -2440,9 +2440,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  ##              "want to use other methods)</h5>"), 
                                                  choices = input$cpm_methods,
                                                  ## c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
-                                                 selected = intersect(input$cpm_methods,
-                                                                      c("OT", "CBN", "MHN", "OncoBN")
-                                                                      )
+                                                 selected = input$cpm_methods
+                                                 ## intersect(input$cpm_methods,
+                                                 ##           c("OT", "CBN", "MHN", "OncoBN"))
+                                                 )
                                                  |> prompter::add_prompt(message = 
                                                           HTML("Show graphical output of the CPMs used to analyze the data.  "
                                                              , "Go back to \"User input\" "
@@ -2486,15 +2487,39 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                         }
                                                    ,
                                                     selected = "trans_mat"
-                                                    )
-                                       |> prompter::add_prompt(message = 
-                                                                   HTML("This output is also displayed in tabular form on the bottom right."
-                                                                        ),
-                                                               position = "right",
-                                                               rounded = TRUE,
-                                                               bounce = TRUE,
-                                                               size = "medium"
+                                                    ), ## Prompter does not allow including HTML formatting.
+                                       shinyBS::bsTooltip("data2plot",
+                                                          HTML("<p>This output is also displayed in tabular form on the bottom right.</p>",
+                                                               "<br><p><u>\"Sampled genotype counts\"</u> is only available if you selected ",
+                                                               "\"Sample genotypes\" under \"Advanced options\". </p>",
+                                                               "<br>",
+                                                               "<p>For <u>\"Predicted genotype relative frequencies\"</u> ",
+                                                               "and <u>\"Sampled genotype counts\"</u>, the histograms only ",
+                                                               "show the 20 most frequent genotypes ", ## 20: argument to  plot_genotype_counts
+                                                               "for reasons of figure size and legibility of genotype labels .",
+                                                               "The table shows all the genotypes. </p>",
                                                                ),
+                                                          "right", options = list(container = "body")
+                                                          )
+                                       ## |> prompter::add_prompt(message = 
+                                       ##                             HTML("This output is also displayed in tabular form on the bottom right.",
+                                       ##                                  "                   ",
+                                       ##                                  paste("<p>\"Sampled genotype counts\" is only available if you selected ",
+                                       ##                                        "\"Sample genotypes\" under \"Advanced options\". </p>"),
+                                       ##                                  "                   ",
+                                       ##                                  paste("For \"Predicted genotype relative frequencies\" ",
+                                       ##                                        "and \"Sampled genotype counts\", the histograms only ",
+                                       ##                                        "show the 20 most frequent genotypes ", ## 20: argument to  plot_genotype_counts
+                                       ##                                        "for reasons of figure size and legibility of genotype labels .",
+                                       ##                                        "The table shows all the genotypes. "),
+                                       ##                                  sep = "\n"
+                                       ##                                  ),
+                                       ##                         position = "right",
+                                       ##                         rounded = TRUE,
+                                       ##                         bounce = TRUE,
+                                       ##                         size = "large"
+                                       ##                         )
+                                      ,
                                        ),
                               tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
                               tags$h4(HTML("<br/>")),
@@ -2528,7 +2553,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                           width = "500px",
                                           value = 5, max = 10, min = 0, step = 1)
                               |> prompter::add_prompt(message = 
-                                                          HTML("Set it to 0 to show all paths or all genotype labels. "
+                                                          HTML("Set it to 0 to show all paths or all genotype labels. ",
                                                                "You probably don't want to do that when there are many ",
                                                                "genes, specially if you are also displaying the output ",
                                                                "from MHN (where any genotype is connected to each of its ",
@@ -2614,9 +2639,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               ) , ## prompter does not work here
                      shinyBS::bsTooltip("table_out3",
                                         ## message = 
-                                        HTML("This output is also displayed as the second row of figures. "
-                                           , "Choose the output to display from the left radio buttons "
-                                           , "\"Predictions from models to display\"."
+                                        HTML("<p>This output is also displayed as the second row of figures. ",
+                                            "Choose the output to display from the left radio buttons ",
+                                           "\"Predictions from models to display\".</p>",
+                                           "<br><p><u>\"Sampled genotype counts\"</u> is only available if you selected ",
+                                             "\"Sample genotypes\" under \"Advanced options\". </p>",
+                                             "<br>",
+                                             "<p>For <u>\"Predicted genotype relative frequencies\"</u> ",
+                                             "and <u>\"Sampled genotype counts\"</u>, the histograms only ",
+                                             "show the 20 most frequent genotypes ", ## 20: argument to  plot_genotype_counts
+                                             "for reasons of figure size and legibility of genotype labels .",
+                                             "The table shows all the genotypes. </p>",
                                              ),
                                         "bottom", options = list(container = "body")
                                         ## position = "bottom",
