@@ -720,7 +720,10 @@ user_input <- function() {
                                                                  inline = FALSE),
                                               tags$h5("Beware: MCCBN may take hours to run. ",
                                                       "H-ESBCN often takes much longer than the ",
-                                                      " remaining methods (often > 20 seconds)."),
+                                                      " remaining methods (except MCCBN). ",
+                                                      "For 7 or more genes, CBN can be much slower ",
+                                                      "than OT, OncoBN, or MHN (e.g., data analyzed in < 1 second ",
+                                                      "by those three methods can take 45 with CBN)."),
                                               tags$hr(style="border-color: darkgrey;"),
 
                                               selectInput("return_paths_max",
