@@ -185,10 +185,6 @@ set_gene_names_after_resize <- function(x, gene_names) {
 
 
 
-
-
-
-
 server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     require(evamtools)
     require(shinyBS)
@@ -228,10 +224,40 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     default_obs_noise <- 0
     default_epos <- 0
     
-    last_visited_pages <- list(upload="Empty",
-                               csd = "Empty",
-                               dag = "DAG_Fork_4",
-                               matrix = "MHN_all_0")
+    ## last_visited_pages <- list(upload="Empty",
+    ##                            csd = "Empty",
+    ##                            dag = "DAG_Fork_4",
+    ##                            matrix = "MHN_all_0")
+
+    ## We could hack this, and use a global variable, as we did in the past,
+    ## and assign via "<<-" but this is arguably a reactive value:
+    ## we do/did last_visited_pages["upload"] <<- dataset_name
+    ## where dataset_name is input$name_uploaded
+    ## According to my understanding of
+    ## https://shiny.rstudio.com/articles/scoping.html
+    ## these should be reactive.
+    ## If the variable is defined inside this server block,
+    ## no bad consequences: it is not changed in all of the
+    ## same user's session.
+    ## It would if the variable was defined outside the block.
+
+    ## This: https://stackoverflow.com/questions/20333399/are-there-global-variables-in-r-shiny
+    ## does not give me much more insight.
+
+    ## But we do not really use the reactivity functionality anyway. So...
+    ## might as well just use a variable, and use "<<-"
+    reactive_last_visited_pages <- list( ## reactiveValues(
+        upload = "Empty",
+        csd    = "Empty",
+        dag    = "DAG_Fork_4",
+        matrix = "MHN_all_0"
+    )
+
+    reactive_last_visited_cpm <- list( # reactiveValues (
+        ## As above. We assign to last_visited_cpm <- result_name
+        ## where result_name is a function of an input, input$select_csd
+        the_last_visited_cpm = ""
+    )
 
     ## last_visited_cpm <- ""
 
@@ -249,10 +275,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         stored_dag_model = default_dag_model
     )
 
-    reactive_last_visited_cpm <- reactiveValues (
-        the_last_visited_cpm = ""
-    )
     
+   
     data <- reactiveValues(
         csd_counts = .ev_SHINY_dflt$template_data$csd_counts
       , data = .ev_SHINY_dflt$template_data$data
@@ -507,11 +531,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     colnames(tmp_data$data)
                   , LETTERS[(length(colnames(tmp_data$data)) + 1):max_genes]
                 )
-                                        # tmp_data$gene_names <- colnames(tmp_data$data)
+
                 tmp_data$n_genes <- ncol(tmp_data$data)
                 datasets$all_csd[["upload"]][[dataset_name]] <- tmp_data
                 
-                last_visited_pages["upload"] <<- dataset_name
+                ## last_visited_pages["upload"] <<- dataset_name
+                reactive_last_visited_pages$upload <<- dataset_name
                 updateRadioButtons(session, "input2build", selected = "upload")
                 updateRadioButtons(session, "select_csd", selected = dataset_name)
             }, error = function(e){
@@ -534,7 +559,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     observeEvent(input$input2build, {
         updateRadioButtons(session, "select_csd",
-                           selected = last_visited_pages[[input$input2build]])
+                           selected = reactive_last_visited_pages[[input$input2build]])
     })
 
     ## Define dataset name
@@ -703,7 +728,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     observeEvent(input$select_csd, {
         tryCatch({
             ## Ufff!!! <<-
-            last_visited_pages[[input$input2build]] <<- input$select_csd
+            ## last_visited_pages[[input$input2build]] <<- input$select_csd
+            reactive_last_visited_pages[[input$input2build]] <<- input$select_csd
         }, error = function(e){
             showModal(dataModal(e[[1]]))
         })
@@ -724,7 +750,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 radioButtons(
                     inputId = "select_csd",
                     label = "",
-                    selected = last_visited_pages[[input$input2build]],
+                    ## selected = last_visited_pages[[input$input2build]],
+                    selected = reactive_last_visited_pages[[input$input2build]],
                     choiceNames = all_choice_names,
                     choiceValues = all_names
                 )
@@ -770,7 +797,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             mymessage("At observeEvent toListen")
 
             ## Cleaning stuff
-            selected <- last_visited_pages[[input$input2build]]
+            ## selected <- last_visited_pages[[input$input2build]]
+            selected <- reactive_last_visited_pages[[input$input2build]]
             tmp_data <- datasets$all_csd[[input$input2build]][[selected]]
             data$gene_names <- tmp_data$gene_names
             data$data <- tmp_data$data
@@ -2457,7 +2485,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
             all_cpm_out[[result_name]] <- all_evam_output
             ## last_visited_cpm <<- result_name
-            reactive_last_visited_cpm$the_last_visited_cpm <- result_name
+            reactive_last_visited_cpm$the_last_visited_cpm <<- result_name
             updateRadioButtons(session, "select_cpm", selected = result_name)
             progress$inc(5/5, detail = "You can see your result by going to the Results tab")
             Sys.sleep(1)
