@@ -1000,6 +1000,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ##     mymessage("    disabled provide_gene_names renderUI")
                 ##     shinyjs::disable("provide_gene_names")
                 ## }
+                ## This also breaks things. Not touching slider or anything.
+                ## is it from accessing data?
                 ## if ((!is.null(data$data) ||
                 ##      (nrow(data$csd_counts) > 0))) {
                 ##     uu <- 3 + 2
@@ -1264,38 +1266,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## })
 
     
-    ## Define new genotype
-    observeEvent(input$dag_model, {
-        ## FIXME Unnecessary, as caught at a much more sensible place
-        ## but leave it here anyway, just in case, until much more testing done.
-        number_of_parents <- colSums(data$dag)
-        if (input$dag_model == "OT" && any(number_of_parents > 1)) {
-            showModal(dataModal(
-                paste("This DAG cannot be transformed into a tree. ",
-                      "Are there nodes with multiple parents? ",
-                      "(OT cannot not have nodes with multiple parents.)")))
-            updateRadioButtons(session, "dag_model", selected = "HESBCN")
-        } else {
-            ## default_dag_model <<- input$dag_model
-            the_dag_model$stored_dag_model <- input$dag_model
-        }
-    })
 
+    
     output$define_genotype <- renderUI({
         n_genes <- ifelse(is.null(input$gene_number), default_number_genes,
                           input$gene_number)
 
-        ## ## FIXME: no_reset. Yes, I need this
-       
-
-        
-        ## Setting it here ain't enough
-        ## This can all be changed in other two lines at least too.
-        ##   Search for id_change_genotype_muts
-        ## gene_options <- data$gene_names[1:n_genes]
         gene_options <- set_gene_names_after_resize(data$data,
                                                     data$gene_names)[1:n_genes]
-
 
         if (input$input2build == "csd") {
             tags$div(
@@ -1666,11 +1644,124 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
 
+    ##    observeEvent(input$dag_model, {
+    ##     ## FIXME Unnecessary, as caught at a much more sensible place
+    ##     ## but leave it here anyway, just in case, until much more testing done.
+    ##     ## The other message is "This DAG has nodes with multiple parents. "
+    ##     ## way below.
+    ##     ## But here, it is often caught even earlier and we avoid the
+    ##     ## flickering screen that happens when we left the error handling below.
+        
+    ##     number_of_parents <- colSums(data$dag)
+
+    ##     if (input$dag_model == "OncoBN") {
+    ##         if (any(data$DAG_parent_set == "XOR")) {
+    ##             updateRadioButtons(session, "dag_model", selected = "HESBCN")
+    ##             showModal(dataModal(HTML("The OncoBN model cannot include ",
+    ##                                      "XOR relationships.")))
+    ##         } else if (length(unique(data$DAG_parent_set)) > 2) {
+    ##             updateRadioButtons(session, "dag_model", selected = "HESBCN")
+    ##             showModal(dataModal(HTML("The OncoBN model can only include ",
+    ##                                      "one type of relationship",
+    ##                                      "(conjunctive or disjunctive, ",
+    ##                                      "as specified in \"Advanced options\").")))
+    ##         } else {
+    ##             ## default_dag_model <<- input$dag_model
+    ##             the_dag_model$stored_dag_model <- input$dag_model
+    ##         }
+    ##     } else if (input$dag_model == "OT") {
+    ##         if (any(number_of_parents > 1)) {
+    ##             updateRadioButtons(session, "dag_model", selected = "HESBCN")
+    ##             showModal(dataModal(
+    ##                 paste("This DAG has nodes with multiple parents. ",
+    ##                       "OT can only use trees ",
+    ##                       "(i.e., no node can have with multiple parents.)")))
+    ##             ## paste("This DAG cannot be transformed into a tree. ",
+    ##             ##   "Are there nodes with multiple parents? ",
+    ##             ##   "(OT cannot not have nodes with multiple parents.)")))
+    ##         } else if (length(unique(data$DAG_parent_set)) > 2) {
+    ##             updateRadioButtons(session, "dag_model", selected = "HESBCN")
+    ##             showModal(dataModal(HTML("The OT model  ",
+    ##                                      "is only for trees. ")))
+    ##         } else {
+    ##             ## default_dag_model <<- input$dag_model
+    ##             the_dag_model$stored_dag_model <- input$dag_model
+    ##         }
+    ##     } else {
+    ##         ## default_dag_model <<- input$dag_model
+    ##         the_dag_model$stored_dag_model <- input$dag_model 
+    ##     }
+    ##     the_dag_model$stored_dag_model <- input$dag_model 
+    ## })
+
+
+
+
+
+    observeEvent(input$dag_model, {
+        tryCatch({
+            ## FIXME Unnecessary, as caught at a much more sensible place
+            ## but leave it here anyway, just in case, until much more testing done.
+            ## The other message is "This DAG has nodes with multiple parents. "
+            ## way below.
+            ## But here, it is often caught even earlier and we avoid the
+            ## flickering screen that happens when we left the error handling below.
+            
+            number_of_parents <- colSums(data$dag)
+
+            if (input$dag_model == "OncoBN") {
+                if (any(data$DAG_parent_set == "XOR")) {
+                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                    stop("The OncoBN model cannot include ",
+                         "XOR relationships.")
+                } else if (length(unique(data$DAG_parent_set)) > 2) {
+                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                    stop("The OncoBN model can only include ",
+                         "one type of relationship",
+                         "(conjunctive or disjunctive, ",
+                         "as specified in \"Advanced options\").")
+                } else {
+                    the_dag_model$stored_dag_model <- input$dag_model
+                }
+            } else if (input$dag_model == "OT") {
+                if (any(number_of_parents > 1)) {
+                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                    stop("This DAG has nodes with multiple parents. ",
+                         "OT can only use trees ",
+                         "(i.e., no node can have with multiple parents.).")
+                    ## paste("This DAG cannot be transformed into a tree. ",
+                    ##   "Are there nodes with multiple parents? ",
+                    ##   "(OT cannot not have nodes with multiple parents.)")))
+                } else if (length(unique(data$DAG_parent_set)) > 2) {
+                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                    stop(HTML("The OT model  ",
+                              "is only for trees."))
+                } else {
+                    ## default_dag_model <<- input$dag_model
+                    the_dag_model$stored_dag_model <- input$dag_model
+                }
+            } else {
+                ## default_dag_model <<- input$dag_model
+                the_dag_model$stored_dag_model <- input$dag_model 
+            }
+        }, 
+        error = function(e) {
+            showModal(dataModal(e[[1]]))
+        })
+    })
+
+
+
+
+    
     ## DAG builder
     ## Controling dag builder
-    ## FIXME: some of the error messages sometimes are triggered twice
-    ## such as if the current model is OncoBN and you move to DAG_A_O_X
+
+    ## FIXME: some of the error messages sometimes are triggered twice such as if
+    ## the current model is OncoBN (e.g., put yourself in DAG_AND and set model
+    ## to OncoBN) and you move to DAG_A_O_X
     
+    ## And there is redundant error checking. See above.
     dag_data <- reactive({
         if (input$input2build == "dag") {
             mymessage("At dag_data reactive call")
@@ -1713,45 +1804,53 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             }
 
             if (the_dag_model$stored_dag_model %in% c("OT")) {
-                colnames(dag_data) <- c("From", "To", "Relation", "Weight")
+                
                 if (any(duplicated(dag_data$To))) {
-                     showModal(dataModal(
-                         paste("This DAG has nodes with multiple parents. ",
-                               "OT can only use trees ",
-                               "(i.e., no node can have with multiple parents.)")))
-                     updateRadioButtons(session, "dag_model", selected = "HESBCN")
-                 } else if (length(unique(dag_data$Relation)) > 2) {
+                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                    showModal(dataModal(
+                        paste("This DAG has nodes with multiple parents. ",
+                              "OT can only use trees ",
+                              "(i.e. no node can have with multiple parents).")))
+                } else if (length(unique(dag_data$Relation)) > 2) {
+                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
                     showModal(dataModal(HTML("The OT model  ",
                                              "is only for trees. ")))
-                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                } else {
+                    colnames(dag_data) <- c("From", "To", "Relation", "Weight")
+                    dag_data$Relation <- NULL
                 }
-
-                dag_data$Relation <- NULL
-                
+                return(dag_data)
             } else if (the_dag_model$stored_dag_model %in% c("OncoBN")) {
                 if (any(dag_data$Relation == "XOR")) {
+                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
                     showModal(dataModal(HTML("The OncoBN model cannot include ",
                                              "XOR relationships.")))
-                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
                 } else if (length(unique(dag_data$Relation)) > 2) {
+                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
                     showModal(dataModal(HTML("The OncoBN model can only include ",
                                              "one type of relationship",
                                              "(conjunctive or disjunctive, ",
                                              "as specified in \"Advanced options\").")))
-                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                } else {
+                    colnames(dag_data) <- c("From", "To", "Relation", "theta")
                 }
-                
-                colnames(dag_data) <- c("From", "To", "Relation", "theta")
-                
+               return(dag_data) 
+            } else {
+                mymessage("    dag_data_reactive, position 4")
+                return(dag_data)
             }
-            mymessage("    dag_data_reactive, position 4")
-            return(dag_data)
         }
     })
 
+
+  
+
+
+    
     output$dag_table <-
         DT::renderDT(
-                dag_data(), escape = FALSE, selection = 'none', server = FALSE,
+                dag_data(),
+                escape = FALSE, selection = 'none', server = FALSE,
                 rownames = FALSE,
                 editable = list(target = "all", disable = list(columns = c(0, 1))),
                 options = list(dom = 't', paging = FALSE, ordering = FALSE,
