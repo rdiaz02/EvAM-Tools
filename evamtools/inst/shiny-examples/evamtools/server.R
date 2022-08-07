@@ -259,6 +259,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         the_last_visited_cpm = ""
     )
 
+
+    the_dag_model <- list( ## reactiveValues(
+        stored_dag_model = default_dag_model
+    )
+
+    
     ## last_visited_cpm <- ""
 
     datasets <- reactiveValues(
@@ -1721,7 +1727,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                          "(conjunctive or disjunctive, ",
                          "as specified in \"Advanced options\").")
                 } else {
-                    the_dag_model$stored_dag_model <- input$dag_model
+                    the_dag_model$stored_dag_model <<- input$dag_model
                 }
             } else if (input$dag_model == "OT") {
                 if (any(number_of_parents > 1)) {
@@ -1738,11 +1744,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               "is only for trees."))
                 } else {
                     ## default_dag_model <<- input$dag_model
-                    the_dag_model$stored_dag_model <- input$dag_model
+                    the_dag_model$stored_dag_model <<- input$dag_model
                 }
             } else {
                 ## default_dag_model <<- input$dag_model
-                the_dag_model$stored_dag_model <- input$dag_model 
+                the_dag_model$stored_dag_model <<- input$dag_model 
             }
         }, 
         error = function(e) {
