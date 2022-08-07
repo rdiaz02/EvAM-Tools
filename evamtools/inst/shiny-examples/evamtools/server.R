@@ -1788,7 +1788,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ) stop("Generate data: number of ",
                        "genotypes to sample cannot be ",
                        "less than 1 or greater than ",
-                       max_allowed_num_samples)
+                       max_allowed_num_samples, ".")
             if ((input$dag_noise < 0) ||
                 (input$dag_noise > 1)) stop("Generate data: observational noise ",
                                             "cannot be ",
@@ -1963,7 +1963,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ) stop("Generate data: number of ",
                        "genotypes to sample cannot be ",
                        "less than 1 or greater than ",
-                       max_allowed_num_samples)
+                       max_allowed_num_samples, ".")
             if ((input$mhn_noise < 0) ||
                 (input$mhn_noise > 1)) stop("Generate data: observational noise ",
                                             "cannot be ",
