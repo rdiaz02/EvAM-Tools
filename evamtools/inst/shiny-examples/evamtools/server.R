@@ -224,6 +224,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     default_number_genes <- 4
     default_csd_noise <- 0
     new_default_csd_samples <- 1000
+    max_allowed_num_samples <- 100000
     
     last_visited_pages <- list(upload="Empty",
                                csd = "Empty",
@@ -1782,6 +1783,20 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             the_dag_data <- dag_data()
             gene_names <- setdiff(unique(c(the_dag_data$From, the_dag_data$To)),
                                   "Root")
+            if ((input$dag_samples < 1) ||
+                (input$dag_samples >  max_allowed_num_samples)
+                ) stop("Generate data: number of ",
+                       "genotypes to sample cannot be ",
+                       "less than 1 or greater than ",
+                       max_allowed_num_samples)
+            if ((input$dag_noise < 0) ||
+                (input$dag_noise > 1)) stop("Generate data: observational noise ",
+                                            "cannot be ",
+                                          "less than 0 or greater than 1.")
+            if ((input$dag_epos < 0) ||
+                (input$dag_epos > 1)) stop("Generate data: epos,e  ",
+                                           "cannot be ",
+                                         "less than 0 or greater than 1.")
             tmp_dag_data <-
                 evamtools:::generate_sample_from_dag(the_dag_data
                                                    , data$DAG_parent_set[gene_names]
@@ -1943,6 +1958,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     observeEvent(input$resample_mhn, {
         tryCatch({
+            if ((input$mhn_samples < 1) ||
+                (input$mhn_samples >  max_allowed_num_samples)
+                ) stop("Generate data: number of ",
+                       "genotypes to sample cannot be ",
+                       "less than 1 or greater than ",
+                       max_allowed_num_samples)
+            if ((input$mhn_noise < 0) ||
+                (input$mhn_noise > 1)) stop("Generate data: observational noise ",
+                                            "cannot be ",
+                                            "less than 0 or greater than 1.")
+            
             mhn_data <- evamtools:::get_mhn_data(data$thetas[1:input$gene_number
                                                            , 1:input$gene_number]
                                                , noise = input$mhn_noise 
