@@ -244,6 +244,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         obs_noise   = default_obs_noise,
         epos        = default_epos 
     )
+
+    the_dag_model <- reactiveValues(
+        stored_dag_model = default_dag_model
+    )
     
     data <- reactiveValues(
         csd_counts = .ev_SHINY_dflt$template_data$csd_counts
@@ -678,7 +682,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 data2save <- list(
                     data = tmp_data$data[, 1:number_of_genes]
                   , model_edges = dag_data()
-                  , model = default_dag_model
+                  , model = the_dag_model$stored_dag_model
                   , DAG_parent_set = tmp_data$DAG_parent_set[1:number_of_genes]
                   , dag = tmp_data$dag[1:(number_of_genes + 1),
                                        1:(number_of_genes + 1)])
@@ -1240,7 +1244,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                       "(OT cannot not have nodes with multiple parents.)")))
             updateRadioButtons(session, "dag_model", selected = "HESBCN")
         } else {
-            default_dag_model <<- input$dag_model
+            ## default_dag_model <<- input$dag_model
+            the_dag_model$stored_dag_model <- input$dag_model
         }
     })
 
@@ -1361,7 +1366,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                         inline = TRUE,
                                                         choiceNames = list("OT", "OncoBN", "CBN/HESBCN"),
                                                         choiceValues = list("OT", "OncoBN", "HESBCN"),
-                                                        selected = default_dag_model)
+                                                        selected = the_dag_model$stored_dag_model)
                                            ),
                                   tags$h4("New Edge"),
                                   tags$h5(HTML("<p></p>")),
@@ -1631,6 +1636,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     ## DAG builder
     ## Controling dag builder
+    ## FIXME: some of the error messages sometimes are triggered twice
+    ## such as if the current model is OncoBN and you move to DAG_A_O_X
+    
     dag_data <- reactive({
         if (input$input2build == "dag") {
             mymessage("At dag_data reactive call")
@@ -1727,7 +1735,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene,
                                                operation = "add",
                                                parent_set = data$DAG_parent_set,
-                                               dag_model = default_dag_model)
+                                               dag_model = the_dag_model$stored_dag_model)
             data$dag <- tmp_data$dag
             data$DAG_parent_set <- tmp_data$parent_set
             datasets$all_csd[[input$input2build]][[input$select_csd]] <-
@@ -1747,7 +1755,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene,
                                                operation = "remove",
                                                parent_set = data$DAG_parent_set,
-                                               dag_model = default_dag_model)
+                                               dag_model = the_dag_model$stored_dag_model)
             data$dag <- tmp_data$dag
             data$DAG_parent_set <- tmp_data$parent_set
             datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
@@ -1795,7 +1803,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                                      info, data$lambdas
                                                                    , data$dag
                                                                    , data$DAG_parent_set
-                                                                   , dag_model = default_dag_model)
+                                                                   , dag_model = the_dag_model$stored_dag_model)
             data$lambdas <- tmp_data$lambdas
             data$DAG_parent_set <- tmp_data$parent_set
             datasets$all_csd[[input$input2build]][[input$select_csd]] <-
@@ -1835,7 +1843,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                    , data$DAG_parent_set[gene_names]
                                                    , noise = input$obs_noise
                                                    , N = input$num_samples
-                                                   , dag_model = default_dag_model
+                                                   , dag_model = the_dag_model$stored_dag_model
                                                    , epos = input$epos)
                 
             data$csd_counts <-
