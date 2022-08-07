@@ -272,7 +272,7 @@ dag_linear["C", "D"] <- 1
 
 linear_parent_set <- c("Single", "Single", "Single", "Single")
 names(linear_parent_set) <- c("A", "B", "C", "D")
-linear_lambdas <- c(.72 ,.89 ,.4 ,6)
+linear_lambdas <- c(.72 ,.89 ,.4 ,.6)
 names(linear_lambdas) <- c("A", "B", "C", "D")
 
 
