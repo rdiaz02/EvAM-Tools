@@ -204,7 +204,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         cat("\n Finishing")
         do_gc(1)
     })
-    
+
+    ## FIXME: a lot of this defaults logic sucks: values depend on 
+    ## the object .ev_SHINY_dflt, which would need to be regenerated
+    ## separately, which is a PITA. Those defaults should be here.
     ## Make these deps explicit. Needed for shinytests
     data("examples_csd", package = "evamtools")
     data("SHINY_DEFAULTS", package = "evamtools")
