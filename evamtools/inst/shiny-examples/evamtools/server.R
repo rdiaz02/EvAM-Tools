@@ -233,7 +233,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                dag = "DAG_Fork_4",
                                matrix = "MHN_all_0")
 
-    last_visited_cpm <- ""
+    ## last_visited_cpm <- ""
 
     datasets <- reactiveValues(
         all_csd = all_csd_data
@@ -247,6 +247,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     the_dag_model <- reactiveValues(
         stored_dag_model = default_dag_model
+    )
+
+    reactive_last_visited_cpm <- reactiveValues (
+        the_last_visited_cpm = ""
     )
     
     data <- reactiveValues(
@@ -2452,7 +2456,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                 , sprintf("%s__%s", input$select_csd, result_index))
 
             all_cpm_out[[result_name]] <- all_evam_output
-            last_visited_cpm <<- result_name
+            ## last_visited_cpm <<- result_name
+            reactive_last_visited_cpm$the_last_visited_cpm <- result_name
             updateRadioButtons(session, "select_cpm", selected = result_name)
             progress$inc(5/5, detail = "You can see your result by going to the Results tab")
             Sys.sleep(1)
@@ -2797,15 +2802,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         for (i in names(all_cpm_out)) {
             all_names <- c(all_names, all_cpm_out[[i]]$orig_data$name)
         }
-
-        if ((length(all_names) > 0) && (last_visited_cpm != "")) {
+        
+       ## if ((length(all_names) > 0) && (last_visited_cpm != "")) {
+        if ((length(all_names) > 0) &&
+            (reactive_last_visited_cpm$the_last_visited_cpm != "")) {
             selected <- names(all_cpm_out)
             
             tagList(
                 radioButtons(
                     inputId = "select_cpm",
                     label = "",
-                    selected = last_visited_cpm,
+                    selected = reactive_last_visited_cpm$the_last_visited_cpm,
                     choiceNames = names(all_cpm_out),
                     choiceValues = names(all_cpm_out)
                 )
