@@ -1446,7 +1446,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                    step = 0.02500, width = "18em"),
                                       )
                                   |> prompter::add_prompt(
-                                                   message = paste("A proportion between 0 and 1. ", 
+                                                   message = paste("A proportion between 0 and 1 ",
+                                                                   "(open interval on the right, so 1 is not allowed).",
                                                                    "Observational noise (e.g., genotyping error) ",
                                                                    "for all models. ",
                                                                    "Added during sampling, ",
@@ -1516,7 +1517,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                    step = 0.025, width = "18em"),
                                       )
                                   |> prompter::add_prompt(message = 
-                                                              paste("A proportion between 0 and 1. ", 
+                                                              paste("A proportion between 0 and 1 ",
+                                                                    "(open interval on the right, so 1 is not allowed).",
                                                                     "Observational noise (e.g., genotyping error) ",
                                                                     "for all models. ",
                                                                     "Added during sampling, ",
@@ -1770,6 +1772,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## And there is redundant error checking. See above.
     dag_data <- reactive({
         if (input$input2build == "dag") {
+
             mymessage("At dag_data reactive call")
             input$dag_model
             input$dag_table_cell_edit
@@ -1804,20 +1807,23 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                  , Lambdas = data$lambdas[edges[, "col"] - 1])
             
             if ((the_dag_model$stored_dag_model %in% c("OT", "OncoBN"))
-                & (any(dag_data$Lambdas < 0) | any(dag_data$Lambdas > 1))){
-                showModal(dataModal("thetas/probabilities should be between 0 and 1"))
+                & (any(dag_data$Lambdas < 0) | any(dag_data$Lambdas > 0.99999999))) {
+                the_dag_model$stored_dag_model <<- "HESBCN"
                 updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                showModal(dataModal("thetas/probabilities should be between 0 and 1 ",
+                                    "(actually, for numerical reasons, 0.99999999)."))
             }
 
             if (the_dag_model$stored_dag_model %in% c("OT")) {
-                
                 if (any(duplicated(dag_data$To))) {
+                    the_dag_model$stored_dag_model <<- "HESBCN"
                     updateRadioButtons(session, "dag_model", selected = "HESBCN")
                     showModal(dataModal(
                         paste("This DAG has nodes with multiple parents. ",
                               "OT can only use trees ",
                               "(i.e. no node can have with multiple parents).")))
                 } else if (length(unique(dag_data$Relation)) > 2) {
+                    the_dag_model$stored_dag_model <<- "HESBCN"
                     updateRadioButtons(session, "dag_model", selected = "HESBCN")
                     showModal(dataModal(HTML("The OT model  ",
                                              "is only for trees. ")))
@@ -1828,10 +1834,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 return(dag_data)
             } else if (the_dag_model$stored_dag_model %in% c("OncoBN")) {
                 if (any(dag_data$Relation == "XOR")) {
+                    the_dag_model$stored_dag_model <<- "HESBCN"
                     updateRadioButtons(session, "dag_model", selected = "HESBCN")
                     showModal(dataModal(HTML("The OncoBN model cannot include ",
                                              "XOR relationships.")))
                 } else if (length(unique(dag_data$Relation)) > 2) {
+                    the_dag_model$stored_dag_model <<- "HESBCN"
                     updateRadioButtons(session, "dag_model", selected = "HESBCN")
                     showModal(dataModal(HTML("The OncoBN model can only include ",
                                              "one type of relationship",
@@ -1968,13 +1976,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                        max_allowed_num_samples,
                        ".")
             if ((input$obs_noise < 0) ||
-                (input$obs_noise > 1)) stop("Generate data: observational noise ",
+                (input$obs_noise >= 0.99999999)) stop("Generate data: observational noise ",
                                             "cannot be ",
-                                          "less than 0 or greater than 1.")
+                                            "less than 0 or greater than (or equal to) 1 ",
+                                            "(to prevent numerical problems, no larger than 0.99999999).")
             if ((input$epos < 0) ||
-                (input$epos > 1)) stop("Generate data: epos,e  ",
+                (input$epos >= 0.99999999)) stop("Generate data: epos,e  ",
                                        "cannot be ",
-                                         "less than 0 or greater than 1.")
+                                       "less than 0 or greater than (or equal to) 1 ",
+                                       "(to prevent numerical problems, no larger than 0.99999999).")
             tmp_dag_data <-
                 evamtools:::generate_sample_from_dag(the_dag_data
                                                    , data$DAG_parent_set[gene_names]
@@ -2073,7 +2083,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             "<ul>",
                             "<li>theta (OncoBN) and Weight (OT) denote conditional probabilities ",
                             "of an event occurring given the parent conditions are satisfied; ",
-                            "thus they must be between 0 and 1.</li>",
+                            "thus they must be between 0 and 1 ",
+                            "(open interval, so neither 0 nor 1 are allowed).</li>",
                             "<li>lambdas (CBN, H-ESBCN) denote rates (time to occurrence of an event, ",
                             "given its parents are satisfied, is modeled as an exponential ",
                             "process with this rate). Thus, lambdas must be larger than 0.</li>",
@@ -2168,9 +2179,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                        max_allowed_num_samples,
                        ".")
             if ((input$obs_noise < 0) ||
-                (input$obs_noise > 1)) stop("Generate data: observational noise ",
+                (input$obs_noise >= 0.99999999)) stop("Generate data: observational noise ",
                                             "cannot be ",
-                                            "less than 0 or greater than 1.")
+                                            "less than 0 or greater than 1",
+                                            "(for numerical issues, no larger than 0.99999999).")
             
             mhn_data <- evamtools:::get_mhn_data(data$thetas[1:input$gene_number
                                                            , 1:input$gene_number]
