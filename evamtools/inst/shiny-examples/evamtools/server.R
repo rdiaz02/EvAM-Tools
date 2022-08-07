@@ -218,13 +218,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     all_csd_data <- evamtools:::to_stnd_csd_all_datasets(examples_csd)
     min_genes <- .ev_SHINY_dflt$min_genes
     max_genes <- .ev_SHINY_dflt$max_genes
-    default_csd_samples <- .ev_SHINY_dflt$csd_samples
-    default_cpm_samples <- .ev_SHINY_dflt$cpm_samples
+
+
     default_dag_model <- .ev_SHINY_dflt$dag_model
     default_number_genes <- 4
-    default_csd_noise <- 0
-    new_default_csd_samples <- 1000
     max_allowed_num_samples <- 100000
+
+    default_num_samples <- 100
+    default_obs_noise <- 0
+    default_epos <- 0
     
     last_visited_pages <- list(upload="Empty",
                                csd = "Empty",
@@ -237,6 +239,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         all_csd = all_csd_data
     )
 
+    generate_data <- reactiveValues(
+        num_samples = default_num_samples,
+        obs_noise   = default_obs_noise,
+        epos        = default_epos 
+    )
+    
     data <- reactiveValues(
         csd_counts = .ev_SHINY_dflt$template_data$csd_counts
       , data = .ev_SHINY_dflt$template_data$data
@@ -382,7 +390,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## That removes the plotting twice issue
     ## but makes this less interactive: you must click
     ## "Sample".
-    
+
     ## Can't make it depend on gene_number too
     ## or we get the "DAG contains more genes ..."
 
@@ -398,9 +406,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## }
     ## ## And now, display_freqs will likely be called
     ## )
-    
 
-    
+
+
     observeEvent(input$gene_number, {
         ## id: here_we_change_gene_number
         mymessage("at gene_number trigger")
@@ -815,6 +823,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 updateNumericInput(session, "gene_number", value = NULL)
             }
 
+            
             if (input$input2build %in% c("csd")) {
                 ## Where we "Add genotypes" manually. This selects mutation (genotype)
                 ##         If we only have WT, n_genes is 0, and it breaks
@@ -974,7 +983,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                              tags$div(class="inlin",
                                       tags$h3(HTML("<br/>")),
                                       sliderInput("gene_number", "Number of genes",
-                                                  value = val, max = max_genes, min = min_genes,
+                                                  value = val,
+                                                  max = max_genes, min = min_genes,
                                                   step = 1),
                                       ## The action that takes place is
                                       ## id: here_we_change_gene_number
@@ -1236,10 +1246,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         n_genes <- ifelse(is.null(input$gene_number), default_number_genes,
                           input$gene_number)
 
-        ## FIXME: no_reset. Yes, I need this
-        new_default_csd_samples <- ifelse(is.null(input$mhn_samples),
-                                          default_csd_samples,
-                                          input$mhn_samples)
+        ## ## FIXME: no_reset. Yes, I need this
+       
 
         
         ## Setting it here ain't enough
@@ -1387,27 +1395,30 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   tags$h4(HTML("<br/>")),
                                   tags$h4(HTML("<u>2. Generate data from the DAG model</u>")),
                                   tags$h4(HTML("<br/>")),
-                                  numericInput("dag_epos",
+                                  numericInput("epos",
                                                HTML("epos,&epsilon;"),
-                                               value = 0.01, min = 0, max = 1,
+                                               value = generate_data$epos,
+                                               min = 0, max = 1,
                                                step = 0.005, width = "12em"),
                                   tags$h5(HTML("For OT (epos) and OncoBN (&epsilon;) only: prob. of children "),
                                           "not allowed by model to occur. ",
                                           "(Affects predicted probabilities.) "),
                                   tags$h3(HTML("<br/>")),
                                   div(style = "white-space: nowrap;",
-                                      numericInput("dag_samples", HTML("Number of genotypes<br>to sample"),
-                                                   value = default_csd_samples, min = 100, max = 10000,
-                                                   step = 100, width = "22em"),
+                                      numericInput("num_samples",
+                                                   HTML("Number of genotypes<br>to sample"),
+                                                   value = generate_data$num_samples,
+                                                   min = 100,
+                                                   max = 10000,
+                                                   step = 100,
+                                                   width = "22em"),
                                       ), 
                                   tags$h3(HTML("<br/>")),
                                   div(style = "white-space: nowrap;", 
-                                      numericInput("dag_noise",
+                                      numericInput("obs_noise",
                                                    HTML("Observational noise <br>(genotyping error)"),
-                                                   ## HTML("Noise ",
-                                                   ##      "<h5>Observational noise (genotyping error), ",
-                                                   ##      "a proportion between 0 and 1.</h5>"),
-                                                   value = 0.0, min = 0, max = 1,
+                                                   value = generate_data$obs_noise,
+                                                   min = 0, max = 1,
                                                    step = 0.02500, width = "18em"),
                                       )
                                   |> prompter::add_prompt(
@@ -1465,19 +1476,19 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   tags$h4(HTML("<u>2. Generate data from the MHN model</u>")),
                                   tags$h4(HTML("<br/>")),
                                   div(style = "white-space: nowrap;", 
-                                      numericInput("mhn_samples",
+                                      numericInput("num_samples",
                                                    HTML("Number of genotypes<br>to sample"),
-                                                   value = new_default_csd_samples,
+                                                   value = generate_data$num_samples,
                                                    min = 100,
                                                    max = 10000,
                                                    step = 100, width = "22em"),
                                       ),
                                   tags$h3(HTML("<br/>")),
                                   div(style = "white-space: nowrap;",
-                                      numericInput("mhn_noise",
+                                      numericInput("obs_noise",
                                                    HTML("Observational noise<br>(genotyping error)"),
-                                                   ## HTML("Noise"),
-                                                   value = default_csd_noise, min = 0, max = 1,
+                                                   value = generate_data$obs_noise,
+                                                   min = 0, max = 1,
                                                    step = 0.025, width = "18em"),
                                       )
                                   |> prompter::add_prompt(message = 
@@ -1783,27 +1794,27 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             the_dag_data <- dag_data()
             gene_names <- setdiff(unique(c(the_dag_data$From, the_dag_data$To)),
                                   "Root")
-            if ((input$dag_samples < 1) ||
-                (input$dag_samples >  max_allowed_num_samples)
+            if ((input$num_samples < 1) ||
+                (input$num_samples >  max_allowed_num_samples)
                 ) stop("Generate data: number of ",
                        "genotypes to sample cannot be ",
                        "less than 1 or greater than ",
                        max_allowed_num_samples)
-            if ((input$dag_noise < 0) ||
-                (input$dag_noise > 1)) stop("Generate data: observational noise ",
+            if ((input$obs_noise < 0) ||
+                (input$obs_noise > 1)) stop("Generate data: observational noise ",
                                             "cannot be ",
                                           "less than 0 or greater than 1.")
-            if ((input$dag_epos < 0) ||
-                (input$dag_epos > 1)) stop("Generate data: epos,e  ",
-                                           "cannot be ",
+            if ((input$epos < 0) ||
+                (input$epos > 1)) stop("Generate data: epos,e  ",
+                                       "cannot be ",
                                          "less than 0 or greater than 1.")
             tmp_dag_data <-
                 evamtools:::generate_sample_from_dag(the_dag_data
                                                    , data$DAG_parent_set[gene_names]
-                                                   , noise = input$dag_noise
-                                                   , N = input$dag_samples
+                                                   , noise = input$obs_noise
+                                                   , N = input$num_samples
                                                    , dag_model = default_dag_model
-                                                   , epos = input$dag_epos)
+                                                   , epos = input$epos)
                 
             data$csd_counts <-
                 tmp_dag_data$csd_counts[tmp_dag_data$csd_counts[, 2] > 0, ]
@@ -1813,14 +1824,21 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             datasets$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$dag
             datasets$all_csd[[input$input2build]][[input$select_csd]]$lambdas <- data$lambdas
             datasets$all_csd[[input$input2build]][[input$select_csd]]$DAG_parent_set <- data$DAG_parent_set
+            
+            generate_data$num_samples <- input$num_samples
+            generate_data$obs_noise   <- input$obs_noise
+            generate_data$epos        <- input$epos
+            
             shinyjs::enable("analysis")
             ## The next is not really necessary, but we do it for consistency
             shinyjs::disable("provide_gene_names")
+            
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
         })
     })
 
+    
 
     ## Help for output of downloaded before results
     observeEvent(input$how2downloaddata, {
@@ -1958,30 +1976,28 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     observeEvent(input$resample_mhn, {
         tryCatch({
-            if ((input$mhn_samples < 1) ||
-                (input$mhn_samples >  max_allowed_num_samples)
+            if ((input$num_samples < 1) ||
+                (input$num_samples >  max_allowed_num_samples)
                 ) stop("Generate data: number of ",
                        "genotypes to sample cannot be ",
                        "less than 1 or greater than ",
                        max_allowed_num_samples)
-            if ((input$mhn_noise < 0) ||
-                (input$mhn_noise > 1)) stop("Generate data: observational noise ",
+            if ((input$obs_noise < 0) ||
+                (input$obs_noise > 1)) stop("Generate data: observational noise ",
                                             "cannot be ",
                                             "less than 0 or greater than 1.")
             
             mhn_data <- evamtools:::get_mhn_data(data$thetas[1:input$gene_number
                                                            , 1:input$gene_number]
-                                               , noise = input$mhn_noise 
-                                               , N = input$mhn_samples)
+                                               , noise = input$obs_noise 
+                                               , N = input$num_samples)
             data$csd_counts <- mhn_data$csd_counts
             data$data <- mhn_data$data
             datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- mhn_data$data
 
-            ## new_default_csd_samples <- input$mhn_samples
-            ## default_csd_samples <- input$mhn_samples
-            ## FIXME: terrible hack is to force updateNumericInput
-            ## using the current values. But clearing the model breaks it
-            ## so I'd need to add many of these.
+            generate_data$num_samples <- input$num_samples
+            generate_data$obs_noise   <- input$obs_noise
+            
             shinyjs::enable("analysis")
             ## The next is not really necessary, but we do it for consistency
             shinyjs::disable("provide_gene_names")
