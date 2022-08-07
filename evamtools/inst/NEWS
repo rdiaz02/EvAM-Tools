@@ -1,9 +1,25 @@
+Changes in version 2.1.4 (2022-08-07):
+	- Web-app mainly; many changes. Most relevant listed:
+	- Mucch better documentation
+	- Better and clearer catching of user errors during DAG
+	  creation and changes,
+	- Using RDS/rds extension consistently.
+	- Do not reset noise and number of samples to default
+	  (respect user settings).
+	- More strict checking of gene and file names provided
+	  by users.
+	- Better default examples that allow more comfortable
+	  playing with the interface (no lambdas > 1, so they
+	  can be turned to OncoBN and OT).
+	- Histograms of predicted genotype freqs: show only
+	  20 most abundant ones.
+
 Changes in version 2.1.4 (2022-08-05):
 	- Web-app: can provide gene names. Not the same as
 	  changing them, but it provides the important
 	  functionality (build models with arbitrarily
 	  named genes).
-	- Web-app: igraph: we use try, for the occsional error
+	- Web-app: igraph: we use try, for the occasional error
 	  of igraph not displaying the plot.
 	- Web-app: more documentation in better tooltips.  
 	
