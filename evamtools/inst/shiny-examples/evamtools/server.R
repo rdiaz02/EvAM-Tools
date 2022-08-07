@@ -1400,9 +1400,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                value = generate_data$epos,
                                                min = 0, max = 1,
                                                step = 0.005, width = "12em"),
-                                  tags$h5(HTML("For OT (epos) and OncoBN (&epsilon;) only: prob. of children "),
-                                          "not allowed by model to occur. ",
-                                          "(Affects predicted probabilities.) "),
+                                  tags$h5(HTML("For <b>OT (epos) and OncoBN (&epsilon;) only</b>: ",
+                                               "probability that children nodes "),
+                                          "not allowed by the model (the DAG) occur. ",
+                                          "This setting affects predicted probabilities. "),
                                   tags$h3(HTML("<br/>")),
                                   div(style = "white-space: nowrap;",
                                       numericInput("num_samples",
@@ -1799,7 +1800,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ) stop("Generate data: number of ",
                        "genotypes to sample cannot be ",
                        "less than 1 or greater than ",
-                       max_allowed_num_samples)
+                       max_allowed_num_samples,
+                       ".")
             if ((input$obs_noise < 0) ||
                 (input$obs_noise > 1)) stop("Generate data: observational noise ",
                                             "cannot be ",
@@ -1987,7 +1989,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ) stop("Generate data: number of ",
                        "genotypes to sample cannot be ",
                        "less than 1 or greater than ",
-                       max_allowed_num_samples)
+                       max_allowed_num_samples,
+                       ".")
             if ((input$obs_noise < 0) ||
                 (input$obs_noise > 1)) stop("Generate data: observational noise ",
                                             "cannot be ",
