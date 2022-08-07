@@ -1230,6 +1230,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     
     ## Define new genotype
     observeEvent(input$dag_model, {
+        ## FIXME Unnecessary, as caught at a much more sensible place
+        ## but leave it here anyway, just in case, until much more testing done.
         number_of_parents <- colSums(data$dag)
         if (input$dag_model == "OT" && any(number_of_parents > 1)) {
             showModal(dataModal(
@@ -1664,23 +1666,41 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                  , Relation = tmp_DAG_parent_set[edges[, "col"] - 1]
                                  , Lambdas = data$lambdas[edges[, "col"] - 1])
             
-            if ((default_dag_model %in% c("OT", "OncoBN"))
+            if ((the_dag_model$stored_dag_model %in% c("OT", "OncoBN"))
                 & (any(dag_data$Lambdas < 0) | any(dag_data$Lambdas > 1))){
                 showModal(dataModal("thetas/probabilities should be between 0 and 1"))
                 updateRadioButtons(session, "dag_model", selected = "HESBCN")
             }
 
-            if (default_dag_model %in% c("OT")) {
+            if (the_dag_model$stored_dag_model %in% c("OT")) {
                 colnames(dag_data) <- c("From", "To", "Relation", "Weight")
+                if (any(duplicated(dag_data$To))) {
+                     showModal(dataModal(
+                         paste("This DAG has nodes with multiple parents. ",
+                               "OT can only use trees ",
+                               "(i.e., no node can have with multiple parents.)")))
+                     updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                 } else if (length(unique(dag_data$Relation)) > 2) {
+                    showModal(dataModal(HTML("The OT model  ",
+                                             "is only for trees. ")))
+                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                }
+
                 dag_data$Relation <- NULL
-            } else if (default_dag_model %in% c("OncoBN")) {
-                if (length(unique(dag_data$Relation)) > 2) {
+                
+            } else if (the_dag_model$stored_dag_model %in% c("OncoBN")) {
+                if (any(dag_data$Relation == "XOR")) {
+                    showModal(dataModal(HTML("The OncoBN model cannot include ",
+                                             "XOR relationships.")))
+                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                } else if (length(unique(dag_data$Relation)) > 2) {
                     showModal(dataModal(HTML("The OncoBN model can only include ",
                                              "one type of relationship",
                                              "(conjunctive or disjunctive, ",
-                                             "as specified in \"Advanced options\")")))
+                                             "as specified in \"Advanced options\").")))
                     updateRadioButtons(session, "dag_model", selected = "HESBCN")
                 }
+                
                 colnames(dag_data) <- c("From", "To", "Relation", "theta")
                 
             }
