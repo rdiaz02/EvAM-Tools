@@ -185,10 +185,6 @@ set_gene_names_after_resize <- function(x, gene_names) {
 
 
 
-
-
-
-
 server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     require(evamtools)
     require(shinyBS)
@@ -218,25 +214,69 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     all_csd_data <- evamtools:::to_stnd_csd_all_datasets(examples_csd)
     min_genes <- .ev_SHINY_dflt$min_genes
     max_genes <- .ev_SHINY_dflt$max_genes
-    default_csd_samples <- .ev_SHINY_dflt$csd_samples
-    default_cpm_samples <- .ev_SHINY_dflt$cpm_samples
+
+
     default_dag_model <- .ev_SHINY_dflt$dag_model
     default_number_genes <- 4
-    default_csd_noise <- 0
-    new_default_csd_samples <- 1000
     max_allowed_num_samples <- 100000
-    
-    last_visited_pages <- list(upload="Empty",
-                               csd = "Empty",
-                               dag = "DAG_Fork_4",
-                               matrix = "MHN_all_0")
 
-    last_visited_cpm <- ""
+    default_num_samples <- 100
+    default_obs_noise <- 0
+    default_epos <- 0
+    
+    ## last_visited_pages <- list(upload="Empty",
+    ##                            csd = "Empty",
+    ##                            dag = "DAG_Fork_4",
+    ##                            matrix = "MHN_all_0")
+
+    ## We could hack this, and use a global variable, as we did in the past,
+    ## and assign via "<<-" but this is arguably a reactive value:
+    ## we do/did last_visited_pages["upload"] <<- dataset_name
+    ## where dataset_name is input$name_uploaded
+    ## According to my understanding of
+    ## https://shiny.rstudio.com/articles/scoping.html
+    ## these should be reactive.
+    ## If the variable is defined inside this server block,
+    ## no bad consequences: it is not changed in all of the
+    ## same user's session.
+    ## It would if the variable was defined outside the block.
+
+    ## This: https://stackoverflow.com/questions/20333399/are-there-global-variables-in-r-shiny
+    ## does not give me much more insight.
+
+    ## But we do not really use the reactivity functionality anyway. So...
+    ## might as well just use a variable, and use "<<-"
+    reactive_last_visited_pages <- list( ## reactiveValues(
+        upload = "Empty",
+        csd    = "Empty",
+        dag    = "DAG_Fork_4",
+        matrix = "MHN_all_0"
+    )
+
+    reactive_last_visited_cpm <- list( # reactiveValues (
+        ## As above. We assign to last_visited_cpm <- result_name
+        ## where result_name is a function of an input, input$select_csd
+        the_last_visited_cpm = ""
+    )
+
+    ## last_visited_cpm <- ""
 
     datasets <- reactiveValues(
         all_csd = all_csd_data
     )
 
+    generate_data <- reactiveValues(
+        num_samples = default_num_samples,
+        obs_noise   = default_obs_noise,
+        epos        = default_epos 
+    )
+
+    the_dag_model <- reactiveValues(
+        stored_dag_model = default_dag_model
+    )
+
+    
+   
     data <- reactiveValues(
         csd_counts = .ev_SHINY_dflt$template_data$csd_counts
       , data = .ev_SHINY_dflt$template_data$data
@@ -382,7 +422,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## That removes the plotting twice issue
     ## but makes this less interactive: you must click
     ## "Sample".
-    
+
     ## Can't make it depend on gene_number too
     ## or we get the "DAG contains more genes ..."
 
@@ -398,9 +438,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## }
     ## ## And now, display_freqs will likely be called
     ## )
-    
 
-    
+
+
     observeEvent(input$gene_number, {
         ## id: here_we_change_gene_number
         mymessage("at gene_number trigger")
@@ -491,11 +531,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     colnames(tmp_data$data)
                   , LETTERS[(length(colnames(tmp_data$data)) + 1):max_genes]
                 )
-                                        # tmp_data$gene_names <- colnames(tmp_data$data)
+
                 tmp_data$n_genes <- ncol(tmp_data$data)
                 datasets$all_csd[["upload"]][[dataset_name]] <- tmp_data
                 
-                last_visited_pages["upload"] <<- dataset_name
+                ## last_visited_pages["upload"] <<- dataset_name
+                reactive_last_visited_pages$upload <<- dataset_name
                 updateRadioButtons(session, "input2build", selected = "upload")
                 updateRadioButtons(session, "select_csd", selected = dataset_name)
             }, error = function(e){
@@ -518,7 +559,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     observeEvent(input$input2build, {
         updateRadioButtons(session, "select_csd",
-                           selected = last_visited_pages[[input$input2build]])
+                           selected = reactive_last_visited_pages[[input$input2build]])
     })
 
     ## Define dataset name
@@ -670,7 +711,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 data2save <- list(
                     data = tmp_data$data[, 1:number_of_genes]
                   , model_edges = dag_data()
-                  , model = default_dag_model
+                  , model = the_dag_model$stored_dag_model
                   , DAG_parent_set = tmp_data$DAG_parent_set[1:number_of_genes]
                   , dag = tmp_data$dag[1:(number_of_genes + 1),
                                        1:(number_of_genes + 1)])
@@ -687,7 +728,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     observeEvent(input$select_csd, {
         tryCatch({
             ## Ufff!!! <<-
-            last_visited_pages[[input$input2build]] <<- input$select_csd
+            ## last_visited_pages[[input$input2build]] <<- input$select_csd
+            reactive_last_visited_pages[[input$input2build]] <<- input$select_csd
         }, error = function(e){
             showModal(dataModal(e[[1]]))
         })
@@ -708,7 +750,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 radioButtons(
                     inputId = "select_csd",
                     label = "",
-                    selected = last_visited_pages[[input$input2build]],
+                    ## selected = last_visited_pages[[input$input2build]],
+                    selected = reactive_last_visited_pages[[input$input2build]],
                     choiceNames = all_choice_names,
                     choiceValues = all_names
                 )
@@ -754,7 +797,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             mymessage("At observeEvent toListen")
 
             ## Cleaning stuff
-            selected <- last_visited_pages[[input$input2build]]
+            ## selected <- last_visited_pages[[input$input2build]]
+            selected <- reactive_last_visited_pages[[input$input2build]]
             tmp_data <- datasets$all_csd[[input$input2build]][[selected]]
             data$gene_names <- tmp_data$gene_names
             data$data <- tmp_data$data
@@ -815,6 +859,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 updateNumericInput(session, "gene_number", value = NULL)
             }
 
+            
             if (input$input2build %in% c("csd")) {
                 ## Where we "Add genotypes" manually. This selects mutation (genotype)
                 ##         If we only have WT, n_genes is 0, and it breaks
@@ -974,7 +1019,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                              tags$div(class="inlin",
                                       tags$h3(HTML("<br/>")),
                                       sliderInput("gene_number", "Number of genes",
-                                                  value = val, max = max_genes, min = min_genes,
+                                                  value = val,
+                                                  max = max_genes, min = min_genes,
                                                   step = 1),
                                       ## The action that takes place is
                                       ## id: here_we_change_gene_number
@@ -1220,6 +1266,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     
     ## Define new genotype
     observeEvent(input$dag_model, {
+        ## FIXME Unnecessary, as caught at a much more sensible place
+        ## but leave it here anyway, just in case, until much more testing done.
         number_of_parents <- colSums(data$dag)
         if (input$dag_model == "OT" && any(number_of_parents > 1)) {
             showModal(dataModal(
@@ -1228,7 +1276,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                       "(OT cannot not have nodes with multiple parents.)")))
             updateRadioButtons(session, "dag_model", selected = "HESBCN")
         } else {
-            default_dag_model <<- input$dag_model
+            ## default_dag_model <<- input$dag_model
+            the_dag_model$stored_dag_model <- input$dag_model
         }
     })
 
@@ -1236,10 +1285,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         n_genes <- ifelse(is.null(input$gene_number), default_number_genes,
                           input$gene_number)
 
-        ## FIXME: no_reset. Yes, I need this
-        new_default_csd_samples <- ifelse(is.null(input$mhn_samples),
-                                          default_csd_samples,
-                                          input$mhn_samples)
+        ## ## FIXME: no_reset. Yes, I need this
+       
 
         
         ## Setting it here ain't enough
@@ -1351,7 +1398,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                         inline = TRUE,
                                                         choiceNames = list("OT", "OncoBN", "CBN/HESBCN"),
                                                         choiceValues = list("OT", "OncoBN", "HESBCN"),
-                                                        selected = default_dag_model)
+                                                        selected = the_dag_model$stored_dag_model)
                                            ),
                                   tags$h4("New Edge"),
                                   tags$h5(HTML("<p></p>")),
@@ -1387,27 +1434,31 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   tags$h4(HTML("<br/>")),
                                   tags$h4(HTML("<u>2. Generate data from the DAG model</u>")),
                                   tags$h4(HTML("<br/>")),
-                                  numericInput("dag_epos",
+                                  numericInput("epos",
                                                HTML("epos,&epsilon;"),
-                                               value = 0.01, min = 0, max = 1,
+                                               value = generate_data$epos,
+                                               min = 0, max = 1,
                                                step = 0.005, width = "12em"),
-                                  tags$h5(HTML("For OT (epos) and OncoBN (&epsilon;) only: prob. of children "),
-                                          "not allowed by model to occur. ",
-                                          "(Affects predicted probabilities.) "),
+                                  tags$h5(HTML("For <b>OT (epos) and OncoBN (&epsilon;) only</b>: ",
+                                               "probability that children nodes "),
+                                          "not allowed by the model (the DAG) occur. ",
+                                          "This setting affects predicted probabilities. "),
                                   tags$h3(HTML("<br/>")),
                                   div(style = "white-space: nowrap;",
-                                      numericInput("dag_samples", HTML("Number of genotypes<br>to sample"),
-                                                   value = default_csd_samples, min = 100, max = 10000,
-                                                   step = 100, width = "22em"),
-                                      ), 
+                                      numericInput("num_samples",
+                                                   HTML("Number of genotypes<br>to sample"),
+                                                   value = generate_data$num_samples,
+                                                   min = 100,
+                                                   max = 10000,
+                                                   step = 100,
+                                                   width = "22em"),
+                                      ),
                                   tags$h3(HTML("<br/>")),
                                   div(style = "white-space: nowrap;", 
-                                      numericInput("dag_noise",
+                                      numericInput("obs_noise",
                                                    HTML("Observational noise <br>(genotyping error)"),
-                                                   ## HTML("Noise ",
-                                                   ##      "<h5>Observational noise (genotyping error), ",
-                                                   ##      "a proportion between 0 and 1.</h5>"),
-                                                   value = 0.0, min = 0, max = 1,
+                                                   value = generate_data$obs_noise,
+                                                   min = 0, max = 1,
                                                    step = 0.02500, width = "18em"),
                                       )
                                   |> prompter::add_prompt(
@@ -1465,19 +1516,19 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   tags$h4(HTML("<u>2. Generate data from the MHN model</u>")),
                                   tags$h4(HTML("<br/>")),
                                   div(style = "white-space: nowrap;", 
-                                      numericInput("mhn_samples",
+                                      numericInput("num_samples",
                                                    HTML("Number of genotypes<br>to sample"),
-                                                   value = new_default_csd_samples,
+                                                   value = generate_data$num_samples,
                                                    min = 100,
                                                    max = 10000,
                                                    step = 100, width = "22em"),
                                       ),
                                   tags$h3(HTML("<br/>")),
                                   div(style = "white-space: nowrap;",
-                                      numericInput("mhn_noise",
+                                      numericInput("obs_noise",
                                                    HTML("Observational noise<br>(genotyping error)"),
-                                                   ## HTML("Noise"),
-                                                   value = default_csd_noise, min = 0, max = 1,
+                                                   value = generate_data$obs_noise,
+                                                   min = 0, max = 1,
                                                    step = 0.025, width = "18em"),
                                       )
                                   |> prompter::add_prompt(message = 
@@ -1617,6 +1668,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     ## DAG builder
     ## Controling dag builder
+    ## FIXME: some of the error messages sometimes are triggered twice
+    ## such as if the current model is OncoBN and you move to DAG_A_O_X
+    
     dag_data <- reactive({
         if (input$input2build == "dag") {
             mymessage("At dag_data reactive call")
@@ -1652,23 +1706,41 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                  , Relation = tmp_DAG_parent_set[edges[, "col"] - 1]
                                  , Lambdas = data$lambdas[edges[, "col"] - 1])
             
-            if ((default_dag_model %in% c("OT", "OncoBN"))
+            if ((the_dag_model$stored_dag_model %in% c("OT", "OncoBN"))
                 & (any(dag_data$Lambdas < 0) | any(dag_data$Lambdas > 1))){
                 showModal(dataModal("thetas/probabilities should be between 0 and 1"))
                 updateRadioButtons(session, "dag_model", selected = "HESBCN")
             }
 
-            if (default_dag_model %in% c("OT")) {
+            if (the_dag_model$stored_dag_model %in% c("OT")) {
                 colnames(dag_data) <- c("From", "To", "Relation", "Weight")
+                if (any(duplicated(dag_data$To))) {
+                     showModal(dataModal(
+                         paste("This DAG has nodes with multiple parents. ",
+                               "OT can only use trees ",
+                               "(i.e., no node can have with multiple parents.)")))
+                     updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                 } else if (length(unique(dag_data$Relation)) > 2) {
+                    showModal(dataModal(HTML("The OT model  ",
+                                             "is only for trees. ")))
+                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                }
+
                 dag_data$Relation <- NULL
-            } else if (default_dag_model %in% c("OncoBN")) {
-                if (length(unique(dag_data$Relation)) > 2) {
+                
+            } else if (the_dag_model$stored_dag_model %in% c("OncoBN")) {
+                if (any(dag_data$Relation == "XOR")) {
+                    showModal(dataModal(HTML("The OncoBN model cannot include ",
+                                             "XOR relationships.")))
+                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                } else if (length(unique(dag_data$Relation)) > 2) {
                     showModal(dataModal(HTML("The OncoBN model can only include ",
                                              "one type of relationship",
                                              "(conjunctive or disjunctive, ",
-                                             "as specified in \"Advanced options\")")))
+                                             "as specified in \"Advanced options\").")))
                     updateRadioButtons(session, "dag_model", selected = "HESBCN")
                 }
+                
                 colnames(dag_data) <- c("From", "To", "Relation", "theta")
                 
             }
@@ -1695,7 +1767,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene,
                                                operation = "add",
                                                parent_set = data$DAG_parent_set,
-                                               dag_model = default_dag_model)
+                                               dag_model = the_dag_model$stored_dag_model)
             data$dag <- tmp_data$dag
             data$DAG_parent_set <- tmp_data$parent_set
             datasets$all_csd[[input$input2build]][[input$select_csd]] <-
@@ -1715,7 +1787,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene,
                                                operation = "remove",
                                                parent_set = data$DAG_parent_set,
-                                               dag_model = default_dag_model)
+                                               dag_model = the_dag_model$stored_dag_model)
             data$dag <- tmp_data$dag
             data$DAG_parent_set <- tmp_data$parent_set
             datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
@@ -1763,7 +1835,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                                      info, data$lambdas
                                                                    , data$dag
                                                                    , data$DAG_parent_set
-                                                                   , dag_model = default_dag_model)
+                                                                   , dag_model = the_dag_model$stored_dag_model)
             data$lambdas <- tmp_data$lambdas
             data$DAG_parent_set <- tmp_data$parent_set
             datasets$all_csd[[input$input2build]][[input$select_csd]] <-
@@ -1783,27 +1855,28 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             the_dag_data <- dag_data()
             gene_names <- setdiff(unique(c(the_dag_data$From, the_dag_data$To)),
                                   "Root")
-            if ((input$dag_samples < 1) ||
-                (input$dag_samples >  max_allowed_num_samples)
+            if ((input$num_samples < 1) ||
+                (input$num_samples >  max_allowed_num_samples)
                 ) stop("Generate data: number of ",
                        "genotypes to sample cannot be ",
                        "less than 1 or greater than ",
-                       max_allowed_num_samples, ".")
-            if ((input$dag_noise < 0) ||
-                (input$dag_noise > 1)) stop("Generate data: observational noise ",
+                       max_allowed_num_samples,
+                       ".")
+            if ((input$obs_noise < 0) ||
+                (input$obs_noise > 1)) stop("Generate data: observational noise ",
                                             "cannot be ",
                                           "less than 0 or greater than 1.")
-            if ((input$dag_epos < 0) ||
-                (input$dag_epos > 1)) stop("Generate data: epos,e  ",
-                                           "cannot be ",
+            if ((input$epos < 0) ||
+                (input$epos > 1)) stop("Generate data: epos,e  ",
+                                       "cannot be ",
                                          "less than 0 or greater than 1.")
             tmp_dag_data <-
                 evamtools:::generate_sample_from_dag(the_dag_data
                                                    , data$DAG_parent_set[gene_names]
-                                                   , noise = input$dag_noise
-                                                   , N = input$dag_samples
-                                                   , dag_model = default_dag_model
-                                                   , epos = input$dag_epos)
+                                                   , noise = input$obs_noise
+                                                   , N = input$num_samples
+                                                   , dag_model = the_dag_model$stored_dag_model
+                                                   , epos = input$epos)
                 
             data$csd_counts <-
                 tmp_dag_data$csd_counts[tmp_dag_data$csd_counts[, 2] > 0, ]
@@ -1813,14 +1886,21 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             datasets$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$dag
             datasets$all_csd[[input$input2build]][[input$select_csd]]$lambdas <- data$lambdas
             datasets$all_csd[[input$input2build]][[input$select_csd]]$DAG_parent_set <- data$DAG_parent_set
+            
+            generate_data$num_samples <- input$num_samples
+            generate_data$obs_noise   <- input$obs_noise
+            generate_data$epos        <- input$epos
+            
             shinyjs::enable("analysis")
             ## The next is not really necessary, but we do it for consistency
             shinyjs::disable("provide_gene_names")
+            
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
         })
     })
 
+    
 
     ## Help for output of downloaded before results
     observeEvent(input$how2downloaddata, {
@@ -1882,36 +1962,53 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                              "If a node has no parent, " ,
                              "it will be assigned as descendant of Root."),
                      tags$p(HTML("</ul>")),
-                     tags$p(HTML("2. To <strong>change the value of a lambda</strong> "),
+                     tags$p(HTML("2. To <strong>change the value of a lambda/theta/Weight</strong> ",
                             "click on the cell, ",
-                            "edit the cell's content and press Ctrl+Enter."),
-                     tags$p(HTML("3. Set the value of <strong>Relation</strong> "),
+                            "edit the cell's content, and press Ctrl+Enter.",
+                            "<ul>",
+                            "<li>theta (OncoBN) and Weight (OT) denote conditional probabilities ",
+                            "of an event occurring given the parent conditions are satisfied; ",
+                            "thus they must be between 0 and 1.</li>",
+                            "<li>lambdas (CBN, H-ESBCN) denote rates (time to occurrence of an event, ",
+                            "given its parents are satisfied, is modeled as an exponential ",
+                            "process with this rate). Thus, lambdas must be larger than 0.</li>",
+                            "</ul>")),
+                     tags$p(HTML("3. Set the value of <strong>Relation</strong> ",
                             "to one of 'Single' (single parent), ",
                             "AND, OR, XOR.",
-                            "OT only accepts 'Single' as each node ",
-                            "has a single parent. ",
-                            "OncoBN accepts 'Single', 'AND', 'OR' ",
+                            "<ul>",
+                            "<li>OT only accepts 'Single' as each node ",
+                            "has a single parent. </li>",
+                            "<li>OncoBN accepts 'Single', 'AND', 'OR' ",
                             "or combinations of either Single and AND or ",
                             "Single and OR ",
                             "(and terms not among Single, AND, OR ",
-                            "will be converted to ORs).",
-                            "'CBN/H-ESBCN' models can be specified with ",
+                            "will be converted to ORs).</li>",
+                            "<li>'CBN/H-ESBCN' models can be specified with ",
                             "AND, OR, XOR, Single, or combinations of the above ",
                             "(and terms not among Single, AND, OR, XOR ",
-                            "will be converted to ANDs)[1]. ",
-                            "Edit the cell's content and press Ctrl+Enter. ",
-                            "All incoming edges to a node must have the same ",
-                            "Relation (the program will force this)."),
-                     tags$p(HTML("4. Modify, if you want, the <strong>size of the sample</strong> "),
-                            "('Number of genotypes to sample') and ",
-                            HTML("the <strong>Observational noise</strong> (genotyping error) "),
-                            HTML("and click on <strong>'Generate data from DAG'</strong> to generate a sample. ")),
+                            "will be converted to ANDs)[1]. </li>",
+                            "<li>All incoming edges to a node must have the same ",
+                            "Relation (the program will force this). </li>",
+                            "<li>Edit the cell's content and press Ctrl+Enter. </li>",
+                            "</ul>"
+                            )),
+                     tags$p(HTML("4. Modify, if you want, ",
+                            "the <strong>'Number of genotypes to sample'</strong> ",
+                            "(the size of the sample) and ",
+                            "the <strong>Observational noise</strong> (genotyping error) ",
+                            "and, for OT and OncoBN, the <strong>epos</strong>, ",   
+                            "and click on <strong>'Generate data from DAG'</strong> to generate a sample. ")),
+                     tags$p(HTML("<br>")),
                      tags$p("After the sample is generated for the first time, ",
                             "the sample should be generated again automatically ",
                             "whenever you change the model ",
                             "(add or remove edges, change lambdas, etc) ",
                             "if you hit Ctrl-Enter after you are done editing ",
                             "the DAG table."),
+                     tags$p(HTML("<br>")),
+                     tags$p("Values in the input boxes have arbitrary default values, ",
+                            "but your last used values are preserved after generating data."),
                      tags$h3(HTML("<br/>")),
                      tags$p(HTML("<h5>[1] The models fitted by CBN contain only ANDs, but the ",
                                  "specification of a model for data simulation from H-ESBCN and CBN is ",
@@ -1958,30 +2055,29 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     observeEvent(input$resample_mhn, {
         tryCatch({
-            if ((input$mhn_samples < 1) ||
-                (input$mhn_samples >  max_allowed_num_samples)
+            if ((input$num_samples < 1) ||
+                (input$num_samples >  max_allowed_num_samples)
                 ) stop("Generate data: number of ",
                        "genotypes to sample cannot be ",
                        "less than 1 or greater than ",
-                       max_allowed_num_samples, ".")
-            if ((input$mhn_noise < 0) ||
-                (input$mhn_noise > 1)) stop("Generate data: observational noise ",
+                       max_allowed_num_samples,
+                       ".")
+            if ((input$obs_noise < 0) ||
+                (input$obs_noise > 1)) stop("Generate data: observational noise ",
                                             "cannot be ",
                                             "less than 0 or greater than 1.")
             
             mhn_data <- evamtools:::get_mhn_data(data$thetas[1:input$gene_number
                                                            , 1:input$gene_number]
-                                               , noise = input$mhn_noise 
-                                               , N = input$mhn_samples)
+                                               , noise = input$obs_noise 
+                                               , N = input$num_samples)
             data$csd_counts <- mhn_data$csd_counts
             data$data <- mhn_data$data
             datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- mhn_data$data
 
-            ## new_default_csd_samples <- input$mhn_samples
-            ## default_csd_samples <- input$mhn_samples
-            ## FIXME: terrible hack is to force updateNumericInput
-            ## using the current values. But clearing the model breaks it
-            ## so I'd need to add many of these.
+            generate_data$num_samples <- input$num_samples
+            generate_data$obs_noise   <- input$obs_noise
+            
             shinyjs::enable("analysis")
             ## The next is not really necessary, but we do it for consistency
             shinyjs::disable("provide_gene_names")
@@ -2036,15 +2132,20 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$p("3. Press Tab to move to the next row."),
                      tags$p("4. Use Ctrl + Enter to save changes. ",
                             HTML("You <strong>must</strong> save the changes.")),
-                     tags$p("5. Modify, if you want, the size of the sample ",
-                            "('Number of genotypes to sample') and ",
-                            HTML("the <strong>Observational noise</strong> (genotyping error) "),
-                            HTML("and click on <strong>'Generate data from MHN model'</strong> to generate a sample. "),
-                            "The sample is also updated as soon as you save an entry ",
-                            "in the matrix or change the number of genes."),
+                     tags$p(HTML("5. Modify, if you want, ",
+                                 "the <strong>'Number of genotypes to sample'</strong> ",
+                                 "(the size of the sample) and ",
+                                 "the <strong>Observational noise</strong> (genotyping error) ",
+                                 "and click on <strong>'Generate data from MHN model'</strong> to generate a sample. ",
+                                 "The sample is also updated as soon as you save an entry ",
+                                 "in the matrix or change the number of genes.")),
+                     tags$p(HTML("<br>")),
                      tags$p(HTML("You can make sure <b>the &theta;s have been updated</b> "),
-                            "by checking the figure of the matrix on the right.")
-                 )
+                            "by checking the figure of the matrix on the right."),
+                     tags$p(HTML("<br>")),
+                     tags$p("Values in the input boxes have arbitrary default values, ",
+                            "but your last used values are preserved after generating data."),
+                     )
         )
         )
     })
@@ -2383,7 +2484,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                 , sprintf("%s__%s", input$select_csd, result_index))
 
             all_cpm_out[[result_name]] <- all_evam_output
-            last_visited_cpm <<- result_name
+            ## last_visited_cpm <<- result_name
+            reactive_last_visited_cpm$the_last_visited_cpm <<- result_name
             updateRadioButtons(session, "select_cpm", selected = result_name)
             progress$inc(5/5, detail = "You can see your result by going to the Results tab")
             Sys.sleep(1)
@@ -2728,15 +2830,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         for (i in names(all_cpm_out)) {
             all_names <- c(all_names, all_cpm_out[[i]]$orig_data$name)
         }
-
-        if ((length(all_names) > 0) && (last_visited_cpm != "")) {
+        
+       ## if ((length(all_names) > 0) && (last_visited_cpm != "")) {
+        if ((length(all_names) > 0) &&
+            (reactive_last_visited_cpm$the_last_visited_cpm != "")) {
             selected <- names(all_cpm_out)
             
             tagList(
                 radioButtons(
                     inputId = "select_cpm",
                     label = "",
-                    selected = last_visited_cpm,
+                    selected = reactive_last_visited_cpm$the_last_visited_cpm,
                     choiceNames = names(all_cpm_out),
                     choiceValues = names(all_cpm_out)
                 )

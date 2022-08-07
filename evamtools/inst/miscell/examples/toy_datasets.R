@@ -272,7 +272,7 @@ dag_linear["C", "D"] <- 1
 
 linear_parent_set <- c("Single", "Single", "Single", "Single")
 names(linear_parent_set) <- c("A", "B", "C", "D")
-linear_lambdas <- c(2 ,1 ,4 ,3)
+linear_lambdas <- c(.72 ,.89 ,.4 ,.6)
 names(linear_lambdas) <- c("A", "B", "C", "D")
 
 
@@ -305,7 +305,7 @@ or_parent_set <- c("Single", "Single", "Single", "OR")
 names(or_parent_set) <- c("A", "B", "C", "D")
 xor_parent_set <- c("Single", "Single", "Single", "XOR")
 names(xor_parent_set) <- c("A", "B", "C", "D")
-and_lambdas <- c(1,2,3,4)
+and_lambdas <- c(.7, .6 ,.8, .9)
 names(and_lambdas) <- c("A", "B", "C", "D")
 
 or_parent_set <- c("Single", "Single", "Single", "OR")
@@ -329,7 +329,7 @@ dag_and_or_xor["A", "E"] <- 1
 dag_and_or_xor["B", "E"] <- 1
 and_or_xor_parent_set <- c("Single", "Single", "AND", "OR", "XOR")
 names(and_or_xor_parent_set) <- c("A", "B", "C", "D", "E")
-and_or_xor_lambdas <- c(1, 2, 3, 4, 5)
+and_or_xor_lambdas <- c(.7, .8, .9, .4, .5)
 names(and_or_xor_lambdas) <- c("A", "B", "C", "D", "E")
 
 
