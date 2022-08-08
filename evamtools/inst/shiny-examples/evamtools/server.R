@@ -1692,9 +1692,27 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## to OncoBN) and you move to DAG_A_O_X
     
     ## And there is redundant error checking. See above.
+
+    ## FIXME: could this be an eventReactive like this?
+    ## we are calling it from other places, as seen from the message
+    ## But if we do as below, then we get weird behavior when changing
+    ## between DAGs related to number of genes.
+    ## I think we really should use eventReactive, but something is not
+    ## done properly below. Or we need a conditional toListen2,
+    ## so that if we are under DAG, we listen to input$gene_number
+    ## as that needs to be listened to for the dag_more_genes_than_set_genes
+    ## to work properly.
+    ## 
+    ## toListen2 <- reactive({
+    ##     list(input$dag_model,
+    ##          input$dag_table_cell_edit)
+    ## })
+    ## dag_data <- eventReactive(toListen2(),
+                              
     dag_data <- reactive({
-        if (input$input2build != "dag") {
-            warning("Why are you calling dag_data if not dealing with DAGs??")
+        if (isolate(input$input2build) != "dag") {
+            message("dag_data reactive: Why are you calling ",
+                    "dag_data if not dealing with DAGs?")
             return()
         }
         mymessage("At dag_data reactive call")
