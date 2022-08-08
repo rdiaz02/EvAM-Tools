@@ -1,6 +1,13 @@
-Changes in version 2.1.4 (2022-08-07):
+Changes in version 2.1.6 (2022-08-08):
+	- More changes to the web app:
+	- More intuitive behavior of the modal box for changing
+	  gene names.
+	- Code cleaned and better commented.
+	- numericInput for sampling arguments: do not go up to 1.
+
+Changes in version 2.1.5 (2022-08-07):
 	- Web-app mainly; many changes. Most relevant listed:
-	- Mucch better documentation
+	- Much better documentation
 	- Better and clearer catching of user errors during DAG
 	  creation and changes,
 	- Using RDS/rds extension consistently.
@@ -64,8 +71,6 @@ Changes in version 2.1.0 (2022-08-02):
 	  changing genotype counts.
 	- Improved help and some tooltips.
 	
-	
-
 Changes in version 1.1.7 (2022-07-06):
 	- Additional error check for gene name changes.
 	- Cleaner and consistent data set renaming, with additional checks.
