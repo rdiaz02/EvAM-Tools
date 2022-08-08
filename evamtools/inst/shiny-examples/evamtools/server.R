@@ -309,12 +309,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         epos        = default_epos 
     )
 
-    the_dag_model <- reactiveValues(
-        stored_dag_model = default_dag_model
-    )
-
+    resampling_trigger_data_change <- function() {
+        if (nrow(data$csd_counts) || !is.null(data$data)) {
+            return(TRUE)
+        } else {
+            return(FALSE)
+        }
+    }
     
-   
     data <- reactiveValues(
         csd_counts = .ev_SHINY_dflt$template_data$csd_counts
       , data = .ev_SHINY_dflt$template_data$data
@@ -413,7 +415,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 dag_message_more_genes_than_set_genes()
             }
         } else if (input$input2build == "matrix") {
-            shinyjs::click("resample_mhn")
+            if (resampling_trigger_data_change()) shinyjs::click("resample_mhn")
         }
     }
     ## And now, display_freqs will likely be called
@@ -1664,6 +1666,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## flickering screen that happens when we only used the error
             ## handling below.
 
+            former_dag_model <- the_dag_model$stored_dag_model
             number_of_parents <- colSums(data$dag)
 
             if ((input$dag_model %in% c("OT", "OncoBN")) &&
@@ -1690,7 +1693,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                          "as specified in \"Advanced options\").")
                 } else {
                     the_dag_model$stored_dag_model <<- input$dag_model
-                    shinyjs::click("resample_dag")
+                    if ((former_dag_model != input$dag_model) &&
+                        resampling_trigger_data_change())  shinyjs::click("resample_dag")
                 }
             } else if (input$dag_model == "OT") {
                 if (any(number_of_parents > 1)) {
@@ -1708,12 +1712,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 } else {
                     ## default_dag_model <<- input$dag_model
                     the_dag_model$stored_dag_model <<- input$dag_model
-                    shinyjs::click("resample_dag")
+                    if ((former_dag_model != input$dag_model) &&
+                        resampling_trigger_data_change())  shinyjs::click("resample_dag")
                 }
             } else {
                 ## default_dag_model <<- input$dag_model
                 the_dag_model$stored_dag_model <<- input$dag_model
-                shinyjs::click("resample_dag")
+                if ((former_dag_model != input$dag_model) &&
+                    resampling_trigger_data_change())  shinyjs::click("resample_dag")
             }
         }, 
         error = function(e) {
@@ -1892,7 +1898,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data$DAG_parent_set <- tmp_data$parent_set
             datasets$all_csd[[input$input2build]][[input$select_csd]] <-
                 evamtools:::to_stnd_csd_dataset(data)
-            shinyjs::click("resample_dag")
+            if (resampling_trigger_data_change()) shinyjs::click("resample_dag")
             shinyjs::disable("provide_gene_names")
             mymessage("At input$add_edge 1")
         },error=function(e){
@@ -1919,7 +1925,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ##     data$csd_counts <-
             ##         datasets$all_csd[[input$input2build]][[input$select_csd]]$csd_counts
             ## } else {
-            shinyjs::click("resample_dag")
+            if (resampling_trigger_data_change())  shinyjs::click("resample_dag")
             ##        }
             mymessage("At input$remove_edge 2")
         },error=function(e){
@@ -2184,7 +2190,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             datasets$all_csd[[input$input2build]][[input$select_csd]]$thetas <- data$thetas
             datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <- input$gene_number
             ## Resample based on changes
-            shinyjs::click("resample_mhn")
+            if (resampling_trigger_data_change()) shinyjs::click("resample_mhn")
             shinyjs::disable("provide_gene_names")            
         }, error = function(e){
             showModal(dataModal(e[[1]]))
