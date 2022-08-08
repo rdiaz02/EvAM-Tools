@@ -183,17 +183,18 @@ modify_dag <-
 
   if(all(dag == tmp_dag2)){
       stop("This operation had no effect. ",
-           "Are you drawing a disconnected DAG, ",
+           "E.g., are you drawing a disconnected DAG, ",
            "where the From node is not already ",
            "part of the DAG (i.e., has no ancestor)?: ",
-           "all nodes except Root must have an ancestor.",
-           "Are you trying to remove the edge from Root to a node X, ",
-           "where this node X has descendants? If yes, ",
-           "remove first the edges from X to its descendants. ",
-           "Did you try to remove a non-existent edge ",
-           "(e.g., you transposed the From and To nodes)?: ",
-           "even if the nodes are the same, an edge A -> C ",
-           "is different from an edge C -> A.")
+           "all nodes except Root must have an ancestor.  ",
+           ## "Are you trying to remove the edge from Root to a node X, ",
+           ## "where this node X has descendants? If yes, ",
+           ## "remove first the edges from X to its descendants.  ",
+           "Or did you try to remove a non-existent edge? ",
+           ## "(e.g., you transposed the From and To nodes)?: ",
+           ## "even if the nodes are the same, an edge A -> C ",
+           ## "is different from an edge C -> A."
+           )
   }
   g2 <- igraph::graph_from_adjacency_matrix(tmp_dag2, mode = "directed")
   if (dag_model %in% c("HESBCN", "OncoBN") && !igraph::is_dag(g2)) {

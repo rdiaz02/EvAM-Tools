@@ -860,69 +860,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         )
     })
 
-
-    ## ## Updating gene names
-    ## observeEvent(input$action_gene_names,{
-    ##     tryCatch({
-    ##         new_gene_names <-
-    ##             strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]]
-    ##         if (isTRUE(any(duplicated(new_gene_names)))) {
-    ##             stop("Duplicated new gene names.")
-    ##         }
-    ##         if (length(data$gene_names[1:input$gene_number]) !=
-    ##             length(new_gene_names)) {
-    ##             stop("Number of old and new gene names differs.")
-    ##         }
-    
-    ##         ## Use a simple lookup-dictionary and 
-    ##         ## avoid to_stnd_csd_dataset which is a function from hell.
-    ##         old_gene_names <- data$gene_names
-    ##         new_gene_names <- c(new_gene_names,
-    ##                             LETTERS[(length(new_gene_names) + 1):max_genes]
-    ##                             )
-    ##         names_dict <- new_gene_names
-    ##         names(names_dict) <- old_gene_names
-    ##         ## For the DAG
-    ##         names_dict <- c(names_dict, "Root" = "Root")
-    
-    ##         new_data <- list()
-    ##         new_data$gene_names <- new_gene_names
-    ##         new_data$name <- data$name
-    ##         new_data$lambdas <- data$lambdas
-    ##         new_data$DAG_parent_set <- data$DAG_parent_set
-    ##         new_data$dag <- data$dag
-    ##         new_data$thetas <- data$thetas
-    ##         new_data$data <- data$data
-
-    ##         ## To rename, use lookup
-    ##         names(new_data$lambdas) <- names_dict[names(new_data$lambdas)]
-    ##         names(new_data$DAG_parent_set) <- names_dict[names(new_data$DAG_parent_set)]
-    ##         colnames(new_data$dag) <- names_dict[colnames(new_data$dag)]
-    ##         rownames(new_data$dag) <- names_dict[rownames(new_data$dag)]
-    ##         colnames(new_data$thetas) <- names_dict[colnames(new_data$thetas)]
-    ##         rownames(new_data$thetas) <- names_dict[rownames(new_data$thetas)]
-    ##         if (!is.null(new_data$data)) {
-    ##             colnames(new_data$data) <- names_dict[colnames(new_data$data)]
-    ##         }
-    ##         ## To create
-    ##         new_data$csd_counts <- get_csd(new_data$data)
-    
-    ##         ## Assign to the correct places
-    ##         data$gene_names <- new_gene_names
-    ##         data$data <- new_data$data
-    ##         data$dag <- new_data$dag
-    ##         data$DAG_parent_set <- new_data$DAG_parent_set
-    ##         data$thetas <- new_data$thetas
-    ##         data$lambdas <- new_data$lambdas
-    ##         data$csd_counts <- new_data$csd_counts
-    
-    ##         datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
-    
-    ##     }, error = function(e){
-    ##         showModal(dataModal(e[[1]]))
-    ##     })
-    ## })
-
     
     ## Advanced option for running evamtools
     observeEvent(input$advanced_options, {
@@ -990,6 +927,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                        actionButton("provide_gene_names", "Use different gene names"),
                                        tippy::tippy_this(element = "dummy_for_tooltip1", ## "provide_gene_names",
                                                          tooltip = paste("<span style='font-size:1.5em; text-align:left;'>",
+                                                                         "<p><b>Use different names</b></p>",
                                                                          "<p>Create new models/new data using gene names you provide.</p> ",
                                                                          "<br>",
                                                                          "<p><b>Can only be used for models/data that are empty. </b>",
@@ -1007,7 +945,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                                          "with the names that you want.</p><span>"
                                                                          ),
                                                          arrow = TRUE, animation = "shift-toward"
-                                                         , placement = "right"
                                                          )
                                        )
                               ),
@@ -1168,45 +1105,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 showModal(dataModal(e[[1]]))
             })
         })
-
-
-    ## From the older implementation. Will remove this commented code.
-    ## observeEvent(input$change_gene_names, {
-    ##     if (input$input2build == "dag") {
-    ##         gene_names_00 <- gene_names_from_genes_in_DAG(data, data$gene_names)
-    ##     } else if (input$input2build == "csd") {
-    ##         gene_names_00 <- set_gene_names_after_resize(data, data$gene_names)
-    ##         ## Or else, it is broken in other places
-    ##         data$gene_names <- gene_names_00
-    ##     } else {
-    ##         gene_names_00 <- data$gene_names
-    ##     }
-
-    ##     showModal(modalDialog(
-    ##         title = tags$h3("Change gene names"),
-    ##         tags$div(class = "inlin2",
-    ##                  textInput(inputId = "new_gene_names", "Gene names",
-    ##                            value = paste(gene_names_00[1:input$gene_number],
-    ##                                          collapse = ", ")
-    ##                            ),
-    ##                  tags$h4(HTML("<br/>")),
-    ##                  tags$h4("Separate you gene names with a ','. ",
-    ##                          "Do no use 'WT' for any gene name. ",
-    ##                          "Use only alphanumeric characters ",
-    ##                          "(of course, do not use comma as part of a gene name), ",
-    ##                          "and do not start ",
-    ##                          "a gene name with a number; ",
-    ##                          "keep gene names short (for figures)."
-    ##                          ),
-    ##                  tags$h4(HTML("<br/>")),
-    ##                  tags$div(class = "download_button",
-    ##                           tags$h4(HTML("<br/>")),
-    ##                           actionButton("action_gene_names", "Change genes names"),
-    ##                           )
-    ##                  ),
-    ##         easyClose = TRUE
-    ##     ))
-    ## })
 
     
 
@@ -1636,59 +1534,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                  )
         ##  }
     })
-
-
-    ##    observeEvent(input$dag_model, {
-    ##     ## FIXME Unnecessary, as caught at a much more sensible place
-    ##     ## but leave it here anyway, just in case, until much more testing done.
-    ##     ## The other message is "This DAG has nodes with multiple parents. "
-    ##     ## way below.
-    ##     ## But here, it is often caught even earlier and we avoid the
-    ##     ## flickering screen that happens when we left the error handling below.
-        
-    ##     number_of_parents <- colSums(data$dag)
-
-    ##     if (input$dag_model == "OncoBN") {
-    ##         if (any(data$DAG_parent_set == "XOR")) {
-    ##             updateRadioButtons(session, "dag_model", selected = "HESBCN")
-    ##             showModal(dataModal(HTML("The OncoBN model cannot include ",
-    ##                                      "XOR relationships.")))
-    ##         } else if (length(unique(data$DAG_parent_set)) > 2) {
-    ##             updateRadioButtons(session, "dag_model", selected = "HESBCN")
-    ##             showModal(dataModal(HTML("The OncoBN model can only include ",
-    ##                                      "one type of relationship",
-    ##                                      "(conjunctive or disjunctive, ",
-    ##                                      "as specified in \"Advanced options\").")))
-    ##         } else {
-    ##             ## default_dag_model <<- input$dag_model
-    ##             the_dag_model$stored_dag_model <- input$dag_model
-    ##         }
-    ##     } else if (input$dag_model == "OT") {
-    ##         if (any(number_of_parents > 1)) {
-    ##             updateRadioButtons(session, "dag_model", selected = "HESBCN")
-    ##             showModal(dataModal(
-    ##                 paste("This DAG has nodes with multiple parents. ",
-    ##                       "OT can only use trees ",
-    ##                       "(i.e., no node can have with multiple parents.)")))
-    ##             ## paste("This DAG cannot be transformed into a tree. ",
-    ##             ##   "Are there nodes with multiple parents? ",
-    ##             ##   "(OT cannot not have nodes with multiple parents.)")))
-    ##         } else if (length(unique(data$DAG_parent_set)) > 2) {
-    ##             updateRadioButtons(session, "dag_model", selected = "HESBCN")
-    ##             showModal(dataModal(HTML("The OT model  ",
-    ##                                      "is only for trees. ")))
-    ##         } else {
-    ##             ## default_dag_model <<- input$dag_model
-    ##             the_dag_model$stored_dag_model <- input$dag_model
-    ##         }
-    ##     } else {
-    ##         ## default_dag_model <<- input$dag_model
-    ##         the_dag_model$stored_dag_model <- input$dag_model 
-    ##     }
-    ##     the_dag_model$stored_dag_model <- input$dag_model 
-    ## })
-
-
 
 
 
@@ -3170,6 +3015,164 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 ######################################################################
 
 
+
+## ## Updating gene names
+## observeEvent(input$action_gene_names,{
+##     tryCatch({
+##         new_gene_names <-
+##             strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]]
+##         if (isTRUE(any(duplicated(new_gene_names)))) {
+##             stop("Duplicated new gene names.")
+##         }
+##         if (length(data$gene_names[1:input$gene_number]) !=
+##             length(new_gene_names)) {
+##             stop("Number of old and new gene names differs.")
+##         }
+
+##         ## Use a simple lookup-dictionary and 
+##         ## avoid to_stnd_csd_dataset which is a function from hell.
+##         old_gene_names <- data$gene_names
+##         new_gene_names <- c(new_gene_names,
+##                             LETTERS[(length(new_gene_names) + 1):max_genes]
+##                             )
+##         names_dict <- new_gene_names
+##         names(names_dict) <- old_gene_names
+##         ## For the DAG
+##         names_dict <- c(names_dict, "Root" = "Root")
+
+##         new_data <- list()
+##         new_data$gene_names <- new_gene_names
+##         new_data$name <- data$name
+##         new_data$lambdas <- data$lambdas
+##         new_data$DAG_parent_set <- data$DAG_parent_set
+##         new_data$dag <- data$dag
+##         new_data$thetas <- data$thetas
+##         new_data$data <- data$data
+
+##         ## To rename, use lookup
+##         names(new_data$lambdas) <- names_dict[names(new_data$lambdas)]
+##         names(new_data$DAG_parent_set) <- names_dict[names(new_data$DAG_parent_set)]
+##         colnames(new_data$dag) <- names_dict[colnames(new_data$dag)]
+##         rownames(new_data$dag) <- names_dict[rownames(new_data$dag)]
+##         colnames(new_data$thetas) <- names_dict[colnames(new_data$thetas)]
+##         rownames(new_data$thetas) <- names_dict[rownames(new_data$thetas)]
+##         if (!is.null(new_data$data)) {
+##             colnames(new_data$data) <- names_dict[colnames(new_data$data)]
+##         }
+##         ## To create
+##         new_data$csd_counts <- get_csd(new_data$data)
+
+##         ## Assign to the correct places
+##         data$gene_names <- new_gene_names
+##         data$data <- new_data$data
+##         data$dag <- new_data$dag
+##         data$DAG_parent_set <- new_data$DAG_parent_set
+##         data$thetas <- new_data$thetas
+##         data$lambdas <- new_data$lambdas
+##         data$csd_counts <- new_data$csd_counts
+
+##         datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
+
+##     }, error = function(e){
+##         showModal(dataModal(e[[1]]))
+##     })
+## })
+
+
+
+## From the older implementation. Will remove this commented code.
+## observeEvent(input$change_gene_names, {
+##     if (input$input2build == "dag") {
+##         gene_names_00 <- gene_names_from_genes_in_DAG(data, data$gene_names)
+##     } else if (input$input2build == "csd") {
+##         gene_names_00 <- set_gene_names_after_resize(data, data$gene_names)
+##         ## Or else, it is broken in other places
+##         data$gene_names <- gene_names_00
+##     } else {
+##         gene_names_00 <- data$gene_names
+##     }
+
+##     showModal(modalDialog(
+##         title = tags$h3("Change gene names"),
+##         tags$div(class = "inlin2",
+##                  textInput(inputId = "new_gene_names", "Gene names",
+##                            value = paste(gene_names_00[1:input$gene_number],
+##                                          collapse = ", ")
+##                            ),
+##                  tags$h4(HTML("<br/>")),
+##                  tags$h4("Separate you gene names with a ','. ",
+##                          "Do no use 'WT' for any gene name. ",
+##                          "Use only alphanumeric characters ",
+##                          "(of course, do not use comma as part of a gene name), ",
+##                          "and do not start ",
+##                          "a gene name with a number; ",
+##                          "keep gene names short (for figures)."
+##                          ),
+##                  tags$h4(HTML("<br/>")),
+##                  tags$div(class = "download_button",
+##                           tags$h4(HTML("<br/>")),
+##                           actionButton("action_gene_names", "Change genes names"),
+##                           )
+##                  ),
+##         easyClose = TRUE
+##     ))
+## })
+
+
+
+
+##    observeEvent(input$dag_model, {
+##     ## FIXME Unnecessary, as caught at a much more sensible place
+##     ## but leave it here anyway, just in case, until much more testing done.
+##     ## The other message is "This DAG has nodes with multiple parents. "
+##     ## way below.
+##     ## But here, it is often caught even earlier and we avoid the
+##     ## flickering screen that happens when we left the error handling below.
+
+##     number_of_parents <- colSums(data$dag)
+
+##     if (input$dag_model == "OncoBN") {
+##         if (any(data$DAG_parent_set == "XOR")) {
+##             updateRadioButtons(session, "dag_model", selected = "HESBCN")
+##             showModal(dataModal(HTML("The OncoBN model cannot include ",
+##                                      "XOR relationships.")))
+##         } else if (length(unique(data$DAG_parent_set)) > 2) {
+##             updateRadioButtons(session, "dag_model", selected = "HESBCN")
+##             showModal(dataModal(HTML("The OncoBN model can only include ",
+##                                      "one type of relationship",
+##                                      "(conjunctive or disjunctive, ",
+##                                      "as specified in \"Advanced options\").")))
+##         } else {
+##             ## default_dag_model <<- input$dag_model
+##             the_dag_model$stored_dag_model <- input$dag_model
+##         }
+##     } else if (input$dag_model == "OT") {
+##         if (any(number_of_parents > 1)) {
+##             updateRadioButtons(session, "dag_model", selected = "HESBCN")
+##             showModal(dataModal(
+##                 paste("This DAG has nodes with multiple parents. ",
+##                       "OT can only use trees ",
+##                       "(i.e., no node can have with multiple parents.)")))
+##             ## paste("This DAG cannot be transformed into a tree. ",
+##             ##   "Are there nodes with multiple parents? ",
+##             ##   "(OT cannot not have nodes with multiple parents.)")))
+##         } else if (length(unique(data$DAG_parent_set)) > 2) {
+##             updateRadioButtons(session, "dag_model", selected = "HESBCN")
+##             showModal(dataModal(HTML("The OT model  ",
+##                                      "is only for trees. ")))
+##         } else {
+##             ## default_dag_model <<- input$dag_model
+##             the_dag_model$stored_dag_model <- input$dag_model
+##         }
+##     } else {
+##         ## default_dag_model <<- input$dag_model
+##         the_dag_model$stored_dag_model <- input$dag_model 
+##     }
+##     the_dag_model$stored_dag_model <- input$dag_model 
+## })
+
+
+
 ## Older version.
 ## display_freqs <- reactive({        
 ##     ## Remember this is called whenever changes in many places
@@ -3190,113 +3193,113 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 ##     ## There are a bunch of calls like this.
 ##     if ((!is.null(data$data) ||
 ##          (nrow(data$csd_counts) > 0))) {
-    ##         mymessage("    disabled provide_gene_names under display_freqs")
-    ##         shinyjs::disable("provide_gene_names")
-    ##     }  
+##         mymessage("    disabled provide_gene_names under display_freqs")
+##         shinyjs::disable("provide_gene_names")
+##     }  
 
-    ##     ## If no data to display, return empty data frame
-    ##     thisd <- input$input2build
+##     ## If no data to display, return empty data frame
+##     thisd <- input$input2build
 
-    ##     if (is.null(data$name) ) {
-    ##         mymessage("       NULL data ",
-    ##                   "Returning a 0-rows data frame")
-    ##         return(data.frame(Genotype = character(), Counts = integer()))
-    ##     } else {
-    ##         thisd_dataset_names <- unlist(lapply(datasets$all_csd[[thisd]],
-    ##                                              function(x) x$name))
-    ##         if (!(data$name %in% thisd_dataset_names)) {
-    ##             mymessage("       data$name not in ", thisd_dataset_names, ". ",
-    ##                       "Returning a 0-rows data frame")
-    ##             return(data.frame(Genotype = character(), Counts = integer()))
-    ##         }
-    ##     } 
+##     if (is.null(data$name) ) {
+##         mymessage("       NULL data ",
+##                   "Returning a 0-rows data frame")
+##         return(data.frame(Genotype = character(), Counts = integer()))
+##     } else {
+##         thisd_dataset_names <- unlist(lapply(datasets$all_csd[[thisd]],
+##                                              function(x) x$name))
+##         if (!(data$name %in% thisd_dataset_names)) {
+##             mymessage("       data$name not in ", thisd_dataset_names, ". ",
+##                       "Returning a 0-rows data frame")
+##             return(data.frame(Genotype = character(), Counts = integer()))
+##         }
+##     } 
 
-    ##     if (input$input2build == "dag") {
-    ##         ## With the DAG we always return all the genotypes
-    ##         ## Other code ensures that gene number is never smaller
-    ##         ## than genes in the DAG.
-    ##         mymessage("      dag")
-    
-    ##         ## FIXME: See comment below  A1_gnn_bisfix
-    ##         ## if (!is.null(data$n_genes) &&
-    ##         ##     input$gene_number != data$n_genes) {
-    ##         ##     mymessage("      DAG: Updating gene names in data")
-    ##         ##     new_gnames2 <- set_gene_names_after_resize(data$data,
-    ##         ##                                                data$gene_names)
-    ##         ##     data$gene_names <- new_gnames2
-    ##         ## }
-    ##         return(
-    ##             evamtools:::reorder_to_standard_order_count_df(
-    ##                             data$csd_counts[data$csd_counts$Counts > 0, ,
-    ##                                             drop = FALSE]))
-    ##     } else if (input$input2build == "matrix") {
-    ##         ## With the MHN we always return all the genotypes
-    ##         ## The genotypes are given by the number of genes directly.
-    ##         mymessage("      matrix (i.e., mhn)")
-    ##         return(
-    ##             evamtools:::reorder_to_standard_order_count_df(
-    ##                             data$csd_counts[data$csd_counts$Counts > 0, ,
-    ##                                             drop = FALSE]))
-    ##     } else if (input$input2build == "upload") {
-    ##         mymessage("      upload")
-    ##         ## With upload, we do not use number of genes
-    ##         ## Return the data we have
-    ##         return(
-    ##             evamtools:::reorder_to_standard_order_count_df(
-    ##                             data$csd_counts[data$csd_counts$Counts > 0, ,
-    ##                                             drop = FALSE]))
-    ##     } else if (input$input2build == "csd") {
-    ##         mymessage("      csd")
+##     if (input$input2build == "dag") {
+##         ## With the DAG we always return all the genotypes
+##         ## Other code ensures that gene number is never smaller
+##         ## than genes in the DAG.
+##         mymessage("      dag")
 
-    ##         return(
-    ##             evamtools:::reorder_to_standard_order_count_df(
-    ##                             data$csd_counts[data$csd_counts$Counts > 0, ,
-    ##                                             drop = FALSE]))
-    
-    ##         ## I think what follows is a relic from the past, when we could change
-    ##         ## gene names on data sets with data already.
-    ##         ## Also would play a role if we allowed decreasing number of genes
-    ##         ## below those in use. Not anymore. Search for
-    ##         ## csd_more_genes_than_set_genes
-    ##         ## A21_gnn_numfix
-    ##         ## I do not allow that
-    ##         ## anymore. So all of this could just be the same as above, which
-    ##         ## shows we always do the same thing
+##         ## FIXME: See comment below  A1_gnn_bisfix
+##         ## if (!is.null(data$n_genes) &&
+##         ##     input$gene_number != data$n_genes) {
+##         ##     mymessage("      DAG: Updating gene names in data")
+##         ##     new_gnames2 <- set_gene_names_after_resize(data$data,
+##         ##                                                data$gene_names)
+##         ##     data$gene_names <- new_gnames2
+##         ## }
+##         return(
+##             evamtools:::reorder_to_standard_order_count_df(
+##                             data$csd_counts[data$csd_counts$Counts > 0, ,
+##                                             drop = FALSE]))
+##     } else if (input$input2build == "matrix") {
+##         ## With the MHN we always return all the genotypes
+##         ## The genotypes are given by the number of genes directly.
+##         mymessage("      matrix (i.e., mhn)")
+##         return(
+##             evamtools:::reorder_to_standard_order_count_df(
+##                             data$csd_counts[data$csd_counts$Counts > 0, ,
+##                                             drop = FALSE]))
+##     } else if (input$input2build == "upload") {
+##         mymessage("      upload")
+##         ## With upload, we do not use number of genes
+##         ## Return the data we have
+##         return(
+##             evamtools:::reorder_to_standard_order_count_df(
+##                             data$csd_counts[data$csd_counts$Counts > 0, ,
+##                                             drop = FALSE]))
+##     } else if (input$input2build == "csd") {
+##         mymessage("      csd")
 
-    
-    ##         ## ## FIXME: A1_gnn_bisfix The code in A1_gnn_0 is not updating
-    ##         ## ## data$etc. That is triggered on gene number change, but not
-    ##         ## ## necessarily on adding a genotype or removing a genotype, in ways
-    ##         ## ## that change the genes, but not the gene number.
-    ##         ## ## Though something I do not fully understand:
-    ##         ## ## It does not happen in the single observeEvent for input$gene_number
-    ##         ## ## and not in the updateNumericInput for input$gene_number
-    ##         ## ## So force it here if there have been changes in input$gene_number
-    ##         ## ## and if they haven't, for some weird, hard to reproduce, cases.
-    ##         ## ## Yes, this seem necessary to prevent BUG_Create_Rename_Click_other
+##         return(
+##             evamtools:::reorder_to_standard_order_count_df(
+##                             data$csd_counts[data$csd_counts$Counts > 0, ,
+##                                             drop = FALSE]))
 
-    ##         ## if ((input$input2build == "csd") &&
-    ##         ##     !is.null(data$n_genes) ) {
-    ##         ##     ## input$gene_number != data$n_genes) {
-    ##         ##     mymessage("       CSD: Updating gene names in data")
-    ##         ##     new_gnames2 <- set_gene_names_after_resize(data$data,
-    ##         ##                                                data$gene_names)
-    ##         ##     if (identical(new_gnames2, data$gene_names)) {
-    ##         ##         mymessage("A1_gnn_bisfix: identical")
-    ##         ##     } else {
-    ##         ##         mymessage("A1_gnn_bisfix: different")
-    ##         ##     }
-    ##         ##     data$gene_names <- new_gnames2
-    ##         ## }
+##         ## I think what follows is a relic from the past, when we could change
+##         ## gene names on data sets with data already.
+##         ## Also would play a role if we allowed decreasing number of genes
+##         ## below those in use. Not anymore. Search for
+##         ## csd_more_genes_than_set_genes
+##         ## A21_gnn_numfix
+##         ## I do not allow that
+##         ## anymore. So all of this could just be the same as above, which
+##         ## shows we always do the same thing
 
-    ##         ## return(
-    ##         ##     evamtools:::reorder_to_standard_order_count_df(
-    ##         ##                     evamtools:::get_display_freqs(data$csd_counts,
-    ##         ##                                                   input$gene_number,
-    ##         ##                                                   data$gene_names,
-    ##         ##                                                   input$input2build))
-    ##         ## )
-    ##     }
+
+##         ## ## FIXME: A1_gnn_bisfix The code in A1_gnn_0 is not updating
+##         ## ## data$etc. That is triggered on gene number change, but not
+##         ## ## necessarily on adding a genotype or removing a genotype, in ways
+##         ## ## that change the genes, but not the gene number.
+##         ## ## Though something I do not fully understand:
+##         ## ## It does not happen in the single observeEvent for input$gene_number
+##         ## ## and not in the updateNumericInput for input$gene_number
+##         ## ## So force it here if there have been changes in input$gene_number
+##         ## ## and if they haven't, for some weird, hard to reproduce, cases.
+##         ## ## Yes, this seem necessary to prevent BUG_Create_Rename_Click_other
+
+##         ## if ((input$input2build == "csd") &&
+##         ##     !is.null(data$n_genes) ) {
+##         ##     ## input$gene_number != data$n_genes) {
+##         ##     mymessage("       CSD: Updating gene names in data")
+##         ##     new_gnames2 <- set_gene_names_after_resize(data$data,
+##         ##                                                data$gene_names)
+##         ##     if (identical(new_gnames2, data$gene_names)) {
+##         ##         mymessage("A1_gnn_bisfix: identical")
+##         ##     } else {
+##         ##         mymessage("A1_gnn_bisfix: different")
+##         ##     }
+##         ##     data$gene_names <- new_gnames2
+##         ## }
+
+##         ## return(
+##         ##     evamtools:::reorder_to_standard_order_count_df(
+##         ##                     evamtools:::get_display_freqs(data$csd_counts,
+##         ##                                                   input$gene_number,
+##         ##                                                   data$gene_names,
+##         ##                                                   input$input2build))
+##         ## )
+##     }
     ## })
 
     
@@ -3393,3 +3396,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 ##                         bounce = TRUE,
 ##                         size = "large"
 ##                         )
+
+
+
