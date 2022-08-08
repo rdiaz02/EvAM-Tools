@@ -32,8 +32,8 @@ options(warnPartialMatchDollar = TRUE)
 
 ## I have left a bunch of messages. To make it easier to dis/enable them
 ## by turning them to a no-op (https://stackoverflow.com/a/10933721)
-## mymessage <- function(...) message(...)
-mymessage <- function(...) invisible(NULL)
+mymessage <- function(...) message(...)
+## mymessage <- function(...) invisible(NULL)
 
 
 sanity_file_name <- function(x) {
@@ -1664,6 +1664,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                          "as specified in \"Advanced options\").")
                 } else {
                     the_dag_model$stored_dag_model <<- input$dag_model
+                    shinyjs::click("resample_dag")
                 }
             } else if (input$dag_model == "OT") {
                 if (any(number_of_parents > 1)) {
@@ -1681,10 +1682,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 } else {
                     ## default_dag_model <<- input$dag_model
                     the_dag_model$stored_dag_model <<- input$dag_model
+                    shinyjs::click("resample_dag")
                 }
             } else {
                 ## default_dag_model <<- input$dag_model
-                the_dag_model$stored_dag_model <<- input$dag_model 
+                the_dag_model$stored_dag_model <<- input$dag_model
+                shinyjs::click("resample_dag")
             }
         }, 
         error = function(e) {
@@ -1948,6 +1951,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Building trm from dag
     observeEvent(input$resample_dag, {
         tryCatch({
+            mymessage("At resample_dag")
             if (sum(colSums(data$dag) > 0) < 2)
                 stop("The must be at least two genes ",
                      "in the DAG.")
@@ -2109,6 +2113,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             "(add or remove edges, change lambdas, etc) ",
                             "if you hit Ctrl-Enter after you are done editing ",
                             "the DAG table."),
+                     tags$p(HTML("<br>")),
+                     tags$p("Whenever edges are removed/added or method changed ",
+                            "in a way that could result in an inconsistent ",
+                            "state of the generated data, we force that ",
+                            "new data be generated."),
                      tags$p(HTML("<br>")),
                      tags$p("Values in the input boxes have arbitrary default values, ",
                             "but your last used values are preserved after generating data."),
