@@ -1421,11 +1421,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   numericInput("epos",
                                                HTML("epos,&epsilon;"),
                                                value = generate_data$epos,
-                                               min = 0, max = 1,
+                                               min = 0, max = 0.995,
                                                step = 0.005, width = "12em"),
                                   tags$h5(HTML("For <b>OT (epos) and OncoBN (&epsilon;) only</b>: ",
                                                "probability that children nodes "),
                                           "not allowed by the model (the DAG) occur. ",
+                                          "Accepted values: [0, 1). ",
                                           "This setting affects predicted probabilities. "),
                                   tags$h3(HTML("<br/>")),
                                   div(style = "white-space: nowrap;",
@@ -1442,7 +1443,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                       numericInput("obs_noise",
                                                    HTML("Observational noise <br>(genotyping error)"),
                                                    value = generate_data$obs_noise,
-                                                   min = 0, max = 1,
+                                                   min = 0, max = 0.95,
                                                    step = 0.02500, width = "18em"),
                                       )
                                   |> prompter::add_prompt(
