@@ -1569,36 +1569,42 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     ## With data modification for upload
     output$change_counts <- renderUI({
-        if (input$input2build %in% c("upload", "csd", "dag", "matrix")) {
-            menu_num <- ifelse(input$input2build == "upload", "2", "3")
-            tags$div(class = "frame",
-                     tags$div(class = "flex",
-                              ## tags$h3(paste0(menu_num, " . Change genotype's counts")),
-                              tags$h3("Change genotype's counts"),
-                              actionButton("display_help_change_genotype_counts",
-                                           "Help", class = "btn-info"),
-                              tags$h3(HTML("<br/>")),
-                              ),
-                     tags$div(id = "csd_table",
-                              DT::DTOutput("csd_counts")
-                              ),
-                     tags$h5(HTML("<br/>")),
-                     ## We could include upload and dag here, but it makes no sense
-                     if (input$input2build %in% c("csd"))
-                         actionButton("clear_genotype", "Delete all genotype data")
-                     else if (input$input2build %in% c("matrix"))
-                         tags$h5(HTML("To delete all genotype data, use",
-                                      "'Reset log-&Theta; matrix and delete genotype data'",
-                                      "above."))
-                     else if (input$input2build %in% c("dag"))
-                         tags$h5(HTML("To delete all genotype data, use ",
-                                      "'Reset DAG and delete genotype data'",
-                                      "above."))
-                     else if (input$input2build %in% c("upload"))
-                         tags$h5(HTML("To delete (or reset) all genotype data",
-                                      "upload a new (or the same) data file."))
-                     )
-        }
+        ## if (input$input2build %in% c("upload", "csd", "dag", "matrix")) {
+        menu_num <- ifelse(input$input2build == "upload", "2", "3")
+        tags$div(class = "frame",
+                 tags$div(class = "flex",
+                          ## tags$h3(paste0(menu_num, " . Change genotype's counts")),
+                          tags$h3("Change genotype's counts"),
+                          actionButton("display_help_change_genotype_counts",
+                                       "Help", class = "btn-info"),
+                          tags$h3(HTML("<br/>")),
+                          ),
+                 tags$div(id = "csd_table",
+                          DT::DTOutput("csd_counts")
+                          ),
+                 tags$h5(HTML("<br/>")),
+                 ## We could include upload and dag here, but it makes no sense
+                 if (input$input2build %in% c("csd")) {
+                     actionButton("clear_genotype", "Delete all genotype data")
+                 } else if (input$input2build %in% c("matrix")) {
+                     tags$h5(HTML("To delete all genotype data, use",
+                                  "'Reset log-&Theta; matrix and delete genotype data'",
+                                  "above."))
+                     actionButton("clear_genotype", "Delete all genotype data")
+                 } else if (input$input2build %in% c("dag")) {
+                     tags$h5(HTML("To delete all genotype data, use ",
+                                  "'Reset DAG and delete genotype data'",
+                                  "above or the button below."))
+                     ## To remove just the genotype
+                     ## it makes little sense. For new DAGs, with new names
+                     ## we want people to start from scratch.
+                     ## And clear_genotype clears everything for now.
+                 } else if (input$input2build %in% c("upload")) {
+                     tags$h5(HTML("To delete (or reset) all genotype data",
+                                  "upload a new (or the same) data file."))
+                 }
+                 )
+        ##  }
     })
 
 
