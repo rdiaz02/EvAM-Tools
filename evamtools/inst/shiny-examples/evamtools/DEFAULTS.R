@@ -25,12 +25,13 @@ template_csd_data <- matrix(0, ncol = 4, nrow = 0)
   dag_model = "HESBCN",
   all_cpms = c("OT", "CBN", "OncoBN", "MHN", "MCCBN", "HESBCN"),
   template_data = list(
-      csd_counts =  template_csd_counts
-    , data = NULL
-    , dag = template_dag
+      csd_counts =  template_csd_counts ## data frame of Genotypes and Counts.
+    , data = NULL ## Yeah, what is data? The data matrix of 0/1 with subjects
+      ## as rows and genes as columns. 
+    , dag = template_dag ## the dag as adjacency matrix.
     , DAG_parent_set = template_parent_set
-    , lambdas = template_lambdas
-    , thetas = template_thetas
+    , lambdas = template_lambdas ## the lambdas, but I guess also the thetas/Weights
+    , thetas = template_thetas ## For MHN.
     , gene_names = LETTERS[1: max_genes]
     , name = "New_CSD"
   )
