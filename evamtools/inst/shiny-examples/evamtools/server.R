@@ -1031,7 +1031,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$h4(HTML("<br/>")),
                      tags$h4(HTML("Likewise, enter all new names in one go ",
                                   "(to try to enforce this, the button \"Use these gene names\" ",
-                                  "will be disabled as soon as you click it). ",
+                                  "will be disabled/closed as soon as you click it). ",
                                   "Repeatedly editing the new gene names ",
                                   "can easily lead to mismatch errors ",
                                   "(that will be displayed in red, with text ",
@@ -1052,7 +1052,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         observeEvent(input$action_provide_gene_names,{
             tryCatch({
                 mymessage("At action_provide_gene_names")
-
+                
                 ## The disabling of the option does not work well sometimes.
                 ## So instead of filling up the code with disables,
                 ## catch it here.
@@ -1145,6 +1145,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
                 ## Disable as soon as clicked on "Use these genes"
                 shinyjs::disable("action_provide_gene_names")
+                removeModal()
             }, error = function(e){
                 showModal(dataModal(e[[1]]))
             })
