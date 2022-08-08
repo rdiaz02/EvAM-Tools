@@ -1007,7 +1007,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                                          "with the names that you want.</p><span>"
                                                                          ),
                                                          arrow = TRUE, animation = "shift-toward"
-                                                         ## , placement = "right"
+                                                         , placement = "right"
                                                          )
                                        )
                               ),
@@ -1268,7 +1268,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                      "genes used, reset the slider ",
                                                      "of \"Number of genes\", and reorder the genes next to  ",
                                                      "\"Mutations\".</p><span>"),
-                                                arrow = TRUE, animation = "shift-toward"
+                                                arrow = TRUE, animation = "shift-toward", placement = "right"
                                                 ),
                               ## shinyBS::bsTooltip("genotype",
                               ##                    HTML("<p>The list of genes next to \"Mutations\" is kept sorted ",
@@ -1346,7 +1346,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                                                    "represent the chosen DAG, ",
                                                                                    "the program sets the model to ",
                                                                                    "CBN/HESBCN, that can represent all possible DAGs."),
-                                                             arrow = TRUE, animation = "shift-toward")
+                                                             arrow = TRUE, animation = "shift-toward", placement = "right")
                                            ),
                                   tags$h4("New Edge"),
                                   tags$h5(HTML("<p></p>")),
@@ -1362,8 +1362,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                                   " You can ",
                                                                   "see more genes (or fewer, up to the number of genes in your genotypes) ",
                                                                   "by moving the slider of 'Number of genes'.<span>"),
-                                                             arrow = TRUE, animation = "shift-toward")
-                                                  ),
+                                                             arrow = TRUE, animation = "shift-toward", placement = "right")
+                                           ),
                                   tags$div(class = "inline",
                                            radioButtons(inputId = "dag_to",
                                                         label = " To (child node)",
@@ -1441,7 +1441,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                           "(i.e., 0s turned to 1s and 1s turned to 0s).",
                                                           "<span>"
                                                           ),
-                                             arrow = TRUE, animation = "shift-toward"),
+                                                    arrow = TRUE, animation = "shift-toward", placement = "right"),
                                   tags$h5(HTML("<br/>")),
                                   actionButton("resample_dag", "Generate data from DAG"),
                                   actionButton("clear_dag", HTML("Reset DAG and delete genotype data")) ,
@@ -1454,7 +1454,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                           "and will remove the generated genotype ",
                                                           "data.",
                                                           "<span>"),
-                                                    arrow = TRUE, animation = "shift-toward"),
+                                                   arrow = TRUE, animation = "shift-toward", placement = "right"),
                                   )
                      }
                  )
@@ -1511,7 +1511,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                           "<span>"
                                                           ),
                                                     arrow = TRUE, animation = "shift-toward"
-                                                    ),
+                                                  , placement = "right"),
                                   tags$h5(HTML("<br/>")),
                                   actionButton("resample_mhn", "Generate data from MHN model"),
                                   actionButton("clear_mhn",
@@ -1525,7 +1525,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                           "and will remove the generated genotype ",
                                                           "data."),
                                                     arrow = TRUE, animation = "shift-toward"
-                                                    ## , placement = "right"
+                                                    , placement = "right"
                                                     )
                               )
                      }
@@ -2898,7 +2898,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                     "<span>"
                                                     ),
                                                 arrow = TRUE, animation = "shift-toward"
-                                                ),
+                                              , placement = "right"),
                               tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
                               tags$h4(HTML("<br/>")),
                               tags$div(class = "inline",
@@ -2954,6 +2954,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                               "</p><span>"
                                                               ),
                                                          arrow = TRUE, animation = "shift-toward"
+                                                       , placement = "right"
                                                          )
 
                                       ,
@@ -2972,7 +2973,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                                "Type of label for transition [rate] plots."
                                                                ),
                                                          arrow = TRUE, animation = "shift-toward"
-                                                         ## , placement = "right"
+                                                         , placement = "right"
                                                          ),
                                        ),
                               ),
@@ -2995,7 +2996,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                      "from MHN (where any genotype is connected to each of its ",
                                                      "descendants) or from models for which the DAG is close to a star. </p><span>"
                                                      ),
-                                                arrow = TRUE, animation = "shift-toward")
+                                                arrow = TRUE, animation = "shift-toward"
+                                              , placement = "right")
                               )
                      ),
            
@@ -3103,7 +3105,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                             "for reasons of figure size and legibility of genotype labels .",
                                             "The table shows all the genotypes. </p></span>",
                                             )
-                                       ),
+                                     , arrow = TRUE, animation = "shift-toward"),
                      ## tags$h4("(This output is also displayed as the second row of figures. ",
             ##         "Choose the output to display from the left radio buttons ",
             ##         "'Predictions from models to display')"),
