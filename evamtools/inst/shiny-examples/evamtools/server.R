@@ -1813,7 +1813,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
 
-  
+    
 
 
     
@@ -1933,15 +1933,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                        ".")
             if ((input$obs_noise < 0) ||
                 (input$obs_noise >= 0.99999999)) stop(HTML("Generate data: observational noise ",
-                                            "cannot be ",
-                                            "less than 0 or greater than (or equal to) 1 ",
-                                            "(to prevent numerical problems, no larger than 0.99999999)."))
+                                                           "cannot be ",
+                                                           "less than 0 or greater than (or equal to) 1 ",
+                                                           "(to prevent numerical problems, no larger than 0.99999999)."))
 
             if ((input$epos < 0) ||
                 (input$epos >= 0.99999999)) stop("Generate data: epos,e  ",
-                                       "cannot be ",
-                                       "less than 0 or greater than (or equal to) 1 ",
-                                       "(to prevent numerical problems, no larger than 0.99999999).")
+                                                 "cannot be ",
+                                                 "less than 0 or greater than (or equal to) 1 ",
+                                                 "(to prevent numerical problems, no larger than 0.99999999).")
             tmp_dag_data <-
                 evamtools:::generate_sample_from_dag(the_dag_data
                                                    , data$DAG_parent_set[gene_names]
@@ -1949,7 +1949,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                    , N = input$num_samples
                                                    , dag_model = the_dag_model$stored_dag_model
                                                    , epos = input$epos)
-                
+            
             data$csd_counts <-
                 tmp_dag_data$csd_counts[tmp_dag_data$csd_counts[, 2] > 0, ]
             data$data <- tmp_dag_data$data
