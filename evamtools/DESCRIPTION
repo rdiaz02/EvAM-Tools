@@ -1,8 +1,8 @@
 Package: evamtools
 Type: Package
 Title: Tools for evolutionary accumulation models or event accumulation models (evam), for now mainly cancer progression models
-Version: 2.1.6-6
-Date: 2022-08-08
+Version: 2.1.6-7
+Date: 2022-08-09
 Authors@R: c(
             person("Ramon", "Diaz-Uriarte",			      
 	    	    email = "r.diaz@uam.es", role = c("cre", "aut")),	      
@@ -37,8 +37,6 @@ Imports: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree
     , R.utils
     , plotly
     , magrittr
-    , prompter
-    , shinyBS
     , dplyr
     , tippy
 Suggests: testthat (>= 3.0.0)

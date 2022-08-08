@@ -305,10 +305,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         all_csd = all_csd_data
     )
 
+    ## I've not had a problem using identical ids, etc
+    ## for DAG and MHN. But just in case
     generate_data <- reactiveValues(
-        num_samples = default_num_samples,
-        obs_noise   = default_obs_noise,
-        epos        = default_epos 
+        dag_num_samples = default_num_samples,
+        dag_obs_noise   = default_obs_noise,
+        mhn_num_samples = default_num_samples,
+        mhn_obs_noise   = default_obs_noise,
+        epos            = default_epos 
     )
 
     resampling_trigger_data_change <- function() {
@@ -1406,9 +1410,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                           "This setting affects predicted probabilities. "),
                                   tags$h3(HTML("<br/>")),
                                   div(style = "white-space: nowrap;",
-                                      numericInput("num_samples",
+                                      numericInput("dag_num_samples",
                                                    HTML("Number of genotypes<br>to sample"),
-                                                   value = generate_data$num_samples,
+                                                   value = generate_data$dag_num_samples,
                                                    min = 100,
                                                    max = 10000,
                                                    step = 100,
@@ -1416,13 +1420,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                       ),
                                   tags$h3(HTML("<br/>")),
                                   div(style = "white-space: nowrap;", 
-                                      numericInput("obs_noise",
+                                      numericInput("dag_obs_noise",
                                                    HTML("Observational noise <br>(genotyping error)"),
-                                                   value = generate_data$obs_noise,
+                                                   value = generate_data$dag_obs_noise,
                                                    min = 0, max = 0.95,
                                                    step = 0.02500, width = "18em"),
                                       ), 
-                                  tippy::tippy_this("obs_noise",
+                                  tippy::tippy_this("dag_obs_noise",
                                                     paste("<span style='font-size:1.5em; text-align:left;'>",
                                                           "A proportion between 0 and 1 ",
                                                           "(open interval on the right, so 1 is not allowed).",
@@ -1476,22 +1480,22 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   tags$h4(HTML("<u>2. Generate data from the MHN model</u>")),
                                   tags$h4(HTML("<br/>")),
                                   div(style = "white-space: nowrap;", 
-                                      numericInput("num_samples",
+                                      numericInput("mhn_num_samples",
                                                    HTML("Number of genotypes<br>to sample"),
-                                                   value = generate_data$num_samples,
+                                                   value = generate_data$mhn_num_samples,
                                                    min = 100,
                                                    max = 10000,
                                                    step = 100, width = "22em"),
                                       ),
                                   tags$h3(HTML("<br/>")),
                                   div(style = "white-space: nowrap;",
-                                      numericInput("obs_noise",
+                                      numericInput("mhn_obs_noise",
                                                    HTML("Observational noise<br>(genotyping error)"),
-                                                   value = generate_data$obs_noise,
+                                                   value = generate_data$mhn_obs_noise,
                                                    min = 0, max = 1,
                                                    step = 0.025, width = "18em"),
                                       ),
-                                  tippy::tippy_this("obs_noise",
+                                  tippy::tippy_this("mhn_obs_noise",
                                                     paste("<span style='font-size:1.5em; text-align:left;'>",
                                                           "A proportion between 0 and 1 ",
                                                           "(open interval on the right, so 1 is not allowed).",
@@ -2022,29 +2026,32 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             the_dag_data <- dag_data()
             gene_names <- setdiff(unique(c(the_dag_data$From, the_dag_data$To)),
                                   "Root")
-            if ((input$num_samples < 1) ||
-                (input$num_samples >  max_allowed_num_samples)
+            if ((input$dag_num_samples < 1) ||
+                (input$dag_num_samples >  max_allowed_num_samples)
                 ) stop("Generate data: number of ",
                        "genotypes to sample cannot be ",
                        "less than 1 or greater than ",
                        max_allowed_num_samples,
                        ".")
-            if ((input$obs_noise < 0) ||
-                (input$obs_noise >= 0.99999999)) stop(HTML("Generate data: observational noise ",
-                                                           "cannot be ",
-                                                           "less than 0 or greater than (or equal to) 1 ",
-                                                           "(to prevent numerical problems, no larger than 0.99999999)."))
+            if ((input$dag_obs_noise < 0) ||
+                (input$dag_obs_noise >= 0.99999999))
+                stop(HTML("Generate data: observational noise ",
+                          "cannot be ",
+                          "less than 0 or greater than (or equal to) 1 ",
+                          "(to prevent numerical problems, no larger than 0.99999999)."))
 
             if ((input$epos < 0) ||
-                (input$epos >= 0.99999999)) stop("Generate data: epos,e  ",
-                                                 "cannot be ",
-                                                 "less than 0 or greater than (or equal to) 1 ",
-                                                 "(to prevent numerical problems, no larger than 0.99999999).")
+                (input$epos >= 0.99999999))
+                stop("Generate data: epos,e  ",
+                     "cannot be ",
+                     "less than 0 or greater than (or equal to) 1 ",
+                     "(to prevent numerical problems, no larger than 0.99999999).")
+            
             tmp_dag_data <-
                 evamtools:::generate_sample_from_dag(the_dag_data
                                                    , data$DAG_parent_set[gene_names]
-                                                   , noise = input$obs_noise
-                                                   , N = input$num_samples
+                                                   , noise = input$dag_obs_noise
+                                                   , N = input$dag_num_samples
                                                    , dag_model = the_dag_model$stored_dag_model
                                                    , epos = input$epos)
             
@@ -2057,8 +2064,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             datasets$all_csd[[input$input2build]][[input$select_csd]]$lambdas <- data$lambdas
             datasets$all_csd[[input$input2build]][[input$select_csd]]$DAG_parent_set <- data$DAG_parent_set
             
-            generate_data$num_samples <- input$num_samples
-            generate_data$obs_noise   <- input$obs_noise
+            generate_data$dag_num_samples <- input$dag_num_samples
+            generate_data$dag_obs_noise   <- input$dag_obs_noise
+            generate_data$mhn_num_samples <- input$dag_num_samples
+            generate_data$mhn_obs_noise   <- input$dag_obs_noise
             generate_data$epos        <- input$epos
             
             shinyjs::enable("analysis")
@@ -2196,7 +2205,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             "new data be generated."),
                      tags$p(HTML("<br>")),
                      tags$p("Values in the input boxes have arbitrary default values, ",
-                            "but your last used values are preserved after generating data."),
+                            "but your last used values are preserved after generating data.",
+                            "(Last includes also MHN, so it is easier  ",
+                            "to use the same set of values across models)."),
                      tags$h3(HTML("<br/>")),
                      tags$p(HTML("<h5>[1] The models fitted by CBN contain only ANDs, but the ",
                                  "specification of a model for data simulation from H-ESBCN and CBN is ",
@@ -2243,29 +2254,31 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     observeEvent(input$resample_mhn, {
         tryCatch({
-            if ((input$num_samples < 1) ||
-                (input$num_samples >  max_allowed_num_samples)
+            if ((input$mhn_num_samples < 1) ||
+                (input$mhn_num_samples >  max_allowed_num_samples)
                 ) stop("Generate data: number of ",
                        "genotypes to sample cannot be ",
                        "less than 1 or greater than ",
                        max_allowed_num_samples,
                        ".")
-            if ((input$obs_noise < 0) ||
-                (input$obs_noise >= 0.99999999)) stop("Generate data: observational noise ",
-                                                      "cannot be ",
+            if ((input$mhn_obs_noise < 0) ||
+                (input$mhn_obs_noise >= 0.99999999)) stop("Generate data: observational noise ",
+                                                          "cannot be ",
                                                       "less than 0 or greater than 1",
                                                       "(for numerical issues, no larger than 0.99999999).")
             
             mhn_data <- evamtools:::get_mhn_data(data$thetas[1:input$gene_number
                                                            , 1:input$gene_number]
-                                               , noise = input$obs_noise 
-                                               , N = input$num_samples)
+                                               , noise = input$mhn_obs_noise 
+                                               , N = input$mhn_num_samples)
             data$csd_counts <- mhn_data$csd_counts
             data$data <- mhn_data$data
             datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- mhn_data$data
 
-            generate_data$num_samples <- input$num_samples
-            generate_data$obs_noise   <- input$obs_noise
+            generate_data$mhn_num_samples <- input$mhn_num_samples
+            generate_data$mhn_obs_noise   <- input$mhn_obs_noise
+            generate_data$dag_num_samples <- input$mhn_num_samples
+            generate_data$dag_obs_noise   <- input$mhn_obs_noise
             
             shinyjs::enable("analysis")
             ## The next is not really necessary, but we do it for consistency
@@ -2333,7 +2346,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             "by checking the figure of the matrix on the right."),
                      tags$p(HTML("<br>")),
                      tags$p("Values in the input boxes have arbitrary default values, ",
-                            "but your last used values are preserved after generating data."),
+                            "but your last used values are preserved after generating data.",
+                            "(Last includes also the DAG models, so it is easier  ",
+                            "to use the same set of values across models)."),
                      )
         )
         )
