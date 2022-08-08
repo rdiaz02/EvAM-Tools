@@ -2413,6 +2413,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     output$plot <- plotly::renderPlotly({
         tryCatch({
             mymessage("At output$plot")
+            ## Not relevant anymore. Remove eventually.
             ## provide_gene_names is being enabled somewhere I can't locate
             ## So make sure we catch it right on the redisplay
             ## if ((!is.null(data$data) ||
@@ -2439,7 +2440,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data2plot <- igraph::decompose(data2plot)[[1]]
             edges <- igraph::as_data_frame(data2plot)
             colnames(edges) <- c("From", "To")
-            if(!is.null(data$DAG_parent_set)) edges$Relation <- data$DAG_parent_set[edges$To]
+            if (!is.null(data$DAG_parent_set)) edges$Relation <- data$DAG_parent_set[edges$To]
         } else if (input$input2build %in% c("matrix") 
                    && !is.null(data$thetas)
                    && !is.null(input$gene_number)
@@ -2682,7 +2683,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                        ifelse(length(plot2show()) <=0, 1, length(plot2show())))
             if(!(is.null(selected_plot_type))){
                 if(selected_plot_type %in% c("trans_mat", "trans_rate_mat")){
-                    lapply(plot2show(), function(met){
+                    lapply(plot2show(), function(met) {
                         method_data <- evamtools:::process_data(tmp_data, met,
                                                                 plot_type = selected_plot_type)
                         output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
