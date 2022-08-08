@@ -353,8 +353,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
 
-
-
     observeEvent(input$gene_number, {
         ## id: here_we_change_gene_number
         mymessage("at gene_number trigger")
@@ -398,7 +396,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     )
 
 
-    
     ## Upload data
     observeEvent(input$csd, {
         if (grepl(".csv", input$csd$datapath)) {
@@ -1621,13 +1618,25 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         tryCatch({
             ## FIXME Unnecessary, as caught at a much more sensible place
             ## but leave it here anyway, just in case, until much more testing done.
-            ## The other message is "This DAG has nodes with multiple parents. "
-            ## way below.
+            ## The other messages come from the dag_data <- reactive
+            ## block.
             ## But here, it is often caught even earlier and we avoid the
-            ## flickering screen that happens when we left the error handling below.
-            
+            ## flickering screen that happens when we only used the error
+            ## handling below.
+
             number_of_parents <- colSums(data$dag)
 
+            if ((input$dag_model %in% c("OT", "OncoBN")) &&
+                (!is.null(data$lambdas)) &&
+                (any(data$lambdas > 0.99999999))
+                ) {
+                the_dag_model$stored_dag_model <<- "HESBCN"
+                updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                stop("thetas/probabilities should be between 0 and 1 ",
+                     "(actually, for numerical reasons, 0.99999999).")
+            }
+
+            
             if (input$dag_model == "OncoBN") {
                 if (any(data$DAG_parent_set == "XOR")) {
                     updateRadioButtons(session, "dag_model", selected = "HESBCN")
@@ -1637,7 +1646,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     updateRadioButtons(session, "dag_model", selected = "HESBCN")
                     stop("The OncoBN model can only include ",
                          "one type of relationship",
-                         "(conjunctive or disjunctive, ",
+                         "(conjunctive ---AND--- or disjunctive ---OR---, ",
                          "as specified in \"Advanced options\").")
                 } else {
                     the_dag_model$stored_dag_model <<- input$dag_model
@@ -1675,6 +1684,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     
     ## DAG builder
     ## Controling dag builder
+    ## FIXME: Would it be cleaner if dag_data was eventReactive, watching for
+    ##  input$dag_model and input$dag_table_cell_edit?
 
     ## FIXME: some of the error messages sometimes are triggered twice such as if
     ## the current model is OncoBN (e.g., put yourself in DAG_AND and set model
