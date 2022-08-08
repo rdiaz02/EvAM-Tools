@@ -1716,11 +1716,21 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## so that if we are under DAG, we listen to input$gene_number
     ## as that needs to be listened to for the dag_more_genes_than_set_genes
     ## to work properly.
-    ## 
+    ##
+
+    ## Or maybe this should just be a function that we call on demand, not a
+    ## reactive one. 
     toListen2 <- reactive({
         list(input$dag_model,
              input$dag_table_cell_edit,
-             data$name)
+             data$name,
+             ## because add_edge and remove_edge modify
+             ## DAG_parent_set and the dag, leaving
+             ## this in a possibly inconsistent state
+             data$DAG_parent_set,
+             data$dag,
+             ## modified in clear_dag
+             data$lambdas)
     })
     ## dag_data <- eventReactive(toListen2(),
 
@@ -1841,6 +1851,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     ## Adding new edge
     observeEvent(input$add_edge, {
+        mymessage("At input$add_edge 1")
         from_gene <- input$dag_from
         to_gene <- input$dag_to
         tryCatch({
@@ -1854,6 +1865,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 evamtools:::to_stnd_csd_dataset(data)
             shinyjs::click("resample_dag")
             shinyjs::disable("provide_gene_names")
+            mymessage("At input$add_edge 1")
         },error=function(e){
             showModal(dataModal(e[[1]]))
         })
@@ -1861,6 +1873,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     ## Remove edge
     observeEvent(input$remove_edge, {
+        mymessage("At input$remove_edge 2")
         from_gene <- input$dag_from
         to_gene <- input$dag_to
         tryCatch({
@@ -1870,12 +1883,16 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                dag_model = the_dag_model$stored_dag_model)
             data$dag <- tmp_data$dag
             data$DAG_parent_set <- tmp_data$parent_set
-            datasets$all_csd[[input$input2build]][[input$select_csd]] <- evamtools:::to_stnd_csd_dataset(data)
-            if (sum(data$dag) == 0) {
-                data$csd_counts <- datasets$all_csd[[input$input2build]][[input$select_csd]]$csd_counts
-            } else {
-                shinyjs::click("resample_dag")
-            }
+            datasets$all_csd[[input$input2build]][[input$select_csd]] <-
+                evamtools:::to_stnd_csd_dataset(data)
+            ## if (sum(data$dag) == 0) {
+            ##     ## WTF is this here? If nothing, nothing. Period.
+            ##     data$csd_counts <-
+            ##         datasets$all_csd[[input$input2build]][[input$select_csd]]$csd_counts
+            ## } else {
+            shinyjs::click("resample_dag")
+            ##        }
+            mymessage("At input$remove_edge 2")
         },error=function(e){
             showModal(dataModal(e[[1]]))
         })
@@ -1910,6 +1927,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             names(data$DAG_parent_set) <- data$gene_names[1:length(data$DAG_parent_set)]
             names(data$lambdas) <- data$gene_names[1:length(data$DAG_parent_set)]
             info <- input$dag_table_cell_edit
+            mymessage("At dag_table_cell_edit, 1")
             tmp_data <-
                 evamtools:::modify_lambdas_and_parent_set_from_table(dag_data(),
                                                                      info, data$lambdas
@@ -1920,6 +1938,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data$DAG_parent_set <- tmp_data$parent_set
             datasets$all_csd[[input$input2build]][[input$select_csd]] <-
                 evamtools:::to_stnd_csd_dataset(data)
+            mymessage("At dag_table_cell_edit, 2")
             shinyjs::click("resample_dag")
         }, error = function(e){
             showModal(dataModal(e[[1]]))
