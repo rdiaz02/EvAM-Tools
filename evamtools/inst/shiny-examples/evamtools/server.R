@@ -220,7 +220,8 @@ set_gene_names_after_resize <- function(x, gene_names) {
 
 server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     require(evamtools)
-    require(shinyBS)
+    require(tippy)
+    ## require(shinyBS)
     ## Just in case
     do_gc(2)
     ## And be paranoid about making sure memory is released on disconnect
@@ -981,44 +982,30 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               ),
                      tags$h4(HTML("<br/>")),
                      tags$div(class="inlin",
-                              actionButton("provide_gene_names", "Use different gene names"),
-                              ## Prompter is not opaque. Changing opacity possible?
-                              ## https://github.com/etiennebacher/prompter/issues/3
-                              ## But need to edit the CSS. PITA
-                              shinyBS::bsTooltip("provide_gene_names",
-                                                 HTML("Create new models/new data using gene names you provide. ",
-                                                      "<br>",
-                                                      "<b>Can only be used for models/data that are empty. </b>",
-                                                      "Therefore, you might need to click on ",
-                                                      "\"Delete all genotype data\"",
-                                                      "\"Reset DAG and delete genotype data\"",
-                                                      "or \"Reset log-&Theta; matrix and delete genotype data\" ",
-                                                      "before being able to use this.",
-                                                      "<br><br>",
-                                                      "<b>IMPORTANT:</b> Do not think about this option as a way ",
-                                                      "to rename genes in existing data or models. ",
-                                                      "That becomes confusing very quickly. ",
-                                                      "Instead, think of this as a way to build ",
-                                                      "<b>new models from scratch</b> ",
-                                                      "with the names that you want."
-                                                      ),
-                                                 "right", options = list(container = "body")),
-                              ## |> prompter::add_prompt(message = 
-                              ##                             paste("Create new models/new data using gene names you provide. ",
-                              ##                                   "Can only be used for models/data that are empty. ",
-                              ##                                   "Therefore, you might need to click on ",
-                              ##                                   "'Delete all genotype data' ",
-                              ##                                   "'Reset DAG and delete genotype data' ",
-                              ##                                   "or 'Reset log-Θ matrix and delete genotype data' ",
-                              ##                                   "before being able to use this."
-                              ##                                   ),
-                              ##                         position = "bottom-right",
-                              ##                         type = "default",
-                              ##                         shadow = FALSE,
-                              ##                         rounded = TRUE,
-                              ##                         bounce = TRUE,
-                              ##                         size = "medium"
-                              ##                         )
+                              tags$div(id="dummy_for_tooltip1",
+                                       actionButton("provide_gene_names", "Use different gene names"),
+                                       tippy::tippy_this(element = "dummy_for_tooltip1", ## "provide_gene_names",
+                                                         tooltip = paste("<span style='font-size:1.5em; text-align:left;'>",
+                                                                         "<p>Create new models/new data using gene names you provide.</p> ",
+                                                                         "<br>",
+                                                                         "<p><b>Can only be used for models/data that are empty. </b>",
+                                                                         "Therefore, you might need to click on ",
+                                                                         "'Delete all genotype data'",
+                                                                         "'Reset DAG and delete genotype data'",
+                                                                         "or 'Reset log-&Theta; matrix and delete genotype data' ",
+                                                                         "before being able to use this.</p>",
+                                                                         "<br>",
+                                                                         "<p><b>IMPORTANT:</b> Do not think about this option as a way ",
+                                                                         "to rename genes in existing data or models. ",
+                                                                         "That becomes confusing very quickly. ",
+                                                                         "Instead, think of this as a way to build ",
+                                                                         "<b>new models from scratch</b> ",
+                                                                         "with the names that you want.</p><span>"
+                                                                         ),
+                                                         arrow = TRUE, animation = "shift-toward"
+                                                         ## , placement = "right"
+                                                         )
+                                       )
                               ),
                      )
         }
@@ -1226,7 +1213,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
         gene_options <- set_gene_names_after_resize(data$data,
                                                     data$gene_names)[1:n_genes]
-
+        ## shinyBS::removeTooltip(session, "provide_gene_names")
         if (input$input2build == "csd") {
             tags$div(
                      tags$h3("Add genotypes"),
@@ -1262,29 +1249,47 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  label = "Mutations",
                                                  choices = set_gene_names_after_resize(data$data,
                                                                                        data$gene_names)[1:n_genes]),
-                              shinyBS::bsTooltip("genotype",
-                                                 HTML("<p>The list of genes next to \"Mutations\" is kept sorted ",
-                                                      "(\"natural order\") showing first the genes ",
-                                                      "in existing genotypes, and then other genes up to ",
-                                                      "\"Number of genes\". ",
-                                                      "The list will be resorted   ",
-                                                      "when new genes are added to genotypes. </p>",
-                                                      "<br> <p>\"Mutations\" is just a list of candidate gene names. You can ",
-                                                      "see more (or fewer, up to the number of genes in your genotypes) ",
-                                                      "by moving the slider of \"Number of genes\".</p>",
-                                                      "<br>",
-                                                      "<p>On renaming of the data, we trigger a counting of the ",
-                                                      "genes used, reset the slider ",
-                                                      "of \"Number of genes\", and reorder the genes next to  ",
-                                                      "\"Mutations\".</p>"),
-                                                 "top", options = list(container = "body")
-                                                 ),
+                              tippy::tippy_this("genotype",
+                                                HTML("<span style='font-size:1.5em; text-align:left;'><p>The list of genes next to \"Mutations\" is kept sorted ",
+                                                     "(\"natural order\") showing first the genes ",
+                                                     "in existing genotypes, and then other genes up to ",
+                                                     "\"Number of genes\". ",
+                                                     "The list will be resorted   ",
+                                                     "when new genes are added to genotypes. </p>",
+                                                     "<br> <p>\"Mutations\" is just a list of candidate gene names. You can ",
+                                                     "see more (or fewer, up to the number of genes in your genotypes) ",
+                                                     "by moving the slider of \"Number of genes\".</p>",
+                                                     "<br>",
+                                                     "<p>On renaming of the data, we trigger a counting of the ",
+                                                     "genes used, reset the slider ",
+                                                     "of \"Number of genes\", and reorder the genes next to  ",
+                                                     "\"Mutations\".</p><span>"),
+                                                arrow = TRUE, animation = "shift-toward"
+                                                ),
+                              ## shinyBS::bsTooltip("genotype",
+                              ##                    HTML("<p>The list of genes next to \"Mutations\" is kept sorted ",
+                              ##                         "(\"natural order\") showing first the genes ",
+                              ##                         "in existing genotypes, and then other genes up to ",
+                              ##                         "\"Number of genes\". ",
+                              ##                         "The list will be resorted   ",
+                              ##                         "when new genes are added to genotypes. </p>",
+                              ##                         "<br> <p>\"Mutations\" is just a list of candidate gene names. You can ",
+                              ##                         "see more (or fewer, up to the number of genes in your genotypes) ",
+                              ##                         "by moving the slider of \"Number of genes\".</p>",
+                              ##                         "<br>",
+                              ##                         "<p>On renaming of the data, we trigger a counting of the ",
+                              ##                         "genes used, reset the slider ",
+                              ##                         "of \"Number of genes\", and reorder the genes next to  ",
+                              ##                         "\"Mutations\".</p>"),
+                              ##                    "top", options = list(container = "body")
+                              ##                    ),
                               ),
                      tags$div(id="fr",
                               numericInput(label = "Counts", value = NA, min = 0,
                                            inputId = "genotype_freq", width = NA),
                               actionButton("add_genotype", "Add genotype")
                               ),
+                     ## shinyBS::removeTooltip(session, "genotype"),
                      )
         } else if (input$input2build == "dag") {
             ## Make sure all genes currently in the DAG are in
@@ -1329,7 +1334,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                         inline = TRUE,
                                                         choiceNames = list("OT", "OncoBN", "CBN/HESBCN"),
                                                         choiceValues = list("OT", "OncoBN", "HESBCN"),
-                                                        selected = the_dag_model$stored_dag_model)
+                                                        selected = the_dag_model$stored_dag_model),
+                                           tippy::tippy_this("dag_model",
+                                                             paste("<span style='font-size:1.5em; text-align:left;'>",
+                                                                   "Choose the model family. ",
+                                                                   "If you select a model that cannot ",
+                                                                                   "represent the chosen DAG, ",
+                                                                                   "the program sets the model to ",
+                                                                                   "CBN/HESBCN, that can represent all possible DAGs."),
+                                                             arrow = TRUE, animation = "shift-toward")
                                            ),
                                   tags$h4("New Edge"),
                                   tags$h5(HTML("<p></p>")),
@@ -1338,15 +1351,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                         label = "From (parent node)",
                                                         inline = TRUE,
                                                         choices =  c("Root", dag_gene_options)),
-                                           shinyBS::bsTooltip("dag_from",
-                                                              HTML("<p>The list of genes next to \"From\" and \"To\" is kept sorted ",
-                                                                   "(alphabetically, often callen \"natural order\"), with \"Root\" first. ",
-                                                                   " You can ",
-                                                                   "see more (or fewer, up to the number of genes in your genotypes) ",
-                                                                   "by moving the slider of \"Number of genes\".</p>")
-                                                            , "right", options = list(container = "body")
-                                                              ),
-                                           ),
+                                           tippy::tippy_this("dag_from",
+                                                             HTML("<span style='font-size:1.5em; text-align:left;'>",
+                                                                  "The list of genes next to 'From' and 'To' is kept sorted ",
+                                                                  "(alphabetically, often callen 'natural order'), with 'Root' first. ",
+                                                                  " You can ",
+                                                                  "see more genes (or fewer, up to the number of genes in your genotypes) ",
+                                                                  "by moving the slider of 'Number of genes'.<span>"),
+                                                             arrow = TRUE, animation = "shift-toward")
+                                                  ),
                                   tags$div(class = "inline",
                                            radioButtons(inputId = "dag_to",
                                                         label = " To (child node)",
@@ -1408,40 +1421,36 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                    value = generate_data$obs_noise,
                                                    min = 0, max = 0.95,
                                                    step = 0.02500, width = "18em"),
-                                      )
-                                  |> prompter::add_prompt(
-                                                   message = paste("A proportion between 0 and 1 ",
-                                                                   "(open interval on the right, so 1 is not allowed).",
-                                                                   "Observational noise (e.g., genotyping error) ",
-                                                                   "for all models. ",
-                                                                   "Added during sampling, ",
-                                                                   "after predictions from model ",
-                                                                   "have been obtained; ",
-                                                                   "predicted probabilities are not affected.",
-                                                                   "If larger than 0, this proportion of entries ",
-                                                                   "in the sampled matrix will be flipped ",
-                                                                   "(i.e., 0s turned to 1s and 1s turned to 0s)."
-                                                                   ),
-                                                   position = "right",
-                                                   rounded = TRUE,
-                                                   bounce = TRUE,
-                                                   size = "medium"
-                                               ),
+                                      ), 
+                                  tippy::tippy_this("obs_noise",
+                                                    paste("<span style='font-size:1.5em; text-align:left;'>",
+                                                          "A proportion between 0 and 1 ",
+                                                          "(open interval on the right, so 1 is not allowed).",
+                                                          "Observational noise (e.g., genotyping error) ",
+                                                          "for all models. ",
+                                                          "Added during sampling, ",
+                                                          "after predictions from model ",
+                                                          "have been obtained; ",
+                                                          "predicted probabilities are not affected.",
+                                                          "If larger than 0, this proportion of entries ",
+                                                          "in the sampled matrix will be flipped ",
+                                                          "(i.e., 0s turned to 1s and 1s turned to 0s).",
+                                                          "<span>"
+                                                          ),
+                                             arrow = TRUE, animation = "shift-toward"),
                                   tags$h5(HTML("<br/>")),
                                   actionButton("resample_dag", "Generate data from DAG"),
-                                  actionButton("clear_dag", HTML("Reset DAG and delete genotype data"))
-                                  |> prompter::add_prompt(message = 
-                                                              HTML("Resetting the DAG will replace the ",
-                                                                   "contents of the named object by ",
-                                                                   "those of the default one ",
-                                                                   "(a three-gene fork with lambdas = 0.5), ",
-                                                                   "and will remove the generated genotype ",
-                                                                   "data."),
-                                                          position = "right",
-                                                          rounded = TRUE,
-                                                          bounce = TRUE,
-                                                          size = "medium"
-                                                          ),
+                                  actionButton("clear_dag", HTML("Reset DAG and delete genotype data")) ,
+                                  tippy::tippy_this("clear_dag",
+                                                    paste("<span style='font-size:1.5em; text-align:left;'>",
+                                                   "Resetting the DAG will replace the ",
+                                                          "contents of the named object by ",
+                                                          "those of the default one ",
+                                                          "(a three-gene fork with lambdas = 0.5), ",
+                                                          "and will remove the generated genotype ",
+                                                          "data.",
+                                                          "<span>"),
+                                                    arrow = TRUE, animation = "shift-toward"),
                                   )
                      }
                  )
@@ -1481,41 +1490,39 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                    value = generate_data$obs_noise,
                                                    min = 0, max = 1,
                                                    step = 0.025, width = "18em"),
-                                      )
-                                  |> prompter::add_prompt(message = 
-                                                              paste("A proportion between 0 and 1 ",
-                                                                    "(open interval on the right, so 1 is not allowed).",
-                                                                    "Observational noise (e.g., genotyping error) ",
-                                                                    "for all models. ",
-                                                                    "Added during sampling, ",
-                                                                    "after predictions from model ",
-                                                                    "have been obtained; ",
-                                                                    "predicted probabilities are not affected.",
-                                                                    "If larger than 0, this proportion of entries ",
-                                                                    "in the sampled matrix will be flipped ",
-                                                                    "(i.e., 0s turned to 1s and 1s turned to 0s)."
-                                                                    ),
-                                                          position = "right",
-                                                          rounded = TRUE,
-                                                          bounce = TRUE,
-                                                          size = "medium"
+                                      ),
+                                  tippy::tippy_this("obs_noise",
+                                                    paste("<span style='font-size:1.5em; text-align:left;'>",
+                                                          "A proportion between 0 and 1 ",
+                                                          "(open interval on the right, so 1 is not allowed).",
+                                                          "Observational noise (e.g., genotyping error) ",
+                                                          "for all models. ",
+                                                          "Added during sampling, ",
+                                                          "after predictions from model ",
+                                                          "have been obtained; ",
+                                                          "predicted probabilities are not affected.",
+                                                          "If larger than 0, this proportion of entries ",
+                                                          "in the sampled matrix will be flipped ",
+                                                          "(i.e., 0s turned to 1s and 1s turned to 0s).",
+                                                          "<span>"
                                                           ),
+                                                    arrow = TRUE, animation = "shift-toward"
+                                                    ),
                                   tags$h5(HTML("<br/>")),
                                   actionButton("resample_mhn", "Generate data from MHN model"),
                                   actionButton("clear_mhn",
-                                               HTML("Reset log-&Theta; matrix and delete genotype data"))
-                                  |> prompter::add_prompt(message = 
-                                                              paste("Resetting the log-Θ matrix will replace the ",
-                                                                    "contents of the named object by ",
-                                                                    "those of the default one ",
-                                                                    "(a three-gene matrix filled with 0s), ",
-                                                                    "and will remove the generated genotype ",
-                                                                    "data."),
-                                                          position = "right",
-                                                          rounded = TRUE,
-                                                          bounce = TRUE,
-                                                          size = "medium"
-                                                          )
+                                               HTML("Reset log-&Theta; matrix and delete genotype data")),
+                                  tippy::tippy_this("clear_mhn",
+                                                    paste("<span style='font-size:1.5em; text-align:left;'>",
+                                                          "Resetting the log-&Theta; matrix will replace the ",
+                                                          "contents of the named object by ",
+                                                          "those of the default one ",
+                                                          "(a three-gene matrix filled with 0s), ",
+                                                          "and will remove the generated genotype ",
+                                                          "data."),
+                                                    arrow = TRUE, animation = "shift-toward"
+                                                    ## , placement = "right"
+                                                    )
                               )
                      }
                  )
@@ -1596,6 +1603,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                           actionButton("display_help_change_genotype_counts",
                                        "Help", class = "btn-info"),
                           tags$h3(HTML("<br/>")),
+                          ## shinyBS::removeTooltip(session, "genotype"),
                           ),
                  tags$div(id = "csd_table",
                           DT::DTOutput("csd_counts")
@@ -2081,6 +2089,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     )
     ## Help for output of downloaded CPM results
     observeEvent(input$how2downloadcpm, {
+        ## sometimes the tooltips misbehave
+        ## shinyBS::removeTooltip(session, "table_out3")
+        ## shinyBS::removeTooltip(session, "freq2label")
+        
         showModal(modalDialog(
             easyClose = TRUE,
             title = tags$h3("Downloading CPMs results and analyzed data"),
@@ -2861,18 +2873,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  selected = input$cpm_methods
                                                  ## intersect(input$cpm_methods,
                                                  ##           c("OT", "CBN", "MHN", "OncoBN"))
-                                                 )
-                                                 |> prompter::add_prompt(message = 
-                                                          HTML("Show graphical output of the CPMs used to analyze the data.  "
-                                                             , "Go back to \"User input\" "
-                                                             , "and click on \"Advanced options\" if you"
-                                                             , "want to use other methods."
-                                                               ),
-                                                      position = "right",
-                                                      rounded = TRUE,
-                                                      bounce = TRUE,
-                                                      size = "medium"
-                                                      ),
+                                                 ),
+                              tippy::tippy_this("cpm2show",
+                                                paste("<span style='font-size:1.5em; text-align:left;'>",
+                                                      "Show graphical output of the CPMs used to analyze the data.  "
+                                                  , "Go back to \"User input\" "
+                                                  , "and click on \"Advanced options\" if you"
+                                                  , "want to use other methods.",
+                                                    "<span>"
+                                                    ),
+                                                arrow = TRUE, animation = "shift-toward"
+                                                ),
                               tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
                               tags$h4(HTML("<br/>")),
                               tags$div(class = "inline",
@@ -2906,46 +2917,30 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                    ,
                                                     selected = "trans_mat"
                                                     ), ## Prompter does not allow including HTML formatting.
-                                       shinyBS::bsTooltip("data2plot",
-                                                          HTML("<p>This output is also displayed in tabular form on the bottom right.</p>",
-                                                               "<br><p><u>\"Sampled genotype counts\"</u> is only available if you selected ",
-                                                               "\"Sample genotypes\" under \"Advanced options\". </p>",
-                                                               "<br>",
-                                                               "<p>For <u>\"Predicted genotype relative frequencies\"</u> ",
-                                                               "and <u>\"Sampled genotype counts\"</u>, the histograms only ",
-                                                               "show the 20 most frequent genotypes ", ## 20: argument to  plot_genotype_counts
-                                                               "for reasons of figure size and legibility of genotype labels .",
-                                                               "The table shows all the genotypes. </p>",
-                                                               "<br>",
-                                                               "<p>For <u>\"Predicted genotype relative frequencies\"</u> ",
-                                                               "we add, to the table, the relative frequencies of genotypes in the original data ",
-                                                               "to make it easier to visually asses how close predictions are to observed data. ",
-                                                               "(It would not be sensible to do this with \"Sampled genotype counts\" as ",
-                                                               "those include additional sampling noise.) For easier comparison, both genotypes ",
-                                                               "with no observed counts in the original data ",
-                                                               "and genotypes with predicted frequency exactly 0 are left as empty (not as 0) ",
-                                                               "in the displayed table.</p>"
-                                                               ),
-                                                          "right", options = list(container = "body")
-                                                          )
-                                       ## |> prompter::add_prompt(message = 
-                                       ##                             HTML("This output is also displayed in tabular form on the bottom right.",
-                                       ##                                  "                   ",
-                                       ##                                  paste("<p>\"Sampled genotype counts\" is only available if you selected ",
-                                       ##                                        "\"Sample genotypes\" under \"Advanced options\". </p>"),
-                                       ##                                  "                   ",
-                                       ##                                  paste("For \"Predicted genotype relative frequencies\" ",
-                                       ##                                        "and \"Sampled genotype counts\", the histograms only ",
-                                       ##                                        "show the 20 most frequent genotypes ", ## 20: argument to  plot_genotype_counts
-                                       ##                                        "for reasons of figure size and legibility of genotype labels .",
-                                       ##                                        "The table shows all the genotypes. "),
-                                       ##                                  sep = "\n"
-                                       ##                                  ),
-                                       ##                         position = "right",
-                                       ##                         rounded = TRUE,
-                                       ##                         bounce = TRUE,
-                                       ##                         size = "large"
-                                       ##                         )
+                                       tippy::tippy_this("data2plot",
+                                                         HTML("<span style='font-size:1.5em; text-align:left'><p>This output is also displayed in tabular form on the bottom right.</p>",
+                                                              "<br><p><u>\"Sampled genotype counts\"</u> is only available if you selected ",
+                                                              "\"Sample genotypes\" under \"Advanced options\". </p>",
+                                                              "",
+                                                              "<p>For <u>\"Predicted genotype relative frequencies\"</u> ",
+                                                              "and <u>\"Sampled genotype counts\"</u>, the histograms only ",
+                                                              "show the 20 most frequent genotypes ", ## 20: argument to  plot_genotype_counts
+                                                              "because of figure size and legibility of genotype labels .",
+                                                              "The table shows all the genotypes. </p>",
+                                                              "",
+                                                              "<p>For <u>\"Predicted genotype relative frequencies\"</u> ",
+                                                              " in the table we add the relative frequencies of genotypes in the original data ",
+                                                              "to make it easier to visually asses how close predictions are to observed data. ",
+                                                              ## "(It would not be sensible to do this with \"Sampled genotype counts\" as ",
+                                                              ## "those include additional sampling noise.) For easier comparison, both genotypes ",
+                                                              ## "with no observed counts in the original data ",
+                                                              ## "and genotypes with predicted frequency exactly 0 are left as empty (not as 0) ",
+                                                              ## "in the displayed table.</p>",
+                                                              "</p><span>"
+                                                              ),
+                                                         arrow = TRUE, animation = "shift-toward"
+                                                         )
+
                                       ,
                                        ),
                               tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
@@ -2956,15 +2951,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                     choiceNames =  c("Genotype", "Last gene mutated"),
                                                     choiceValues = c("genotype", "acquisition"),
                                                     selected = "genotype"
-                                                    )
-                                       |> prompter::add_prompt(message = 
-                                                                   HTML("Type of label for transition [rate] plots."
-                                                                        ),
-                                                               position = "right",
-                                                               rounded = TRUE,
-                                                               bounce = TRUE,
-                                                               size = "medium"
+                                                    ),
+                                       tippy::tippy_this("label2plot",
+                                                         paste("<span style='font-size:1.5em; text-align:left;'>",
+                                                               "Type of label for transition [rate] plots."
                                                                ),
+                                                         arrow = TRUE, animation = "shift-toward"
+                                                         ## , placement = "right"
+                                                         ),
                                        ),
                               ),
                      tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
@@ -2979,28 +2973,18 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                           "",
                                           width = "500px",
                                           value = 5, max = 10, min = 0, step = 1),
-                              shinyBS::bsTooltip("freq2label",
-                                                 HTML("<p>Set it to 0 to show all paths or all genotype labels. <p>",
-                                                      "<br><p>You probably <u>don't want to set it to 0</u> when there are many ",
-                                                      "genes, specially if you are also displaying the output ",
-                                                      "from MHN (where any genotype is connected to each of its ",
-                                                      "descendants) or from models for which the DAG is close to a star. "
-                                                      ),
-                                                 "right", options = list(container = "body"))
-                              ## |> prompter::add_prompt(message = 
-                              ##                             HTML("Set it to 0 to show all paths or all genotype labels. ",
-                              ##                                  "You probably don't want to do that when there are many ",
-                              ##                                  "genes, specially if you are also displaying the output ",
-                              ##                                  "from MHN (where any genotype is connected to each of its ",
-                              ##                                  "descendants) or from models for which the DAG is close to a star. "
-                              ##                                  ),
-                              ##                         position = "right",
-                              ##                         rounded = TRUE,
-                              ##                         bounce = TRUE,
-                              ##                         size = "medium"                                                 ),
+                              tippy::tippy_this("freq2label-wrap",
+                                                HTML("<span style='font-size:1.5em; text-align:left;'><p>Set it to 0 to show all paths or all genotype labels. <p>",
+                                                      "<p>You probably <u>do NOT want to set it to 0</u> when there are many ",
+                                                     "genes, specially if you are also displaying the output ",
+                                                     "from MHN (where any genotype is connected to each of its ",
+                                                     "descendants) or from models for which the DAG is close to a star. </p><span>"
+                                                     ),
+                                                arrow = TRUE, animation = "shift-toward")
                               )
-                     )
-        )
+                     ),
+           
+            )
     })
 
     output$cpm_list <- renderUI({
@@ -3090,26 +3074,21 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                    "Not a valid input$data2plot"
                                                    )))
                               ) , ## prompter does not work here
-                     shinyBS::bsTooltip("table_out3",
-                                        ## message = 
-                                        HTML("<p>This output is also displayed as the second row of figures. ",
+                     tippy::tippy_this("table_out3",
+                                       ## message = 
+                                       HTML("<span style='font-size:1.5em; text-align:left;'><p>This output is also displayed as the second row of figures. ",
                                             "Choose the output to display from the left radio buttons ",
-                                           "\"Predictions from models to display\".</p>",
-                                           "<br><p><u>\"Sampled genotype counts\"</u> is only available if you selected ",
-                                             "\"Sample genotypes\" under \"Advanced options\". </p>",
-                                             "<br>",
-                                             "<p>For <u>\"Predicted genotype relative frequencies\"</u> ",
-                                             "and <u>\"Sampled genotype counts\"</u>, the histograms only ",
-                                             "show the 20 most frequent genotypes ", ## 20: argument to  plot_genotype_counts
-                                             "for reasons of figure size and legibility of genotype labels .",
-                                             "The table shows all the genotypes. </p>",
-                                             ),
-                                        "bottom", options = list(container = "body")
-                                        ## position = "bottom",
-                                        ## rounded = TRUE,
-                                        ## bounce = TRUE,
-                                        ## size = "medium"
-                                        ),
+                                            "\"Predictions from models to display\".</p>",
+                                            "<br><p><u>\"Sampled genotype counts\"</u> is only available if you selected ",
+                                            "\"Sample genotypes\" under \"Advanced options\". </p>",
+                                            "<br>",
+                                            "<p>For <u>\"Predicted genotype relative frequencies\"</u> ",
+                                            "and <u>\"Sampled genotype counts\"</u>, the histograms only ",
+                                            "show the 20 most frequent genotypes ", ## 20: argument to  plot_genotype_counts
+                                            "for reasons of figure size and legibility of genotype labels .",
+                                            "The table shows all the genotypes. </p></span>",
+                                            )
+                                       ),
                      ## tags$h4("(This output is also displayed as the second row of figures. ",
             ##         "Choose the output to display from the left radio buttons ",
             ##         "'Predictions from models to display')"),
@@ -3119,9 +3098,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             )
         }
     })
-    ## sometimes the tooltip misbehaves
-    shinyBS::removeTooltip(session, "table_out3")
-
+   
     ## Download button
     output$download_cpm <- downloadHandler(
         filename = function() sprintf("%s_cpm.rds", input$select_cpm),
@@ -3328,3 +3305,74 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## }
     ## ## And now, display_freqs will likely be called
     ## )
+
+
+## Examples with prompter and shinyBS
+
+
+
+## |> prompter::add_prompt(
+##                  message =
+##                      paste("The list of genes next to 'From' and 'To' is kept sorted ",
+##                            "(alphabetically, often callen 'natural order'), with 'Root' first. ",
+##                            " You can ",
+##                            "see more genes (or fewer, up to the number of genes in your genotypes) ",
+##                            "by moving the slider of 'Number of genes'."),
+##                  position = "right",
+##                  rounded = TRUE,
+##                  bounce = TRUE,
+##                  size = "medium")
+## shinyBS::bsTooltip("dag_from",
+##                    HTML("<p>The list of genes next to \"From\" and \"To\" is kept sorted ",
+##                         "(alphabetically, often callen \"natural order\"), with \"Root\" first. ",
+##                         " You can ",
+##                         "see more (or fewer, up to the number of genes in your genotypes) ",
+                                           ##                         "by moving the slider of \"Number of genes\".</p>")
+                                           ##                  , "right", options = list(container = "body")
+                                           ##                    ),
+## Prompter is not opaque. Changing opacity possible?
+## https://github.com/etiennebacher/prompter/issues/3
+## But need to edit the CSS. PITA
+
+
+
+## shinyBS::bsTooltip("data2plot",
+##                    HTML("<p>This output is also displayed in tabular form on the bottom right.</p>",
+##                         "<br><p><u>\"Sampled genotype counts\"</u> is only available if you selected ",
+##                         "\"Sample genotypes\" under \"Advanced options\". </p>",
+##                         "<br>",
+##                         "<p>For <u>\"Predicted genotype relative frequencies\"</u> ",
+##                         "and <u>\"Sampled genotype counts\"</u>, the histograms only ",
+##                         "show the 20 most frequent genotypes ", ## 20: argument to  plot_genotype_counts
+##                         "for reasons of figure size and legibility of genotype labels .",
+##                         "The table shows all the genotypes. </p>",
+##                         "<br>",
+##                         "<p>For <u>\"Predicted genotype relative frequencies\"</u> ",
+##                         "we add, to the table, the relative frequencies of genotypes in the original data ",
+##                         "to make it easier to visually asses how close predictions are to observed data. ",
+##                         "(It would not be sensible to do this with \"Sampled genotype counts\" as ",
+##                         "those include additional sampling noise.) For easier comparison, both genotypes ",
+##                         "with no observed counts in the original data ",
+##                         "and genotypes with predicted frequency exactly 0 are left as empty (not as 0) ",
+##                         "in the displayed table.</p>"
+##                         ),
+##                    "right", options = list(container = "body")
+##                    )
+## |> prompter::add_prompt(message = 
+##                             HTML("This output is also displayed in tabular form on the bottom right.",
+##                                  "                   ",
+##                                  paste("<p>\"Sampled genotype counts\" is only available if you selected ",
+##                                        "\"Sample genotypes\" under \"Advanced options\". </p>"),
+##                                  "                   ",
+##                                  paste("For \"Predicted genotype relative frequencies\" ",
+##                                        "and \"Sampled genotype counts\", the histograms only ",
+##                                        "show the 20 most frequent genotypes ", ## 20: argument to  plot_genotype_counts
+##                                        "for reasons of figure size and legibility of genotype labels .",
+##                                        "The table shows all the genotypes. "),
+##                                  sep = "\n"
+##                                  ),
+##                         position = "right",
+##                         rounded = TRUE,
+##                         bounce = TRUE,
+##                         size = "large"
+##                         )

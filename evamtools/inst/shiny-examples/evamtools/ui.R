@@ -1,9 +1,9 @@
 ## Copyright 2022 Pablo Herrera Nieto, Ramon Diaz-Uriarte
 
 cpm_info <- function(){
-  tags$div(id = "background",
-    tags$head(
-      tags$style(HTML("
+    tags$div(id = "background",
+             tags$head(
+                      tags$style(HTML("
         html, body{
           margin: 0;
         }
@@ -62,18 +62,18 @@ cpm_info <- function(){
           padding:0;
         }
         "
-    ))),
-    tags$div(id = "cpm_info",
-      includeMarkdown("assets/landing_page.md")
-    )
-  )
+        ))),
+        tags$div(id = "cpm_info",
+                 includeMarkdown("assets/landing_page.md")
+                 )
+        )
 }
 
 
 tutorial <- function(){
-  tags$div(id = "background",
-    tags$head(
-      tags$style(HTML("
+    tags$div(id = "background",
+             tags$head(
+                      tags$style(HTML("
         html, body{
           margin: 0;
         }
@@ -132,18 +132,18 @@ tutorial <- function(){
           padding:0;
         }
         "
-    ))),
-    tags$div(id = "cpm_info",
-      includeMarkdown("assets/tutorial.md")
-    )
-  )
+        ))),
+        tags$div(id = "cpm_info",
+                 includeMarkdown("assets/tutorial.md")
+                 )
+        )
 }
 
 results_simple <- function(){
     fluidPage(
         tags$head(
-            tags$style(
-                HTML("
+                 tags$style(
+                          HTML("
                     .row{
                       width: 98%;
                       margin: auto;
@@ -271,68 +271,68 @@ results_simple <- function(){
 
                     }
                     "
-                )
-            )
-        ),
-        tags$div(class = "row",
-          # column(1,
-          # column(11,
-            column(2,
-              tags$div(class = "frame",
-                       tags$h3("Data name"),
-                       uiOutput("cpm_list")
-                       |> prompter::add_prompt(message =
-                                                   paste("Analyzed data. ",
-                                                         "Beware: we cannot guarantee you have ",
-                                                         "not made additional changes ",
-                                                         "to the data ",
-                                                         "(model changes, genotype ",
-                                                         "frequencies changes) ",
-                                                         "in the corresponding \'User input\' ",
-                                                         " screen since ",
-                                                         "you analyzed them."),
-                                               position = "bottom",
-                                               rounded = TRUE,
-                                               bounce = TRUE,
-                                               size = "medium")
-                       ),
-              uiOutput("customize"),
-              tags$div(class = "frame",
-                       tags$h3(HTML("Download CPM results <br> and analyzed data")),
-                       actionButton("how2downloadcpm", "Help", class = "btn-info"),
-                       tags$div(class = "download_button",
-                                downloadButton("download_cpm", "Download")
-                                )
-                       ),
-              tags$div(
-                       tags$h5(paste("evamtools version: ",
-                          packageVersion("evamtools")))
-                       )
-              ),
-            column(10,
-              column(12, uiOutput("sims")),
-              column(12, uiOutput("sims2"))
-            )
-            ,
-            column(4,
-                   ## FIXME zzply
-                   uiOutput("original_data")
-            ),
-            column(6,
-              uiOutput("tabular_data")
-            )
-
-          # )
-        )
+      )
+      )
+      ),
+      tags$div(class = "row",
+                                        # column(1,
+                                        # column(11,
+               column(2,
+                      tags$div(id="dummy_data_name",
+                               class = "frame",
+                               tags$h3("Data name"),
+                               uiOutput("cpm_list"),
+                               tippy::tippy_this("dummy_data_name",
+                                                 paste("<span style='font-size:1.5em; text-align:left;'>",
+                                                       "Analyzed data. ",
+                                                       "Beware: we cannot guarantee you have ",
+                                                       "not made additional changes ",
+                                                       "to the data ",
+                                                       "(model changes, genotype ",
+                                                       "frequencies changes) ",
+                                                       "in the corresponding 'User input' ",
+                                                       " screen since ",
+                                                       "you analyzed them.",
+                                                       "<span>"),
+                                                 arrow = TRUE, animation = "shift-toward"
+                                                 ## , placement = "right"
+                                                 ),
+                               ),
+                      uiOutput("customize"),
+                      tags$div(class = "frame",
+                               tags$h3(HTML("Download CPM results <br> and analyzed data")),
+                               actionButton("how2downloadcpm", "Help", class = "btn-info"),
+                               tags$div(class = "download_button",
+                                        downloadButton("download_cpm", "Download")
+                                        )
+                               ),
+                      tags$div(
+                               tags$h5(paste("evamtools version: ",
+                                             packageVersion("evamtools")))
+                           )
+                      ),
+               column(10,
+                      column(12, uiOutput("sims")),
+                      column(12, uiOutput("sims2"))
+                      )
+              ,
+               column(4,
+                      ## FIXME zzply
+                      uiOutput("original_data")
+                      ),
+               column(6,
+                      uiOutput("tabular_data")
+                      )
+               )
     )
-
 }
 
 user_input <- function() {
     fluidPage(
         ## require(shinyBS),
-        prompter::use_prompt(),
+        ## prompter::use_prompt(),
         shinyjs::useShinyjs(),
+        ## tippy::use_tippy(),
         tags$head(
                  tags$style(HTML("
       body{
@@ -907,3 +907,17 @@ ui <-
     ## )
     )
 
+## |> prompter::add_prompt(message =
+##                             paste("Analyzed data. ",
+##                                   "Beware: we cannot guarantee you have ",
+##                                   "not made additional changes ",
+##                                   "to the data ",
+##                                   "(model changes, genotype ",
+##                                   "frequencies changes) ",
+##                                   "in the corresponding \'User input\' ",
+##                                   " screen since ",
+##                                   "you analyzed them."),
+##                         position = "bottom",
+##                         rounded = TRUE,
+##                         bounce = TRUE,
+##                         size = "medium")
