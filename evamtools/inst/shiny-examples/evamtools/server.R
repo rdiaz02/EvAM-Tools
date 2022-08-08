@@ -93,9 +93,9 @@ sanity_new_gene_names <- function(x) {
 ## more serious refactoring.
 
 ## We reset the number of genes back to an OK number
-dag_more_genes_than_set_genes <- function(input, dag_data = dag_data(),
+dag_more_genes_than_set_genes <- function(input, dag_model_as_dframe = dag_model_as_dframe(),
                                           session = session) {
-    gene_names <- setdiff(unique(c(dag_data$From, dag_data$To)),
+    gene_names <- setdiff(unique(c(dag_model_as_dframe$From, dag_model_as_dframe$To)),
                           "Root")
     number_of_genes <- length(gene_names)
     if (!is.null(input$gene_number) &&
@@ -122,8 +122,8 @@ dag_message_more_genes_than_set_genes <- function() {
 ## data is the big object, with a $data inside. Yeah, great naming
 csd_more_genes_than_set_genes <- function(input, data,
                                           session = session) {
-    number_of_genes <- ifelse(is.null(data$data),
-                              0, sum(colSums(data$data) > 0))
+    number_of_genes <- ifelse(is.null(data$matrix_subjects_genes),
+                              0, sum(colSums(data$matrix_subjects_genes) > 0))
     if (!is.null(input$gene_number) &&
         (number_of_genes > input$gene_number)) {
         updateNumericInput(session, "gene_number", value = number_of_genes)
@@ -287,16 +287,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         epos        = default_epos 
     )
 
-    the_dag_model <- reactiveValues(
-        stored_dag_model = default_dag_model
-    )
-
+   
     
    
     data <- reactiveValues(
-        csd_counts = .ev_SHINY_dflt$template_data$csd_counts
-      , data = .ev_SHINY_dflt$template_data$data
-      , dag = .ev_SHINY_dflt$template_data$dag
+        genotype_counts_df = .ev_SHINY_dflt$template_data$genotype_counts_df
+      , matrix_subjects_genes = .ev_SHINY_dflt$template_data$matrix_subjects_genes
+      , adjmat_dag = .ev_SHINY_dflt$template_data$adjmat_dag
       , DAG_parent_set = .ev_SHINY_dflt$template_data$DAG_parent_set
       , lambdas = .ev_SHINY_dflt$template_data$lambdas
       , thetas = .ev_SHINY_dflt$template_data$thetas
@@ -323,8 +320,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         ## provide_gene_names is being enabled somewhere I can't locate
         ## So make sure we catch it right on the redisplay
         ## There are a bunch of calls like this.
-        if ((!is.null(data$data) ||
-             (nrow(data$csd_counts) > 0))) {
+        if ((!is.null(data$matrix_subjects_genes) ||
+             (nrow(data$genotype_counts_df) > 0))) {
             mymessage("    disabled provide_gene_names under display_freqs")
             shinyjs::disable("provide_gene_names")
         }  
@@ -348,7 +345,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
         return(
             evamtools:::reorder_to_standard_order_count_df(
-                            data$csd_counts[data$csd_counts$Counts > 0, ,
+                            data$genotype_counts_df[data$genotype_counts_df$Counts > 0, ,
                                             drop = FALSE]))
    
     })
@@ -371,7 +368,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             
             current_data <- datasets$all_csd[[input$input2build]][[input$select_csd]]
             new_gnames <-
-                set_gene_names_after_resize(current_data$data,
+                set_gene_names_after_resize(current_data$matrix_subjects_genes,
                                             current_data$gene_names)
             data$gene_names <- new_gnames
 
@@ -386,8 +383,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 csd_message_more_genes_than_set_genes()
             }
         } else if (input$input2build == "dag") {
-            the_dag_data <- dag_data()
-            if (dag_more_genes_than_set_genes(input, the_dag_data, session)) {
+            the_dag_model_as_dframe <- dag_model_as_dframe()
+            if (dag_more_genes_than_set_genes(input, the_dag_model_as_dframe, session)) {
                 dag_message_more_genes_than_set_genes()
             }
         } else if (input$input2build == "matrix") {
@@ -422,10 +419,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                          "Use a different name for the uploaded data.")
                 }
                 tmp_data <- list()
-                tmp_data$data <- try(read.csv(input$csd$datapath),
+                tmp_data$matrix_subjects_genes <- try(read.csv(input$csd$datapath),
                                      silent = TRUE)
-                if (inherits(tmp_data$data, "try-error")) {
-                    if (grepl("no lines available in input", tmp_data$data)) {
+                if (inherits(tmp_data$matrix_subjects_genes, "try-error")) {
+                    if (grepl("no lines available in input", tmp_data$matrix_subjects_genes)) {
                         stop("The uploaded data contains no valid input. ",
                              "Did you upload an empty file?")
                     } else {
@@ -441,11 +438,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     evamtools:::to_stnd_csd_dataset(tmp_data)
                 datasets$all_csd[["upload"]][[dataset_name]]$name <- dataset_name
                 tmp_data$gene_names <- c(
-                    colnames(tmp_data$data)
-                  , LETTERS[(length(colnames(tmp_data$data)) + 1):max_genes]
+                    colnames(tmp_data$matrix_subjects_genes)
+                  , LETTERS[(length(colnames(tmp_data$matrix_subjects_genes)) + 1):max_genes]
                 )
 
-                tmp_data$n_genes <- ncol(tmp_data$data)
+                tmp_data$n_genes <- ncol(tmp_data$matrix_subjects_genes)
                 datasets$all_csd[["upload"]][[dataset_name]] <- tmp_data
                 
                 ## last_visited_pages["upload"] <<- dataset_name
@@ -544,38 +541,38 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             }
 
             ## Is this ever possible?
-            if ( (nrow(data$csd_counts) > 0 ) &&  (is.null(data$data))) {
+            if ( (nrow(data$genotype_counts_df) > 0 ) &&  (is.null(data$matrix_subjects_genes))) {
                 stop("This should not be possible: ",
-                     "(nrow(data$csd_counts) > 0 ) &&  (is.null(data$data))")
+                     "(nrow(data$genotype_counts_df) > 0 ) &&  (is.null(data$matrix_subjects_genes))")
             }
-            if ( (nrow(data$csd_counts) > 0 ) && all(is.na(data$data)) ) {
-                if (data$csd_counts["Genotype"] == "WT") {
+            if ( (nrow(data$genotype_counts_df) > 0 ) && all(is.na(data$matrix_subjects_genes)) ) {
+                if (data$genotype_counts_df["Genotype"] == "WT") {
                     mymessage("Data with only WT")
                 }  else {
                     stop("This should not be possible",
                          "These are not data with only WT and yet ",
-                         "(nrow(data$csd_counts) > 0 ) && all(is.na(data$data))"
+                         "(nrow(data$genotype_counts_df) > 0 ) && all(is.na(data$matrix_subjects_genes))"
                          ) 
                 }
             }
             
             ## A couple of paranoid consistency checks
-            if (nrow(data$csd_counts) > 0) {
-                ddtmp <- evamtools:::genotypeCounts_to_data(data$csd_counts,
+            if (nrow(data$genotype_counts_df) > 0) {
+                ddtmp <- evamtools:::genotypeCounts_to_data(data$genotype_counts_df,
                                                             e = 0)
-                ddtmp2 <- data$data[, colnames(ddtmp), drop = FALSE]
+                ddtmp2 <- data$matrix_subjects_genes[, colnames(ddtmp), drop = FALSE]
                 stopifnot(all.equal(colSums(ddtmp2), colSums(ddtmp)))
                 c_ddtmp2 <- evamtools:::data_to_counts(ddtmp2, "data.frame",
                                                        omit_0 = TRUE)
                 rownames(c_ddtmp2) <- c_ddtmp2$Genotype
-                csdc_clean <- data$csd_counts[data$csd_counts$Counts > 0, ]
+                csdc_clean <- data$genotype_counts_df[data$genotype_counts_df$Counts > 0, ]
                 rownames(csdc_clean) <- csdc_clean$Genotype
                 stopifnot(all.equal(c_ddtmp2[csdc_clean[, "Genotype"], ],
                                     csdc_clean))
                 rm(ddtmp2, ddtmp)
             }
 
-            if ((input$input2build == "upload") && is.null(data$data)) {
+            if ((input$input2build == "upload") && is.null(data$matrix_subjects_genes)) {
                 stop("When no data has been uploaded, ",
                      "it makes no sense to rename the data: ",
                      "there is nothing you could do with them, ",
@@ -583,12 +580,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             }
 
             n_genes <- ifelse(input$input2build == "upload",
-                       ifelse(is.null(data$data), 0, ncol(data$data)),
+                       ifelse(is.null(data$matrix_subjects_genes), 0, ncol(data$matrix_subjects_genes)),
                        input$gene_number)
             
             tmp_data <- list(
-                data = data$data
-              , dag = data$dag
+                matrix_subjects_genes = data$matrix_subjects_genes
+              , adjmat_dag = data$adjmat_dag
               , gene_names = data$gene_names
               , DAG_parent_set = data$DAG_parent_set
               , lambdas = data$lambdas
@@ -615,23 +612,23 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         content = function(file) {
             tmp_data <- datasets$all_csd[[input$input2build]][[input$select_csd]]
             if (input$input2build %in%  c("csd", "upload")) {
-                saveRDS(tmp_data$data, file=file)
+                saveRDS(tmp_data$matrix_subjects_genes, file=file)
             } else if(input$input2build == "dag") {
-                gene_names <- setdiff(unique(c(dag_data()$From, dag_data()$To)),
+                gene_names <- setdiff(unique(c(dag_model_as_dframe()$From, dag_model_as_dframe()$To)),
                                       "Root")
                 number_of_genes <- length(gene_names)
                 stopifnot(number_of_genes == input$gene_number)
                 data2save <- list(
-                    data = tmp_data$data[, 1:number_of_genes]
-                  , model_edges = dag_data()
+                    data = tmp_data$matrix_subjects_genes[, 1:number_of_genes]
+                  , model_edges = dag_model_as_dframe()
                   , model = the_dag_model$stored_dag_model
                   , DAG_parent_set = tmp_data$DAG_parent_set[1:number_of_genes]
-                  , dag = tmp_data$dag[1:(number_of_genes + 1),
-                                       1:(number_of_genes + 1)])
+                  , adjmat_dag = tmp_data$adjmat_dag[1:(number_of_genes + 1),
+                                                           1:(number_of_genes + 1)])
                 saveRDS(data2save, file=file)
             } else if (input$input2build == "matrix") {
                 data2save <-
-                    list(data = tmp_data$data[,1:input$gene_number],
+                    list(data = tmp_data$matrix_subjects_genes[,1:input$gene_number],
                          log_Theta_matrix = tmp_data$thetas[1:input$gene_number,
                                                             1:input$gene_number])
                 saveRDS(data2save, file=file)
@@ -716,15 +713,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             selected <- reactive_last_visited_pages[[input$input2build]]
             tmp_data <- datasets$all_csd[[input$input2build]][[selected]]
             data$gene_names <- tmp_data$gene_names
-            data$data <- tmp_data$data
+            data$matrix_subjects_genes <- tmp_data$matrix_subjects_genes
 
             shinyjs::disable("analysis")
             shinyjs::hide("all_advanced_options")
-            if (!is.null(data$data)) {
-                data$csd_counts <- evamtools:::get_csd(data$data)
+            if (!is.null(data$matrix_subjects_genes)) {
+                data$genotype_counts_df <- evamtools:::get_csd(data$matrix_subjects_genes)
                 shinyjs::enable("analysis")
             } else {
-                data$csd_counts <- .ev_SHINY_dflt$template_data$csd_counts
+                data$genotype_counts_df <- .ev_SHINY_dflt$template_data$genotype_counts_df
             }
 
             mymessage("At observeEvent toListen2")
@@ -732,17 +729,16 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             shinyjs::disable("provide_gene_names")
             
             
-            
-            data$dag <- tmp_data$dag
+            data$adjmat_dag <- tmp_data$adjmat_dag
             data$DAG_parent_set <- tmp_data$DAG_parent_set
             data$lambdas <- tmp_data$lambdas
             data$thetas <- tmp_data$thetas
             data$name <- tmp_data$name
             data$n_genes <- tmp_data$n_genes
 
-
+            browser()
             if (input$input2build == "dag") {
-                number_of_parents <- colSums(data$dag)
+                number_of_parents <- colSums(data$adjmat_dag)
                 to_keep <- sum(number_of_parents > 0)
                 n_genes <- ifelse(to_keep < 1, default_number_genes, to_keep)
                 ## Why the next line?
@@ -753,9 +749,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     n_genes <- default_number_genes
                 } 
             } else if (input$input2build %in% c("csd", "upload")) {
-                if (!is.null(data$data))  {
-                    n_genes <- ncol(data$data)  
-                } else { ## data$data is null
+                if (!is.null(data$matrix_subjects_genes))  {
+                    n_genes <- ncol(data$matrix_subjects_genes)  
+                } else { ## data$matrix_subjects_genes is null
                     if (input$input2build == "csd") {
                         n_genes <- default_number_genes
                     } else { ## if (input$input2build == "upload")
@@ -780,7 +776,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ##         If we only have WT, n_genes is 0, and it breaks
                 ##         and we have set minimum number of genes to 2
                 ## id_change_genotype_muts
-                gene_options <- set_gene_names_after_resize(data$data,
+                gene_options <- set_gene_names_after_resize(data$matrix_subjects_genes,
                                                             data$gene_names)[1:max(2, n_genes)]
 
                 updateCheckboxGroupInput(session, "genotype", label = "Mutations",
@@ -791,7 +787,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 updateNumericInput(session, "genotype_freq", value = NA)
             }
 
-            if (is.null(data$data) || (nrow(data$csd_counts) == 0)) {
+            if (is.null(data$matrix_subjects_genes) || (nrow(data$genotype_counts_df) == 0)) {
                 mymessage("    enabled provide_gene_names at end of toListen")
                 shinyjs::enable("provide_gene_names")
             }
@@ -860,31 +856,31 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##         new_data$name <- data$name
     ##         new_data$lambdas <- data$lambdas
     ##         new_data$DAG_parent_set <- data$DAG_parent_set
-    ##         new_data$dag <- data$dag
+    ##         new_data$adjmat_dag <- data$adjmat_dag
     ##         new_data$thetas <- data$thetas
-    ##         new_data$data <- data$data
+    ##         new_data$matrix_subjects_genes <- data$matrix_subjects_genes
 
     ##         ## To rename, use lookup
     ##         names(new_data$lambdas) <- names_dict[names(new_data$lambdas)]
     ##         names(new_data$DAG_parent_set) <- names_dict[names(new_data$DAG_parent_set)]
-    ##         colnames(new_data$dag) <- names_dict[colnames(new_data$dag)]
-    ##         rownames(new_data$dag) <- names_dict[rownames(new_data$dag)]
+    ##         colnames(new_data$adjmat_dag) <- names_dict[colnames(new_data$adjmat_dag)]
+    ##         rownames(new_data$adjmat_dag) <- names_dict[rownames(new_data$adjmat_dag)]
     ##         colnames(new_data$thetas) <- names_dict[colnames(new_data$thetas)]
     ##         rownames(new_data$thetas) <- names_dict[rownames(new_data$thetas)]
-    ##         if (!is.null(new_data$data)) {
-    ##             colnames(new_data$data) <- names_dict[colnames(new_data$data)]
+    ##         if (!is.null(new_data$matrix_subjects_genes)) {
+    ##             colnames(new_data$matrix_subjects_genes) <- names_dict[colnames(new_data$matrix_subjects_genes)]
     ##         }
     ##         ## To create
-    ##         new_data$csd_counts <- get_csd(new_data$data)
+    ##         new_data$genotype_counts_df <- get_csd(new_data$matrix_subjects_genes)
     
     ##         ## Assign to the correct places
     ##         data$gene_names <- new_gene_names
-    ##         data$data <- new_data$data
-    ##         data$dag <- new_data$dag
+    ##         data$matrix_subjects_genes <- new_data$matrix_subjects_genes
+    ##         data$adjmat_dag <- new_data$adjmat_dag
     ##         data$DAG_parent_set <- new_data$DAG_parent_set
     ##         data$thetas <- new_data$thetas
     ##         data$lambdas <- new_data$lambdas
-    ##         data$csd_counts <- new_data$csd_counts
+    ##         data$genotype_counts_df <- new_data$genotype_counts_df
     
     ##         datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
     
@@ -910,16 +906,16 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         ## Why should it have this effect?
         ## Even the code below screws things up. 
         ## Yes, this is the gene number slider. 
-        if ((!is.null(isolate(data$data)) ||
-             (nrow(isolate(data$csd_counts)) > 0))) {
+        if ((!is.null(isolate(data$matrix_subjects_genes)) ||
+             (nrow(isolate(data$genotype_counts_df)) > 0))) {
             mymessage("    disabled provide_gene_names renderUI")
             shinyjs::disable("provide_gene_names")
         }
         
         ## This also breaks things. Not touching slider or anything.
         ## is it from accessing data? Yes. The following leads to chaos
-        ## if ((!is.null(data$data)) ||
-        ##     (nrow(data$csd_counts) > 0)) {
+        ## if ((!is.null(data$matrix_subjects_genes)) ||
+        ##     (nrow(data$genotype_counts_df) > 0)) {
         ##     uu <- 3 + 2
         ##     message("    just a message from renderUI, no isolate")
         ##     ## shinyjs::disable("provide_gene_names")
@@ -927,8 +923,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
         ## ## Not if we use isolate
         ## ## Would this work if we used isolate?
-        ## if ((!is.null(isolate(data$data)) ||
-        ##      (nrow(isolate(data$csd_counts)) > 0))) {
+        ## if ((!is.null(isolate(data$matrix_subjects_genes)) ||
+        ##      (nrow(isolate(data$genotype_counts_df)) > 0))) {
         ##     uu <- 3 + 2
         ##     message("    just a message from renderUI, isolate ",
         ##             "so you won't see me")
@@ -1060,8 +1056,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 ## catch it here.
                 ## I still leave a bunch of them, as it would be ideal not to
                 ## end here.
-                if ((!is.null(data$data) ||
-                     (nrow(data$csd_counts) > 0))) {
+                if ((!is.null(data$matrix_subjects_genes) ||
+                     (nrow(data$genotype_counts_df) > 0))) {
                     mymessage("    disabled provide_gene_names action_provide_gene_names")
                     shinyjs::disable("provide_gene_names")
                     stop("As the tooltip and box text explained, ",
@@ -1102,19 +1098,19 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 new_data$name <- data$name
                 new_data$lambdas <- data$lambdas
                 new_data$DAG_parent_set <- data$DAG_parent_set
-                ## BEWARE! If we do not do this, new_data$dag,
+                ## BEWARE! If we do not do this, new_data$adjmat_dag,
                 ## because of partial matching, gets DAG_parent_set
-                if (!is.null(data$dag)) {
-                    new_data[["dag"]] <- data[["dag"]]
+                if (!is.null(data$adjmat_dag)) {
+                    new_data[["adjmat_dag"]] <- data[["adjmat_dag"]]
                 } else {
-                    new_data$dag <- NULL
+                    new_data$adjmat_dag <- NULL
                 }
                 if (!is.null(data$thetas)) {
                     new_data$thetas <- data$thetas
                 } else {
                     new_data$thetas <- NULL
                 }
-                new_data$data <- data$data
+                new_data$matrix_subjects_genes <- data$matrix_subjects_genes
 
                 mymessage("        At action_provide_gene_names: 2")
                 ## To rename, use lookup
@@ -1122,27 +1118,27 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 names(new_data$DAG_parent_set) <- names_dict[names(new_data$DAG_parent_set)]
 
                 if (!is.null(new_data[["dag"]])) {
-                    colnames(new_data$dag) <- names_dict[colnames(new_data$dag)]
-                    rownames(new_data$dag) <- names_dict[rownames(new_data$dag)]
+                    colnames(new_data$adjmat_dag) <- names_dict[colnames(new_data$adjmat_dag)]
+                    rownames(new_data$adjmat_dag) <- names_dict[rownames(new_data$adjmat_dag)]
                 }
                 if (!is.null(new_data$thetas)) {
                     colnames(new_data$thetas) <- names_dict[colnames(new_data$thetas)]
                     rownames(new_data$thetas) <- names_dict[rownames(new_data$thetas)]
                 }
-                if (!is.null(new_data$data)) {
-                    colnames(new_data$data) <- names_dict[colnames(new_data$data)]
+                if (!is.null(new_data$matrix_subjects_genes)) {
+                    colnames(new_data$matrix_subjects_genes) <- names_dict[colnames(new_data$matrix_subjects_genes)]
                 }
                 ## To create
-                new_data$csd_counts <- evamtools:::get_csd(new_data$data)
+                new_data$genotype_counts_df <- evamtools:::get_csd(new_data$matrix_subjects_genes)
 
                 ## Assign to the correct places
                 data$gene_names <- new_gene_names
-                data$data <- new_data$data
-                data$dag <- new_data$dag
+                data$matrix_subjects_genes <- new_data$matrix_subjects_genes
+                data$adjmat_dag <- new_data$adjmat_dag
                 data$DAG_parent_set <- new_data$DAG_parent_set
                 data$thetas <- new_data$thetas
                 data$lambdas <- new_data$lambdas
-                data$csd_counts <- new_data$csd_counts
+                data$genotype_counts_df <- new_data$genotype_counts_df
                 mymessage("        At action_provide_gene_names: 3")
                 datasets$all_csd[[input$input2build]][[input$select_csd]] <- new_data
                 ## Disable as soon as clicked on "Use these genes"
@@ -1199,7 +1195,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         n_genes <- ifelse(is.null(input$gene_number), default_number_genes,
                           input$gene_number)
 
-        gene_options <- set_gene_names_after_resize(data$data,
+        gene_options <- set_gene_names_after_resize(data$matrix_subjects_genes,
                                                     data$gene_names)[1:n_genes]
 
         if (input$input2build == "csd") {
@@ -1235,7 +1231,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$div(class = "inline",
                               checkboxGroupInput(inputId = "genotype",
                                                  label = "Mutations",
-                                                 choices = set_gene_names_after_resize(data$data,
+                                                 choices = set_gene_names_after_resize(data$matrix_subjects_genes,
                                                                                        data$gene_names)[1:n_genes]),
                               shinyBS::bsTooltip("genotype",
                                                  HTML("<p>The list of genes next to \"Mutations\" is kept sorted ",
@@ -1267,16 +1263,16 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             mymessage("At output$define_genotype, DAG")
 
             ## ## Otherwise, it gets enabled again occasionally.
-            if ((!is.null(data$data) ||
-                 (nrow(data$csd_counts) > 0))) {
+            if ((!is.null(data$matrix_subjects_genes) ||
+                 (nrow(data$genotype_counts_df) > 0))) {
                 mymessage("    disabled provide_gene_names under select_csd")
                 shinyjs::disable("provide_gene_names")
             }
             
-            current_dag_data <- dag_data()
-            if (is.null(current_dag_data)) mymessage("   current_dag_data is NULL")
-            genes_in_dag <- setdiff(unique(c(current_dag_data$From,
-                                             current_dag_data$To)),
+            current_dag_model_as_dframe <- dag_model_as_dframe()
+            if (is.null(current_dag_model_as_dframe)) mymessage("   current_dag_model_as_dframe is NULL")
+            genes_in_dag <- setdiff(unique(c(current_dag_model_as_dframe$From,
+                                             current_dag_model_as_dframe$To)),
                                     "Root")
             if (length(genes_in_dag) < n_genes) {
                 genes_not_in_dag <- setdiff(gene_options, genes_in_dag)
@@ -1521,7 +1517,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##                           tags$h3(HTML("<br/>")),
     ##                           ),
     ##                  tags$div(id = "csd_table",
-    ##                           DT::DTOutput("csd_counts")
+    ##                           DT::DTOutput("genotype_counts_df")
     ##                           ),
     ##                  tags$h5(HTML("<br/>")),
     ##                  if (input$input2build %in% c("csd"))
@@ -1552,7 +1548,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               tags$h3(HTML("<br/>")),
                               ),
                      tags$div(id = "csd_table",
-                              DT::DTOutput("csd_counts")
+                              DT::DTOutput("genotype_counts_df")
                               ),
                      tags$h5(HTML("<br/>")),
                      ## We could include upload and dag here, but it makes no sense
@@ -1582,7 +1578,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##     ## But here, it is often caught even earlier and we avoid the
     ##     ## flickering screen that happens when we left the error handling below.
         
-    ##     number_of_parents <- colSums(data$dag)
+    ##     number_of_parents <- colSums(data$adjmat_dag)
 
     ##     if (input$dag_model == "OncoBN") {
     ##         if (any(data$DAG_parent_set == "XOR")) {
@@ -1632,13 +1628,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         tryCatch({
             ## FIXME Unnecessary, as caught at a much more sensible place
             ## but leave it here anyway, just in case, until much more testing done.
-            ## The other messages come from the dag_data <- reactive
+            ## The other messages come from the dag_model_as_dframe <- reactive
             ## block.
             ## But here, it is often caught even earlier and we avoid the
             ## flickering screen that happens when we only used the error
             ## handling below.
 
-            number_of_parents <- colSums(data$dag)
+            number_of_parents <- colSums(data$adjmat_dag)
 
             if ((input$dag_model %in% c("OT", "OncoBN")) &&
                 (!is.null(data$lambdas)) &&
@@ -1701,7 +1697,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     
     ## DAG builder
     ## Controling dag builder
-    ## FIXME: Would it be cleaner if dag_data was eventReactive, watching for
+    ## FIXME: Would it be cleaner if dag_model_as_dframe was eventReactive, watching for
     ##  input$dag_model and input$dag_table_cell_edit?
 
     ## FIXME: some of the error messages sometimes are triggered twice such as if
@@ -1731,20 +1727,20 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
              ## DAG_parent_set and the dag, leaving
              ## this in a possibly inconsistent state
              data$DAG_parent_set,
-             data$dag,
+             data$adjmat_dag,
              ## modified in clear_dag
              data$lambdas)
     })
-    ## dag_data <- eventReactive(toListen2(),
+    ## dag_model_as_dframe <- eventReactive(toListen2(),
 
-    ## dag_data <- reactive({
-    dag_data <- eventReactive(toListen2(), {
+    ## dag_model_as_dframe <- reactive({
+    dag_model_as_dframe <- eventReactive(toListen2(), {
         if (isolate(input$input2build) != "dag") {
-            mymessage("dag_data reactive: Why are you calling ",
-                      "dag_data if not dealing with DAGs?")
+            mymessage("dag_model_as_dframe reactive: Why are you calling ",
+                      "dag_model_as_dframe if not dealing with DAGs?")
             return()
         }
-        mymessage("At dag_data reactive call")
+        mymessage("At dag_model_as_dframe reactive call")
         ## FIXME: why do I need to make it eventReactive and listen
         ## on the next three' Would it not be enough just using them?
         input$dag_model
@@ -1756,7 +1752,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
         
         all_gene_names <- c("Root", data$gene_names)
-        edges <- which(data$dag == 1, arr.ind = TRUE)
+        edges <- which(data$adjmat_dag == 1, arr.ind = TRUE)
         tmp_DAG_parent_set <- data$DAG_parent_set
         x <- length(tmp_DAG_parent_set)
         ## The code below could fail (without severe consequences)
@@ -1776,50 +1772,50 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             mymessage("    data$name not in dag_dataset_names. Returning a NULL")
             return(NULL)
         }
-        mymessage("    dag_data_reactive, position 3")
+        mymessage("    dag_model_as_dframe_reactive, position 3")
         
         ## I have to this weird thing because using data$gene_names does not work
         ## for some unkown reason. Eh??!!! What weird thing?
         names(tmp_DAG_parent_set) <- all_gene_names[seq(2, x + 1)]
-        dag_data <- data.frame(From = all_gene_names[edges[, "row"]]
+        dag_model_as_dframe <- data.frame(From = all_gene_names[edges[, "row"]]
                              , To = all_gene_names[edges[, "col"]]
                              , Relation = tmp_DAG_parent_set[edges[, "col"] - 1]
                              , Lambdas = data$lambdas[edges[, "col"] - 1])
         
         if ((the_dag_model$stored_dag_model %in% c("OT", "OncoBN"))
-            & (any(dag_data$Lambdas < 0) | any(dag_data$Lambdas > 0.99999999))) {
+            & (any(dag_model_as_dframe$Lambdas < 0) | any(dag_model_as_dframe$Lambdas > 0.99999999))) {
             the_dag_model$stored_dag_model <<- "HESBCN"
             updateRadioButtons(session, "dag_model", selected = "HESBCN")
             showModal(dataModal(paste("thetas/probabilities should be between 0 and 1 ",
                                       "(actually, for numerical reasons, 0.99999999).")))
-            return(dag_data)
+            return(dag_model_as_dframe)
         }
 
         if (the_dag_model$stored_dag_model %in% c("OT")) {
-            if (any(duplicated(dag_data$To))) {
+            if (any(duplicated(dag_model_as_dframe$To))) {
                 the_dag_model$stored_dag_model <<- "HESBCN"
                 updateRadioButtons(session, "dag_model", selected = "HESBCN")
                 showModal(dataModal(
                     paste("This DAG has nodes with multiple parents. ",
                           "OT can only use trees ",
                           "(i.e. no node can have with multiple parents).")))
-            } else if (length(unique(dag_data$Relation)) > 2) {
+            } else if (length(unique(dag_model_as_dframe$Relation)) > 2) {
                 the_dag_model$stored_dag_model <<- "HESBCN"
                 updateRadioButtons(session, "dag_model", selected = "HESBCN")
                 showModal(dataModal(HTML("The OT model  ",
                                          "is only for trees. ")))
             } else {
-                colnames(dag_data) <- c("From", "To", "Relation", "Weight")
-                dag_data$Relation <- NULL
+                colnames(dag_model_as_dframe) <- c("From", "To", "Relation", "Weight")
+                dag_model_as_dframe$Relation <- NULL
             }
-            return(dag_data)
+            return(dag_model_as_dframe)
         } else if (the_dag_model$stored_dag_model %in% c("OncoBN")) {
-            if (any(dag_data$Relation == "XOR")) {
+            if (any(dag_model_as_dframe$Relation == "XOR")) {
                 the_dag_model$stored_dag_model <<- "HESBCN"
                 updateRadioButtons(session, "dag_model", selected = "HESBCN")
                 showModal(dataModal(HTML("The OncoBN model cannot include ",
                                          "XOR relationships.")))
-            } else if (length(unique(dag_data$Relation)) > 2) {
+            } else if (length(unique(dag_model_as_dframe$Relation)) > 2) {
                 the_dag_model$stored_dag_model <<- "HESBCN"
                 updateRadioButtons(session, "dag_model", selected = "HESBCN")
                 showModal(dataModal(HTML("The OncoBN model can only include ",
@@ -1827,12 +1823,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                          "(conjunctive ---AND--- or disjunctive ---OR---, ",
                                          "as specified in \"Advanced options\").")))
             } else {
-                colnames(dag_data) <- c("From", "To", "Relation", "theta")
+                colnames(dag_model_as_dframe) <- c("From", "To", "Relation", "theta")
             }
-            return(dag_data) 
+            return(dag_model_as_dframe) 
         } else {
-            mymessage("    dag_data_reactive, position 4")
-            return(dag_data)
+            mymessage("    dag_model_as_dframe_reactive, position 4")
+            return(dag_model_as_dframe)
         }
     })
 
@@ -1843,7 +1839,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     output$dag_table <-
         DT::renderDT(
-                dag_data(),
+                dag_model_as_dframe(),
                 escape = FALSE, selection = 'none', server = FALSE,
                 rownames = FALSE,
                 editable = list(target = "all", disable = list(columns = c(0, 1))),
@@ -1858,11 +1854,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         from_gene <- input$dag_from
         to_gene <- input$dag_to
         tryCatch({
-            tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene,
+            tmp_data <- evamtools:::modify_dag(data$adjmat_dag, from_gene, to_gene,
                                                operation = "add",
                                                parent_set = data$DAG_parent_set,
                                                dag_model = the_dag_model$stored_dag_model)
-            data$dag <- tmp_data$dag
+            data$adjmat_dag <- tmp_data$adjmat_dag
             data$DAG_parent_set <- tmp_data$parent_set
             datasets$all_csd[[input$input2build]][[input$select_csd]] <-
                 evamtools:::to_stnd_csd_dataset(data)
@@ -1880,18 +1876,18 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         from_gene <- input$dag_from
         to_gene <- input$dag_to
         tryCatch({
-            tmp_data <- evamtools:::modify_dag(data$dag, from_gene, to_gene,
+            tmp_data <- evamtools:::modify_dag(data$adjmat_dag, from_gene, to_gene,
                                                operation = "remove",
                                                parent_set = data$DAG_parent_set,
                                                dag_model = the_dag_model$stored_dag_model)
-            data$dag <- tmp_data$dag
+            data$adjmat_dag <- tmp_data$adjmat_dag
             data$DAG_parent_set <- tmp_data$parent_set
             datasets$all_csd[[input$input2build]][[input$select_csd]] <-
                 evamtools:::to_stnd_csd_dataset(data)
-            ## if (sum(data$dag) == 0) {
+            ## if (sum(data$adjmat_dag) == 0) {
             ##     ## WTF is this here? If nothing, nothing. Period.
-            ##     data$csd_counts <-
-            ##         datasets$all_csd[[input$input2build]][[input$select_csd]]$csd_counts
+            ##     data$genotype_counts_df <-
+            ##         datasets$all_csd[[input$input2build]][[input$select_csd]]$genotype_counts_df
             ## } else {
             shinyjs::click("resample_dag")
             ##        }
@@ -1905,13 +1901,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     observeEvent(input$clear_dag, {
         tryCatch({
             mymessage("At clear_dag")
-            tmp_data <- evamtools:::modify_dag(data$dag, NULL, NULL, operation = "clear")
-            tmp_dag <- tmp_data$dag
+            tmp_data <- evamtools:::modify_dag(data$adjmat_dag, NULL, NULL, operation = "clear")
+            tmp_dag <- tmp_data$adjmat_dag
             colnames(tmp_dag) <- rownames(tmp_dag) <- c("Root", data$gene_names)
             tmp_dag["Root", data$gene_names[1]] <- 1
-            data$dag <- tmp_dag
-            data$csd_counts <- .ev_SHINY_dflt$template_data$csd_counts
-            data$data <- .ev_SHINY_dflt$template_data$data
+            data$adjmat_dag <- tmp_dag
+            data$genotype_counts_df <- .ev_SHINY_dflt$template_data$genotype_counts_df
+            data$matrix_subjects_genes <- .ev_SHINY_dflt$template_data$matrix_subjects_genes
             data$DAG_parent_set <- tmp_data$DAG_parent_set
             data$lambdas <- .ev_SHINY_dflt$template_data$lambdas
             names(data$lambdas) <- names(data$DAG_parent_set) <- data$gene_names
@@ -1932,9 +1928,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             info <- input$dag_table_cell_edit
             mymessage("At dag_table_cell_edit, 1")
             tmp_data <-
-                evamtools:::modify_lambdas_and_parent_set_from_table(dag_data(),
+                evamtools:::modify_lambdas_and_parent_set_from_table(dag_model_as_dframe(),
                                                                      info, data$lambdas
-                                                                   , data$dag
+                                                                   , data$adjmat_dag
                                                                    , data$DAG_parent_set
                                                                    , dag_model = the_dag_model$stored_dag_model)
             data$lambdas <- tmp_data$lambdas
@@ -1952,11 +1948,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     observeEvent(input$resample_dag, {
         tryCatch({
             mymessage("At resample_dag")
-            if (sum(colSums(data$dag) > 0) < 2)
+            if (sum(colSums(data$adjmat_dag) > 0) < 2)
                 stop("The must be at least two genes ",
                      "in the DAG.")
-            the_dag_data <- dag_data()
-            gene_names <- setdiff(unique(c(the_dag_data$From, the_dag_data$To)),
+            the_dag_model_as_dframe <- dag_model_as_dframe()
+            gene_names <- setdiff(unique(c(the_dag_model_as_dframe$From, the_dag_model_as_dframe$To)),
                                   "Root")
             if ((input$num_samples < 1) ||
                 (input$num_samples >  max_allowed_num_samples)
@@ -1977,19 +1973,19 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  "less than 0 or greater than (or equal to) 1 ",
                                                  "(to prevent numerical problems, no larger than 0.99999999).")
             tmp_dag_data <-
-                evamtools:::generate_sample_from_dag(the_dag_data
+                evamtools:::generate_sample_from_dag(the_dag_model_as_dframe
                                                    , data$DAG_parent_set[gene_names]
                                                    , noise = input$obs_noise
                                                    , N = input$num_samples
                                                    , dag_model = the_dag_model$stored_dag_model
                                                    , epos = input$epos)
             
-            data$csd_counts <-
-                tmp_dag_data$csd_counts[tmp_dag_data$csd_counts[, 2] > 0, ]
-            data$data <- tmp_dag_data$data
+            data$genotype_counts_df <-
+                tmp_dag_data$genotype_counts_df[tmp_dag_data$genotype_counts_df[, 2] > 0, ]
+            data$matrix_subjects_genes <- tmp_dag_data$matrix_subjects_genes
             
-            datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- data$data
-            datasets$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$dag
+            datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- data$matrix_subjects_genes
+            datasets$all_csd[[input$input2build]][[input$select_csd]]$dag <- data$adjmat_dag
             datasets$all_csd[[input$input2build]][[input$select_csd]]$lambdas <- data$lambdas
             datasets$all_csd[[input$input2build]][[input$select_csd]]$DAG_parent_set <- data$DAG_parent_set
             
@@ -2184,9 +2180,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                            , 1:input$gene_number]
                                                , noise = input$obs_noise 
                                                , N = input$num_samples)
-            data$csd_counts <- mhn_data$csd_counts
-            data$data <- mhn_data$data
-            datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- mhn_data$data
+            data$genotype_counts_df <- mhn_data$genotype_counts_df
+            data$matrix_subjects_genes <- mhn_data$matrix_subjects_genes
+            datasets$all_csd[[input$input2build]][[input$select_csd]]$data <- mhn_data$matrix_subjects_genes
 
             generate_data$num_samples <- input$num_samples
             generate_data$obs_noise   <- input$obs_noise
@@ -2207,9 +2203,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tmp_thetas <- .ev_SHINY_dflt$template_data$thetas
             colnames(tmp_thetas) <- rownames(tmp_thetas) <- data$gene_names
             data$thetas <- tmp_thetas
-            data$dag <- NULL
-            data$csd_counts <- .ev_SHINY_dflt$template_data$csd_counts
-            data$data <- .ev_SHINY_dflt$template_data$data
+            data$adjmat_dag <- NULL
+            data$genotype_counts_df <- .ev_SHINY_dflt$template_data$genotype_counts_df
+            data$matrix_subjects_genes <- .ev_SHINY_dflt$template_data$matrix_subjects_genes
             data$DAG_parent_set <- .ev_SHINY_dflt$template_data$DAG_parent_set
             data$lambdas <- .ev_SHINY_dflt$template_data$lambdas
             names(data$lambdas) <- names(data$DAG_parent_set) <- data$gene_names
@@ -2267,7 +2263,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     observeEvent(input$genotype, {
         tryCatch({
             genotype <- paste(input$genotype, collapse = ", ")
-            genot_count <- data$csd_counts[, 2][data$csd_counts[, 1] == genotype]
+            genot_count <- data$genotype_counts_df[, 2][data$genotype_counts_df[, 1] == genotype]
             updateNumericInput(session, "genotype_freq", value = genot_count)
 
         }, error = function(e){
@@ -2277,12 +2273,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     observeEvent(input$clear_genotype, {
         tryCatch({
-            tmp_dag <- .ev_SHINY_dflt$template_data$dag
+            tmp_dag <- .ev_SHINY_dflt$template_data$adjmat_dag
             colnames(tmp_dag) <- rownames(tmp_dag) <- c("WT", data$gene_names)
             tmp_dag["WT", data$gene_names[1]] <- 1
-            data$dag <- tmp_dag
-            data$csd_counts <- .ev_SHINY_dflt$template_data$csd_counts
-            data$data <- .ev_SHINY_dflt$template_data$data
+            data$adjmat_dag <- tmp_dag
+            data$genotype_counts_df <- .ev_SHINY_dflt$template_data$genotype_counts_df
+            data$matrix_subjects_genes <- .ev_SHINY_dflt$template_data$matrix_subjects_genes
             data$DAG_parent_set <- .ev_SHINY_dflt$template_data$DAG_parent_set
             data$lambdas <- .ev_SHINY_dflt$template_data$lambdas
             names(data$lambdas) <- names(data$DAG_parent_set) <- data$gene_names
@@ -2302,16 +2298,16 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             genot_count <- ifelse(is.na(input$genotype_freq), -1,
                                   input$genotype_freq)
             if (genot_count > 0) {
-                data$csd_counts[genotype, ] <- c(genotype, genot_count)
-                rownames(data$csd_counts) <- data$csd_counts$Genotype
-                data$csd_counts[, 2] <- as.numeric(data$csd_counts[, 2])
+                data$genotype_counts_df[genotype, ] <- c(genotype, genot_count)
+                rownames(data$genotype_counts_df) <- data$genotype_counts_df$Genotype
+                data$genotype_counts_df[, 2] <- as.numeric(data$genotype_counts_df[, 2])
                 ## Filtering out non-positive counts
-                data$csd_counts <-
+                data$genotype_counts_df <-
                     evamtools:::reorder_to_standard_order_count_df(
-                                    data$csd_counts[data$csd_counts[, 2] > 0, ])
-                data$data <-
+                                    data$genotype_counts_df[data$genotype_counts_df[, 2] > 0, ])
+                data$matrix_subjects_genes <-
                     datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
-                        evamtools:::genotypeCounts_to_data(data$csd_counts, e = 0)
+                        evamtools:::genotypeCounts_to_data(data$genotype_counts_df, e = 0)
                 
                 
                 shinyjs::enable("analysis")
@@ -2324,7 +2320,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             updateNumericInput(session, "genotype_freq", value = NA)
 
             ## id_change_genotype_muts
-            gene_options <- set_gene_names_after_resize(data$data,
+            gene_options <- set_gene_names_after_resize(data$matrix_subjects_genes,
                                                         data$gene_names)[1:input$gene_number]
 
             updateCheckboxGroupInput(session, "genotype", label = "Mutations",
@@ -2341,7 +2337,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
     ## Genotypes table
-    output$csd_counts <- DT::renderDT( {
+    output$genotype_counts_df <- DT::renderDT( {
         d1 <- display_freqs()
         if (nrow(d1)) {
             d1 <- data.frame(Index = 1:nrow(d1),
@@ -2367,25 +2363,25 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         info = FALSE, paginate= FALSE),
     )
 
-    observeEvent(input$csd_counts_cell_edit, {
+    observeEvent(input$genotype_counts_df_cell_edit, {
         tryCatch({
-            info <- input$csd_counts_cell_edit
+            info <- input$genotype_counts_df_cell_edit
             info[ , "col"] <- 2
-            data$csd_counts <- DT::editData(data$csd_counts, info, "csd_counts")
+            data$genotype_counts_df <- DT::editData(data$genotype_counts_df, info, "genotype_counts_df")
 
             ## Filtering out non-positive counts
-            if (any(data$csd_counts[, 2] < 0))
+            if (any(data$genotype_counts_df[, 2] < 0))
                 showModal(modalDialog(paste("Counts < 0 present. ",
                                             "They will be removed.")))
             ## We want to purge 0 entries
-            data$csd_counts <- data$csd_counts[data$csd_counts[, 2] > 0, ]
+            data$genotype_counts_df <- data$genotype_counts_df[data$genotype_counts_df[, 2] > 0, ]
 
-            if (nrow(data$csd_counts) == 0) {
-                data$data <- NULL
+            if (nrow(data$genotype_counts_df) == 0) {
+                data$matrix_subjects_genes <- NULL
             } else {
-                data$data <-
+                data$matrix_subjects_genes <-
                     datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
-                        evamtools:::genotypeCounts_to_data(data$csd_counts, e = 0)
+                        evamtools:::genotypeCounts_to_data(data$genotype_counts_df, e = 0)
             }
             shinyjs::disable("provide_gene_names")
             }, error = function(e) {
@@ -2400,8 +2396,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## Not relevant anymore. Remove eventually.
             ## provide_gene_names is being enabled somewhere I can't locate
             ## So make sure we catch it right on the redisplay
-            ## if ((!is.null(data$data) ||
-            ##      (nrow(data$csd_counts) > 0))) {
+            ## if ((!is.null(data$matrix_subjects_genes) ||
+            ##      (nrow(data$genotype_counts_df) > 0))) {
             ##     mymessage("    disabled provide_gene_names under output_plot")
             ##     shinyjs::disable("provide_gene_names")
             ## }
@@ -2417,10 +2413,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         edges <- NULL
 
         if (input$input2build %in% c("dag")
-            && sum(data$dag) > 0
+            && sum(data$adjmat_dag) > 0
             && !is.null(input$gene_number)
             ) {
-            data2plot <- igraph::graph_from_adjacency_matrix(data$dag)
+            data2plot <- igraph::graph_from_adjacency_matrix(data$adjmat_dag)
             data2plot <- igraph::decompose(data2plot)[[1]]
             edges <- igraph::as_data_frame(data2plot)
             colnames(edges) <- c("From", "To")
@@ -2441,7 +2437,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
         tryCatch({
 
-            if (ncol(data$data) >= 7) {
+            if (ncol(data$matrix_subjects_genes) >= 7) {
                 showModal(
                     dataModal(paste("Beware! You are analyzing data ",
                                     "with 7 or more genes. ",
@@ -2581,7 +2577,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             orig_data <- list(data = data2run, name = data$name
                             , type = input$input2build, gene_names = data$gene_names
                             , thetas = data$thetas, lambdas = data$lambdas
-                            , dag = data$dag, DAG_parent_set = data$DAG_parent_set)
+                            , dag = data$adjmat_dag, DAG_parent_set = data$DAG_parent_set)
 
             tabular_data <- evamtools:::create_tabular_data(c(cpm_output, sampled_from_CPMs))
             all_evam_output <- list("cpm_output" = c(cpm_output, sampled_from_CPMs)
@@ -2757,8 +2753,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##                 evamtools:::to_stnd_csd_dataset(tmp_data)
 
     ##             data <- tmp_data
-    ##             data$csd_counts <- evamtools:::get_csd(tmp_data$data)
-    ##             data$n_genes <- ncol(data$data)
+    ##             data$genotype_counts_df <- evamtools:::get_csd(tmp_data$matrix_subjects_genes)
+    ##             data$n_genes <- ncol(data$matrix_subjects_genes)
     ##             updateNumericInput(session, "gene_number", value = data$n_genes)
     ##             updateTabsetPanel(session, "navbar",
     ##                               selected = "csd_builder")
@@ -3130,8 +3126,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 ##     ## provide_gene_names is being enabled somewhere I can't locate
 ##     ## So make sure we catch it right on the redisplay
 ##     ## There are a bunch of calls like this.
-##     if ((!is.null(data$data) ||
-##          (nrow(data$csd_counts) > 0))) {
+##     if ((!is.null(data$matrix_subjects_genes) ||
+##          (nrow(data$genotype_counts_df) > 0))) {
     ##         mymessage("    disabled provide_gene_names under display_freqs")
     ##         shinyjs::disable("provide_gene_names")
     ##     }  
@@ -3163,13 +3159,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##         ## if (!is.null(data$n_genes) &&
     ##         ##     input$gene_number != data$n_genes) {
     ##         ##     mymessage("      DAG: Updating gene names in data")
-    ##         ##     new_gnames2 <- set_gene_names_after_resize(data$data,
+    ##         ##     new_gnames2 <- set_gene_names_after_resize(data$matrix_subjects_genes,
     ##         ##                                                data$gene_names)
     ##         ##     data$gene_names <- new_gnames2
     ##         ## }
     ##         return(
     ##             evamtools:::reorder_to_standard_order_count_df(
-    ##                             data$csd_counts[data$csd_counts$Counts > 0, ,
+    ##                             data$genotype_counts_df[data$genotype_counts_df$Counts > 0, ,
     ##                                             drop = FALSE]))
     ##     } else if (input$input2build == "matrix") {
     ##         ## With the MHN we always return all the genotypes
@@ -3177,7 +3173,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##         mymessage("      matrix (i.e., mhn)")
     ##         return(
     ##             evamtools:::reorder_to_standard_order_count_df(
-    ##                             data$csd_counts[data$csd_counts$Counts > 0, ,
+    ##                             data$genotype_counts_df[data$genotype_counts_df$Counts > 0, ,
     ##                                             drop = FALSE]))
     ##     } else if (input$input2build == "upload") {
     ##         mymessage("      upload")
@@ -3185,14 +3181,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##         ## Return the data we have
     ##         return(
     ##             evamtools:::reorder_to_standard_order_count_df(
-    ##                             data$csd_counts[data$csd_counts$Counts > 0, ,
+    ##                             data$genotype_counts_df[data$genotype_counts_df$Counts > 0, ,
     ##                                             drop = FALSE]))
     ##     } else if (input$input2build == "csd") {
     ##         mymessage("      csd")
 
     ##         return(
     ##             evamtools:::reorder_to_standard_order_count_df(
-    ##                             data$csd_counts[data$csd_counts$Counts > 0, ,
+    ##                             data$genotype_counts_df[data$genotype_counts_df$Counts > 0, ,
     ##                                             drop = FALSE]))
     
     ##         ## I think what follows is a relic from the past, when we could change
@@ -3221,7 +3217,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##         ##     !is.null(data$n_genes) ) {
     ##         ##     ## input$gene_number != data$n_genes) {
     ##         ##     mymessage("       CSD: Updating gene names in data")
-    ##         ##     new_gnames2 <- set_gene_names_after_resize(data$data,
+    ##         ##     new_gnames2 <- set_gene_names_after_resize(data$matrix_subjects_genes,
     ##         ##                                                data$gene_names)
     ##         ##     if (identical(new_gnames2, data$gene_names)) {
     ##         ##         mymessage("A1_gnn_bisfix: identical")
@@ -3233,7 +3229,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     ##         ## return(
     ##         ##     evamtools:::reorder_to_standard_order_count_df(
-    ##         ##                     evamtools:::get_display_freqs(data$csd_counts,
+    ##         ##                     evamtools:::get_display_freqs(data$genotype_counts_df,
     ##         ##                                                   input$gene_number,
     ##         ##                                                   data$gene_names,
     ##         ##                                                   input$input2build))

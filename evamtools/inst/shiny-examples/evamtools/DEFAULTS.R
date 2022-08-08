@@ -13,7 +13,7 @@ template_lambdas <- rep(0.5, max_genes)
 names(template_lambdas) <- all_gene_names
 template_thetas <- matrix(0, ncol = max_genes, nrow = max_genes)
 rownames(template_thetas) <- colnames(template_thetas) <- all_gene_names
-template_csd_counts <- data.frame(Genotype = character(), Counts = integer())
+template_genotype_counts_df <- data.frame(Genotype = character(), Counts = integer())
 template_csd_data <- matrix(0, ncol = 4, nrow = 0)
 
 .ev_SHINY_dflt <- list(
@@ -25,10 +25,10 @@ template_csd_data <- matrix(0, ncol = 4, nrow = 0)
   dag_model = "HESBCN",
   all_cpms = c("OT", "CBN", "OncoBN", "MHN", "MCCBN", "HESBCN"),
   template_data = list(
-      csd_counts =  template_csd_counts ## data frame of Genotypes and Counts.
-    , data = NULL ## Yeah, what is data? The data matrix of 0/1 with subjects
+      genotype_counts_df =  template_genotype_counts_df ## data frame of Genotypes and Counts.
+    , matrix_subjects_genes = NULL ## The data matrix of 0/1 with subjects
       ## as rows and genes as columns. 
-    , dag = template_dag ## the dag as adjacency matrix.
+    , adjmat_dag = template_dag ## the dag as adjacency matrix.
     , DAG_parent_set = template_parent_set
     , lambdas = template_lambdas ## the lambdas, but I guess also the thetas/Weights
     , thetas = template_thetas ## For MHN.

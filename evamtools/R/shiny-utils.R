@@ -459,7 +459,7 @@ to_stnd_csd_dataset <- function(data,
     default_data <- default_template_data$data
     default_lambdas <- default_template_data$lambdas
     default_DAG_parent_set <- default_template_data$DAG_parent_set
-    default_dag <- default_template_data$dag
+    default_adjmat_dag <- default_template_data$adjmat_dag
     default_thetas <- default_template_data$thetas
     
     
@@ -563,10 +563,10 @@ to_stnd_csd_dataset <- function(data,
 
 to_stnd_csd_all_datasets <- function(datasets){
   all_new_data <- list()
-  for(i in c("upload", "csd", "dag", "matrix")){
-    tmp_data <- datasets[[i]] 
-    for(j in names(tmp_data)) all_new_data[[i]][[j]] <-     
-      to_stnd_csd_dataset(tmp_data[[j]])
+  for (i in c("upload", "csd", "dag", "matrix")){
+      tmp_data <- datasets[[i]] 
+      for(j in names(tmp_data)) all_new_data[[i]][[j]] <-     
+                                    to_stnd_csd_dataset(tmp_data[[j]])
   }
   return(all_new_data)
 }
