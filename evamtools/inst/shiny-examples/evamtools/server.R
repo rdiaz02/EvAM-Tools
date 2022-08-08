@@ -16,13 +16,15 @@
 ## #'  I followed this link to structure the shiny app whithin the package
 ## #'  https://deanattali.com/2015/04/21/r-package-shiny-app/
 
-dataModal <- function(error_message, type="Error: ") {
+
+dataModal <- function(error_message, type = "Error: ") {
+    if (type == "Error: ") {
+        type <- HTML("<font color ='red'>", type, "</font color>")
+    }
     modalDialog(
         easyClose = TRUE,
         title = tags$h3(type),
-        tags$div(
-                 error_message
-             )
+        tags$div(HTML(error_message))
     )
 }
 
@@ -35,12 +37,20 @@ mymessage <- function(...) invisible(NULL)
 
 
 sanity_file_name <- function(x) {
+    if (gsub(" ", "", x, fixed = TRUE) == "") {
+        stop("Name of data or file name cannot be an empty string.")
+    }
+    if (grepl(" ", x, fixed = TRUE)) {
+        stop("Name of data or file name cannot contain spaces.")
+    }
+
     gn_space <- !(stringi::stri_count_regex(x, "^[a-zA-Z].*"))
     if (any(gn_space))
         stop("All file and data names should start with a letter. ",
              "Yours don't; that is not allowed.")
 
     gn_space <- stringi::stri_count_regex(x,  "[^a-zA-z0-9_-]+")
+    
     if (any(gn_space))
         stop("Use only letters, numbers, the hyphen - and the underscore _ .",
              "The name you provided contains other characters.")
@@ -496,14 +506,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         if (grepl(".csv", input$csd$datapath)) {
             tryCatch({
                 dataset_name <- input$name_uploaded
-                sanity_file_name(input$name_uploaded)
+                sanity_file_name(dataset_name)
                 ## repeated from obserEvent(input$save_csd_data
-                if (gsub(" ", "", dataset_name, fixed = TRUE) == "") {
-                    stop("Name of data cannot be an empty string")
-                }
-                if (grepl(" ", dataset_name, fixed = TRUE)) {
-                    stop("Name of data should not contain spaces")
-                }
+                ## if (gsub(" ", "", dataset_name, fixed = TRUE) == "") {
+                ##     stop("Name of data cannot be an empty string")
+                ## }
+                ## if (grepl(" ", dataset_name, fixed = TRUE)) {
+                ##     stop("Name of data should not contain spaces")
+                ## }
                 existing_names <- c(names(datasets$all_csd$upload),
                                     names(datasets$all_csd$csd),
                                     names(datasets$all_csd$dag),
@@ -1977,10 +1987,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                        max_allowed_num_samples,
                        ".")
             if ((input$obs_noise < 0) ||
-                (input$obs_noise >= 0.99999999)) stop("Generate data: observational noise ",
+                (input$obs_noise >= 0.99999999)) stop(HTML("Generate data: observational noise ",
                                             "cannot be ",
                                             "less than 0 or greater than (or equal to) 1 ",
-                                            "(to prevent numerical problems, no larger than 0.99999999).")
+                                            "(to prevent numerical problems, no larger than 0.99999999)."))
+
             if ((input$epos < 0) ||
                 (input$epos >= 0.99999999)) stop("Generate data: epos,e  ",
                                        "cannot be ",
