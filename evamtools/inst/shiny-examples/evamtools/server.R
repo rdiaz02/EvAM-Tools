@@ -908,17 +908,28 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         ## Why should it have this effect?
         ## Even the code below screws things up. 
         ## Yes, this is the gene number slider. 
-        ## if ((!is.null(data$data) ||
-        ##      (nrow(data$csd_counts) > 0))) {
-        ##     mymessage("    disabled provide_gene_names renderUI")
-        ##     shinyjs::disable("provide_gene_names")
-        ## }
+        if ((!is.null(isolate(data$data)) ||
+             (nrow(isolate(data$csd_counts)) > 0))) {
+            mymessage("    disabled provide_gene_names renderUI")
+            shinyjs::disable("provide_gene_names")
+        }
+        
         ## This also breaks things. Not touching slider or anything.
-        ## is it from accessing data?
-        ## if ((!is.null(data$data) ||
-        ##      (nrow(data$csd_counts) > 0))) {
+        ## is it from accessing data? Yes. The following leads to chaos
+        ## if ((!is.null(data$data)) ||
+        ##     (nrow(data$csd_counts) > 0)) {
         ##     uu <- 3 + 2
-        ##     ## mymessage("    just a message from renderUI")
+        ##     message("    just a message from renderUI, no isolate")
+        ##     ## shinyjs::disable("provide_gene_names")
+        ## }
+
+        ## ## Not if we use isolate
+        ## ## Would this work if we used isolate?
+        ## if ((!is.null(isolate(data$data)) ||
+        ##      (nrow(isolate(data$csd_counts)) > 0))) {
+        ##     uu <- 3 + 2
+        ##     message("    just a message from renderUI, isolate ",
+        ##             "so you won't see me")
         ##     ## shinyjs::disable("provide_gene_names")
         ## }
         ## ## Yes, the following seems inocuous
