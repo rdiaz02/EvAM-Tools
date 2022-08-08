@@ -1682,88 +1682,92 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     
     ## And there is redundant error checking. See above.
     dag_data <- reactive({
-        if (input$input2build == "dag") {
+        if (input$input2build != "dag") {
+            warning("Why are you calling dag_data if not dealing with DAGs??")
+            return()
+        }
+        mymessage("At dag_data reactive call")
+        input$dag_model
+        input$dag_table_cell_edit
 
-            mymessage("At dag_data reactive call")
-            input$dag_model
-            input$dag_table_cell_edit
-            all_gene_names <- c("Root", data$gene_names)
-            edges <- which(data$dag == 1, arr.ind = TRUE)
-            tmp_DAG_parent_set <- data$DAG_parent_set
-            x <- length(tmp_DAG_parent_set)
-            ## The code below could fail (without sever consequences)
-            ## if we have moved back and forth between DAG and upload, for example
-            ## as we have not yet update the DAG data. The plot will ask for
-            ## the dag data, but those are not available.
-            ## Be more elegant
-            ## FIXME: what should really happen is that the work that happens
-            ## in "At observeEvent toListen" happened before this
-            ## But this is part of the UI and the other is listening. I guess
-            ## this must come first?
-            
-            dag_dataset_names <- unlist(lapply(datasets$all_csd$dag, function(x) x$name))
+        all_gene_names <- c("Root", data$gene_names)
+        edges <- which(data$dag == 1, arr.ind = TRUE)
+        tmp_DAG_parent_set <- data$DAG_parent_set
+        x <- length(tmp_DAG_parent_set)
+        ## The code below could fail (without severe consequences)
+        ## if we have moved back and forth between DAG and upload, for example
+        ## as we have not yet update the DAG data. The plot will ask for
+        ## the dag data, but those are not available.
+        ## Be more elegant
+        ## FIXME: what should really happen is that the work that happens
+        ## in "At observeEvent toListen" happened before this
+        ## But this is part of the UI and the other is listening. I guess
+        ## this must come first?
+        
+        dag_dataset_names <- unlist(lapply(datasets$all_csd$dag,
+                                           function(x) x$name))
 
-            if (!(data$name %in% dag_dataset_names)) {
-                mymessage("    data$name not in dag_dataset_names. Returning a NULL")
-                return(NULL)
-            }
-            mymessage("    dag_data_reactive, position 3")
-            
-            ## I have to this weird thing because using data$gene_names does not work
-            ## for some unkown reason. Eh??!!! What weird thing?
-            names(tmp_DAG_parent_set) <- all_gene_names[seq(2, x + 1)]
-            dag_data <- data.frame(From = all_gene_names[edges[, "row"]]
-                                 , To = all_gene_names[edges[, "col"]]
-                                 , Relation = tmp_DAG_parent_set[edges[, "col"] - 1]
-                                 , Lambdas = data$lambdas[edges[, "col"] - 1])
-            
-            if ((the_dag_model$stored_dag_model %in% c("OT", "OncoBN"))
-                & (any(dag_data$Lambdas < 0) | any(dag_data$Lambdas > 0.99999999))) {
+        if (!(data$name %in% dag_dataset_names)) {
+            mymessage("    data$name not in dag_dataset_names. Returning a NULL")
+            return(NULL)
+        }
+        mymessage("    dag_data_reactive, position 3")
+        
+        ## I have to this weird thing because using data$gene_names does not work
+        ## for some unkown reason. Eh??!!! What weird thing?
+        names(tmp_DAG_parent_set) <- all_gene_names[seq(2, x + 1)]
+        dag_data <- data.frame(From = all_gene_names[edges[, "row"]]
+                             , To = all_gene_names[edges[, "col"]]
+                             , Relation = tmp_DAG_parent_set[edges[, "col"] - 1]
+                             , Lambdas = data$lambdas[edges[, "col"] - 1])
+        
+        if ((the_dag_model$stored_dag_model %in% c("OT", "OncoBN"))
+            & (any(dag_data$Lambdas < 0) | any(dag_data$Lambdas > 0.99999999))) {
+            the_dag_model$stored_dag_model <<- "HESBCN"
+            updateRadioButtons(session, "dag_model", selected = "HESBCN")
+            showModal(dataModal(paste("thetas/probabilities should be between 0 and 1 ",
+                                      "(actually, for numerical reasons, 0.99999999).")))
+            return(dag_data)
+        }
+
+        if (the_dag_model$stored_dag_model %in% c("OT")) {
+            if (any(duplicated(dag_data$To))) {
                 the_dag_model$stored_dag_model <<- "HESBCN"
                 updateRadioButtons(session, "dag_model", selected = "HESBCN")
-                showModal(dataModal("thetas/probabilities should be between 0 and 1 ",
-                                    "(actually, for numerical reasons, 0.99999999)."))
-            }
-
-            if (the_dag_model$stored_dag_model %in% c("OT")) {
-                if (any(duplicated(dag_data$To))) {
-                    the_dag_model$stored_dag_model <<- "HESBCN"
-                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
-                    showModal(dataModal(
-                        paste("This DAG has nodes with multiple parents. ",
-                              "OT can only use trees ",
-                              "(i.e. no node can have with multiple parents).")))
-                } else if (length(unique(dag_data$Relation)) > 2) {
-                    the_dag_model$stored_dag_model <<- "HESBCN"
-                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
-                    showModal(dataModal(HTML("The OT model  ",
-                                             "is only for trees. ")))
-                } else {
-                    colnames(dag_data) <- c("From", "To", "Relation", "Weight")
-                    dag_data$Relation <- NULL
-                }
-                return(dag_data)
-            } else if (the_dag_model$stored_dag_model %in% c("OncoBN")) {
-                if (any(dag_data$Relation == "XOR")) {
-                    the_dag_model$stored_dag_model <<- "HESBCN"
-                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
-                    showModal(dataModal(HTML("The OncoBN model cannot include ",
-                                             "XOR relationships.")))
-                } else if (length(unique(dag_data$Relation)) > 2) {
-                    the_dag_model$stored_dag_model <<- "HESBCN"
-                    updateRadioButtons(session, "dag_model", selected = "HESBCN")
-                    showModal(dataModal(HTML("The OncoBN model can only include ",
-                                             "one type of relationship",
-                                             "(conjunctive or disjunctive, ",
-                                             "as specified in \"Advanced options\").")))
-                } else {
-                    colnames(dag_data) <- c("From", "To", "Relation", "theta")
-                }
-               return(dag_data) 
+                showModal(dataModal(
+                    paste("This DAG has nodes with multiple parents. ",
+                          "OT can only use trees ",
+                          "(i.e. no node can have with multiple parents).")))
+            } else if (length(unique(dag_data$Relation)) > 2) {
+                the_dag_model$stored_dag_model <<- "HESBCN"
+                updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                showModal(dataModal(HTML("The OT model  ",
+                                         "is only for trees. ")))
             } else {
-                mymessage("    dag_data_reactive, position 4")
-                return(dag_data)
+                colnames(dag_data) <- c("From", "To", "Relation", "Weight")
+                dag_data$Relation <- NULL
             }
+            return(dag_data)
+        } else if (the_dag_model$stored_dag_model %in% c("OncoBN")) {
+            if (any(dag_data$Relation == "XOR")) {
+                the_dag_model$stored_dag_model <<- "HESBCN"
+                updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                showModal(dataModal(HTML("The OncoBN model cannot include ",
+                                         "XOR relationships.")))
+            } else if (length(unique(dag_data$Relation)) > 2) {
+                the_dag_model$stored_dag_model <<- "HESBCN"
+                updateRadioButtons(session, "dag_model", selected = "HESBCN")
+                showModal(dataModal(HTML("The OncoBN model can only include ",
+                                         "one type of relationship",
+                                         "(conjunctive ---AND--- or disjunctive ---OR---, ",
+                                         "as specified in \"Advanced options\").")))
+            } else {
+                colnames(dag_data) <- c("From", "To", "Relation", "theta")
+            }
+            return(dag_data) 
+        } else {
+            mymessage("    dag_data_reactive, position 4")
+            return(dag_data)
         }
     })
 
