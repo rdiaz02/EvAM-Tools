@@ -30,10 +30,32 @@ dataModal <- function(error_message, type = "Error: ") {
 
 options(warnPartialMatchDollar = TRUE)
 
+
+
+
+
+######################################################################
+######
+######  In lieu of proper refactoring, this is some info
+######  about some atrocious names
+######
+######################################################################
+
+## data$data:  the subjects by genes matrix (or data frame) of 0/1
+## csd_counts: the Genotype and Counts data frame
+## data$dag:   the DAG as an adjacency matrix
+## dag_data:   object and functions for the dag model as a data frame with
+##              From, To, Weights/Lambdas/etc
+##
+
+
+
+
+
 ## I have left a bunch of messages. To make it easier to dis/enable them
 ## by turning them to a no-op (https://stackoverflow.com/a/10933721)
-mymessage <- function(...) message(...)
-## mymessage <- function(...) invisible(NULL)
+## mymessage <- function(...) message(...)
+mymessage <- function(...) invisible(NULL)
 
 
 sanity_file_name <- function(x) {
