@@ -1723,8 +1723,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               
     dag_data <- reactive({
         if (isolate(input$input2build) != "dag") {
-            message("dag_data reactive: Why are you calling ",
-                    "dag_data if not dealing with DAGs?")
+            mymessage("dag_data reactive: Why are you calling ",
+                      "dag_data if not dealing with DAGs?")
             return()
         }
         mymessage("At dag_data reactive call")
