@@ -79,7 +79,7 @@ reorder_to_standard_order_arbitrary_df <- function(x) {
 ##             ## }
 ##             stopifnot(all(gene_names_in_freqs %in% valid_gene_names))
 ##         } else {
-##             stopifnot(sort(gene_names_in_freqs)[1:n_genes] %in% valid_gene_names)
+##             stopifnot(evamtools:::evam_string_sort(gene_names_in_freqs)[1:n_genes] %in% valid_gene_names)
 ##         }
 ##     }
 
@@ -186,7 +186,14 @@ modify_dag <-
            "Are you drawing a disconnected DAG, ",
            "where the From node is not already ",
            "part of the DAG (i.e., has no ancestor)?: ",
-           "all nodes except Root must have an ancestor.")
+           "all nodes except Root must have an ancestor.",
+           "Are you trying to remove the edge from Root to a node X, ",
+           "where this node X has descendants? If yes, ",
+           "remove first the edges from X to its descendants. ",
+           "Did you try to remove a non-existent edge ",
+           "(e.g., you transposed the From and To nodes)?: ",
+           "even if the nodes are the same, an edge A -> C ",
+           "is different from an edge C -> A.")
   }
   g2 <- igraph::graph_from_adjacency_matrix(tmp_dag2, mode = "directed")
   if (dag_model %in% c("HESBCN", "OncoBN") && !igraph::is_dag(g2)) {

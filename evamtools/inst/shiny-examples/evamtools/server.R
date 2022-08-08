@@ -181,12 +181,13 @@ random_dataset_name <- function() {
 ## x: the big data object's matrix
 set_gene_names_after_resize <- function(x, gene_names) {
     gene_names_num <- length(gene_names)
-    gene_names_in_freqs <- sort(colnames(x))
+    gene_names_in_freqs <- evamtools:::evam_string_sort(colnames(x))
     if (length(gene_names_in_freqs) == 0) {
         ## Only WT
-        return(gene_names)
+        return(evamtools:::evam_string_sort(gene_names))
     } else {
-        gene_names_wo_current <- sort(setdiff(gene_names, gene_names_in_freqs))
+        gene_names_wo_current <-
+            evamtools:::evam_string_sort(setdiff(gene_names, gene_names_in_freqs))
         gene_names <-
             c(gene_names_in_freqs, gene_names_wo_current)[1:gene_names_num]
         return(gene_names)
@@ -1263,20 +1264,20 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                                                        data$gene_names)[1:n_genes]),
                               shinyBS::bsTooltip("genotype",
                                                  HTML("<p>The list of genes next to \"Mutations\" is kept sorted ",
-                                                      "(alphabetically, often callen \"natural order\") showing first the genes already ",
+                                                      "(\"natural order\") showing first the genes ",
                                                       "in existing genotypes, and then other genes up to ",
-                                                      "the number of genes under \"Number of genes\". ",
-                                                      "The candidates might be resorted if you add  ",
-                                                      "a genotypes so that it has a gene that was not formerly part of any genotype. </p>",
+                                                      "\"Number of genes\". ",
+                                                      "The list will be resorted   ",
+                                                      "when new genes are added to genotypes. </p>",
                                                       "<br> <p>\"Mutations\" is just a list of candidate gene names. You can ",
                                                       "see more (or fewer, up to the number of genes in your genotypes) ",
                                                       "by moving the slider of \"Number of genes\".</p>",
                                                       "<br>",
                                                       "<p>On renaming of the data, we trigger a counting of the ",
-                                                      "actual number of different genes used, reset the slider ",
+                                                      "genes used, reset the slider ",
                                                       "of \"Number of genes\", and reorder the genes next to  ",
                                                       "\"Mutations\".</p>"),
-                                                 "right", options = list(container = "body")
+                                                 "top", options = list(container = "body")
                                                  ),
                               ),
                      tags$div(id="fr",
@@ -1304,10 +1305,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                     "Root")
             if (length(genes_in_dag) < n_genes) {
                 genes_not_in_dag <- setdiff(gene_options, genes_in_dag)
-                dag_gene_options <- c(genes_in_dag,
-                                      genes_not_in_dag[1:(n_genes - length(genes_in_dag))])
+                dag_gene_options <-
+                    evamtools:::evam_string_sort(c(genes_in_dag,
+                                                   genes_not_in_dag[1:(n_genes - length(genes_in_dag))]))
             } else {
-                dag_gene_options <- genes_in_dag
+                dag_gene_options <- evamtools:::evam_string_sort(genes_in_dag)
             }
             tags$div(                    
                      tags$div(class = "flex",
@@ -1335,13 +1337,29 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                            radioButtons(inputId = "dag_from",
                                                         label = "From (parent node)",
                                                         inline = TRUE,
-                                                        choices =  c("Root", dag_gene_options))
+                                                        choices =  c("Root", dag_gene_options)),
+                                           shinyBS::bsTooltip("dag_from",
+                                                              HTML("<p>The list of genes next to \"From\" and \"To\" is kept sorted ",
+                                                                   "(alphabetically, often callen \"natural order\"), with \"Root\" first. ",
+                                                                   " You can ",
+                                                                   "see more (or fewer, up to the number of genes in your genotypes) ",
+                                                                   "by moving the slider of \"Number of genes\".</p>")
+                                                            , "right", options = list(container = "body")
+                                                              ),
                                            ),
                                   tags$div(class = "inline",
                                            radioButtons(inputId = "dag_to",
                                                         label = " To (child node)",
                                                         inline = TRUE,
-                                                        choices =  dag_gene_options)
+                                                        choices =  dag_gene_options),
+                                           ## shinyBS::bsTooltip("dag_to",
+                                           ##                    HTML("<p>The list of genes next to \"From\" and \"To\" is kept sorted ",
+                                           ##                         "(alphabetically, often callen \"natural order\"), with \"Root\" first. ",
+                                           ##                         " You can ",
+                                           ##                         "see more (or fewer, up to the number of genes in your genotypes) ",
+                                           ##                         "by moving the slider of \"Number of genes\".</p>")
+                                           ##                  , "right", options = list(container = "body")
+                                           ##                    ),
                                            ),
                                   tags$h5(HTML("<p></p>")),
                                   actionButton("add_edge", "Add edge"),
@@ -1355,7 +1373,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   tags$h5(HTML("If you want to increase the number of genes ",
                                                "use 'Set the number of genes' to increase ",
                                                "the available gene labels, and then ",
-                                               "increase the number of nodes in the DAG")),
+                                               "increase the number of nodes in the DAG.")),
                                   tags$h3(HTML("<br/>DAG table")),
                                   tags$h4(HTML("Remember to hit Ctrl-Enter when you are done editing the DAG table for changes to take effect.")),
                                   DT::DTOutput("dag_table"),
@@ -1785,7 +1803,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         mymessage("At dag_data reactive call")
         ## FIXME: why do I need to make it eventReactive and listen
         ## on the next three' Would it not be enough just using them?
-        input$dag_model
+                                                                input$dag_model
         input$dag_table_cell_edit
         if (input$input2build == "dag") {
             ## Force update on changes in name
@@ -2144,6 +2162,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                  "the <strong>Observational noise</strong> (genotyping error) ",
                                  "and, for OT and OncoBN, the <strong>epos</strong>, ",   
                                  "and click on <strong>'Generate data from DAG'</strong> to generate a sample. ")),
+                     tags$p(HTML("<br>")),
+                     tags$p(HTML("You can create, and simulate from, ",
+                                 "<b>non-transitively reduced DAGs</b> ",
+                                 "(not for OT, of course) ", 
+                                 "but CBN only estimates transitively ",
+                                 "reduced graphs. ",
+                                 "More discussion about this issue is ",
+                                 "available in the 'Additional documentation'")),
                      tags$p(HTML("<br>")),
                      tags$p("After the sample is generated for the first time, ",
                             "the sample should be generated again automatically ",
