@@ -102,9 +102,9 @@ dag_more_genes_than_set_genes <- function(input, dag_data = dag_data(),
         (number_of_genes > input$gene_number)) {
         updateNumericInput(session, "gene_number", value = number_of_genes)
         return(TRUE)
-    }
-    else
+    } else {
         return(FALSE)
+    }
 }
 
 
