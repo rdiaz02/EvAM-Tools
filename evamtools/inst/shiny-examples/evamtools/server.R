@@ -302,6 +302,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       , thetas = .ev_SHINY_dflt$template_data$thetas
       , n_genes = default_number_genes ## .ev_SHINY_dflt$ngenes
       , gene_names = LETTERS[1: max_genes]
+      , name = NULL
     )
 
     display_freqs <- reactive({
@@ -385,7 +386,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 csd_message_more_genes_than_set_genes()
             }
         } else if (input$input2build == "dag") {
-            if (dag_more_genes_than_set_genes(input, dag_data(), session)) {
+            the_dag_data <- dag_data()
+            if (dag_more_genes_than_set_genes(input, the_dag_data, session)) {
                 dag_message_more_genes_than_set_genes()
             }
         } else if (input$input2build == "matrix") {
@@ -1715,22 +1717,31 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## as that needs to be listened to for the dag_more_genes_than_set_genes
     ## to work properly.
     ## 
-    ## toListen2 <- reactive({
-    ##     list(input$dag_model,
-    ##          input$dag_table_cell_edit)
-    ## })
+    toListen2 <- reactive({
+        list(input$dag_model,
+             input$dag_table_cell_edit,
+             data$name)
+    })
     ## dag_data <- eventReactive(toListen2(),
-                              
-    dag_data <- reactive({
+
+    ## dag_data <- reactive({
+    dag_data <- eventReactive(toListen2(), {
         if (isolate(input$input2build) != "dag") {
             mymessage("dag_data reactive: Why are you calling ",
                       "dag_data if not dealing with DAGs?")
             return()
         }
         mymessage("At dag_data reactive call")
+        ## FIXME: why do I need to make it eventReactive and listen
+        ## on the next three' Would it not be enough just using them?
         input$dag_model
         input$dag_table_cell_edit
-
+        if (input$input2build == "dag") {
+            ## Force update on changes in name
+            ## though this is asked for below
+            dummy <- data$name
+        }
+        
         all_gene_names <- c("Root", data$gene_names)
         edges <- which(data$dag == 1, arr.ind = TRUE)
         tmp_DAG_parent_set <- data$DAG_parent_set
@@ -1813,10 +1824,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
 
-    
 
 
-    
+
+
     output$dag_table <-
         DT::renderDT(
                 dag_data(),
@@ -1972,7 +1983,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         })
     })
 
-    
+
 
     ## Help for output of downloaded before results
     observeEvent(input$how2downloaddata, {
@@ -2035,43 +2046,43 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                              "it will be assigned as descendant of Root."),
                      tags$p(HTML("</ul>")),
                      tags$p(HTML("2. To <strong>change the value of a lambda/theta/Weight</strong> ",
-                            "click on the cell, ",
-                            "edit the cell's content, and press Ctrl+Enter.",
-                            "<ul>",
-                            "<li>theta (OncoBN) and Weight (OT) denote conditional probabilities ",
-                            "of an event occurring given the parent conditions are satisfied; ",
-                            "thus they must be between 0 and 1 ",
-                            "(open interval, so neither 0 nor 1 are allowed).</li>",
-                            "<li>lambdas (CBN, H-ESBCN) denote rates (time to occurrence of an event, ",
-                            "given its parents are satisfied, is modeled as an exponential ",
-                            "process with this rate). Thus, lambdas must be larger than 0.</li>",
-                            "</ul>")),
+                                 "click on the cell, ",
+                                 "edit the cell's content, and press Ctrl+Enter.",
+                                 "<ul>",
+                                 "<li>theta (OncoBN) and Weight (OT) denote conditional probabilities ",
+                                 "of an event occurring given the parent conditions are satisfied; ",
+                                 "thus they must be between 0 and 1 ",
+                                 "(open interval, so neither 0 nor 1 are allowed).</li>",
+                                 "<li>lambdas (CBN, H-ESBCN) denote rates (time to occurrence of an event, ",
+                                 "given its parents are satisfied, is modeled as an exponential ",
+                                 "process with this rate). Thus, lambdas must be larger than 0.</li>",
+                                 "</ul>")),
                      tags$p(HTML("3. Set the value of <strong>Relation</strong> ",
-                            "to one of 'Single' (single parent), ",
-                            "AND, OR, XOR.",
-                            "<ul>",
-                            "<li>OT only accepts 'Single' as each node ",
-                            "has a single parent. </li>",
-                            "<li>OncoBN accepts 'Single', 'AND', 'OR' ",
-                            "or combinations of either Single and AND or ",
-                            "Single and OR ",
-                            "(and terms not among Single, AND, OR ",
-                            "will be converted to ORs).</li>",
-                            "<li>'CBN/H-ESBCN' models can be specified with ",
-                            "AND, OR, XOR, Single, or combinations of the above ",
-                            "(and terms not among Single, AND, OR, XOR ",
-                            "will be converted to ANDs)[1]. </li>",
-                            "<li>All incoming edges to a node must have the same ",
-                            "Relation (the program will force this). </li>",
-                            "<li>Edit the cell's content and press Ctrl+Enter. </li>",
-                            "</ul>"
-                            )),
+                                 "to one of 'Single' (single parent), ",
+                                 "AND, OR, XOR.",
+                                 "<ul>",
+                                 "<li>OT only accepts 'Single' as each node ",
+                                 "has a single parent. </li>",
+                                 "<li>OncoBN accepts 'Single', 'AND', 'OR' ",
+                                 "or combinations of either Single and AND or ",
+                                 "Single and OR ",
+                                 "(and terms not among Single, AND, OR ",
+                                 "will be converted to ORs).</li>",
+                                 "<li>'CBN/H-ESBCN' models can be specified with ",
+                                 "AND, OR, XOR, Single, or combinations of the above ",
+                                 "(and terms not among Single, AND, OR, XOR ",
+                                 "will be converted to ANDs)[1]. </li>",
+                                 "<li>All incoming edges to a node must have the same ",
+                                 "Relation (the program will force this). </li>",
+                                 "<li>Edit the cell's content and press Ctrl+Enter. </li>",
+                                 "</ul>"
+                                 )),
                      tags$p(HTML("4. Modify, if you want, ",
-                            "the <strong>'Number of genotypes to sample'</strong> ",
-                            "(the size of the sample) and ",
-                            "the <strong>Observational noise</strong> (genotyping error) ",
-                            "and, for OT and OncoBN, the <strong>epos</strong>, ",   
-                            "and click on <strong>'Generate data from DAG'</strong> to generate a sample. ")),
+                                 "the <strong>'Number of genotypes to sample'</strong> ",
+                                 "(the size of the sample) and ",
+                                 "the <strong>Observational noise</strong> (genotyping error) ",
+                                 "and, for OT and OncoBN, the <strong>epos</strong>, ",   
+                                 "and click on <strong>'Generate data from DAG'</strong> to generate a sample. ")),
                      tags$p(HTML("<br>")),
                      tags$p("After the sample is generated for the first time, ",
                             "the sample should be generated again automatically ",
@@ -2137,9 +2148,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                        ".")
             if ((input$obs_noise < 0) ||
                 (input$obs_noise >= 0.99999999)) stop("Generate data: observational noise ",
-                                            "cannot be ",
-                                            "less than 0 or greater than 1",
-                                            "(for numerical issues, no larger than 0.99999999).")
+                                                      "cannot be ",
+                                                      "less than 0 or greater than 1",
+                                                      "(for numerical issues, no larger than 0.99999999).")
             
             mhn_data <- evamtools:::get_mhn_data(data$thetas[1:input$gene_number
                                                            , 1:input$gene_number]
@@ -2162,7 +2173,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
 
 
-    
+
     observeEvent(input$clear_mhn, {
         tryCatch({
             tmp_thetas <- .ev_SHINY_dflt$template_data$thetas
