@@ -226,7 +226,7 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
              "0s to lambdas/weights. "
              )
 
-    if (length(new_lambdas == 0)) {
+    if (length(new_lambdas) == 0) {
         changed_genes <- character()
     } else {
         ## yes, the if does the same, but an if with a logical(0) sucks
@@ -240,7 +240,7 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
         stop("There are unkown genes")
     }
 
-    if (length(new_lambdas == 0)) {
+    if (length(new_lambdas) == 0) {
         changed_lambdas <- numeric()
     } else {  
         changed_lambdas <- new_lambdas[(new_lambdas != old_lambdas)
