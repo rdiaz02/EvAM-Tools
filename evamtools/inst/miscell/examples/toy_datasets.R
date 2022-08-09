@@ -431,27 +431,28 @@ examples_csd <- list(
     d4gc3 = list(data = dB_4g_3, name = "Four genes, third example", dag = dag_4g)
   ),
   "dag" = list(
-      DAG_Fork_3 = list(dag = template_dag, name = "DAG_Fork_3"),
+      DAG_Fork_3 = list(dag = template_dag, name = "DAG_Fork_3",
+                        this_d_dag_model = "HESBCN"),
       DAG_Fork_4 = list(dag = dag_fork_4,
                         DAG_parent_set = fork_4_parent_set,
                         lambdas = fork_4_lambdas,
-                        name = "DAG_Fork_4"),
+                        name = "DAG_Fork_4", this_d_dag_model = "HESBCN"),
       DAG_Linear = list(data = NULL,  name = "DAG_Linear", dag = dag_linear,
                         DAG_parent_set = linear_parent_set,
                         lambdas = linear_lambdas
-                        ),
+                      , this_d_dag_model = "HESBCN"),
       DAG_AND = list(data = NULL, name = "DAG_AND",
                      dag = dag_or, DAG_parent_set = and_parent_set,
-               lambdas = and_lambdas),
+                     lambdas = and_lambdas, this_d_dag_model = "HESBCN"),
       DAG_OR = list(data = NULL, name = "DAG_OR", dag = dag_or,
-                    DAG_parent_set = or_parent_set), 
+                    DAG_parent_set = or_parent_set, this_d_dag_model = "HESBCN"), 
       DAG_XOR = list(data = NULL, name = "DAG_XOR", dag = dag_or,
-                     DAG_parent_set = xor_parent_set),
+                     DAG_parent_set = xor_parent_set, this_d_dag_model = "HESBCN"),
       DAG_A_O_X = list(data = NULL,
                        name = "DAG_A_O_X",
                        dag = dag_and_or_xor,
                       DAG_parent_set = and_or_xor_parent_set,
-                      lambdas = and_or_xor_lambdas)
+                      lambdas = and_or_xor_lambdas, this_d_dag_model = "HESBCN")
   ),
   "matrix" = list(
      MHN_all_0 = list(thetas = template_thetas, name = "MHN_all_0"),

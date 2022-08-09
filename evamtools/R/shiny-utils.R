@@ -455,7 +455,7 @@ create_tabular_data <- function(data) {
     return(tabular_data)
 }
 
-
+## FIXME: try to simplify and clarify this function.
 ## Fills empty attributes of a csd data object
 
 ## Yes, could have passed all default_* as part of a single list. Whatever.
@@ -469,7 +469,7 @@ to_stnd_csd_dataset <- function(data,
     default_DAG_parent_set <- default_template_data$DAG_parent_set
     default_dag <- default_template_data$dag
     default_thetas <- default_template_data$thetas
-    
+    default_this_d_dag_model <- "HESBCN"
     
     if(is.null(data)) return(default_template_data)
 
@@ -566,6 +566,11 @@ to_stnd_csd_dataset <- function(data,
         colnames(new_data$data) <- new_data$gene_names[1:ncol(new_data$data)]
     }
     new_data$csd_counts <- get_csd(new_data$data)
+    if (is.null(data$this_d_dag_model)) {
+        new_data$this_d_dag_model <- default_this_d_dag_model
+    } else {
+        new_data$this_d_dag_model <- data$this_d_dag_model
+    }
     return(new_data)
 }
 
