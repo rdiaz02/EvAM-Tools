@@ -233,8 +233,8 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
   if (any(is.na(new_lambdas))) {
     stop("There are missing lambdas")
   }
-  if(dag_model == "HESBCN") {
-    old_lambdas <- dag_data$Lambdas
+  if (dag_model == "HESBCN") {
+      old_lambdas <- dag_data$Lambdas
   } else if (dag_model == "OT") {
     old_lambdas <- dag_data$Weight
   } else if (dag_model == "OncoBN") {
@@ -257,8 +257,8 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
   tmp_lambdas[changed_genes] <- changed_lambdas
 
   if (dag_model %in% c("OT", "OncoBN")
-    & (any(tmp_lambdas < 0) | any(tmp_lambdas > 1))){
-      stop("thetas/probabilities should be between 0 and 1")
+      & (any(tmp_lambdas <= 0) | any(tmp_lambdas >= 0.99995))){
+      stop("thetas/probabilities should be between 0 and 1.")
   }
 
   ##Relationships
