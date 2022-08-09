@@ -1771,9 +1771,16 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     observeEvent(input$resample_dag, {
         tryCatch({
             mymessage("At resample_dag")
-            if (sum(colSums(data$dag) > 0) < 2)
+            if (sum(colSums(data$dag) > 0) < 2) {
+                data$csd_counts <- data.frame(Genotype = character(),
+                                              Counts = integer())
+                data$data <- NULL
+                shinyjs::disable("analysis")
                 stop("The must be at least two genes ",
-                     "in the DAG.")
+                     "in the DAG.\n\n",
+                     "<b>Any frequency data is suspect until ",
+                     "you solve this problem.</b>")
+            }
             the_dag_data <- dag_data()
             gene_names <- setdiff(unique(c(the_dag_data$From, the_dag_data$To)),
                                   "Root")
