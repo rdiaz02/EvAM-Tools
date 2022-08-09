@@ -1585,28 +1585,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     
     ## DAG builder
     ## Controling dag builder
-    ## FIXME: Would it be cleaner if dag_data was eventReactive, watching for
-    ##  input$dag_model and input$dag_table_cell_edit?
 
-    ## FIXME: some of the error messages sometimes are triggered twice such as if
-    ## the current model is OncoBN (e.g., put yourself in DAG_AND and set model
-    ## to OncoBN) and you move to DAG_A_O_X
-    
-    ## And there is redundant error checking. See above.
-
-    ## FIXME: could this be an eventReactive like this?
-    ## we are calling it from other places, as seen from the message
-    ## But if we do as below, then we get weird behavior when changing
-    ## between DAGs related to number of genes.
-    ## I think we really should use eventReactive, but something is not
-    ## done properly below. Or we need a conditional toListen2,
-    ## so that if we are under DAG, we listen to input$gene_number
-    ## as that needs to be listened to for the dag_more_genes_than_set_genes
-    ## to work properly.
-    ##
-
-    ## Or maybe this should just be a function that we call on demand, not a
-    ## reactive one. 
     toListen2 <- reactive({
         list(## input$dag_model,
              input$dag_table_cell_edit,
