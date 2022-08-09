@@ -343,7 +343,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## clearer this way, but requires changing this value
     ## inside dag_data eventReactive code block
     changed_dag_model <- reactiveValues(
-        invalidate_dag_model_dframe = FALSE
+        invalidate = FALSE
     )
 
     ## switched_dag_model <- reactiveValues(
@@ -352,9 +352,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     toggle_switch <-
         eventReactive(
-            changed_dag_model$invalidate_dag_model_dframe,
+            changed_dag_model$invalidate,
             {
-                !(changed_dag_model$invalidate_dag_model_dframe)
+                !(changed_dag_model$invalidate)
             })
     
     
@@ -1543,19 +1543,19 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##             (any(data$lambdas > 0.99999999))
     ##             ) {
     ##             data$this_d_dag_model <- "HESBCN"
-    ##             changed_dag_model$invalidate_dag_model_dframe <- FALSE
+    ##             changed_dag_model$invalidate <- FALSE
     ##             updateRadioButtons(session, "dag_model", selected = "HESBCN")
     ##             stop("thetas/probabilities should be between 0 and 1 ",
     ##                  "(actually, for numerical reasons, 0.99999999).")
     ##         }
     ##         if (input$dag_model == "OncoBN") {
     ##             if (any(data$DAG_parent_set == "XOR")) {
-    ##                 changed_dag_model$invalidate_dag_model_dframe <- FALSE
+    ##                 changed_dag_model$invalidate <- FALSE
     ##                 updateRadioButtons(session, "dag_model", selected = "HESBCN")
     ##                 stop("The OncoBN model cannot include ",
     ##                      "XOR relationships.")
     ##             } else if (length(unique(data$DAG_parent_set)) > 2) {
-    ##                 changed_dag_model$invalidate_dag_model_dframe <- FALSE
+    ##                 changed_dag_model$invalidate <- FALSE
     ##                 updateRadioButtons(session, "dag_model", selected = "HESBCN")
     ##                 stop("The OncoBN model can only include ",
     ##                      "one type of relationship",
@@ -1566,7 +1566,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##         if (input$dag_model == "OT") {
     ##             number_of_parents <- colSums(data$dag)
     ##             if (any(number_of_parents > 1)) {
-    ##                 changed_dag_model$invalidate_dag_model_dframe <- FALSE
+    ##                 changed_dag_model$invalidate <- FALSE
     ##                 updateRadioButtons(session, "dag_model", selected = former_dag_model)
     ##                 stop("This DAG has nodes with multiple parents. ",
     ##                      "OT can only use trees ",
@@ -1575,19 +1575,19 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##                 ##   "Are there nodes with multiple parents? ",
     ##                 ##   "(OT cannot not have nodes with multiple parents.)")))
     ##             } else if (length(unique(data$DAG_parent_set)) > 2) {
-    ##                 changed_dag_model$invalidate_dag_model_dframe <- FALSE
+    ##                 changed_dag_model$invalidate <- FALSE
     ##                 updateRadioButtons(session, "dag_model", selected = former_dag_model)
     ##                 stop(HTML("The OT model is only for trees."))
     ##             }
     ##         }
     ##         ## dag_model was changed
     ##         if ((former_dag_model != input$dag_model)) {
-    ##             changed_dag_model$invalidate_dag_model_dframe <- TRUE
+    ##             changed_dag_model$invalidate <- TRUE
     ##         } else {
     ##             message("former is ", former_dag_model)
     ##             message("input is", input$dag_model)
-    ##             message("CUCU happened with value ",  changed_dag_model$invalidate_dag_model_dframe)
-    ##             changed_dag_model$invalidate_dag_model_dframe <- FALSE
+    ##             message("CUCU happened with value ",  changed_dag_model$invalidate)
+    ##             changed_dag_model$invalidate <- FALSE
     ##         }
     ##         data$this_d_dag_model <- input$dag_model
     ##         datasets$all_csd[["dag"]][[input$select_csd]]$this_d_dag_model <- input$dag_model
@@ -1642,12 +1642,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##         }
     ##         message("CUCU here ; value is ", can_change_dag_model)
     ##         if (can_change_dag_model) {
-    ##             changed_dag_model$invalidate_dag_model_dframe <- TRUE
+    ##             changed_dag_model$invalidate <- TRUE
     ##             data$this_d_dag_model <- input$dag_model
     ##             datasets$all_csd[["dag"]][[input$select_csd]]$this_d_dag_model <- input$dag_model
     ##             if (resample_trigger_from_data_change())  shinyjs::click("resample_dag")
     ##         } else {
-    ##             changed_dag_model$invalidate_dag_model_dframe <- FALSE
+    ##             changed_dag_model$invalidate <- FALSE
     ##             updateRadioButtons(session, "dag_model", selected = former_dag_model)
     ##         }
     ##     }, 
@@ -1661,7 +1661,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     observeEvent(input$dag_model, {
         tryCatch({
             mymessage("At observeEvent input$dag_model")
-
             former_dag_model <- data$this_d_dag_model
             can_change_dag_model <- TRUE
 
@@ -1670,7 +1669,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 (any(data$lambdas > 0.99999999))
                 ) {
                 can_change_dag_model <- FALSE
-                changed_dag_model$invalidate_dag_model_dframe <- FALSE
+                ## changed_dag_model$invalidate <- FALSE
                 updateRadioButtons(session, "dag_model", selected = former_dag_model)
                 stop("thetas/probabilities should be between 0 and 1 ",
                      "(actually, for numerical reasons, 0.99999999).")
@@ -1678,13 +1677,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             if (input$dag_model == "OncoBN") {
                 if (any(data$DAG_parent_set == "XOR")) {
                     can_change_dag_model <- FALSE
-                    changed_dag_model$invalidate_dag_model_dframe <- FALSE
+                    ## changed_dag_model$invalidate <- FALSE
                     updateRadioButtons(session, "dag_model", selected = former_dag_model)
                     stop("The OncoBN model cannot include ",
                          "XOR relationships.")
                 } else if (length(unique(data$DAG_parent_set)) > 2) {
                     can_change_dag_model <- FALSE
-                    changed_dag_model$invalidate_dag_model_dframe <- FALSE
+                    changed_dag_model$invalidate <- FALSE
                     updateRadioButtons(session, "dag_model", selected = former_dag_model)
                     stop("The OncoBN model can only include ",
                          "one type of relationship",
@@ -1695,34 +1694,36 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 number_of_parents <- colSums(data$dag)
                 if (any(number_of_parents > 1)) {
                     can_change_dag_model <- FALSE
-                    changed_dag_model$invalidate_dag_model_dframe <- FALSE
+                    ## changed_dag_model$invalidate <- FALSE
                     updateRadioButtons(session, "dag_model", selected = former_dag_model)
                     stop("This DAG has nodes with multiple parents. ",
                          "OT can only use trees ",
                          "(i.e., no node can have with multiple parents.).")
                 } else if (length(unique(data$DAG_parent_set)) > 2) {
                     can_change_dag_model <- FALSE
-                    changed_dag_model$invalidate_dag_model_dframe <- FALSE
+                    ## changed_dag_model$invalidate <- FALSE
                     updateRadioButtons(session, "dag_model", selected = former_dag_model)
                     stop(HTML("The OT model is only for trees."))
                 }
             }
             
             if (can_change_dag_model) {
-                changed_dag_model$invalidate_dag_model_dframe <- TRUE
+                changed_dag_model$invalidate <- !changed_dag_model$invalidate
                 data$this_d_dag_model <- input$dag_model
                 datasets$all_csd[["dag"]][[input$select_csd]]$this_d_dag_model <- input$dag_model
                 if (resample_trigger_from_data_change())  shinyjs::click("resample_dag")
+                ## force trigger it
+                null <- dag_data()
             } else {
                 message("Are we ever here??? Value is ", can_change_dag_model)
-                changed_dag_model$invalidate_dag_model_dframe <- FALSE
+                changed_dag_model$invalidate <- FALSE
                 updateRadioButtons(session, "dag_model", selected = former_dag_model)
             }
         }, 
         error = function(e) {
             showModal(dataModal(e[[1]]))
         })
-    }, ignoreInit = TRUE)
+    })
 
 
 
@@ -1744,7 +1745,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data$dag,
             data$lambdas,
             ## dag_data will be triggered on successful dag_model change
-            changed_dag_model$invalidate_dag_model_dframe
+            changed_dag_model$invalidate
         )
     })
 
@@ -1759,7 +1760,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             return()
         }
         mymessage("At dag_data reactive call")
-        
+
         all_gene_names <- c("Root", data$gene_names)
         edges <- which(data$dag == 1, arr.ind = TRUE)
         tmp_DAG_parent_set <- data$DAG_parent_set
@@ -1787,13 +1788,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             colnames(dag_data) <- c("From", "To", "Relation", "theta")
         }
 
-        ## isolate(changed_dag_model$invalidate_dag_model_dframe <- FALSE)
+        ## isolate(changed_dag_model$invalidate <- FALSE)
         return(dag_data)
     })
-
-
-
-
 
 
     output$dag_table <-
@@ -1884,6 +1881,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## Allowing the setting of a value of 0 to remove an edge
             ## FIXME: this should be a function
             tryCatch({
+                
                 if (any(info$value == 0L)) {
                     mymessage("At dag_table_cell_edit, passed a 0 value; ",
                               "trying to remove the edge")
@@ -1954,10 +1952,36 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data$DAG_parent_set <- tmp_data$parent_set
             datasets$all_csd[[input$input2build]][[input$select_csd]] <-
                 evamtools:::to_stnd_csd_dataset(data)
+
+            ## ## Consistency checks
+            ## browser()
+            ## cnames <- colnames(dag_data())
+            ## if (data$this_d_dag_model == "OT") {
+            ##     if ( (any(c("Lambdas", "theta", "Relation") %in% cnames)) ||
+            ##          !("Weight" %in% cnames ))
+            ##         stop("OT model with impossible DAG table columns. ",
+            ##              "Did you change the model while editing? ",
+            ##              "Reset the DAG and expect possible app errors.")
+            ## } else if (data$this_d_dag_model == "OncoBN") {
+            ##     if ( (any(c("Lambdas", "Weight") %in% cnames)) ||
+            ##          !("theta" %in% cnames ) ||
+            ##          !("Relation" %in% cnames))
+            ##         stop("OncoBN model with impossible DAG table columns. ",
+            ##              "Did you change the model while editing? ",
+            ##              "Reset the DAG and expect possible app errors.")
+            ## } else if (data$this_d_dag_model == "HESBCN") {
+            ##     if ( (any(c("theta", "Weight") %in% cnames)) ||
+            ##          !("Lambdas" %in% cnames ) ||
+            ##          !("Relation" %in% cnames))
+            ##         stop("HESBCN model with impossible DAG table columns. ",
+            ##              "Did you change the model while editing? ",
+            ##              "Reset the DAG and expect possible app errors.")
+            ## }
+                                
             mymessage("At dag_table_cell_edit, 2")
             shinyjs::click("resample_dag")
         }, error = function(e){
-            showModal(dataModal(e[[1]]))
+                    showModal(dataModal(e[[1]]))
         })
     })
 
