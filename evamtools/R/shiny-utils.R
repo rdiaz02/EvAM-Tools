@@ -145,10 +145,9 @@ modify_dag <-
   } else if (dag[from_node, to_node] == 1 && operation == "add"){
     stop("That edge is already present")
   } else if (dag["Root", to_node] == 1 && operation == "add"){
- ##      else if(dag["WT", to_node] == 1 && operation == "add"){
-    stop("A direct children of Root cannot have multiple parents")
+      stop("A direct children of Root cannot have multiple parents")
   } 
-  
+
   tmp_dag <- dag
   tmp_dag[from_node, to_node] = value_from_operation[operation]
 
@@ -181,20 +180,42 @@ modify_dag <-
     }
   }
 
-  if(all(dag == tmp_dag2)){
+  if(all(dag == tmp_dag2)) {
       stop("This operation had no effect. ",
-           "E.g., are you drawing a disconnected DAG, ",
+           "Some possible causes and solutions: ",
+           "\n\n                          ",
+           "A) You tried to draw a disconnected DAG, ",
            "where the From node is not already ",
-           "part of the DAG (i.e., has no ancestor)?: ",
+           "part of the DAG (i.e., has no ancestor): ",
            "all nodes except Root must have an ancestor.  ",
-           ## "Are you trying to remove the edge from Root to a node X, ",
-           ## "where this node X has descendants? If yes, ",
-           ## "remove first the edges from X to its descendants.  ",
-           "Or did you try to remove a non-existent edge? ",
+           "\n\n                            ",
+           "B) You tried to remove the edge from Y to X, ",
+           "where X has descendants that have other ancestors: ",
+           "This operation is sometimes not possible,  ",
+           "especially if Y is Root. ",
+           "Remove first the edges from X to its descendants.  ",
+           "\n\n                             ",           
+           "C) You tried to remove a non-existent edge. ",
+           "\n\n",
+           "D) Something else. Start removing from the leave ",
+           "nodes."
            ## "(e.g., you transposed the From and To nodes)?: ",
            ## "even if the nodes are the same, an edge A -> C ",
            ## "is different from an edge C -> A."
            )
+      ## stop("This operation had no effect. ",
+      ##      "E.g., are you drawing a disconnected DAG, ",
+      ##      "where the From node is not already ",
+      ##      "part of the DAG (i.e., has no ancestor)?: ",
+      ##      "all nodes except Root must have an ancestor.  ",
+      ##      ## "Are you trying to remove the edge from Root to a node X, ",
+      ##      ## "where this node X has descendants? If yes, ",
+      ##      ## "remove first the edges from X to its descendants.  ",
+      ##      "Or did you try to remove a non-existent edge? ",
+      ##      ## "(e.g., you transposed the From and To nodes)?: ",
+      ##      ## "even if the nodes are the same, an edge A -> C ",
+      ##      ## "is different from an edge C -> A."
+      ##      )
   }
   g2 <- igraph::graph_from_adjacency_matrix(tmp_dag2, mode = "directed")
   if (dag_model %in% c("HESBCN", "OncoBN") && !igraph::is_dag(g2)) {
