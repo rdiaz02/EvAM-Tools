@@ -1791,9 +1791,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 selection = 'none',
                 server = FALSE,
                 rownames = FALSE,
-                ## set target to column, so non editable columns not used on tab movemente
-
-                editable = list(target = "column", ## "all",
+                ## DO NOT set target to "columns". Yeah, it'd be easier for
+                ## moving around with tab, but if you do, editing
+                ## breaks (function modify_lambdas_and_parent_set_from_table )
+                editable = list(target = "all",
                                 disable = list(columns = c(0, 1))),
                 options = list(dom = 't', paging = FALSE, ordering = FALSE,
                                columnDefs = list(list(className = 'dt-center',
