@@ -1573,6 +1573,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 changed_dag_model$invalidate_dag_model_dframe <- FALSE
             }
             data$this_d_dag_model <- input$dag_model
+            datasets$all_csd[["dag"]][[input$select_csd]]$this_d_dag_model <- input$dag_model
             if ((former_dag_model != input$dag_model) &&
                 resample_trigger_from_data_change())  shinyjs::click("resample_dag")
         }, 
@@ -1615,23 +1616,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             return()
         }
         mymessage("At dag_data reactive call")
-        ## FIXME: why do I need to make it eventReactive and listen
-        ## on the next three' Would it not be enough just using them?
-      
         
         all_gene_names <- c("Root", data$gene_names)
         edges <- which(data$dag == 1, arr.ind = TRUE)
         tmp_DAG_parent_set <- data$DAG_parent_set
         x <- length(tmp_DAG_parent_set)
-        ## The code below could fail (without severe consequences)
-        ## if we have moved back and forth between DAG and upload, for example
-        ## as we have not yet update the DAG data. The plot will ask for
-        ## the dag data, but those are not available.
-        ## Be more elegant
-        ## FIXME: what should really happen is that the work that happens
-        ## in "At observeEvent toListen" happened before this
-        ## But this is part of the UI and the other is listening. I guess
-        ## this must come first?
         
         dag_dataset_names <- unlist(lapply(datasets$all_csd$dag,
                                            function(x) x$name))
@@ -1641,7 +1630,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             return(NULL)
         }
         mymessage("    dag_data_reactive, position 3")
-        
         
         names(tmp_DAG_parent_set) <- all_gene_names[seq(2, x + 1)]
         dag_data <- data.frame(From = all_gene_names[edges[, "row"]]
@@ -1655,7 +1643,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         } else if (data$this_d_dag_model %in% c("OncoBN")) {
             colnames(dag_data) <- c("From", "To", "Relation", "theta")
         }
-        
+
         changed_dag_model$invalidate_dag_model_dframe <- FALSE
         return(dag_data)
     })
