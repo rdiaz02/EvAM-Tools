@@ -263,16 +263,21 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
   }
   
   all_genes <- dag_data$To
-  changed_genes <- all_genes[new_lambdas != old_lambdas
-    & new_lambdas > 0]
+  if (length(new_lambdas) != length(old_lambdas))
+      stop("Inconsistent state of DAG structure after editing. ",
+           "Try adding/removing genes one by one, using ",
+           "'Add edge' and 'Remove edge' instead of passing ",
+           "0s to lambdas/weights")
+  changed_genes <- all_genes[(new_lambdas != old_lambdas)
+                             & (new_lambdas > 0)]
   info_from <- info[info["col"] == 0,"value"]
   info_to <- info[info["col"] == 1,"value"]
   if (!(all(c(info_from, info_to, dag_data$To, dag_data$From) %in%
             c("Root", names(lambdas))))) {
-    stop("There are unkown genes")
+      stop("There are unkown genes")
   }
   changed_lambdas <- new_lambdas[new_lambdas != old_lambdas
-    & new_lambdas > 0]
+                                 & new_lambdas > 0]
 
   tmp_lambdas <- lambdas
   tmp_lambdas[changed_genes] <- changed_lambdas
@@ -285,36 +290,36 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
   ##Relationships
   number_of_parents <- colSums(dag)[-1]
   if (dag_model %in% c("HESBCN", "OncoBN")) {
-    tmp_parent_set <- parent_set
-    number_of_parents <- number_of_parents[number_of_parents > 0]
-    new_relationships <- info[info["col"] == 2,"value"]
-    names(new_relationships) <- info[info["col"] == 1,"value"]
-    
-    #Cleaning unwanted value
-    genes_in_relationships <- names(new_relationships)
-    freq_genes_in_relationships <- table(genes_in_relationships)
+      tmp_parent_set <- parent_set
+      number_of_parents <- number_of_parents[number_of_parents > 0]
+      new_relationships <- info[info["col"] == 2,"value"]
+      names(new_relationships) <- info[info["col"] == 1,"value"]
+      
+                                        #Cleaning unwanted value
+      genes_in_relationships <- names(new_relationships)
+      freq_genes_in_relationships <- table(genes_in_relationships)
 
-    old_relationships <- stats::setNames(dag_data$Relation, dag_data$To)
-    if (dag_model %in% c("HESBCN"))  
-        new_relationships[!(new_relationships %in% c("Single", "AND", "OR", "XOR"))] <- "AND"
-    if (dag_model %in% c("OncoBN"))  
-        new_relationships[!(new_relationships %in% c("Single", "AND", "OR"))] <- "OR"
-    
-    new_relationships[names(number_of_parents[number_of_parents<2])] <- "Single"
-    new_relationships[setdiff(unique(genes_in_relationships), 
-      names(freq_genes_in_relationships[freq_genes_in_relationships > 1]))] <- "Single"
-    
-    multiple_parents <- names(number_of_parents[number_of_parents > 1])
+      old_relationships <- stats::setNames(dag_data$Relation, dag_data$To)
+      if (dag_model %in% c("HESBCN"))  
+          new_relationships[!(new_relationships %in% c("Single", "AND", "OR", "XOR"))] <- "AND"
+      if (dag_model %in% c("OncoBN"))  
+          new_relationships[!(new_relationships %in% c("Single", "AND", "OR"))] <- "OR"
+      
+      new_relationships[names(number_of_parents[number_of_parents<2])] <- "Single"
+      new_relationships[setdiff(unique(genes_in_relationships), 
+                                names(freq_genes_in_relationships[freq_genes_in_relationships > 1]))] <- "Single"
+      
+      multiple_parents <- names(number_of_parents[number_of_parents > 1])
 
-    for (i in multiple_parents){
-      changed_relationships <- setdiff(new_relationships[genes_in_relationships == i], c(parent_set[i]))
-      if (length(changed_relationships) > 0){
-        tmp_parent_set[i] <- changed_relationships[[1]]
+      for (i in multiple_parents){
+          changed_relationships <- setdiff(new_relationships[genes_in_relationships == i], c(parent_set[i]))
+          if (length(changed_relationships) > 0){
+              tmp_parent_set[i] <- changed_relationships[[1]]
+          }
       }
-    }
   } else if (dag_model == "OT") {
-    tmp_parent_set <- parent_set
-    tmp_parent_set[1:length(tmp_parent_set)] <- "Single"
+      tmp_parent_set <- parent_set
+      tmp_parent_set[1:length(tmp_parent_set)] <- "Single"
   } 
   
 

@@ -1754,8 +1754,20 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     lambda_val <-
                         suppressWarnings(as.numeric(info[info["col"] == lambda_col,
                                                          "value"]))
+                    info_rows_to_rm <- info[info$value == 0L, "row"]
+                    lambda_val_0 <- which(lambda_val == 0L)
+                    if ( (length(info_rows_to_rm) != length(lambda_val_0)) ||
+                         !(all(info_rows_to_rm == lambda_val_0))) {
+                        stop("This delete operation using 0s cannot be performed. ",
+                             "Try removing setting 0s one by one and/or ",
+                             "using 'Remove edge' ")
+                    }
 
-                    for (nd in  rev(which(lambda_val == 0L))) {
+                    ## For removing entries from info, and because more likely
+                    ## to be terminal nodes
+                    lambda_val_0 <- sort(lambda_val_0, decreasing = TRUE)
+
+                    for (nd in lambda_val_0) {
                         from_gene <- info_from[nd]
                         to_gene   <- info_to[nd]
                         
@@ -1770,6 +1782,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                         ## }
                         data$dag <- post_delete$dag
                         data$DAG_parent_set <- post_delete$parent_set
+                        info <- info[!(info[, "row"] == nd), ]
                     }
                 }
             }, error = function(e) {
@@ -1785,11 +1798,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             "Check the DAG. ")
                 stop(paste(e0, "\n\n", e[[1]], "\n\n", e2))
             })
-            
+
             mymessage("At dag_table_cell_edit, 1")
             tmp_data <-
                 evamtools:::modify_lambdas_and_parent_set_from_table(dag_data(),
-                                                                     info, data$lambdas
+                                                                     info,
+                                                                     data$lambdas
                                                                    , data$dag
                                                                    , data$DAG_parent_set
                                                                    , dag_model = data$this_d_dag_model)
