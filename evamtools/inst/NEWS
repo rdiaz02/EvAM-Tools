@@ -1,8 +1,12 @@
-Changes in version 2.1.7 (2022-08-09):
+Changes in version 2.1.8 (2022-08-09):
 	- More changes to the web app:
 	- Much better error messages when manipulating DAGs.
 	- The DAG model is part of the data.
 	- Can remove edges by setting them to 0.
+	- Additional checks of internal consistency
+	  during/after DAG manipulation.
+	- Code cleanup.
+	- (An version 2.1.7? well, this sums up both)
 
 Changes in version 2.1.6 (2022-08-08):
 	- More changes to the web app:
