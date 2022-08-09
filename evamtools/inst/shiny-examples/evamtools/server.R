@@ -1583,10 +1583,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##         ## dag_model was changed
     ##         if ((former_dag_model != input$dag_model)) {
     ##             changed_dag_model$invalidate_dag_model_dframe <- TRUE
-    ##         } ## else {
-    ##         ##     message("CUCU happened with value ",  changed_dag_model$invalidate_dag_model_dframe)
-    ##         ##     changed_dag_model$invalidate_dag_model_dframe <- FALSE
-    ##         ## }
+    ##         } else {
+    ##             message("former is ", former_dag_model)
+    ##             message("input is", input$dag_model)
+    ##             message("CUCU happened with value ",  changed_dag_model$invalidate_dag_model_dframe)
+    ##             changed_dag_model$invalidate_dag_model_dframe <- FALSE
+    ##         }
     ##         data$this_d_dag_model <- input$dag_model
     ##         datasets$all_csd[["dag"]][[input$select_csd]]$this_d_dag_model <- input$dag_model
     ##         if ((former_dag_model != input$dag_model) &&
@@ -1712,7 +1714,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 datasets$all_csd[["dag"]][[input$select_csd]]$this_d_dag_model <- input$dag_model
                 if (resample_trigger_from_data_change())  shinyjs::click("resample_dag")
             } else {
-                message("CUCU here ; value is ", can_change_dag_model)
+                message("Are we ever here??? Value is ", can_change_dag_model)
                 changed_dag_model$invalidate_dag_model_dframe <- FALSE
                 updateRadioButtons(session, "dag_model", selected = former_dag_model)
             }
