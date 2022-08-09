@@ -283,7 +283,7 @@ modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
   all_genes <- dag_data$To
   if (length(new_lambdas) != length(old_lambdas))
       stop("Inconsistent state of DAG structure after editing. ",
-           "\n\n This could be the result of addition/removals. "
+           "\n\n This could be the result of addition/removals. ",
            "Try adding/removing genes one by one, using ",
            "'Add edge' and 'Remove edge' instead of passing ",
            "0s to lambdas/weights. ",
