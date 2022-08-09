@@ -1749,6 +1749,55 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             names(data$DAG_parent_set) <- data$gene_names[1:length(data$DAG_parent_set)]
             names(data$lambdas) <- data$gene_names[1:length(data$DAG_parent_set)]
             info <- input$dag_table_cell_edit
+
+            ## Allowing the setting of a value of 0 to remove an edge
+            ## FIXME: this should be a function
+            tryCatch({
+                if (any(info$value == 0L)) {
+                    mymessage("At dag_table_cell_edit, passed a 0 value; ",
+                              "trying to remove the edge")
+                    info_from <- info[info["col"] == 0, "value"]
+                    info_to <- info[info["col"] == 1, "value"]
+                    if (data$this_d_dag_model == "OT") {
+                        lambda_col <- 2
+                    } else {
+                        lambda_col <- 3
+                    }
+                    lambda_val <-
+                        suppressWarnings(as.numeric(info[info["col"] == lambda_col,
+                                                         "value"]))
+
+                    for (nd in  rev(which(lambda_val == 0L))) {
+                        from_gene <- info_from[nd]
+                        to_gene   <- info_to[nd]
+                        
+                        post_delete <- evamtools:::modify_dag(data$dag, from_gene, to_gene,
+                                                              operation = "remove",
+                                                              parent_set = data$DAG_parent_set,
+                                                              dag_model = data$this_d_dag_model)
+                        ## if (inherits(post_delete, "try-error")) {
+                        ##     stop("Deleting an edge by setting it to 0 did not succeed. ",
+                        ##          "Try removing the edge by selecting each of the nodes ",
+                        ##          "to delete in turn, and clicking on 'Remove edge'.")
+                        ## }
+                        data$dag <- post_delete$dag
+                        data$DAG_parent_set <- post_delete$parent_set
+                    }
+                }
+            }, error = function(e) {
+                e0 <- paste("Deleting one or more edge(s) by ",
+                            "setting it/them to 0 did not succeed ",
+                            "when you tried to remove edge ",
+                            "<b>", from_gene, " -> ", to_gene, "</b> ",
+                            "because: ",
+                            "-----------------------")
+                e2 <- paste("-----------------------",
+                            "Some of the operations requested ",
+                            "might have been performed successfully. ",
+                            "Check the DAG. ")
+                stop(paste(e0, "\n\n", e[[1]], "\n\n", e2))
+            })
+            
             mymessage("At dag_table_cell_edit, 1")
             tmp_data <-
                 evamtools:::modify_lambdas_and_parent_set_from_table(dag_data(),
