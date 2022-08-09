@@ -1790,8 +1790,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             "when you tried to remove edge ",
                             "<b>", from_gene, " -> ", to_gene, "</b> ",
                             "because: ",
-                            "-----------------------")
-                e2 <- paste("-----------------------",
+                            "\n-----------------------\n")
+                e2 <- paste("\n-----------------------\n",
                             "Some of the operations requested ",
                             "might have been performed successfully. ",
                             "Check the DAG. ")
