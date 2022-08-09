@@ -226,13 +226,31 @@ modify_dag <-
            "With OT nodes cannot have multiple parents.")
   }
 
+
   ## Recompute parent set
   number_of_parents <- colSums(tmp_dag2)[-1]
   tmp_parent_set <- parent_set
   tmp_parent_set[number_of_parents <= 1] <- "Single" ##Default is Single
   tmp_parent_set[number_of_parents > 1 & !(parent_set %in% c("AND", "OR", "XOR"))] <- "AND" ##Default is AND
+
+  if (dag_model == "OncoBN")  {
+      if (length(unique(tmp_parent_set)) > 2) {
+          stop("This operation does not give a valid OncoBN model. ",
+               "The OncoBN model can only include ",
+               "one type of relationship",
+               "(conjunctive ---AND--- or disjunctive ---OR---) ",
+               "but not both.")
+      } else if (any(tmp_parent_set == "XOR" )) {
+          ## I think this is impossible from here, but just in case
+          stop("This operation does not give a valid OncoBN model. ",
+               "The OncoBN model cannot include ",
+               "XOR relationships.")
+      }
+  }
+  
+  
   return(list(dag = tmp_dag2, parent_set = tmp_parent_set))
-}
+    }
 
 modify_lambdas_and_parent_set_from_table <- function(dag_data, info,
                                                      lambdas, dag, parent_set,
