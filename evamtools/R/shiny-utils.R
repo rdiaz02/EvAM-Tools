@@ -125,27 +125,27 @@ modify_dag <-
   }
 
   if (is.null(from_node) | is.null(to_node) | is.null(dag)){
-    stop("From and To options and DAG have to be defined")
+      stop("From and To options and DAG have to be defined.")
   } 
 
 
   if(!all(names(parent_set) == colnames(dag)[-1])){
-    stop("Dag and parent set should have information of the same genes")
+      stop("Dag and parent set should have information of the same genes.")
   }
   
   ## from_node <- ifelse(from_node == "Root", "WT", from_node)
   if (!(from_node %in% colnames(dag)) | !(to_node %in% colnames(dag))) {
-    stop("Both From and To options have to be valid gene names")
+      stop("Both From and To options have to be valid gene names.")
   } else if(!all(unique(as.vector(dag)) %in% c(0, 1))){
-    stop("The adjacency matrix should only contain 0 and 1")
+      stop("The adjacency matrix should only contain 0 and 1.")
   } else if (from_node == to_node){
-    stop("Both From and To options must be different")
-  } else if(dag[to_node, from_node] == 1 && operation == "add"){
-    stop("Relationships cannot be bidirectional")
-  } else if (dag[from_node, to_node] == 1 && operation == "add"){
-    stop("That edge is already present")
-  } else if (dag["Root", to_node] == 1 && operation == "add"){
-      stop("A direct children of Root cannot have multiple parents")
+      stop("Both From and To options must be different.")
+  } else if(dag[to_node, from_node] == 1 && operation == "add") {
+      stop("Relationships cannot be bidirectional.")
+  } else if (dag[from_node, to_node] == 1 && operation == "add") {
+      stop("That edge is already present.")
+  } else if (dag["Root", to_node] == 1 && operation == "add") {
+      stop("A direct children of Root cannot have multiple parents.")
   } 
 
   tmp_dag <- dag
@@ -219,8 +219,8 @@ modify_dag <-
   }
   g2 <- igraph::graph_from_adjacency_matrix(tmp_dag2, mode = "directed")
   if (dag_model %in% c("HESBCN", "OncoBN") && !igraph::is_dag(g2)) {
-      stop("This relationship breaks the DAG. Revise it.",
-           "For example, did you introduce a cycle?")
+      stop("This relationship breaks the DAG. Revise it. ",
+           "For example, did you try to introduce a cycle?")
   } else if (dag_model %in% c("OT") && any(number_of_parents > 1)) {
       stop("This operation does not give a tree. ",
            "With OT nodes cannot have multiple parents.")
@@ -237,7 +237,7 @@ modify_dag <-
       if (length(unique(tmp_parent_set)) > 2) {
           stop("This operation does not give a valid OncoBN model. ",
                "The OncoBN model can only include ",
-               "one type of relationship",
+               "one type of relationship ",
                "(conjunctive ---AND--- or disjunctive ---OR---) ",
                "but not both.")
       } else if (any(tmp_parent_set == "XOR" )) {
