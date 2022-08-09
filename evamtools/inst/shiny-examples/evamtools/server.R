@@ -1523,14 +1523,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         tryCatch({
             mymessage("At observeEvent input$dag_model")
 
-            ## FIXME Unnecessary, as caught at a much more sensible place
-            ## but leave it here anyway, just in case, until much more testing done.
-            ## The other messages come from the dag_data <- reactive
-            ## block.
-            ## But here, it is often caught even earlier and we avoid the
-            ## flickering screen that happens when we only used the error
-            ## handling below.
-
             former_dag_model <- data$this_d_dag_model
 
             if ((input$dag_model %in% c("OT", "OncoBN")) &&
@@ -1626,11 +1618,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             data$DAG_parent_set,
             data$dag,
             data$lambdas,
-            ## dag_data triggered on successful dag_model change
+            ## dag_data will be triggered on successful dag_model change
             changed_dag_model$invalidate_dag_model_dframe
         )
     })
-    ## dag_data <- eventReactive(toListen2(),
 
     ## With the dag model itself being part of data,
     ## we can take for granted that anything that is in data must be correct
@@ -1670,10 +1661,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
         mymessage("    dag_data_reactive, position 3")
         
-        ## dag_data is the CPM model as a data frame.
-        ## This is not stored as such (why? I don't know)
-        ## (FIXME change logic and store the dag_data)
-        ## But is requested to generate data, etc.
         
         names(tmp_DAG_parent_set) <- all_gene_names[seq(2, x + 1)]
         dag_data <- data.frame(From = all_gene_names[edges[, "row"]]
@@ -1690,55 +1677,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         
         changed_dag_model$invalidate_dag_model_dframe <- FALSE
         return(dag_data)
-        
-        ## if ((data$this_d_dag_model %in% c("OT", "OncoBN"))
-        ##     & (any(dag_data$Lambdas < 0) | any(dag_data$Lambdas > 0.99999999))) {
-        ##     data$this_d_dag_model <- "HESBCN"
-        ##     updateRadioButtons(session, "dag_model", selected = "HESBCN")
-        ##     showModal(dataModal(paste("thetas/probabilities should be between 0 and 1 ",
-        ##                               "(actually, for numerical reasons, 0.99999999).")))
-        ##     return(dag_data)
-        ## }
-
-        ## if (data$this_d_dag_model %in% c("OT")) {
-        ##     if (any(duplicated(dag_data$To))) {
-        ##         data$this_d_dag_model <- "HESBCN"
-        ##         updateRadioButtons(session, "dag_model", selected = "HESBCN")
-        ##         showModal(dataModal(
-        ##             paste("This DAG has nodes with multiple parents. ",
-        ##                   "OT can only use trees ",
-        ##                   "(i.e. no node can have with multiple parents).")))
-        ##     } else if (length(unique(dag_data$Relation)) > 2) {
-        ##         data$this_d_dag_model <- "HESBCN"
-        ##         updateRadioButtons(session, "dag_model", selected = "HESBCN")
-        ##         showModal(dataModal(HTML("The OT model  ",
-        ##                                  "is only for trees. ")))
-        ##     } else {
-        ##         colnames(dag_data) <- c("From", "To", "Relation", "Weight")
-        ##         dag_data$Relation <- NULL
-        ##     }
-        ##     return(dag_data)
-        ## } else if (data$this_d_dag_model %in% c("OncoBN")) {
-        ##     if (any(dag_data$Relation == "XOR")) {
-        ##         data$this_d_dag_model <- "HESBCN"
-        ##         updateRadioButtons(session, "dag_model", selected = "HESBCN")
-        ##         showModal(dataModal(HTML("The OncoBN model cannot include ",
-        ##                                  "XOR relationships.")))
-        ##     } else if (length(unique(dag_data$Relation)) > 2) {
-        ##         data$this_d_dag_model <- "HESBCN"
-        ##         updateRadioButtons(session, "dag_model", selected = "HESBCN")
-        ##         showModal(dataModal(HTML("The OncoBN model can only include ",
-        ##                                  "one type of relationship",
-        ##                                  "(conjunctive ---AND--- or disjunctive ---OR---, ",
-        ##                                  "as specified in \"Advanced options\").")))
-        ##     } else {
-        ##         colnames(dag_data) <- c("From", "To", "Relation", "theta")
-        ##     }
-        ##     return(dag_data) 
-        ## } else {
-        ##     mymessage("    dag_data_reactive, position 4")
-        ##     return(dag_data)
-        ## }
     })
 
 
@@ -1831,7 +1769,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             names(data$lambdas) <- data$gene_names[1:length(data$DAG_parent_set)]
             info <- input$dag_table_cell_edit
             mymessage("At dag_table_cell_edit, 1")
-            browser()
             tmp_data <-
                 evamtools:::modify_lambdas_and_parent_set_from_table(dag_data(),
                                                                      info, data$lambdas
