@@ -60,9 +60,9 @@ test_that("Test standarize datasets works correctly", {
     
     check_fields <- function(orig_data, expected_data) {
         standard_data <- to_stnd_csd_dataset(orig_data,
-                                            default_max_genes = old$max_genes,
-                                            default_template_data = old$template_data
-                                            )
+                                             default_max_genes = old$max_genes,
+                                             default_template_data = old$template_data
+                                             )
         expected_attr <- names(expected_data)
         for(i in expected_attr){
             expect_equal(standard_data[[i]], expected_data[[i]])
@@ -71,6 +71,8 @@ test_that("Test standarize datasets works correctly", {
             ## The rest has to be equal to .ev_SHINY_dflt
             if(i == "gene_names" & "data" %in% names(orig_data)) next
             if(i == "csd_counts" & "data" %in% names(orig_data)) next
+            ## this I added recently so cannot expect it to be in the old format
+            if (i == "this_d_dag_model") next 
             expect_equal(unname(standard_data[[i]])
                        , unname(old$template_data[[i]]))
         }
