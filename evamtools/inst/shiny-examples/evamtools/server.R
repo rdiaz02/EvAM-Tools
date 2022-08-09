@@ -629,7 +629,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             }
 
             if ((input$input2build == "upload") && is.null(data$data)) {
-                stop("When no data has been uploaded, ",
+                stop("When no data have been uploaded, ",
                      "it makes no sense to rename the data: ",
                      "there is nothing you could do with them, ",
                      "since there are none.")
@@ -1186,7 +1186,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                      "genes used, reset the slider ",
                                                      "of \"Number of genes\", and reorder the genes next to  ",
                                                      "\"Mutations\".</p><span>"),
-                                                arrow = TRUE, animation = "shift-toward", placement = "right"
+                                                arrow = TRUE, animation = "shift-toward"
                                                 ),
                               ## shinyBS::bsTooltip("genotype",
                               ##                    HTML("<p>The list of genes next to \"Mutations\" is kept sorted ",
@@ -1796,9 +1796,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     output$dag_table <-
         DT::renderDT(
                 dag_data(),
-                escape = FALSE, selection = 'none', server = FALSE,
+                escape = FALSE,
+                selection = 'none',
+                server = FALSE,
                 rownames = FALSE,
-                editable = list(target = "all", disable = list(columns = c(0, 1))),
+                ## set target to column, so non editable columns not used on tab movemente
+
+                editable = list(target = "column", ## "all",
+                                disable = list(columns = c(0, 1))),
                 options = list(dom = 't', paging = FALSE, ordering = FALSE,
                                columnDefs = list(list(className = 'dt-center',
                                                       targets = "_all")))
@@ -1994,10 +1999,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                               Counts = integer())
                 data$data <- NULL
                 shinyjs::disable("analysis")
-                stop("The must be at least two genes ",
+                stop("There must be at least two genes ",
                      "in the DAG.\n\n",
                      "<b>Any frequency data is suspect until ",
-                     "you solve this problem.</b>")
+                     "you solve this problem.</b> ",
+                     "so will try to delete all genotype data. ")
             }
             the_dag_data <- dag_data()
             gene_names <- setdiff(unique(c(the_dag_data$From, the_dag_data$To)),
@@ -2217,7 +2223,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                       , rownames = TRUE,
                                         options = list(
                                             searching = FALSE, columnDefs = list(list(className = 'dt-center',
-                                                                                      targets = "_all")), info = FALSE, paginate= FALSE),
+                                                                                      targets = "_all")),
+                                            info = FALSE, paginate= FALSE),
                                         )
 
     observeEvent(input$thetas_table_cell_edit, {
@@ -2429,7 +2436,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         d1
     }
   , selection = 'none', server = TRUE,
-    editable = list(target = "column",
+    editable = list(target = "column", 
                     disable = list(columns = c(0, 1)))
   , rownames = FALSE,
     options = list(
@@ -3057,7 +3064,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     selection = 'none', server = TRUE
   , rownames = FALSE
   , options = list(
-        columnDefs = list(list(className = 'dt-center', targets = "_all")), info = FALSE, paginate= FALSE)
+        columnDefs = list(list(className = 'dt-center', targets = "_all")),
+        info = FALSE, paginate= FALSE)
     )
 
     output$tabular_data <- renderUI({
