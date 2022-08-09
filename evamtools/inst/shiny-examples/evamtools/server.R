@@ -339,23 +339,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
       , this_d_dag_model = default_dag_model
     )
 
-    ## value does not really matter; only matters that it changes
+    ## Value does not really matter; only matters that it changes
     ## clearer this way, but requires changing this value
     ## inside dag_data eventReactive code block
     changed_dag_model <- reactiveValues(
         invalidate = FALSE
     )
 
-    ## switched_dag_model <- reactiveValues(
-    ##     toggled = FALSE
-    ## )
-
-    toggle_switch <-
-        eventReactive(
-            changed_dag_model$invalidate,
-            {
-                !(changed_dag_model$invalidate)
-            })
+    
     
     
     display_freqs <- reactive({
@@ -1713,7 +1704,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 datasets$all_csd[["dag"]][[input$select_csd]]$this_d_dag_model <- input$dag_model
                 if (resample_trigger_from_data_change())  shinyjs::click("resample_dag")
                 ## force trigger it
-                null <- dag_data()
+                ## null <- dag_data()
             } else {
                 message("Are we ever here??? Value is ", can_change_dag_model)
                 changed_dag_model$invalidate <- FALSE
