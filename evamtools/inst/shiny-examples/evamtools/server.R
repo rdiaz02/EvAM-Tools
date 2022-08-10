@@ -873,7 +873,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                        actionButton("provide_gene_names", "Use different gene names"),
                                        tippy::tippy_this(element = "dummy_for_tooltip1", ## "provide_gene_names",
                                                          tooltip = paste("<span style='font-size:1.5em; text-align:left;'>",
-                                                                         "<p><b>Use different names</b></p>",
+                                                                         "<p><b>Use different gene names</b></p>",
                                                                          "<p>Create new models/new data using gene names you provide.</p> ",
                                                                          "<br>",
                                                                          "<p><b>Can only be used for models/data that are empty. </b>",
