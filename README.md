@@ -58,6 +58,18 @@ What can EvAM-Tools be used for?
        * We can examine how a give method works, and what type of inferences it performs, when data are generated under the model of another method. For example, what is the output from MHN if the data are really coming from an H-ESBCN model?
        * We can compare new methods against existing state-of-the-art ones (using different data sources ---simulated from EvAM-Tools or imported from other sources).
 
+
+
+The web app in particular should allow for easy exploration of CPM models without the need for installing any software. Details about the use of the web app are provided in  https://www.iib.uam.es/evamtools/ . The following figure provides an overview of the workflow with the web app:
+
+![Overview EvAM-Tools web app](./evamtools/inst/shiny-examples/evamtools/assets/figure-1_cf00b24.png?raw=true)
+<br>
+<img src="./figure-1_cf00b24.png" alt="" width="100%">
+<br>
+<br>
+
+
+
 ---
 ---
 
