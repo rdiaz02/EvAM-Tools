@@ -1,16 +1,16 @@
-<center><h1>Evam-tools</h1></center>
+<center><h1>EvAM-tools</h1></center>
 
 &nbsp;
 ****
 #### Table of contents <a id="evamtools"></a>
 ****
-- [Evam-tools](#evamtools)
+- [EvAM-tools](#evamtools)
 - [How to use this web interface?](#input)
 <br>&nbsp;&nbsp;- [What is available under ```Results```?](#helpresults)
 <br>&nbsp;&nbsp;- [Additional documentation](#additional_docs)
 <br>&nbsp;&nbsp;- [Session timeouts, RAM and elapsed time execution limits](#limits)
 <br>&nbsp;&nbsp;- [How long does it take to run?](#timetorun)
-- [What CPMs are included in ```Evam-tools```?](#cpms)
+- [What CPMs are included in ```EvAM-tools```?](#cpms)
 <br>&nbsp;&nbsp;- [Default options and default CPMs run](#cpms2run)
 <br>&nbsp;&nbsp;- [References and related repositories](#refs)
 - [Where is the code? Terms of use? Copyright](#code)
@@ -20,10 +20,10 @@
 
 
 ****
-## Evam-tools <a id="evamtools"></a>
+## EvAM-tools <a id="evamtools"></a>
 ****
 
-```Evam-tools``` is an R package and Shiny web app that provides tools for evolutionary accumulation, or event accumulation, models. We use code from  "Cancer Progression Models" (CPM) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost). ```Evam-tools``` is  also available as an R package (see https://github.com/rdiaz02/EvAM-Tools).
+```EvAM-tools``` is an R package and Shiny web app that provides tools for evolutionary accumulation, or event accumulation, models. We use code from  "Cancer Progression Models" (CPM) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost). ```EvAM-tools``` is  also available as an R package (see https://github.com/rdiaz02/EvAM-Tools).
 
 
 This web interface provides a GUI to the package. You can analyze your data, create cross-sectional data from scratch (by giving genotype frequencies), or generate data under different CPMs. You can compare results from different methods/models, as well as experiment and understand the consequences of changes in the input data on the returned inferences. You can also examine how a given method performs when data have been generated under another (or its own) model. See more details for examples of use in https://github.com/rdiaz02/EvAM-Tools#some-examples-of-use .
@@ -44,6 +44,14 @@ In cross-sectional data, a single sample is obtained from each subject or patien
 ****
 ## How to use this web interface? <a id="input"></a>
 ***
+
+
+This figure provides an overview:
+
+<br>
+<img src="figure-1_cf00b24.png" alt="Overview EvAM-Tools web app" width="100%">
+<br>
+<br>
 
 
 * Go first to the ```User input``` tab (on top of the page). Here you can:
@@ -129,7 +137,7 @@ It depends on the number of genes or features and methods used. For six genes, a
 
 
 ****
-## What CPMs are included in ```Evam-tools```?<a id="cpms"></a>
+## What CPMs are included in ```EvAM-tools```?<a id="cpms"></a>
 ***
 
 *  **Oncogenetic Tress (OT):** Restrictions in the accumulation of mutations (or events) are represented as a tree. Hence, a parent node can have many children, but children have a single parent. OTs are untimed (edge weights represent conditional probabilities of observing a given mutation, when the sample is taken, given the parents are observed).
