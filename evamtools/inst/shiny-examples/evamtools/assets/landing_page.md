@@ -48,7 +48,7 @@ In cross-sectional data, a single sample is obtained from each subject or patien
 ***
 
 
-The figure below provides an overview; in the sections below we explain the main functionality shown in the figure. 
+The figure below provides an overview of the workflow with the web app; in the sections below we explain the main functionality shown in the figure. 
 
 <br>
 <img src="figure-overview.png" alt="Overview EvAM-Tools web app" width="100%">
