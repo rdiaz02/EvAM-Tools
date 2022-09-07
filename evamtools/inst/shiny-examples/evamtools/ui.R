@@ -610,14 +610,15 @@ user_input <- function() {
                                 tags$h3(HTML("<h3 style=\"margin-left:-5px\">Cross-sectional data. Upload, create, generate, modify: </h3>")),
                                 ## tags$h3(HTML('<hr style="height:4px;background-color:black;width:100%; text-align:left;margin-left:0">')),
                                 tags$h4(HTML("<hr style=\"height:1px; width:70px; background-color:black;text-align:left;margin-left:5px\">")),
-                                tags$h4(HTML("<h4 style=\"margin-left:-20px\"> Enter data directly: </h4>")),
+                                tags$h4(HTML("<h4 style=\"margin-left:-20px\"> Enter<br>cross-sectional data: </h4>")),
                                 tagList(
                                     radioButtons(inputId = "input2build", label = "",
                                                  choiceNames = list(
-                                                     HTML("Upload data"),
-                                                     HTML("Create data <br> interactively"),
-                                                     HTML("DAG and <br> rates/probs."),
-                                                     "MHN thetas"),
+                                                     HTML("Upload file"),
+                                                     HTML("Enter genotype <br> frequencies <br> manually"),
+                                                     HTML("DAG and <br> rates/cond. probs."),
+                                                     HTML("MHN <br>log-&Theta; matrix")
+                                                 ),
                                                  choiceValues = list("upload", "csd", "dag", "matrix"),
                                                  selected = "dag"
                                                  )
@@ -632,7 +633,7 @@ user_input <- function() {
                                         
                                         tags$footer(tags$script(HTML("
               tmp_label = document.createElement('p');
-              tmp_label.innerHTML = '<hr style=\"height:1px; width:70px; background-color:black;text-align:left;margin-left:-10px\"> <h4 style=\"margin-left:-30px\">Generate data from CPM models:</h4>';
+              tmp_label.innerHTML = '<hr style=\"height:1px; width:70px; background-color:black;text-align:left;margin-left:-10px\"> <h4 style=\"margin-left:-30px\">Generate<br>cross-sectional data from CPM models:</h4>';
               document.querySelectorAll('#input2build div.radio')[1].after(tmp_label)
               document.querySelectorAll('#input2build div.radio')[1].after(tmp_label)
               "))),
