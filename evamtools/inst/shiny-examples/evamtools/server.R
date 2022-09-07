@@ -820,6 +820,42 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         )
     })
 
+
+    observeEvent(input$display_help_upload_data, {
+        showModal(modalDialog(
+            easyClose = TRUE,
+            title = tags$h3("Format for uploading data"),
+            tags$div(
+                     tags$h5(paste0("Format: csv ---comma separated values---,",
+                                    "with subjects in rows and gens in columns. ",
+                                    "Use 0 or 1 for ",
+                                    "altered/not-altered (mutated/not-mutated). ", 
+                                    "The first row should contain ",
+                                    " the gene names ",
+                                    "and there should be no subject names ",
+                                    "(i.e., no column of subject names)."
+                                    )),
+                     tags$h5(HTML("Use only alphanumeric characters ",
+                                  "for gene names, and do not start ",
+                                  "a gene name with a number. <br> <br> ",
+                                  "Keep gene names short (for figures). <br>"
+                                  )),
+                     tags$h5(HTML("<br><br>A short <b>example file</b> is available here<br><br> ",
+                                  "<a href=\"https://raw.githubusercontent.com/rdiaz02/EvAM-Tools/main/examples_for_upload/tinydata.csv\">",
+                                  "https://raw.githubusercontent.com/rdiaz02/EvAM-Tools/main/examples_for_upload/tinydata.csv </a>",
+                                  "<br><br>",
+                                  "and there are additional examples in that ",
+                                  "directory ",
+                                  "<a href=\"https://github.com/rdiaz02/EvAM-Tools/tree/main/examples_for_upload\">",
+                                  "(https://github.com/rdiaz02/EvAM-Tools/tree/main/examples_for_upload)</a> ---make sure to view the files as raw or ",
+                                  "download them and open them with a ",
+                                  "text editor in your computer.")),
+                     )
+        )
+        )
+    })
+
+    
     
     ## Advanced option for running evamtools
     observeEvent(input$advanced_options, {
@@ -1331,10 +1367,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         } else if (input$input2build == "upload") {
             tags$div(## class = "frame",
                      tags$h3("Upload data (CSV format)"),
+                     actionButton("display_help_upload_data",
+                                  "Help", class = "btn-info"),
                      tags$h5(HTML("If you want to give your data a specific ",
                                   "name, set it in the box below ",
                                   "before uploading the data. ",
-                                  "Names should start with a letter, ",
+                                  "File names should start with a letter, ",
                                   "and can contain only letters, numbers, ",
                                   "hyphen, and underscore, but no ",
                                   "other characters (no periods, spaces, etc)."
@@ -1345,16 +1383,26 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                         value = "Uploaded_data"
                                         )
                               ),
-                     tags$h5(paste0("Format: csv ---comma separated values---,",
-                                    " with first row with gene names."
-                                    )),
-                     tags$h5(HTML("Use only alphanumeric characters ",
-                                  "for gene names, and do not start ",
-                                  "a gene name with a number. <br> ",
-                                  "Keep gene names short (for figures). <br>",
-                                  "Use 0 or 1 for ",
-                                  "altered/not-altered (mutated/not-mutated)."                  
-                                  )),
+                     
+                     ## tags$h5(paste0("Format: csv ---comma separated values---,",
+                     ##                "with subjects in rows and gens in columns. ",
+                     ##                "Use 0 or 1 for ",
+                     ##                "altered/not-altered (mutated/not-mutated).", 
+                     ##                "The first row should contain ",
+                     ##                " the gene names ",
+                     ##                "and there should be no subject names. "
+                     ##                )),
+                     ## tags$h5(HTML("Use only alphanumeric characters ",
+                     ##              "for gene names, and do not start ",
+                     ##              "a gene name with a number. <br> ",
+                     ##              "Keep gene names short (for figures). <br>"
+                     ##              )),
+                     ## tags$h5(HTML("A short example file is available here ",
+                     ##              "https://raw.githubusercontent.com/rdiaz02/EvAM-Tools/main/examples_for_upload/tinydata.csv" ,
+
+                     ##              "and there are additional examples in that ",
+                     ##              "directory ",
+                     ##              "(https://github.com/rdiaz02/EvAM-Tools/tree/main/examples_for_upload ---make sure to view the files as raw)")),
                      tags$div(class = "upload_file",
                               fileInput("csd", "Load Data",
                                         multiple = FALSE,
