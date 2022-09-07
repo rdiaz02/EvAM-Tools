@@ -2575,7 +2575,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               tags$h4(HTML("<br/>")),
                               tags$div(class = "inline",
                                        radioButtons(inputId = "data2plot",
-                                                    label = HTML("Predictions from models to display"
+                                                    label = HTML("Predictions from fitted models to display"
                                                                  ),
                                                     choiceNames = 
                                                         if (do_sampling) {
@@ -2751,7 +2751,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               ## A hack to get the tooltip to only show on hover
                               ## over heading of table
                               id = "table_out3", 
-                              tags$h3(paste("Tabular output of predictions from models: ",
+                              tags$h3(paste("Tabular output of predictions from fitted models: ",
                                             switch(ifelse(is.null(input$data2plot),
                                                           "not_valid_or_not_yet_existent",
                                                           input$data2plot),
