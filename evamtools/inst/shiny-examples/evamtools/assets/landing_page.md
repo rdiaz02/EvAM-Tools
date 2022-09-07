@@ -1,16 +1,18 @@
-<center><h1>EvAM-tools</h1></center>
+<center><h1>EvAM-Tools</h1></center>
 
 &nbsp;
 ****
 #### Table of contents <a id="evamtools"></a>
 ****
-- [EvAM-tools](#evamtools)
+- [EvAM-Tools](#evamtools)
 - [How to use this web interface?](#input)
-<br>&nbsp;&nbsp;- [What is available under ```Results```?](#helpresults)
+<br>&nbsp;&nbsp;- [```User input```?](#userinput)
+<br>&nbsp;&nbsp;- [Analyze data: ```Run evamtools```](#running)
+<br>&nbsp;&nbsp;- [```Results```](#helpresults)
 <br>&nbsp;&nbsp;- [Additional documentation](#additional_docs)
 <br>&nbsp;&nbsp;- [Session timeouts, RAM and elapsed time execution limits](#limits)
 <br>&nbsp;&nbsp;- [How long does it take to run?](#timetorun)
-- [What CPMs are included in ```EvAM-tools```?](#cpms)
+- [What CPMs are included in ```EvAM-Tools```?](#cpms)
 <br>&nbsp;&nbsp;- [Default options and default CPMs run](#cpms2run)
 <br>&nbsp;&nbsp;- [References and related repositories](#refs)
 - [Where is the code? Terms of use? Copyright](#code)
@@ -20,10 +22,10 @@
 
 
 ****
-## EvAM-tools <a id="evamtools"></a>
+## EvAM-Tools <a id="evamtools"></a>
 ****
 
-```EvAM-tools``` is an R package and Shiny web app that provides tools for evolutionary accumulation, or event accumulation, models. We use code from  "Cancer Progression Models" (CPM) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost). ```EvAM-tools``` is  also available as an R package (see https://github.com/rdiaz02/EvAM-Tools).
+```EvAM-Tools``` is an R package and Shiny web app that provides tools for evolutionary accumulation, or event accumulation, models. We use code from  "Cancer Progression Models" (CPM) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost). ```EvAM-Tools``` is  also available as an R package (see https://github.com/rdiaz02/EvAM-Tools).
 
 
 This web interface provides a GUI to the package. You can analyze your data, create cross-sectional data from scratch (by giving genotype frequencies), or generate data under different CPMs. You can compare results from different methods/models, as well as experiment and understand the consequences of changes in the input data on the returned inferences. You can also examine how a given method performs when data have been generated under another (or its own) model. See more details for examples of use in https://github.com/rdiaz02/EvAM-Tools#some-examples-of-use .
@@ -54,53 +56,120 @@ This figure provides an overview:
 <br>
 
 
+
+
+****
+### ```User input```<a id="userinput"></a>
+***
+
+
 * Go first to the ```User input``` tab (on top of the page). Here you can:
-    - Define your data by specifying the genotype composition or uploading a data set or a combination of both.
-    - Generate data according to CPM models specified using DAGs (Directed Acyclic Graphs) and trees: CBN, OT, OncoBN, H-ESBCN: "DAG and rates/probs".
-    - Generate data according to the MHN model: "MHN thetas".
-    - When you generate data according to a model, you can specify the sample size, the amount of noise, if any, to add, and the parameters of the models.
-    - You can also increase or decrease the number of genes, or rename genes.
+    &nbsp;
+   - Enter cross-sectional data directly by either:
+	    - Uploading a file
+		- Entering genotype frequencies manually<br/>
+		&nbsp;
+   - Generate cross-sectional data from CPM models. Follow these steps:
+       1. Specify the CPM model first. You can use:
+	   
+	       1.1. Models that use DAGs to specify restrictions: OT, OncoBN (in both its conjunctive and disjunctive versions), CBN and H-ESBCN (H-ESBCN allows you to model AND, OR, and XOR dependency relationships). You will specify that DAG and the rates (CBN, H-ESBCN)/conditional probabilities (OT, OncoBN) of events conditional on their parents.<br/>
 
-* Change, if you want, options under "Advanced options and CPMs to use" (on the right of the screen).
-* Click on "Run evamtools". 
-* Results will be shown in the ```Results``` tab.
+		   1.2. MHN, that models inhibiting/facilitating relationships between genes using baseline hazard rates and multiplicative effects between genes (specified in the log-&Theta; matrix).
+		   &nbsp;
+	   2. Simulate data from the CPM model. In addition to the number of samples, you can specify the amount of observational noise (and, for OT and OncoBN, deviations from the model).<br/>
+	   &nbsp;
+
+       Note that simulating data from CPMs allows you to get an intuitive feeling for what different CPM models and their parameters mean in terms of the genotype frequency data they would produce.
+	   
+	   
+&nbsp;
+&nbsp;
+
+* Cross-sectional data that have been uploaded or simulated from CPM models can be further modified: you can alter genotype counts. Moreover, it is possible to specify cross-sectional data and DAG/MHN models with user-specified gene names. Finally, from the User input tab you can also save the cross-sectional data.
 
 
-To make it easier to play with the tool, under "DAG and rates/probs" there are predefined DAGs that you can use to generate data; you can also modify the predefined DAGs before generating data.
+* To make it easier to play with the tool, we provide predefined cross-sectional data sets under "Enter genotype frequencies manually", as well as predefined DAG and MHN models. You can also modify the predefined DAGs and MHNs before generating data.
 
 
 &nbsp;&nbsp;
 
 ****
-### What is available under ```Results```?<a id="helpresults"></a>
+### Analyze data: ```Run evamtools```<a id="running"></a>
+***
+
+* Change, if you want, options under "Advanced options and CPMs to use" (on the right of the screen). These options include what CPM methods to use as well as parameters of the methods.
+* Click on "Run evamtools". 
+* Results will be shown in the ```Results``` tab.
+
+
+
+
+<!-- * Go first to the ```User input``` tab (on top of the page). Here you can: -->
+<!--     - Define your data by specifying the genotype composition or uploading a data set or a combination of both. -->
+<!--     - Generate data according to CPM models specified using DAGs (Directed Acyclic Graphs) and trees: CBN, OT, OncoBN, H-ESBCN: "DAG and rates/probs". -->
+<!--     - Generate data according to the MHN model: "MHN thetas". -->
+<!--     - When you generate data according to a model, you can specify the sample size, the amount of noise, if any, to add, and the parameters of the models. -->
+<!--     - You can also increase or decrease the number of genes, or rename genes. -->
+
+<!-- * Change, if you want, options under "Advanced options and CPMs to use" (on the right of the screen). -->
+<!-- * Click on "Run evamtools".  -->
+<!-- * Results will be shown in the ```Results``` tab. -->
+
+
+
+
+&nbsp;&nbsp;
+
+****
+###  ```Results```<a id="helpresults"></a>
 ***
 
 The results include:
-
-* Plots:
-    * On the top row, the DAGs and, for MHN, the log-&Theta; matrix.
-        * The edges of the DAGs are annotated with the lambda (CBN, HESBCN),  weight (OT) or &theta; (OncoBN).
-        * Remember: these are DAGs that have *genes (not genotypes) as nodes*. They represent the order restrictions of the events.
-    * On the bottom row, the transition probabilities between genotypes or the transition rate matrix (for the models that return it); what is represented is chosen on the left, ```Customize the visualization```.
-        * These plots have *genotypes (not genes) as nodes*.
-        <!-- * (If you choose to *Sample for observed genotype transitions*, under  ```Advanced options and CPMs to use```, for models that return a transition rate matrix (CBN, H-ESBCN, MHN), you can also represent the observed genotype transitions.) -->
-		<!-- This was not used, and likely to be confusing.  This is removal_note_sogt_1 -->
-        * You can show, for the bottom plots, only some of the most relevant paths; again, modify options under ```Customize the visualization```.
-        * The bottom plots might include genotypes never observed in the sample; these are shown in light green.
-        * For easier visualization, in very busy plots, instead of the Genotypes you might want to show the last gene mutated.
-    * You can represent only a subset of the fitted models (choose the CPMs to show). 
-&nbsp;	
-* Tabular output: a table where you can choose to display:
+ &nbsp;
+  * The fitted CPMs themselves, including the DAGs with their rates/conditional probabilities (depending on the model) and the MHN log-&Theta; matrix.
+	 &nbsp;
+	 
+  * Predictions derived from the fitted models, including:
+	&nbsp;
     * Transition probabilities: the probabilities of transition between genotypes. For OT and OncoBN see the additional documentation as these are not really available for untimed oncogenetic models.
+
     * Transition rates: for models that provide them (CBN, H-ESBCN, MHN) transition rates.
-    * Predicted genotype relative frequencies: the predicted genotype frequencies from the fitted models.
-    * Sampled genotype counts: the counts from obtaining a finite sample (of the size you chose) with the probabilities given by the predicted genotype frequencies. If you add noise, they include observational (e.g., genotyping) noise.
-    <!-- * Observed genotype transitions (counts): if you choose to *Sample for observed genotype transitions* (under ```Advanced options and CPMs to use```), for models that return a transition rate matrix (CBN, H-ESBCN, MHN), we obtain the observed sampled of genotypes by simulating sampling from the continuous-time Markov chain; this provides also observed transition counts between genotypes. -->
-	<!-- See remove_note_sogt_1 -->
-&nbsp;		
-* Original data: to help interpret the results, a histogram of the genotype counts is also provided.
-&nbsp;
-* You can also *download* the tabular results, fitted models, and the analyzed data.
+
+	* Predicted genotype relative frequencies: the predicted genotype frequencies from the fitted models.
+
+	* Sampled genotype counts: the counts from obtaining a finite sample (of the size you chose) with the probabilities given by the predicted genotype frequencies. If you add noise, they include observational (e.g., genotyping) noise.
+	
+  <!-- * Observed genotype transitions (counts): if you choose to *Sample for observed genotype transitions* (under ```Advanced options and CPMs to use```), for models that return a transition rate matrix (CBN, H-ESBCN, MHN), we obtain the observed sampled of genotypes by simulating sampling from the continuous-time Markov chain; this provides also observed transition counts between genotypes. -->
+	<!-- See remove_note_sogt_1 -->	
+	
+&nbsp;	
+	
+The results are displayed using a combination of figures and tabular output. Specifically:
+
+  * The first row of figures shows the fitted CPMs: DAGs with their rates/probabilities and MHN log-&Theta; matrix.
+	
+     * The edges of the DAGs are annotated with the lambda (CBN, HESBCN),  weight (OT) or &theta; (OncoBN).
+		 
+     * Remember: these are DAGs that have *genes (not genotypes) as nodes*. They represent the order restrictions of the events.
+		 
+	 * You can represent the results of all the fitted models or only of a subset (select those using "CPMs to show").
+&nbsp;&nbsp;
+
+  * The second row of figures shows the predictions derived from the fitted models. These same predictions are also displayed in tabular output on the bottom right. On the left side panel ("Customize the visualization"), you choose what predictions you want to display.
+&nbsp;&nbsp;
+
+  * The plots that show Transition probabilities and Transition rates (again, on the second row of figures) have *genotypes (not genes) as nodes*.
+    * You can show, for these transition plots, only some of the most relevant paths; again, modify options under ```Customize the visualization```.
+    * These plots might include genotypes never observed in the sample; these are shown in light green.
+    * For easier visualization, in very busy plots, instead of the Genotypes you might want to show the last gene mutated; change this under "Type of label".
+
+
+
+To help interpret the results, we also show a histogram of the genotype counts of the analyzed data.
+
+
+Finally, you can also *download* the tabular results, fitted models, and the analyzed data. To download figures, the simplest procedure is to use screen captures. 	
+
 
 &nbsp;&nbsp;
 ***
@@ -137,7 +206,7 @@ It depends on the number of genes or features and methods used. For six genes, a
 
 
 ****
-## What CPMs are included in ```EvAM-tools```?<a id="cpms"></a>
+## What CPMs are included in ```EvAM-Tools```?<a id="cpms"></a>
 ***
 
 *  **Oncogenetic Tress (OT):** Restrictions in the accumulation of mutations (or events) are represented as a tree. Hence, a parent node can have many children, but children have a single parent. OTs are untimed (edge weights represent conditional probabilities of observing a given mutation, when the sample is taken, given the parents are observed).
