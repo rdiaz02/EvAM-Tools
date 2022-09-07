@@ -1150,7 +1150,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                            radioButtons(inputId = "dag_model",
                                                         label = "Model: ",
                                                         inline = TRUE,
-                                                        choiceNames = list("OT", "OncoBN", "CBN/HESBCN"),
+                                                        choiceNames = list("OT", "OncoBN", "CBN/H-ESBCN"),
                                                         choiceValues = list("OT", "OncoBN", "HESBCN"),
                                                         selected = data$this_d_dag_model)
                                            ),
@@ -2410,11 +2410,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ## Values less than 500 can break the app. Larger values might break
     ## with complex plots. Deactivate this completely commenting the debounce
     plot2show <- debounce(reactive({
-        input$cpm2show
+        gsub("H-ESBCN", "HESBCN", input$cpm2show, fixed = TRUE)
     }),  900)
 
     ## ## No delay showing plots. 
     ## plot2show <- reactive({
+    ##     gsub("H-ESBCN", "HESBCN", input$cpm2show, fixed = TRUE)
     ##     input$cpm2show
     ## })
 
@@ -2557,11 +2558,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  ##              "use 'Modify data' ---below--- to go back ",
                                                  ##              "and click on 'Advanced options' if you",
                                                  ##              "want to use other methods)</h5>"), 
-                                                 choices = input$cpm_methods,
-                                                 ## c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN"),
-                                                 selected = input$cpm_methods
-                                                 ## intersect(input$cpm_methods,
-                                                 ##           c("OT", "CBN", "MHN", "OncoBN"))
+                                                 choices = gsub("HESBCN", "H-ESBCN", input$cpm_methods, fixed = TRUE),
+                                                 selected = gsub("HESBCN", "H-ESBCN", input$cpm_methods, fixed = TRUE)
                                                  ),
                               tippy::tippy_this("cpm2show",
                                                 paste("<span style='font-size:1.5em; text-align:left;'>",

@@ -796,7 +796,7 @@ user_input <- function() {
                                               tags$h5("Number of OMP threads; large numbers do ",
                                                       "necessarily lead to faster computations."),
                                               tags$hr(style="border-color: darkgrey;"),
-                                              tags$h4("HESBCN options"),
+                                              tags$h4("H-ESBCN options"),
                                               numericInput("HESBCN_steps", "Steps: ", 100000, min=100, max=10000000),
                                               numericInput("HESBCN_seed", "Seed: ", NULL, min=0),
                                               selectInput("HESBCN_reg", "Regularization: ",
