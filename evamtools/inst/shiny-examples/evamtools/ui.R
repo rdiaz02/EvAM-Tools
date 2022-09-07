@@ -615,9 +615,9 @@ user_input <- function() {
                                     radioButtons(inputId = "input2build", label = "",
                                                  choiceNames = list(
                                                      HTML("Upload file"),
-                                                     HTML("Enter genotype <br> frequencies <br> manually"),
-                                                     HTML("DAG and <br> rates/cond. probs."),
-                                                     HTML("MHN <br>log-&Theta; matrix")
+                                                     HTML("Enter<br>genotype <br> frequencies <br> manually"),
+                                                     HTML("DAG and<br>rates/cond.<br> probs."),
+                                                     HTML("MHN <br>log-&Theta;<br> matrix")
                                                  ),
                                                  choiceValues = list("upload", "csd", "dag", "matrix"),
                                                  selected = "dag"
@@ -893,7 +893,7 @@ ui <-
         "
       ))),
     tabPanel("About EvAM-tools",
-      cpm_info()
+             cpm_info()
     ),
     tabPanel("User input", 
       value = "csd_builder",
