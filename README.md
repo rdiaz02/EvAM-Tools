@@ -63,10 +63,6 @@ What can EvAM-Tools be used for?
 The web app in particular should allow for easy exploration of CPM models without the need for installing any software. Details about the use of the web app are provided in  https://www.iib.uam.es/evamtools/ . The following figure provides an overview of the workflow with the web app:
 
 ![Overview EvAM-Tools web app](./evamtools/inst/shiny-examples/evamtools/assets/figure-1_cf00b24.png?raw=true)
-<br>
-<img src="./figure-1_cf00b24.png" alt="" width="100%">
-<br>
-<br>
 
 
 
