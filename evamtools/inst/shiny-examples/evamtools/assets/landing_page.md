@@ -48,7 +48,7 @@ In cross-sectional data, a single sample is obtained from each subject or patien
 ***
 
 
-This figure provides an overview:
+The figure below provides an overview; in the next sections we explain the main functionality shown in the figure.
 
 <br>
 <img src="figure-1_cf00b24.png" alt="Overview EvAM-Tools web app" width="100%">
@@ -79,7 +79,7 @@ This figure provides an overview:
 	   2. Simulate data from the CPM model. In addition to the number of samples, you can specify the amount of observational noise (and, for OT and OncoBN, deviations from the model).<br/>
 	   &nbsp;
 
-       Note that simulating data from CPMs allows you to get an intuitive feeling for what different CPM models and their parameters mean in terms of the genotype frequency data they would produce.
+       Note that simulating data from CPMs allows you to get an intuitive feeling for what different CPM models and their parameters mean in terms of the genotype frequency data they produce.
 	   
 	   
 &nbsp;
