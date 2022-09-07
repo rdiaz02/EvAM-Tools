@@ -48,25 +48,55 @@ In cross-sectional data, a single sample is obtained from each subject or patien
 ***
 
 
-The figure below provides an overview; in the next sections we explain the main functionality shown in the figure.
+The figure below provides an overview; in the sections below we explain the main functionality shown in the figure. 
 
 <br>
-<img src="figure-1_cf00b24.png" alt="Overview EvAM-Tools web app" width="100%">
+<img src="figure-overview.png" alt="Overview EvAM-Tools web app" width="100%">
 <br>
 <br>
 
 
+The web app encompasses, thus, different major functionalities and use cases, mainly:
 
+
+1. Inference of CPMs from user uploaded from a file.
+
+2. Exploration of the inferences that different CPM methods yield from manually constructed synthetic data.
+
+3. Construction of CPM models (DAGs and rates/probabilities or MHN models) and simulation of synthetic data from them. 
+
+    3.1. Examination of the consequences of different models and their parameters on the simulated data. 
+
+    3.2. Analysis of the data simulated under one model with methods that have different models (e.g., data simulated from CBN analyzed with OT and OncoBN).
+	
+	3.3. Analysis of the data simulated under model after manual modification of specific genotype frequencies (e.g., data simulated under CBN but where, prior to analysis, we remove all observations with the WT genotype and the genotype with all loci mutated).
+
+
+Furthermore, note that in all cases, when data are analyzed, in addition to returning the fitted models, the web app returns the analysis of the CPMs in terms of their predictions such as predicted genotype frequencies and transition probabilities between genotypes.
+
+
+
+The figure below highlights the different major functionalities and use cases, over-imposed on the previous one:
+
+
+
+<br>
+<img src="figure-overview-paths.png" alt="Overview EvAM-Tools web app, with main functionalities highlighted." width="100%">
+<br>
+<br>
+
+
+We explain now in more detail the functionality, options, input, and output, of the web app.
 
 ****
 ### ```User input```<a id="userinput"></a>
 ***
 
 
-* Go first to the ```User input``` tab (on top of the page). Here you can:
+* To start using the web app, go first to the ```User input``` tab (on top of the page). Here you can:
     &nbsp;
    - Enter cross-sectional data directly by either:
-	    - Uploading a file
+	    - Uploading a file.
 		- Entering genotype frequencies manually<br/>
 		&nbsp;
    - Generate cross-sectional data from CPM models. Follow these steps:
@@ -79,16 +109,16 @@ The figure below provides an overview; in the next sections we explain the main 
 	   2. Simulate data from the CPM model. In addition to the number of samples, you can specify the amount of observational noise (and, for OT and OncoBN, deviations from the model).<br/>
 	   &nbsp;
 
-       Note that simulating data from CPMs allows you to get an intuitive feeling for what different CPM models and their parameters mean in terms of the genotype frequency data they produce.
+           Note that simulating data from CPMs allows you to get an intuitive feeling for what different CPM models and their parameters mean in terms of the genotype frequency data they produce.
 	   
 	   
 &nbsp;
 &nbsp;
 
-* Cross-sectional data that have been uploaded or simulated from CPM models can be further modified: you can alter genotype counts. Moreover, it is possible to specify cross-sectional data and DAG/MHN models with user-specified gene names. Finally, from the User input tab you can also save the cross-sectional data.
+* Cross-sectional data that have been uploaded or simulated from CPM models can be further modified by altering genotype counts. Moreover, it is possible to specify cross-sectional data and DAG/MHN models with user-specified gene names. Finally, from the "User input" tab you can also save the cross-sectional data.
 
 
-* To make it easier to play with the tool, we provide predefined cross-sectional data sets under "Enter genotype frequencies manually", as well as predefined DAG and MHN models. You can also modify the predefined DAGs and MHNs before generating data.
+* To make it easier to play with the tool, we provide predefined cross-sectional data sets under "Enter genotype frequencies manually", as well as predefined DAG and MHN models (from which you can generate data by clicking on "Generate data from DAG [MHN model]"). You can also modify the predefined DAGs and MHNs before generating data.
 
 
 &nbsp;&nbsp;
@@ -97,7 +127,7 @@ The figure below provides an overview; in the next sections we explain the main 
 ### Analyze data: ```Run evamtools```<a id="running"></a>
 ***
 
-* Change, if you want, options under "Advanced options and CPMs to use" (on the right of the screen). These options include what CPM methods to use as well as parameters of the methods.
+* Change, if you want, the options under "Advanced options and CPMs to use" (on the right of the screen). These options include what CPM methods to use as well as parameters of the methods.
 * Click on "Run evamtools". 
 * Results will be shown in the ```Results``` tab.
 

@@ -1,6 +1,13 @@
+Changes in version 2.1.10 (2022-09-08):
+	- Further details about using web app in landing page, with
+	  additional figure and improved previous figure.
+	- More details about csv upload, including examples, and all
+	  now in a Help button.
+	- Improved use of left column space.  
+
 Changes in version 2.1.9 (2022-09-07):
 	- Changed landing page to include better explanations of use
-	of web app, including the figure with the overview.
+	  of web app, including the figure with the overview.
 	- Changes in web app for consistent naming of terms.
 	
 Changes in version 2.1.8 (2022-08-09):
