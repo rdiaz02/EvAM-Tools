@@ -1,3 +1,8 @@
+Changes in version 2.1.9 (2022-09-07):
+	- Changed landing page to include better explanations of use
+	of web app, including the figure with the overview.
+	- Changes in web app for consistent naming of terms.
+	
 Changes in version 2.1.8 (2022-08-09):
 	- More changes to the web app:
 	- Much better error messages when manipulating DAGs.
