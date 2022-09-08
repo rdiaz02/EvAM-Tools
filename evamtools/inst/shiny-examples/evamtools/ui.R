@@ -308,7 +308,10 @@ results_simple <- function(){
                                ),
                       tags$div(
                                tags$h5(paste("evamtools R package version: ",
-                                             packageVersion("evamtools")))
+                                             packageVersion("evamtools"))),
+                               tags$h5(paste("commit: ",
+                                             substr(system("git rev-parse HEAD", intern=TRUE), 1, 7)))
+
                            )
                       ),
                column(10,
@@ -648,7 +651,9 @@ user_input <- function() {
               tags$h3(HTML("<br/>")),
               tags$h3(HTML('<hr style="height:1px;background-color:black;margin-left:-20px">')),
               tags$h5(paste("evamtools R package version: ",
-                            packageVersion("evamtools")))
+                            packageVersion("evamtools"))),
+              tags$h5(paste("commit: ",
+                            substr(system("git rev-parse HEAD", intern=TRUE), 1, 7)))
               
               )
               ## do it with a render UI
