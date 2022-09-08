@@ -29,18 +29,24 @@
 ```EvAM-Tools``` is an R package and Shiny web app that provides tools for evolutionary accumulation, or event accumulation, models. We use code from  "Cancer Progression Models" (CPM) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost). ```EvAM-Tools``` is  also available as an R package (see https://github.com/rdiaz02/EvAM-Tools).
 
 
-This web interface provides a GUI to the package. You can analyze your data, create cross-sectional data from scratch (by giving genotype frequencies), or generate data under different CPMs. You can compare results from different methods/models, as well as experiment and understand the consequences of changes in the input data on the returned inferences. You can also examine how a given method performs when data have been generated under another (or its own) model. See more details for examples of use in https://github.com/rdiaz02/EvAM-Tools#some-examples-of-use .
+This web interface provides a GUI to the package and focuses on allowing fast construction, manipulation, and exploration of CPM models, and making it easy to gain an intuitive understanding of what these methods infer from different data sets as well as what kind of data are to be expected under these models. You can analyze your data, create cross-sectional data from scratch (by giving genotype frequencies), or generate synthetic data under different CPMs. You can compare results from different methods/models, as well as experiment and understand the consequences of changes in the input data on the returned inferences. You can also examine how a given method performs when data have been generated under another (or its own) model. Additional examples of use are discussed in  https://github.com/rdiaz02/EvAM-Tools#some-examples-of-use and in the [Additional documentation] (https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_doc_all.pdf).
 
-* In the ```User input``` tab (on top of the page) you can upload data or define cross-sectional data, or simulate cross-sectional data from models. These are then submitted to run.
-* In the ```Results``` tab you can see the output.
+<!-- * In the ```User input``` tab (on top of the page) you can upload data or define cross-sectional data, or simulate cross-sectional data from models. These are then submitted to run. -->
+<!-- * In the ```Results``` tab you can see the output. -->
 
 <!-- You add/remove images by adding HTML code. The usual img block. But do not leave that commented code around or shiny might break. -->
 
 
 &nbsp;
-#### What is _cross-sectional_ data?<a id="helpcsd"></a> 
+### A two-paragraph summary about _cross-sectional_ data and CPMs<a id="helpcsd"></a> 
 
-In cross-sectional data, a single sample is obtained from each subject or patient. That single sample represents the "observed genotype" of, for example, the tumor of that patient. Genotype can refer to single point mutations, insertions, deletions, or any other genetic modification. In this app, as is often done by CPM software, we store cross-sectional data in a matrix, where rows are patients or subjects, and columns are genes; the data is a 1 if the event was observed and 0 if it was not.
+In cross-sectional data a single sample is obtained from each subject or patient. That single sample represents the "observed genotype" of, for example, the tumor of that patient. Genotype can refer to single point mutations, insertions, deletions, or any other genetic modification. In this app, as is often done by CPM software, we store cross-sectional data in a matrix, where rows are patients or subjects, and columns are genes; the data is a 1 if the event was observed and 0 if it was not.
+
+Cancer progression models (CPMs) or, more generally, event accumulation models, use these cross-sectional data to try to infer restrictions in the order of accumulation of events; for example, that a mutation on gene B is always preceded by a mutation in gene A (maybe because mutating B when A is not mutated). Some cancer progression models, such as MHN, instead of modeling deterministic restrictions, model facilitating/inhibiting interactions between genes, for example that having a mutation in gene A makes it very likely to gain a mutation in gene B. A longer explanation is provided in [What CPMs are included in ```EvAM-Tools```?](#cpms), below, and many more details in the [Additional documentation](https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_doc_all.pdf ).  Finally, note we have talked about  "genotype" and "mutation", but CPMs have been used with non-genetic data too, and thus our preference for the expression "event accumulation models"; as said above, the key idea is that events are gained one by one, but not lost, and that we can consider the different subjects/patients in the cross-sectional data as replicate evolutionary experiments or runs where all individuals are under the same constraints (e.g., genetic constraints if we are dealing with mutations).
+
+
+
+
 
 &nbsp;&nbsp;
 
@@ -54,7 +60,7 @@ In cross-sectional data, a single sample is obtained from each subject or patien
 ***
 
 
-The figure below provides an overview of the workflow with the web app; in the sections below we explain the main functionality shown in the figure. 
+The figure below provides an overview of the workflow with the web app:
 
 <br>
 <img src="figure-overview.png" alt="Overview EvAM-Tools web app" width="100%" style="border:1px solid black;">
@@ -66,20 +72,20 @@ The figure below provides an overview of the workflow with the web app; in the s
 The web app encompasses, thus, different major functionalities and use cases, mainly:
 
 
-1. Inference of CPMs from user uploaded from a file.
+1. Inference of CPMs from user data uploaded from a file.
 
 2. Exploration of the inferences that different CPM methods yield from manually constructed synthetic data.
 
-3. Construction of CPM models (DAGs and rates/probabilities or MHN models) and simulation of synthetic data from them. 
+3. Construction of CPM models (DAGs with their rates/probabilities and MHN models) and simulation of synthetic data from them. 
 
-    3.1. Examination of the consequences of different models and their parameters on the simulated data. 
+    3.1. Examination of the consequences of different CPM models and their parameters on the simulated data. 
 
     3.2. Analysis of the data simulated under one model with methods that have different models (e.g., data simulated from CBN analyzed with OT and OncoBN).
 	
-	3.3. Analysis of the data simulated under model after manual modification of specific genotype frequencies (e.g., data simulated under CBN but where, prior to analysis, we remove all observations with the WT genotype and the genotype with all loci mutated).
+	3.3. Analysis of the data simulated under one model after manual modification of specific genotype frequencies (e.g., data simulated under CBN but where, prior to analysis, we remove all observations with the WT genotype and the genotype with all loci mutated).
 
 
-Furthermore, note that in all cases, when data are analyzed, in addition to returning the fitted models, the web app returns the analysis of the CPMs in terms of their predictions such as predicted genotype frequencies and transition probabilities between genotypes.
+Furthermore, note that in all cases, when data are analyzed, in addition to returning the fitted models, the web app also returns the analysis of the CPMs in terms of their predictions such as predicted genotype frequencies and transition probabilities between genotypes.
 
 
 
@@ -101,7 +107,7 @@ We explain now in more detail the functionality, options, input, and output, of 
 ***
 
 
-* To start using the web app, go first to the ```User input``` tab (on top of the page). Here you can:
+To start using the web app, go first to the ```User input``` tab (on top of the page). Here you can:
     &nbsp;
    - Enter cross-sectional data directly by either:
 	    - Uploading a file.
@@ -110,7 +116,7 @@ We explain now in more detail the functionality, options, input, and output, of 
    - Generate cross-sectional data from CPM models. Follow these steps:
        1. Specify the CPM model first. You can use:
 	   
-	       1.1. Models that use DAGs to specify restrictions: OT, OncoBN (in both its conjunctive and disjunctive versions), CBN and H-ESBCN (H-ESBCN allows you to model AND, OR, and XOR dependency relationships). You will specify that DAG and the rates (CBN, H-ESBCN)/conditional probabilities (OT, OncoBN) of events conditional on their parents.<br/>
+	       1.1. Models that use DAGs to specify restrictions: OT, OncoBN (in both its conjunctive and disjunctive versions), CBN and H-ESBCN (H-ESBCN allows you to model AND, OR, and XOR dependency relationships). You will specify the DAG and the rates (CBN, H-ESBCN)/conditional probabilities (OT, OncoBN) of events conditional on their parents.<br/>
 
 		   1.2. MHN, that models inhibiting/facilitating relationships between genes using baseline hazard rates and multiplicative effects between genes (specified in the log-&Theta; matrix).
 		   &nbsp;
@@ -123,10 +129,10 @@ We explain now in more detail the functionality, options, input, and output, of 
 &nbsp;
 &nbsp;
 
-* Cross-sectional data that have been uploaded or simulated from CPM models can be further modified by altering genotype counts. Moreover, it is possible to specify cross-sectional data and DAG/MHN models with user-specified gene names. Finally, from the "User input" tab you can also save the cross-sectional data.
+Cross-sectional data that have been uploaded or simulated from CPM models can be further modified by altering genotype counts. Moreover, it is possible to specify cross-sectional data and DAG/MHN models with user-specified gene names. Finally, from the "User input" tab you can also save the cross-sectional data.
 
 
-* To make it easier to play with the tool, we provide predefined cross-sectional data sets under "Enter genotype frequencies manually", as well as predefined DAG and MHN models (from which you can generate data by clicking on "Generate data from DAG [MHN model]"). You can also modify the predefined DAGs and MHNs before generating data.
+To make it easier to play with the tool, we provide predefined cross-sectional data sets under "Enter genotype frequencies manually", as well as predefined DAG and MHN models (from which you can generate data by clicking on "Generate data from DAG [MHN model]"). You can also modify the predefined DAGs and MHNs before generating data.
 
 
 &nbsp;&nbsp;
@@ -135,9 +141,9 @@ We explain now in more detail the functionality, options, input, and output, of 
 ### Analyze data: ```Run evamtools```<a id="running"></a>
 ***
 
-* Change, if you want, the options under "Advanced options and CPMs to use" (on the right of the screen). These options include what CPM methods to use as well as parameters of the methods.
-* Click on "Run evamtools". 
-* Results will be shown in the ```Results``` tab.
+1. Change, if you want, the options under "Advanced options and CPMs to use" (on the right of the screen). These options include what CPM methods to use as well as parameters of the methods.
+2. Click on "Run evamtools". 
+3.  Results will be shown in the ```Results``` tab.
 
 
 
@@ -188,25 +194,27 @@ The results are displayed using a combination of figures and tabular output. Spe
 	
      * The edges of the DAGs are annotated with the lambda (CBN, HESBCN),  weight (OT) or &theta; (OncoBN).
 		 
-     * Remember: these are DAGs that have *genes (not genotypes) as nodes*. They represent the order restrictions of the events.
+     * Remember: for DAGs, these are DAGs that have *genes (not genotypes) as nodes*. They represent the order restrictions of the events.
+	 
+     * For MHN there is no DAG of restrictions; we show the fitted log-&Theta; matrix rounded to two decimal places. The diagonal entries are the log-baseline rates, and the off-diagonal the log of the multiplicative effects of the effector event (the columns) on the affected event (rows).
 		 
 	 * You can represent the results of all the fitted models or only of a subset (select those using "CPMs to show").
-&nbsp;&nbsp;
+&nbsp;&nbsp;&nbsp;&nbsp;
 
   * The second row of figures shows the predictions derived from the fitted models. These same predictions are also displayed in tabular output on the bottom right. On the left side panel ("Customize the visualization"), you choose what predictions you want to display.
 &nbsp;&nbsp;
 
   * The plots that show Transition probabilities and Transition rates (again, on the second row of figures) have *genotypes (not genes) as nodes*.
-    * You can show, for these transition plots, only some of the most relevant paths; again, modify options under ```Customize the visualization```.
+    * You can show, for these transition plots, only some of the most relevant paths; again, modify options under "Customize the visualization".
     * These plots might include genotypes never observed in the sample; these are shown in light green.
-    * For easier visualization, in very busy plots, instead of the Genotypes you might want to show the last gene mutated; change this under "Type of label".
+    * For easier visualization, in very busy plots, instead of the Genotypes you might want to show the last gene (or event) mutated or gained; change this options under "Type of label".
 
 
 
 To help interpret the results, we also show a histogram of the genotype counts of the analyzed data.
 
 
-Finally, you can also *download* the tabular results, fitted models, and the analyzed data. To download figures, the simplest procedure is to use screen captures. 	
+Finally, you can also *download* the tabular results, fitted models, and the analyzed data. To download figures, either use screen captures or use your web browser to download them (e.g., right click on a figure to obtain a menu with a "Save image as" entry ---if you need higher resolution or original PDF images, you will need to use the R package itself).
 
 
 &nbsp;&nbsp;
