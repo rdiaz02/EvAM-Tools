@@ -6,7 +6,8 @@
 ****
 - [EvAM-Tools](#evamtools)
 - [How to use this web interface?](#input)
-<br>&nbsp;&nbsp;- [```User input```?](#userinput)
+<br>&nbsp;&nbsp;- [Web app: overview of workflow and use cases](#overview)
+<br>&nbsp;&nbsp;- [```User input```](#userinput)
 <br>&nbsp;&nbsp;- [Analyze data: ```Run evamtools```](#running)
 <br>&nbsp;&nbsp;- [```Results```](#helpresults)
 <br>&nbsp;&nbsp;- [Additional documentation](#additional_docs)
@@ -48,12 +49,18 @@ In cross-sectional data, a single sample is obtained from each subject or patien
 ***
 
 
+****
+### Web app: overview of workflow and use cases<a id="overview"></a>
+***
+
+
 The figure below provides an overview of the workflow with the web app; in the sections below we explain the main functionality shown in the figure. 
 
 <br>
-<img src="figure-overview.png" alt="Overview EvAM-Tools web app" width="100%">
+<img src="figure-overview.png" alt="Overview EvAM-Tools web app" width="100%" style="border:1px solid black;">
 <br>
 <br>
+
 
 
 The web app encompasses, thus, different major functionalities and use cases, mainly:
@@ -76,18 +83,19 @@ Furthermore, note that in all cases, when data are analyzed, in addition to retu
 
 
 
-The figure below highlights the different major functionalities and use cases, over-imposed on the previous one:
+The figure below highlights the different major functionalities and use cases, as numbered above, over-imposed on the previous figure:
 
 
 
 <br>
-<img src="figure-overview-paths.png" alt="Overview EvAM-Tools web app, with main functionalities highlighted." width="100%">
+<img src="figure-overview-paths.png" alt="Overview EvAM-Tools web app, with main functionalities highlighted." width="100%" style="border:1px solid black;">
 <br>
 <br>
 
 
 We explain now in more detail the functionality, options, input, and output, of the web app.
 
+&nbsp;&nbsp;
 ****
 ### ```User input```<a id="userinput"></a>
 ***
