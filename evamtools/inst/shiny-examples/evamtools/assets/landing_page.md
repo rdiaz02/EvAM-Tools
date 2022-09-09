@@ -5,6 +5,7 @@
 #### Table of contents <a id="evamtools"></a>
 ****
 - [EvAM-Tools](#evamtools)
+<br>&nbsp;&nbsp;- [A two-paragraph summary about cross-sectional data and CPMs](#helpcsd)
 - [How to use this web interface?](#input)
 <br>&nbsp;&nbsp;- [Web app: overview of workflow and use cases](#overview)
 <br>&nbsp;&nbsp;- [```User input```](#userinput)
@@ -39,6 +40,7 @@ This web interface provides a GUI to the package and focuses on allowing fast co
 
 &nbsp;
 ### A two-paragraph summary about _cross-sectional_ data and CPMs<a id="helpcsd"></a> 
+***
 
 In cross-sectional data a single sample is obtained from each subject or patient. That single sample represents the "observed genotype" of, for example, the tumor of that patient. Genotype can refer to single point mutations, insertions, deletions, or any other genetic modification. In this app, as is often done by CPM software, we store cross-sectional data in a matrix, where rows are patients or subjects, and columns are genes; the data is a 1 if the event was observed and 0 if it was not.
 
@@ -255,7 +257,7 @@ It depends on the number of genes or features and methods used. For six genes, a
 ## What CPMs are included in ```EvAM-Tools```?<a id="cpms"></a>
 ***
 
-*  **Oncogenetic Tress (OT):** Restrictions in the accumulation of mutations (or events) are represented as a tree. Hence, a parent node can have many children, but children have a single parent. OTs are untimed (edge weights represent conditional probabilities of observing a given mutation, when the sample is taken, given the parents are observed).
+*  **Oncogenetic Trees (OT):** Restrictions in the accumulation of mutations (or events) are represented as a tree. Hence, a parent node can have many children, but children have a single parent. OTs are untimed (edge weights represent conditional probabilities of observing a given mutation, when the sample is taken, given the parents are observed).
 
 *  **Conjuntive Bayesian Networks (CBN):** This model generalizes the tree-based restriction of OT to a direct acyclic graph (DAG). A node can have multiple parents, and it denotes that all of the parents have to be present for the children to appear. Therefore, relationships are conjuntive (AND relationships between the parents). These are timed models, and the parameters of the models are rates given that all parents have been observed. We include both H-CBN as well as MC-CBN.
 
