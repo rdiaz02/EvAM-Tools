@@ -51,6 +51,53 @@
 This document provides additional documentation about EvAM-Tools; some of the sections complement the Shiny web GUI application help, others apply to the package, or to both. You can run the web app from \url{https://iib.uam.es/evamtools/} or download a Docker image from \url{https://hub.docker.com/r/rdiaz02/evamshiny}; to run the R package download a Docker image from \url{https://hub.docker.com/r/rdiaz02/evamrstudio}.
 
 
+\section{Cancer Progression Models included in EvAM-Tool: details}
+
+\subsection{Cancer Progression Models and cross-sectional data: overview}
+
+(Note: this subsection repeats material available from the landing page of the web app: \url{https://www.iib.uam.es/evamtools/#helpcsd} )
+
+In cross-sectional data a single sample is obtained from each subject or patient. That single sample represents the "observed genotype" of, for example, the tumor of that patient. Genotype can refer to single point mutations, insertions, deletions, or any other genetic modification. As is often done by CPM software, we think of the cross-sectional data as being stored in a matrix, where rows are patients or subjects, and columns are genes; the data is a 1 if the event (or alteration or mutation) was observed and 0 if it was not.  
+
+Note that we have talked about  "genotype" and "mutation", but CPMs have been used with non-genetic data too, and thus our preference for the expression "event accumulation models"; the key idea is that events or alterations are gained one by one, but not lost, and that we can consider the different subjects/patients in the cross-sectional data as replicate evolutionary experiments or runs where all individuals are under the same constraints (e.g., genetic constraints if we are dealing with mutations).
+
+
+Cancer progression models (CPMs) or, more generally, event accumulation models, use these cross-sectional data to try to infer restrictions in the order of accumulation of events; for example, that a mutation on gene B is always preceded by a mutation in gene A (maybe because mutating B when A is not mutated). Inferring restrictions, in the sense just explained (B only if A), is what CBN, OT, OncoBN, and H-ESBCN do. 
+
+Other cancer progression models, such as MHN, instead of modeling deterministic restrictions, model facilitating/inhibiting interactions between genes, for example that having a mutation in gene A makes it very likely to gain a mutation in gene B. 
+
+
+
+\subsection{Cancer Progression Models (CPMs): assumptions}
+
+CPMs assume that the observations in the cross-sectional data set are independent realizations of evolutionary processes where the same constraints hold for all tumors; therefore, a cross-sectional data set is considered a set of replicate evolutionary experiments where all individuals are under the same (genetic) constraints \citep{gerstung2011temporal, Beerenwinkel2014, beerenwinkel_computational_2016, diaz2019every}. The objective of CPMs is to infer these constraints. CPMs assume that events are gained one by one (no simultaneous acquisition of events)  and that there is no back mutation so that once gained an event is not lost; CPMs also assume that the events that drive the process (driver genes if we are thinking about cancer) are known and present in the data set. Finally, CPMs assume that all subjects start the evolutionary process without any of the studied events (i.e., all subjects start the process with 0s in the matrix of subjects by alterations). If we think about cancer, this means that ``CPMs assume that all tumors start cancer progression without any of the mutations considered in the study (the above matrix of subjects by driver alterations), but other mutations could be present that have caused the initial tumor growth'' \citep{diaz2019every}; these other additional mutations that lead to the initiation of the process are absorbed in the root node from which cancer starts \citep{Attolini2010a}.
+
+
+
+\subsection{Cancer Progression Models (CPMs): details}
+
+
+\begin{description}
+\item[Oncogenetic Trees (OT)]  With OTs, restrictions in the accumulation of mutations (or events) are represented as a tree. Hence, a parent node can have many children, but children have a single parent: therefore, an event can only directly depend on another event. OTs are untimed: edge weights represent conditional probabilities of observing a given mutation, when the sample is taken, given the parents are observed. 
+
+
+
+As detailed in \cite[p.~5 of][]{Szabo2008}, the estimation of the topology uses an ``(...) algorithm [that] takes a greedy bottom-up approach: it assigns the parent of
+each node by finding the maximum-weight in-edge starting from the leaves.'' and that provides a computationally fast way of inferring the tree. 
+
+OTs were originally in \cite{desper1999inferring}; additional references include \cite{Szabo2008, OTpackage}. Sufficient conditions for the reconstruction of the true tree when there are false positive and false negative errors are given in \cite{Szabo2002}.
+
+which, in the absence of false observations, is guaranteed to reconstruct the original tree (if the data do conform to a tree).
+
+Estimation of parameters ...
+
+
+
+\end{description}
+
+
+
+
 \section{Predicted genotype frequencies}
 \label{pred-gen-freq}
 
