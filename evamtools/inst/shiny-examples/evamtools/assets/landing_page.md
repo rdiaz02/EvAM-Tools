@@ -12,6 +12,7 @@
 <br>&nbsp;&nbsp;- [Analyze data: ```Run evamtools```](#running)
 <br>&nbsp;&nbsp;- [```Results```](#helpresults)
 <br>&nbsp;&nbsp;- [Additional documentation](#additional_docs)
+<br>&nbsp;&nbsp;- [Example files for upload](#example_files)
 <br>&nbsp;&nbsp;- [Session timeouts, RAM and elapsed time execution limits](#limits)
 <br>&nbsp;&nbsp;- [How long does it take to run?](#timetorun)
 - [What CPMs are included in ```EvAM-Tools```?](#cpms)
@@ -230,8 +231,13 @@ Additional documentation is available from https://rdiaz02.github.io/EvAM-Tools/
 
 
 &nbsp;&nbsp;
+***
+### Example files for upload <a id="example_files"></a>
+***
 
+In https://github.com/rdiaz02/EvAM-Tools/tree/main/examples_for_upload there are several files in CSV format ready to be used as examples for upload. The two files mentioned in the documentation are: [ov2.csv](https://raw.githubusercontent.com/rdiaz02/EvAM-Tools/main/examples_for_upload/ov2.csv) and [BRCA_ba_s.csv](https://raw.githubusercontent.com/rdiaz02/EvAM-Tools/main/examples_for_upload/BRCA_ba_s.csv).
 
+&nbsp;&nbsp;
 
 ****
 ### Session timeouts, RAM and elapsed time execution limits<a id="limits"></a>
