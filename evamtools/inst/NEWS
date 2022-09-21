@@ -1,3 +1,8 @@
+Changes in version 2.1.11 (2022-09-21):
+	- Minimize possible errors with histograms in shiny app
+	  with very long genotype names. If error, provide
+	  explicit error message.
+	
 Changes in version 2.1.10 (2022-09-08):
 	- Further details about using web app in landing page, with
 	  additional figure and improved previous figure.
