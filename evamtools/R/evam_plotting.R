@@ -802,8 +802,9 @@ plot_genotype_counts <- function(data, max.num = 20) {
     if (nrow(data) == 0) return(invisible(NULL))
     if (nrow(data) > max.num) data <- trim_data_to_plot(data, max.num)
     largest_genot_name <- max(vapply(data$Genotype, nchar, 1))
-    bottom_mar <- min(25, max(5, (2/3) * largest_genot_name))
-    op <- par(las = 2, cex.main = 1.6, cex.lab = 1.5, cex.axis = 1.2,
+    bottom_mar <- min(20, max(5, (2/3) * largest_genot_name))
+    op <- par(las = 2, cex.main = 1.6, cex.lab = 1.5,
+              cex.axis = ifelse(largest_genot_name < 25, 1.2, 0.8),
               mar = c(bottom_mar, 5, 5, 1))
     if ("Freq" %in% colnames(data)) {
         data2 <- stats::setNames(data[, "Freq"], nm = data[, "Genotype"])
@@ -812,10 +813,27 @@ plot_genotype_counts <- function(data, max.num = 20) {
     }
     data2 <- na.omit(reorder_to_standard_order(data2))
 
-    barplot(height = as.vector(data2)
-          , names = names(data2)
-          , horiz = FALSE)
-    grid(nx = NA, ny = NULL, col='gray', lwd = 2)
+    trybp <- try(barplot(height = as.vector(data2)
+                       , names = names(data2)
+                       , horiz = FALSE))
+    if (inherits(trybp, "try-error")) {
+        par(op)
+        op <- par(las = 2, cex.main = 1.6, cex.lab = 1.5,
+                  cex.axis = 1.2, 
+                  mar = c(5, 5, 5, 1))
+        plot(x = c(0, 1), y = c(0, 1), type = "n",
+             axes = FALSE, xlab = "", ylab = "")
+        text(x = 0.5, y = 0.75,
+             "Plotting error.", col = "red")
+        text(x = 0.5, y = 0.5,
+             "Figure margins too large?", col = "red",
+             cex = 0.9)
+        text(x = 0.5, y = 0.25,
+             "Genotype names too long?", col = "red",
+             cex = 0.9)
+    } else {
+        grid(nx = NA, ny = NULL, col='gray', lwd = 2)
+    }
     par(op)
 }
 
