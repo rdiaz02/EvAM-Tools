@@ -2295,7 +2295,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 (length(input$cpm_methods) ==1 && is.na(input$cpm_methods)))
                 stop("You must use at least one method ",
                      "(check 'CPMs to use' under 'Advanced options ",
-                     "and CPMs to use).")
+                     "and CPMs to use').")
 
                 
                 shinyjs::disable("analysis")
