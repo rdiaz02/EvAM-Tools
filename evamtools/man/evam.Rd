@@ -99,9 +99,10 @@ multiple evams in parallel.}
 \item{hesbcn_opts}{Named list of arguments used in the fit of
   H-ESBCN (details in \url{https://github.com/danro9685/HESBCN}). 
   \itemize{
-\item{MCMC_iter: }{Number of MCMC iterations to run. Default:
-  100000. MCMC_iter is argument "-n, --number_samples" in the original
-  H-ESBCN C code.}
+    \item{MCMC_iter: }{Number of MCMC iterations to run;
+      this is argument "-n, --number_samples" in the original
+  H-ESBCN C code.   Default:  100000, as in the original implementation.  Note that the web app uses a larger default of
+  200000.}
 
 \item{reg: }{Regularization: one of \code{bic} (default), \code{aic},
   \code{loglik}.} 
