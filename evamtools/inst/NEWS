@@ -1,3 +1,8 @@
+Changes in version 2.1.12 (2022-09-22):
+	- Renamed argument to H-ESBCN that controls number
+	  of MCMC iterations; was "steps" now is "MCMC_iter".
+	  In both package and web app.
+
 Changes in version 2.1.11 (2022-09-21):
 	- Minimize possible errors with histograms in shiny app
 	  with very long genotype names. If error, provide
