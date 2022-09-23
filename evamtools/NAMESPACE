@@ -14,7 +14,7 @@ importFrom("shiny", "runApp", "Progress", "onStop")
 importFrom("shinyjs", "useShinyjs", "enable", "disable", "disabled")
 importFrom("grDevices", "rgb", "colorRampPalette")
 importFrom("graphics", "axis", "legend", "lines", "par", "title", "barplot",
-           "grid", "mtext")
+           "grid", "mtext", "text")
 importFrom("utils", "capture.output", "read.csv", "read.table", "type.convert",
            "write.csv", "tail", "globalVariables")
 importFrom("Matrix", "diag", "rowSums", "colSums", "summary", "Matrix",
