@@ -15,7 +15,7 @@ evam(x,
                      init_poset = "OT"
                  ),
      hesbcn_opts = list(
-                     steps = 100000,
+                     MCMC_iter = 100000,
                      seed = NULL,
                      reg = c("bic", "aic", "loglik"),
                      silent = TRUE
@@ -99,7 +99,9 @@ multiple evams in parallel.}
 \item{hesbcn_opts}{Named list of arguments used in the fit of
   H-ESBCN (details in \url{https://github.com/danro9685/HESBCN}). 
   \itemize{
-\item{n_steps: }{Number of steps to run. Default: 100000}
+\item{MCMC_iter: }{Number of MCMC iterations to run. Default:
+  100000. MCMC_iter is argument "-n, --number_samples" in the original
+  H-ESBCN C code.}
 
 \item{reg: }{Regularization: one of \code{bic} (default), \code{aic},
   \code{loglik}.} 

@@ -36,8 +36,8 @@ rm(.._EvamTools_test.hesbcn)
 
 
 do_HESBCN <- function(data,
-    n_steps = 100000,
-    reg = c("bic", "aic", "loglik"),
+                      MCMC_iter = 100000,
+                      reg = c("bic", "aic", "loglik"),
     seed = NULL,
     tmp_dir = NULL,
     addname = NULL,
@@ -72,7 +72,7 @@ do_HESBCN <- function(data,
     command <- paste0("h-esbcn -d ",
                       tmp_dir, "/input.txt -o ",
                       tmp_dir, "/output.txt -n ",
-                      format(round(n_steps), scientific = FALSE),
+                      format(round(MCMC_iter), scientific = FALSE),
                       " --reg ", reg)
     if (!is.null(seed))
         command <- paste0(command,

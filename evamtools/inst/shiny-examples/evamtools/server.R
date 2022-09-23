@@ -2317,7 +2317,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 cbn_opts <- list(init_poset = input$CBN_init_poset,
                                  omp_threads = input$CBN_omp_threads)
                 hesbcn_opts <- list(
-                    steps = input$HESBCN_steps,
+                    MCMC_iter = input$HESBCN_MCMC_iter,
                     reg = input$HESBCN_reg
                 ) 
                 if(!is.na(input$HESBCN_seed)) hesbcn_opts$seed <- input$HESBCN_seed

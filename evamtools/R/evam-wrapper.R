@@ -617,7 +617,7 @@ evam <- function(x,
                      init_poset = "OT"
                  ),
                  hesbcn_opts = list(
-                     steps = 100000,
+                     MCMC_iter = 100000,
                      seed = NULL,
                      reg = c("bic", "aic", "loglik"),
                      silent = TRUE                     
@@ -723,7 +723,7 @@ evam <- function(x,
         init_poset = "OT"
     )
     d_hesbcn_opts <- list(
-        steps = 100000,
+        MCMC_iter = 100000,
         seed = NULL,
         reg = c("bic", "aic", "loglik"),
         silent = TRUE
@@ -796,7 +796,7 @@ evam <- function(x,
         } else if (method == "HESBCN") {
             time_out <- system.time({
                 out <- do_HESBCN(x,
-                                 n_steps = hesbcn_opts_2$steps,
+                                 MCMC_iter = hesbcn_opts_2$MCMC_iter,
                                  seed = hesbcn_opts_2$seed,
                                  silent = hesbcn_opts_2$silent,
                                  reg = hesbcn_opts_2$reg)
