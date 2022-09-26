@@ -277,6 +277,9 @@ It depends on the number of genes or features and methods used. For six genes, a
   
 *  **Mutual Hazard networks (MHN):** With MHN dependencies are not deterministic and events can make other events more like or less likely (inhibiting influence). The fitted parameters are multiplicative hazards that represent how one event influences other events.
 
+
+For details, please see the [EvAM-Tools: additional technical documentation](https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_tech_doc.pdf).
+
 &nbsp;
 
 ****
