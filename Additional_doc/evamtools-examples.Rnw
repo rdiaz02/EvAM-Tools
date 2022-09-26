@@ -1,0 +1,840 @@
+%% ;;; -*- mode: Rnw; -*-
+\synctex=1
+\documentclass[a4paper,11pt]{article}
+\usepackage[nottoc,numbib]{tocbibind}
+\usepackage{graphics}
+\usepackage{amssymb,amsfonts,amsmath,amsbsy}
+\usepackage{geometry}
+\geometry{verbose,a4paper,tmargin=28mm,bmargin=28mm,lmargin=30mm,rmargin=30mm}
+\usepackage{setspace}
+\singlespacing
+\usepackage{url}
+\usepackage{nameref}
+\usepackage[english]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage{times}
+\usepackage[T1]{fontenc}
+\usepackage{cancel}
+\usepackage{MnSymbol} %% for upmodels, cond, indep.
+\usepackage{wasysym} %% smileys
+\usepackage{pdflscape} %% Landscape
+\usepackage[iso,english]{isodate}
+
+\usepackage[authoryear, round, sort]{natbib}
+%% see
+%% https://tex.stackexchange.com/questions/3631/is-there-a-standard-symbol-for-conditional-independence
+%% https://tex.stackexchange.com/questions/3631/is-there-a-standard-symbol-for-conditional-independence
+%% for alternatives
+\usepackage{enumitem}
+\usepackage[small]{caption}
+\usepackage{hyperref}
+
+\hypersetup{
+  colorlinks = true,
+  citecolor=  black,
+  linkcolor = {blue},
+  filecolor = cyan %% controls color of external ref, if used
+}
+%% I do not understand why I keep using Burl. Oh well.
+\usepackage{color}
+\newcommand{\cyan}[1]{{\textcolor {cyan} {#1}}}
+\newcommand{\blu}[1]{{\textcolor {blue} {#1}}}
+\newcommand{\Burl}[1]{\blu{\url{#1}}}
+\newcommand{\red}[1]{{\textcolor {red} {#1}}}
+\newcommand{\green}[1]{{\textcolor {green} {#1}}}
+\newcommand{\mg}[1]{{\textcolor {magenta} {#1}}}
+\newcommand{\og}[1]{{\textcolor {PineGreen} {#1}}}
+\newcommand{\code}[1]{\texttt{#1}} %From B. Bolker
+\newcommand{\myverb}[1]{{\footnotesize\texttt {\textbf{#1}}}}
+\newcommand{\Rnl}{\ +\qquad\ }
+\newcommand{\Emph}[1]{\emph{\mg{#1}}}
+\usepackage[begintext=\textquotedblleft,endtext=\textquotedblright]{quoting}
+\newcommand{\activities}{{\vspace*{10pt}\LARGE \textcolor {red} {Activities:\ }}}
+
+\newcommand{\R}{R}
+
+\newcommand{\flspecific}[1]{{\textit{#1}}}
+
+\newcommand*{\qref}[1]{\hyperref[{#1}]{\textit{``\nameref*{#1}'' (section \ref*{#1})}}}
+\newcommand*{\qrefP}[1]{\hyperref[{#1}]{\textit{``\nameref*{#1}'', section \ref*{#1}}}}
+\newcommand*{\qrefS}[1]{\hyperref[{#1}]{section \textit{\ref*{#1},
+      ``\nameref*{#1}''}}}
+
+\setlength{\parskip}{0.35em}
+
+%% For using listings, so as to later produce HTML
+%% uncommented by the make-knitr-hmtl.sh script
+%% listings-knitr-html%%\usepackage{listings}
+%% listings-knitr-html%%\lstset{language=R}
+
+<<setup,include=FALSE,cache=FALSE>>=
+require(knitr)
+opts_knit$set(concordance = TRUE)
+opts_knit$set(stop_on_error = 2L)
+## next are for listings, to produce HTML
+##listings-knitr-html%%options(formatR.arrow = TRUE)
+##listings-knitr-html%%render_listings()
+@
+
+\begin{document}
+
+\title{EvAM-Tools: examples}
+
+\author{Ramon Diaz-Uriarte\footnote{Department of Biochemistry, Universidad Aut\'onoma de Madrid, Instituto de Investigaciones Biom\'edicas ``Alberto Sols'' (UAM-CSIC), Madrid, Spain. Author for correspondence: \texttt{r.diaz@uam.es}}% , Pablo Herrera-Nieto$^*$
+}
+
+\date{\today}
+
+\maketitle
+\tableofcontents
+
+%% FIXME: add a TOC.
+
+
+\section{Introduction}
+\label{sec:introduction}
+
+Here we present examples, with both real and simulated data, that illustrate the use and utility of EvAM-Tools. We will start with the analysis of one cancer data set, trying to understand the differences in the output of the different methods, and to do that we will also make use of flexibly modifying the genotype counts to run additional analyses. We will then show the analyses of a different cancer data set, which departs from the previous example in the patterns of differences and similarities between methods. Next, we use two short examples where we simulate data under a given model, and examine how different methods perform (whether or not they can recover the true signal). All the previous examples can be run in the web app, and that is what we use here. In the final section we discuss simulating random models, using the R package.
+
+The objective of this document is not to provide complete analyses of any of the data sets, or address and of the questions mentioned above in full (that would require full papers). The objective is to illustrate the use of EvAM-Tools, especially its web app, and also to include some examples of output that, although not necessarily very common, are not unusual and can some surprising at first (e.g., the variability among fitted H-ESBCN models, in \qrefP{just-sample-size},  or output with DAGs that are not transitively reduced in \qrefP{sec:model-with-and}).
+
+
+
+\subsection{Web app: overview of workflow and use cases, and relationship to these examples}\label{overview-examples}
+
+On the web app landing page, under ``About EvAM-tools'' (\url{https://www.iib.uam.es/evamtools/#overview}) we provide an overview of the workflow and use cases. For completeness we repeat that material here, indicating, in bold, how the examples in this document relate to the major functionalities and workflows discussed there.
+
+The figure below provides an overview of the workflow with the web app:
+
+\includegraphics[width=0.99\textwidth]{figure-overview.pdf}
+
+The web app encompasses, thus, different major functionalities and use cases, mainly:
+
+\begin{enumerate}[label*=\arabic*.]
+\item Inference of CPMs from user data uploaded from a file. \textbf{Examples \qref{brca} and \qref{ova}}.
+
+\item Exploration of the inferences that different CPM methods yield from manually constructed synthetic data. \textbf{Example \qref{just-sample-size} uses a modification of uploaded data to explore changes in sample size; example \qref{sec:manual} constructs synthetic data to examine the effect of aliasing of events.}
+
+
+  
+\item Construction of CPM models (DAGs with their rates/probabilities and MHN models) and simulation of synthetic data from them.
+
+  \begin{enumerate}[label*=\arabic*.]
+  \item Examination of the consequences of different CPM models and their parameters on the simulated data. \textbf{Examples \qref{epsilon-oncobn}, \qref{explore-mhn}}.
+
+  \item Analysis of the data simulated under one model with methods that have different models (e.g., data simulated from CBN analyzed with OT and OncoBN). \textbf{Examples \qref{sec:model-with-or} and \qref{sec:model-with-and}}.
+
+  \item Analysis of the data simulated under one model after manual modification of specific genotype frequencies (e.g., data simulated under CBN but where, prior to analysis, we remove all observations with the WT genotype and the genotype with all loci mutated). \textbf{Example \qref{CBN-no-WT}}. 
+
+  \end{enumerate}
+
+\end{enumerate}
+
+
+The figure below highlights the different major functionalities and use cases, as numbered above, over-imposed on the previous figure:
+
+\includegraphics[width=0.99\textwidth]{figure-overview-paths.pdf}
+
+
+
+Furthermore, note that in all cases, when data are analyzed, in addition to returning the fitted models, the web app also returns the analysis of the CPMs in terms of their predictions such as predicted genotype frequencies and transition probabilities between genotypes. Most of the examples below illustrate this, showing, for example, the predicted genotype frequencies and transition probabilities. 
+
+
+
+
+
+
+
+\section{Analysis of cross-sectional data}\label{anal-cross-sect}
+
+We will analyze two cancer data sets, the ovarian cancer CGH data included in the Oncotree package \citep{oncotree}, and the BRCA data set for basal-like subtypes (from \citealp{Cerami:2012, Gao:2013}, originally from \citealp{cgan2012}; see Supplementary File S5\_Text, \url{https://doi.org/10.1371/journal.pcbi.1007246.s007} of \citealp{diaz-uriarte2019a} for full details about data origins and preprocessing).
+
+So that you can use these data sets directly, we provide them in the repository (\Burl{https://github.com/rdiaz02/EvAM-Tools/tree/main/examples_for_upload}). The direct links are:
+\begin{itemize}
+\item \texttt{BRCA\_ba\_s.csv}: \Burl{https://raw.githubusercontent.com/rdiaz02/EvAM-Tools/main/examples_for_upload/BRCA_ba_s.csv}
+\item \texttt{ov2.csv}: \Burl{https://raw.githubusercontent.com/rdiaz02/EvAM-Tools/main/examples_for_upload/ov2.csv}
+\end{itemize}
+
+
+In section \qref{how-get-data} we show how to obtain the data from the R console. 
+
+
+
+\subsection{Analyzing the BRCA data set}\label{brca}
+
+We now import the BRCA csv data set, \texttt{BRCA\_ba\_s.csv}, into the web app, \url{https://iib.uam.es/evamtools}. We go to the ``User input'' tab, and click, on the left, on ``Upload file'';  we set the ``Name for data'' as ``BRCA\_ba''):
+
+\includegraphics[width=0.4\textwidth]{import_00B.png}
+
+
+On ``Load Data'' we click on ``Browse'' and select the file from our file system; the data is uploaded, and the genotypes' frequencies are shown in the histogram on the right and the table at the bottom (where, if we wanted, we could modify the genotype counts):
+
+\clearpage
+
+
+
+ \includegraphics[width=0.9\textwidth]{import_00B_1.png}
+
+\vspace*{15pt}
+ Before running the analysis, we select the unselected H-ESBCN as one of the methods to run (under ``Advanced options and CPMs to use''). We also set the number of MCMC iterations to 500000, instead of 200000, for increased stability of results; this increase in iterations will of course result in longer running times.
+
+ 
+
+ We click ``Run evamtools'' and the output is shown in about 30 to 50 seconds\footnote{In this example, changing the setting for the number of MCMC iterations of H-ESBCN from 100000 to 500000 is responsible for increasing the total time from about 30 to about 50 seconds.}. For easier display of the figures in this document, we select first three of the methods to show, by clicking, on the left menu, under ``Customize the visualization'':
+
+ \includegraphics[width=.3\textwidth]{customize-1.png}
+
+ First on the first three (CBN, OT, OncoBN)
+ 
+\includegraphics[width=.3\textwidth]{customize-2.png}
+ 
+Then on the next two (MHN, H-ESBCN)
+
+\includegraphics[width=.3\textwidth]{customize-3.png}
+ 
+ \clearpage
+This is the output from the first three methods (CBN, OT, OncoBN):
+ 
+ \includegraphics[width=1.05\textwidth]{out_brca_1}
+
+ And this from the next two methods (MHN, H-ESBCN):
+
+ %% zz: using 500000 iterations gives same output
+ \includegraphics[width=1.05\textwidth]{out_brca_2}
+
+ (The above screen-captures only show the DAGs/MHN matrix; we are not showing the figures of the predictions of the fitted models, such as transition probabilities or predicted genotype relative frequencies).
+
+
+ % \subsection{An analysis of the differences in DAGs}
+ 
+ EvAM-Tools makes it immediate to see that:
+
+ \begin{itemize}
+ \item The output from OncoBn and OT is essentially identical.
+ \item CBN and H-ESBCN give very different DAGs.
+ \item OT and OncoBN differ from both CBN and H-ESBCN.
+ \end{itemize}
+
+
+ That OT and OncoBN give identical results is not surprising since OncoBN has not found any disjunctive pattern and OncoBN is using the disjunctive (OR relationships) model.  We can run OncoBN using the conjunctive model. Go back to ``User input'' and click on ``Advanced options and CPMs to run'' and set, for ``OncoBN options'', the ``Model'' to ``Conjunctive'':
+
+\includegraphics[width=0.3\textwidth]{onco_conjunct}
+
+Click on ``Run evamtools'' to obtain the new fit (since we are only interested in rerunning OncoBN, we might want to unclick the other methods, so as to make the run as fast as possible). Interestingly, if we run OncoBN with conjunctive pattern, it does not show any conjunctions either (the result is the same as shown above):
+
+\includegraphics[width=.4\textwidth]{out_brca_1_ob_conj}
+
+ 
+Thus, CBN seems to find support in the data for conjunctive dependencies that neither OncoBN (run using the ``Conjunctive'' model) nor H-ESBCN find.
+
+ EvAM-Tools's output also displays, in the Results tab, the original data as well as transition probabilities, transition rates, and predicted genotype relative frequencies. We show the three differing DAGs, MHN's output, and the data, when we select ``Transition probabilities'' (tabular output truncated in the screen capture):
+
+\vspace*{5pt}
+ \includegraphics[width=1.0\textwidth]{out_brca_data_1}
+\vspace*{15pt}
+
+ 
+and when we select ``Predicted genotype relative frequencies'':
+
+\vspace*{5pt}
+
+ \includegraphics[width=1.0\textwidth]{out_brca_data_2}
+
+\vspace*{15pt}
+
+ 
+(This, incidentally, shows that we probably would have wanted to use shorter genes names as the histogram labels are too long).
+
+
+
+From the above display we can conclude:
+
+\begin{itemize}
+\item The data contain very few cases where there are joint occurrences of two or more genes: most joint occurrences appear only once.
+\item The conditional probabilities from OncoBN (or OT) indicate that the really likely event is gaining TP53; the conditional probability of the remaining ones is very small.
+\item CBN leads to the same conclusion: the only large $\lambda$ is that for TP53.
+\item MHN's output points in the same direction: except for TP53, the diagonal entries of the matrix are all negative and large in absolute value, and the off-diagonal entries are all essentially 0. Thus MHN's model is saying that we can fit the data reasonably well without modeling inhibiting or facilitating relations between genes.
+\end{itemize}
+
+
+Therefore, we can conclude that the apparently different results are caused by differences in the weighting of evidence: H-ESBCN, given the very small frequencies of most genotypes with more than one mutation, is choosing not to take those as evidence of dependencies, and is instead returning a simpler model.
+
+
+\clearpage
+\subsection{Is it just sample size?}\label{just-sample-size}
+
+We can examine more carefully the conjecture above: would H-ESBCN return a different DAG if sample size were much larger but relative proportions were the same? We can do that easily with EvAM-Tools. We simply go to the ``User input'' tab and multiply the genotype counts, for example by 10 (which is trivially done by clicking on each cell and adding a 0).
+
+We rename the data first, and then increase the sample size. This is what it looks like:
+
+\includegraphics[width=0.9\textwidth]{brca_x10}
+
+\clearpage
+
+Now, we rerun the analyses:
+
+\vspace*{5pt}
+
+\includegraphics[width=0.9\textwidth]{out_brca_x10_1}
+
+%% zz: same with 500000 iterations
+\includegraphics[width=0.9\textwidth]{out_brca_x10_2}
+
+\vspace*{15pt}
+
+
+The DAGs and weights (lambdas, probabilities) are the same for OT, OncoBN and CBN. But the models inferred by MHN and H-ESBCN have both changed, and the second now includes dependencies between some of the genes. Some of these dependencies are similar to the ones in the CBN output (PNPLA3 depends on RB1 and TP53; PIK3CA depends on TP53).
+
+
+Interestingly, increasing the sample size another 10 times results in  additional changes in the MHN and H-ESBCN models (OT, OncoBN, and CBN only show minor changes, not shown  below):
+
+\vspace*{5pt}
+%% zz: same with 500000 iterations
+\includegraphics[width=0.9\textwidth]{out_brca_x100_2}
+
+\vspace*{15pt}
+
+Note that in some runs, the output returned by H-ESBCN is different from the one above; with H-ESBCN different runs can sometimes lead to different results. You can fix the random number seed in ``Advanced options'' to prevent this, though this is probably not advisable, since fixing the seed would precisely prevent us from seeing the instability of the fitted models. For example, if you set the number of MCMC iterations (under ``Advanced options'') to 100000 and the seed to 19, you will obtain a model with an XOR\footnote{Note, though, that the output with  the XOR also contains an edge with an extreme weight, which makes this model suspect; more detailed exploration would use a range of seeds, and possibly change also the number of MCMC iterations to run}. In the web app we use, by default, 200000 MCMC iterations, a number larger than the default in \Burl{https://github.com/danro9685/HESBCN}, precisely to minimize this instability). In the examples in this document we use an even larger number of 500000 MCMC iterations to obtain more robust results and because none of the examples shown take longer than about 1 minute to run. Variability of results from different runs can also be observed with CBN sometimes (though, in our experience, it is less common than with H-ESBCN with default parameters). 
+
+
+
+% In these examples, seed 13 produces the result with the OR, whereas seed 19 produces the XOR.---steps, in ``Advanced options''--- as well as, possibly, compare the likelihoods of the models).
+
+% \includegraphics[width=0.9\textwidth]{out_brca_x100_2-B.png}
+
+
+
+
+These results lead us to conclude tentatively that, compared to OT, CBN, and OncoBN, the penalties used in H-ESBCN and MHN seem to have a larger effect on models fitted to modest sample sizes. 
+
+\clearpage
+\subsection{Analyzing the ovarian CGH data}\label{ova}
+
+Lest readers think that the above (coincidence between OT and OncoBN, and H-ESBCN returning star models with moderate sample sizes) are general patterns, we now show, for a different example, the analyses of the ovarian CGH data. We upload the data \texttt{ov2.csv} and, as before, include H-ESBCN in the methods and set the number of MCMC iterations of H-ESBCN to 500000.
+
+
+This is the output from the web app (run takes a little bit over one minute):
+
+
+\vspace*{5pt}
+
+\includegraphics[width=0.99\textwidth]{ov_out_1}
+
+\vspace*{2pt}
+%% zz: yes, I also get this with 500000
+\includegraphics[width=0.9\textwidth]{ov_out_2_A}
+
+\vspace*{15pt}
+
+
+\clearpage
+And we re-run the OncoBN model using the ``Conjunctive'' options (instead of the default disjunctive ---we did this before in section \qrefP{brca}, and it involves going back to ``User input'', clicking on ``Advanced options and CPMs to run'' and setting, for ``OncoBN options'', the ``Model'' to ``Conjunctive'').  This is the output:
+\vspace*{5pt}
+
+\includegraphics[width=0.3\textwidth]{ov_out_dbn_c}
+
+\vspace*{15pt}
+
+Interestingly, in the above run, H-ESBCN gives an identical structure to that of OT (parameters are, of course, different: OT's weights are conditional probabilities and H-ESBCN $\lambda$s are rates).  Different runs of H-ESBCN can give different results, such as the following ones, where we also ask the web app to display the predicted genotype frequencies:
+
+
+
+\vspace*{5pt}
+\includegraphics[width=0.7\textwidth]{ov_out_2_500K_pred_gen.png}
+
+%% \includegraphics[width=0.4\textwidth]{ov_out_2_B_200K_4321_pred_gen.png}
+
+\vspace*{2pt}
+\includegraphics[width=0.7\textwidth]{ov_out_2_B_500_12_pred_gen.png}
+
+\vspace*{13pt}
+%% \includegraphics[width=0.4\textwidth]{ov_out_2_another_or.png}
+% \includegraphics[width=0.4\textwidth]{ov_out_2_xor.png}
+
+
+
+We can increase the number of MCMC iterations. When using 1000000 most runs tend to give this model:
+
+\includegraphics[width=0.7\textwidth]{ov_out_2_B_1M_NA_pred_gen.png}
+
+\vspace*{15pt}
+
+The variability between fitted H-ESBCN models might deserve a more careful exploration and, in ``for real'' analyses, additional runs with 1000000 iterations or even more.% ; quick preliminary conclusions are that it decreases when the number of iterations is increased, that the sample size is probably too small to definitely separate different structures (e.g., few genotypes have frequencies larger than 5), and that some of the fitted models can show large differences in the predicted genotype frequencies that would, however, be difficult to detect in observed data because of the small sample sizes.
+
+%% FIXME: recheck this when done
+Now there are large similarities are between OT and CBN (though, of course, there can be no conjunctions in OT). H-ESBCN finds identical restrictions for G3q (3q+) and  G8q (8q+) as OT and CBN; it also finds similar patters to OT for L5q and LXp; note that CBN shows L5q $\rightarrow$ L8p and L5q $\rightarrow$ LXp and that H-ESBCN shows an OR for the dependency of L8p on G8q and L5q, whereas CBN, which can only model ANDs, places an AND.  % But H-ESBCN is the only model that can fit XOR relationships, so these could not be found in no other methods' output.
+OncoBN using the default disjunctive relationship (OR, but not XOR) seems to suggest quite a different model (note that H-ESBCN can also fit OR relationships). Interestingly, the conjunctive model for OncoBN is similar, but not identical, to the ones from OT and CBN. 
+
+
+% We have seen that H-ESBCN fits can vary in repeated runs.  CBN fits can also vary in repeated runs; in our experience, however, not as much as H-ESBCN, at least with the default parameter settings.
+
+\clearpage
+\subsection{Using the web app for small computational experiments}
+
+We have shown the output of repeated runs of H-ESBCN, changing the number of MCMC iterations and possibly setting different random number seeds. GUIs and web apps are not the most appropriate tools for a systematic exploration; instead, properly documented code as an R script would be the preferred procedure. For small experiments, however, the web app is  fine. A simple way to keep track of what is done is as follows:
+\begin{enumerate}
+\item Upload the data, giving it a meaningful name (under ``Name for data''); for example, \texttt{ov}.
+\item Go to the  ``Rename the data'' box, and add the settings you will use to the name of the data; for example, for 500000 MCMC iterations with seed 14 for H-ESBCN enter \texttt{ov\_500K\_s14} in ``Give your data a name'', and \textbf{click on ``Rename the data''}.\label{reps1}
+  
+  \vspace*{5pt}
+
+  \includegraphics[width=0.6\textwidth]{rename_ov_500K_s14}
+
+
+    
+  \item Under ``Advanced options and CPMs to use'' set the seed to 14 and the number of MCMC iterations to 500000, possible also setting H-ESBCN as the only method to run.
+  \item Click on ``Run evamtools''.\label{reps3}
+  \item Repeat steps \ref{reps1} to \ref{reps3} as needed.
+\end{enumerate}
+
+The ``Results'' tab will contain the output of the different runs, properly labeled so we can examine, at will, outputs from runs with different settings.
+
+
+
+
+\clearpage
+
+\section{Analyzing manually constructed synthetic data}\label{sec:manual}
+
+We will create some synthetic data to show the consequences of analyzing data where two events are indistinguishable, because they are completely aliased, i.e., indistinguishable, because they have identical patterns ---identical columns in the data matrix---. Of course, manually constructed synthetic data can be used to explore or examine many other patterns, unrelated to aliased  events. 
+
+
+  
+
+From the ``User input'' tab we select the ``Enter genotype frequencies manually'':
+
+ 
+  \vspace*{5pt}
+
+  \includegraphics[width=0.1\textwidth]{manual-1}
+
+
+  Now, we enter some WT, for example, 20 WT observations. We select no mutations, and type a ``20'' in ``Counts'':
+
+\vspace*{5pt}
+
+  \includegraphics[width=0.3\textwidth]{manual-2}
+
+  And when we click on ``Add genotype'' we see the histogram with 20 WT and the genotype table with the 20 WT:
+
+ \vspace*{5pt}
+
+  \includegraphics[width=0.3\textwidth]{manual-3}
+
+
+  We now add 15 observations with only A mutated (i.e., 15 individuals of genotype A), and 12 with both B and C (i.e., 12 individuals with genotype ``B, C''); we first click on ``A'' on ``Mutations'' putting a 15 in ``Counts''
+
+ \vspace*{5pt}
+
+  \includegraphics[width=0.3\textwidth]{manual-4}
+
+  and then on ``Add genotype''. We next click on B and C in ``Mutations'' putting a 12 in Counts. We finally add 20 individuals with the ``A, D'' genotype (steps as before: click on A and D for mutations, and put a 20 in counts). After these steps, we can see the genotype composition as both a histogram and table:
+
+   \vspace*{5pt}
+
+  \includegraphics[width=0.5\textwidth]{manual-5}
+
+
+  So that it is easier to go back to these data, we give this data set a name, for example ``Aliased\_1'' under ``Rename the data''.
+
+  \vspace*{5pt}
+
+  \includegraphics[width=0.3\textwidth]{manual-5b}
+
+  
+  Click the ``Rename the data'' button, so the name is used and you will see it listed on the left, under ``Examples and user's data:''
+
+  \vspace*{5pt}
+
+  \includegraphics[width=0.3\textwidth]{manual-5c}
+
+
+
+  Now we click on ``Run evamtools''. These are the fitted models (we did not use H-ESBCN here):
+
+    \vspace*{5pt}
+
+  \includegraphics[width=0.8\textwidth]{manual-6}
+
+
+  In the DAGs and the MHN log $\Theta$ matrix, as well as the transition probabilities, an event labelled ``C\_B''. ``C\_B'' is the name of the event created automatically by EvAM-Tools by fusing the ``C'' and ``B'' events that are not distinguishable.
+ 
+
+  Note also that the models fitted by the DAGs, for example OncoBN or CBN, do not seem right when we look at the parameters of the ``C\_B'' event. That is because there are no ``A, B, C'' events, and we would expect to see some if A on the one hand, and B and C on the other, are occurring independently. We will add some observations (eight, for example) with all of A, B, C. We go back to the ``User input'' tab, we ``Rename the data'' to ``Aliased\_2'' (so that the new modifications we are about to make do not affect ``Aliased\_1''), and we add genoytpe ``A, B, C'' with a count of 8. And we click on ``Run evamtools''. This is the output
+
+  \vspace*{5pt}
+
+  \includegraphics[width=0.8\textwidth]{manual-7}
+
+  \flushleft which is more sensible. Notice, however, that we still have ``C\_B'' as an event because, in fact, they remain completely aliased, indistinguishable. This aliasing would be broken by adding just a single ``C'' or a single ``B'', or a single ``A, C'', or ``A, B'', or ``B, D'' or ``D, C'' or any ``A, B, D'' or ``A, C, D''.
+
+
+  
+
+  
+  
+
+  
+
+
+\section{Generating data from known models}
+
+The discussion in sections \qref{brca} and \qref{ova} has used CPMs on two cancer data sets for which the truth is unknown. To understand the differences between models, and the performance characteristics of different methods, we can simulate data under a known model and examine if the true pattern can be recovered. This is very easy to do with EvAM-Tools and addresses two commonly asked questions:
+
+\begin{itemize}
+\item Can we recover the true structure?
+\item How do different methods perform when data has been generated under the assumptions of another method?
+\end{itemize}
+
+This is what we will do below in examples \qref{sec:model-with-or} and \qref{sec:model-with-and}. But EvAM-Tools is also useful to understand what different models imply in terms of the data we would observe, even without considering what each method would fit to a given observed data set; this is what we show in \qref{sec:data-from-models}.
+
+
+\subsection{CPM models: what type of data they imply?}\label{sec:data-from-models}
+
+\subsubsection{What happens if we increase $\epsilon$ for OncoBN?}\label{epsilon-oncobn}
+
+We go to ``User input'' and, by default, the option ``DAG and rates/cond. probs'' is selected under ``Generate cross-sectional data from CPM models''. We can leave the default DAG in the selected ``DAG\_Fork\_4''. In ``Type of model'' under ``Define DAG'' we click on ``OncoBN'':
+
+
+\vspace*{5pt}
+
+\includegraphics[width=0.3\textwidth]{ocb1.png}
+
+and you can see that the last column of the DAG table is now called ``theta'':
+
+\vspace*{5pt}
+
+\includegraphics[width=0.3\textwidth]{ocb2.png}
+
+Now, click on ``Generate data from DAG''; to make patterns easier to observe, set the ``Number of genotypes to sample'' to a large number, such as 10000. If we look at the histogram we will see something similar to this one:
+
+
+\vspace*{5pt}
+
+\includegraphics[width=0.3\textwidth]{ocb3.png}
+
+
+In particular, notice how the following genotypes are not observed: ``A,D'', ``B, C'', ``B, C, D'', ``A, C, D'', as they are not possible if the restrictions are completely respected. Now, increase ``epos, $\epsilon$'' to, say, 0.15, and click again on ``Generate data from DAG''; now we will observe at least a few cases of all or most of the above four genotypes, as the predicted genotypes now incorporate deviations from the model.
+
+\vspace*{5pt}
+
+\includegraphics[width=0.3\textwidth]{ocb4.png}
+
+
+We could continue increasing the value of $\epsilon$; this will result in increasing frequencies of the above four genotypes, and a decrease in WT. Very large increases in $\epsilon$ will lead to a blurring of the signature of this DAG.
+
+
+A more advanced exploration of the role of deviations from the model in OT and OncoBN compared to the role of observational noise would alter ``epos, $\epsilon$'' with and without simultaneously changing the value of ``Observational noise''. 
+
+\subsubsection{A simple exploration of MHN}\label{explore-mhn}
+To try to gain a quick intuitive understanding of the multiplicative hazards model of MHN we go to ``User input'' and then click on ``MHN log-$\Theta$ matrix''
+
+\vspace*{5pt}
+
+\includegraphics[width=0.1\textwidth]{mhne1.png}
+
+To start with a simple, yet not completely trivial, model, we set the number of genes to three:
+
+\vspace*{5pt}
+
+\includegraphics[width=0.3\textwidth]{mhne2.png}
+
+Now, we click on ``Generate data from MHN model'':
+\vspace*{5pt}
+
+\includegraphics[width=0.3\textwidth]{mhne3.png}
+
+In this model, there are not multiplicative effects between genes. This is what we obtain (again, it might help to increase the Number of genotypes to sample to 10000 to decrease the role of random sampling noise and focus on the predicted genotype frequencies):
+
+\vspace*{5pt}
+
+\includegraphics[width=0.3\textwidth]{mhne4.png}
+
+
+Let us now increase the baseline hazard of event B. For example, set  log-$\Theta_{2, 2} = 3$. (Modify the entry, and click on Ctrl-Enter). The figure changes dramatically and all genotypes that have ``B'' have increased their frequency:
+
+\vspace*{5pt}
+
+\includegraphics[width=0.3\textwidth]{mhne5.png}
+
+
+
+Let us now create a very large promoting effect of B on C; for that, we enter, for example, a 4 on the matrix entry (3, 2): log-$\Theta_{3, 2} = 4$:
+
+\vspace*{5pt}
+
+\includegraphics[width=0.3\textwidth]{mhne6.png}
+
+Notice how genotype B is more common than either A or C, but now whenever there is B it frequently in combination with C (very larger frequencies of genotypes B,C and A,B,C).
+
+
+But what if B also an inhibiting effect on A? Set log-$\Theta_{1, 2} = -2$:
+
+
+
+\vspace*{5pt}
+
+\includegraphics[width=0.3\textwidth]{mhne7.png}
+
+Notice how the frequency of genotype A,B,C has gone down (and also, though it is harder to appreciate, that of A,B).
+
+
+
+
+
+
+\subsection{A model with AND, XOR, OR}
+\label{sec:model-with-or}
+
+Here, we will simulate data under a model that includes both AND, OR, and XOR relationships (e.g., H-ESBCN). EvAM-Tools, in its web app, already includes such a model for five genes:
+
+ \vspace*{5pt}
+
+\includegraphics[width=0.9\textwidth]{and_or_xor}
+%% FIXME: about here
+
+
+ \vspace*{15pt}
+If we want, we can change values (rates, relationships, noise, etc). We will change the rates of A, B, D, and E, setting them to 3.2, 1.5, 2, and 1, respectively; we set the number of genotypes to sample to 1000 and we will add 1\% of Observation noise (i.e., we will type 0.01 in the ``Observational nose (genotyping error)'' box). Then,  we click on ``Generate data from DAG'', and obtain data simulated under that model:
+
+\vspace*{5pt}
+
+\includegraphics[width=0.9\textwidth]{and_or_xor-b}
+
+\flushleft (Of course, the actual simulated data you are likely to obtain will vary differ from this one).
+
+
+Now, we click  ``Run evamtools'', after adding H-ESBCN to the set of methods and setting its number of MCMC iterations to 500000 (again, this is done under ``Advanced options and CPMs to use''). After about 30 seconds we obtain the output. In the plots below, and as we did before, we split it into three and two methods so it is easier to see. We show the models with two of the predictions: transition probabilities and predicted genotype relative frequencies (these predictions are also shown in the table, which we do not show below).
+
+Note that the histograms of predicted genotype frequencies display, at most, the 20 most frequent genotypes (because of reasons of limited plotting space); all predicted genotypes are shown in the table.
+
+\clearpage
+
+
+\includegraphics[width=0.9\textwidth]{and_or_xor_out1-tp}
+
+\vspace*{5pt}
+
+\includegraphics[width=0.9\textwidth]{and_or_xor_out1-pg}
+ 
+\clearpage
+
+
+\includegraphics[width=0.9\textwidth]{and_or_xor_out2-tp}
+
+\vspace*{5pt}
+
+\includegraphics[width=0.9\textwidth]{and_or_xor_out2-pg}
+
+And, as has been the case before, repeated runs of H-ESBCN can lead to different results, for example:
+
+\vspace*{5pt}
+
+
+\includegraphics[width=0.45\textwidth]{and_or_xor_out3}
+
+\vspace*{15pt}
+
+% FIXME: here.
+None of OT, CBN, or OncoBN can capture XOR relationships. But in this case, H-ESBCN incorrectly infers an XOR for D (it is really an OR) and an OR for C (it is really an AND).
+
+We could increase the sample size by 10 by just setting ``Number of genotypes to sample'' to 10000 or add different levels of noise, etc.
+
+
+We could also ask to get, as return, not only the predicted genotype relative frequencies, but sampled genotype counts with, possibly, some noise added. Even without noise added, the relative frequencies of the sampled genotype counts would differ from the predicted genotype relative frequencies just because of sampling noise. We can do that by going back to the ``User input'' tab, clicking on ``Advanced options and CPMs to use'' and setting ``Sample genotypes'' to TRUE and selecting the number of samples, which here we set equal to the sample size of original data set (i.e., 1000); we also set the observation noise to 0.01.
+
+\vspace*{5pt}
+
+\includegraphics[width=0.5\textwidth]{sample_genotypes}
+
+
+\vspace*{15pt}
+
+We hit on ``Run evamtools'' and, as before, we get the output but we now have one extra possible ``Predictions from fitted models to display'':
+
+\vspace*{5pt}
+
+\includegraphics[width=0.5\textwidth]{sample_genotypes_out}
+
+\vspace*{15pt}
+
+\clearpage
+And this is the output for three of the models; notice the added variability (i.e., how the relative heights and even the actual genotypes present are not the same as in the predicted genotype counts):
+
+\vspace*{5pt}
+
+\includegraphics[width=0.9\textwidth]{sample_genotypes_out_methods}
+
+\vspace*{15pt}
+
+
+Of course, you can switch from displaying ``Sampled genotype counts'' to displaying ``Predicted genotype counts'' just by clicking on the button on the left.
+
+\clearpage
+\subsection{A model with AND}
+\label{sec:model-with-and}
+
+Let us use now a model with AND; we use the preselected ``DAG\_AND'', with 1000 observations and a 5\% (0.05) genotyping error. Remember to click on ``Generate data from DAG'' after changing the noise level:
+
+\vspace*{5pt}
+
+\includegraphics[width=0.9\textwidth]{and}
+
+\vspace*{5pt}
+
+These are the fitted models:
+\clearpage
+\vspace*{5pt}
+
+\includegraphics[width=0.9\textwidth]{and__out_1}
+
+\includegraphics[width=0.8\textwidth]{and__out_2}
+
+\vspace*{15pt}
+
+H-ESBCN incorrectly infers the AND as an OR. CBN correctly infers the underlying model and provides estimates of the parameters that are very close to the true ones. OT and OncoBN cannot infer the correct true dependencies: OT because it cannot fit DAGs, but only trees (i.e., each node has only one parent) and OncoBN because it was run in disjunctive mode (OR relationships). We can run OncoBN using the conjunctive model; we have done this before (sections \qrefP{brca} and \qrefP{ova}) and it involves going to ``Advanced options and CPMs to run'' and setting, for ``OncoBN options'', the ``Model'' to ``Conjunctive'':
+
+\includegraphics[width=0.3\textwidth]{onco_conjunct}
+
+
+This is the output we get:
+
+
+\vspace*{5pt}
+
+\includegraphics[width=0.45\textwidth]{and__out_3}
+
+\vspace*{10pt}
+
+
+This correctly identifies the joint dependency of D on both B and C, but there is also and edge between A and D that we would never observe with CBN (as CBN always returns the transitively reduced DAGs); this is a technical issue beyond the scope of this document, but one that we have discussed  in the OncoBN repo\footnote{\url{https://github.com/phillipnicol/OncoBN/issues/5}}.
+
+
+For H-ESBCN the returned model also includes an edge, the one between A and B, that is not necessary: since B depends on C and C depends on A, having B depend with an AND on both A and C is not needed (i.e., the transitive reduction of that DAG would remove the edge from A -> B).  Note also that removing the A -> B arrow does not affect the relationships with D. Of course, for the relationships between C, B, and D we should not return the transitive reduction (as that would break the OR of D on either C or B). Thus, a model without the $A \rightarrow B$ would generate the exact same predictions as the model returned by H-ESBCN. (Why does this happen with H-ESBCN? It is a consequence of the heuristic search over DAG structures, which can occasionally return these topologies).
+
+
+
+\subsection{Modifying data generated from a CPM model before analysis}\label{CBN-no-WT}
+What if the data came from a given model but some additional process had altered the genotype data? For example, suppose data really came from a CBN model, but the frequency of WT genotypes is too small because the data have been filtered to contain only genotypes with at least one driver mutation, or the data contain some contaminated samples that would never had become tumores and have an excess of WT. We can explore this by generating data from a CPM model and, then, modifying the genotype composition, as we did in section \qref{just-sample-size} when we modified uploaded data.
+
+
+As an example, go to ``User input'', ``DAG and rates/cond. probs'', and use the default selected ``DAG\_Fork\_4''. Change lambdas to 2, 2.5, 1, 1.5, for A, B, C, D, respectively. Add 1\% of observational noise. And set the ``Number of genotypes to sample'' to 5000, to ensure small sample sizes are not the culprit of different inferences. Click on ``Generate data from DAG'' and, for simplicity, then analyze the data with OT, OncoBN,  CBN, MHN, and H-ESBCN.
+
+This is the output:
+
+\includegraphics[width=0.9\textwidth]{cbn_no_wt_1.png}
+
+CBN correctly infers the DAG and the estimates of the $\lambda$s are close to the true ones. The other methods are not able to infer this model correctly.
+
+Now, go back to the ``User input''. Before modifying the data, and to keep a copy of the originally generated one, on the ``Rename data'' type a name (e.g., ``data\_original'') and click on ``Rename data''. Now, enter a new name in ``Rename data'', for example ``data\_few\_wt'', click on ``Rename data'', and modify the WT frequency; I change it from its original value of 912 to 9. And then, analyze the data clicking on ``Run evamtools''. This is the output:
+
+
+\includegraphics[width=0.9\textwidth]{cbn_no_wt_2.png}
+
+OT and OncoBN get the structure right, and for CBN the main consequence is altering the rates of A and B, increasing them (which is what we would expect). MHN also has increased estimates of log-$\Theta_{A,A}$ and log-$\Theta_{B,B}$ when we reduced the frequency of WT.
+
+What if we removed the WT completely? We go back  (and, if it is not the selected one, click, on the left, under ``Examples and user's data'', on ``data\_original''), and set WT to 0 (possibly after creating a new data set, ``data\_no\_wt'') and analyze them:
+
+\includegraphics[width=0.9\textwidth]{cbn_no_wt_3.png}
+
+The effect is minor, which is not surprising, since the large cut in WT had been going from 912 to 9.
+
+We could, instead, eliminate all the observations with the four mutations (e.g., maybe they are too lethal to ever be observed?). We go to ``User input'', select, on the left, ``data\_original'', rename it (``no\_all\_mut''), and set to 0 the A,B,C,D genotype.
+
+
+\includegraphics[width=0.9\textwidth]{cbn_no_wt_4.png}
+
+The DAG structures for CBN, OT, OncoBN are preserved, but now H-ESBCN has modeled an XOR; the XOR models is not actually present, but unless there are XOR or similar phenomena, models with AND and OR cannot model the absence of A,B,C,D, given the relatively high frequencies of the rest of the genotypes  (the CBN model, for example, has decreased the estimates of all the $\lambda$s).
+
+
+We could also, as mentioned at the beginning of this section, increase the number of WTs. Etc, etc. We will not pursue this any further here. The key message from this section is that EvAM-Tools makes it very simple to examine targeted, specific, deviations in genotype composition from the genotype composition generated by a CPM model.
+
+
+
+\clearpage
+\section{Simulating random CPMs/evams}
+
+If we were interested in systematically examining the performance of the different methods under different models, simulating random CPM (or evam) models is crucial. This type of work (generating and analyzing large numbers of simulations) is not suited for a web app, but it can be easily done with the R package. The key function here is \texttt{random\_evam}. 
+
+
+<<>>=
+## Load the package
+library(evamtools)
+## For reproductibility
+set.seed(3)
+he_r1 <- random_evam(ngenes = 5, model = "HESBCN")
+he_r1$HESBCN_model
+
+## Now, simulate a data set of size 200 from that model
+## with 5% genotyping error
+
+he_s1 <- sample_evam(he_r1, N = 200, obs_noise = 0.05)
+
+## Analyze this data with all the methods except MCCBN (for speed)
+
+he_s1_anal <- evam(he_s1$HESBCN_sampled_genotype_counts_as_data,
+                   methods = c("CBN", "OT", "OncoBN",
+                               "HESBCN", "MHN"))
+
+## Show the fitted DAGs
+he_s1_anal[grepl("_model", names(he_s1_anal))]
+## Show MHN
+he_s1_anal["MHN_theta"]
+@
+
+This is just one example; serious simulation studies would examine exhaustively a range of scenarios. And we could, of course, compare other output, such as the predicted genotype frequencies, or the probabilities of paths to the maximum (use argument \texttt{paths\_max = TRUE} when calling \texttt{evam}), etc. But this should be enough to show you how EvAM-Tools can be used to systematically compare the performance of different methods in different scenarios.
+
+
+\clearpage
+\section{Appendix: getting the BRCA and Ov data sets from the R console}\label{how-get-data}
+
+Here we show how to obtain, from the R console, the two data sets used in section \qref{anal-cross-sect}. We simply export those data in a CSV format that can be uploaded to the web app.
+
+
+% both previously used in \cite{diaz-uriarte2019a}. The first is the glioblastoma data set used also in \cite{Gerstung2011} and originally from \citep{parsons2008b} and the second is the BRCA data set for the basal-like subtypes from \cite{Cerami:2012, Gao:2013}, originally from \cite{cgan2012}
+% (see Supplementary File S5\_Text, \url{https://doi.org/10.1371/journal.pcbi.1007246.s007} of \citep{diaz-uriarte2019a} for full details about data origins and preprocessing). 
+
+
+<<>>=
+## Load the package to access the BRCA data
+library(evamtools)
+data(every_which_way_data)
+
+## You can check the names here, which are the same
+## as in Suppl File S5 Text of Diaz-Uriarte & Vasallo, 2019
+##  names(every_which_way_data)
+
+write.csv(every_which_way_data[["BRCA_ba_s"]],
+          file = "BRCA_ba_s.csv", row.names = FALSE,
+          quote = FALSE)
+
+
+## Now export the ovarian cancer CGH data
+library(Oncotree)
+data(ov.cgh)
+
+## Rename column names: they start with a number and
+## finish on a "+" (gain) or "-" (loss), so automatically
+## reading these column names removes the +/- and adds an
+## "X" as the first character. Let us have columns start
+## with L or G for loss/gain.
+
+new_cn <- stringi::stri_sub(colnames(ov.cgh), 1L, 2L)
+new_cn <- paste(ifelse(grepl("+", colnames(ov.cgh), fixed = TRUE),
+                       "G", "L"), new_cn, sep = "")
+ov2 <- ov.cgh
+colnames(ov2) <- new_cn
+write.csv(ov2,
+          file = "ov2.csv", row.names = FALSE, quote = FALSE)
+
+@ 
+
+\clearpage
+
+\bibliographystyle{natbib} %myplainnat}
+\bibliography{evamtools-examples}
+
+
+\end{document}
+
+

@@ -1,3 +1,10 @@
+Changes in version 2.1.13 (2022-09-26):
+	- New file of examples, included in /Addtional_doc.
+	- Many changes and additions to Additional_tech_doc (mainly
+	  details about CPMs, and additional FAQs).
+	- Reorganization of additional files, and links from
+	  landing page.
+	
 Changes in version 2.1.12 (2022-09-22):
 	- Renamed argument to H-ESBCN that controls number
 	  of MCMC iterations; was "steps" now is "MCMC_iter".
