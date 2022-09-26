@@ -178,7 +178,7 @@ The results include:
 	 
   * Predictions derived from the fitted models, including:
 	&nbsp;
-    * Transition probabilities: conditional probability of transition to a genotype (obtained using competing exponentials from the transition rate matrix for all methods except OT and OncoBN). For OT and OncoBN this is actually an abuse of the untimed oncogenetic tree model; see the additional technical documentation for details.
+    * Transition probabilities: conditional probability of transition to a genotype (obtained using competing exponentials from the transition rate matrix for all methods except OT and OncoBN). For OT and OncoBN this is actually an abuse of the untimed oncogenetic tree model; see the [additional technical documentation](https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_tech_doc.pdf) for details.
 
     * Transition rates: for models that provide them (CBN, H-ESBCN, MHN) transition rates of the continuous-time Markov chain that models the transition from one genotype to another. This option is not available for OT and OncoBN, as these do not return rates.
 
@@ -227,7 +227,7 @@ Finally, you can also *download* the tabular results, fitted models, and the ana
 
 Additional documents are available from https://rdiaz02.github.io/EvAM-Tools .
 
-For users of the web app, the most relevant are: [EvAM-Tools: examples](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf) and [EvAM-Tools: additional technical documentation](https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_tech_doc.pdf)
+For users of the web app, the most relevant are: [EvAM-Tools: examples](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf) and [EvAM-Tools: additional technical documentation](https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_tech_doc.pdf).
 
 
 <!-- (If you install the R package or the RStudio Docker image with the package, you also have access to the documentation of the package, which is included in this pdf). -->

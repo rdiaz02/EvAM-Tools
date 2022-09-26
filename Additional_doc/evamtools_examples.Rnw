@@ -99,7 +99,6 @@ Here we present examples, with both real and simulated data, that illustrate the
 The objective of this document is not to provide complete analyses of any of the data sets, or address and of the questions mentioned above in full (that would require full papers). The objective is to illustrate the use of EvAM-Tools, especially its web app, and also to include some examples of output that, although not necessarily very common, are not unusual and can some surprising at first (e.g., the variability among fitted H-ESBCN models, in \qrefP{just-sample-size},  or output with DAGs that are not transitively reduced in \qrefP{sec:model-with-and}).
 
 
-
 \subsection{Web app: overview of workflow and use cases, and relationship to these examples}\label{overview-examples}
 
 On the web app landing page, under ``About EvAM-tools'' (\url{https://www.iib.uam.es/evamtools/#overview}) we provide an overview of the workflow and use cases. For completeness we repeat that material here, indicating, in bold, how the examples in this document relate to the major functionalities and workflows discussed there.
@@ -140,7 +139,9 @@ The figure below highlights the different major functionalities and use cases, a
 Furthermore, note that in all cases, when data are analyzed, in addition to returning the fitted models, the web app also returns the analysis of the CPMs in terms of their predictions such as predicted genotype frequencies and transition probabilities between genotypes. Most of the examples below illustrate this, showing, for example, the predicted genotype frequencies and transition probabilities. 
 
 
+\subsection{Additional documentation}
 
+See additional documentation in \url{https://rdiaz02.github.io/EvAM-Tools}. In particular, additional technical documentation, with details about the models implemented, error models, predicted genotype frequencies,  etc, is available from \url{https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_tech_doc.pdf}.
 
 
 
@@ -832,7 +833,7 @@ write.csv(ov2,
 \clearpage
 
 \bibliographystyle{natbib} %myplainnat}
-\bibliography{evamtools-examples}
+\bibliography{evamtools_examples}
 
 
 \end{document}
