@@ -225,7 +225,7 @@ Finally, you can also *download* the tabular results, fitted models, and the ana
 ### Additional documentation<a id="additional_docs"></a>
 ***
 
-Additional documents are available from https://rdiaz02.github.io/EvAM-Tools/pdfs.
+Additional documents are available from https://rdiaz02.github.io/EvAM-Tools .
 
 For users of the web app, the most relevant are: [EvAM-Tools: examples](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf) and [EvAM-Tools: additional technical documentation](https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_tech_doc.pdf)
 
