@@ -45,7 +45,7 @@ This web interface provides a GUI to the package and focuses on allowing fast co
 
 In cross-sectional data a single sample is obtained from each subject or patient. That single sample represents the "observed genotype" of, for example, the tumor of that patient. Genotype can refer to single point mutations, insertions, deletions, or any other genetic modification. In this app, as is often done by CPM software, we store cross-sectional data in a matrix, where rows are patients or subjects, and columns are genes; the data is a 1 if the event was observed and 0 if it was not.
 
-Cancer progression models (CPMs) or, more generally, event accumulation models, use these cross-sectional data to try to infer restrictions in the order of accumulation of events; for example, that a mutation on gene B is always preceded by a mutation in gene A (maybe because mutating B when A is not mutated). Some cancer progression models, such as MHN, instead of modeling deterministic restrictions, model facilitating/inhibiting interactions between genes, for example that having a mutation in gene A makes it very likely to gain a mutation in gene B. A longer explanation is provided in [What CPMs are included in ```EvAM-Tools```?](#cpms), below, and many more details in the [EvAM-Tools: additional technical documentation](https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_tech_doc.pdf ).  Finally, note we have talked about  "genotype" and "mutation", but CPMs have been used with non-genetic data too, and thus our preference for the expression "event accumulation models"; as said above, the key idea is that events are gained one by one, but not lost, and that we can consider the different subjects/patients in the cross-sectional data as replicate evolutionary experiments or runs where all individuals are under the same constraints (e.g., genetic constraints if we are dealing with mutations).
+Cancer progression models (CPMs) or, more generally, event accumulation models, use these cross-sectional data to try to infer restrictions in the order of accumulation of events; for example, that a mutation on gene B is always preceded by a mutation in gene A (maybe because mutating B when A is not mutated). Some cancer progression models, such as MHN, instead of modeling deterministic restrictions, model facilitating/inhibiting interactions between genes, for example that having a mutation in gene A makes it very likely to gain a mutation in gene B. A longer explanation is provided in [What CPMs are included in ```EvAM-Tools```?](#cpms), below, and many more details in  [EvAM-Tools: methods' details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf ).  Finally, note we have talked about  "genotype" and "mutation", but CPMs have been used with non-genetic data too, and thus our preference for the expression "event accumulation models"; as said above, the key idea is that events are gained one by one, but not lost, and that we can consider the different subjects/patients in the cross-sectional data as replicate evolutionary experiments or runs where all individuals are under the same constraints (e.g., genetic constraints if we are dealing with mutations).
 
 
 
@@ -178,7 +178,7 @@ The results include:
 	 
   * Predictions derived from the fitted models, including:
 	&nbsp;
-    * Transition probabilities: conditional probability of transition to a genotype (obtained using competing exponentials from the transition rate matrix for all methods except OT and OncoBN). For OT and OncoBN this is actually an abuse of the untimed oncogenetic tree model; see the [additional technical documentation](https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_tech_doc.pdf) for details.
+    * Transition probabilities: conditional probability of transition to a genotype (obtained using competing exponentials from the transition rate matrix for all methods except OT and OncoBN). For OT and OncoBN this is actually an abuse of the untimed oncogenetic tree model; see the [Evamtools: methods' details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf) for details.
 
     * Transition rates: for models that provide them (CBN, H-ESBCN, MHN) transition rates of the continuous-time Markov chain that models the transition from one genotype to another. This option is not available for OT and OncoBN, as these do not return rates.
 
@@ -227,7 +227,7 @@ Finally, you can also *download* the tabular results, fitted models, and the ana
 
 Additional documents are available from https://rdiaz02.github.io/EvAM-Tools .
 
-For users of the web app, the most relevant are: [EvAM-Tools: examples](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf) and [EvAM-Tools: additional technical documentation](https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_tech_doc.pdf).
+For users of the web app, the most relevant are: [EvAM-Tools: examples](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf) and [EvAM-Tools: methods' details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf).
 
 
 <!-- (If you install the R package or the RStudio Docker image with the package, you also have access to the documentation of the package, which is included in this pdf). -->
@@ -278,7 +278,7 @@ It depends on the number of genes or features and methods used. For six genes, a
 *  **Mutual Hazard networks (MHN):** With MHN dependencies are not deterministic and events can make other events more like or less likely (inhibiting influence). The fitted parameters are multiplicative hazards that represent how one event influences other events.
 
 
-For details, please see the [EvAM-Tools: additional technical documentation](https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_tech_doc.pdf).
+For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf).
 
 &nbsp;
 

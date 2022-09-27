@@ -165,7 +165,7 @@ You can run on your machines:
   * The [R package in an RStudio session from the Docker image](#how-to-run-the-r-package-from-the-docker-image)
   * The [Shiny app from a Docker image](#how-to-run-the-shiny-app-from-the-docker-image)
   
-You can also build your own Docker image and you might want to run the Shiny app in a local intranet, possibly after modifying some settings. See the FAQ in the [Additional technical documentation](https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_tech_doc.pdf) for details. 
+You can also build your own Docker image and you might want to run the Shiny app in a local intranet, possibly after modifying some settings. See the FAQ in the [EvAM-Tools: methods' details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf) for details. 
 
 
 ### How to install the R package 
@@ -210,7 +210,7 @@ Details about Docker are available here: https://docs.docker.com/get-docker/ .
 Details about R with Docker and Rocker project here: https://www.rocker-project.org/ . Our images are based on the r-ver (https://hub.docker.com/r/rocker/r-ver) and rstudio (https://hub.docker.com/r/rocker/rstudio) Docker images from the Rocker project (https://www.rocker-project.org/).
 
 
-More details about building and modifying the Docker images are provided in the Additional technical documentation: https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_tech_doc_all.pdf .
+More details about building and modifying the Docker images are provided in  [EvAM-Tools: method's details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf) .
 
 
 ### How to run the R package and the shiny app locally without Docker
