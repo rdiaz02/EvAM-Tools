@@ -63,7 +63,7 @@ Cancer progression models (CPMs) or, more generally, event accumulation models, 
 ***
 
 
-The figure below provides an overview of the workflow with the web app:
+The figure below provides an overview of the major workflows with the web app:
 
 <br>
 <img src="figure-overview.png" alt="Overview EvAM-Tools web app" width="100%" style="border:1px solid black;">
@@ -72,7 +72,7 @@ The figure below provides an overview of the workflow with the web app:
 
 
 
-The web app encompasses, thus, different major functionalities and use cases, mainly:
+The web app encompasses, thus, different major functionalities and workflows, mainly:
 
 
 1. Inference of CPMs from user data uploaded from a file.
@@ -92,7 +92,7 @@ Furthermore, note that in all cases, when data are analyzed, in addition to retu
 
 
 
-The figure below highlights the different major functionalities and use cases, as numbered above, over-imposed on the previous figure:
+The figure below highlights the different major functionalities and workflows, as numbered above, over-imposed on the previous figure:
 
 
 

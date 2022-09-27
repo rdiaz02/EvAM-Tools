@@ -103,7 +103,7 @@ The objective of this document is not to provide complete analyses of any of the
 
 On the web app landing page, under ``About EvAM-tools'' (\url{https://www.iib.uam.es/evamtools/#overview}) we provide an overview of the workflow and use cases. For completeness we repeat that material here, indicating, in bold, how the examples in this document relate to the major functionalities and workflows discussed there.
 
-The figure below provides an overview of the workflow with the web app:
+The figure below provides an overview of the major workflows with the web app:
 
 \includegraphics[width=0.99\textwidth]{figure-overview.pdf}
 
@@ -130,7 +130,7 @@ The web app encompasses, thus, different major functionalities and use cases, ma
 \end{enumerate}
 
 
-The figure below highlights the different major functionalities and use cases, as numbered above, over-imposed on the previous figure:
+The figure below highlights the different major functionalities and workflows, as numbered above, over-imposed on the previous figure:
 
 \includegraphics[width=0.99\textwidth]{figure-overview-paths.pdf}
 
