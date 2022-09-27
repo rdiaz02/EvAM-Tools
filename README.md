@@ -3,7 +3,7 @@
 <p>Additional documents for  <a href="https://github.com/rdiaz02/EvAM-Tools">EvAM-Tools</a> and <a href=" https://www.iib.uam.es/evamtools/">its Shiny web app</a>.</p>
 
 
-<p><a href="https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_tech_doc.pdf">EvAM-Tools: additional technical documentation (https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_tech_doc.pdf)</a>: Additional  documentation about EvAM-Tools. These include technical details (CPMs, error models, predicting genotype frequencies, generation of random evam models), and a FAQ.</p>
+<p><a href="https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf">EvAM-Tools: methods' details and FAQ (https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf)</a>: Additional  documentation about EvAM-Tools. These include technical details (CPMs, error models, predicting genotype frequencies, generation of random evam models), and a FAQ.</p>
 
 
 <p><a href="https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf">EvAM-Tools: examples (https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf)</a>: Commented examples, with both real and simulated data, that illustrate the use and utility of EvAM-Tools.</p>
