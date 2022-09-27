@@ -113,9 +113,9 @@ We explain now in more detail the functionality, options, input, and output, of 
 To start using the web app, go first to the ```User input``` tab (on top of the page). Here you can:
     &nbsp;
    - Enter cross-sectional data directly by either:
-	    - Uploading a file.
-		- Entering genotype frequencies manually<br/>
-		&nbsp;
+       - Uploading a file.
+       - Entering genotype frequencies manually<br/>
+        		&nbsp;
    - Generate cross-sectional data from CPM models. Follow these steps:
        1. Specify the CPM model first. You can use:
 	   
