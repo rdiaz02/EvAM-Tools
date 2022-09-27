@@ -911,7 +911,7 @@ ui <-
         }
         "
       ))),
-    tabPanel("About EvAM-tools",
+    tabPanel("About EvAM-Tools",
              cpm_info()
     ),
     tabPanel("User input", 
