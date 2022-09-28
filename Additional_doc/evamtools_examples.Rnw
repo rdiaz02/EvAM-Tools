@@ -832,6 +832,20 @@ write.csv(ov2,
 
 \clearpage
 
+
+\section{License and copyright}
+This work is Copyright, \copyright, 2022, Ramon Diaz-Uriarte.
+
+Like the rest of this package (EvAM-Tools), this work is licensed under the GNU Affero General Public License. You can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.
+
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License along with this program. If not, see \url{https://www.gnu.org/licenses/}. 
+
+The source of this document and the EvAM-Tools package is at \url{https://github.com/rdiaz02/EvAM-Tools}.
+
+\clearpage
+
 \bibliographystyle{natbib} %myplainnat}
 \bibliography{evamtools_examples}
 
