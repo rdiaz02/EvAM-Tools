@@ -1404,7 +1404,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      ##              "directory ",
                      ##              "(https://github.com/rdiaz02/EvAM-Tools/tree/main/examples_for_upload ---make sure to view the files as raw)")),
                      tags$div(class = "upload_file",
-                              fileInput("csd", "Load Data",
+                              fileInput("csd", "Load data",
                                         multiple = FALSE,
                                         accept = c(
                                             "text/csv",
