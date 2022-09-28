@@ -1190,7 +1190,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                         choiceValues = list("OT", "OncoBN", "HESBCN"),
                                                         selected = data$this_d_dag_model)
                                            ),
-                                  tags$h4("New Edge"),
+                                  tags$h4("New edge"),
                                   tags$h5(HTML("<p></p>")),
                                   tags$div(class = "inline",
                                            radioButtons(inputId = "dag_from",
