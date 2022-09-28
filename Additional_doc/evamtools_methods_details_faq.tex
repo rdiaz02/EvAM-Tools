@@ -848,28 +848,124 @@ Nothing changes. Use the rules for AND where there is an AND, XOR where there is
 \section{FAQ}
 \label{sec:faq}
 
-\subsection{In the figures, some times I get the error ``Figure margins too large''}
+\subsection{Web app, figures}
+\subsubsection{In the figures, some times I get the error ``Figure margins too large''}
 
 Solution: try to reduce the length of the gene names. 
 
 Longer explanation: It is impossible to accommodate, automatically, all possible use cases in terms of length of genotypes (e.g., you analyzed a data set with 10 genes, and some have names that are many characters long). We try to catch mistakes, but we might have missed some.
 
-\subsection{In the figures, some times genotype names are truncated}
+\subsubsection{In the figures, some times genotype names are truncated}
 
 This problem is related to the previous one: with very large genotype or gene names, sometimes the only way to prevent the "Figure margins too large" error is to make figure margins smaller, which can result in truncation. 
 
 
-\subsection{In the figures, some times the histograms are too tiny}
+\subsubsection{In the figures, some times the histograms are too tiny}
 
 Similar to previous problems: genotype or gene names are probably too large, so to accommodate them we need to make the rest of the plot smaller.
 
-
+\subsection{Web app, saved output}
 \subsubsection{When data are saved, genes without mutations are excluded}
 \label{sec:number-genes-genes}
 
  When creating user data (for instance, when adding new genotypes), any gene that has no mutations is automatically excluded from the saved data, regardless of the setting for number of genes. This is a feature, not a bug. For example, suppose you set the number of genes to 3, but you only specify frequencies, or counts, for genotypes "A" and "A, B". The data set will only contain columns for genes A and B (since gene C has no mutations and it would be excluded during the analyses).
 
 
+ \subsection{Web app: could we reduce the number of required clicks?}
+
+ This issue was raised by one reviewer: Editing values inside the app typically must be confirmed by an additional button press or key combination. It would be more convenient if values updated automatically after pressing Enter or switching the input field.
+
+
+ We have taken the liberty of adding it to the FAQ because it clarifies our design decisions and provides additional information about the behavior of the GUI.
+
+
+
+ We have tried to minimize additional button presses. Below we provide a description of the current behavior, with detailed explanations of the reasons for the behavior. There are few remaining cases where additional button presses or key combinations could be avoided.
+
+\begin{itemize}
+\item ``Set the number of genes'': moving the slider has an immediate effect. 
+  \begin{itemize}
+  \item For ``Enter genotype frequencies manually'', new gene names are immediately added to ``Mutations'' in the ``Add genotypes'' box.
+  \item For DAG, new gene names are immediately added to the ``To'' and ``From'' lists under \underline{1. Define DAG}, ``New edge''.
+    
+  \item For MHN, it immediately resizes the log-$\Theta$ matrix; if data have already been generated, and to prevent the data and the log-$\Theta$ matrix from being in inconsistent states, on every change of number of genes a new data set is generated.
+  \item (This is not applicable to ``Upload file'':  setting the number of genes is not available here.)
+  \end{itemize}
+
+
+
+\item ``Use different gene names'' requires clicking on ``Use these gene names'' (on the popup box that is opened on clicking on ``Use different gene names''). This is on purpose; first, forcing the change of gene names on switching input fields could lead to disconcerting behavior especially because the renaming is often an operation of renaming the complete set of genes, not just one of them; moreover,  we try to convey that using this option carelessly will lead to confusion (several warnings are provided to minimize this careless use: on the box itself and on the tooltip). If users decide they do not want to use different names after all, they can abort the operation by clicking on ``Dismiss''.
+
+  Since this option will be used sparingly and consciously, we think forcing explicit clicks and not renaming on switching input field is the appropriate behavior.
+
+  
+\item When uploading a file (under ``Upload file''), there is no need to click on additional buttons after entering a name in ``Name for data''. The user enters a string for the name, and then clicks on ``Load data''; the entered string will become the name of the data when the upload is finished (and that data, with that name, will be shown on the left side, under ``Examples and user's data'').
+
+  
+\item For DAG modification/creation, it is necessary to click on ``Add edge'' or ``Remove edge'' after selecting the ``From'' and ``To'' nodes. The alternative (adding a non-existent edge or removing an existing edge as soon as two nodes are selected), even if it removes one click, gives rise to non-obvious behavior that can be hard to understand. ``Add/Remove edge'' require an extra click but this extra click makes the behavior clear and explicit, and allow for correcting the From/To nodes before changing the DAG. Moreover, because we have separate buttons for ``Add edge'' and ``Remove edge'', user errors such as trying to remove an edge that does not exist, or trying to add an edge that already exists, are much easier for users to understand: when the error message pops-up, the clicked button (``Add edge'', ``Remove edge'') is still colored gray.
+
+  
+  
+\item For DAGs, when changing entries in the DAG table, as soon as ``Ctrl + Enter'' is pressed, new values of the data are generated according to the new parameters, without any need to press ``Generate data from DAG model''.
+
+  (Several parameters and/or relations can be changed without clicking ``Ctrl + Enter'' until all changes have been made: we move between entries of the table with Tab and ``Shift + Tab'', and click ``Ctrl + Enter'' only at the end).
+
+  
+  
+
+
+\item For MHN, if a data set has been generated previously, when changing entries in the MHN table, as soon as ``Ctrl + Enter'' is pressed, new values of the data are generated according to the new parameters, without any need to press ``Generate data from MHN model''.  (As above, several entries of the table can be changed without clicking ``Ctrl + Enter'' until all changes have been made; we can move between cells of the table with Tab, and click ``Ctrl + Enter'' only at the end).
+
+  Why generate new data for MHN on log-$\Theta$ matrix modification only if data had been previously generated, but generate it immediately for DAGs even if data had not been modified?
+  
+  \begin{itemize}
+  \item We, and the users in our lab, seem to build DAG models step by step, and seem to appreciate the immediate feedback from adding/removing edges, changing the type of relationship, or modifying $\lambda$s or conditional probabilities. 
+  \item We, and the user in our lab, seem to build MHNs by first thinking about a pattern of relationships that involves more than one entry of the log-$\Theta$ matrix. Once the initial model is specified, ``Generate data'' is clicked. After that has happened, and to avoid the data and the log-$\Theta$ matrix from being in inconsistent states, we always force a resampling of data when an entry of the matrix is changed.
+    
+  \item The difference in behavior would, at most, involve one extra click with MHN.
+  \end{itemize}
+
+
+\item For DAGs, when changing the ``Type of model'' (OT, OncoBN, CBN/H-ESBCN), if a data set has been generated previously, new data are immediately generated, without any need to press ``Generate data from MHN model''. This both saves one click and prevents the model and the data from possibly being in inconsistent states.
+
+  If no data have been generated we do not generate data. Why? For reasons similar to above. In our experience, if there is no data present, users are likely to change the model and then start modifying the DAG (adding/removing edges; changing type of relationships; changing parameters). It seems reasonable to delay the sampling until the sampling becomes necessary to prevent any possibly ambiguities or inconsistencies.
+
+  
+\item For both DAG and MHN, switching from the input fields of ``Number of genotypes to sample'', ``Observational noise'', and ``epos, $\epsilon$'' (only for DAG) will not lead to generating new data unless ``Generate data from DAG/MHN'' is clicked. In our experience, these three parameters are often modified together; updating the data immediately after switching from the input field leads to intermediate data updates that get in the way of ``modify this set of parameters, and then update according to the new set''. Moreover, the operation could be slightly expensive, computationally, if ``Number of genotypes to sample'' is a very large number.
+  
+
+\item When genotype data are modified (under ``Change genotype's counts'', and with the same behavior in ``Upload file'', ``Enter genotype frequencies manually'', ``DAG'', ``MHN''), as soon as the user enters ``Ctrl + Enter'', the histogram displaying genotype frequencies is updated.
+
+  Note, therefore, that a user can choose to modify the histogram with every change of a genotype, or modify several genotypes without clicking ``Ctrl + Enter'' until the end: modify the number,  move with Tab to the next, modify, move with Tab to the next, etc, and only update the histogram when all modifications have been done with a single ``Ctrl + Enter''.
+
+
+
+\item The ``Rename the data'' box requires entering a name and then clicking on the button ``Rename the data''. This is also on purpose: we think renaming the data should be a very conscious action, and users will hopefully notice that, as soon as the ``Rename the data'' button is clicked, that name appears on the left side, with a blue button denoting it is the current, selected one on which modifications are being made. This should also prevent unwanted proliferation of data names that the user is not fully aware of having explicitly created.  Asking for a click here, instead of renaming immediately after switching away from the input field, therefore, seems reasonable. 
+
+\item Options under ``Advanced options'': options are set just by changing them, without any additional clicks. For example, the ``Number of MCMC iterations'' (under ``H-ESBCN options'') can be changed from the default 200000 to, say, 500000 just by deleting the 2 and putting a 5 without additional clicks. Likewise, changing the ``Model'' under ``OncoBN options'' requires clicking on the down arrow of the pull down menu and clicking on ``Conjunctive'', without additional clicks.
+
+
+\item In the ``Output'' tab, virtually all operations do not require any additional clicks and are executed immediately. ``CPMs to show'' does not require extra clicks, but has a small lag of about 0.9 seconds from the first click: redrawing is a potentially expensive operation, and we do not start it until giving some reasonable time for the user to click/unclick methods to show. ``Download CPM results and analyzed data'' opens the standard popup box that allows to change the name and then asks for clicking on ``Save''.
+  
+  
+\end{itemize}
+
+
+
+In summary, thus, in most cases, few or none additional button presses are needed. We think that those that remain fall into the following cases:
+
+\begin{itemize}
+\item The additional button or key press is unavoidable becaus of the way Shiny works.
+
+\item Not requiring this additional button or key press could lead to surprising and hard to understand behavior.
+  
+  \item Potentially expensive operations that we only want to execute when the user is done changing values.
+\end{itemize}
+
+
+
+
+ 
 
 \subsection{Why haven't you used method X?}\label{other_methods}
 
@@ -910,13 +1006,13 @@ When we obtain a finite sample from the predicted frequencies, you can decide to
 
 
 
-
-\subsection{I want to setup my own Shiny app with different default ``Advanced options''}
+\subsection{Docker and setting up your own Shiny app}
+\subsubsection{I want to setup my own Shiny app with different default ``Advanced options''}
 
 In file \texttt{EvAM-Tools/evamtools/inst/shiny-examples/evamtools/ui.R} search for ``Advanced options'' and modify the defaults to whatever you want.
 
 
-\subsection{How can I use the Shiny app in a local intranet with load balancing using multiple Docker instances}
+\subsubsection{How can I use the Shiny app in a local intranet with load balancing using multiple Docker instances}
 \label{haproxy}
 
 This is well beyond the scope of this document and there are many options available. One that can work (and this is more or less what we actually do) is the following:
@@ -929,13 +1025,13 @@ This is well beyond the scope of this document and there are many options availa
 As said above, this is just a sketch of the basic procedure. There are many other options.
 
 
-\subsection{If I use the Docker image for the package (rdiaz02/evamrstudio), can I run the Shiny app?}
+\subsubsection{If I use the Docker image for the package (rdiaz02/evamrstudio), can I run the Shiny app?}
 
 Yes, you can. Just start a browser as explained in the README (\url{https://github.com/rdiaz02/EvAM-Tools#how-to-run-the-r-package-from-the-docker-image}). Then, once in RStudio, in the R console type \verb@ runShiny() @ and you will have the interactive Shiny app open. But even if you can do it, it is not clear why you'd want to do this: if you only want to run the Shiny app, the Docker image rdiaz02/evamshiny is lighter and the steps to launch it much faster.
 
 
 
-\subsection{Why aren't you using Shiny Server?}
+\subsubsection{Why aren't you using Shiny Server?}
 \label{sec:why-arent-you}
 
 Because we did not see it as necessary or convenient. If you want to run Shiny interactively from an R session load \texttt{evamtools} and call function \texttt{runShiny}; no need for Shiny Server.
@@ -949,7 +1045,7 @@ However, we might be missing something; if you think Shiny Server would allow or
 
 
 
-\subsection{I want to build my own Docker images}
+\subsubsection{I want to build my own Docker images}
 
 If you want to modify the Docker images, modify the Dockerfiles: Dockerfile-evam-rstudio (for the RStudio Dockerfile that launches RStudio) or Dockerfile-evam-shiny (well, for the Dockerfile that creates the container to run shiny). 
 
@@ -968,12 +1064,12 @@ Note: it is possible, and actually a better idea, to run docker without sudo; lo
 \url{https://docs.docker.com/engine/security/rootless/}).
 
 
-\subsubsection{What if creating the image fails because of no internet connection from the container}
+\paragraph{What if creating the image fails because of no internet connection from the container}
 Creating the above image requires installing R packages and that might fail because the Docker container cannot connect with the internet. The following might help: \url{https://superuser.com/a/1582710}, \url{https://superuser.com/a/1619378}. In many cases, doing
 \verb@ sudo systemctl restart docker@ might be enough.
 
 
-\subsubsection{Cleaning the build cache and stale old images}
+\paragraph{Cleaning the build cache and stale old images}
 Sometimes (e.g., if the base containers change or you want to remove build cache) you might want to issue
 
 \begin{verbatim}
@@ -989,7 +1085,7 @@ docker system prune -a
 Please, read the documentation for both.
 
 
-\subsubsection{Copying docker images from one machine to another}
+\paragraph{Copying docker images from one machine to another}
 Yes, that can be done. See here, for example: \url{https://stackoverflow.com/a/23938978}
 
 
