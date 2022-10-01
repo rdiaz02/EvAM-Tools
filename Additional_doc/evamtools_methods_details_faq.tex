@@ -972,10 +972,57 @@ In summary, thus, in most cases, few or none additional button presses are neede
 
 
 
+\subsection{Web app: some genes have disappeared, and instead I see a name with an underscore ("\_")}
+
+Those events were indistinguishable, because they are completely aliased, i.e., indistinguishable, because they have identical patterns ---identical columns in the data matrix---.
+
+There are example in the additional examples files.
+
+\subsection{Web app: the gene number slider changes automatically on changing data set name}
+
+This is on purpose to keep consistency and also so that we save only the needed data.
+
+\subsection{Web app: Names of genes under "Mutations" in Create, are resorted on save/rename}
+
+This is on purpose. As explained by the tooltip, the list of genes next to "Mutations" is kept sorted ("natural order") showing first the genes in existing genotypes, and then other genes up to ""Number of genes". The list will be resorted when new genes are added to genotypes. "Mutations" is just a list of candidate gene names. You can see more (or fewer, up to the number of genes in your genotypes) by moving the slider of "Number of genes". On renaming of the data, we trigger a counting of the genes used, reset the slider of "Number of genes" and reorder the genes next to "Mutations".
+
+
+% \begin{itemize}
+% \item We show all the genes in use in genotypes, and the rest in alphabetical order. Whenever you rename , we trigger a reorder and count the number of genes used.
+% \item The list under "Mutations" is just a list of candidates. You can see more (or fewer, up to the actual number in your genotypes) by moving the slider.
+% \end{itemize}
+
+
+
+\subsection{Web app: I want to rename my genes, after I made a complex graph, and don't want to reset it. What can I do?}
+
+ This is borderline behavior, and we do not encourage it, but you can do it if you set all genotypes to 0 via the "Change genotype's counts". Why is this not encouraged? Because the code is not intended for this.
+
+
+
+ \subsection{Web app: the names of data sets are separate for DAG, MHN, etc}
+
+ This is on purpose: it should help users organize data and experiments.
+
+
+ \subsection{Web app: I do not find my data under 'Examples and user's data'}
+
+ Maybe you are not looking in the right place? If you created your data using DAGs, it will not be shown under MHN, for example. See previous question.
+
+
+ \subsection{Web app: Changing gene number with MHN and forced generation of data.}
+ 
+ With MHN (but not DAG) , changing number of genes forces the generation of data from the model to prevent inconsistent states between the data and the model. This is on purpose.
+
+ Under MHN, adding a gene amounts to adding a row and a column, and removing a gene removing a row and a column; if we did not force a resample and you forgot to do it, the genotype data could be left in a state completely inconsistent with the model. In contrast, with DAGs, changing gene number has no effect on the model until you add/remove edges. 
+
+ And this is why adding/removing edges from a DAG forces data generation.
+
+
 
  
-
-\subsection{Why haven't you used method X?}\label{other_methods}
+ \subsection{Why haven't you used method X?}\label{other_methods}
+ 
 
 We have included here what we believe are the current state-of-the-art methods that have existing public implementations that run in reasonable time. After searching the literature, we have included any method that could be deemed appropriate. We have, in fact, provided access to two very recent methods: H-ESBCN and OncoBN (and their github repos show we have contributed bug reports).
 
