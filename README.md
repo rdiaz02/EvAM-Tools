@@ -23,7 +23,7 @@
   * [OT](#ot)
   * [CBN and MCCBN](#cbn-and-mccbn)
   * [MHN](#mhn)
-  * [HESBCN (PMCE)](#hesbcn-pmce)
+  * [H-ESBCN (PMCE)](#h-esbcn-pmce)
   * [OncoBN (DBN)](#oncobn-dbn)
   * [Conditional prediction of genotypes and probabilities of paths from CPMs](#conditional-prediction-of-genotypes-and-probabilities-of-paths-from-cpms)
 - [Additional documentation](#additional-documentation)
@@ -210,7 +210,7 @@ Details about Docker are available here: https://docs.docker.com/get-docker/ .
 Details about R with Docker and Rocker project here: https://www.rocker-project.org/ . Our images are based on the r-ver (https://hub.docker.com/r/rocker/r-ver) and rstudio (https://hub.docker.com/r/rocker/rstudio) Docker images from the Rocker project (https://www.rocker-project.org/).
 
 
-More details about building and modifying the Docker images are provided in  [EvAM-Tools: method's details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf) .
+More details about building and modifying the Docker images are provided in the FAQ available at [EvAM-Tools: method's details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf) .
 
 
 ### How to run the R package and the shiny app locally without Docker
@@ -333,7 +333,7 @@ The R package itself with standard organization. Directories and files under ins
   progression using Mutual Hazard Networks. Bioinformatics, 36(1),
   241–249. http://dx.doi.org/10.1093/bioinformatics/btz513
 
-### HESBCN (PMCE) ###
+### H-ESBCN (PMCE) ###
 
 
 - Angaroni, F., Chen, K., Damiani, C., Caravagna, G., Graudenzi, A., &
@@ -341,7 +341,7 @@ The R package itself with standard organization. Directories and files under ins
   evolution with high prognostic power. Bioinformatics, 38(3),
   754–762. http://dx.doi.org/10.1093/bioinformatics/btab717
 
-   (About terminology: we will often refer to HESBCN, as that is the program we use, as shown here: https://github.com/danro9685/HESBCN. H-ESBCN is part of the PMCE procedure).
+   (About terminology: we will often refer to H-ESBCN, as that is the program we use, as shown here: https://github.com/danro9685/HESBCN. H-ESBCN is part of the PMCE procedure).
 
 ### OncoBN (DBN) ###
 
@@ -373,7 +373,7 @@ The R package itself with standard organization. Directories and files under ins
 ## Additional documentation
    Additional documentation is available from: https://rdiaz02.github.io/EvAM-Tools/
 
-   A preprint is available from bioRxiv at  https://doi.org/10.1101/2022.07.05.498481 (or the direct bioRxiv link: https://www.biorxiv.org/content/10.1101/2022.07.05.498481v1 ), which includes additional examples ( https://www.biorxiv.org/content/10.1101/2022.07.05.498481v1.supplementary-material ).
+   A preprint is available from bioRxiv at  https://doi.org/10.1101/2022.07.05.498481 <!-- (or the direct bioRxiv link: https://www.biorxiv.org/content/10.1101/2022.07.05.498481v1 ) <!-- -\->, which includes additional examples ( https://www.biorxiv.org/content/10.1101/2022.07.05.498481v1.supplementary-material ) -->.
 
 
 ## Funding
