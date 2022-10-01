@@ -143,7 +143,7 @@ Furthermore, note that in all cases, when data are analyzed, in addition to retu
 
 \subsection{Additional documentation}
 
-See additional documentation in \url{https://rdiaz02.github.io/EvAM-Tools}. In particular, additional technical documentation, with details about the models implemented, error models, predicted genotype frequencies,  etc, is available from \url{https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_tech_doc.pdf}.
+See additional documentation in \url{https://rdiaz02.github.io/EvAM-Tools}. In particular, additional details about CPMs, error models, predicting genotype frequencies, generating random evam models, and a FAQ is available from \url{https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf}.
 
 
 
