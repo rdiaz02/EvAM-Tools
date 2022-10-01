@@ -14,7 +14,7 @@ Rscript --vanilla -e 'library(knitr); knit("evamtools_examples.Rnw")'
 texi2pdf --shell-escape evamtools_examples.tex
 
 
-pdftk intro_additional_docs.pdf evamtools_methods_details_faq.pdf evamtools-examples.pdf ../evamtools.Rcheck/evamtools-manual.pdf Using_OncoSimulR_to_get_accessible_genotypes_trans_mats.pdf cat output Additional_doc_all.pdf
+pdftk intro_additional_docs.pdf evamtools_methods_details_faq.pdf evamtools_examples.pdf ../evamtools.Rcheck/evamtools-manual.pdf Using_OncoSimulR_to_get_accessible_genotypes_trans_mats.pdf cat output Additional_doc_all.pdf
 
 cp Additional_doc_all.pdf ../../evamtools-gh-pages/pdfs/.
 
