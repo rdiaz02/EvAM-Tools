@@ -3,6 +3,7 @@
 \documentclass[a4paper,11pt]{article}
 \usepackage[nottoc,numbib]{tocbibind}
 \usepackage{graphics}
+\usepackage{latexgit}
 \usepackage{amssymb,amsfonts,amsmath,amsbsy}
 \usepackage{geometry}
 \geometry{verbose,a4paper,tmargin=28mm,bmargin=28mm,lmargin=30mm,rmargin=30mm}
@@ -83,7 +84,8 @@ opts_knit$set(stop_on_error = 2L)
 \author{Ramon Diaz-Uriarte\footnote{Department of Biochemistry, Universidad Aut\'onoma de Madrid, Instituto de Investigaciones Biom\'edicas ``Alberto Sols'' (UAM-CSIC), Madrid, Spain. Author for correspondence: \texttt{r.diaz@uam.es}}% , Pablo Herrera-Nieto$^*$
 }
 
-\date{\today}
+\date{\today \\ Version \gitcommithash}
+% \date{\today}
 
 \maketitle
 \tableofcontents

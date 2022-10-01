@@ -38,16 +38,15 @@
 
 
 \begin{document}
-
-
-\pagenumbering{roman}
-\begin{titlepage}
+%% No, I do not want separate numbering of pages for ToC and titlle
+% \begin{titlepage}
 \maketitle
 \tableofcontents
-\end{titlepage}
+% \end{titlepage}
 
 \clearpage
-\pagenumbering{arabic}
+% \setcounter{page}{3}
+%\pagenumbering{arabic}
 \section{Introduction}
 
 This document provides additional details about EvAM-Tools and the methods included in it. You can run the web app from \url{https://iib.uam.es/evamtools/} or download a Docker image from \url{https://hub.docker.com/r/rdiaz02/evamshiny}; to run the R package download a Docker image from \url{https://hub.docker.com/r/rdiaz02/evamrstudio}.  Another file, \texttt{evamtools\_examples.pdf}, from \url{https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf}, includes commented examples, with both real and simulated data, that illustrate the use and utility of EvAM-Tools.
