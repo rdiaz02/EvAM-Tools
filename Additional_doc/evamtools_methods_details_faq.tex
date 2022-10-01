@@ -940,6 +940,9 @@ Similar to previous problems: genotype or gene names are probably too large, so 
 \item For both DAG and MHN, switching from the input fields of ``Number of genotypes to sample'', ``Observational noise'', and ``epos, $\epsilon$'' (only for DAG) will not lead to generating new data unless ``Generate data from DAG/MHN'' is clicked. In our experience, these three parameters are often modified together; updating the data immediately after switching from the input field leads to intermediate data updates that get in the way of ``modify this set of parameters, and then update according to the new set''. Moreover, the operation could be slightly expensive, computationally, if ``Number of genotypes to sample'' is a very large number.
   
 
+Note, however, that we have changed the behavior of the app, so that changes to settings of ``Number of genotypes to sample'' and ``Observational noise'' are now preserved and they are common to MHN and DAG. We think this will minimize needing to repeatedly change them to the desired settings (as we think it is reasonable that if a user is, say, using a sample size of 10000, this setting will be desired for both DAGs and MHN); this also prevents having to set them again to the desired value after, say, moving to ``Upload file'' and back.
+
+  
 \item When genotype data are modified (under ``Change genotype's counts'', and with the same behavior in ``Upload file'', ``Enter genotype frequencies manually'', ``DAG'', ``MHN''), as soon as the user enters ``Ctrl + Enter'', the histogram displaying genotype frequencies is updated.
 
   Note, therefore, that a user can choose to modify the histogram with every change of a genotype, or modify several genotypes without clicking ``Ctrl + Enter'' until the end: modify the number,  move with Tab to the next, modify, move with Tab to the next, etc, and only update the histogram when all modifications have been done with a single ``Ctrl + Enter''.
