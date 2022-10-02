@@ -7,7 +7,7 @@
 - [EvAM-Tools](#evamtools)
 <br>&nbsp;&nbsp;- [A two-paragraph summary about cross-sectional data and CPMs](#helpcsd)
 - [How to use this web interface?](#input)
-<br>&nbsp;&nbsp;- [Web app: overview of workflow and use cases](#overview)
+<br>&nbsp;&nbsp;- [Web app: overview of workflow and functionality](#overview)
 <br>&nbsp;&nbsp;- [```User input```](#userinput)
 <br>&nbsp;&nbsp;- [Analyze data: ```Run evamtools```](#running)
 <br>&nbsp;&nbsp;- [```Results```](#helpresults)
@@ -59,7 +59,7 @@ Cancer progression models (CPMs) or, more generally, event accumulation models, 
 
 
 ****
-### Web app: overview of workflow and use cases<a id="overview"></a>
+### Web app: overview of workflow and functionality<a id="overview"></a>
 ***
 
 
@@ -83,9 +83,9 @@ The web app encompasses, thus, different major functionalities and workflows, ma
 
     3.1. Examination of the consequences of different CPM models and their parameters on the simulated data. 
 
-    3.2. Analysis of the data simulated under one model with methods that have different models (e.g., data simulated from CBN analyzed with OT and OncoBN).
+    3.2. Analysis of data simulated under one model with methods that have different models (e.g., data simulated from CBN analyzed with OT and OncoBN).
 	
-	3.3. Analysis of the data simulated under one model after manual modification of specific genotype frequencies (e.g., data simulated under CBN but where, prior to analysis, we remove all observations with the WT genotype and the genotype with all loci mutated).
+	3.3. Analysis of data simulated under one model with manual modification of specific genotype frequencies prior to analyses (e.g., data simulated under CBN but where, prior to analysis, we remove all observations with the WT genotype and the genotype with all loci mutated).
 
 
 Furthermore, note that in all cases, when data are analyzed, in addition to returning the fitted models, the web app also returns the analysis of the CPMs in terms of their predictions such as predicted genotype frequencies and transition probabilities between genotypes.
