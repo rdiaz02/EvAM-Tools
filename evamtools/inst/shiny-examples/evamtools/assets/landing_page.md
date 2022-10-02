@@ -102,7 +102,7 @@ The figure below highlights the different major functionalities and workflows, a
 <br>
 
 
-We explain now in more detail the functionality, options, input, and output, of the web app. Commented examples that illustrate each of those workflows are provided in the [EvAM-Tools: examples](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf).
+We explain now in more detail the functionality, options, input, and output, of the web app. Commented examples that illustrate each of those workflows are provided in the [EvAM-Tools: examples](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf) additional documentation file.
 
 &nbsp;&nbsp;
 ****
