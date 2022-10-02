@@ -308,9 +308,11 @@ results_simple <- function(){
                                ),
                       tags$div(
                                tags$h5(paste("evamtools R package version: ",
-                                             packageVersion("evamtools")))## ,
-                               ## tags$h5(paste("commit: ",
-                               ##               substr(system("git rev-parse HEAD", intern=TRUE), 1, 7)))
+                                             packageVersion("evamtools"))) ,
+                               tags$h5(paste("commit: ",
+                                             this_string_to_be_replaced_by_git_hash
+                                             ))
+                               ## substr(system("git rev-parse HEAD", intern=TRUE), 1, 7)))
 
                            )
                       ),
@@ -651,9 +653,11 @@ user_input <- function() {
               tags$h3(HTML("<br/>")),
               tags$h3(HTML('<hr style="height:1px;background-color:black;margin-left:-20px">')),
               tags$h5(paste("evamtools R package version: ",
-                            packageVersion("evamtools")))
-              ## tags$h5(paste("commit: ",
-              ##               substr(system("git rev-parse HEAD", intern=TRUE), 1, 7)))
+                            packageVersion("evamtools"))),
+              tags$h5(paste("commit: ",
+                            this_string_to_be_replaced_by_git_hash
+                            ))
+              ## substr(system("git rev-parse HEAD", intern=TRUE), 1, 7)))
               
               )
               ## do it with a render UI
@@ -662,7 +666,7 @@ user_input <- function() {
 
               
               column(width = 11,
-                    #  titlePanel(HTML("&ensp; Cross-sectional data input")),
+                                        #  titlePanel(HTML("&ensp; Cross-sectional data input")),
                      column(width = 6,
                             column(width = 12,
                                    uiOutput("gene_number_slider"),
@@ -813,7 +817,7 @@ user_input <- function() {
                                                            200000, min=100, max=10000000),
                                               tags$h5("Number of MCMC iterations: ",
                                                       "Argument '-n | --number_samples' in the H-ESBCN C code. ",
-                                                       "EvAM's web app default is 200000, larger than the ",
+                                                      "EvAM's web app default is 200000, larger than the ",
                                                       "original default of 100000. ",
                                                       "You might want to increase it to 500000 or 1000000 ",
                                                       "being aware that this will result in longer running times. "),

@@ -106,6 +106,8 @@ COPY Renviron.based_on_bioc /app/
 COPY evamtools/ /app/evamtools/
   
 RUN cd /app && \
+    GIT_HASH=$(git rev-parse --short HEAD) && \
+    sed -i 's/this_string_to_be_replaced_by_git_hash/'"$GIT_HASH"'/' ./evamtools/inst/shiny-examples/evamtools/ui.R && \
     V_PKG=$(cat ./evamtools/DESCRIPTION | grep Version | cut -d' ' -f2) && \
     R --no-site-file --no-init-file CMD build evamtools && \
     R --no-site-file --no-init-file CMD INSTALL --install-tests evamtools_$V_PKG.tar.gz && \
