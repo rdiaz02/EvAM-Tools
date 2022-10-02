@@ -49,7 +49,10 @@
 %\pagenumbering{arabic}
 \section{Introduction}
 
-This document provides additional details about EvAM-Tools and the methods included in it. You can run the web app from \url{https://iib.uam.es/evamtools/} or download a Docker image from \url{https://hub.docker.com/r/rdiaz02/evamshiny}; to run the R package download a Docker image from \url{https://hub.docker.com/r/rdiaz02/evamrstudio}.  Another file, \texttt{evamtools\_examples.pdf}, from \url{https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf}, includes commented examples, with both real and simulated data, that illustrate the use and utility of EvAM-Tools.
+This document provides additional details about EvAM-Tools and the methods included in it. Another file, \texttt{evamtools\_examples.pdf}, from \url{https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf}, includes commented examples, with both real and simulated data, that illustrate the use and utility of EvAM-Tools.
+
+
+You can run the web app from \url{https://iib.uam.es/evamtools/} or download a Docker image from \url{https://hub.docker.com/r/rdiaz02/evamshiny}; to run the R package download a Docker image from \url{https://hub.docker.com/r/rdiaz02/evamrstudio}.  
 
 
 \section{Cancer Progression Models included in EvAM-Tool: details}
@@ -64,13 +67,13 @@ In cross-sectional data a single sample is obtained from each subject or patient
 We have used expressions such as "genotype", "mutation" and other genetic- and genomic-related terms, but nothing prevents CPMs from being used with non-genetic, non-genomic data, and thus our preference for the expression "event accumulation models". The key features that the data must have to be properly analyzed with these methods are: a) that events or alterations are (or can be reasonably assumed to be) gained one by one; b) that once gained, they are not lost (e.g., there is no back mutation); c) that we can consider the different individuals/patients in the cross-sectional data as replicate evolutionary experiments or runs where all individuals are under the same constraints (e.g., genetic constraints if we are dealing with mutations); see further details below (\qrefS{assumpt}).
 
 
-Cancer progression models (CPMs) or, more generally, event accumulation models, use these cross-sectional data to try to infer restrictions in the order of accumulation of events; for example, that a mutation on gene B is always preceded by a mutation in gene A (maybe because mutating B when A is not mutated results in a lethal state for that cell). Inferring restrictions, in the sense just explained (B only if A), is what CBN, OT, OncoBN, and H-ESBCN do. Other cancer progression models, such as MHN, instead of modeling deterministic restrictions, model promoting/inhibiting interactions between genes, for example that having a mutation in gene A makes it very likely to gain a mutation in gene B. 
+Cancer progression models (CPMs) or, more generally, event accumulation models, use these cross-sectional data to try to infer restrictions in the order of the irreversible accumulation of discrete events; for example, that a mutation on gene B is always preceded by a mutation in gene A (maybe because mutating B when A is not mutated results in a lethal state for that cell). Inferring restrictions, in the sense just explained (B only if A), is what CBN, OT, OncoBN, and H-ESBCN do. Other cancer progression models, such as MHN, instead of modeling deterministic restrictions, model promoting/inhibiting interactions between genes, for example that having a mutation in gene A makes it very likely to gain a mutation in gene B. 
 
 
 
 \subsection{Cancer Progression Models (CPMs): assumptions}\label{assumpt}
 
-CPMs assume that the observations in the cross-sectional data set are independent realizations of evolutionary processes where the same constraints hold for all tumors; therefore, a cross-sectional data set is considered a set of replicate evolutionary experiments where all individuals are under the same (genetic) constraints \citep{gerstung2011temporal, Beerenwinkel2014, beerenwinkel_computational_2016, diaz2019every}. The objective of CPMs is to infer these constraints. CPMs assume that events are gained one by one (no simultaneous acquisition of events)  and that there is no back mutation so that once gained an event is not lost; CPMs also assume that the events that drive the process (driver genes if we are thinking about cancer) are known and present in the data set. Finally, CPMs assume that all subjects start the evolutionary process without any of the studied events (i.e., all subjects start the process with 0s in the matrix of subjects by alterations). If we think about cancer, this means that ``CPMs assume that all tumors start cancer progression without any of the mutations considered in the study (the above matrix of subjects by driver alterations), but other mutations could be present that have caused the initial tumor growth'' \citep{diaz2019every}; these other additional mutations that lead to the initiation of the process are absorbed in the root node from which cancer starts \citep{Attolini2010a}.
+CPMs model the irreversible accumulation of discrete events. They assume that the observations in the cross-sectional data set are independent realizations of evolutionary processes where the same constraints hold for all tumors; therefore, a cross-sectional data set is considered a set of replicate evolutionary experiments where all individuals are under the same (genetic) constraints \citep{gerstung2011temporal, Beerenwinkel2014, beerenwinkel_computational_2016, diaz2019every}. The objective of CPMs is to infer these constraints. CPMs assume that events are gained one by one (no simultaneous acquisition of events)  and that there is no back mutation so that once gained an event is not lost; CPMs also assume that the events that drive the process (driver genes if we are thinking about cancer) are known and present in the data set. Finally, CPMs assume that all subjects start the evolutionary process without any of the studied events (i.e., all subjects start the process with 0s in the matrix of subjects by alterations). If we think about cancer, this means that ``CPMs assume that all tumors start cancer progression without any of the mutations considered in the study (the above matrix of subjects by driver alterations), but other mutations could be present that have caused the initial tumor growth'' \citep{diaz2019every}; these other additional mutations that lead to the initiation of the process are absorbed in the root node from which cancer starts \citep{Attolini2010a}.
 
 
 
@@ -80,18 +83,21 @@ CPMs assume that the observations in the cross-sectional data set are independen
 
 \subsubsection{Oncogenetic Trees (OT)}\label{otdetails}
 
-OTs are among the earliest formal models of accumulation of mutations in cancer. They were originally described in  \citet{desper1999inferring} (see also \citealp{SimonDesper2000, RadmacherSimon2001}); additional references include \citet{Szabo2008, OTpackage, Szabo2002}. With OTs, restrictions in the accumulation of mutations (or events) are represented as a tree. Hence, a parent node can have many children, but children have a single parent: therefore, an event can only directly depend on another event. OTs are untimed models (in contrast to, for example CBN, explained in section \ref{cbndetails}): weights along edges (the $\pi_{xy}$ we will use below) can be directly interpreted as probabilities of transition along the edges by the time of observation \citep[p.~5]{Szabo2008}. In other words, edge weights represent conditional probabilities of observing a given mutation, when the sample is taken, given the parents are observed.
+OTs are among the earliest formal models of accumulation of mutations in cancer. They were originally described in  \citet{desper1999inferring} (see also \citealp{SimonDesper2000, RadmacherSimon2001}); additional references include \citet{Szabo2008, OTpackage, Szabo2002}. With OTs, restrictions in the accumulation of mutations (or events) are represented as a tree\footnote{A tree is a Directed Acyclic Graph (DAG) where a child node can have only only one parent. Thus, trees are DAGs, but not all DAGs are trees.}. Hence, a parent node can have many children, but children have a single parent: therefore, an event can only directly depend on another event. As for all CPMs that use DAGs and trees, an edge from gene $i$ to gene $j$ means that a mutation in $i$ must occur before a mutation in $j$ can occur; an edge (or arrow from $i$ to $j$) indicates a direct dependency of a mutation in gene $j$ on a mutation in gene $i$. 
+
+
+OTs are untimed models (in contrast to, for example CBN, explained in section \ref{cbndetails}): weights along edges (the $\pi_{xy}$ we will use below) can be directly interpreted as probabilities of transition along the edges by the time of observation \citep[p.~5]{Szabo2008}. In other words, edge weights represent conditional probabilities of observing a given mutation, when the sample is taken, given the parents are observed.
 
 As explained in \citep[Definition 1, p.~4]{Szabo2008}:  ``A pure untimed oncogenetic tree is a tree $T$ with a probability $\pi(e)$ attached to each edge $e$. This tree generates observations on mutation presence/absence the following way: each edge $e$ is independently retained with probability $\pi(e)$; the set of vertices that are still reachable from $M_0$ [the root of the tree, representing no alterations] gives the set of the observed genetic alterations.''
 
 
 To give an example, suppose a tree as follows: \\
 
-\includegraphics[width=.50\linewidth]{./dag_ot_ex1.png}.\\
+\includegraphics[width=.55\linewidth]{./dag_ot_ex1.png}.\\
 
 In this tree, events (mutations) A and B can be acquired independently, and depend on no one (Root is $M_0$ in the notation of \citealp{Szabo2008}). C and D depend on A (and are independent of each other, conditional on A). The parameters of the model, shown in brown, are:
 \begin{itemize}
-\item Probability of acquiring $A$, $\pi_{0A} = 0.4$; $\pi_{0A}$ is the notation in \citealp{Szabo2008}, and is the \textit{weight} along the edge from $M_0$ to $A$.
+\item Probability of acquiring $A$, $\pi_{0A} = 0.4$; $\pi_{0A}$ is the notation in \citealp{Szabo2008}, and is the \textit{weight} along the edge from $M_0$ (Root) to $A$.
 \item Probability of acquiring $B$, $\pi_{0B} = 0.7$.
 \item Probability of acquiring $C$, given $A$ has already been acquired, $\pi_{AC} = 0.3$ (again, $\pi_{AC}$ is the \textit{weight} along the edge from $A$ to $C$).
 \item Probability of acquiring $D$, given $A$ has already been acquired, $\pi_{AD} = 0.2$. 
@@ -101,7 +107,7 @@ In this tree, events (mutations) A and B can be acquired independently, and depe
 According to the above model, the tumor develops as follows: starting from Root (or $M_0$), the tumor can gain $A$ and $B$, and these are independent events. If $A$ is gained, then the tumor can gain $C$ and $D$, and these two are again independent events (once $A$ has been gained). Therefore, the probabilities of the different genotypes or states of the tumor at the time of sampling are:
 
 \begin{itemize}
-\item Only Root or $M_0$, i.e., no events gained: $(1 - \pi_{0A}) (1 - \pi_{0B})$.
+\item Only Root or $M_0$, i.e., no events gained (i.e., only genotypes without any mutation, or “WT”): $(1 - \pi_{0A}) (1 - \pi_{0B})$.
 \item Only $A$ occurs (i.e., genotype $A$): $\pi_{0A}(1 - \pi_{0B}) (1 - \pi_{AC}) (1 - \pi_{AD}) $.
 \item Only $B$ occures (i.e., we observe genotype $B$): $\pi_{0B}(1 - \pi_{0A})$.
 \item Both $A$ and $B$ (but no $C$ or $D$), genotype $AB$: $\pi_{0A} \pi_{0B} (1 - \pi_{AC}) (1 - \pi_{AD})$.
@@ -115,7 +121,7 @@ According to the above model, the tumor develops as follows: starting from Root 
 The above describes the ideal scenario, without errors. OT includes a model for errors from different sources: deviations from the model (i.e., events that do not respect the pure untimed model above) and observational (e.g., genotyping) errors. Together, these two types of error cause false positive and false negative observational errors ($\epsilon_+, \epsilon_-$). These error rates are estimated by the OT algorithm and are incorporated in the computation of the predicted frequencies of genotypes according to OT (see details in \qrefP{error_models}).
 
 
-When using OT, as explained in \citet[p.~5][]{Szabo2008}, the main objective is reconstructing the topology of the tree; the estimation of the edge probabilities (the weights or $\pi_{xy}$) and the error rates ($\epsilon_+, \epsilon_-$) is of secondary importance. As detailed in \citet[p.~5]{Szabo2008}, the estimation of the topology uses an ``(...) algorithm [that] takes a greedy bottom-up approach: it assigns the parent of each node by finding the maximum-weight in-edge starting from the leaves.'' and that provides a computationally fast way of inferring the tree. The full algorithm for topology reconstruction is provided in \citet[Section 3 and Fig.~2]{Szabo2008} (the algorithm is also provided in Figure 2 of file \texttt{ot.pdf}, part of the documentation of \citealp{OTpackage}); estimation of the weights is detailed in \citet[p.~13]{Szabo2008}. Sufficient conditions for the reconstruction of the true tree when there are false positive and false negative errors are given in \citet{Szabo2002} and sample size requirements in \citet[p.~8]{Szabo2008}(see also \citealp{desper1999inferring}).
+When using OT, as explained in \citet[p.~5]{Szabo2008}, the main objective is reconstructing the topology of the tree; the estimation of the edge probabilities (the weights or $\pi_{xy}$) and the error rates ($\epsilon_+, \epsilon_-$) is of secondary importance. As detailed in \citet[p.~5]{Szabo2008}, the estimation of the topology uses an ``(...) algorithm [that] takes a greedy bottom-up approach: it assigns the parent of each node by finding the maximum-weight in-edge starting from the leaves.'' and that provides a computationally fast way of inferring the tree. The full algorithm for topology reconstruction is provided in \citet[Section 3 and Fig.~2]{Szabo2008} (the algorithm is also provided in Figure 2 of file \texttt{ot.pdf}, part of the documentation of \citealp{OTpackage}); estimation of the weights is detailed in \citet[p.~13]{Szabo2008}. Sufficient conditions for the reconstruction of the true tree when there are false positive and false negative errors are given in \citet{Szabo2002} and sample size requirements in \citet[p.~8]{Szabo2008}(see also \citealp{desper1999inferring}).
 
 
 % which, in the absence of false observations, is guaranteed to reconstruct the original tree (if the data do conform to a tree).
@@ -125,13 +131,13 @@ When using OT, as explained in \citet[p.~5][]{Szabo2008}, the main objective is 
 
 \subsubsection{OncoBN}\label{oncobndetails}
 
-OncoBN, described in \cite{nicol2021oncogenetic}, is similar to OT in the sense of being an untimed oncogenetic model but, in contrast to OT, a node can have multiple parents. When there are multiple parents the relationships and models can be of two different kinds:
+OncoBN, described in \cite{nicol2021oncogenetic}, is similar to OT in the sense of being an untimed oncogenetic model but, in contrast to OT, a node can have multiple parents (again, as for all CPMs that use DAGs and trees, an edge from gene $i$ to gene $j$ means that a mutation in $i$ must occur before a mutation in $j$ can occur; an edge ---or arrow from $i$ to $j$--- indicates a direct dependency of a mutation in gene $j$ on a mutation in gene $i$). When there are multiple parents the relationships and models can be of two different kinds:
 \begin{itemize}
 \item disjunctive (OR relationship): the DBN, Disjunctive Bayesian Network model;
 \item conjunctive (AND relationship): the CBN, Conjunctive Bayesian Network model.
 \end{itemize}
 
-A given OncoBN be either a DBN or a CBN, but not both: it can have conjunctive or disjunctive relationships, but not both. (And note that the CBN models fitted by OncoBN are untimed, and thus the parameters do not have the same interpretation as the parameters of the CBN models discussed below, \qref{cbndetails}).
+A given OncoBN be either a DBN or a CBN, but not both: it can have conjunctive or disjunctive relationships, but not both. (And note that the CBN models fitted by OncoBN are untimed, and thus the parameters do not have the same interpretation as the parameters of the CBN models discussed below, \qrefP{cbndetails}).
 
 As explained in \citet[p.~2]{nicol2021oncogenetic}, a key difference between the conjunctive (AND) and the disjunctive (OR) model is that under the conjunctive model all parent alterations that constitute the AND relationship must be present in a cell for the child mutation to occur; the disjunctive model, in contrast, allows child event to occur when just one of the parent events has taken place. According to the authors, this might make the model better for modeling intra-tumor heterogeneity.
 
@@ -141,7 +147,7 @@ The following DAG shows a conjunctive model fitted with OncoBN: \\
 \includegraphics[width=.45\linewidth]{./oncobn_c1.png}.\\
 
 
-Note that the value of 0.3 is the value of the parameter $\theta_C$: this is the conditional probability of $C$ given its ancestors. (So, in contrast to OT, but similar to CBN and H-ESBCN, the parameters are not of edges, but of events). The values of $\theta$ are: $\theta_A = 0.8$, $\theta_B = 0.4$, $\theta_C = 0.3$. According to the OncoBN model the probabilities of some genotypes are:
+Note that the value of 0.3 is the value of the parameter $\theta_C$: this is the conditional probability of $C$ given its ancestors. (So, in contrast to OT, but similar to CBN and H-ESBCN, the parameters are not of edges, but of events). The values of $\theta$ are: $\theta_A = 0.8$, $\theta_B = 0.4$, $\theta_C = 0.3$. According to the OncoBN model the probabilities of the different  genotypes are:
 
 \begin{itemize}
 \item Only Root (i.e., only genotypes without any mutation, or ``WT''): $(1 - \theta_A) (1 - \theta_B)$.
@@ -150,6 +156,7 @@ Note that the value of 0.3 is the value of the parameter $\theta_C$: this is the
 \item $A$ and $B$ (but not $C$), genotype $AB$: $\theta_A \theta_B (1 - \theta_C)$.
 \item All of $A$, $B$, $C$, genotype $ABC$:  $\theta_A \theta_B \theta_C$.
 \item Only $C$: 0, since neither $A$ nor $B$ have occurred.
+  \item $\ldots$
 \end{itemize}
 
 
@@ -157,7 +164,7 @@ The next DAG is identical, except the model is a disjunctive one (notice the edg
 
 \includegraphics[width=.45\linewidth]{./oncobn_d1.png}.\\
 
-Now, $\theta_C$ is the probability of $C$ occurring if at least one of its ancestors has occurred. Therefore, we have the following probabilities of some of the genotypes, where those that differ from the conjunctive case have been marked in bold with an initial asterisk:
+Now, $\theta_C$ is the probability of $C$ occurring if at least one of its ancestors has occurred. Therefore, we have the following probabilities of  genotypes, where those that differ from the conjunctive case have been marked in bold with an initial asterisk:
 
 \begin{itemize}
 \item Only Root (i.e., only genotypes without any mutation, or ``WT'') : $(1 - \theta_A) (1 - \theta_B)$.
@@ -168,7 +175,7 @@ Now, $\theta_C$ is the probability of $C$ occurring if at least one of its ances
 \item Only $C$: 0, since neither $A$ nor $B$ have occurred.
 \end{itemize}
 
-The above represent the probabilities in a model without errors. OncoBN includes an error model, the ``spontaneous activation model'' where there is a non-zero probability of observing child events when restrictions in the DAG are not satisfied. The rate of spontaneous activation is part of the estimation procedure, and is included in the computed probabilities of the different genotypes  (see details in \qrefS{error_models}). For example, under the disjunctive model above, the probability of observing genotype $C$ would be $(1 - \theta_A) (1 - \theta_B) \epsilon$, where $\epsilon$ is the spontaneous activation probability, which is set as the same for all events  \citep[p.~5]{nicol2021oncogenetic}). (Figure~1 of \citealp{nicol2021oncogenetic} provides another example of the role of $\epsilon$ in computing predicted probabilities).
+The above represent the probabilities in a model without errors. OncoBN includes an error model, the ``spontaneous activation model'', where there is a non-zero probability of observing child events when restrictions in the DAG are not satisfied. The rate of spontaneous activation is part of the estimation procedure, and is included in the computed probabilities of the different genotypes  (see details in \qrefS{error_models}). For example, under the disjunctive model above, the probability of observing genotype $C$ would be $(1 - \theta_A) (1 - \theta_B) \epsilon$, where $\epsilon$ is the spontaneous activation probability, which is set as the same for all events  \citep[p.~5]{nicol2021oncogenetic}. (Figure~1 of \citealp{nicol2021oncogenetic} provides another example of the role of $\epsilon$ in computing predicted probabilities).
 
 
 
@@ -183,7 +190,7 @@ To search for the best graph (the model with the best BIC) the authors provide t
 
 \subsubsection{Conjuntive Bayesian Networks (CBN)}\label{cbndetails}
 
-In terms of the representation of the restrictions, CBN, like OncoBN, generalizes the tree-based restriction of OT to a directed acyclic graph (DAG): a node can have multiple parents. A node with multiple parents means that all of the parents have to be present (all of the parent events must have occurred) for the children to appear; therefore, relationships are conjuntive ---AND relationships between the parents (recall OncoBN can model AND and OR relationships). CBN also differs from OT and OncoBM because the CBN model is a timed model: the $\lambda$s, the parameters of the models, are the rates of the exponentially distributed times to fixation of an  event given that all parents of that event have been observed (i.e., given that the event restrictions, as specified in the DAG, are satisfied: \citealp[p. i729]{montazeri2016large}; \citealp[section 2.2]{gerstung2009quantifying}).
+In terms of the representation of the restrictions, CBN, like OncoBN, generalizes the tree-based restriction of OT to a directed acyclic graph (DAG): a node can have multiple parents. A node with multiple parents means that all of the parents have to be present (all of the parent events must have occurred) for the children to appear; therefore, relationships are conjuntive ---AND relationships between the parents (recall OncoBN can model AND and OR relationships). CBN also differs from OT and OncoBN because the CBN model is a timed model: the $\lambda$s, the parameters of the models, are the rates of the exponentially distributed times to fixation of an  event given that all parents of that event have been observed (i.e., given that the event restrictions, as specified in the DAG, are satisfied: \citealp[p. i729]{montazeri2016large}; \citealp[section 2.2]{gerstung2009quantifying}).
 
 
 Specifically, $T_i$, the waiting time for event $i$ to occur, is an exponentially distributed random variable with parameter $\lambda_i$ conditioned on all the parent mutations, $\mathrm{pa}(i)$, having occurred \citep{gerstung2009quantifying}; thus, $T_i$ is defined recursively as \citep{gerstung2009quantifying, hosseini2019a}:
@@ -236,10 +243,10 @@ In other words, this is the transition rate matrix, where only genotypes that ca
 
 For parameter estimation, and since the observation times of the different individuals are unknown, it is assumed that observation time is exponentially distributed with parameter 1 (the probabilities of observing the different events are invariant under rescalings of the $\lambda_i$ and the $\lambda_s$, the rate of the time to observation --- \citealp{gerstung2009quantifying}).
 
-In EvAM-Tools we include two versions of CBN that differ in the algorithm (and, thus, in speed and in how many observations can be analyzed) and in the error model: H-CBN, described in \citet{gerstung2009quantifying, gerstung2011temporal}, and MC-CBN, described in \citet{montazeri2016large}. Unless qualified otherwise (i.e., saying MC-CBN), when we say ``CBN'' we refer to H-CBN\footnote{Note that, by default, MC-CBN is not selected as a method to be used in the web app because it is often much slower than any of the remaining methods.}.
+In EvAM-Tools we include two versions of CBN that differ in the algorithm (and, thus, in speed and in how many observations can be analyzed) and in the error model: H-CBN, described in \citet{gerstung2009quantifying, gerstung2011temporal}, and MC-CBN, described in \citet{montazeri2016large}. Unless qualified otherwise (i.e., saying MC-CBN), when we say ``CBN'' we refer to H-CBN. By default, MC-CBN is not selected as a method to be used in the web app because it is often much slower than any of the remaining methods; but H-CBN, although faster, can only handle, at most, 14 events whereas MC-CBN can handle hundreds of events. 
 
 
-H-CBN uses simulated annealing with a nested expectation-maximization (EM) algorithm for estimation: structure ---DAG--- learning is conducted with simulated annealing and parameters ($\lambda$s and $\epsilon$ ---the error term; see next) are estimated using the EM algorithm \citep[section 2.3, pp.~2810--2811 of][]{gerstung2009quantifying}. As is the case for other methods, the key focus of the algorithm is inferring the DAG of restrictions (the poset); the selected DAG (poset) is the maximum likelihood one ``(...) without additional model selection criterion such as the Akaike or Bayesian information criterion (AIC and BIC, respectively)'' \citep[p.~2811]{gerstung2009quantifying}. Briefly, the algorithm first finds the maximum likelihood estimates for $\lambda$s and $\epsilon$ of a given poset; a new poset is then generated from the previous one (after addition/removal of relations from the poset), the maximum likelihood estimates of $\lambda$s and $\epsilon$ computed for this new poset, and the new poset is accepted if its likelihood is larger or, if smaller, it is accepted with a probability that is a function the difference in likelihoods divided by the temperature (recall they use a simulated annealing algorithm). MC-CBN uses a Monte-Carlo EM algorithm (see \citealp{montazeri2016large}, p.~i731 for network ---DAG--- learning and p.~i730 and Algorithm 1 in p.~i731 for parameter estimation).
+H-CBN uses simulated annealing with a nested expectation-maximization (EM) algorithm for estimation: structure ---DAG--- learning is conducted with simulated annealing and parameters ($\lambda$s and $\epsilon$ ---the error term; see next) are estimated using the EM algorithm \citep[section 2.3, pp.~2810--2811 of][]{gerstung2009quantifying}. As is the case for most other methods, the key focus of the algorithm is inferring the DAG of restrictions (the poset); the selected DAG (poset) is the maximum likelihood one ``(...) without additional model selection criterion such as the Akaike or Bayesian information criterion (AIC and BIC, respectively)'' \citep[p.~2811]{gerstung2009quantifying}. Briefly, the algorithm first finds the maximum likelihood estimates for $\lambda$s and $\epsilon$ of a given poset; a new poset is then generated from the previous one (after addition/removal of relations from the poset), the maximum likelihood estimates of $\lambda$s and $\epsilon$ computed for this new poset, and the new poset is accepted if its likelihood is larger or, if smaller, it is accepted with a probability that is a function the difference in likelihoods divided by the temperature (recall they use a simulated annealing algorithm). MC-CBN uses a Monte-Carlo EM algorithm (see \citealp{montazeri2016large}, p.~i731 for network ---DAG--- learning and p.~i730 and Algorithm 1 in p.~i731 for parameter estimation).
 
 H-CBN and MC-CBN also differ in their error models. In H-CBN the $\lambda$s describe the true underlying model that produces the true, hidden genotypes, but the observed genotypes might differ from the true ones because of observation error; the observation error is a Bernoulli process, in which a mutation is falsely observed with probability $\epsilon$,   which is assumed to be the same and independent across all sites (see also \citealp[p.~2319]{Sakoparnig2012}). In MC-CBN the model is a mixture between the CBN model and a noise component model, such as the independence model provided by a DAG where all mutations are direct descendants of the root (the empty poset; see details in \citealp[p.~i731]{montazeri2016large}). The error models are, of course, part of the fitting algorithm.
 
@@ -248,7 +255,7 @@ H-CBN and MC-CBN also differ in their error models. In H-CBN the $\lambda$s desc
 
 \subsubsection{Hidden Extended Suppes-Bayes Causal Networks (H-ESBCN)} \label{hesbcndetails}
 
-H-ESBCN (Hidden Extended Suppes-Bayes Causal Networks), described in \citet{angaroni2021} (and used by its authors as part of Progression Models of Cancer Evolution, PMCE), is similar to CBN in that it is a timed model, where parameters of the model, the $\lambda$s are  the rates of the exponentially distributed times to fixation of an  event given that the parents of that event have been observed. In contrast to CBN, the dependency relationships are not limited to AND, and they can include OR and XOR. In contrast to OncoBN with respect to dependencies, H-ESBCN adds XOR relationships, but H-ESBCN allows the very same model to include AND, OR, and XOR relationships; the fitting algorithm includes automatic inference of logical formulas for these three different patterns, AND, OR, XOR.
+H-ESBCN (Hidden Extended Suppes-Bayes Causal Networks), described in \citet{angaroni2021} (and used by its authors as part of Progression Models of Cancer Evolution, PMCE), is similar to CBN in that it is a timed model, where the parameters of the model, the $\lambda$s,  are  the rates of the exponentially distributed times to fixation of an  event given that the parents of that event have been observed. In contrast to CBN, the dependency relationships are not limited to AND, and they can include OR and XOR. In contrast to OncoBN with respect to dependencies, H-ESBCN adds XOR relationships, but H-ESBCN allows the very same model to include AND, OR, and XOR relationships; the fitting algorithm includes automatic inference of logical formulas for these three different patterns, AND, OR, XOR.
 
 
 To give an example, suppose the following DAG (we only show XOR and OR relationships, since we have already shown AND relationships in examples above, and there is nothing new with AND relationships); this example is discused, in another context, in \qref{hesbcn-example-or-xor}:\\
@@ -261,7 +268,7 @@ According to this DAG
  \item $D$ depends, with an OR, on both $A$ and $B$: the rate of fixation of $D$ given at least one of $A$ or $B$ have occurred is $\lambda_D$. Thus, we can observe genotypes $AD$, $BD$, $ABD$.
  \item $E$ depends, with an XOR, on $B$ and $C$: the rate of occurrence of $E$ given exactly one of $B$ XOR $C$ has occurred is $\lambda_E$. Thus, $E$ can only be observed in genotypes that show $B$ XOR $C$, such as genotypes $BE$, $CE$, $ABE$, $ACE$; genotypes $BCE$ or $ABCE$, in contrast, are not allowed because those genotypes have both $B$ and $C$ mutated. \end{itemize}
 
-The transition rate matrix between genotypes is shown below, where rows are origin, column destination (i.e., entries of $Q_{xy}$ are the transition rates from $x$ to $y$):
+The transition rate matrix between the genotypes that are possible under the model is shown below, where rows are origin, column destination (i.e., entries of $Q_{xy}$ are the transition rates from $x$ to $y$):
 
 
 
@@ -312,7 +319,7 @@ The error model is similar to the one of CBN \qref{cbndetails}, as described in 
 
 \subsubsection{Mutual Hazard networks (MHN)}\label{mhndetails}
 
-All of the methods described above share a model of deterministic dependencies for the accumulation of events (or mutations) \citep{schill2020modelling}: an event (a mutation) can only occur if its dependencies are satisfied (though note that both OT and OncoBN, as well as MB-CBN allow for error deviations from this requirement --- see \qrefP{error_models} ). 
+All of the methods described above share a model of deterministic dependencies for the accumulation of events (or mutations) \citep{schill2020modelling}: an event (a mutation) can only occur if its dependencies are satisfied (though note that both OT and OncoBN, as well as MB-CBN allow for error deviations from this requirement --- see \qrefP{error_models}). 
 
 In contrast to the previous methods, with MHN \citep{schill2020modelling} dependencies are not deterministic and events can make other events more likely (promoting influence) or less likely (inhibiting influence). The rate of occurrence of events is modeled by a spontaneous rate of fixation and a multiplicative effect that each of these events can have on other events via pairwise interactions; these pairwise interactions are what allow MHN to model both promoting and inhibiting dependencies.
 
@@ -356,7 +363,7 @@ As can be seen, the relationships between events are inhibiting (event $j$ inhib
 % The fitted parameters are multiplicative hazards that represent how one event influences other events.
 
 
-To fit the model, because observation time is unknown, and as is done by \citet{gerstung2009quantifying}, the authors assume that observation times are exponentially distributed with parameter 1. To prevent overfitting,  the model fitting procedure maximizes the likelihood of the data minus an L1 penalty to try to avoid many interacting events (i.e., to promote sparsity of the fitted models): it uses a tunning parameter, $\lambda$\footnote{This $\lambda$ is different from the $\lambda$s of CBN and H-ESBCN} that multiplies the sum of the absolute values of the off-diagonal entries of the log $\Theta$ matrix \citep[eq.~6]{schill2020modelling}. The default value of $\lambda$ is 1/number of rows of the data set. The authors provide an efficient implementation of their method that uses a Quasi-Newton algorithm.
+To fit the model, because observation time is unknown, and as is done by \citet{gerstung2009quantifying}, the authors assume that observation times are exponentially distributed with parameter 1. To prevent overfitting,  the model fitting procedure maximizes the likelihood of the data minus an L1 penalty to try to avoid many interacting events (i.e., to promote sparsity of the fitted models): it uses a tunning parameter, $\lambda$\footnote{This $\lambda$ is different from the $\lambda$s of CBN and H-ESBCN} that multiplies the sum of the absolute values of the off-diagonal entries of the log $\Theta$ matrix \citep[eq.~6]{schill2020modelling}. The default value of $\lambda$ is 1/number of rows of the data set. The authors provide an efficient implementation of their method that uses a Quasi-Newton algorithm. There is no explicit error model for MHN.
 
 
 
@@ -374,12 +381,12 @@ We have mentioned error models when describing each procedure. We put together t
 
 \item[H-ESBCN] As for CBN \cite[p.~756]{angaroni2021}.
 
-\item[MC-CBN] With MC-CBN the model is a mixture between the CBN model and a noise component model, such as the independence model provided by a DAG where all mutations are direct descendants of the root (the empty poset; see details in \citealp[p.~i730-i731]{montazeri2016large}. The simulations in \url{https://github.com/cbg-ethz/MC-CBN}, however, use a procedure where observations are generated from an underlying poset with a given set of lambdas, and symmetric error is then added (see the functions \texttt{mccbn:::random\_poset} and \texttt{mccbn:::random\_posets}), as for CBN above.
+\item[MC-CBN] With MC-CBN the model is a mixture between the CBN model and a noise component model, such as the independence model provided by a DAG where all mutations are direct descendants of the root (the empty poset; see details in \citealp[p.~i730-i731]{montazeri2016large}). The simulations in \url{https://github.com/cbg-ethz/MC-CBN}, however, use a procedure where observations are generated from an underlying poset with a given set of lambdas, and symmetric error is then added (see the functions \texttt{mccbn:::random\_poset} and \texttt{mccbn:::random\_posets}), as for CBN above.
 
   
-\item[OncoBN] The model includes a DBN (disjunctive) or CBN (conjunctive) model, as given by a DAG and a set of $\theta$s, and a ``spontaneous activation model'' \cite[p.~3-4]{nicol2021oncogenetic}. The ``spontaneous activation model'', with parameter $\epsilon$, represents deviations from the model and allows child mutations to appear even if the parents in the DAG have not been mutated (i.e., even if the restrictions encoded in the DAG are not satisfied). (This $\epsilon$, therefore, has a different meaning from the $\epsilon$ of CBN and H-ESBCN).
+\item[OncoBN] The model includes a DBN (disjunctive) or CBN (conjunctive) model, as given by a DAG and a set of $\theta$s, and a ``spontaneous activation model'' \cite[p.~3-4]{nicol2021oncogenetic}. The ``spontaneous activation model'', with parameter $\epsilon$, represents deviations from the model and allows child mutations to appear even if the parents in the DAG have not been mutated (i.e., even if the restrictions encoded in the DAG are not satisfied). This $\epsilon$, therefore, has a different meaning from the $\epsilon$ of CBN and H-ESBCN.
    
-\item[OT] There are two sources of deviations from the OT model: a) those that result from observational (or genotyping) errors, that can lead to both false positive and false negative observational errors; b) events occurring that do not respect the OT model \citep{Szabo2002,Szabo2008}. The second would be the same as the ``spontaneous activation'' in OncoBN.
+\item[OT] There are two sources of deviations from the OT model: a) those that result from observational (or genotyping) errors, that can lead to both false positive and false negative observational errors; b) events occurring that do not respect the OT model \citep{Szabo2002,Szabo2008}. The second source of errors would be the same as the ``spontaneous activation'' in OncoBN.
   
   The \texttt{oncotree.fit} function in the \texttt{Oncotree} package returns a \texttt{eps} component with the estimated false positive, \texttt{epos} ($\epsilon_+$), and false negative, \texttt{eneg} ($\epsilon_-$), error rates. But these are the result of combining the two sources of error \citep{Szabo2008}: observation errors and true deviations from the model. So observation error is reflected in both \texttt{eneg}  ($\epsilon_-$), and \texttt{epos} ($\epsilon_+$), whereas true deviations from the model are only reflected in \texttt{epos} ($\epsilon_+$). In other words, the false negatives, as measured by the estimated  \texttt{eneg}, are due purely to observation error. But the \texttt{epos} are not equivalent to the $\epsilon$ of OncoBN: \texttt{epos} includes both observation error (false positives) and true mutations that occur without respecting the restrictions of the OT DAG (tree). 
   
@@ -388,7 +395,7 @@ We have mentioned error models when describing each procedure. We put together t
 
 
 
-So, when obtaining predicted frequencies under the model, for CBN, H-ESBCN, and MHN, we assume perfect compliance with the model; symmetric noise (e.g., genotyping noise) is added only when obtaining finite samples from the model. For OT and OncoBN the predicted frequencies from the model already include deviations from the fitted model.
+So, when obtaining predicted frequencies under the model, for CBN, H-ESBCN, and MHN, we assume perfect compliance with the model; symmetric noise (e.g., genotyping noise) is added only when obtaining finite samples from the model. For OT and OncoBN the predicted frequencies from the model already include deviations from the ``pure'' model (``pure model'': the model where the only possible genotypes are those that strictly respect the DAG or tree).
 
 % We explained above that when obtaining the predicted frequencies under a model we assume perfect compliance with the model. This is straightforward with most methods, but not with others. This summarizes the error models for each method:
 
@@ -411,7 +418,8 @@ In addition, directly derived predictions, such as \textbf{predicted probabiliti
 
 
 \textbf{Transition rate matrices} themselves are not part of the immediate output of any of the methods (except MHN\footnote{And we saw an example in \qref{mhndetails}}) but, as explained in  \qref{pred-gen-freq}, can be obtained from the DAG and the $\lambda$s, as we do in EvAM-Tools; we have already seen examples of the transition rate matrices for all of CBN (\qrefP{cbndetails}),  H-ESBCN (\qrefP{hesbcndetails}), and MHN (\qrefP{mhndetails}).
-From the transition rate matrices it is also possible to obtain the \textbf{probabilities of evolutionary paths}  and the \textbf{transition probabilities} (for instance, using competing exponentials; see references and details in \qrefS{probpaths}).
+
+\textbf{Transition probabilities} can be computed from the transition rate matrices  (for instance, using competing exponentials). And from the transition probabilities we can compute  \textbf{probabilities of evolutionary paths} as the product of each transition along each possible path (see references and details in \qrefP{probpaths}).
 
 All of this output is available from EvAM-Tools, and the web app shows most of them using both figures and tables. (Probabilities of evolutionary paths, even if asked to be computed, are not explicitly available from the web app, as they can be unwieldy to display; they are provided in the output one can download and are, of course, implicit from the transition probabilities between genotypes, and transition probabilities are displayed in the web app.)
 
@@ -475,10 +483,10 @@ Once we have obtained the transition rate matrix, the fastest way to obtain the 
 \begin{equation}
 \mathbf{p} = \int_{0}^{\infty} dt \ e^{-t} \ e^{t Q}\ \mathbf{p}_0 = [I - Q]^{-1} \mathbf{p}_0
 \end{equation}
-where $\mathbf{p}_0$ is the initial distribution (i.e., 1 for WT and 0 for the rest of the genotypes), $t$ is the time of observation (again, assumed to be exponentially distributed with parameter 1), and $Q$ is the transition rate matrix (beware: written here, as in \citealp{schill2020modelling}, with $Q_{ij}$ meaning the transition rate from $j$ to $i$, in contrast to our expressions for transition rate matrices in equation \ref{eq:ratecbn} or the transition rate matrix in section \ref{hesbcndetails}). This is implemented in the non-exported function \texttt{probs\_from\_trm}, and follows also what is done in the original \texttt{Generate.pTh} from \cite{schill2020modelling}. \texttt{probs\_from\_trm} is called from function \texttt{evam}.
+where $\mathbf{p}_0$ is the initial distribution (i.e., 1 for WT and 0 for the rest of the genotypes), $t$ is the time of observation (again, assumed to be exponentially distributed with parameter 1), and $Q$ is the transition rate matrix (beware: written here, as in \citealp{schill2020modelling}, with $Q_{ij}$ meaning the transition rate from $j$ to $i$, in contrast to our expressions for transition rate matrices in equation \ref{eq:ratecbn} or the transition rate matrix in section \ref{hesbcndetails}). This is implemented in the non-exported function \texttt{probs\_from\_trm}, and follows also what is done in the original \texttt{Generate.pTh} function from \cite{schill2020modelling}. \texttt{probs\_from\_trm} is called from function \texttt{evam}.
 
 
-Instead of using that expression, we can sample from the continuous-time Markov Chain using standard procedures (\citealp[e.g., ch.~5 in][]{wilkinson2019stochastic} or \citealp[Algorithm 1 in][]{gotovos2021}). Sampling is what we do when you call \texttt{sample\_CPMs} asking for \texttt{obs\_genotype\_transitions} or \texttt{state\_counts} to be returned (and this sampling is implemented in the non-exported function \texttt{population\_sample\_from\_trm}, and called, as needed, by \texttt{sample\_CPMs}).
+Instead of using that expression, we can sample from the continuous-time Markov Chain using standard procedures (\citealp[e.g., ch.~5 in][]{wilkinson2019stochastic} or \citealp[Algorithm 1 in][]{gotovos2021}). Sampling is what we do in EvAM-Tools when you call \texttt{sample\_CPMs} asking for \texttt{obs\_genotype\_transitions} or \texttt{state\_counts} to be returned (and this sampling is implemented in the non-exported function \texttt{population\_sample\_from\_trm}, and called, as needed, by function  \texttt{sample\_CPMs}).
 
 
 
@@ -487,18 +495,18 @@ Instead of using that expression, we can sample from the continuous-time Markov 
 \label{predicted-ot-oncobn}
 
 OT and OncoBN do not return rates of a continuous-time Markov chain, but probabilities of seeing specific alterations at the time of observation. 
-Predicted probabilities of genotypes for OT and OncoBN are obtained using the weights (OT) or $\theta$s (OncoBN), according to the expression for the probability of observing a genotype; these expressions incorporate, when predicting the genotypes, the estimated errors ($\epsilon_+, \epsilon_-$ for OT, $\epsilon$ for OncoBN; see section \qrefP{error_models}). For example, see section 2.2 in \cite{Szabo2008} for OT and Figure 1 and section 2.1 in \cite{nicol2021oncogenetic} for OncoBN. For OT we can use function \texttt{distributiion.oncotree} in package \texttt{Oncotree} and for OncoBN function \texttt{Lik.genotype} from package \texttt{OncoBN}\footnote{Though for OncoBN we do not use \texttt{Lik.genotype} directly, as that would involve making the exact same repeated set of calls for every individual; see the non-exported function \texttt{DBN\_prob\_genotypes} in file \texttt{onco-bn-process.R}}.
+Predicted probabilities of genotypes for OT and OncoBN are obtained using the weights (OT) or $\theta$s (OncoBN), according to the expression for the probability of observing a genotype; these expressions incorporate, when predicting the genotypes, the estimated errors ($\epsilon_+, \epsilon_-$ for OT, $\epsilon$ for OncoBN; see section \qrefP{error_models}). For example, see section 2.2 in \cite{Szabo2008} for OT and Figure 1 and section 2.1 in \cite{nicol2021oncogenetic} for OncoBN or section \qref{oncobndetails}. For OT we can use function \texttt{distributiion.oncotree} in package \texttt{Oncotree} and for OncoBN function \texttt{Lik.genotype} from package \texttt{OncoBN}\footnote{Though for OncoBN we do not use \texttt{Lik.genotype} directly, as that would involve making the exact same repeated set of calls for every individual; see the non-exported function \texttt{DBN\_prob\_genotypes} in file \texttt{onco-bn-process.R}}.
 
 % In OT observation error is already part of the model  (in contrast to what happened in CBN, MHN, H-ESBCN). This is explained in \qrefS{error_models}.
 
-% \vspace*{15pt}
+\vspace*{15pt}
 
 For all methods, once we have the predicted probabilities, we can obtain a finite sample and, if we want, add observational (or genotyping) noise; see details in \qrefS{error_ot}.
 
 
 \section{Probabilities of evolutionary paths and transition probabilities}\label{probpaths}
 
-How to obtain probabilities of evolutionary paths for CBN and OT is detailed in \cite{hosseini2019a} and \cite{diaz2019every} (see S4\_Text: \url{https://doi.org/10.1371/journal.pcbi.1007246.s006}, section 3). For how to obtain transition probabilities see also \cite{diaz2021conditional} (specifically section 1 in S1 Appendix: \url{https://doi.org/10.1371/journal.pcbi.1009055.s001}).
+How to obtain probabilities of evolutionary paths for CBN and OT is detailed in \cite{hosseini2019a} and \cite{diaz2019every} (see S4\_Text: \url{https://doi.org/10.1371/journal.pcbi.1007246.s006}, section 3). Basically it involves computing the product of all the transition probabilities between genotypes along all paths from WT to the last possible genotype (for OT and CBN the genotype with all loci mutated). For how to obtain transition probabilities see also \cite{diaz2021conditional} (specifically section 1 in S1 Appendix: \url{https://doi.org/10.1371/journal.pcbi.1009055.s001}).
 
 The procedures to obtain transition probabilities and probabilities of evolutionary paths for H-ESBCN and MHN are similar to CBN: in all these methods we obtain probabilities of paths from the transition matrix, which is itself obtained from the transition rate matrix. The procedure with OncoBN is analogous to the one used with OT, both being untimed models (and, in both cases, obtaining probabilities of paths, as discussed in \citealp{diaz2019every} is an abuse of the untimed model). 
 
@@ -543,7 +551,7 @@ We explain each one in turn below, with reference to \texttt{evamtools} function
 
 \item Obtaining the predicted genotype frequencies from that model.
   
-  These are returned as part of the output of \texttt{random\_evam} (as well as part of the output of \texttt{evam}). In all cases, the predicted distribution of genotypes for a model is done assuming perfect compliance with the model; see \qref{pred-gen-freq}.
+  These are returned as part of the output of \texttt{random\_evam} (as well as part of the output of \texttt{evam}).  The predicted distribution of genotypes for a model is done assuming perfect compliance with the model; see \qref{pred-gen-freq}. Remember that the model in OT and OncoBN already includes deviations from the ``pure model'' (see \qrefP{error_models}).
 
 \item Obtaining a finite sample from the predicted frequencies of that model.
 
@@ -570,7 +578,7 @@ We explain each one in turn below, with reference to \texttt{evamtools} function
 \label{error_ot}
 
 
-When obtaining a finite sample from a model, in all cases except OT, we have always followed the same procedure:  we have first generated the predicted genotype frequencies under the model and, if requested, then added observational (e.g., genotyping) noise to the finite samples obtained from the predicted frequencies\footnote{Obtaining a finite sample of size $N$ given a vector of relative frequencies is done in R using the function \texttt{sample}}. Recall that, for OncoBN, the fitted model (and, thus, the predicted frequencies under the model) already include deviations from the model, as measured by $\epsilon$; see \qrefS{error_models} and \qrefS{oncobndetails}.
+When obtaining a finite sample from a model, in all cases except OT, we have always followed the same procedure:  we have first generated the predicted genotype frequencies under the model and, if requested, then added observational (e.g., genotyping) noise to the finite samples obtained from the predicted frequencies\footnote{Obtaining a finite sample of size $N$ given a vector of relative frequencies is done in R using the function \texttt{sample}.}. Recall that, for OncoBN, the fitted model (and, thus, the predicted frequencies under the model) already include deviations from the ``pure model'', as measured by $\epsilon$; see \qrefS{error_models} and \qrefS{oncobndetails}.
 
 
 For OT, since \texttt{epos} ($\epsilon_+$) reflects both observation error and true deviations from the model, the above procedure is not possible. We need to introduce a difference between sampling from a model specified from scratch, such as a random model returned from function \texttt{random\_evam}, and sampling from the predictions of a fitted model.
@@ -659,7 +667,7 @@ Here I provide full details about how we interpret and use the results from the 
 
 \subsection{Lambdas from the output: "Best Lambdas" and "lambdas\_matrix"}
 
-The output returned by the H-ESBCN C code contains a "Best Lambdas" vector. The output returned by function \texttt{import.hesbcn} (that we have included in the code, in file \texttt{HESBCN\_\_import.hesbcn.R}) has an object called "lambdas\_matrix" where each of the lambdas for a gene is divided by the number of parents. This can be checked in any of the examples in the PMCE repository. Code that shows three examples, with XOR, OR, AND is available under "inst/miscell/examples/HESBCN-lambdas-from-examples.R".
+The output returned by the H-ESBCN C code contains a "Best Lambdas" vector. The output returned by function \texttt{import.hesbcn} (that we have included in the code, in file \texttt{HESBCN\_\_import.hesbcn.R}) has an object called "lambdas\_matrix" where each of the lambdas for a gene is divided by the number of parents. This can be checked in any of the examples in the PMCE repository. Code that shows three examples, with XOR, OR, AND, is available under "inst/miscell/examples/HESBCN-lambdas-from-examples.R".
 
 
 It is the output from "Best lambdas" (i.e., the undivided lambdas) that are "[the] rates of the Poisson processes of the continuous-time HMM, associated with the vertices of the model, which allow one to estimate the expected waiting time of a node, given that its predecessor has occurred." (p. 756). (What is the division? An  operation that modifies an internal data structure, and just a temporary operation, done merely for implementation purposes. In line 95 of the code ---as of current version, in \url{https://github.com/BIMIB-DISCo/PMCE/blob/main/Utilities/R/utils.R}--- the divided lambdas are again summed, so the partition disappears: "curr\_in\_lambda = sum(hesbcn\$lambdas\_matrix[,curr\_node])", and it is that value that is used in further downstream computations;  email with the authors on 2021-07-09). The ``Best lambdas'' are returned by our modified \texttt{import.hesbcn} function.
@@ -879,7 +887,7 @@ Similar to previous problems: genotype or gene names are probably too large, so 
 \subsubsection{When data are saved, genes without mutations are excluded}
 \label{sec:number-genes-genes}
 
- When creating user data (for instance, when adding new genotypes), any gene that has no mutations is automatically excluded from the saved data, regardless of the setting for number of genes. This is a feature, not a bug. For example, suppose you set the number of genes to 3, but you only specify frequencies, or counts, for genotypes "A" and "A, B". The data set will only contain columns for genes A and B (since gene C has no mutations and it would be excluded during the analyses).
+ When creating user data (for instance, when adding new genotypes), any gene that has no mutations is automatically excluded from the saved data, regardless of the setting for number of genes. This is a feature, not a bug. For example, suppose you set the number of genes to 3, but you only specify frequencies, or counts, for genotypes "A" and "A, B". The data set will only contain columns for genes A and B (since gene C has no mutations and it would be excluded during the analyses). See also \ref{slider}.
 
 
  \subsection{Web app: could we reduce the number of required clicks?}
@@ -984,13 +992,13 @@ Those events were indistinguishable, because they are completely aliased, i.e., 
 
 There are example in the additional examples files.
 
-\subsection{Web app: the gene number slider changes automatically on changing data set name}
+\subsection{Web app: the gene number slider changes automatically on changing data set name}\label{slider}
 
-This is on purpose to keep consistency and also so that we save only the needed data.
+This is on purpose to keep consistency and also so that we save only the needed data. See also \ref{sec:number-genes-genes}.
 
 \subsection{Web app: Names of genes under "Mutations" in Create, are resorted on save/rename}
 
-This is on purpose. As explained by the tooltip, the list of genes next to "Mutations" is kept sorted ("natural order") showing first the genes in existing genotypes, and then other genes up to ""Number of genes". The list will be resorted when new genes are added to genotypes. "Mutations" is just a list of candidate gene names. You can see more (or fewer, up to the number of genes in your genotypes) by moving the slider of "Number of genes". On renaming of the data, we trigger a counting of the genes used, reset the slider of "Number of genes" and reorder the genes next to "Mutations".
+This is on purpose. As explained by the tooltip, the list of genes next to "Mutations" is kept sorted ("natural order") showing first the genes in existing genotypes, and then other genes up to ""Number of genes". The list will be resorted when new genes are added to genotypes. "Mutations" is just a list of candidate gene names. You can see more (or fewer, up to the number of genes in your genotypes) by moving the slider of "Number of genes". On renaming of the data, we trigger a counting of the genes used, reset the slider of "Number of genes", and reorder the gene names next to "Mutations".
 
 
 % \begin{itemize}
@@ -1006,23 +1014,21 @@ This is on purpose. As explained by the tooltip, the list of genes next to "Muta
 
 
 
- \subsection{Web app: the names of data sets are separate for DAG, MHN, etc}
+ \subsection{Web app: the names of data sets are separate for DAG, MHN, etc}\label{sec:names_separate}
 
  This is on purpose: it should help users organize data and experiments.
 
 
  \subsection{Web app: I do not find my data under 'Examples and user's data'}
 
- Maybe you are not looking in the right place? If you created your data using DAGs, it will not be shown under MHN, for example. See previous question.
+ Maybe you are not looking in the right place? If you created your data using DAGs, it will not be shown under MHN, for example; see \ref{sec:names_separate}.
 
 
  \subsection{Web app: Changing gene number with MHN and forced generation of data.}
  
- With MHN (but not DAG) , changing number of genes forces the generation of data from the model to prevent inconsistent states between the data and the model. This is on purpose.
+ With MHN (but not DAG) , changing number of genes forces the generation of data from the model (as if you had clicked on ``Generate data from MHN model'') to prevent inconsistent states between the data and the model. This is on purpose.
 
- Under MHN, adding a gene amounts to adding a row and a column, and removing a gene removing a row and a column; if we did not force a resample and you forgot to do it, the genotype data could be left in a state completely inconsistent with the model. In contrast, with DAGs, changing gene number has no effect on the model until you add/remove edges. 
-
- And this is why adding/removing edges from a DAG forces data generation.
+ Under MHN, adding a gene amounts to adding a row and a column, and removing a gene removing a row and a column; if we did not force a resample and you forgot to do it, the genotype data could be left in a state completely inconsistent with the model. In contrast, with DAGs, changing gene number has no effect on the model until you add/remove edges.  (This is why adding/removing edges from a DAG forces data generation.)
 
 
 
