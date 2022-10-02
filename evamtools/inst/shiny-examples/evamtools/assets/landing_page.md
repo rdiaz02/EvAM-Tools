@@ -211,6 +211,7 @@ The results are displayed using a combination of figures and tabular output. Spe
     * You can show, for these transition plots, only some of the most relevant paths; again, modify options under "Customize the visualization".
     * These plots might include genotypes never observed in the sample; these are shown in light green.
     * For easier visualization, in very busy plots, instead of the Genotypes you might want to show the last gene (or event) mutated or gained; change this options under "Type of label".
+    * (As visualizing the acquisition of mutations in a complex network can be challenging, for the transition probabilities/rates plots we use the representation of the hypergraph transition graph from HyperTraPS --- Greenbury et al., 2020. HyperTraPS: Inferring probabilistic patterns of trait acquisition in evolutionary and disease progression pathways. Cell systems, 10, 39–51, https://doi.org/10.1016/j.cels.2019.10.009)
 
 
 
