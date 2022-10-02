@@ -309,9 +309,9 @@ results_simple <- function(){
                       tags$div(
                                tags$h5(paste("evamtools R package version: ",
                                              packageVersion("evamtools"))) ,
-                               tags$h5(paste("commit: ",
-                                             this_string_to_be_replaced_by_git_hash
-                                             ))
+                               ## tags$h5(paste("commit: ",
+                               ##               this_string_to_be_replaced_by_git_hash
+                               ##               ))
                                ## substr(system("git rev-parse HEAD", intern=TRUE), 1, 7)))
 
                            )
@@ -654,9 +654,9 @@ user_input <- function() {
               tags$h3(HTML('<hr style="height:1px;background-color:black;margin-left:-20px">')),
               tags$h5(paste("evamtools R package version: ",
                             packageVersion("evamtools"))),
-              tags$h5(paste("commit: ",
-                            this_string_to_be_replaced_by_git_hash
-                            ))
+              ## tags$h5(paste("commit: ",
+              ##               this_string_to_be_replaced_by_git_hash
+              ##               ))
               ## substr(system("git rev-parse HEAD", intern=TRUE), 1, 7)))
               
               )
