@@ -171,8 +171,14 @@ Now, $\theta_C$ is the probability of $C$ occurring if at least one of its ances
 The above represent the probabilities in a model without errors. OncoBN includes an error model, the ``spontaneous activation model'' where there is a non-zero probability of observing child events when restrictions in the DAG are not satisfied. The rate of spontaneous activation is part of the estimation procedure, and is included in the computed probabilities of the different genotypes  (see details in \qrefS{error_models}). For example, under the disjunctive model above, the probability of observing genotype $C$ would be $(1 - \theta_A) (1 - \theta_B) \epsilon$, where $\epsilon$ is the spontaneous activation probability, which is set as the same for all events  \citep[p.~5]{nicol2021oncogenetic}). (Figure~1 of \citealp{nicol2021oncogenetic} provides another example of the role of $\epsilon$ in computing predicted probabilities).
 
 
-Structure learning can be conducted using an exact procedure that uses dynamic programming, recommended when there are less than 30 events; for larger problems, approximate structure learning using genetic programming is available.
 
+For structure and model parameter learning \citep[p.~5]{nicol2021oncogenetic}), and to avoid overfitting and increase interpretability of the models,
+the authors use as the score the Bayesian Information Criterion (BIC), so the log-likelihood is penalized by the number of edges ($\log(N) |E|$, where $|E|$ the number of edges); in addition, the search space is restricted to DAGs with an in-degree bound that, by default, is set to 3 (this option can be changed in EvAM-Tools; in the web app, under ``Advanced options'', ``OncoBN options'', ``k: In-degree bound of the estimated network''). Finally, for disjunctive models, there is an additional step of removing low confidence edges that are likely to be spurious.
+
+To search for the best graph (the model with the best BIC) the authors provide two algorithms: an exact procedure that uses dynamic programming and an approximate structure learning algorithm that uses genetic programming \citep[p.~5]{nicol2021oncogenetic}). The authors recommend the dynamic programming procedure for less than 30 events, and the genetic algorithm for larger problems. (By default, EvAM-Tools uses the dynamic programming algorithm; this can be changed, for example in the web app, under  ``Advanced options'', ``OncoBN options'', ``Algorithm'').
+
+
+% Structure and model parameter learning can be conducted using an exact procedure that uses dynamic programming, recommended when there are less than 30 events; for larger problems, approximate structure learning using genetic programming is available \citep[p.~5]{nicol2021oncogenetic}). To avoid overfitting and increase interpretability of the models, the authors use two strategies; first,  second, the optimized score is the 
 
 
 \subsubsection{Conjuntive Bayesian Networks (CBN)}\label{cbndetails}
