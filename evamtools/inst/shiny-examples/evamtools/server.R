@@ -2629,7 +2629,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                    , "Go back to \"User input\" "
                                                    , "and click on \"Advanced options\" if you"
                                                    , "want to use other methods.</p>"
-                                                   , "<p>When re-displaying former results, "
+                                                   , "<p>When re-displaying previous results, "
                                                    , "if subsequent analyses used different methods, "
                                                    , "you will need to go back to "
                                                    , "\"User input\" , \"Advanced options\", "
