@@ -1435,18 +1435,30 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                  if (input$input2build %in% c("csd")) {
                      actionButton("clear_genotype", "Delete all genotype data")
                  } else if (input$input2build %in% c("matrix")) {
+                     
                      tags$h5(HTML("To delete all genotype data, use",
                                   "'Reset log-&Theta; matrix and delete genotype data'",
-                                  "above."))
-                     actionButton("clear_genotype", "Delete all genotype data")
+                                  "above. ",
+                                  "That will also reset the model. ",
+                                  "If you just want new genotype data from ",
+                                  "the same model, click on ",
+                                  "'Generate data from MHN model'."))
+                     ## If you uncomment below, that is what takes
+                     ## effect, and the h5 message is not shown.
+                     ## actionButton("clear_genotype", "Delete all genotype data")
                  } else if (input$input2build %in% c("dag")) {
                      tags$h5(HTML("To delete all genotype data, use ",
                                   "'Reset DAG and delete genotype data'",
-                                  "above or the button below."))
+                                  "above. ",
+                                  "That will also reset the model. ",
+                                  "If you just want new genotype data from ",
+                                  "the same model, click on ",
+                                  "'Generate data from DAG'."))
                      ## To remove just the genotype
                      ## it makes little sense. For new DAGs, with new names
                      ## we want people to start from scratch.
                      ## And clear_genotype clears everything for now.
+                     ## actionButton("clear_genotype", "Delete all genotype data")
                  } else if (input$input2build %in% c("upload")) {
                      tags$h5(HTML("To delete (or reset) all genotype data",
                                   "upload a new (or the same) data file."))
