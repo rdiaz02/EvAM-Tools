@@ -252,17 +252,20 @@ In https://github.com/rdiaz02/EvAM-Tools/tree/main/examples_for_upload there are
 
 * **RAM and time limits:** Maximum RAM of any process is limited to 2 GB. Likewise, the analyses should be aborted after 1.5 hours of elapsed (not CPU ---we parallelize the runs) time. If you want to use the Shiny app without these limits, install a local copy. (To modify the time limit, change the value of variable EVAM_MAX_ELAPSED, in the definition of function "server", in file "server.R".  The RAM limit is imposed on the Docker containers we use; to remove it, run Docker without the memory limit.) Note: because of what we do to enforce these limits, running over limits might not be signalled by an explicit error, but rather by a graying out or a complete refresh of the session.
 
-* **Aborting a run:** Sometimes you might want to abort a run (e.g., you might have accidentally sent a run that will take a very long time). This is not possible if you run in our servers. What if you do not care about the long running, not-yet-fished run, and want to start a new one? If, from the same computer and browser you open a new tab to https://iib.uam.es/evamtools it is very likely that the request will be served by the exact same session and docker process as the previous run; thus, if R has not finished running, you would have to wait for the previous session to finish. 
+* **Aborting a run:** Sometimes you might want to abort a run (e.g., you might have accidentally sent a run that will take a very long time). This is not possible if you run in our servers. What if you do not care about the long running, not-yet-fished run, and want to start a new one? If, from the same computer and browser, you open a new tab to https://iib.uam.es/evamtools it is very likely that the request will be served by the exact same session and docker process as the previous run; thus, if R has not finished running, you would have to wait for the previous session to finish (and even connecting to a Shiny session might not work).
 
   To continue using EvAM-Tools you can try one or more of these:
 
-    - Force a refresh of the page (e.g., "F5", "Ctrl + r", or the force reload versions, such as "Ctrl + Shift + r", "Ctrl + F5"). 
+    - Force a refresh or reload of the page (e.g., "Ctrl + Shift + r", "Ctrl + F5"). 
 	- Close the browser, and open it again.
     - Start a new connection from a different web browser.
     - Start a new connection from an incognito session of the same web browser.
+    - (Note: some of the above, with some browsers, can return a "Proxy error" message. This is due to time outs: until the busy shiny/R process is not done, the connection to that very shiny/R process might fail. Just use a different web browser.)
+    - Use a different computer.
 
 
   None of those will abort the old process; that old process will eventually finish or be aborted. But you will be able to continue using EvAM-Tools. (That said, please make considerate use of this service: it is provided free of charge, so do not abuse it.)
+
 
 
 
