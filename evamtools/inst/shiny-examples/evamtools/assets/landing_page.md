@@ -254,9 +254,10 @@ In https://github.com/rdiaz02/EvAM-Tools/tree/main/examples_for_upload there are
 
 * **Aborting a run:** Sometimes you might want to abort a run (e.g., you might have accidentally sent a run that will take a very long time). This is not possible if you run in our servers. What if you do not care about the long running, not-yet-fished run, and want to start a new one? If, from the same computer and browser you open a new tab to https://iib.uam.es/evamtools it is very likely that the request will be served by the exact same session and docker process as the previous run; thus, if R has not finished running, you would have to wait for the previous session to finish. 
 
-  To continue using EvAM-Tools you can try this:
+  To continue using EvAM-Tools you can try one or more of these:
 
-    - Force a refresh of the page (e.g., "F5", "Ctrl + r", or the force reload versions, such as "Ctrl + Shift + r", "Ctrl + F5").
+    - Force a refresh of the page (e.g., "F5", "Ctrl + r", or the force reload versions, such as "Ctrl + Shift + r", "Ctrl + F5"). 
+	- Close the browser, and open it again.
     - Start a new connection from a different web browser.
     - Start a new connection from an incognito session of the same web browser.
 
