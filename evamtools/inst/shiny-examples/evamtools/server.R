@@ -2618,17 +2618,30 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  ##              "use 'Modify data' ---below--- to go back ",
                                                  ##              "and click on 'Advanced options' if you",
                                                  ##              "want to use other methods)</h5>"), 
-                                                 choices = gsub("HESBCN", "H-ESBCN", input$cpm_methods, fixed = TRUE),
-                                                 selected = gsub("HESBCN", "H-ESBCN", input$cpm_methods, fixed = TRUE)
+                                                 choices = gsub("HESBCN", "H-ESBCN",
+                                                                input$cpm_methods, fixed = TRUE),
+                                                 selected = gsub("HESBCN", "H-ESBCN",
+                                                                 input$cpm_methods, fixed = TRUE)
                                                  ),
                               tippy::tippy_this("cpm2show",
-                                                paste("<span style='font-size:1.5em; text-align:left;'>",
-                                                      "Show graphical output of the CPMs used to analyze the data.  "
-                                                    , "Go back to \"User input\" "
-                                                    , "and click on \"Advanced options\" if you"
-                                                    , "want to use other methods.",
-                                                      "<span>"
-                                                      ),
+                                                HTML("<span style='font-size:1.5em; text-align:left;'>",
+                                                     "<p>Show graphical output of the CPMs used to analyze the data.  "
+                                                   , "Go back to \"User input\" "
+                                                   , "and click on \"Advanced options\" if you"
+                                                   , "want to use other methods.</p>"
+                                                   , "<p>I.e., when re-displaying former results, "
+                                                   , "if subsequent analyses used different methods, "
+                                                   , "you will need to go back to "
+                                                   , "\"User input\" , \"Advanced options\", "
+                                                   , "and click on the methods you used. "
+                                                   , "But do not re-run; click on the methods "
+                                                   , "and come back to the 'Results' tab."
+                                                   , "You can click on all methods: this is innocuous "
+                                                   , "though the figure will contain empty wholes "
+                                                   , "corresponding to methods clicked but not used in the run."
+                                                   , "(Remove the empty holes by unclicking those methods here.)"
+                                                  ,  "<span>"
+                                                    ),
                                                 arrow = TRUE, animation = "shift-toward"
                                               , placement = "right"),
                               tags$h4(HTML("<hr style=\"height:1px; width:80%; background-color:black;text-align:left\">")),
