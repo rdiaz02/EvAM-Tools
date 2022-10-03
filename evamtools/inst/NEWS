@@ -1,4 +1,9 @@
-Changes in version 2.1.14 (2022-10-10):
+Changes in version 2.1.15 (2022-10-03):
+	- FAQ: fixed typos.
+	- Web app, landing page: aborting runs
+	- Web app, better messages MHN and DAG about delete all data.
+
+Changes in version 2.1.14 (2022-10-02):
 	- Improvements in additional documentation.
 	- Fixed inconsistent capitalization in web app interface.
 	- Changes in landing page (capitalization, documentation,
