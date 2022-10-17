@@ -373,9 +373,9 @@ The R package itself with standard organization. Directories and files under ins
 ## Additional documentation
    Additional documentation is available from: https://rdiaz02.github.io/EvAM-Tools/
 
-   A preprint is available from bioRxiv at  https://doi.org/10.1101/2022.07.05.498481 
+   A preprint is available from bioRxiv at  https://doi.org/10.1101/2022.07.05.498481 .
    
-   <!-- (or the direct bioRxiv link: https://www.biorxiv.org/content/10.1101/2022.07.05.498481v1 ) <!-- -\->, which includes additional examples ( https://www.biorxiv.org/content/10.1101/2022.07.05.498481v1.supplementary-material ) -->.
+   <!-- (or the direct bioRxiv link: https://www.biorxiv.org/content/10.1101/2022.07.05.498481v1 ) <!-- -\->, which includes additional examples ( https://www.biorxiv.org/content/10.1101/2022.07.05.498481v1.supplementary-material ) -->
 
 
 ## Funding
