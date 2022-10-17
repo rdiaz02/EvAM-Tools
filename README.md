@@ -381,5 +381,5 @@ The R package itself with standard organization. Directories and files under ins
 ## Funding
 Supported by grant PID2019-111256RB-I00 funded by MCIN/AEI/10.13039/501100011033 and Comunidad de Madrid's PEJ-2019-AI/BMD-13961 to R. Diaz-Uriarte.
 <p align="center">
-<img src="micin-aei.png" alt="micin-aei logo" width="200"/>.
+<img src="micin-aei.png" alt="micin-aei logo" width="200"/>
 </p>
