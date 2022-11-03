@@ -18,9 +18,9 @@
 - [What CPMs are included in ```EvAM-Tools```?](#cpms)
 <br>&nbsp;&nbsp;- [Default options and default CPMs run](#cpms2run)
 <br>&nbsp;&nbsp;- [References and related repositories](#refs)
-- [Where is the code? Terms of use? Citing. Copyright](#code)
-<br>&nbsp;&nbsp;- [Citing EvAM-Tools](#citation) 
+- [Where is the code? Terms of use. Citing. Copyright](#code)
 <br>&nbsp;&nbsp;- [Authors, contact and bug reports](#authors) 
+<br>&nbsp;&nbsp;- [Citing EvAM-Tools](#citation) 
 - [Funding](#funding)
 - [Cookies](#cookies)
 
@@ -393,13 +393,23 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 
 
 ****
-## Where is the code? Terms of use? Citing. Copyright<a id="code"></a>
+## Where is the code? Terms of use. Citing. Copyright<a id="code"></a>
 ***
 
 The complete source code for the package and the shiny app, as well information about how to run the shiny app locally, is available from https://github.com/rdiaz02/EvAM-Tools.
 
 
 This app is free to use, but please **cite it** if you use it; see [Citing EvAM-Tools](#citation). Confidentiality and security: if you have confidential data, you might want not to upload it here, and instead install the package locally. 
+
+
+
+&nbsp;
+### Authors, contact and bug reports<a id="authors"></a>
+
+Most of the files for this app (and the package) are copyright Ramon Diaz-Uriarte and Pablo Herrera-Nieto (and released under the Affero GPL v3 license ---https://www.gnu.org/licenses/agpl-3.0.html) except some files for HESBCN, MHN, and the CBN code; see full details in https://github.com/rdiaz02/EvAM-Tools#copyright-and-origin-of-files.
+
+
+For bug reports, please, submit them using the repository https://github.com/rdiaz02/EvAM-Tools.
 
 
 &nbsp;
@@ -413,13 +423,6 @@ Diaz-Uriarte, R & Herrera-Nieto, P. 2022. EvAM-Tools: tools for evolutionary acc
 If you use the web app, also provide a link to the web app itself, https://iib.uam.es/evamtools , or the code repository, https://github.com/rdiaz02/EvAM-Tools. 
  
 
-&nbsp;
-### Authors, contact and bug reports<a id="authors"></a>
-
-Most of the files for this app (and the package) are copyright Ramon Diaz-Uriarte and Pablo Herrera-Nieto (and released under the Affero GPL v3 license ---https://www.gnu.org/licenses/agpl-3.0.html) except some files for HESBCN, MHN, and the CBN code; see full details in https://github.com/rdiaz02/EvAM-Tools#copyright-and-origin-of-files.
-
-
-For bug reports, please, submit them using the repository https://github.com/rdiaz02/EvAM-Tools.
 
 &nbsp;
 ****
