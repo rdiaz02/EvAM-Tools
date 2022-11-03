@@ -412,10 +412,6 @@ Most of the files for this app (and the package) are copyright Ramon Diaz-Uriart
 For bug reports, please, submit them using the repository https://github.com/rdiaz02/EvAM-Tools.
 
 
-<<<<<<< HEAD
-=======
-
->>>>>>> 131bc98 (minor reordering of entries in landing page)
 &nbsp;
 ### Citing EvAM-Tools<a id="citation"></a>
 
