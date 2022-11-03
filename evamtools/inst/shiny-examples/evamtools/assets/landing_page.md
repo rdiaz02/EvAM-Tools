@@ -393,7 +393,7 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 
 
 ****
-## Where is the code? Terms of use? Citing. Copyright<a id="code"></a>
+## Where is the code? Terms of use. Citing. Copyright<a id="code"></a>
 ***
 
 The complete source code for the package and the shiny app, as well information about how to run the shiny app locally, is available from https://github.com/rdiaz02/EvAM-Tools.
@@ -410,7 +410,6 @@ Most of the files for this app (and the package) are copyright Ramon Diaz-Uriart
 
 
 For bug reports, please, submit them using the repository https://github.com/rdiaz02/EvAM-Tools.
-
 
 
 &nbsp;
