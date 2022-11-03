@@ -18,7 +18,7 @@
 - [What CPMs are included in ```EvAM-Tools```?](#cpms)
 <br>&nbsp;&nbsp;- [Default options and default CPMs run](#cpms2run)
 <br>&nbsp;&nbsp;- [References and related repositories](#refs)
-- [Where is the code? Terms of use? Citing. Copyright](#code)
+- [Where is the code? Terms of use. Citing. Copyright](#code)
 <br>&nbsp;&nbsp;- [Authors, contact and bug reports](#authors) 
 <br>&nbsp;&nbsp;- [Citing EvAM-Tools](#citation) 
 - [Funding](#funding)
