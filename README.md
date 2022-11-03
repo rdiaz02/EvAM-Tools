@@ -27,6 +27,7 @@
   * [OncoBN (DBN)](#oncobn-dbn)
   * [Conditional prediction of genotypes and probabilities of paths from CPMs](#conditional-prediction-of-genotypes-and-probabilities-of-paths-from-cpms)
 - [Additional documentation](#additional-documentation)
+- [Citing EvAM-Tools](#citing-evam-tools)
 - [Funding](#funding)
 <!-- tocstop -->
 
@@ -41,6 +42,10 @@ We provide an R package, evamtools, that can also launch a GUI as a Shiny (https
 
 
 For easier use, we provide links to Docker images that you can download and run, as well as instructions on how to build Docker images. You can also run the Shiny app on our servers: https://www.iib.uam.es/evamtools/ .
+
+
+If you use the package or the web app, please **cite** the Bioinformatics paper:
+Diaz-Uriarte, R & Herrera-Nieto, P. 2022. EvAM-Tools: tools for evolutionary accumulation and cancer progression models. _Bioinformatics_.  https://doi.org/10.1093/bioinformatics/btac710 .
 
 
 ### Some examples of use
@@ -373,7 +378,18 @@ The R package itself with standard organization. Directories and files under ins
 ## Additional documentation
    Additional documentation is available from: https://rdiaz02.github.io/EvAM-Tools/
 
-   A preprint is available from bioRxiv at  https://doi.org/10.1101/2022.07.05.498481 .
+   The Bioinformatics paper "EvAM-Tools: tools for evolutionary accumulation and cancer progression models" is available at
+  https://doi.org/10.1093/bioinformatics/btac710 .
+   
+   
+## Citing EvAM-Tools
+If you use the package or the web app, please **cite** the Bioinformatics paper:
+
+Diaz-Uriarte, R & Herrera-Nieto, P. 2022. EvAM-Tools: tools for evolutionary accumulation and cancer progression models. _Bioinformatics_.  https://doi.org/10.1093/bioinformatics/btac710 .
+
+   
+   
+   <!-- The preprint is available from bioRxiv at  https://doi.org/10.1101/2022.07.05.498481 . -->
    
    <!-- (or the direct bioRxiv link: https://www.biorxiv.org/content/10.1101/2022.07.05.498481v1 ) <!-- -\->, which includes additional examples ( https://www.biorxiv.org/content/10.1101/2022.07.05.498481v1.supplementary-material ) -->
 
