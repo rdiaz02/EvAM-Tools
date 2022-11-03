@@ -387,7 +387,11 @@ If you use the package or the web app, please **cite** the Bioinformatics paper:
 
 Diaz-Uriarte, R & Herrera-Nieto, P. 2022. EvAM-Tools: tools for evolutionary accumulation and cancer progression models. _Bioinformatics_.  https://doi.org/10.1093/bioinformatics/btac710 .
 
-   
+ 
+ 
+Ideally, also provide a link to the web app itself, https://iib.uam.es/evamtools , or the code repository, https://github.com/rdiaz02/EvAM-Tools. 
+ 
+ 
    
    <!-- The preprint is available from bioRxiv at  https://doi.org/10.1101/2022.07.05.498481 . -->
    

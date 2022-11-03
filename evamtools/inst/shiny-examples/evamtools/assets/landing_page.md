@@ -19,6 +19,7 @@
 <br>&nbsp;&nbsp;- [Default options and default CPMs run](#cpms2run)
 <br>&nbsp;&nbsp;- [References and related repositories](#refs)
 - [Where is the code? Terms of use? Copyright](#code)
+<br>&nbsp;&nbsp;- [Citing EvAM-Tools](#citation) 
 <br>&nbsp;&nbsp;- [Authors, contact and bug reports](#authors) 
 - [Funding](#funding)
 - [Cookies](#cookies)
@@ -398,8 +399,19 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 The complete source code for the package and the shiny app, as well information about how to run the shiny app locally, is available from https://github.com/rdiaz02/EvAM-Tools.
 
 
-This app is free to use. Confidentiality and security: ff you have confidential data, you might want not to upload it here, and instead install the package locally. 
+This app is free to use, but please **cite it** if you use it; see [Citing EvAM-Tools](#citation). Confidentiality and security: if you have confidential data, you might want not to upload it here, and instead install the package locally. 
 
+
+&nbsp;
+### Citing EvAM-Tools<a id="citation"></a>
+
+If you use EvAM-Tools (the package or the web app), please **cite** the Bioinformatics paper:
+
+Diaz-Uriarte, R & Herrera-Nieto, P. 2022. EvAM-Tools: tools for evolutionary accumulation and cancer progression models. _Bioinformatics_.  https://doi.org/10.1093/bioinformatics/btac710 .
+
+ 
+If you use the web app, also provide a link to the web app itself, https://iib.uam.es/evamtools , or the code repository, https://github.com/rdiaz02/EvAM-Tools. 
+ 
 
 &nbsp;
 ### Authors, contact and bug reports<a id="authors"></a>
