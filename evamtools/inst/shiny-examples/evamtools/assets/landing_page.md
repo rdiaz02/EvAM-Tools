@@ -18,7 +18,7 @@
 - [What CPMs are included in ```EvAM-Tools```?](#cpms)
 <br>&nbsp;&nbsp;- [Default options and default CPMs run](#cpms2run)
 <br>&nbsp;&nbsp;- [References and related repositories](#refs)
-- [Where is the code? Terms of use? Copyright](#code)
+- [Where is the code? Terms of use? Citing. Copyright](#code)
 <br>&nbsp;&nbsp;- [Citing EvAM-Tools](#citation) 
 <br>&nbsp;&nbsp;- [Authors, contact and bug reports](#authors) 
 - [Funding](#funding)
@@ -393,7 +393,7 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 
 
 ****
-## Where is the code? Terms of use? Copyright<a id="code"></a>
+## Where is the code? Terms of use? Citing. Copyright<a id="code"></a>
 ***
 
 The complete source code for the package and the shiny app, as well information about how to run the shiny app locally, is available from https://github.com/rdiaz02/EvAM-Tools.
