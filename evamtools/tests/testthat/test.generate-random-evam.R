@@ -142,6 +142,13 @@ test_that("error/warning/messages conditions random_evam", {
                  "Give exactly", fixed = TRUE)
     expect_warning(random_evam(ngenes = 3, model = c("OT", "CBN")),
                    "Only one model", fixed = TRUE)
+   })
+
+
+test_that("error/warning/messages conditions random_evam, MCCBN", {
+    if (!requireNamespace("mccbn", quietly = TRUE))
+        message("Skipping test, as mccbn not installed.")
+    skip_if_not_installed("mccbn")
     expect_message(random_evam(ngenes = 3, model = "MCCBN"),
                    "Generating a random MCCBN",
                    fixed = TRUE)

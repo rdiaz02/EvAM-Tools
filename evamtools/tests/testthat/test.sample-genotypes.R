@@ -1,11 +1,14 @@
 t1 <- Sys.time()
 
 test_that("We get requested output, by the specified means", {
+    MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
     data(every_which_way_data)
     Dat1 <- every_which_way_data[[16]][1:40, 2:6]
-    out <- suppressMessages(evam(Dat1,
-                                 methods = c("CBN", "OT", "OncoBN",
-                                             "MHN", "HESBCN", "MCCBN")))
+    out <- suppressMessages(
+        evam(Dat1,
+             methods = c("CBN", "OT", "OncoBN",
+                         "MHN", "HESBCN", "MCCBN")[c(rep(TRUE, 5), MCCBN_INSTALLED)]
+             ))
 
     ## Sample from the predicted genotype frequencies
     ## for all methods in the output out
@@ -17,7 +20,8 @@ test_that("We get requested output, by the specified means", {
           "CBN_sampled_genotype_counts",
           "MCCBN_sampled_genotype_counts",
           "MHN_sampled_genotype_counts",
-          "HESBCN_sampled_genotype_counts") %in% names(outS1)))
+          "HESBCN_sampled_genotype_counts")[c(rep(TRUE, 3), MCCBN_INSTALLED, rep(TRUE, 2))]
+        %in% names(outS1)))
 
     expect_true(sum(is.na(unlist(outS1))) == 0)
         

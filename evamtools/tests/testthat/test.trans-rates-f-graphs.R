@@ -917,7 +917,7 @@ and identical results between algorithms with sparse matrices, OT", {
 
 test_that("OT and CBN: algorithm consistency with various data examples", {
     
-    ## Check OT, CBN, MCCBN if installed
+    ## Check OT, CBN;  no longer MCCBN, even if installed
     ## for consistency of different algorithms
 
     ## ot_cbn_methods is no longer used in the code directly. Here it is only

@@ -3,9 +3,11 @@ t1 <- Sys.time()
 test_that("Minimal test: we can run", {
     data(every_which_way_data)
     Dat1 <- every_which_way_data[[16]][1:40, 2:6]
-    out <- suppressMessages(evam(Dat1,
-                                 methods = c("CBN", "OT", "OncoBN",
-                                             "MHN", "HESBCN", "MCCBN")))
+    MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
+    out <- suppressMessages(
+        evam(Dat1,
+             methods = c("CBN", "OT", "OncoBN",
+                         "MHN", "HESBCN", "MCCBN")[c(rep(TRUE, 5), MCCBN_INSTALLED)]))
     expect_true(exists("OT_model", where = out))
 
     out2 <- evam(Dat1[, 1:3],
@@ -156,57 +158,60 @@ test_that("Examples from initial-simple-examples", {
 test_that("We can run evam with non-default arguments", {
     data(every_which_way_data)
     Dat1 <- every_which_way_data[[16]][1:40, 2:8]
-    out <- suppressMessages(evam(Dat1,
-                                  methods = c("CBN", "OT", "OncoBN",
-                                              "MHN", "HESBCN", "MCCBN"),
-                                 max_cols = 4,
-                                 cores = 1,
-                                 hesbcn_opts = list(MCMC_iter = 20000,
-                                                    seed = 2,
-                                                    reg = "aic",
-                                                    silent = FALSE),
-                                 mhn_opts = list(lambda = 1/10),
-                                 oncobn_opts = list(model = "CBN", epsilon = 0.01),
-                                 ot_opts = list(with_errors_dist_ot = FALSE),
-                                 mccbn_opts = list(model = "H-CBN2",
-                                                   max.iter = 10L,
-                                                   L = 6,
-                                                   max.iter.asa = 20L)
+    out <- suppressMessages(
+        evam(Dat1,
+             methods = c("CBN", "OT", "OncoBN",
+                         "MHN", "HESBCN", "MCCBN")[c(rep(TRUE, 5), MCCBN_INSTALLED)],
+             max_cols = 4,
+             cores = 1,
+             hesbcn_opts = list(MCMC_iter = 20000,
+                                seed = 2,
+                                reg = "aic",
+                                silent = FALSE),
+             mhn_opts = list(lambda = 1/10),
+             oncobn_opts = list(model = "CBN", epsilon = 0.01),
+             ot_opts = list(with_errors_dist_ot = FALSE),
+             mccbn_opts = list(model = "H-CBN2",
+                               max.iter = 10L,
+                               L = 6,
+                               max.iter.asa = 20L)
                                  ))
     expect_true(exists("OT_model", where = out))
     exercise_sample_evam(out)
 
-    out2 <- suppressMessages(evam(Dat1,
-                                  methods = c("CBN", "OT", "OncoBN",
-                                              "MHN", "HESBCN", "MCCBN"),
-                                 max_cols = 4,
-                                 cbn_opts = list(omp_threads = 2),
-                                 hesbcn_opts = list(MCMC_iter = 20000, seed = 2),
-                                 mhn_opts = list(lambda = 1/10),
-                                 oncobn_opts = list(model = "CBN", epsilon = 0.01),
-                                 ot_opts = list(with_errors_dist_ot = FALSE),
-                                 mccbn_opts = list(model = "OT-CBN",
-                                                   max.iter = 10L,
-                                                   L = 6,
-                                                   max.iter.asa = 20L)
+    out2 <- suppressMessages(
+        evam(Dat1,
+             methods = c("CBN", "OT", "OncoBN",
+                         "MHN", "HESBCN", "MCCBN")[c(rep(TRUE, 5), MCCBN_INSTALLED)],
+             max_cols = 4,
+             cbn_opts = list(omp_threads = 2),
+             hesbcn_opts = list(MCMC_iter = 20000, seed = 2),
+             mhn_opts = list(lambda = 1/10),
+             oncobn_opts = list(model = "CBN", epsilon = 0.01),
+             ot_opts = list(with_errors_dist_ot = FALSE),
+             mccbn_opts = list(model = "OT-CBN",
+                               max.iter = 10L,
+                               L = 6,
+                               max.iter.asa = 20L)
                                  ))
     expect_true(exists("OT_model", where = out2))
     exercise_sample_evam(out2)
 
 
-    expect_warning(out3 <- suppressMessages(evam(Dat1,
-                                  methods = c("CBN", "OT", "OncoBN",
-                                              "MHN", "HESBCN", "MCCBN"),
-                                  max_cols = 4,
-                                  cores = 1, ## if >, will hang because of MCCBN thrds > 1
-                                 cbn_opts = list(omp_threads = 2, cucu = 9),
-                                 hesbcn_opts = list(MCMC_iter = 20000, seed = 2),
-                                 mhn_opts = list(lambda = 1/10),
-                                 oncobn_opts = list(model = "CBN", epsilon = 0.01),
-                                 ot_opts = list(with_errors_dist_ot = FALSE),
-                                 mccbn_opts = list(model = "H-CBN2",
-                                                      thrds = 8, max.iter = 20,
-                                                   max.iter.asa = 25))),
+    expect_warning(out3 <- suppressMessages(
+                       evam(Dat1,
+                            methods = c("CBN", "OT", "OncoBN",
+                                        "MHN", "HESBCN", "MCCBN")[c(rep(TRUE, 5), MCCBN_INSTALLED)],
+                            max_cols = 4,
+                            cores = 1, ## if >, will hang because of MCCBN thrds > 1
+                            cbn_opts = list(omp_threads = 2, cucu = 9),
+                            hesbcn_opts = list(MCMC_iter = 20000, seed = 2),
+                            mhn_opts = list(lambda = 1/10),
+                            oncobn_opts = list(model = "CBN", epsilon = 0.01),
+                            ot_opts = list(with_errors_dist_ot = FALSE),
+                            mccbn_opts = list(model = "H-CBN2",
+                                              thrds = 8, max.iter = 20,
+                                              max.iter.asa = 25))),
                    "Option(s) cucu",
                    fixed = TRUE)
 
