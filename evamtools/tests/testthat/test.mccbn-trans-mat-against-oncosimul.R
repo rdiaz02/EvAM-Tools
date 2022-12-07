@@ -3,8 +3,16 @@
 
 t1 <- Sys.time()
 
+
 test_that("Testing cpm2tm by comparing with
 OncoSimulR's based cpm_to_trans_mat_oncosimul.", {
+
+    if (!requireNamespace("mccbn", quietly = TRUE)) {
+        message("Skipping test.mccbn-trans-mat-against-oncosimul.R as mccbn ",
+                "not installed")
+    }
+    skip_if_not_installed("mccbn")
+    
     ## Recall cpm2F2tm <- cpm_to_trans_mat_oncosimul
 
     ## The first set of tests use pre-run analyses. So we would not catch
@@ -21,7 +29,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul.", {
         expect_equal(
             reorder_trans_mat(cpm2F2tm(data, max_f = NULL)$transition_matrix),
             reorder_trans_mat(cpm2tm(
-                                              list(edges = data))$trans_mat_genots),
+                list(edges = data))$trans_mat_genots),
             check.attributes = TRUE)
 
         ## Do not run next test if fitness is absurdly large as scaling will fail
@@ -38,7 +46,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul.", {
     run_test_for_dataset <- function(data){
         expect_equal(reorder_trans_mat(cpm2F2tm(data$edges, max_f = NULL)$transition_matrix),
                      reorder_trans_mat(cpm2tm(
-                                                       data)$trans_mat_genots),
+                         data)$trans_mat_genots),
                      check.attributes = TRUE)
         maxff <- sample(c(2, 3, 3.5, 3.8, 4, 5, 8), size = 1)
         expect_equal(as.matrix(cpm2F2tm(data$edges, max_f = NULL)$transition_matrix),

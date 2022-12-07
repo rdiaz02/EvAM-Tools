@@ -45,8 +45,8 @@ importFrom("stats", "aggregate", "chisq.test", "na.omit", "rexp",
 importFrom("plot.matrix", "fmt")
 
 importFrom("OncoBN", "fitCPN", "Lik.genotype")
-importFrom("mccbn", "candidate_posets", "adaptive.simulated.annealing",
-           "random_poset")
+## importFrom("mccbn", "candidate_posets", "adaptive.simulated.annealing",
+##            "random_poset")
 
 importFrom("RhpcBLASctl", "blas_set_num_threads", "omp_set_num_threads")
 importFrom("Rlinsolve", "lsolve.jacobi")

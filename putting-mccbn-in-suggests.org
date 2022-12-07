@@ -1,0 +1,8 @@
+* Why
+- See my latest comment on the bug report in https://github.com/cbg-ethz/MC-CBN/issues/5#issuecomment-1340660538
+- Original report was on April 2021 (over 18 months ago)
+- Unless this is fixed, MCCBN will become non-installable
+* Suggests
+- Yes, here. See http://dirk.eddelbuettel.com/blog/2017/03/22/#suggests_is_not_depends
+* TODO
+- mccbn::random_poset is used in several places. Must copy the function (adding authors to code) so we do not depend on MCCBN
