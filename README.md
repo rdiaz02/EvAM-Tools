@@ -201,7 +201,8 @@ You can also build your own Docker image and you might want to run the Shiny app
     - OncoBN is available from https://github.com/phillipnicol/OncoBN
     - But this should work: start R, install the devtools package if you don't have it, and then issue `devtools::install_github("phillipnicol/OncoBN")`.
 	
-  * Install MC-CBN
+  * Install MC-CBN: this is optional.
+    - Installing MC-CBN can be complicated, because it requires old versions of Boost (see https://github.com/cbg-ethz/MC-CBN/issues/5). Thus we make it optional. Of course, if you do not have MC-CBN, you will not be able to run it. (MC-CBN is included in the methods available both from the web app and the Docker images).
     - Go to https://github.com/cbg-ethz/MC-CBN and follow the installation instructions: https://github.com/cbg-ethz/MC-CBN#installation
     <!-- - If you have all dependencies installed, and the correct version of libboost, then from R this should work: `install.packages("https://github.com/cbg-ethz/MC-CBN/releases/download/v2.1.0/mccbn_2.1.0.tar.gz", repos=NULL)` -->
     - Review the installation instructions and then install manually: https://github.com/cbg-ethz/MC-CBN#installation-from-source .
