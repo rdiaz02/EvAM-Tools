@@ -65,3 +65,8 @@ importFrom(magrittr, "%>%")
 ## importFrom("shinyBS", "bsTooltip", "removeTooltip")
 importFrom("dplyr", "full_join")
 importFrom("tippy", "tippy_this", "tippy", "use_tippy")
+
+## For random_poset
+importFrom("relations", "as.relation",
+           "transitive_reduction",
+           "relation_incidence")
