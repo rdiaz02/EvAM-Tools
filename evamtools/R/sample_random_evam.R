@@ -832,13 +832,13 @@ random_evam <- function(ngenes = NULL, gene_names = NULL,
         colnames(thetas) <- rownames(thetas) <- gene_names
         output <- MHN_from_thetas(thetas)
     } else if (model == "CBN") {
-        poset <- mccbn::random_poset(ngenes, graph_density = graph_density)
+        poset <- evam_random_poset(ngenes, graph_density = graph_density)
         lambdas <- runif(ngenes, cbn_hesbcn_lambda_min, cbn_hesbcn_lambda_max)
         names(lambdas) <-  colnames(poset) <- rownames(poset) <- gene_names
         output <- CBN_from_poset_lambdas(poset, lambdas)
     } else if (model == "HESBCN") {
         hesbcn_probs <- hesbcn_probs/sum(hesbcn_probs)
-        poset <- mccbn::random_poset(ngenes, graph_density = graph_density)
+        poset <- evam_random_poset(ngenes, graph_density = graph_density)
         lambdas <- runif(ngenes, cbn_hesbcn_lambda_min, cbn_hesbcn_lambda_max)
         names(lambdas) <-  colnames(poset) <- rownames(poset) <- gene_names
         stopifnot(identical(evam_string_sort(names(hesbcn_probs)), c("AND", "OR", "XOR")))
@@ -854,7 +854,7 @@ random_evam <- function(ngenes = NULL, gene_names = NULL,
         output <- OT_from_poset_weights_epos(poset, weights, ot_oncobn_epos)
 
     } else if (model == "OncoBN") {
-        poset <- mccbn::random_poset(ngenes,
+        poset <- evam_random_poset(ngenes,
                                      graph_density = graph_density)
         thetas <- runif(ngenes, ot_oncobn_weight_min, ot_oncobn_weight_max)
         names(thetas) <-  colnames(poset) <- rownames(poset) <- gene_names
@@ -1015,7 +1015,7 @@ HESBCN_model_from_edges_lambdas_parent_set <- function(edges, lambdas,
 
 ## A random poset where each gene depends on at most one parent
 OT_random_poset <- function(ngenes, graph_density) {
-    poset0 <- mccbn::random_poset(ngenes, graph_density = graph_density)
+    poset0 <- evam_random_poset(ngenes, graph_density = graph_density)
     ## Leave only one parent
     cosum <- colSums(poset0)
     if (all(cosum <= 1)) return(poset0)

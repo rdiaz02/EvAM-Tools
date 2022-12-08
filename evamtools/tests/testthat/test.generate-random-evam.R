@@ -50,7 +50,7 @@ test_that("Predicting from CBN and HESBCN is identical when only AND", {
         ngenes <- sample(4:7, 1)
         gene_names <- LETTERS[seq_len(ngenes)]
         graph_density <- runif(1, 0.3, 0.7)
-        poset <- mccbn::random_poset(ngenes,
+        poset <- evam_random_poset(ngenes,
                                      graph_density = graph_density)
         lambdas <- runif(ngenes, 1/10, 10)
         names(lambdas) <-  colnames(poset) <- rownames(poset) <- gene_names
