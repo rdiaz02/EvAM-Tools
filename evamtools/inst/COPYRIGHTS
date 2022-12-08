@@ -29,6 +29,17 @@
   
   Paper: Schill, R., Solbrig, S., Wettig, T., & Spang, R. (2020). Modelling cancer progression using Mutual Hazard Networks. Bioinformatics, 36(1),  241–249. http://dx.doi.org/10.1093/bioinformatics/btz513
 
+
+- File MCCBN__random_poset.R: This file contains function random_poset and additional required functions for random_poset to work.
+
+  File obtained from file common.r from https://github.com/cbg-ethz/MC-CBN , commit a6eceb8 from 2022-02-05.
+
+  License:  GNU General Public License v2.0, which can be combined with software under the AGPL 3 as used by the rest of this project.
+
+  Author of code:  from comments and commit history (e.g., d2d8dfd, f08add1) most likely Hesam Montazeri.
+
+  Authors of project: Hesam Montazeri, Susana Posada-Cespedes.
+
 - This information is also provided under evamtools/inst/COPYRIGHTS and in the header of the files themselves, as comments.
 
 

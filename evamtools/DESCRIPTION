@@ -11,11 +11,18 @@ Authors@R: c(
 	    person("Daniele", "Ramazzotti", role = "ctb",
 	           comment = "import.hesbcn"),
 	    person("Rudolf", "Schill", role = "ctb",
-	           comment = "MHN"))
+	           comment = "MHN"),
+	    person("Hesam", "Montazeri", role = "ctb",
+	           comment = "random_poset"),
+            person("Susana", "Posada-Cespedes", role = "ctb",
+	           comment = "random_poset")
+)
 Author: Ramon Diaz-Uriarte [aut, cre]
         Pablo Herrera-Nieto [aut]
 	Daniele Ramazzotti [ctb],
-	Rudolf Schill [ctb]
+	Rudolf Schill [ctb],
+	Hesam Montazeri [ctb],
+	Susana Posada-Cespedes [ctb].
 Maintainer: Ramon Diaz-Uriarte <r.diaz@uam.es>
 Description: Wrappers to run cancer progression models (CPMs) on
     cross-sectional data, including Conjuntive Bayesian Networks (CBN ---and their MC-CBN version---), Oncogenetic trees (OT), Mutual Hazard Networks (MHN), Hidden Extended Suppes-Bayes Causal Networks (H-ESBCNs ---PMCE---), and Disjunctive Bayesian Networks (DBN, from the OncoBN package). Tools to represent, graphically, the fitted models (DAGs of restrictions or matrix of hazards, as appropriate), the transition matrices and transition rate matrices (where appropriate) between genotypes and to show frequencies of genotypes sampled from the fitted models. Functions to sample from the fitted models or from random models to facilitate comparing different methods. An interactive Shiny web app allows users to easily visualize the effects of changes in genotype composition and to interactively modify and create datasets from models defined from scratch.
@@ -38,6 +45,7 @@ Imports: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree
     , magrittr
     , dplyr
     , tippy
+    , relations
 Suggests: testthat (>= 3.0.0), mccbn
 Config/testthat/parallel: true
 Config/testthat/edition: 3

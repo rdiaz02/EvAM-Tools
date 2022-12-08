@@ -3,3 +3,5 @@ Please see file COPYRIGHTS, under inst/ for details. Briefly:
 - code for file R/HESBCN__import.hesbcn.R is licensed under the Apache License 2.0.
 
 - code for files R/MHN__*.R is licensed under the MIT license.
+
+- code for file R/MCCBN__random_poset.R is licensed under the GNU GPL v2.0 license.
