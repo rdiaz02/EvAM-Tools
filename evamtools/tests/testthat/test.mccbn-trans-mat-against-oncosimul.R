@@ -154,7 +154,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul.", {
                              )
     do_MCCBN_HCBN <- function(x)
         suppressMessages(do_MCCBN_HCBN2(x,
-                                                    mccbn_hcbn2_opts))
+                                        mccbn_hcbn2_opts))
 
         ex_mccbn_and <- do_MCCBN_HCBN(examples_csd$csd$AND$data)
         ex_mccbn_linear <- do_MCCBN_HCBN(examples_csd$csd$Linear$data)
