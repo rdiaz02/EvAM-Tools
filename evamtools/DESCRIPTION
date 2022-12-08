@@ -1,8 +1,8 @@
 Package: evamtools
 Type: Package
 Title: Tools for evolutionary accumulation models or event accumulation models (evam), for now mainly cancer progression models
-Version: 2.1.15
-Date: 2022-10-03
+Version: 2.1.16
+Date: 2022-12-08
 Authors@R: c(
             person("Ramon", "Diaz-Uriarte",			      
 	    	    email = "r.diaz@uam.es", role = c("cre", "aut")),	      
@@ -15,8 +15,7 @@ Authors@R: c(
 	    person("Hesam", "Montazeri", role = "ctb",
 	           comment = "random_poset"),
             person("Susana", "Posada-Cespedes", role = "ctb",
-	           comment = "random_poset")
-)
+	           comment = "random_poset"))
 Author: Ramon Diaz-Uriarte [aut, cre]
         Pablo Herrera-Nieto [aut]
 	Daniele Ramazzotti [ctb],
@@ -46,7 +45,8 @@ Imports: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree
     , dplyr
     , tippy
     , relations
-Suggests: testthat (>= 3.0.0), mccbn
+Suggests: testthat (>= 3.0.0)
+Enhances: mccbn
 Config/testthat/parallel: true
 Config/testthat/edition: 3
 
