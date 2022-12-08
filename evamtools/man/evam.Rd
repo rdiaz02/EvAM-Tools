@@ -83,7 +83,7 @@ evam(x,
 \item{cbn_opts}{A named list with arguments passed to CBN. 
 \itemize{
 \item{omp_threads: }{OMP threads to be used by CBN (set via the
-  environment variable OMP\_NUM\_THREADS). Defaults to 1. In contrast to
+  environment variable OMP_NUM_THREADS). Defaults to 1. In contrast to
   MCCBN and MHN, you can set
   this to a number larger than one even if you set \code{cores} to a
   number larger than one (i.e., if we use
@@ -351,7 +351,7 @@ Executes all CPMS given a cross sectional data set.
   
 \bold{Reference in details}
   
--  Weinreich, D. M., \& Chao, L. (2005). Rapid evolutionary escape by large populations from local fitness peaks is likely in nature. Evolution, 59(6),   1175–1182. \url{http://dx.doi.org/10.1111/j.0014-3820.2005.tb01769.x} 
+-  Weinreich, D. M., & Chao, L. (2005). Rapid evolutionary escape by large populations from local fitness peaks is likely in nature. Evolution, 59(6),   1175–1182. \url{http://dx.doi.org/10.1111/j.0014-3820.2005.tb01769.x} 
   
 }
 
