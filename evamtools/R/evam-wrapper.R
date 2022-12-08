@@ -686,8 +686,8 @@ evam <- function(x,
         if (!MCCBN_INSTALLED) {
             warning("MCCBN method requested, but mccbn packaged not installed. ",
                     "Removing MCCBN from list of requested methods.")
+            methods <- setdiff(methods, "MCCBN")
         }
-        methods <- setdiff(methods, "MCCBN")
     }
     
     if (length(methods) == 0) stop("No valid methods given.")
