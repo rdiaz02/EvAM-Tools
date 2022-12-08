@@ -163,8 +163,15 @@ dB_c1 <- matrix(
 )
 colnames(dB_c1) <- LETTERS[1:5]
 
+## Use MCCBN only if installed
+MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
+methods <- c("CBN", "OT", "OncoBN", "MHN", "HESBCN")
+if (MCCBN_INSTALLED) {
+    methods <- c(methods, "MCCBN")
+}
+
 out <- evam(dB_c1,
-            methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN"))
+            methods = methods)
 
 plot_evam(out, plot_type = "trans_mat")
 

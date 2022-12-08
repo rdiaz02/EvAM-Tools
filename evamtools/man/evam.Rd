@@ -365,10 +365,16 @@ Executes all CPMS given a cross sectional data set.
 data(every_which_way_data)
 ## Use a small data set for speed.
 Dat1 <- every_which_way_data[[16]][1:40, 2:6]
-out1 <- evam(Dat1,
-            methods = c("CBN", "OT", "OncoBN",
-                        "MHN", "HESBCN", "MCCBN"))
 
+## Use MCCBN only if installed
+MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
+methods <- c("CBN", "OT", "OncoBN", "MHN", "HESBCN")
+if (MCCBN_INSTALLED) {
+    methods <- c(methods, "MCCBN")
+}
+
+out1 <- evam(Dat1,
+            methods = methods)
 
 ## Running only some methods and changing some options
 ## (this example is not necessarily sensible!)
