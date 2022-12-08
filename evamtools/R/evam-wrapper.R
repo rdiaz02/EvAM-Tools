@@ -673,15 +673,24 @@ evam <- function(x,
     methods <- unique(methods)
     accepted_methods <- c("OT", "OncoBN", "CBN", "MCCBN", "MHN", "HESBCN")
     not_valid_methods <- which(!(methods %in% accepted_methods))
-    if(length(not_valid_methods)) {
+    if (length(not_valid_methods)) {
         warning("Method(s) ",
                 paste(methods[not_valid_methods], sep = ", ", collapse = ", "),
                 " not among the available methods.",
                 " Ignoring the invalid method.")
         methods <- methods[-not_valid_methods]
     }
-    if(length(methods) == 0) stop("No valid methods given.")
-
+    
+    if ("MCCBN" %in% methods) {
+        MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
+        if (!MCCBN_INSTALLED) {
+            warning("MCCBN method requested, but mccbn packaged not installed. ",
+                    "Removing MCCBN from list of requested methods.")
+        }
+        methods <- setdiff(methods, "MCCBN")
+    }
+    
+    if (length(methods) == 0) stop("No valid methods given.")
 
     ## ########      Preprocessing: common to all methods
     x <- df_2_mat_integer(x)
@@ -906,7 +915,6 @@ evam <- function(x,
             return(NA)
         }
     }
-  
     return(list(
         OT_model = get_output("OT", "edges"),
         OT_f_graph = get_output("OT", "weighted_fgraph"),

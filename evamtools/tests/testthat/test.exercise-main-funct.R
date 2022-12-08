@@ -156,6 +156,7 @@ test_that("Examples from initial-simple-examples", {
 
 
 test_that("We can run evam with non-default arguments", {
+    MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
     data(every_which_way_data)
     Dat1 <- every_which_way_data[[16]][1:40, 2:8]
     out <- suppressMessages(
