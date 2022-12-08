@@ -1,0 +1,5 @@
+* To make it easy, if ever, to go back before making MCCBN optional.
+
+* As of 2022-12-08, the web up is using this code. Not yet version 2.1.16, with
+  MCCBN optional. (But note the web app and Docker images will continue including
+  MCCBN).
