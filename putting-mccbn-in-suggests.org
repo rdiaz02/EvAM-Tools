@@ -6,7 +6,8 @@
 - Yes, here. See http://dirk.eddelbuettel.com/blog/2017/03/22/#suggests_is_not_depends
 - Well, not quite:
   - https://stat.ethz.ch/pipermail/r-devel/2016-April/072531.html
-  - I do not want to use _R_CHECK_FORCE_SUGGESTS_
-- So it is now in Enhances
-* TODO
-- mccbn::random_poset is used in several places. Must copy the function (adding authors to code) so we do not depend on MCCBN
+  - I do not want to use _R_CHECK_FORCE_SUGGESTS_ (makes it harder for students and other users to simply do R CMD check)
+- So it is now in Enhances.
+- Tested in systems with and without mccbn.
+* DONE
+- mccbn::random_poset is used in several places. Must copy the function (adding authors to code) so we do not depend on MCCBN. Authors as ctb in DESCRIPTION and added info to copyright files.
