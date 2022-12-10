@@ -604,13 +604,20 @@ transition_fg_sparseM <- function(x, weights) {
 
 ## Main function. data frame or matrix -> output
 evam <- function(x,
-                 methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN"),
+                 methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN", "HyperHMM"),
                  max_cols = 15,
                  cores = detectCores(),
                  paths_max = FALSE,
                  mhn_opts = list(lambda = 1/nrow(x),
                                  omp_threads = ifelse(cores > 1, 1, detectCores())
                                 ),
+                 hyperhmm_opts = list(precursors = NA, # precursors (e.g. ancestors) -- blank for cross-sectional
+                                      nboot = 1, # number of boostrap resamples
+                                      random.walkers = 0, # run random walkers for each resample? 0 no, 1 yes
+                                      label = "label", # label for file I/O
+                                      simulate = TRUE, # actually run HyperHMM? If not, try and pull precomputed output using "label"
+                                      fork = FALSE # if we are running it, fork to a new process, or keep linear?
+                                      ),
                  ot_opts = list(with_errors_dist_ot = TRUE),
                  cbn_opts = list(
                      omp_threads = 1,
@@ -671,7 +678,7 @@ evam <- function(x,
     
     ## Sanity checks of methods
     methods <- unique(methods)
-    accepted_methods <- c("OT", "OncoBN", "CBN", "MCCBN", "MHN", "HESBCN")
+    accepted_methods <- c("OT", "OncoBN", "CBN", "MCCBN", "MHN", "HESBCN", "HyperHMM")
     not_valid_methods <- which(!(methods %in% accepted_methods))
     if (length(not_valid_methods)) {
         warning("Method(s) ",
@@ -731,6 +738,14 @@ evam <- function(x,
         omp_threads = 1,
         init_poset = "OT"
     )
+    d_hyperhmm_opts = list(
+      precursors = NA, 
+      nboot = 1,
+      random.walkers = 0, 
+      label = "label", 
+      simulate = TRUE, 
+      fork = FALSE
+    )
     d_hesbcn_opts <- list(
         MCMC_iter = 100000,
         seed = NULL,
@@ -768,14 +783,15 @@ evam <- function(x,
 
     ## Not needed, but make sure we keep names distinct
     mhn_opts_2 <- fill_args_default(mhn_opts, d_mhn_opts)
+    hyperhmm_opts_2 <- fill_args_default(hyperhmm_opts, d_hyperhmm_opts)
     cbn_opts_2 <- fill_args_default(cbn_opts, d_cbn_opts)
     hesbcn_opts_2 <- fill_args_default(hesbcn_opts, d_hesbcn_opts)
     oncobn_opts_2 <- fill_args_default(oncobn_opts, d_oncobn_opts)
     mccbn_opts_2 <- fill_args_default(mccbn_opts, d_mccbn_opts)
 
     ## rm to avoid confusion, though not needed
-    rm(cbn_opts, hesbcn_opts, oncobn_opts, mccbn_opts, mhn_opts)
-    rm(d_cbn_opts, d_hesbcn_opts, d_oncobn_opts, d_mccbn_opts, d_mhn_opts)
+    rm(cbn_opts, hesbcn_opts, oncobn_opts, mccbn_opts, mhn_opts, hyperhmm_opts)
+    rm(d_cbn_opts, d_hesbcn_opts, d_oncobn_opts, d_mccbn_opts, d_mhn_opts, d_hyperhmm_opts)
 
     if (!(cbn_opts_2$init_poset %in% c("OT", "linear")))
         stop("CBN's init_poset must be one of OT or linear. ",
@@ -787,6 +803,21 @@ evam <- function(x,
 
     if ("OncoBN" %in% methods) {
         stopifnot(oncobn_opts_2$model %in% c("DBN", "CBN"))
+    }
+    
+    if ("HyperHMM" %in% methods) {
+      # possible names of executable
+      cmds = c("hyperhmm.ce", "hyperhmm.exe", "hyperhmm")
+      #see if any are hee
+      found = FALSE
+      for(cmd in cmds) {
+        if(cmd %in% list.files()) {
+          commandname <- cmd
+          found = TRUE
+        }
+      }
+      if (found == FALSE) { message ("Couldn't find HyperHMM executable in the PATH") }
+      if(ncol(xoriginal) > 15) { message("In HyperHMM model you are welcome to try > 15 features but this may use a lot of memory.") }
     }
     
     
@@ -802,6 +833,11 @@ evam <- function(x,
                      predicted_genotype_freqs =
                          list(probs_from_trm(out$transitionRateMatrix)))
                 })["elapsed"]
+        } else if (method == "HyperHMM") {
+            time_out <- system.time({
+              out <- do_HyperHMM(xoriginal, precursors = NA, nboot = 1, random.walkers = 0,
+                                 label = "label", simulate = TRUE,fork = FALSE)
+            })
         } else if (method == "HESBCN") {
             time_out <- system.time({
                 out <- do_HESBCN(x,
