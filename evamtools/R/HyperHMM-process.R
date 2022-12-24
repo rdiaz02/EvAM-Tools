@@ -57,7 +57,16 @@ do_HyperHMM <- function(xoriginal,
   filename <- paste(c("HyperHMM-in-", label, ".txt"), collapse="")
   write(final.rows, filename)
   
-  #create call to HyperHMM
+  # create commandname for HyperHMM
+  # possible names of executable
+  cmds <- c("hyperhmm.ce", "hyperhmm.exe", "hyperhmm")
+  #see if any are here
+  for(cmd in cmds) {
+    if(cmd %in% list.files()) {
+      commandname <- cmd
+    }
+  }
+  # create call to HyperHMM
   if(simulate == TRUE) {
     if(fork == TRUE) {
       syscommand <- paste(c("./", commandname, " ", filename, " ", L, " ", nboot, " ", label, " ", cross.sectional, " ", random.walkers, " &"), collapse = "")
