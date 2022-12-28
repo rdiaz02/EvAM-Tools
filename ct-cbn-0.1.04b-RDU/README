@@ -1,0 +1,159 @@
+ct-cbn :: Continuous time conjunctive Bayesian networks
+-------------------------------------------------------
+
+-- Version 0.1.04a, Nov 2015
+
+
+Prerequisites:
+--------------
+
+CT-CBN requires
+- GNU Scientific Library (GSL)
+- OpenMP compiler support
+
+Get the GSL from http://www.gnu.org/software/gsl/
+
+On Mac OS X, we recommend you install all dependencies via
+MacPorts (https://www.macports.org). Once MacPorts is installed,
+proceed to install GCC and the GSL with
+
+	sudo port install gcc5 gsl
+
+
+Installation:
+-------------
+
+- Decompress the tarball with
+	tar -xjf ct-cbn-0.1.04a.tar.bz2
+
+- Change directory
+	cd ct-cbn-0.1.04a
+
+- On Linux, run the configure script
+	./configure
+  On Mac OS X, also pass it GCC as preferred compiler
+	./configure CC=gcc-mp-5
+  alternatively, also give the configure script a '--prefix=<DIR>' to install
+  to a custom root
+
+- Compile the sources with
+	make -j2
+
+- (Optional) install the files with
+	make install
+
+- (Optional, if you haven't run the previous step) add the build directory to your PATH.
+  When using bash, add the following commands in .bashrc or .bash_profile
+	echo export PATH=`pwd`:'$PATH' >> ~/.bash_profile
+	
+
+Description:
+------------
+
+'ct-cbn' is an implementation of the continuous time conjunctive Bayesian 
+         network as described in Beerenwikel & Sullivant, 
+         http://arxiv.org/abs/0709.2646v1.
+
+'h-cbn'  is a more recent implementation of the CBN with an explicit error 
+         process.
+
+
+Usage:
+------
+
+Type 'ct-cbn -h' or 'h-cbn -h' for available options.
+
+
+
+File formats:
+-------------
+
+(a) Pattern files (.pat): 
+
+A binary data matrix preceeded by its dimensions (#rows #columns) 
+in the first line. The initial event (column 1) must always occur, 
+i.e., all patterns have to start with a 1 followed by a 
+space-separated list of 0's and 1's.
+Note that the pattern matrix is not checked for validity!
+
+Example with 7 mutations:
+10 8
+1 0 0 0 1 0 1 1
+1 1 1 1 1 0 0 0
+1 1 1 1 1 0 1 1
+1 1 1 1 1 0 1 1
+1 1 1 1 1 0 1 1
+1 1 1 1 1 0 0 0
+1 1 1 0 1 0 1 1
+1 1 1 0 1 0 1 1
+1 1 1 0 1 0 1 1
+1 1 1 0 1 0 1 1
+
+
+(b) Poset files (.poset): 
+
+A list of binary relations preceeded by the number of genetic events
+(mutations). A relation "i<j" is specified by the line "i j". The end
+of the list is indicated by a line containing only a zero.
+
+Example with 7 mutations and 5 relations:
+7
+6 1
+1 5
+4 7
+7 2
+2 3
+0
+
+
+(c) Event name files (.prf):
+
+A list of names of the genetic events. The first row is a dummy, often with
+the name 'null' or 'wild type', the next n lines label the genetic events
+1, ..., n. Thus the file has n+1 lines for n genetic events. 
+This file is _not_ used by the ct-cbn program.
+
+
+
+Citing:
+-------
+
+Niko Beerenwinkel and Seth Sullivant.
+Markov models for accumulating mutations.
+arxiv:0709.2646v1, 2007.
+
+
+
+Copyright:
+----------
+
+Copyright (C)  2007-2009  Niko Beerenwinkel
+                          niko.beerenwinkel@bsse.ethz.ch
+
+			  Moritz Gerstung
+			  moritz.gerstung@bsse.ethz.ch
+
+This program is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or
+(at your option) any later version.
+  
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+  
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+
+
+Contact:
+--------
+
+Niko Beerenwinkel
+Department of Biosystems Science and Engineering
+ETH Zurich
+
+niko.beerenwinkel@bsse.ethz.ch

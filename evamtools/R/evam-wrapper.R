@@ -837,6 +837,7 @@ evam <- function(x,
             time_out <- system.time({
               out <- do_HyperHMM(xoriginal, precursors = NA, nboot = 1, random.walkers = 0,
                                  label = "label", simulate = TRUE,fork = FALSE)
+              
             })
         } else if (method == "HESBCN") {
             time_out <- system.time({
@@ -987,9 +988,11 @@ evam <- function(x,
         MHN_paths_max = get_paths_max("MHN"),
         
         HyperHMM_stats.df = get_output('HyperHMM', 'stats.df'),
-        HyperHMM_transitions = get_output('HyperHMM, transitions'),
+        HyperHMM_transitions = get_output('HyperHMM', 'transitions'),
         HyperHMM_features = get_output('HyperHMM', 'features'),
         HyperHMM_viz.tl = get_output('HyperHMM', 'viz.tl'),
+        HyperHMM_predicted_genotype_freqs = get_output("HyperHMM",
+                                                  "predicted_genotype_freqs"),
         #HyperHMM = get_paths_max('HyperHMM'),
         
         OncoBN_model = get_output("OncoBN", "edges"),

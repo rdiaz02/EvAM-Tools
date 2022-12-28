@@ -112,7 +112,11 @@ do_HyperHMM <- function(xoriginal,
         index <- index+1
       }
     }
-    fitted <- list(stats.df, transitions, features, viz.tl)
+    
+   
+    
+    fitted <- list(stats.df=stats.df,transitions=transitions, features=features, viz.tl=viz.tl)
+
     return(fitted)
     #create a list of useful objects and return it
   }
