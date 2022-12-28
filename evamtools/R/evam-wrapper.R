@@ -991,7 +991,7 @@ evam <- function(x,
         HyperHMM_transitions = get_output('HyperHMM', 'transitions'),
         HyperHMM_features = get_output('HyperHMM', 'features'),
         HyperHMM_viz.tl = get_output('HyperHMM', 'viz.tl'),
-        HyperHMM_predicted_genotype_freqs = get_output("HyperHMM",
+        #HyperHMM_predicted_genotype_freqs = get_output("HyperHMM",
                                                   "predicted_genotype_freqs"),
         #HyperHMM = get_paths_max('HyperHMM'),
         
