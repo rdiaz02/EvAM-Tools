@@ -807,13 +807,14 @@ evam <- function(x,
     
     if ("HyperHMM" %in% methods) {
       # possible names of executable
-      cmds = c("hyperhmm.ce", "hyperhmm.exe", "hyperhmm")
-      #see if any are hee
-      found = FALSE
+      cmds <- c("hyperhmm.ce", "hyperhmm.exe", "hyperhmm")
+      #see if any are here
+      found <- FALSE
+      commandname <- ""
       for(cmd in cmds) {
         if(cmd %in% list.files()) {
           commandname <- cmd
-          found = TRUE
+          found <- TRUE
         }
       }
       if (found == FALSE) { message ("Couldn't find HyperHMM executable in the PATH") }
@@ -835,7 +836,7 @@ evam <- function(x,
                 })["elapsed"]
         } else if (method == "HyperHMM") {
             time_out <- system.time({
-              out <- do_HyperHMM(xoriginal, precursors = NA, nboot = 1, random.walkers = 0,
+              out <- do_HyperHMM(xoriginal, commandname, precursors = NA, nboot = 1, random.walkers = 0,
                                  label = "label", simulate = TRUE,fork = FALSE)
             })
         } else if (method == "HESBCN") {
@@ -926,7 +927,7 @@ evam <- function(x,
 
     
     ## f_graph: remember this is the transition rate matrix
-    ## for CBN, MCCBN, HESBCN
+    ## for CBN, MCCBN, HESBCN, HyperHMM
     ## For OT ... well, it is something else, but not really probabilities
     ## of anything.
 
@@ -986,6 +987,12 @@ evam <- function(x,
                                                   "predicted_genotype_freqs"),
         MHN_paths_max = get_paths_max("MHN"),
         
+        #HyperHMM_stats.df = get_output('HyperHMM', 'stats.df'),
+        #HyperHMM_transitions = get_output('HyperHMM, transitions'),
+        #HyperHMM_features = get_output('HyperHMM', 'features'),
+        #HyperHMM_viz.tl = get_output('HyperHMM', 'viz.tl'),
+        #HyperHMM = get_paths_max('HyperHMM'),
+        
         OncoBN_model = get_output("OncoBN", "edges"),
         OncoBN_likelihood = get_output("OncoBN", "likelihood"),
         OncoBN_f_graph = get_output("OncoBN", "weighted_fgraph"), 
@@ -1015,6 +1022,7 @@ evam <- function(x,
                             genotypes_standard_order(colnames(x))),
         all_options = list(
             mhn_opts = mhn_opts_2,
+            hyperhmm_opts = hyperhmm_opts_2,
             ot_opts = ot_opts,
             cbn_opts = cbn_opts_2,
             hesbcn_opts = hesbcn_opts_2,

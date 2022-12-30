@@ -1,4 +1,5 @@
 do_HyperHMM <- function(xoriginal,
+                        commandname,
                         precursors = NA, # precursors (e.g. ancestors) -- blank for cross-sectional
                         nboot = 1, # number of boostrap resamples
                         random.walkers = 0, # run random walkers for each resample? 0 no, 1 yes
