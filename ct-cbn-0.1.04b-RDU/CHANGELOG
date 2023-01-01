@@ -1,0 +1,56 @@
+New in version 0.1.04a
+---------------------
+Autotooled the build system and removed the broken Makefile
+
+
+New in version 0.1.04
+---------------------
++  Cleaned up code
+
++  -m option shows most likely path.
+
++  -w option writes output.
+
++  Only report results of the H-CBN model
+
+
+New in version 0.1.03
+---------------------
+Optimized EM_ACCURACY for efficiency
+
+
+New in version 0.1.01
+---------------------
++ Optimized search strategy for simulated annealing: 
+  Suggesting relations with probability 
+    e^{-change in data explained without errors}
+
++ Support for calculating MAP estimates as well as GPS (-g option).
+
+
+New in version 0.1.00
+---------------------
+
++ ct-cbn.h: Functions are now shared in ct-cbn.h
+
++ h-cbn: Hidden-Markov Conjunctive Bayesian networks:
+  Uses EM to estimate posets and parameters from noisy mutation patterns.
+  Includes simulated annealing search algorithm to find ML poset. (-L option)
+
++ Increased performance after profiling (eg, ham_dist()).
+  
++ Using openmp for p arallelization:
+  Requires gcc > 4.2.
+
+
+New in version 0.0.03
+---------------------
+
++ Support to calculate genetic progression score (GPS).
+
++ Fixed bug while reducing to cover relations:
+  New function reduce_to_cover_relations() uses BFS to search whole lattice, 
+  instead of comparing only pairs.
+
++ Fixed bug in function draw_samples():
+  gsl_ran_exp() has mu = 1/lambda as its argument instead of lambda.

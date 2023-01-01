@@ -58,7 +58,16 @@ do_HyperHMM <- function(xoriginal,
   filename <- paste(c("HyperHMM-in-", label, ".txt"), collapse="")
   write(final.rows, filename)
   
-  #create call to HyperHMM
+  # create commandname for HyperHMM
+  # possible names of executable
+  cmds <- c("hyperhmm.ce", "hyperhmm.exe", "hyperhmm")
+  #see if any are here
+  for(cmd in cmds) {
+    if(cmd %in% list.files()) {
+      commandname <- cmd
+    }
+  }
+  # create call to HyperHMM
   if(simulate == TRUE) {
     if(fork == TRUE) {
       syscommand <- paste(c("./", commandname, " ", filename, " ", L, " ", nboot, " ", label, " ", cross.sectional, " ", random.walkers, " &"), collapse = "")
@@ -104,7 +113,11 @@ do_HyperHMM <- function(xoriginal,
         index <- index+1
       }
     }
-    fitted <- list(stats.df, transitions, features, viz.tl)
+    
+   
+    
+    fitted <- list(stats.df=stats.df,transitions=transitions, features=features, viz.tl=viz.tl)
+
     return(fitted)
     #create a list of useful objects and return it
   }
