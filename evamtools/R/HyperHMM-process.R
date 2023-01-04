@@ -119,10 +119,10 @@ do_HyperHMM <- function(xoriginal,
    #Create HyperHMM_trans_mat from transitions (dataframe) 
     
     M <- matrix(0, nrow = 16, ncol = 16)
-    lista<-(c(c('WT', features), combn(features, 2, simplify = FALSE), 
-              combn(features, 3, simplify = FALSE),
-              combn(features, 4, simplify = FALSE) ))
-    lista<-lapply(lista, function(y) toString(y))
+    
+    lista<-lapply(1:length(features),function(y) combn(features,y,simplify=FALSE))
+    lista<-c('WT',unlist(lapply(lista, 
+                                function(y) (lapply(y, function(z) toString(z))))))
     
     for (i in (1:length(transitions[["Probability"]]))){
       
