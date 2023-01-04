@@ -51,6 +51,7 @@ do_HyperHMM <- function(xoriginal,
   
   if(any(obs.sums == 0)) {
     message("Dropping O^L observations")
+    message(getwd())
     final.rows = final.rows[obs.sums]
   }
   
@@ -115,8 +116,27 @@ do_HyperHMM <- function(xoriginal,
     }
     
    
+   #Create HyperHMM_trans_mat from transitions (dataframe) 
     
-    fitted <- list(stats.df=stats.df,transitions=transitions, features=features, viz.tl=viz.tl)
+    M <- matrix(0, nrow = 16, ncol = 16)
+    lista<-(c(c('WT', features), combn(features, 2, simplify = FALSE), 
+              combn(features, 3, simplify = FALSE),
+              combn(features, 4, simplify = FALSE) ))
+    lista<-lapply(lista, function(y) toString(y))
+    
+    for (i in (1:length(transitions[["Probability"]]))){
+      
+      M[transitions[["From"]][i],
+        transitions[["To"]][i]] <- transitions[["Probability"]][i]
+    }
+    trans_mat <- as(M, "dgCMatrix")
+    trans_mat@Dimnames[[1]]<-as.character(lista)
+    trans_mat@Dimnames[[2]]<-as.character(lista)
+    
+    
+    fitted <- list (stats.df = stats.df, transitions = transitions, 
+                   trans_mat = trans_mat, features = features, 
+                  viz.tl = viz.tl)
 
     return(fitted)
     #create a list of useful objects and return it

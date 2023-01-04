@@ -810,7 +810,6 @@ evam <- function(x,
       cmds <- c("hyperhmm.ce", "hyperhmm.exe", "hyperhmm")
       #see if any are here
       found <- FALSE
-
       commandname <- ""
       for(cmd in cmds) {
         if(cmd %in% list.files()) {
@@ -988,6 +987,12 @@ evam <- function(x,
         MHN_predicted_genotype_freqs = get_output("MHN",
                                                   "predicted_genotype_freqs"),
         MHN_paths_max = get_paths_max("MHN"),
+<<<<<<< HEAD
+=======
+<<<<<<< HEAD
+
+=======
+>>>>>>> fab6f34
         
 #<<<<<<< HEAD
         #HyperHMM_stats.df = get_output('HyperHMM', 'stats.df'),
@@ -995,14 +1000,20 @@ evam <- function(x,
         #HyperHMM_features = get_output('HyperHMM', 'features'),
         #HyperHMM_viz.tl = get_output('HyperHMM', 'viz.tl'),
 #=======
+<<<<<<< HEAD
+=======
+>>>>>>> 699dfee (Bugs in evam-wrapper solved)
+>>>>>>> fab6f34
         HyperHMM_stats.df = get_output('HyperHMM', 'stats.df'),
         HyperHMM_transitions = get_output('HyperHMM', 'transitions'),
         HyperHMM_features = get_output('HyperHMM', 'features'),
         HyperHMM_viz.tl = get_output('HyperHMM', 'viz.tl'),
-        #HyperHMM_predicted_genotype_freqs = get_output("HyperHMM",
-#                                                  "predicted_genotype_freqs"),
+<<<<<<< HEAD
+        HyperHMM_trans_mat = get_output("HyperHMM", "trans_mat"),
+=======
 #>>>>>>> 9c183f00211e5785795c2a98c395ba8f2c441d5d
         #HyperHMM = get_paths_max('HyperHMM'),
+>>>>>>> 699dfee (Bugs in evam-wrapper solved)
         
         OncoBN_model = get_output("OncoBN", "edges"),
         OncoBN_likelihood = get_output("OncoBN", "likelihood"),
