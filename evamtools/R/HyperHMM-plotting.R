@@ -1,3 +1,16 @@
+#Slight modifications have been made to the original repository files to adapt the functions to EvamTools.
+
+#Code from https://github.com/StochasticBiology/hypercube-hmm .
+#Commit fd53923 from 2022-11-11
+
+#Authors of code: Stochastic Biology Group (Iain Johnston at University of Bergen) and Marcus Moen.
+
+#Author of paper/project: Marcus T. Moen and Iain G. Johnston
+
+#Paper: Moen, M. T., & Johnston, I. G. (2022). HyperHMM: Efficient inference of evolutionary and progressive dynamics on hypercubic transition graphs. 
+#Bioinformatics (Oxford, England), btac803. Advance online publication. https://doi.org/10.1093/bioinformatics/btac803
+
+
 library(ggplot2)
 library(ggrepel)
 library(igraph)
