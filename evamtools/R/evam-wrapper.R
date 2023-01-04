@@ -987,12 +987,29 @@ evam <- function(x,
         MHN_predicted_genotype_freqs = get_output("MHN",
                                                   "predicted_genotype_freqs"),
         MHN_paths_max = get_paths_max("MHN"),
+<<<<<<< HEAD
 
+=======
+        
+#<<<<<<< HEAD
+        #HyperHMM_stats.df = get_output('HyperHMM', 'stats.df'),
+        #HyperHMM_transitions = get_output('HyperHMM, transitions'),
+        #HyperHMM_features = get_output('HyperHMM', 'features'),
+        #HyperHMM_viz.tl = get_output('HyperHMM', 'viz.tl'),
+#=======
+>>>>>>> 699dfee (Bugs in evam-wrapper solved)
         HyperHMM_stats.df = get_output('HyperHMM', 'stats.df'),
         HyperHMM_transitions = get_output('HyperHMM', 'transitions'),
         HyperHMM_features = get_output('HyperHMM', 'features'),
         HyperHMM_viz.tl = get_output('HyperHMM', 'viz.tl'),
+<<<<<<< HEAD
         HyperHMM_trans_mat = get_output("HyperHMM", "trans_mat"),
+=======
+        #HyperHMM_predicted_genotype_freqs = get_output("HyperHMM",
+#                                                  "predicted_genotype_freqs"),
+#>>>>>>> 9c183f00211e5785795c2a98c395ba8f2c441d5d
+        #HyperHMM = get_paths_max('HyperHMM'),
+>>>>>>> 699dfee (Bugs in evam-wrapper solved)
         
         OncoBN_model = get_output("OncoBN", "edges"),
         OncoBN_likelihood = get_output("OncoBN", "likelihood"),
@@ -1029,6 +1046,7 @@ evam <- function(x,
             hesbcn_opts = hesbcn_opts_2,
             oncobn_opts = oncobn_opts_2,
             mccbn_opts = mccbn_opts_2)
+    
     )
     )
 }
