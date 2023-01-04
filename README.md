@@ -25,6 +25,7 @@
   * [MHN](#mhn)
   * [H-ESBCN (PMCE)](#h-esbcn-pmce)
   * [OncoBN (DBN)](#oncobn-dbn)
+  * [Hypercube-HMM](#hypercube-hmm)
   * [Conditional prediction of genotypes and probabilities of paths from CPMs](#conditional-prediction-of-genotypes-and-probabilities-of-paths-from-cpms)
 - [Additional documentation](#additional-documentation)
 - [Citing EvAM-Tools](#citing-evam-tools)
@@ -36,7 +37,7 @@ Tools for evolutionary accumulation, or event accumulation, models. We use code 
 
 We provide an R package, evamtools, that can also launch a GUI as a Shiny (https://shiny.rstudio.com/) web app (running on https://www.iib.uam.es/evamtools/) that allows you to:
 
-  * Run state-of-the-art CPM methods, including Conjuntive Bayesian Networks (CBN ---and their MC-CBN version---), Oncogenetic trees (OT), Mutual Hazard Networks (MHN), Hidden Extended Suppes-Bayes Causal Networks (H-ESBCNs ---PMCE---), and Disjunctive Bayesian Networks (DBN, from the OncoBN package) with a single function call.
+  * Run state-of-the-art CPM methods, including Conjuntive Bayesian Networks (CBN ---and their MC-CBN version---), Oncogenetic trees (OT), Mutual Hazard Networks (MHN), Hidden Extended Suppes-Bayes Causal Networks (H-ESBCNs ---PMCE---), Hypercubic inference using Hidden Markov Models (HyperHMM), Disjunctive Bayesian Networks (DBN, from the OncoBN package) with a single function call.
   * From the fitted models, represent, graphically, the fitted models (DAGs of restrictions or matrix of hazards, as appropriate), the transition matrices and transition rate matrices (where appropriate) between genotypes and show frequencies of genotypes sampled from the fitted models.
   * Using the shiny app, easily visualize the effects of changes in genotype composition on the fitted models by entering user-defined cross-sectional data using a GUI.
 
@@ -138,6 +139,20 @@ Furthermore, note that in all cases, when data are analyzed, in addition to retu
   Author of code:  from comments and commit history (e.g., d2d8dfd, f08add1) most likely Hesam Montazeri.
 
   Authors of project: Hesam Montazeri, Susana Posada-Cespedes.
+  
+
+- Files HyperHMM-process.R and HyperHMM-plotting: 
+
+  Slight modifications have been made to the original repository files to adapt the functions to EvamTools.
+  
+  Code from https://github.com/StochasticBiology/hypercube-hmm .
+  Commit fd53923 from 2022-11-11
+  
+  Authors of code: Stochastic Biology Group (Iain Johnston at University of Bergen) and Marcus Moen.
+  
+  Author of paper/project: Marcus T. Moen and Iain G. Johnston
+  
+  Paper: Moen, M. T., & Johnston, I. G. (2022). HyperHMM: Efficient inference of evolutionary and progressive dynamics on hypercubic transition graphs. Bioinformatics (Oxford, England), btac803. Advance online publication. https://doi.org/10.1093/bioinformatics/btac803
 
 
 - This information is also provided under evamtools/inst/COPYRIGHTS and in the header of the files themselves, as comments.
@@ -214,6 +229,13 @@ You can also build your own Docker image and you might want to run the Shiny app
      - Build (R CMD build evamtools) and install (R CMD INSTALL evamtools_x.y.z.tar.gz, with x.y.z replaced by the current version number). File `build-test.sh` builds, tests, and installs the package (and takes care of the version number).
 	 
 	   Testing is, by default, parallelized and will use all CPUs except 1 (up to 20, the number of test files): the package includes over 1400 tests, with a test coverage of more than 90%. If you want to use fewer CPUs modify variable `TESTTHAT_CPUS` in script `build-test.sh` (see also https://testthat.r-lib.org/articles/parallel.html).
+	   
+  * Install Hypercube-hmm:
+  - Make sure you have the required dependencies and imports, as listed in the DESCRIPTION file:stringr , ggplot2, ggrepel, gridExtra, and igraph.
+  - You'll need to compile the C++ code. 
+          - Install the armadillo library on your machine
+          - Compile from Terminal (g++ hyperhmm.cpp -larmadillo -o hyperhmm.ce)
+
 	
 	  
 ### Docker images 
@@ -369,6 +391,12 @@ The R package itself with standard organization. Directories and files under ins
   1027. http://dx.doi.org/10.1002/cso2.1027
 
 
+### Hypercube-HMM ###
+
+- Moen, M. T., & Johnston, I. G. (2022). HyperHMM: Efficient inference of 
+  evolutionary and progressive dynamics on hypercubic transition graphs. 
+  Bioinformatics (Oxford, England), btac803. Advance online publication.
+  https://doi.org/10.1093/bioinformatics/btac803
 
 
 ### Conditional prediction of genotypes and probabilities of paths from CPMs ###

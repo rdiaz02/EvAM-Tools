@@ -3,12 +3,13 @@
 \title{Runs the CPMs (or evams)}
 \usage{
 evam(x,
-     methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN"),
+     methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN", "HyperHMM"),
      max_cols = 15,
      cores = detectCores(),
      paths_max = FALSE,
      mhn_opts = list(lambda = 1/nrow(x),
                      omp_threads = ifelse(cores > 1, 1, detectCores())),
+     hyperhmm_opts = list(precursors = NA, nboot = 1, random.walkers = 0,                            label = "label", simulate = TRUE, fork = FALSE),
      ot_opts = list(with_errors_dist_ot = TRUE),
      cbn_opts = list(
                      omp_threads = 1,
@@ -56,7 +57,7 @@ evam(x,
 \item{x}{cross sectional data}
 
 \item{methods}{Methods to use. A vector with one or more of the
-  following strings, \dQuote{OT}, \dQuote{OncoBN}, \dQuote{CBN}, \dQuote{MCCBN}, \dQuote{MHN}, \dQuote{HESBCN}.}
+  following strings, \dQuote{OT}, \dQuote{OncoBN}, \dQuote{CBN}, \dQuote{MCCBN}, \dQuote{MHN}, \dQuote{HESBCN}, \dQuote{HyperHMM}.}
 
 
 \item{max_cols}{Maximum number of columns to use in the analysis. If x has > max_cols, selected columns are those with the largest number of events.} 
@@ -77,6 +78,25 @@ evam(x,
    \code{thrds} > 1 with \code{cores} > 1: as with MCCBN, do not use OpenMP threads from forked process from \code{\link[parallel]{mclapply}}. }
   }
 
+}
+
+
+\item{hyperhmm_opts}{A list with six named arguments.
+  \itemize{
+
+ \item{precursors: }{Precursors (e.g. ancestors). Leave it blank for cross-sectional. }
+ 
+ \item{nboot: }{Number of bootstrap resamples. }
+ 
+ \item{random.walkers: }{Run random walkers for each resample. 0 if "no", 1 if "yes".}
+ 
+ \item{label: }{Label for file I/O.}
+ 
+ \item{simulate: }{Actually run HyperHMM. If not, try and pull precomputed output using "label.}
+ 
+ \item{fork: }{if we are running it, fork to a new process, or keep linear}
+
+  }
 }
 
 \item{ot_opts}{A list with the single named argument \code{with_errors_dist_ot}: value for option with \code{with.errors} in the call to \code{\link[Oncotree]{distribution.oncotree}}. A value of TRUE means to incorporate the false positive and negative errors when returning the probabilities of genotypes under OT. Note that for large models using a value of TRUE can result in very long computing times. Default is TRUE.} 
@@ -192,7 +212,13 @@ multiple evams in parallel.}
         \item{MHN_predicted_genotype_freqs: }{As for CBN.}
 	\item{MHN_paths_max: }{As for OT.}
 
-	
+		    \item{HyperHMM_stats.df: }{.}
+		    \item{HyperHMM_transitions: }{.}
+		    \item{HyperHMM_features: }{.}
+		    \item{HyperHMM_viz.tl: }{.}
+		    \item{HyperHMM_trans_mat: }{As for CBN.}
+
+
         \item{OncoBN_model: }{Similar to the ones above (but with a column
         named theta, instead of lambdas or edge weights), with the
         additional column dQuote{Relation}, that can take values OR (if
@@ -333,6 +359,14 @@ Executes all CPMS given a cross sectional data set.
   Bayesian networks. Computational and Systems Oncology, 1(2),
   1027. \url{http://dx.doi.org/10.1002/cso2.1027}
 
+
+\bold{Hypercube-HMM}
+
+- Moen, M. T., & Johnston, I. G. (2022). HyperHMM: Efficient inference of 
+  evolutionary and progressive dynamics on hypercubic transition graphs. 
+  Bioinformatics (Oxford, England), btac803. Advance online publication.
+  https://doi.org/10.1093/bioinformatics/btac803
+
 \bold{Conditional prediction of genotypes and probabilities of paths from CPMs}
 
 - Hosseini, S., Diaz-Uriarte, Ramon, Markowetz, F., & Beerenwinkel,
@@ -368,7 +402,7 @@ Dat1 <- every_which_way_data[[16]][1:40, 2:6]
 
 ## Use MCCBN only if installed
 MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
-methods <- c("CBN", "OT", "OncoBN", "MHN", "HESBCN")
+methods <- c("CBN", "OT", "OncoBN", "MHN", "HESBCN", "HyperHMM")
 if (MCCBN_INSTALLED) {
     methods <- c(methods, "MCCBN")
 }
