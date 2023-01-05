@@ -402,7 +402,7 @@ Dat1 <- every_which_way_data[[16]][1:40, 2:6]
 
 ## Use MCCBN only if installed
 MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
-methods <- c("CBN", "OT", "OncoBN", "MHN", "HESBCN", "HyperHMM")
+methods <- c("CBN", "OT", "OncoBN", "MHN", "HESBCN")
 if (MCCBN_INSTALLED) {
     methods <- c(methods, "MCCBN")
 }
