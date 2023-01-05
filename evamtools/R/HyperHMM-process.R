@@ -124,16 +124,18 @@ do_HyperHMM <- function(xoriginal,
    
    #Create HyperHMM_trans_mat from transitions (dataframe) 
     
-    M <- matrix(0, nrow = 16, ncol = 16)
+    lista<-lapply(1:length(features),
+                  function(y) combn(features,y,simplify=FALSE))
     
-    lista<-lapply(1:length(features),function(y) combn(features,y,simplify=FALSE))
     lista<-c('WT',unlist(lapply(lista, 
-                                function(y) (lapply(y, function(z) toString(z))))))
+                  function(y) (lapply(y, function(z) toString(z))))))
+    
+    M <- matrix(0, nrow = length(lista), ncol = length(lista))
     
     for (i in (1:length(transitions[["Probability"]]))){
       
       M[transitions[["From"]][i],
-        transitions[["To"]][i]] <- transitions[["Probability"]][i]
+        transitions[["To"]][i]+1] <- transitions[["Probability"]][i]
     }
     trans_mat <- as(M, "dgCMatrix")
     trans_mat@Dimnames[[1]]<-as.character(lista)
