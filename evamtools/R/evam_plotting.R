@@ -697,7 +697,7 @@ plot_evam <- function(cpm_output, samples = NULL, orientation = "horizontal",
                         methods = NULL, 
                         plot_type = "trans_mat", label_type="genotype",
                         fixed_vertex_size = FALSE,
-                        top_paths = NULL, ...) {
+                        top_paths = NULL) {
 
     if (!(plot_type %in% c("trans_mat", "trans_rate_mat", "obs_genotype_transitions"))){
         stop(sprintf("Plot type %s is not supported", plot_type))
@@ -760,8 +760,8 @@ plot_evam <- function(cpm_output, samples = NULL, orientation = "horizontal",
     ## Specific plots for HyperHMM
     for (met in available_methods) {
         if (met=='HyperHMM') {
-            plot.bubbles(cpm_output$HyperHMM_stats.df, ...)
-            plot.hypercube(cpm_output$HyperHMM_viz.tl, ...)
+            plot.bubbles(cpm_output$HyperHMM_stats.df)
+            plot.hypercube(cpm_output$HyperHMM_viz.tl)
         } else {
             ## Processing data
             method_data2plot <- process_data(cpm_output, met, plot_type, samples)

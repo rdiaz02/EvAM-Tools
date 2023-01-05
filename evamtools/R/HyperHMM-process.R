@@ -101,9 +101,14 @@ do_HyperHMM <- function(xoriginal,
     return()
   } else {
     mean.table = read.table(mean.filename)
+    file.remove(mean.filename)
     sd.table = read.table(sd.filename)
+    file.remove(sd.filename)
     transitions = read.csv(transitions.filename, sep=" ")
+    file.remove(transitions.filename)
     viz.tl = readLines(viz.filename)
+    file.remove(viz.filename)
+    file.remove(filename)
     
     message("All expected files found.")
     L <- nrow(mean.table)
@@ -148,11 +153,5 @@ do_HyperHMM <- function(xoriginal,
                   viz.tl = viz.tl)
 
     return(fitted)
-    #delete intermediate files
-    file.remove(mean.filename)
-    file.remove(sd.filename)
-    file.remove(transitions.filename)
-    file.remove(viz.filename)
-    file.remove(filename)
   }
 }
