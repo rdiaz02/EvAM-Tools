@@ -719,7 +719,7 @@ plot_evam <- function(cpm_output, samples = NULL, orientation = "horizontal",
             }, logical(1))
         ])
     } else {
-        allms <- c("OT", "OncoBN", "CBN", "MCCBN", "HESBCN", "MHN")
+        allms <- c("OT", "OncoBN", "CBN", "MCCBN", "HESBCN", "MHN", "HyperHMM")
         available_methods <- unique(allms[
             vapply(allms, function(method) {
                 attr_name <- ifelse(method == "MHN", "theta", "model")
@@ -731,6 +731,7 @@ plot_evam <- function(cpm_output, samples = NULL, orientation = "horizontal",
 
     
     ## Shape of the plot
+    
     l_methods <- length(available_methods)
     if (l_methods < 1) stop("No valid methods or ",
                           "no valid methods with analysis output.")
