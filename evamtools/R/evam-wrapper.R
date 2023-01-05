@@ -991,7 +991,7 @@ evam <- function(x,
 
         
         HyperHMM_stats.df = get_output('HyperHMM', 'stats.df'),
-        HyperHMM_transitions = get_output('HyperHMM', 'transitions'),
+        HyperHMM_model = get_output('HyperHMM', 'transitions'),
         HyperHMM_features = get_output('HyperHMM', 'features'),
         HyperHMM_viz.tl = get_output('HyperHMM', 'viz.tl'),
         HyperHMM_trans_mat = get_output("HyperHMM", "trans_mat"),
