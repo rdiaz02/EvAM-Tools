@@ -72,9 +72,14 @@ importFrom("relations", "as.relation",
            "relation_incidence")
            
 ## For HyperHMM plots
-import(ggplot2)
-import(ggrepel)
-import(igraph)
-import(stringr)
-import(gtools)
-import(ggraph)
+import("ggplot2")
+import("ggrepel")
+import("igraph")
+import("stringr")
+importFrom("gtools", "mixedsort")
+import("ggraph")
+
+## Others
+importFrom("methods", "as")
+importFrom("utils", "combn")
+
