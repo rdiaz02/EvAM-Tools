@@ -812,8 +812,9 @@ evam <- function(x,
       found <- FALSE
       commandname <- ""
       for(cmd in cmds) {
-        if(cmd %in% list.files()) {
-          commandname <- cmd
+        commandpath <- Sys.which(cmd)
+        if(nchar(commandpath) > 0) {
+          commandname <- commandpath
           found <- TRUE
         }
       }
