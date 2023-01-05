@@ -15,6 +15,8 @@ library(ggplot2)
 library(ggrepel)
 library(igraph)
 library(stringr)
+library(gtools)
+library(ggraph)
 
 plot.bubbles <- function(stats.df, labels = NULL) {
   message("Building bubble plot")
@@ -22,9 +24,14 @@ plot.bubbles <- function(stats.df, labels = NULL) {
   bp.df$prob <- bp.df$mean
   ## plot bubbles
   if(is.null(labels)) {
-    g.1 <- ggplot(bp.df, aes(x=order, y=feature)) + geom_point(aes(size=prob), colour="#CCCCCC") + theme_classic() + theme(legend.position = "none")
+    g.1 <- ggplot(bp.df, aes(x=order, y=feature)) + 
+    geom_point(aes(size=prob), colour="#CCCCCC") + theme_classic() + 
+    theme(legend.position = "none")
   } else {
-    g.1 <- ggplot(bp.df, aes(x=order, y=feature)) + geom_point(aes(size=prob), colour="#CCCCCC") + scale_y_continuous(breaks=length(labels):1, labels=labels) + theme_classic() + theme(legend.position = "none")
+    g.1 <- ggplot(bp.df, aes(x=order, y=feature)) + 
+    geom_point(aes(size=prob), colour="#CCCCCC") + 
+    scale_y_continuous(breaks=length(labels):1, labels=labels) + theme_classic() 
+    + theme(legend.position = "none")
   }
   g.1
 }
@@ -85,18 +92,21 @@ plot.pfg <- function(viz.tl,              # list of transitions between states
   message("Building plot")
   # plot PFG
   if(pfg.layout == "tree") {
-    g.3 <- ggraph(g, layout="tree") + geom_edge_bend(aes(edge_width=exp(weight/sumw), edge_alpha = weight/sumw), strength=curvature,  arrow=arrow()) + geom_node_point() + geom_node_label(aes(label=name), nudge_x = 0.05, nudge_y=-0.05) + theme_void() + theme(legend.position = "none")
+    g.3 <- ggraph(g, layout="tree") + 
+    geom_edge_bend(aes(edge_width=exp(weight/sumw), edge_alpha = weight/sumw), strength=curvature,  arrow=arrow()) + geom_node_point() + 
+    geom_node_label(aes(label=name), nudge_x = 0.05, nudge_y=-0.05) + 
+    theme_void() + theme(legend.position = "none")
   } else if(pfg.layout == "matrix") {
-    g.3 <- ggraph(g, layout="matrix") + geom_edge_bend(aes(edge_width=exp(weight/sumw), edge_alpha = weight/sumw), strength=curvature,  arrow=arrow()) + geom_node_point() + geom_node_label(aes(label=name), nudge_x = 0.05, nudge_y=-0.05) + theme_void() + theme(legend.position = "none")
+    g.3 <- ggraph(g, layout="matrix") + geom_edge_bend(aes(edge_width=exp(weight/sumw), edge_alpha = weight/sumw), strength=curvature,  arrow=arrow()) + 
+    geom_node_point() + geom_node_label(aes(label=name), nudge_x = 0.05, nudge_y=-0.05) + 
+    theme_void() + theme(legend.position = "none")
   } else {
-    g.3 <- ggraph(g) + geom_edge_bend(aes(edge_width=exp(weight/sumw), edge_alpha = weight/sumw), strength=curvature,  arrow=arrow()) + geom_node_point() + geom_node_label(aes(label=name), nudge_x = 0.05, nudge_y=-0.05) + theme_void() + theme(legend.position = "none")
+    g.3 <- ggraph(g) + geom_edge_bend(aes(edge_width=exp(weight/sumw), 
+    edge_alpha = weight/sumw), strength=curvature,  arrow=arrow()) + 
+    geom_node_point() + geom_node_label(aes(label=name), nudge_x = 0.05, nudge_y=-0.05) + 
+    theme_void() + theme(legend.position = "none")
   }
   g.3
-}
-
-# binary to decimal function
-BinToDec <- function(x) {
-  sum(2^(which(rev(unlist(strsplit(as.character(x), "")) == 1))-1))
 }
 
 plot.hypercube <- function(viz.tl,                  # set of transitions
@@ -110,7 +120,7 @@ plot.hypercube <- function(viz.tl,                  # set of transitions
                            break.redundancy = 0,    # itself redundant now?
                            rotate.phi = FALSE       # rotate states out of the page (in case of trajectories bunched up near the top/bottom)
 ) {
-  transitions <- viz.tl
+  translist <- viz.tl
   message("Building hypercube plot")  
   
   ## hypercube

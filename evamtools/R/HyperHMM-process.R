@@ -65,7 +65,7 @@ do_HyperHMM <- function(xoriginal,
   
   if(any(obs.sums == 0)) {
     message("Dropping O^L observations")
-    message(getwd())
+    #message(getwd())
     final.rows = final.rows[obs.sums]
   }
   
@@ -142,11 +142,17 @@ do_HyperHMM <- function(xoriginal,
     trans_mat@Dimnames[[2]]<-as.character(lista)
     
     
+    #create a list of useful objects and return it
     fitted <- list (stats.df = stats.df, transitions = transitions, 
                    trans_mat = trans_mat, features = features, 
                   viz.tl = viz.tl)
 
     return(fitted)
-    #create a list of useful objects and return it
+    #delete intermediate files
+    file.remove(mean.filename)
+    file.remove(sd.filename)
+    file.remove(transitions.filename)
+    file.remove(viz.filename)
+    file.remove(filename)
   }
 }

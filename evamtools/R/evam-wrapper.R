@@ -838,8 +838,7 @@ evam <- function(x,
         } else if (method == "HyperHMM") {
             time_out <- system.time({
               out <- do_HyperHMM(xoriginal, commandname, precursors = NA, nboot = 1, random.walkers = 0,
-                                 label = "label", simulate = TRUE,fork = FALSE)
-              
+                                 label = "label", simulate = TRUE,fork = FALSE)              
             })
         } else if (method == "HESBCN") {
             time_out <- system.time({

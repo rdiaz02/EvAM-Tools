@@ -70,3 +70,11 @@ importFrom("tippy", "tippy_this", "tippy", "use_tippy")
 importFrom("relations", "as.relation",
            "transitive_reduction",
            "relation_incidence")
+           
+## For HyperHMM plots
+import(ggplot2)
+import(ggrepel)
+import(igraph)
+import(stringr)
+import(gtools)
+import(ggraph)
