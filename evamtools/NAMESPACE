@@ -73,11 +73,13 @@ importFrom("relations", "as.relation",
            
 ## For HyperHMM plots
 import("ggplot2")
+import("gridBase")
 import("ggrepel")
 import("igraph")
 import("stringr")
 importFrom("gtools", "mixedsort")
 import("ggraph")
+importFrom("graphics", "plot.new")
 
 ## Others
 importFrom("methods", "as")
