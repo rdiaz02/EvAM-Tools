@@ -235,6 +235,7 @@ You can also build your own Docker image and you might want to run the Shiny app
   - You'll need to compile the C++ code. 
           - Install the armadillo library on your machine
           - Compile from Terminal (g++ hyperhmm.cpp -larmadillo -o hyperhmm.ce)
+  - When finished, add the `hyperhmm.ce` executable to your $PATH.
 
 	
 	  
