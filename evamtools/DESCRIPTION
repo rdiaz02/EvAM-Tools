@@ -49,6 +49,8 @@ Imports: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree
     , ggrepel
     , ggraph
     , methods
+    , grid
+    , gridBase
 Suggests: testthat (>= 3.0.0)
 Enhances: mccbn
 Config/testthat/parallel: true

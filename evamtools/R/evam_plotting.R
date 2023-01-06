@@ -1050,7 +1050,7 @@ plot.hypercube <- function(viz.tl,                  # set of transitions
                            threshold = 0,           # ignore edges under a threshold in the hypercube plot
                            break.redundancy = 0,    # itself redundant now?
                            rotate.phi = FALSE, 
-                           vp1=vp1      # rotate states out of the page (in case of trajectories bunched up near the top/bottom)
+                           vp1 = vp1      # rotate states out of the page (in case of trajectories bunched up near the top/bottom)
 ) {
   translist <- viz.tl
   message("Building hypercube plot")  
@@ -1166,6 +1166,6 @@ plot.hypercube <- function(viz.tl,                  # set of transitions
     if(seg.labels == TRUE) { cube.plot <- cube.plot + geom_text(data=seglabels, aes(x=z,y=x,label=label), color="#888888", size=lab.size) }
     
   }
-  print(cube.plot, vp = vp1)
+  print(cube.plot, vp1 = vp1)
   popViewport()
 }

@@ -79,6 +79,8 @@ import("stringr")
 importFrom("gtools", "mixedsort")
 import("ggraph")
 importFrom("graphics", "plot.new")
+import("grid")
+import("gridBase")
 
 ## Others
 importFrom("methods", "as")
