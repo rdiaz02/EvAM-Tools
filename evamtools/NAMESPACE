@@ -73,7 +73,6 @@ importFrom("relations", "as.relation",
            
 ## For HyperHMM plots
 import("ggplot2")
-import("gridBase")
 import("ggrepel")
 import("igraph")
 import("stringr")
