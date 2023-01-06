@@ -743,6 +743,7 @@ plot_evam <- function(cpm_output, samples = NULL, orientation = "horizontal",
     }
 
     n_rows <- 2
+
     if (orientation == "vertical") {
         op1 <- par(mfrow = c(l_methods, n_rows),
                    mar = c(0.5, 1, 0.5, 0.5),
@@ -760,8 +761,11 @@ plot_evam <- function(cpm_output, samples = NULL, orientation = "horizontal",
     ## Specific plots for HyperHMM
     for (met in available_methods) {
         if (met=='HyperHMM') {
+
             plot.bubbles(cpm_output$HyperHMM_stats.df)
             plot.hypercube(cpm_output$HyperHMM_viz.tl)
+
+            
         } else {
             ## Processing data
             method_data2plot <- process_data(cpm_output, met, plot_type, samples)
@@ -936,10 +940,17 @@ plot_genotype_counts_plly <- function(data) {
 
 ##### Specific plots for HyperHMM (plot.bubbles, plot.pfg and plot.hypercube)
 
-plot.bubbles <- function(stats.df, labels = NULL) {
+plot.bubbles <- function(stats.df, labels = NULL,vp1=vp1) {
   message("Building bubble plot")
   bp.df <- stats.df
   bp.df$prob <- bp.df$mean
+  
+  #arrange grid
+  plot.new()             
+  vps <- baseViewports()
+  pushViewport(vps$figure)
+  vp1 <-plotViewport(c(1.8,1,0,1))
+  
   ## plot bubbles
   if(is.null(labels)) {
     g.1 <- ggplot(bp.df, aes(x=order, y=feature)) + 
@@ -951,7 +962,9 @@ plot.bubbles <- function(stats.df, labels = NULL) {
     scale_y_continuous(breaks=length(labels):1, labels=labels) + theme_classic() 
     + theme(legend.position = "none")
   }
-  g.1
+
+  print(g.1, vp=vp1)
+  popViewport()
 }
 
 # plot graph of ordered pair acquisitions
@@ -1036,10 +1049,18 @@ plot.hypercube <- function(viz.tl,                  # set of transitions
                            seg.labels = TRUE,       # line segment labels?
                            threshold = 0,           # ignore edges under a threshold in the hypercube plot
                            break.redundancy = 0,    # itself redundant now?
-                           rotate.phi = FALSE       # rotate states out of the page (in case of trajectories bunched up near the top/bottom)
+                           rotate.phi = FALSE, 
+                           vp1=vp1      # rotate states out of the page (in case of trajectories bunched up near the top/bottom)
 ) {
   translist <- viz.tl
   message("Building hypercube plot")  
+  
+  #arrange grid
+  
+  plot.new() 
+  vps2 <- baseViewports()
+  pushViewport(vps2$figure)
+  vp2 <-plotViewport(c(1.8,1,0,1))
   
   ## hypercube
   # get unique set of transitions and associated counts
@@ -1145,5 +1166,6 @@ plot.hypercube <- function(viz.tl,                  # set of transitions
     if(seg.labels == TRUE) { cube.plot <- cube.plot + geom_text(data=seglabels, aes(x=z,y=x,label=label), color="#888888", size=lab.size) }
     
   }
-  return(cube.plot)
+  print(cube.plot, vp = vp1)
+  popViewport()
 }
