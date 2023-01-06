@@ -80,6 +80,7 @@ Random model, with the same structure as returned by function \code{\link{evam}}
 
 \examples{
 rmhn <- random_evam(model = "MHN", ngenes = 5)
+rhmm <- random_evam(model = "HyperHMM", ngenes = 5)
 rcbn <- random_evam(model = "CBN", ngenes = 5,
                              graph_density = 0.5)
 

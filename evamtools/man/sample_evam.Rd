@@ -101,7 +101,7 @@ Dat1 <- every_which_way_data[[16]][1:40, 2:6]
 ## For faster execution, use only some methods
 out <- suppressMessages(evam(Dat1,
                              methods = c("CBN", "OT", "OncoBN",
-                                         "MHN")))
+                                         "MHN", "HyperHMM")))
 
 ## Sample from the predicted genotype frequencies
 ## only for OT

@@ -402,7 +402,7 @@ Dat1 <- every_which_way_data[[16]][1:40, 2:6]
 
 ## Use MCCBN only if installed
 MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
-methods <- c("CBN", "OT", "OncoBN", "MHN", "HESBCN")
+methods <- c("CBN", "OT", "OncoBN", "MHN", "HESBCN", "HyperHMM")
 if (MCCBN_INSTALLED) {
     methods <- c(methods, "MCCBN")
 }
@@ -417,10 +417,11 @@ out1 <- evam(Dat1,
 
 out2 <- evam(Dat1,
             methods = c("CBN", "OT", "OncoBN",
-                        "MHN"),
+                        "MHN", "HyperHMM"),
             mhn_opts = list(lambda = 5/nrow(Dat1)),
             cbn_opts = list(omp_threads = 2),
-            oncobn_opts = list(model = "CBN"))
+            oncobn_opts = list(model = "CBN"),
+            hyperhmm_opts = list(precursors = NA))
 
 
 ## Getting paths to maximum/maxima. Using only two methods

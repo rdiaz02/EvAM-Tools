@@ -76,6 +76,6 @@ lapply(every_which_way_data, dim)
 Dat1 <- every_which_way_data[[16]][1:40, 2:6]
 out <- evam(Dat1,
             methods = c("OT", "OncoBN",
-                        "MHN"))
+                        "MHN", "HyperHMM"))
 }
 \keyword{datasets}
