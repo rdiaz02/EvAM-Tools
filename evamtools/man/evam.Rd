@@ -212,10 +212,10 @@ multiple evams in parallel.}
         \item{MHN_predicted_genotype_freqs: }{As for CBN.}
 	\item{MHN_paths_max: }{As for OT.}
 
-		    \item{HyperHMM_stats.df: }{.}
-		    \item{HyperHMM_transitions: }{.}
-		    \item{HyperHMM_features: }{.}
-		    \item{HyperHMM_viz.tl: }{.}
+		    \item{HyperHMM_stats.df: }{Frequency of appearance of each gene.}
+		    \item{HyperHMM_transitions: }{Transition matrix between genotypes.}
+		    \item{HyperHMM_features: }{Genes that appear mutated.}
+		    \item{HyperHMM_viz.tl: }{Individual transitions from one genotype to             another, obtained during the calculation process.}
 		    \item{HyperHMM_trans_mat: }{As for CBN.}
 
 
