@@ -949,18 +949,18 @@ plot.bubbles <- function(stats.df, labels = NULL,vp1=vp1) {
   plot.new()             
   vps <- baseViewports()
   pushViewport(vps$figure)
-  vp1 <-plotViewport(c(1.8,1,0,1))
+  vp1 <-plotViewport(c(1.8,1,2,1))
   
   ## plot bubbles
   if(is.null(labels)) {
     g.1 <- ggplot(bp.df, aes(x=order, y=feature)) + 
     geom_point(aes(size=prob), colour="#CCCCCC") + theme_classic() + 
-    theme(legend.position = "none")
+    theme(legend.position = "none") + title("HyperHMM")
   } else {
     g.1 <- ggplot(bp.df, aes(x=order, y=feature)) + 
     geom_point(aes(size=prob), colour="#CCCCCC") + 
     scale_y_continuous(breaks=length(labels):1, labels=labels) + theme_classic() 
-    + theme(legend.position = "none")
+    + theme(legend.position = "none") + title("HyperHMM")
   }
 
   print(g.1, vp=vp1)
@@ -1049,8 +1049,7 @@ plot.hypercube <- function(viz.tl,                  # set of transitions
                            seg.labels = TRUE,       # line segment labels?
                            threshold = 0,           # ignore edges under a threshold in the hypercube plot
                            break.redundancy = 0,    # itself redundant now?
-                           rotate.phi = FALSE, 
-                           vp1 = vp1      # rotate states out of the page (in case of trajectories bunched up near the top/bottom)
+                           rotate.phi = FALSE  # rotate states out of the page (in case of trajectories bunched up near the top/bottom)
 ) {
   translist <- viz.tl
   message("Building hypercube plot")  
@@ -1166,7 +1165,7 @@ plot.hypercube <- function(viz.tl,                  # set of transitions
     if(seg.labels == TRUE) { cube.plot <- cube.plot + geom_text(data=seglabels, aes(x=z,y=x,label=label), color="#888888", size=lab.size) }
     
   }
-  print(cube.plot, vp1 = vp1)
+  print(cube.plot, vp = vp2)
   popViewport()
 }
 
