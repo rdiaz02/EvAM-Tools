@@ -231,7 +231,7 @@ You can also build your own Docker image and you might want to run the Shiny app
 	   Testing is, by default, parallelized and will use all CPUs except 1 (up to 20, the number of test files): the package includes over 1400 tests, with a test coverage of more than 90%. If you want to use fewer CPUs modify variable `TESTTHAT_CPUS` in script `build-test.sh` (see also https://testthat.r-lib.org/articles/parallel.html).
 	   
   * Install Hypercube-hmm:
-  - Make sure you have the required dependencies and imports, as listed in the DESCRIPTION file:stringr , ggplot2, ggrepel, gridExtra, and igraph.
+  - Make sure you have the required dependencies and imports, as listed in the DESCRIPTION file: stringr , ggplot2, ggrepel, gridExtra, gridBase and igraph.
   - You'll need to compile the C++ code. 
           - Install the armadillo library on your machine
           - Compile from Terminal (g++ hyperhmm.cpp -larmadillo -o hyperhmm.ce)

@@ -1169,3 +1169,6 @@ plot.hypercube <- function(viz.tl,                  # set of transitions
   print(cube.plot, vp1 = vp1)
   popViewport()
 }
+
+globalVariables(c('feature', 'prob', 'src.z', 'src.x', 'dest.z', 'dest.x', 
+'count', 'z', 'x', 'weight', 'name'))
