@@ -213,9 +213,9 @@ multiple evams in parallel.}
 	\item{MHN_paths_max: }{As for OT.}
 
 		    \item{HyperHMM_stats.df: }{Frequency of appearance of each gene.}
-		    \item{HyperHMM_transitions: }{Transition matrix between genotypes.}
+		    \item{HyperHMM_model: }{Similar to the ones above.}
 		    \item{HyperHMM_features: }{Genes that appear mutated.}
-		    \item{HyperHMM_viz.tl: }{Individual transitions from one genotype to             another, obtained during the calculation process.}
+		    \item{HyperHMM_viz.tl: }{Individual transitions from one genotype to another, obtained during the calculation process.}
 		    \item{HyperHMM_trans_mat: }{As for CBN.}
 
 
