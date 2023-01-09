@@ -805,6 +805,24 @@ evam <- function(x,
         stopifnot(oncobn_opts_2$model %in% c("DBN", "CBN"))
     }
     
+    if ("HyperHMM" %in% methods) {
+      # possible names of executable
+      cmds <- c("hyperhmm.ce", "hyperhmm.exe", "hyperhmm")
+      #see if any are here
+      found <- FALSE
+      commandname <- ""
+      for(cmd in cmds) {
+        commandpath <- Sys.which(cmd)
+        if(nchar(commandpath) > 0) {
+          commandname <- commandpath
+          found <- TRUE
+        }
+      }
+      if (found == FALSE) { message ("Couldn't find HyperHMM executable in the PATH") }
+      if(ncol(xoriginal) > 15) { message("In HyperHMM model you are welcome to try > 15 features but this may use a lot of memory.") }
+    }
+    
+    
     ## ######################################################################
     ##   Big function so we can parallelize the calls
     ## Run inside evam. Take all additional args from envir of evam
@@ -819,7 +837,7 @@ evam <- function(x,
                 })["elapsed"]
         } else if (method == "HyperHMM") {
             time_out <- system.time({
-              out <- do_HyperHMM(xoriginal, precursors = NA, nboot = 1, random.walkers = 0,
+              out <- do_HyperHMM(xoriginal, commandname, precursors = NA, nboot = 1, random.walkers = 0,
                                  label = "label", simulate = TRUE,fork = FALSE)              
             })["elapsed"]
         } else if (method == "HESBCN") {

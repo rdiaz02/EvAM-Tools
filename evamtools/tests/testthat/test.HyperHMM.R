@@ -3,6 +3,8 @@
 t1 <- Sys.time()
 test_that("Testing HyperHMM integration in EvAM-Tools", {
     data <- cbind(c(1,1,0,0), c(1,0,0,0),c(0,0,1,0),c(0,1,1,0))
+    colnames(data) <- c('A','B','C','D')
+    rownames(data) <- c('A','B','C','D')
     out <- suppressMessages(evam(data, methods = 'HyperHMM'))
     expect_true(inherits(out$HyperHMM_trans_mat, 'Matrix'))
     expect_true(all(slotNames(out$HyperHMM_trans_mat)==c('i','p','Dim','Dimnames','x','factors')))
