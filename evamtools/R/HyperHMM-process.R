@@ -13,7 +13,6 @@
 
 
 do_HyperHMM <- function(xoriginal,
-                        commandname,
                         precursors = NA, # precursors (e.g. ancestors) -- blank for cross-sectional
                         nboot = 1, # number of boostrap resamples
                         random.walkers = 0, # run random walkers for each resample? 0 no, 1 yes
@@ -24,6 +23,20 @@ do_HyperHMM <- function(xoriginal,
   # get number and names of features
   L <- ncol(xoriginal)
   features <- colnames(xoriginal)
+  
+  cmds <- c("hyperhmm.ce", "hyperhmm.exe", "hyperhmm")
+  #see if any are here
+  found <- FALSE
+  commandname <- ""
+  for(cmd in cmds) {
+    commandpath <- Sys.which(cmd)
+    if(nchar(commandpath) > 0) {
+      commandname <- commandpath
+      found <- TRUE
+    }
+  }
+  if (found == FALSE) { message ("Couldn't find HyperHMM executable in the PATH") }
+  if(ncol(xoriginal) > 15) { message("In HyperHMM model you are welcome to try > 15 features but this may use a lot of memory.") }
   
   # deal with non-binary values
   if(any(xoriginal != 0 & xoriginal != 1)) {
