@@ -3,14 +3,14 @@ t1 <- Sys.time()
 
 test_that("Exercise random_evam with different options", {
 
-    for (mm in c("MHN", "CBN", "HESBCN", "OT", "OncoBN")) {
+    for (mm in c("MHN", "CBN", "HESBCN", "OT", "OncoBN", "HyperHMM")) {
         ou <- paste0(mm, "_predicted_genotype_freqs")
         o1 <- random_evam(ngenes = 5, model = mm)
         expect_true(!any(is.na(o1[[ou]])))
         expect_true(!is.null(o1[[ou]]))
         }
 
-    for (mm in c("MHN", "CBN", "HESBCN", "OT", "OncoBN")) {
+    for (mm in c("MHN", "CBN", "HESBCN", "OT", "OncoBN", "HyperHMM")) {
         ng <- sample(2:6, 1)
         gnam <- sample(LETTERS, size = ng)
         ou <- paste0(mm, "_predicted_genotype_freqs")

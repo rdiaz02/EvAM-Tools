@@ -7,7 +7,7 @@ test_that("Minimal test: we can run", {
     out <- suppressMessages(
         evam(Dat1,
              methods = c("CBN", "OT", "OncoBN",
-                         "MHN", "HESBCN", "MCCBN")[c(rep(TRUE, 5), MCCBN_INSTALLED)]))
+                         "MHN", "HESBCN", "HyperHMM" "MCCBN")[c(rep(TRUE, &), MCCBN_INSTALLED)]))
     expect_true(exists("OT_model", where = out))
 
     out2 <- evam(Dat1[, 1:3],
@@ -42,28 +42,28 @@ test_that("We can deal with duplicated columns and columns without events and co
     
     out1 <- suppressMessages(evam(Dat1[, 1:6],
                                   methods = c("CBN", "OT", "OncoBN",
-                                              "MHN", "HESBCN")))
+                                              "MHN", "HESBCN", "HyperHMM")))
     expect_true(exists("OT_model", where = out1))
 
     out2 <- suppressMessages(evam(Dat1[, c(1:5, 7)],
                                   methods = c("CBN", "OT", "OncoBN",
-                                              "MHN", "HESBCN")))
+                                              "MHN", "HESBCN", "HyperHMM")))
     expect_true(exists("OT_model", where = out2))
 
     out3 <- suppressMessages(evam(Dat1[, c(1:5, 8)],
                                   methods = c("CBN", "OT", "OncoBN",
-                                              "MHN", "HESBCN")))
+                                              "MHN", "HESBCN", "HyperHMM")))
     expect_true(exists("OT_model", where = out3))
 
 
     out4 <- suppressMessages(evam(Dat1,
                                   methods = c("CBN", "OT", "OncoBN",
-                                              "MHN", "HESBCN")))
+                                              "MHN", "HESBCN", "HyperHMM")))
     expect_true(exists("OT_model", where = out4))
 
     out5 <- suppressMessages(evam(Dat1,
                                   methods = c("CBN", "OT", "OncoBN",
-                                              "MHN", "HESBCN"),
+                                              "MHN", "HESBCN", "HyperHMM"),
                                   max_cols = 3))
     expect_true(exists("OT_model", where = out5))
 
@@ -99,7 +99,7 @@ test_that("We can deal with duplicated columns and columns without events and co
         colnames(dd) <- gn
         outdd <- suppressMessages(evam(dd,
                                   methods = c("CBN", "OT", "OncoBN",
-                                              "MHN", "HESBCN"),
+                                              "MHN", "HESBCN", "HyperHMM"),
                                   max_cols = 4))
         expect_true(exists("OT_model", where = outdd))
         exercise_sample_evam(outdd)
@@ -132,19 +132,19 @@ test_that("Examples from initial-simple-examples", {
 
     out3 <- suppressMessages(evam(db3,
                                   methods = c("CBN", "OT", "OncoBN",
-                                              "MHN", "HESBCN")))
+                                              "MHN", "HESBCN", "HyperHMM")))
     expect_true(exists("OT_model", where = out3))
 
 
     out4 <- suppressMessages(evam(db4,
                                   methods = c("CBN", "OT", "OncoBN",
-                                              "MHN", "HESBCN")))
+                                              "MHN", "HESBCN", "HyperHMM")))
     expect_true(exists("OT_model", where = out4))
 
 
     out5 <- suppressMessages(evam(db5,
                                   methods = c("CBN", "OT", "OncoBN",
-                                              "MHN", "HESBCN")))
+                                              "MHN", "HESBCN", "HyperHMM")))
     expect_true(exists("OT_model", where = out5))
 
 
@@ -162,7 +162,7 @@ test_that("We can run evam with non-default arguments", {
     out <- suppressMessages(
         evam(Dat1,
              methods = c("CBN", "OT", "OncoBN",
-                         "MHN", "HESBCN", "MCCBN")[c(rep(TRUE, 5), MCCBN_INSTALLED)],
+                         "MHN", "HESBCN", "HyperHMM", "MCCBN")[c(rep(TRUE, 6), MCCBN_INSTALLED)],
              max_cols = 4,
              cores = 1,
              hesbcn_opts = list(MCMC_iter = 20000,
@@ -183,7 +183,7 @@ test_that("We can run evam with non-default arguments", {
     out2 <- suppressMessages(
         evam(Dat1,
              methods = c("CBN", "OT", "OncoBN",
-                         "MHN", "HESBCN", "MCCBN")[c(rep(TRUE, 5), MCCBN_INSTALLED)],
+                         "MHN", "HESBCN", "HyperHMM", "MCCBN")[c(rep(TRUE, 6), MCCBN_INSTALLED)],
              max_cols = 4,
              cbn_opts = list(omp_threads = 2),
              hesbcn_opts = list(MCMC_iter = 20000, seed = 2),
@@ -202,7 +202,7 @@ test_that("We can run evam with non-default arguments", {
     expect_warning(out3 <- suppressMessages(
                        evam(Dat1,
                             methods = c("CBN", "OT", "OncoBN",
-                                        "MHN", "HESBCN", "MCCBN")[c(rep(TRUE, 5), MCCBN_INSTALLED)],
+                                        "MHN", "HESBCN", "HyperHMM", "MCCBN")[c(rep(TRUE, 6), MCCBN_INSTALLED)],
                             max_cols = 4,
                             cores = 1, ## if >, will hang because of MCCBN thrds > 1
                             cbn_opts = list(omp_threads = 2, cucu = 9),
