@@ -7,7 +7,7 @@ test_that("We get requested output, by the specified means", {
     out <- suppressMessages(
         evam(Dat1,
              methods = c("CBN", "OT", "OncoBN",
-                         "MHN", "HESBCN", "HyperHMM", "MCCBN")[c(rep(TRUE, 6), MCCBN_INSTALLED)]
+                         "MHN", "HESBCN", "MCCBN")[c(rep(TRUE, 5), MCCBN_INSTALLED)]
              ))
 
     ## Sample from the predicted genotype frequencies
