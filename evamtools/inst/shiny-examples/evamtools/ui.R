@@ -719,20 +719,23 @@ user_input <- function() {
                                                                      "OncoBN",
                                                                      "MHN",
                                                                      "MCCBN",
-                                                                     "H-ESBCN"),
+                                                                     "H-ESBCN",
+                                                                     "HyperHMM"),
                                                                  choiceValues = c(
                                                                      "CBN",
                                                                      "OT",
                                                                      "OncoBN",
                                                                      "MHN",
                                                                      "MCCBN",
-                                                                     "HESBCN"
+                                                                     "HESBCN",
+                                                                     "HyperHMM"
                                                                  ),
                                                                  selected = c(
                                                                      "CBN",
                                                                      "OT",
                                                                      "OncoBN",
-                                                                     "MHN"
+                                                                     "MHN",
+                                                                     "HyperHMM"
                                                                  ),
                                                                  inline = FALSE),
                                               tags$h5("Beware: MCCBN may take hours to run. ",
