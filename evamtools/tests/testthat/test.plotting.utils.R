@@ -1,7 +1,8 @@
 t1 <- Sys.time()
 
 test_that("Processing samples & Plotting of CPMs is correct", {
-  sample_evam_output <- evam(examples_csd$csd$AND$data)
+  methods <- c("OT", "CBN", "OncoBN", "HESBCN", "MHN", "HyperHMM"
+  sample_evam_output <- evam(examples_csd$csd$AND$data, methods = methods))
   models <- c("OT", "CBN", "OncoBN", "HESBCN", "MHN")
 
   # Does not process
@@ -95,7 +96,8 @@ test_that("how it handles processing missing data", {
 })
 
 test_that("plot_evam handles argument correctly", {
-  sample_evam_output <- evam(examples_csd$csd$AND$data)
+  methods <- c("OT", "CBN", "OncoBN", "HESBCN", "MHN", "HyperHMM")
+  sample_evam_output <- evam(examples_csd$csd$AND$data, methods = methods )
   expect_error(plot_evam(sample_evam_output, orientation="horizontal",
                          plot_type = "not_supported"))
   expect_error(plot_evam(sample_evam_output, orientation="horizontal",
