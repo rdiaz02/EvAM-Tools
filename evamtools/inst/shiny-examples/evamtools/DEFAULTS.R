@@ -23,7 +23,7 @@ template_csd_data <- matrix(0, ncol = 4, nrow = 0)
   ngenes = 4,
   csd_samples = 1000,
   dag_model = "HESBCN",
-  all_cpms = c("OT", "CBN", "OncoBN", "MHN", "MCCBN", "HESBCN", "HyperHMM"),
+  all_cpms = c("OT", "CBN", "OncoBN", "MHN", "MCCBN", "HESBCN"),
   template_data = list(
       csd_counts =  template_csd_counts ## data frame of Genotypes and Counts.
     , data = NULL ## Yeah, what is data? The data matrix of 0/1 with subjects
