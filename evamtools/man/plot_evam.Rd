@@ -40,7 +40,7 @@ plot_CPMs(
 
 \item{methods}{Vector of strings with the names of methods that we want to plot. If NULL, all
   methods with output in cpm_output. The list of available methods is
-  OT, OncoBN, CBN, MCCBN, MHN, HESBCN, HyperHMM.}
+  OT, OncoBN, CBN, MCCBN, MHN, HESBCN.}
 
 \item{plot_type}{One of:
   \itemize{
@@ -165,7 +165,7 @@ colnames(dB_c1) <- LETTERS[1:5]
 
 ## Use MCCBN only if installed
 MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
-methods <- c("CBN", "OT", "OncoBN", "MHN", "HESBCN", "HyperHMM")
+methods <- c("CBN", "OT", "OncoBN", "MHN", "HESBCN")
 if (MCCBN_INSTALLED) {
     methods <- c(methods, "MCCBN")
 }
@@ -197,7 +197,7 @@ plot_evam(out, out_samp, plot_type = "obs_genotype_transitions",
 data("ex_mixed_and_or_xor")
 
 out_AND_OR_XOR <- evam(ex_mixed_and_or_xor,
-                       methods = c("OT", "HESBCN", "MHN", "OncoBN", "HyperHMM"),
+                       methods = c("OT", "HESBCN", "MHN", "OncoBN"),
                        hesbcn_opts = list(seed = 26))
 
 plot_evam(out_AND_OR_XOR,plot_type = "trans_mat",

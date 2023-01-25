@@ -2296,6 +2296,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 showModal(
                     dataModal(paste("Beware! You are analyzing data ",
                                     "with 7 or more genes. ",
+                                    "This can take longer than usual ",
                                     "and plots may be crowded. "),
                               ## "We recommend using top_paths options in ",
                               ## "the Results' tab.",
@@ -2478,35 +2479,23 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##     input$cpm2show
     ## })
 
+    
     output$sims <- renderUI({
-        if (!is.null(input$cpm_methods)) {
-          methods <- unique(input$cpm_methods)
-          print(methods)
-        }
-      
-      
         if ((length(names(all_cpm_out)) > 0) && (!is.null(input$select_cpm))) {
             tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
-            
+
             number_of_columns <- floor(12 /
                                        ifelse(length(plot2show()) <=0, 1, length(plot2show())))
 
             lapply(plot2show(), function(met) {
-                
                 method_data <- evamtools:::process_data(tmp_data, met,
                                                         plot_type = "trans_mat")
-                
-                if (met=="HyperHMM"){ output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
-                   pl <- evamtools:::plot.bubbles(tmp_data$HyperHMM_stats.df)
-                   
-                })}
-                else
-                  {output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
+                output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
                     pl <- evamtools:::plot_method(method_data$method_info
-                                               , method_data$parent_set
-                                               , method_data$edges
-                                               , met)
-                })}
+                                                , method_data$parent_set
+                                                , method_data$edges
+                                                , met)
+                })
                 return(
                     column(number_of_columns,
                            plotOutput(sprintf("plot_sims_%s", met)))
@@ -2531,41 +2520,29 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             if(!(is.null(selected_plot_type))){
                 if(selected_plot_type %in% c("trans_mat", "trans_rate_mat")){
                     lapply(plot2show(), function(met) {
-                      
-                    
                         method_data <- evamtools:::process_data(tmp_data, met,
                                                                 plot_type = selected_plot_type)
-                        
+                        output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
+                            ## This occasionally fails for no reason
+                            ## so try up to max_plot_tries
+                            max_plot_tries <- 5
+                            for (i in 1:max_plot_tries) {
+                                pl <-
+                                    try(evamtools:::plot_genot_fg(method_data$data2plot,
+                                                                  ## We use it to define "Observed" and "Not Observed" genotypes
+                                                                  observations = tmp_data$original_data, 
+                                                                  sampled_counts = method_data$sampled_genotype_counts,
+                                                                  top_paths = input$freq2label,
+                                                                  label_type = input$label2plot,
+                                                                  plot_type = selected_plot_type))
+                                if (!inherits(pl, "try-error")) break
+                                if (i >= max_plot_tries) stop("Could not produce requested plot ",
+                                                              "after ", max_plot_tries, " attempts. ",
+                                                              "A problem with the data? ",
+                                                              "Can any of the other plot types be produced?")
+                            }
 
-                        
-                        
-                          output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
-                              ## This occasionally fails for no reason
-                              ## so try up to max_plot_tries
-                              max_plot_tries <- 5
-                              for (i in 1:max_plot_tries) {
-                                  pl <-
-                                      try(evamtools:::plot_genot_fg(method_data$data2plot,
-                                                                    ## We use it to define "Observed" and "Not Observed" genotypes
-                                                                    observations = tmp_data$original_data, 
-                                                                    sampled_counts = method_data$sampled_genotype_counts,
-                                                                    top_paths = input$freq2label,
-                                                                    label_type = input$label2plot,
-                                                                    plot_type = selected_plot_type))
-                                  if (!inherits(pl, "try-error")) break
-                                  if (i >= max_plot_tries) stop("Could not produce requested plot ",
-                                                                "after ", max_plot_tries, " attempts. ",
-                                                                "A problem with the data? ",
-                                                                "Can any of the other plot types be produced?")
-                              }
-  
-                          })
-                          
-                          if (met=="HyperHMM"){ output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
-                            
-                            pl <- evamtools:::plot.hypercube(tmp_data$HyperHMM_viz.tl)
-                          })}
-                          
+                        })
                         return(
                             column(number_of_columns,
                                    plotOutput(sprintf("plot_sims2_%s", met)))
