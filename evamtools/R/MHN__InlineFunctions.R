@@ -105,8 +105,8 @@
 
 
 kronvec <- function(Theta, i_, x, diag_, transp_)
-    .Call("C_kronvec", Theta, i_, x, diag_, transp_,
-           PACKAGE = "evamtools")
+    .Call(C_kronvec, Theta, i_, x, diag_, transp_,
+          PACKAGE = "evamtools")
 
 
 ## #--------------------------------------------------------------------------------
@@ -152,7 +152,7 @@ kronvec <- function(Theta, i_, x, diag_, transp_)
 ##                          cppargs=c("-fopenmp -ftree-vectorize"))
 
 
-grad_loop_j <- function(i_, n_, r) .Call("C_grad_loop_j", i_, n_, r,
+grad_loop_j <- function(i_, n_, r) .Call(C_grad_loop_j, i_, n_, r,
                                          PACKAGE = "evamtools")
 
 
