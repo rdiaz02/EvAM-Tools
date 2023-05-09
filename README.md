@@ -192,9 +192,9 @@ You can also build your own Docker image and you might want to run the Shiny app
     - Uncompress the directory. Then the usual configure, make dance. (Go inside the uncompressed directory and type `./configure`; when finished, type `make`).
     - Put the `h-cbn` and `ct-cbn` executables in your $PATH.
 	
-  * Install HESBCN
+  * Install H-ESBCN
     - Clone the repository from  https://github.com/danro9685/HESBCN . 
-	- Go inside that directory, and do the usual configure, make dance.
+	- Go inside that directory, and type make.
 	- When finished, add the `h-esbcn` executable to your $PATH.
 	
   * Install OncoBN
