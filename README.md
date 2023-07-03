@@ -21,6 +21,13 @@
 <p> <a href="https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_doc_all.pdf">Additionlal_doc_all.pdf (https://rdiaz02.github.io/EvAM-Tools/pdfs/Additional_doc_all.pdf)</a>: A single PDF that concatenates all previous four. </p>
 
 
+## Funding
+Supported by grant PID2019-111256RB-I00 funded by MCIN/AEI/10.13039/501100011033 and Comunidad de Madrid's PEJ-2019-AI/BMD-13961 to R. Diaz-Uriarte.
+<p align="center">
+<img src="micin-aei.png" alt="micin-aei logo" width="200"/>
+</p>
+
+
 
 <!-- Tools for evolutionary accumulation, or event accumulation, models (mainly cancer progression models). -->
 
