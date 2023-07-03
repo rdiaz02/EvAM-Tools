@@ -45,7 +45,7 @@ For easier use, we provide links to Docker images that you can download and run,
 
 
 If you use the package or the web app, please **cite** the Bioinformatics paper:
-Diaz-Uriarte, R & Herrera-Nieto, P. 2022. EvAM-Tools: tools for evolutionary accumulation and cancer progression models. _Bioinformatics_.  https://doi.org/10.1093/bioinformatics/btac710 .
+Diaz-Uriarte, R & Herrera-Nieto, P. 2022. EvAM-Tools: tools for evolutionary accumulation and cancer progression models. _Bioinformatics_, 38 (24): 5457-5459.  https://doi.org/10.1093/bioinformatics/btac710 .
 
 
 <b>Funding:</b> Supported by grant PID2019-111256RB-I00 funded by MCIN/AEI/10.13039/501100011033 and Comunidad de Madrid's PEJ-2019-AI/BMD-13961 to R. Diaz-Uriarte.
@@ -53,7 +53,7 @@ Diaz-Uriarte, R & Herrera-Nieto, P. 2022. EvAM-Tools: tools for evolutionary acc
 <img src="micin-aei.png" alt="micin-aei logo" width="200"/>
 </p>
 
-
+---
 
 ### Some examples of use
 
