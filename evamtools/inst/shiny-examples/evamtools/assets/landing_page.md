@@ -39,6 +39,10 @@ This web interface provides a GUI to the package and focuses on allowing fast co
 
 <!-- You add/remove images by adding HTML code. The usual img block. But do not leave that commented code around or shiny might break. -->
 
+<b>Funding:</b> Supported by grant PID2019-111256RB-I00 funded by MCIN/AEI/10.13039/501100011033 and Comunidad de Madrid's PEJ-2019-AI/BMD-13961 to R. Diaz-Uriarte.
+<center>
+<img src="micin-aei.png" alt="micin-aei logo" width=200>
+</center>
 
 &nbsp;
 ### A two-paragraph summary about _cross-sectional_ data and CPMs<a id="helpcsd"></a> 
