@@ -927,7 +927,16 @@ You should have received a copy of the GNU Affero General Public License along w
 
 The source of this document and the EvAM-Tools package is at \url{https://github.com/rdiaz02/EvAM-Tools}.
 
+
+\section{Funding}
+Supported by grant PID2019-111256RB-I00 funded by MCIN/AEI/10.13039/501100011033 and Comunidad de Madrid's PEJ-2019-AI/BMD-13961 to R. Diaz-Uriarte.
+\begin{center}
+\includegraphics[width=.25\linewidth]{../micin-aei.png}\\
+\end{center}
+
 \clearpage
+
+
 
 \bibliographystyle{natbib} %myplainnat}
 \bibliography{evamtools_examples}

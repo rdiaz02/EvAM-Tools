@@ -175,7 +175,7 @@ Now, $\theta_C$ is the probability of $C$ occurring if at least one of its ances
 \item Only $C$: 0, since neither $A$ nor $B$ have occurred.
 \end{itemize}
 
-The above represent the probabilities in a model without errors. OncoBN includes an error model, the ``spontaneous activation model'', where there is a non-zero probability of observing child events when restrictions in the DAG are not satisfied. The rate of spontaneous activation is part of the estimation procedure, and is included in the computed probabilities of the different genotypes  (see details in \qrefS{error_models}). For example, under the disjunctive model above, the probability of observing genotype $C$ would be $(1 - \theta_A) (1 - \theta_B) \epsilon$, where $\epsilon$ is the spontaneous activation probability, which is set as the same for all events  \citep[p.~5]{nicol2021oncogenetic}. (Figure~1 of \citealp{nicol2021oncogenetic} provides another example of the role of $\epsilon$ in computing predicted probabilities).
+The above represent the probabilities in a model without errors. OncoBN includes an error model, the ``spontaneous activation model'', where there is a non-zero probability of observing child events when restrictions in the DAG are not satisfied. The rate of spontaneous activation is part of the estimation procedure, and is included in the computed probabilities of the different genotypes  (see details in \qrefS{error_models}). For example, under the disjunctive model above, the probability of observing genotype $C$ would be $(1 - \theta_A) (1 - \theta_B) \epsilon$, where $\epsilon$ is the spontaneous activation probability, which is set as the same for all events  \citep[p.~5]{nicol2021oncogenetic}. (Figure~1 of \citealp{nicol2021oncogenetic} provides another example of the role of $\epsilon$ in computing predicted probabilities)\footnote{Actually, the supplementary material of the OncoBN paper describes also an observational error model, where it is said, in p.~3, "Assuming $\xi^+$ and $\xi^-$ are fixed and known"; notice the ``known''. Moreover, as far as I can tell, the code makes no provision for it, nor does it return any estimate. Thus, this is why I do not mention this observational error model in the main text.}.
 
 
 
@@ -1170,6 +1170,14 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 You should have received a copy of the GNU Affero General Public License along with this program. If not, see \url{https://www.gnu.org/licenses/}. 
 
 The source of this document and the EvAM-Tools package is at \url{https://github.com/rdiaz02/EvAM-Tools}.
+
+
+
+\section{Funding}
+Supported by grant PID2019-111256RB-I00 funded by MCIN/AEI/10.13039/501100011033 and Comunidad de Madrid's PEJ-2019-AI/BMD-13961 to R. Diaz-Uriarte.
+\begin{center}
+\includegraphics[width=.25\linewidth]{../micin-aei.png}\\
+\end{center}
 
 \bibliographystyle{natbib}
 \bibliography{cpm_refs}
