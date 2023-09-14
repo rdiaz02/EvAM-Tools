@@ -61,6 +61,8 @@ do_HESBCN <- function(data,
         dir.create(tmp_dir, recursive = TRUE)
     }
 
+    ## We need to change column names because of a weird behavior of H-ESBCN
+    ## See: https://github.com/danro9685/HESBCN/issues/3
     orig_gene_names <- colnames(data)
     colnames(data) <- LETTERS[1:ncol(data)]
 
