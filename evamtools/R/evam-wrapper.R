@@ -80,6 +80,7 @@
 
 ## HESBCN: if only AND, as for OT/CBN. If only OR, as for OncoBN with DBN.
 ##  o.w. (XOR or mixtures of any of AND/OR/XOR): cpm2tm_relationships
+##                        now called DAG_2_access_genots_relationships
 ##    A vector that specifies the relationship if multiple parents
 ##    is used.
 
@@ -245,7 +246,7 @@ DAG_2_access_genots_OR <- function(x) {
 ## DAG of restrictions (as data frame), options info about gene_relations
 ##            -> vector of accessible genotypes and graph of DAG of restrictions
 ##  Under OR, AND, XOR models, as specified by gene_relations
-##  Called from cpm2tm_relationships
+##  Called from cpm2tm_relationships (DAG_2_access_genots_relationships now)
 ##   which itself is used for HESBCN
 
 ## We could just rm the "gene_relations" and create it as we do inside
