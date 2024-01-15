@@ -102,7 +102,7 @@ multiple evams in parallel.}
     \item{MCMC_iter: }{Number of MCMC iterations to run;
       this is argument "-n, --number_samples" in the original
   H-ESBCN C code.   Default:  100000, as in the original implementation.  Note that the web app uses a larger default of
-  200000.}
+  200000. Larger values, such as 500000, might be better.}
 
 \item{reg: }{Regularization: one of \code{bic} (default), \code{aic},
   \code{loglik}.} 
