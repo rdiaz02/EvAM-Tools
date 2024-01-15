@@ -68,66 +68,71 @@ cbn_proc <- function(x, addname, init.poset = "OT", nboot = 0,
         edges <- cbind(edges, CBN_edgeBootFreq = NA,
                        stringsAsFactors = FALSE)
     } else {
-        if(!parall) { 
-            ## Returns CBN and bootstrap freqs of edges
-            edges <- run.cbn(x, addname = addname, init.poset = init.poset,
-                             omp_threads = omp_threads, silent = silent, rmfile = rmfile)
-            CBN_edgeBootFreq <- rep(0, nrow(edges))
-            names(CBN_edgeBootFreq) <- edges[, "edge"]
-            nn <- names(CBN_edgeBootFreq)
-            for(i in seq.int(nboot)) {
-                if(verbose)
-                    message("\n  .... doing bootstrap ", i, "\n")
-                ind <- sample(nrow(x), nrow(x), replace = TRUE)
-                bx <- x[ind, , drop = FALSE]
-                addnameb <- paste0(addname, "b", i, paste(sample(letters, 3), collapse=""))
-                bootedges <- run.cbn(bx, addname = addnameb, init.poset = init.poset,
-                                     omp_threads = omp_threads, silent = silent,
-                                     rmfile = rmfile)$edge
-                posadd <- na.omit(match(bootedges, nn))
-                if(length(posadd))
-                    CBN_edgeBootFreq[posadd] <- CBN_edgeBootFreq[posadd] + 1
-            }
-        } else {
-            ## We parallelize over all calls, including the first,
-            ## non-boottstrapped one
-            ll <- c(0, seq.int(nboot))
-            paralfunc <- function(index, odata = x,
-                                  addname_ = addname,
-                                  init.poset_ = init.poset, omp_threads_ = omp_threads,
-                                  silent_ = silent) {
-                dd <- boot_data_index(odata, index)
-                
-                ## ## Save dd before cbn execution for debugging
-                ## save(dd,file=paste0("dds/other/dd_",strsplit(ff[dbgfile],"\\.rds"),"_seed",toString(rseed),"_index",toString(index),".Rdata"))
-                ## tmp <- run.cbn(dd, addname = "debug", init.poset = init.poset_,
-                ##                omp_threads = omp_threads_, silent = TRUE, rmfile = TRUE)
-                     
-                addnameb <- paste0(addname_, "b", index, paste(sample(letters, 3),
-                                                              collapse=""))
-                tmp <- run.cbn(dd, addname = addnameb, init.poset = init.poset_,
-                               omp_threads = omp_threads_, silent = silent_,
-                               rmfile = rmfile)
-                
-                if(index > 0) {
-                    return(tmp$edge)
-                } else {
-                    return(tmp)
-                }
-            }
-            ## Do not use mclapply at all. No parallel to allow multiple indep. runs
-            alledges <- lapply(ll, function(z) paralfunc(z))
-            edges <- alledges[[1]]
-            CBN_edgeBootFreq <- rep(0, nrow(edges))
-            names(CBN_edgeBootFreq) <- edges[, "edge"]
-            nn <- names(CBN_edgeBootFreq)
-            tedges <- table(unlist(alledges[-1])) ## gives all.
-            nm_in_boot_table <- intersect(nn, names(tedges))
-            if(length(nm_in_boot_table))
-                CBN_edgeBootFreq[nm_in_boot_table] <- tedges[nm_in_boot_table]
+      ## FIXME: we seem to always run with parall, but nboot = 0
+      ## and we do not use mclapply.
+      ## We should remove the !parall part of the if, or simplify this.
+      ## deleting the !parall seems best, as the code in use now is more
+      ## general and easy to extend
+      if(!parall) { 
+        ## Returns CBN and bootstrap freqs of edges
+        edges <- run.cbn(x, addname = addname, init.poset = init.poset,
+                         omp_threads = omp_threads, silent = silent, rmfile = rmfile)
+        CBN_edgeBootFreq <- rep(0, nrow(edges))
+        names(CBN_edgeBootFreq) <- edges[, "edge"]
+        nn <- names(CBN_edgeBootFreq)
+        for(i in seq.int(nboot)) {
+          if(verbose)
+            message("\n  .... doing bootstrap ", i, "\n")
+          ind <- sample(nrow(x), nrow(x), replace = TRUE)
+          bx <- x[ind, , drop = FALSE]
+          addnameb <- paste0(addname, "b", i, paste(sample(letters, 3), collapse=""))
+          bootedges <- run.cbn(bx, addname = addnameb, init.poset = init.poset,
+                               omp_threads = omp_threads, silent = silent,
+                               rmfile = rmfile)$edge
+          posadd <- na.omit(match(bootedges, nn))
+          if(length(posadd))
+            CBN_edgeBootFreq[posadd] <- CBN_edgeBootFreq[posadd] + 1
         }
-        edges <- cbind(edges, CBN_edgeBootFreq = CBN_edgeBootFreq/nboot,
-                       stringsAsFactors = FALSE)
+      } else {
+        ## We parallelize over all calls, including the first,
+        ## non-boottstrapped one
+        ll <- c(0, seq.int(nboot))
+        paralfunc <- function(index, odata = x,
+                              addname_ = addname,
+                              init.poset_ = init.poset, omp_threads_ = omp_threads,
+                              silent_ = silent) {
+          dd <- boot_data_index(odata, index)
+          
+          ## ## Save dd before cbn execution for debugging
+          ## save(dd,file=paste0("dds/other/dd_",strsplit(ff[dbgfile],"\\.rds"),"_seed",toString(rseed),"_index",toString(index),".Rdata"))
+          ## tmp <- run.cbn(dd, addname = "debug", init.poset = init.poset_,
+          ##                omp_threads = omp_threads_, silent = TRUE, rmfile = TRUE)
+          
+          addnameb <- paste0(addname_, "b", index, paste(sample(letters, 3),
+                                                         collapse=""))
+          tmp <- run.cbn(dd, addname = addnameb, init.poset = init.poset_,
+                         omp_threads = omp_threads_, silent = silent_,
+                         rmfile = rmfile)
+          
+          if(index > 0) {
+            return(tmp$edge)
+          } else {
+            return(tmp)
+          }
+        }
+        ## Do not use mclapply at all. No parallel to allow multiple indep. runs
+        alledges <- lapply(ll, function(z) paralfunc(z))
+        edges <- alledges[[1]]
+        CBN_edgeBootFreq <- rep(0, nrow(edges))
+        names(CBN_edgeBootFreq) <- edges[, "edge"]
+        nn <- names(CBN_edgeBootFreq)
+        tedges <- table(unlist(alledges[-1])) ## gives all.
+        nm_in_boot_table <- intersect(nn, names(tedges))
+        if(length(nm_in_boot_table))
+          CBN_edgeBootFreq[nm_in_boot_table] <- tedges[nm_in_boot_table]
+      }
+      edges <- cbind(edges, CBN_edgeBootFreq = CBN_edgeBootFreq/nboot,
+                     stringsAsFactors = FALSE)
     }
     return(list(edges = edges,
                 nboot = nboot,
