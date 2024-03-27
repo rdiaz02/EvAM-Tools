@@ -1,4 +1,6 @@
 # EvAM Tools #
+
+<!-- Simpler: use markdown-toc emacs package start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 <!-- Create toc with markdown-toc, from node. -->
 <!-- markdown-toc README.md -i -->
 
