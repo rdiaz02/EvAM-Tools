@@ -1,10 +1,12 @@
-FROM rocker/rstudio:4.2.2
+FROM rocker/rstudio:4.4.1
 
 ######################################################################
 ######################################################################
 #####
 #####     Common to the two Dockerfiles
-#####
+#####     ## FIXME: now, we are moving the rstudio docker version,
+#####     ## but not the shiny one, to use R-4.4.1
+#####     ## and OncoSimulR as in BioC devel (i.e., 3.20)
 ######################################################################
 ######################################################################
 
@@ -66,6 +68,8 @@ RUN R -e "BiocManager::install('Rgraphviz')"
 RUN R -e "install.packages('devtools')"
 RUN R -e "install.packages('igraph')"
 RUN R -e "BiocManager::install('OncoSimulR')"
+## Force devel version
+RUN R -e "BiocManager::install('OncoSimulR', version = 'devel)"
 RUN R -e "library(devtools);devtools::install_github('phillipnicol/OncoBN')"
 RUN R -e "install.packages('prompter')"
 RUN R -e "install.packages('shinyBS')"
@@ -76,20 +80,20 @@ RUN mkdir -p /app/Sources/
 ## Install HESBCN
 RUN cd /app/Sources && \
     git clone https://github.com/danro9685/HESBCN && \
-    cd HESBCN && \ 
+    cd HESBCN && \
     make && \
-    cp h-esbcn /usr/local/bin/ 
+    cp h-esbcn /usr/local/bin/
 
 ## Install MCCBN
 RUN cd /app/Sources && \
     git clone https://github.com/cbg-ethz/MC-CBN && \
-    cd MC-CBN  && \ 
+    cd MC-CBN  && \
     apt-get install -y dh-autoreconf autoconf automake autotools-dev autoconf autoconf-archive && \
     autoreconf -vif -I m4  && \
     R CMD build . && \
     V_MCCBN=$(cat DESCRIPTION | grep Version | cut -d' ' -f2) && \
     R CMD INSTALL mccbn_$V_MCCBN.tar.gz
-    
+
 ## Install cbn
 COPY ct-cbn-0.1.04b-RDU.tar.gz /app/Sources/
 RUN cd /app/Sources && \
@@ -97,14 +101,14 @@ RUN cd /app/Sources && \
     cd ct-cbn-0.1.04b-RDU && \
     ./configure && \
     make && \
-    cp -t /usr/local/bin/ ct-cbn h-cbn 
+    cp -t /usr/local/bin/ ct-cbn h-cbn
 
 ## Copy a file used for testing
 COPY Renviron.based_on_bioc /app/
 
 ## Copy the directory and install and test evamtools
 COPY evamtools/ /app/evamtools/
-  
+
 RUN cd /app && \
     ## sed -i 's/this_string_to_be_replaced_by_git_hash/'"$GIT_HASH"'/' ./evamtools/inst/shiny-examples/evamtools/ui.R && \
     V_PKG=$(cat ./evamtools/DESCRIPTION | grep Version | cut -d' ' -f2) && \
@@ -133,8 +137,3 @@ RUN echo ".First <- function() {library(methods); library(datasets); library(uti
 
 ## Debugging errors: for example, start as
 ## sudo docker run -it --entrypoint bash evamrstudio
-
-
-
-
-
