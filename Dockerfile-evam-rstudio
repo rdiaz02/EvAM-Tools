@@ -69,7 +69,8 @@ RUN R -e "install.packages('devtools')"
 RUN R -e "install.packages('igraph')"
 RUN R -e "BiocManager::install('OncoSimulR')"
 ## Force devel version
-RUN R -e "BiocManager::install('OncoSimulR', version = 'devel')"
+RUN R -e "BiocManager::install(version = '3.20', ask = FALSE)"
+RUN R -e "BiocManager::install('OncoSimulR', version = 'devel', ask = FALSE)"
 RUN R -e "library(devtools);devtools::install_github('phillipnicol/OncoBN')"
 RUN R -e "install.packages('prompter')"
 RUN R -e "install.packages('shinyBS')"
@@ -86,9 +87,35 @@ RUN cd /app/Sources && \
 
 ## Install MCCBN
 RUN cd /app/Sources && \
-    git clone https://github.com/cbg-ethz/MC-CBN && \
+    git clone https://github.com/cbg-ethz/MC-CBN
+
+RUN cd /app/Sources && \
     cd MC-CBN  && \
-    apt-get install -y dh-autoreconf autoconf automake autotools-dev autoconf autoconf-archive && \
+    apt-get install -y dh-autoreconf autoconf automake autotools-dev autoconf autoconf-archive
+
+## For MC-CBN and this issue
+## https://github.com/cbg-ethz/MC-CBN/issues/13
+RUN mkdir ~/.R
+RUN echo 'CXXFLAGS = -g -O2 -Wall -Wrestrict' >> ~/.R/Makevars && \
+    echo 'CFLAGS = -g -O2 -Wall -Wrestrict' >> ~/.R/Makevars && \
+    echo 'CXX11FLAGS = -g -O2 -Wall -Wrestrict' >> ~/.R/Makevars
+
+## RUN R -e 'tools::makevars_user()'
+## RUN R -e 'tools::makevars_site()'
+
+## This will not do. Use ~/.R/Makevars
+## RUN export CXXFLAGS="-g -O2 -g -fopenmp"
+## RUN export CFLAGS="-g -O2 -g -fopenmp"
+## RUN export CXX11FLAGS="-g -O2 -g -fopenmp"
+
+## Just to see what we have set
+RUN R CMD config CFLAGS
+RUN R CMD config CXXFLAGS
+RUN R CMD config CPPFLAGS
+RUN R CMD config CXX11FLAGS
+
+RUN cd /app/Sources && \
+    cd MC-CBN  && \
     autoreconf -vif  && \
     R CMD build . && \
     V_MCCBN=$(cat DESCRIPTION | grep Version | cut -d' ' -f2) && \
@@ -108,6 +135,7 @@ COPY Renviron.based_on_bioc /app/
 
 ## Copy the directory and install and test evamtools
 COPY evamtools/ /app/evamtools/
+COPY micin-aei.png /app/evamtools/inst/miscell/
 
 RUN cd /app && \
     ## sed -i 's/this_string_to_be_replaced_by_git_hash/'"$GIT_HASH"'/' ./evamtools/inst/shiny-examples/evamtools/ui.R && \
