@@ -89,7 +89,7 @@ RUN cd /app/Sources && \
     git clone https://github.com/cbg-ethz/MC-CBN && \
     cd MC-CBN  && \
     apt-get install -y dh-autoreconf autoconf automake autotools-dev autoconf autoconf-archive && \
-    autoreconf -vif -I m4  && \
+    autoreconf -vif  && \
     R CMD build . && \
     V_MCCBN=$(cat DESCRIPTION | grep Version | cut -d' ' -f2) && \
     R CMD INSTALL mccbn_$V_MCCBN.tar.gz
