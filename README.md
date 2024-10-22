@@ -64,9 +64,9 @@ What can EvAM-Tools be used for?
    * To understand CPMs and how different inputs (which can be easily modified interactively in the web app) affect the fitted models. For example, change the genotype frequencies according to sensible models of dependencies and run the CPMs.
 
    * To understand what different models imply about how the cross-sectional data looks like. Create the dependency structures (DAGs or MHN log-Theta matrix) and generate data from them, possibly playing with the amount of noise. This does not even require to run the methods themselves.
-   
+
    * As a research tool to analyze cross-sectional data with state-of-the-art CPMs.
-   
+
    * As a research tool in methodological work. For example:
        * We can examine how well a method can recover the true structure when the data fulfills the assumptions of a method. We would generate data under a particular model and see if the method that implements that model can recover the true structure under different sample sizes. (The web app only allows for playing with this; for serious work one would use the package itself and build code using the package functions).
        * We can examine how a give method works, and what type of inferences it performs, when data are generated under the model of another method. For example, what is the output from MHN if the data are really coming from an H-ESBCN model?
@@ -85,12 +85,12 @@ As can be seen, the web app workflows encompass different major functionalities 
 
 2. Exploration of the inferences that different CPM methods yield from manually constructed synthetic data.
 
-3. Construction of CPM models (DAGs and rates/probabilities or MHN models) and simulation of synthetic data from them. 
+3. Construction of CPM models (DAGs and rates/probabilities or MHN models) and simulation of synthetic data from them.
 
-    3.1. Examination of the consequences of different models and their parameters on the simulated data. 
+    3.1. Examination of the consequences of different models and their parameters on the simulated data.
 
     3.2. Analysis of the data simulated under one model with methods that have different models (e.g., data simulated from CBN analyzed with OT and OncoBN).
-	
+
 	3.3. Analysis of the data simulated under model after manual modification of specific genotype frequencies (e.g., data simulated under CBN but where, prior to analysis, we remove all observations with the WT genotype and the genotype with all loci mutated).
 
 
@@ -107,18 +107,18 @@ Furthermore, note that in all cases, when data are analyzed, in addition to retu
 
 - All files under evamtools/R are copyright Pablo Herrera Nieto and Ramon Diaz-Uriarte (and released under the GNU Affero General Public License (AGPL) v3 license) except for the following:
 
-- File HESBCN__import.hesbcn.R: 
+- File HESBCN__import.hesbcn.R:
    This file contains function import.hesbcn (with a minor modification to return "Best Lambdas").
-   
+
    Code from https://github.com/BIMIB-DISCo/PMCE/blob/main/Utilities/R/utils.R .
    Commit 5578c79 from 2021-09-29.
 
    License: Apache License 2.0, which can be combined with software under the  AGPL 3 as used by the rest of this project.
-   
+
    Author of code: from commit history, most likely Daniele Ramazzotti (danro9685)
 
    Authors of project: F. Angaroni, K. Chen, C. Damiani, G. Caravagna, A. Graudenzi, D. Ramazotti.
-   
+
   Paper:  Angaroni, F., Chen, K., Damiani, C., Caravagna, G., Graudenzi, A., &
   Ramazzotti, D. (2021). PMCE: efficient inference of expressive models of cancer
   evolution with high prognostic power. Bioinformatics, 38(3): 754-762. http://dx.doi.org/10.1093/bioinformatics/btab717
@@ -128,13 +128,13 @@ Furthermore, note that in all cases, when data are analyzed, in addition to retu
 
   Files obtained from https://github.com/RudiSchill/MHN .
   Commit 49a8cc0 from 2018-08-16 (updated to reflect explicit MIT license on 2022-04-04). We have added the "MHN__" and made minor modifications to conform to usage within an R package. We have moved the inline C code in InlineFunctions.R (now MHN__InlineFuctions.R) to MHN.c and done the rest of the scaffolding for it to be used from the R package.
-  
+
   License: MIT, which can be combined with software under the  AGPL 3 as used by the rest of this project.
-  
+
   Author of code: Rudolf Schill (inferred from commit history).
-  
+
   Authors of paper/project: Schill, R., Solbrig, S., Wettig, T., & Spang, R.
-  
+
   Paper: Schill, R., Solbrig, S., Wettig, T., & Spang, R. (2020). Modelling cancer progression using Mutual Hazard Networks. Bioinformatics, 36(1),  241–249. http://dx.doi.org/10.1093/bioinformatics/btz513
 
 
@@ -150,23 +150,23 @@ Furthermore, note that in all cases, when data are analyzed, in addition to retu
 
 
 - This information is also provided under evamtools/inst/COPYRIGHTS and in the header of the files themselves, as comments.
-  
+
 
 - The authors of the above code have been added to the DESCRIPTION file, under "Auhor".
 
 
 - Some of the code for transition rate matrices, input from different CPMs, tests, etc (authored by Ramon Diaz-Uriarte, released under the GPL-3) has been previously used in Diaz-Uriarte and Vasallo, 2019 (all code available from https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1007246#sec019, files S1 Dataset and S2 Dataset) and Diaz-Colunga and Diaz-Uriarte, 2021 (repository: https://github.com/rdiaz02/what_genotype_next).
 
-    
+
 ### ct-cbn ###
 
    This repository includes ct-​cbn-0.1.04b, from
    https://bsse.ethz.ch/cbg/software/ct-cbn.html, whose authors are Niko Beerenwinkel, Moritz Gerstung, and Seth Sullivant. It is released under the GNU GPL ("either version 2 of the License, or (at your option) any later version"). The GPL v3 can be combined with software under the AGPL v3, as used by the rest of this project.
-   
+
    The code included in this repository is file ct-cbn-0.1.04b-RDU.tar.gz, a
    modification by RDU of the code in ct-​cbn-0.1.04b that includes: a minor bug fix (which, however, could be related to non-identifiability) and output with lambdas and likelihood from the initial run and each of the iterations.
-  
-   (For references about CBN see [References](#references)). 
+
+   (For references about CBN see [References](#references)).
 
 
 ---
@@ -185,51 +185,51 @@ If you just want to run the Shiny app:
 You can install on your machines:
   * The [package and its dependencies](#how-to-install-the-r-package)
   * A [Docker image](#docker-images)
-	
+
 You can run on your machines:
   * The [R package, which includes the Shiny app](#how-to-run-the-r-package-and-the-shiny-app-locally-without-docker)
   * The [R package in an RStudio session from the Docker image](#how-to-run-the-r-package-from-the-docker-image)
   * The [Shiny app from a Docker image](#how-to-run-the-shiny-app-from-the-docker-image)
-  
-You can also build your own Docker image and you might want to run the Shiny app in a local intranet, possibly after modifying some settings. See the FAQ in the [EvAM-Tools: methods' details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf) for details. 
+
+You can also build your own Docker image and you might want to run the Shiny app in a local intranet, possibly after modifying some settings. See the FAQ in the [EvAM-Tools: methods' details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf) for details.
 
 
-### How to install the R package 
+### How to install the R package
 
   * Install CBN
     - Use the file ct-cbn-0.1.04b-RDU.tar.gz.
     - Uncompress the directory. Then the usual configure, make dance. (Go inside the uncompressed directory and type `./configure`; when finished, type `make`).
     - Put the `h-cbn` and `ct-cbn` executables in your $PATH.
-	
+
   * Install H-ESBCN
-    - Clone the repository from  https://github.com/danro9685/HESBCN . 
+    - Clone the repository from  https://github.com/danro9685/HESBCN .
 	- Go inside that directory, and type make.
 	- When finished, add the `h-esbcn` executable to your $PATH.
-	
+
   * Install OncoBN
     - OncoBN is available from https://github.com/phillipnicol/OncoBN
     - But this should work: start R, install the devtools package if you don't have it, and then issue `devtools::install_github("phillipnicol/OncoBN")`.
-	
+
   * Install MC-CBN: this is optional.
     - Installing MC-CBN used to be complicated, because it required old versions of Boost (see https://github.com/cbg-ethz/MC-CBN/issues/5). This is no longer the case (see github issue) as of 2022-12-12, but MC-CBN is optional for EvAM-Tools. Of course, if you do not have MC-CBN, you will not be able to run MC-CBN. (MC-CBN is included in the methods available both from the web app and the Docker images).
     - Go to https://github.com/cbg-ethz/MC-CBN and follow the installation instructions: https://github.com/cbg-ethz/MC-CBN#installation
     <!-- - If you have all dependencies installed, and the correct version of libboost, then from R this should work: `install.packages("https://github.com/cbg-ethz/MC-CBN/releases/download/v2.1.0/mccbn_2.1.0.tar.gz", repos=NULL)` -->
     - Review the installation instructions and then install manually: https://github.com/cbg-ethz/MC-CBN#installation-from-source .
       (We suggest that at least for now you install manually, which is what we do in the Dockefiles, instead of doing `install.packages("https://github.com/cbg-ethz/MC-CBN/releases/download/v2.1.0/mccbn_2.1.0.tar.gz", repos=NULL)` because file `mccbn_2.1.0.tar.gz` is from December 2020, and thus it does not incorporate several bug fixes, including changes to the NAMESPACE).
-  
+
   * Install the evamtools package
      - Make sure you have the required dependencies and imports, as listed in the DESCRIPTION file: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree , gtools , plot.matrix , DT, shinyjs, shiny, RhpcBLASctl, Rlinsolve, fastmatrix, graph, Rgraphviz, R.utils.
-         - Note that we list, as imports, OncoBN, mccbn. You need those (from above). 
+         - Note that we list, as imports, OncoBN, mccbn. You need those (from above).
      - Build (R CMD build evamtools) and install (R CMD INSTALL evamtools_x.y.z.tar.gz, with x.y.z replaced by the current version number). File `build-test.sh` builds, tests, and installs the package (and takes care of the version number).
-	 
+
 	   Testing is, by default, parallelized and will use all CPUs except 1 (up to 20, the number of test files): the package includes over 1400 tests, with a test coverage of more than 90%. If you want to use fewer CPUs modify variable `TESTTHAT_CPUS` in script `build-test.sh` (see also https://testthat.r-lib.org/articles/parallel.html).
-	
-	  
-### Docker images 
+
+
+### Docker images
 We provide two Docker images, one for running the Shiny app, and another with  RStudio to run the evamtools package directly.  They are available from
 https://hub.docker.com/r/rdiaz02/evamshiny
-and 
-https://hub.docker.com/r/rdiaz02/evamrstudio ; the first for running the Shiny app, the second for using the package from RStudio. Pull the one you need (`docker pull rdiaz02/evamshiny` or `docker pull rdiaz02/evamrstudio`).
+and
+https://hub.docker.com/r/rdiaz02/evamrstudio ; the first for running the Shiny app, the second for using the package from RStudio. Pull the one you need (`docker pull rdiaz02/evamshiny` or `docker pull rdiaz02/evamrstudio`). (Note: as of 2024-10-22, the docker image for using the package from RStudio is using R-4.4.1 and OncoSimulR 4.7.8, whereas the one for running the Shiny app is still using R-4.2.2 and OncoSimulR 4.0. I have updated the RStudio image because of internal lab needs ---access to the latest functionality in OncoSimulR--- but have not updated the Shiny app image since it is working and thus there is no need for updates).
 
 
 
@@ -267,7 +267,7 @@ If you want to easily share data between your local file system and the Docker i
 ```
 docker run --rm -p 8787:8787 -v $HOME/tmp/rst:/home/rstudio -e PASSWORD=yourpasswordhere rdiaz02/evamrstudio
 ```
-which will allow you to use your local `~/tmp/rst` to read from/write to the RStudio container (if using Windows you could write `-v /c/Users/someuser/somedirectory:/home/rstudio`); see additional documentation in https://www.rocker-project.org/use/shared_volumes/. See also https://docs.docker.com/storage/bind-mounts/. 
+which will allow you to use your local `~/tmp/rst` to read from/write to the RStudio container (if using Windows you could write `-v /c/Users/someuser/somedirectory:/home/rstudio`); see additional documentation in https://www.rocker-project.org/use/shared_volumes/. See also https://docs.docker.com/storage/bind-mounts/.
 
 
 
@@ -281,7 +281,7 @@ Some additional notes:
 docker run -d -p 4080:3000 --memory="2g" --name EVAM1 rdiaz02/evamshiny
 ```
 
-This runs the `evamshiny` Docker image, mapping port 3000 of the container to port 4080 of the host  (so if you want to use the usual port 80, write 80 instead of 4080). You can use whatever you want instead of "EVAM1"; it is just a name to make other operations  (like stopping the container) simpler. In this example, we also limit the maximum memory to 2 GB. 
+This runs the `evamshiny` Docker image, mapping port 3000 of the container to port 4080 of the host  (so if you want to use the usual port 80, write 80 instead of 4080). You can use whatever you want instead of "EVAM1"; it is just a name to make other operations  (like stopping the container) simpler. In this example, we also limit the maximum memory to 2 GB.
 
 This is a *non-interactive run*, and we use the "-d" or "--detach" option, so it runs in detached mode. You can point your browser to 0.0.0.0:4080 and the Shiny app should be there.  (If you want to keep the container running, you might want to add `tail -f /dev/null` to the above command).
 
@@ -294,9 +294,9 @@ This is a *non-interactive run*, and we use the "-d" or "--detach" option, so it
 
 ## Main files and directories
 
-### Dockerfiles ###  
+### Dockerfiles ###
 
-The Dockerfiles (Dockerfile-evam-shiny, Dockerfile-evam-rstudio) include all the information to create the containers with all dependencies. 
+The Dockerfiles (Dockerfile-evam-shiny, Dockerfile-evam-rstudio) include all the information to create the containers with all dependencies.
 
 
 ### evamtools
@@ -306,8 +306,8 @@ The R package itself with standard organization. Directories and files under ins
   * miscell/Using_OncoSimulR_to_get_accessible_genotypes_trans_mats.tex: explanation of using OncoSimulR to check transition matrices for OT, CBN, OncoBN, and HESBCN, the equivalence of lambdas to terms in fitness expressions.
   * miscell/examples: examples referred to from other files (for example, from the former tex file).
   * miscell/tests-sample_genotypes_from_trm: output of tests that were run to verify the code for sampling genotypes from the transition rate matrices. <!-- We compared the output of our code with that from the code of the original authors (MHN, MCCBN) for a large set of cases. -->
-      
-	Note that the R package uses testthat to test our R code. Those tests will run automatically with the usual procedures from testthat or while doing `R CMD check`. <!-- For example, we check that transition rate matrices and transition probability matrices give identical results when compared to finding them via OncoSimulR (file test.OT-CBN-trans-mat-against-oncosimul.R and test.HESBCN-trans-mat-against-oncosimul.R) and against hand-computed examples (file test.trans-rates-f-graphs.R and test.HESBCN-transition-rate-matrices.R). --> The tests in evamtools/tests/testthat are separate from the tests under  inst/miscell/tests-sample_genotypes_from_trm  
+
+	Note that the R package uses testthat to test our R code. Those tests will run automatically with the usual procedures from testthat or while doing `R CMD check`. <!-- For example, we check that transition rate matrices and transition probability matrices give identical results when compared to finding them via OncoSimulR (file test.OT-CBN-trans-mat-against-oncosimul.R and test.HESBCN-trans-mat-against-oncosimul.R) and against hand-computed examples (file test.trans-rates-f-graphs.R and test.HESBCN-transition-rate-matrices.R). --> The tests in evamtools/tests/testthat are separate from the tests under  inst/miscell/tests-sample_genotypes_from_trm
 
 
 
@@ -402,21 +402,21 @@ The R package itself with standard organization. Directories and files under ins
 
    The Bioinformatics paper "EvAM-Tools: tools for evolutionary accumulation and cancer progression models" is available at
   https://doi.org/10.1093/bioinformatics/btac710 .
-   
-   
+
+
 ## Citing EvAM-Tools
 If you use the package or the web app, please **cite** the Bioinformatics paper:
 
 Diaz-Uriarte, R & Herrera-Nieto, P. 2022. EvAM-Tools: tools for evolutionary accumulation and cancer progression models. _Bioinformatics_.  https://doi.org/10.1093/bioinformatics/btac710 .
 
- 
- 
-Ideally, also provide a link to the web app itself, https://iib.uam.es/evamtools , or the code repository, https://github.com/rdiaz02/EvAM-Tools. 
- 
- 
-   
+
+
+Ideally, also provide a link to the web app itself, https://iib.uam.es/evamtools , or the code repository, https://github.com/rdiaz02/EvAM-Tools.
+
+
+
    <!-- The preprint is available from bioRxiv at  https://doi.org/10.1101/2022.07.05.498481 . -->
-   
+
    <!-- (or the direct bioRxiv link: https://www.biorxiv.org/content/10.1101/2022.07.05.498481v1 ) <!-- -\->, which includes additional examples ( https://www.biorxiv.org/content/10.1101/2022.07.05.498481v1.supplementary-material ) -->
 
 
