@@ -140,6 +140,11 @@ genots_2_fgraph_and_trans_mat <- function(x) {
     ##  and use allGenotypes_to_matrix. And would need to change
     ##  OncoSimulR's wrap_accessibleGenotype and how it uses the th.
 
+    ## THINK: but the call to genots_2_fgraph_and_trans_mat inside
+    ## cpm_to_trans_mat_oncosimul has already used wrap_accessibleGenotypes
+    ## and only accessible genotypes are passed to this function.
+    ## Note, though, that this function has been extenssively tested.
+
     ## We use this approach, to minimize the number of genotypes we call
     ## unrestricted_fitness_graph_sparseM in cpm_to_trans_mat_oncosimul
 
