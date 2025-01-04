@@ -70,3 +70,5 @@ importFrom("tippy", "tippy_this", "tippy", "use_tippy")
 importFrom("relations", "as.relation",
            "transitive_reduction",
            "relation_incidence")
+
+importFrom("hypertrapsCT", "HyperTraPS")
