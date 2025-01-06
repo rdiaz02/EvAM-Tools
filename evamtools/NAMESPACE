@@ -71,4 +71,4 @@ importFrom("relations", "as.relation",
            "transitive_reduction",
            "relation_incidence")
 
-importFrom("hypertrapsCT", "HyperTraPS")
+importFrom("hypertrapsct", "HyperTraPS")

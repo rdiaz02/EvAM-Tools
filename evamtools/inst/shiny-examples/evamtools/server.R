@@ -2326,7 +2326,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             lapply(plot2show(), function(met) {
                 if (met == "HyperTraps") {
                     output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
-                        pl <- hypertrapsCT:::plotHypercube.influences(tmp_data$HyperTraps_post)
+                        pl <- hypertrapsct:::plotHypercube.influences(tmp_data$HyperTraps_post)
                         pl
                     })
                     return(
@@ -2454,7 +2454,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             lapply(plot2show(), function(met) {
                 if (met == "HyperTraps") {
                     output[[sprintf("plot_hypertraps_%s", met)]] <- renderPlot({
-                        pl <- hypertrapsCT:::plotHypercube.summary(tmp_data$HyperTraps_post)
+                        pl <- hypertrapsct:::plotHypercube.summary(tmp_data$HyperTraps_post)
 
                         pl 
                     })

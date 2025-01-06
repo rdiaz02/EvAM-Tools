@@ -140,7 +140,7 @@ run_HyperTraps <- function(x, opts) {
     time_out <- system.time({
         opts <- c(list(obs = x), opts)
         out <- invisible(do.call(
-            hypertrapsCT::HyperTraPS,
+            hypertrapsct::HyperTraPS,
             opts
         ))
     })["elapsed"]
