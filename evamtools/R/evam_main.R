@@ -14,7 +14,7 @@ common_preprocess <- function(x, max_cols) {
 }
 
 evam <- function(x,
-                 methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN", "HyperTraps"),
+                 methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN", "HyperTraps", "BML"),
                  max_cols = 15,
                  cores = detectCores(),
                  paths_max = FALSE,
@@ -24,7 +24,8 @@ evam <- function(x,
                  hesbcn_opts = list(),
                  oncobn_opts = list(),
                  mccbn_opts = list(),
-                 hyper_traps_opts = list()
+                 hyper_traps_opts = list(),
+                 bml_opts = list()
 ) {
     preprocessed_x <- common_preprocess(x, max_cols)
     x <- preprocessed_x$processed
@@ -40,7 +41,8 @@ evam <- function(x,
         hesbcn_opts = fill_args_default(hesbcn_opts, default_opts$hesbcn_opts),
         oncobn_opts = fill_args_default(oncobn_opts, default_opts$oncobn_opts),
         mccbn_opts = fill_args_default(mccbn_opts, default_opts$mccbn_opts),
-        hyper_traps_opts = fill_args_default(hyper_traps_opts, default_opts$hyper_traps_opts)
+        hyper_traps_opts = fill_args_default(hyper_traps_opts, default_opts$hyper_traps_opts),
+        bml_opts = fill_args_default(bml_opts, default_opts$bml_opts)
     ) 
 
 
@@ -172,6 +174,8 @@ evam <- function(x,
         HyperTraps_trans_mat = get_output("HyperTraps", "td_trans_mat"),
         HyperTraps_predicted_genotype_freqs = get_output("HyperTraps", "predicted_genotype_freqs"),
         HyperTraps_post = all_out$HyperTraps,
+
+        BML_output = all_out$BML,
 
 
         original_data = xoriginal,

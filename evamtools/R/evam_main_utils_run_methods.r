@@ -180,6 +180,19 @@ run_HyperTraps <- function(x, opts) {
     return(list(time_out = time_out, out = out))
 }
 
+
+run_BML <- function(x, opts) {
+    time_out <- system.time({
+        opts <- c(list(dataset = x), opts)
+        out <- invisible(do.call(
+            BML::bml,
+            opts
+        ))
+    })["elapsed"]
+
+    return(list(time_out = time_out, out = out))
+}
+
 run_method <- function(method, x, opts) {
     if (method == "MHN") {
         result <- run_MHN(x, opts$mhn_opts)
@@ -195,6 +208,8 @@ run_method <- function(method, x, opts) {
         result <- run_OncoBN(x, opts$oncobn_opts)
     } else if (method == "HyperTraps") {
         result <- run_HyperTraps(x, opts$hyper_traps_opts)
+    } else if (method == "BML") {
+        result <- run_BML(x, opts$bml_opts)
     }
     
 

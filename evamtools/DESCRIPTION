@@ -46,6 +46,7 @@ Imports: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree
     , tippy
     , relations
     , hypertrapsct
+    , BML
 Suggests: testthat (>= 3.0.0)
 Enhances: mccbn
 Config/testthat/parallel: true
