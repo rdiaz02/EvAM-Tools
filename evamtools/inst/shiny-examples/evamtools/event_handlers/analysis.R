@@ -152,6 +152,16 @@ get_hyper_traps_args <- function(input) {
     return(hyper_traps_opts)
 }
 
+get_bml_args <- function(input) {
+    bml_opts <- list(
+        ntree = input$BML_ntree,
+        threshold = input$BML_threshold,
+        rep = input$BML_rep
+    )
+
+    return(bml_opts)
+}
+
 parse_opts <- function(input) {
     opts <- list()
 
@@ -162,6 +172,7 @@ parse_opts <- function(input) {
     opts$oncobn_opts <- get_oncobn_args(input)
     opts$mccbn_opts <- get_mccbn_args(input)
     opts$hyper_traps_opts <- get_hyper_traps_args(input)
+    opts$bml_opts <- get_bml_args(input)
 
     return(opts)
 }
@@ -216,7 +227,8 @@ run_analysis <- function(data, input, disp_freqs_ret, EVAM_MAX_ELAPSED) {
                 hesbcn_opts = opts$hesbcn_opts,
                 oncobn_opts = opts$oncobn_opts,
                 mccbn_opts = opts$mccbn_opts,
-                hyper_traps_opts = opts$hyper_traps_opts
+                hyper_traps_opts = opts$hyper_traps_opts,
+                bml_opts = opts$bml_opts,
             )
         },
         elapsed = EVAM_MAX_ELAPSED,
@@ -266,7 +278,6 @@ run_analysis <- function(data, input, disp_freqs_ret, EVAM_MAX_ELAPSED) {
     }
 
     progress$inc(4 / 5, detail = "Post processing data")
-    Sys.sleep(0.5)
 
     orig_data <- list(
         data = data2run, name = data$name,
@@ -284,7 +295,6 @@ run_analysis <- function(data, input, disp_freqs_ret, EVAM_MAX_ELAPSED) {
                                         ) 
     
     progress$inc(5/5, detail = "You can see your result by going to the Results tab")
-    Sys.sleep(1)
 
     shinyjs::enable("analysis")
 

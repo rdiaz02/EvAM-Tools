@@ -2332,7 +2332,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     return(
                         column(number_of_columns,
                             tagList(
-                                h5("HyperTraps"),  # Add the title here
+                                h5("HyperTraps"),
                                 plotOutput(sprintf("plot_sims_%s", met))
                             )
                         )

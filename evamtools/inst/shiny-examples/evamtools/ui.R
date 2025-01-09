@@ -722,7 +722,8 @@ user_input <- function() {
                                                                      "MHN",
                                                                      "MCCBN",
                                                                      "H-ESBCN",
-                                                                     "HyperTraps"),
+                                                                     "HyperTraps",
+                                                                     "BML"),
                                                                  choiceValues = c(
                                                                      "CBN",
                                                                      "OT",
@@ -730,7 +731,8 @@ user_input <- function() {
                                                                      "MHN",
                                                                      "MCCBN",
                                                                      "HESBCN",
-                                                                     "HyperTraps"
+                                                                     "HyperTraps",
+                                                                     "BML"
                                                                  ),
                                                                  selected = c(
                                                                      "CBN",
@@ -892,7 +894,12 @@ user_input <- function() {
                                               selectInput("HyperTraps_sa", "sa: Use SA (0/1): ", c(0, 1), selected = 0),
                                               selectInput("HyperTraps_sgd", "sgd: Use SGD (0/1): ", c(0, 1), selected = 0),
                                               selectInput("HyperTraps_pli", "pli: Use PLI (0/1): ", c(0, 1), selected = 0),
-                                              numericInput("HyperTraps_seed", "Seed: ", NULL, min=0)
+                                              numericInput("HyperTraps_seed", "Seed: ", NULL, min=0),
+                                              tags$hr(style="border-color: darkgrey;"),
+                                              tags$h4("BML options"),
+                                              numericInput("BML_ntree", "Number of random restarts for searching the tree space", 1, min=0),
+                                              numericInput("BML_threshold", "Threshold for inferring paths", 0.5, min=0, max=1),
+                                              numericInput("BML_rep", "Number of bootstrap replicates, if nrep = 0 (default) no bootstrap will be performed", 0, min=0),
                     ),
                                   
                     )

@@ -134,8 +134,6 @@ decode_state <- function(state, num_features, feature_labels) {
 }
 
 
-
-
 run_HyperTraps <- function(x, opts) {
     time_out <- system.time({
         opts <- c(list(obs = x), opts)
@@ -189,6 +187,48 @@ run_BML <- function(x, opts) {
             opts
         ))
     })["elapsed"]
+
+    out$DAG$labels <- sub("Normal", "WT", out$DAG$labels)
+    out$DAG$labels <- sapply(out$DAG$labels, function(label) {
+        # If label is not "WT", sort the components and join them with a comma and space
+        if (label != "WT") {
+        label_parts <- strsplit(label, ",")[[1]]
+        sorted_label <- paste(sort(trimws(label_parts)), collapse = ", ")
+        return(sorted_label)
+        }
+        # If the label is "WT", return it as is
+        return(label)
+    }) 
+
+    unname(out$DAG$labels)
+
+    out$trans_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
+    out$trans_rate_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
+ 
+    for (i in seq_len(nrow(out$trans_mat))) {
+        for (j in seq_len(ncol(out$trans_mat))) {
+            if (out$trans_mat[i, j] == 1) {
+                # Scale the transition rate by the probability for node i
+                out$trans_rate_mat[i, j] <- out$DAG$probs[i]
+            } else {
+                # If no edge exists, transition rate remains 0
+                out$trans_rate_mat[i, j] <- 0
+            }
+        }
+    }
+
+    genotype_names = colnames(x)
+    combinations = c("WT", unlist(lapply(1:length(genotype_names), function(n) combn(genotype_names, n, FUN = function(x) paste(x, collapse = ", "))), use.names = FALSE))
+    freqs = rep(0, length(combinations))
+    out$predicted_genotype_freqs <- as.data.frame(t(freqs))
+    colnames(out$predicted_genotype_freqs) <- combinations
+
+   for (i in seq_along(out$DAG$labels)) {
+        label <- out$DAG$labels[i]
+        prob <- 0
+  
+        out$predicted_genotype_freqs[label] <- prob
+    } 
 
     return(list(time_out = time_out, out = out))
 }

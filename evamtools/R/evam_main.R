@@ -175,6 +175,9 @@ evam <- function(x,
         HyperTraps_predicted_genotype_freqs = get_output("HyperTraps", "predicted_genotype_freqs"),
         HyperTraps_post = all_out$HyperTraps,
 
+        BML_trans_mat = get_output("BML", "trans_mat"),
+        BML_predicted_genotype_freqs = get_output("BML", "predicted_genotype_freqs"),
+        BML_trans_rate_mat = get_output("BML", "trans_rate_mat"),
         BML_output = all_out$BML,
 
 

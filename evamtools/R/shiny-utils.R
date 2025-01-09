@@ -365,7 +365,7 @@ generate_sample_from_dag <- function(data, parent_set, noise = 0, N = 10000,
 }
 
 create_tabular_data <- function(data) {
-    available_methods <- c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN", "HyperTraps")
+    available_methods <- c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN", "HyperTraps", "BML")
     attr_to_make_tabular <- c("trans_mat", "trans_rate_mat",
                               "predicted_genotype_freqs"
                               )
@@ -418,6 +418,7 @@ create_tabular_data <- function(data) {
                              MCCBN = numeric(), 
                              MHN = numeric(),
                              HyperTraps = numeric(),
+                             BML = numeric(),
                              stringsAsFactors = FALSE) 
 
             for (method in available_methods){
