@@ -70,11 +70,14 @@ RUN R -e "install.packages('igraph')"
 RUN R -e "BiocManager::install('OncoSimulR')"
 ## Force devel version
 RUN R -e "BiocManager::install(version = '3.20', ask = FALSE)"
-RUN R -e "BiocManager::install('OncoSimulR', version = 'devel', ask = FALSE)"
+# RUN R -e "BiocManager::install('OncoSimulR', version = 'devel', ask = FALSE)"
 RUN R -e "library(devtools);devtools::install_github('phillipnicol/OncoBN')"
 RUN R -e "install.packages('prompter')"
 RUN R -e "install.packages('shinyBS')"
 RUN R -e "install.packages('tippy')"
+RUN R -e "BiocManager::install('ggtree')"
+RUN R -e "devtools::install_github('https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor')"
+RUN R -e "devtools::install_github('https://github.com/Deschain/BML')"
 
 RUN mkdir -p /app/Sources/
 
