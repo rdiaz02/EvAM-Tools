@@ -674,9 +674,10 @@ genotypes_standard_order <- function(gene_names) {
 ## return the same vector sorted in the same order as genotypes_standard_order
 ## Like reorder_to_pD, but in what for me is much more sensible
 reorder_to_standard_order <- function(x) {
+    if (is.null(names(x))) stop("x must be a named vector")
     ## If only WT, return immediately
     if ((length(x) == 1) && (names(x) == "WT")) return(x)
-    
+
     genots_n <- names(x)
     ## Ensure genotype names are canonical
     genots_n <- canonicalize_genotype_names(genots_n)
