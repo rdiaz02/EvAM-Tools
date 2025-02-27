@@ -10,4 +10,5 @@ R_ENVIRON_USER=./Renviron.based_on_bioc R --no-site-file --no-init-file CMD INST
 ## For parallel testing. All except 1
 export TESTTHAT_CPUS=$(cat /proc/cpuinfo | awk '/^processor/{print $3}' | tail -n 1)
 R_ENVIRON_USER=./Renviron.based_on_bioc R --no-site-file --no-init-file CMD check evamtools_$V_PKG.tar.gz
-
+## Use also R-devel
+R_ENVIRON_USER=./Renviron.based_on_bioc R-devel --no-site-file --no-init-file CMD check evamtools_$V_PKG.tar.gz
