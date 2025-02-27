@@ -5,22 +5,22 @@
 \format{
 Defaults values of the shiny app
 \describe{
-  \item{max_genes}{Maximun number of genes allowed}
+  \item{max_genes:}{Maximun number of genes allowed}
 
-  \item{min_genes}{Minimum number of genes allowed}
-  
-  \item{ngenes}{Integer of default number of genes to use when building}
-  
-  \item{cpm_samples}{Number of patients to samples to generate csd data from a matrix using with CPM outputs}
+  \item{min_genes:}{Minimum number of genes allowed}
 
-  \item{all_cpms}{All CPMs in evamtools}
-  
-  \item{csd_samples}{Number of patients to samples to generate csd data from a matrix or a dag}
+  \item{ngenes:}{Integer of default number of genes to use when building}
+
+  \item{cpm_samples:}{Number of patients to samples to generate csd data from a matrix using with CPM outputs}
+
+  \item{all_cpms:}{All CPMs in evamtools}
+
+  \item{csd_samples:}{Number of patients to samples to generate csd data from a matrix or a dag}
 
 %%  \item{cpms2run}{Which CPMs to run in the shiny server by defaults}
 
-  \item{template_data}{One of:
-    \itemize{
+  \item{template_data:}{One of:
+    \describe{
       \item{csd_counts:}{Data frame with the counts of each genotype}
       \item{data:}{Data frame with cross sectional data.}
       \item{dag:}{Matrix of 10x10 with lambdas}
