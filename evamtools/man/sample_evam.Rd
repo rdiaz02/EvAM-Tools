@@ -5,14 +5,14 @@
   counts of genotype transitions.}
 \usage{
 sample_evam(cpm_output,  N,
-                methods = NULL, 
+                methods = NULL,
                 output = c("sampled_genotype_counts"),
                 obs_noise = 0,
                 genotype_freqs_as_data = TRUE
             )
 
 sample_CPMs(cpm_output,  N,
-                methods = NULL, 
+                methods = NULL,
                 output = c("sampled_genotype_counts"),
                 obs_noise = 0,
                 genotype_freqs_as_data = TRUE
@@ -30,7 +30,7 @@ sample_CPMs(cpm_output,  N,
 \item{output}{A vector with one or more of the following possible
   outputs: sampled_genotype_counts, obs_genotype_transitions,
   state_counts. Even if requested, obs_genotype_transitions and
-  state_counts are not available for OT and OncoBN. } 
+  state_counts are not available for OT and OncoBN. }
 
 \item{obs_noise}{When obtaining a sample, should we add observation
   noise (for example, genotyping error) to the data?   If larger than 0,
@@ -43,23 +43,23 @@ sample_CPMs(cpm_output,  N,
 }
 
 
-\value{
-  A list, with a many entries as methods times number of components requested. For each method among CBN, MCCBN, HESBCN, and MHN:
-   \itemize{
-    \item{sampled_genotype_counts: }{Counts, or absolute genotype frequencies,
+\value{A list, with a many entries as methods times number of components requested. For each method among CBN, MCCBN, HESBCN, and MHN:
+
+    \item{sampled_genotype_counts}{Counts, or absolute genotype frequencies,
   obtained by sampling from the predicted frequencies. See also
-  Description, below}.
-    \item{obs_genotype_transitions: }{Number of observed transitions between   genotypes (as a sparse matrix).}
-    \item{state_counts: }{Number of times each genotype was visited
+  Description, below.}
+    \item{obs_genotype_transitions}{Number of observed transitions between   genotypes (as a sparse matrix).}
+    \item{state_counts}{Number of times each genotype was visited
   during the transitions. Column sums of observed genotype transitions are equal to state counts.}
-    \item{sampled_genotype_counts_as_data: }{The genotypes in a matrix of 0/1. This can directly be passed as an argument for \code{\link{evam}}, as the input data.}
-  }
-  
+    \item{sampled_genotype_counts_as_data}{The genotypes in a matrix of 0/1. This can directly be passed as an argument for \code{\link{evam}}, as the input data.}
+
+
+
   Observed genotype transitions are not the way to obtain estimates of transition probabilities. The transition probabilities given by each method are already available from the output of evam itself. These genotype transitions are the observed transitions during the simulation of the sampling process and, thus, have additional noise.
 
   For OT and OncoBN, only the \code{sampled_genotype_counts} and
   \code{sampled_genotype_counts_as_data} components are available (the other two are not available).
-  
+
 }
 
 \note{
@@ -85,13 +85,13 @@ sample_CPMs(cpm_output,  N,
   rarely used, but lead to confusion and could increase without good
   reason running times. So, from the web app, we sample
   without using obs_genotype_transitions.
- 
+
   Observed genotype transitions, if requested, are obtained by counting the transitions between pairs of genotypes when simulating from the continuous-time Markov Chain. State counts are also obtained by counting from this process how many times a genotype was visited.
 }
 
 \seealso{
   \code{\link{random_evam}}
- 
+
 }
 
 \examples{
@@ -122,7 +122,7 @@ outS1 <- sample_evam(out, N = 1000)
 outS1e <- sample_evam(out, N = 1000, obs_noise = 0.1)
 
 ## Only CBN and will simulate sampling from the transition
-## rate matrix. 
+## rate matrix.
 
 outS2 <- sample_evam(out, N = 1000, methods = "CBN",
                      output = "obs_genotype_transitions")
@@ -131,7 +131,7 @@ outS2 <- sample_evam(out, N = 1000, methods = "CBN",
 ## No output available for OT
 ## For CBN and MHN simulate from the transition rate matrix
 
-outS3 <- sample_evam(out, N = 1000, methods = c("CBN", "OT", "MHN"), 
+outS3 <- sample_evam(out, N = 1000, methods = c("CBN", "OT", "MHN"),
                      output = c("obs_genotype_transitions",
                                 "state_counts"))
 
@@ -140,12 +140,12 @@ outS3 <- sample_evam(out, N = 1000, methods = c("CBN", "OT", "MHN"),
 ## No obs_genotype_transitions available for OT
 ## CBN and OT simulate from the transition rate matrix, for consistency
 
-outS4 <- sample_evam(out, N = 1000, methods = c("CBN", "OT", "MHN"), 
+outS4 <- sample_evam(out, N = 1000, methods = c("CBN", "OT", "MHN"),
                      output = c("obs_genotype_transitions",
                                 "sampled_genotype_counts"))
 
 ## Only CBN,  will simulate sampling from the transition
-## rate matrix and add observation error to the genotype frequencies. 
+## rate matrix and add observation error to the genotype frequencies.
 
 outS5 <- sample_evam(out, N = 1000, methods = "CBN",
                      output = c("obs_genotype_transitions", "sampled_genotype_counts"), obs_noise = 0.1)

@@ -59,7 +59,7 @@ evam(x,
   following strings, \dQuote{OT}, \dQuote{OncoBN}, \dQuote{CBN}, \dQuote{MCCBN}, \dQuote{MHN}, \dQuote{HESBCN}.}
 
 
-\item{max_cols}{Maximum number of columns to use in the analysis. If x has > max_cols, selected columns are those with the largest number of events.} 
+\item{max_cols}{Maximum number of columns to use in the analysis. If x has > max_cols, selected columns are those with the largest number of events.}
 
 \item{cores}{If larger than 1, use mclapply to run all methods. This is
   the default. If you use mclapply, MHN and MCCBN should not use OMP
@@ -69,7 +69,7 @@ evam(x,
   their probabilities. See details for how they are computed.}
 
 \item{mhn_opts}{A list with two named arguments.
-  \itemize{
+  \describe{
 
  \item{lambda: }{The penalty for MHN. Defaults to 1/nrow(data). (These are not the lambdas as the estimated parameters for the rates of the continuous-time Markov chains for MHN or CBN or HESBCN.) }
 
@@ -79,9 +79,9 @@ evam(x,
 
 }
 
-\item{ot_opts}{A list with the single named argument \code{with_errors_dist_ot}: value for option with \code{with.errors} in the call to \code{\link[Oncotree]{distribution.oncotree}}. A value of TRUE means to incorporate the false positive and negative errors when returning the probabilities of genotypes under OT. Note that for large models using a value of TRUE can result in very long computing times. Default is TRUE.} 
-\item{cbn_opts}{A named list with arguments passed to CBN. 
-\itemize{
+\item{ot_opts}{A list with the single named argument \code{with_errors_dist_ot}: value for option with \code{with.errors} in the call to \code{\link[Oncotree]{distribution.oncotree}}. A value of TRUE means to incorporate the false positive and negative errors when returning the probabilities of genotypes under OT. Note that for large models using a value of TRUE can result in very long computing times. Default is TRUE.}
+\item{cbn_opts}{A named list with arguments passed to CBN.
+\describe{
 \item{omp_threads: }{OMP threads to be used by CBN (set via the
   environment variable OMP_NUM_THREADS). Defaults to 1. In contrast to
   MCCBN and MHN, you can set
@@ -97,15 +97,15 @@ multiple evams in parallel.}
 }
 
 \item{hesbcn_opts}{Named list of arguments used in the fit of
-  H-ESBCN (details in \url{https://github.com/danro9685/HESBCN}). 
-  \itemize{
+  H-ESBCN (details in \url{https://github.com/danro9685/HESBCN}).
+  \describe{
     \item{MCMC_iter: }{Number of MCMC iterations to run;
       this is argument "-n, --number_samples" in the original
   H-ESBCN C code.   Default:  100000, as in the original implementation.  Note that the web app uses a larger default of
   200000. Larger values, such as 500000, might be better.}
 
 \item{reg: }{Regularization: one of \code{bic} (default), \code{aic},
-  \code{loglik}.} 
+  \code{loglik}.}
 
 %% \item{tmp_dir: }{Directory name where the oput is located.}
 
@@ -116,9 +116,9 @@ multiple evams in parallel.}
 \item{silent: }{Whether to run show message showing the folder name where HESBCN is run}
   }
   }
-  
 
- \item{oncobn_opts}{Named list of arguments used in the fit of OncoBN. See \code{\link[OncoBN]{fitCPN}}. } 
+
+ \item{oncobn_opts}{Named list of arguments used in the fit of OncoBN. See \code{\link[OncoBN]{fitCPN}}. }
 
 
 \item{mccbn_opts}{Named list of arguments used in the fit of
@@ -127,9 +127,9 @@ multiple evams in parallel.}
     \code{\link[mccbn]{adaptive.simulated.annealing}}; see the help of
     \code{\link[mccbn]{adaptive.simulated.annealing}} for details.
     In addition, the following options:
-    \itemize{
+    \describe{
        \item{tmp_dir: }{Directory name where the oput is      located. This is  passed to      \code{\link[mccbn]{adaptive.simulated.annealing}}, as  argument \code{outdir}, with \code{addname} added, if provided. }
- 
+
       \item{addname: }{String to append to the temporary directory name. Default is NULL.}
 
       \item{silent: }{Whether to show a message with the name of the
@@ -137,95 +137,91 @@ multiple evams in parallel.}
     }
     %% \code{mccbn_hcbn_proc} (i.e., used only
     %% if fitting a \code{H-CBN2} model). See \code{\link{do_MCCBN_HCBN2}}.
-    
+
     Note: do not pass \code{thrds} > 1 with \code{cores} > 1: as with
-  MHN, do not use OpenMP threads from forked process from 
+  MHN, do not use OpenMP threads from forked process from
   \code{\link[parallel]{mclapply}}.
   }
 }
 
 \value{A list with named components (that should be self-explanatory). The pattern is method_component.
-  
-  \itemize{
-        \item{OT_model: }{Data frame with parent and descendant edges,
+
+        \item{OT_model}{Data frame with parent and descendant edges,
   edge weight, and observed and predicted frequencies of genes.}
-        \item{OT_f_graph: }{The fitness graph, as a sparse matrix, with weights  obtained from the edge weights (this is not a transition rate  matrix). See full documentation for details.}
-        \item{OT_trans_mat: }{Transition matrix between genotypes. This is
+        \item{OT_f_graph}{The fitness graph, as a sparse matrix, with weights  obtained from the edge weights (this is not a transition rate  matrix). See full documentation for details.}
+        \item{OT_trans_mat}{Transition matrix between genotypes. This is
   really an abuse of what an untimed OT provides. See full documentation for details.}
-        \item{OT_predicted_genotype_freqs: }{Probabilities of genotypes from the
+        \item{OT_predicted_genotype_freqs}{Probabilities of genotypes from the
   OT model, as a data frame.}
-	\item{OT_paths_max: }{If \code{paths_max} is TRUE, a list of two components, \code{paths} and \code{weights}. The \code{paths} list is a list of \code{igraph.vs} (igraph vertex sequences) objects, one for each path; the \code{weights} is vector of log-probabilities of each path. If \code{paths_max} is FALSE, the default, NA.}
+	\item{OT_paths_max}{If \code{paths_max} is TRUE, a list of two components, \code{paths} and \code{weights}. The \code{paths} list is a list of \code{igraph.vs} (igraph vertex sequences) objects, one for each path; the \code{weights} is vector of log-probabilities of each path. If \code{paths_max} is FALSE, the default, NA.}
 
 
 
 
-        \item{CBN_model: }{Similar to the ouput from OT, but with
+        \item{CBN_model}{Similar to the ouput from OT, but with
         lambdas. The lambda to be used is "rerun_lambda".}
-        \item{CBN_trans_rate_mat: }{Transition rate matrix as a sparse matrix.}
-        \item{CBN_trans_mat: }{Transition matrix between genotypes,
+        \item{CBN_trans_rate_mat}{Transition rate matrix as a sparse matrix.}
+        \item{CBN_trans_mat}{Transition matrix between genotypes,
         obtained from the transition rate matrix using competing exponentials.}
-        \item{CBN_td_trans_mat: }{Time-discretized transition matrix,
+        \item{CBN_td_trans_mat}{Time-discretized transition matrix,
         using the uniformization method; see full documentation for details.}
-      \item{CBN_predicted_genotype_freqs: }{Named vector of probabilities of genotypes predicted
+      \item{CBN_predicted_genotype_freqs}{Named vector of probabilities of genotypes predicted
         by the CBN model (under a model where sampling times are
         distributed as an exponential of rate 1).}
-      \item{CBN_paths_max: }{As for OT.}
+      \item{CBN_paths_max}{As for OT.}
 
-      
-        \item{MCCBN_model: }{As for CBN, only with one column of \eqn{\lambda}s.}
-        \item{MCCBN_trans_rate_mat: }{As for CBN.}
-        \item{MCCBN_trans_mat: }{As for CBN.}
-        \item{MCCBN_td_trans_mat: }{As for CBN.}
-       \item{MCCBN_predicted_genotype_freqs: }{As for CBN.}
-       \item{MCCBN_paths_max: }{As for OT.}
 
-       
-        \item{MHN_theta: }{Matrix of estimated thetas (the log-Theta
+        \item{MCCBN_model}{As for CBN, only with one column of \eqn{\lambda}s.}
+        \item{MCCBN_trans_rate_mat}{As for CBN.}
+        \item{MCCBN_trans_mat}{As for CBN.}
+        \item{MCCBN_td_trans_mat}{As for CBN.}
+       \item{MCCBN_predicted_genotype_freqs}{As for CBN.}
+       \item{MCCBN_paths_max}{As for OT.}
+
+
+        \item{MHN_theta}{Matrix of estimated thetas (the log-Theta
         matrix). The values in this matrix can range from minus to plus infinity.}
-        \item{MHN_trans_rate_mat: }{As for CBN.}
-        \item{MHN_trans_mat: }{As for CBN.}
-        \item{MHN_td_trans_mat: }{As for CBN.}
-        \item{MHN_exp_theta: }{Matrix of the exponential of thetas; the
+        \item{MHN_trans_rate_mat}{As for CBN.}
+        \item{MHN_trans_mat}{As for CBN.}
+        \item{MHN_td_trans_mat}{As for CBN.}
+        \item{MHN_exp_theta}{Matrix of the exponential of thetas; the
         matrix \eqn{\Theta} in Schill et al. (just
         each theta, exponentiated; not the matrix exponential of the
         matrix of thetas). These are the multiplicative effects themselves.}
-        \item{MHN_predicted_genotype_freqs: }{As for CBN.}
-	\item{MHN_paths_max: }{As for OT.}
+        \item{MHN_predicted_genotype_freqs}{As for CBN.}
+	\item{MHN_paths_max}{As for OT.}
 
-	
-        \item{OncoBN_model: }{Similar to the ones above (but with a column
-        named theta, instead of lambdas or edge weights), with the
-        additional column dQuote{Relation}, that can take values OR (if
-        fitting model DBN) or AND (if fitting model CBN); Single
-        indicates nodes with a single ancestor (where OR or AND make no difference).}
-        \item{OncoBN_likelihood: }{Likelihood of the OncoBN model.}
-        \item{OncoBN_f_graph: }{As for OT.}
-	\item{OncoBN_trans_mat: }{As for OT.}
-        \item{OncoBN_predicted_genotype_freqs: }{As for OT.}
-        \item{OncoBN_fitted_model: }{DBN or CBN, depending on what you chose.}
-        \item{OncoBN_epsilon: }{Epsilon (this is an argument of the call
+
+        \item{OncoBN_model}{Similar to the ones above (but with a
+        column named theta, instead of lambdas or edge weights), with the   additional column \dQuote{Relation}, that can take values OR (if fitting model DBN) or AND (if fitting model CBN); Single      indicates nodes with a single ancestor (where OR or AND make no difference).}
+        \item{OncoBN_likelihood}{Likelihood of the OncoBN model.}
+        \item{OncoBN_f_graph}{As for OT.}
+	\item{OncoBN_trans_mat}{As for OT.}
+        \item{OncoBN_predicted_genotype_freqs}{As for OT.}
+        \item{OncoBN_fitted_model}{DBN or CBN, depending on what you chose.}
+        \item{OncoBN_epsilon}{Epsilon (this is an argument of the call
         to evam, but it is evaluated after possibly having modified the
         input data; see below).}
-        \item{OncoBN_parent_set: }{.}
-	\item{OncoBN_paths_max: }{As for OT.}
+        \item{OncoBN_parent_set}{.}
+	\item{OncoBN_paths_max}{As for OT.}
 
-	
-        \item{HESBCN_model: }{As for CBN.}
-        \item{HESBCN_parent_set: }{As for CBN.}
-        \item{HESBCN_trans_rate_mat: }{As for CBN.}
-        \item{HESBCN_trans_mat: }{As for CBN.}
-        \item{HESBCN_td_trans_mat: }{As for CBN.}
-	\item{HESBCN_predicted_genotype_freqs: }{As for CBN.}
-	\item{HESBCN_paths_max: }{As for OT.}
-	
-	
-        \item{original_data: }{The original data.}
-        \item{analyzed_data: }{The data that were actually analyzed. Can
+
+        \item{HESBCN_model}{As for CBN.}
+        \item{HESBCN_parent_set}{As for CBN.}
+        \item{HESBCN_trans_rate_mat}{As for CBN.}
+        \item{HESBCN_trans_mat}{As for CBN.}
+        \item{HESBCN_td_trans_mat}{As for CBN.}
+	\item{HESBCN_predicted_genotype_freqs}{As for CBN.}
+	\item{HESBCN_paths_max}{As for OT.}
+
+
+        \item{original_data}{The original data.}
+        \item{analyzed_data}{The data that were actually analyzed. Can
         differ from the original data because of the data pre-processing
         steps.}
-      \item{genotype_id_ordered: }{A named vector, from 1:number of genotypes, with names the genotypes. This can be useful for sorting; WT has value 1, and genotypes are ordered by increasing number of mutations and, withing number of mutations, alphanumerically.}
-      \item{all_options: }{All of the options used, as a list of lists.}
-  }
+      \item{genotype_id_ordered}{A named vector, from 1:number of genotypes, with names the genotypes. This can be useful for sorting; WT has value 1, and genotypes are ordered by increasing number of mutations and, withing number of mutations, alphanumerically.}
+      \item{all_options}{All of the options used, as a list of lists.}
+
 }
 
 
@@ -234,15 +230,15 @@ multiple evams in parallel.}
   The \strong{data pre-processing} involves, in sequence, these steps:
 
 
-  \itemize{ 
+  \describe{
 
   \item{Adding pseudosamples: }{If any gene (column) is always observed
     mutated (i.e, has a value of 1 for all observations), we add one
-    observation that has no gene mutated.} 
-  
+    observation that has no gene mutated.}
+
   \item{Removing genes with no mutations: }{Any column that has value of 0 for all observations is removed.}
 
-  \item{Merging identical columns: }{Any identical columns are replaced by a single one (with a new identifier, the result of pasting the names of the fused columns separated by a _).} 
+  \item{Merging identical columns: }{Any identical columns are replaced by a single one (with a new identifier, the result of pasting the names of the fused columns separated by a _).}
 
   \item{No more than max_cols: }{If the \dQuote{max_cols} argument is not NULL, and if the data set has more columns that max_cols, we keep only max_cols columns of data, those with the largest number of mutations.}
  }
@@ -348,17 +344,17 @@ Executes all CPMS given a cross sectional data set.
   comes next? PLOS Computational Biology, 17(12),
   1009055. \url{http://dx.doi.org/10.1371/journal.pcbi.1009055}
 
-  
+
 \bold{Reference in details}
-  
--  Weinreich, D. M., & Chao, L. (2005). Rapid evolutionary escape by large populations from local fitness peaks is likely in nature. Evolution, 59(6),   1175–1182. \url{http://dx.doi.org/10.1111/j.0014-3820.2005.tb01769.x} 
-  
+
+-  Weinreich, D. M., & Chao, L. (2005). Rapid evolutionary escape by large populations from local fitness peaks is likely in nature. Evolution, 59(6),   1175–1182. \url{http://dx.doi.org/10.1111/j.0014-3820.2005.tb01769.x}
+
 }
 
 \seealso{
    \code{\link{sample_evam}},
    \code{\link{plot_evam}}
-  
+
 }
 
 \examples{
