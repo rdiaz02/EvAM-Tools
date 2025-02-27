@@ -1,13 +1,13 @@
 Package: evamtools
 Type: Package
 Title: Tools for evolutionary accumulation models or event accumulation models (evam), for now mainly cancer progression models
-Version: 2.1.16
-Date: 2022-12-08
+Version: 2.1.17
+Date: 2025-02-27
 Authors@R: c(
-            person("Ramon", "Diaz-Uriarte",			      
-	    	    email = "r.diaz@uam.es", role = c("cre", "aut")),	      
+            person("Ramon", "Diaz-Uriarte",
+	    	    email = "r.diaz@uam.es", role = c("cre", "aut")),
             person("Herrera-Nieto", "Pablo",
-	   	   email = "pablo.h.nieto@gmail.com", role = "aut"), 
+	   	   email = "pablo.h.nieto@gmail.com", role = "aut"),
 	    person("Daniele", "Ramazzotti", role = "ctb",
 	           comment = "import.hesbcn"),
 	    person("Rudolf", "Schill", role = "ctb",
@@ -49,4 +49,3 @@ Suggests: testthat (>= 3.0.0)
 Enhances: mccbn
 Config/testthat/parallel: true
 Config/testthat/edition: 3
-
