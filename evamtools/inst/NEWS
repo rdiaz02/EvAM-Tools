@@ -1,3 +1,15 @@
+Changes in version 2.1.17 (2025-02-27):
+	- Fixed .Rd formatting notes.
+	- Miscell documentation and code comments additions.
+	- Updated dependencies in NAMESPACE.
+	- R_forceSymbols(dll, TRUE) and changes in .Call to ensure
+	  will not break with R-4.3.0
+
+Changes in version 2.1.16 (2022-12-08):
+	- MCCBN now in Enhances (no longer dependency). Thus:
+	- Also added MCCBN_random_poset.R
+	- Updated authors (and README.md).
+
 Changes in version 2.1.15 (2022-10-03):
 	- FAQ: fixed typos.
 	- Web app, landing page: aborting runs
@@ -8,7 +20,7 @@ Changes in version 2.1.14 (2022-10-02):
 	- Fixed inconsistent capitalization in web app interface.
 	- Changes in landing page (capitalization, documentation,
 	  typos).
-	- H-ESBCN: increased default MCMC iterations.  
+	- H-ESBCN: increased default MCMC iterations.
 
 Changes in version 2.1.13 (2022-09-26):
 	- New file of examples, included in /Addtional_doc.
@@ -16,7 +28,7 @@ Changes in version 2.1.13 (2022-09-26):
 	  details about CPMs, and additional FAQs).
 	- Reorganization of additional files, and links from
 	  landing page.
-	
+
 Changes in version 2.1.12 (2022-09-22):
 	- Renamed argument to H-ESBCN that controls number
 	  of MCMC iterations; was "steps" now is "MCMC_iter".
@@ -26,19 +38,19 @@ Changes in version 2.1.11 (2022-09-21):
 	- Minimize possible errors with histograms in shiny app
 	  with very long genotype names. If error, provide
 	  explicit error message.
-	
+
 Changes in version 2.1.10 (2022-09-08):
 	- Further details about using web app in landing page, with
 	  additional figure and improved previous figure.
 	- More details about csv upload, including examples, and all
 	  now in a Help button.
-	- Improved use of left column space.  
+	- Improved use of left column space.
 
 Changes in version 2.1.9 (2022-09-07):
 	- Changed landing page to include better explanations of use
 	  of web app, including the figure with the overview.
 	- Changes in web app for consistent naming of terms.
-	
+
 Changes in version 2.1.8 (2022-08-09):
 	- More changes to the web app:
 	- Much better error messages when manipulating DAGs.
@@ -79,15 +91,15 @@ Changes in version 2.1.4 (2022-08-05):
 	  named genes).
 	- Web-app: igraph: we use try, for the occasional error
 	  of igraph not displaying the plot.
-	- Web-app: more documentation in better tooltips.  
-	
+	- Web-app: more documentation in better tooltips.
+
 Changes in version 2.1.3 (2022-08-04):
 	- Web-app: no changing gene names. Was confusing and
 	  error and bug prone.
 	- Several weird and hard to reproduce bugs when using
 	  Create data interactively with non-consecutive gene names
 	  and changing name of data.
-	- Better output of table of genotype frequencies.  
+	- Better output of table of genotype frequencies.
 
 Changes in version 2.1.2 (2022-08-03):
 	- Always ensure that table of genotype counts in standard
@@ -96,17 +108,17 @@ Changes in version 2.1.2 (2022-08-03):
 	  in some DAGs and with weirdly ordered manually entered data.
 	- Methods to show graphical output: only those used for analyses.
 	- Miscell improvements of the look of the "Results" tab (moved
-	  help text to tooltips, etc).	  
-	
+	  help text to tooltips, etc).
+
 Changes in version 2.1.1 (2022-08-03):
 	- Input now clearly differentiates creating DAG/MHN from
 	  generating data from them.
-	- More consistent help and miscell typos fixed.  
+	- More consistent help and miscell typos fixed.
 	- Return gracefully instead of giving errors when renaming
 	  not yet loaded data sets.
 	- Cleaner, more elegant handling of not-yet-created data.
 	- Code clean up.
-	
+
 Changes in version 2.1.0 (2022-08-02):
 	- Most of the changes affect the web app.
 	- Clearer, cleaner interface for input.
@@ -121,7 +133,7 @@ Changes in version 2.1.0 (2022-08-02):
 	- Fixed many occasional bugs: renaming genes, renaming data sets,
 	  changing genotype counts.
 	- Improved help and some tooltips.
-	
+
 Changes in version 1.1.7 (2022-07-06):
 	- Additional error check for gene name changes.
 	- Cleaner and consistent data set renaming, with additional checks.
@@ -138,16 +150,16 @@ Changes in version 1.1.5 (2022-07-04):
 	- MHN matrix figure: can handle just fine gene names up to seven letters.
 	- Better formating of small edge probs/lambdas (e.g., 2.998111e-3).
 	- Clarified top_paths = NULL possible problems with many genes.
-	
+
 Changes in version 1.1.4 (2022-05-03):
 	- Shiny web app: consistent behavior when changing number of genes for DAGs and MHN.
-	
+
 Changes in version 1.1.2 and 1.1.3 (2022-05-02):
 	- Mainly documentation changes.
-	
+
 Changes in version 1.1.1 (2022-04-24):
 	- Documentation: moved content between files and further details about thetas.
-	
+
 Changes in version 1.1.0 (2022-04-20):
 	- Deprecated sample_evam and plot_CPMs.
 
