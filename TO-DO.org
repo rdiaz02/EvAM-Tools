@@ -1,0 +1,5 @@
+* Try to decreased depended upon packages
+- shiny and shinyjs only needed for shiny app, so enhances/suggests, not importFrom
+- remove all uses of stringr and replace by stringi, which we are already using
+* In call to evam in server.R (around line 2383), do not use only_used_methods = FALSE
+- I added it for now, in case it was used and to prevent mysterious failures. Remove if we can.
