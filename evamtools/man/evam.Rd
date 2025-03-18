@@ -223,7 +223,7 @@ multiple evams in parallel.}
         \item{analyzed_data}{The data that were actually analyzed. Can
         differ from the original data because of the data pre-processing
         steps.}
-      \item{genotype_id_ordered}{A named vector, from 1:number of genotypes, with names the genotypes. This can be useful for sorting; WT has value 1, and genotypes are ordered by increasing number of mutations and, withing number of mutations, alphanumerically.}
+      \item{genotype_id_ordered}{A named vector, from 1:number of genotypes, with names the genotypes. This can be useful for sorting; WT has value 1, and genotypes are ordered by increasing number of mutations and, within number of mutations, alphanumerically.}
       \item{all_options}{All of the options used, as a list of lists.}
 
 }
