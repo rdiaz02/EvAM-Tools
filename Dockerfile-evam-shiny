@@ -1,4 +1,4 @@
-FROM rocker/r-ver:4.2.2
+FROM rocker/r-ver:4.4.3
 
 ######################################################################
 ######################################################################
@@ -81,20 +81,20 @@ RUN mkdir -p /app/Sources/
 ## Install HESBCN
 RUN cd /app/Sources && \
     git clone https://github.com/danro9685/HESBCN && \
-    cd HESBCN && \ 
+    cd HESBCN && \
     make && \
-    cp h-esbcn /usr/local/bin/ 
+    cp h-esbcn /usr/local/bin/
 
 ## Install MCCBN
 RUN cd /app/Sources && \
     git clone https://github.com/cbg-ethz/MC-CBN && \
-    cd MC-CBN  && \ 
+    cd MC-CBN  && \
     apt-get install -y dh-autoreconf autoconf automake autotools-dev autoconf autoconf-archive && \
     autoreconf -vif -I m4  && \
     R CMD build . && \
     V_MCCBN=$(cat DESCRIPTION | grep Version | cut -d' ' -f2) && \
     R CMD INSTALL mccbn_$V_MCCBN.tar.gz
-    
+
 ## Install cbn
 COPY ct-cbn-0.1.04b-RDU.tar.gz /app/Sources/
 RUN cd /app/Sources && \
@@ -102,7 +102,7 @@ RUN cd /app/Sources && \
     cd ct-cbn-0.1.04b-RDU && \
     ./configure && \
     make && \
-    cp -t /usr/local/bin/ ct-cbn h-cbn 
+    cp -t /usr/local/bin/ ct-cbn h-cbn
 
 ## Copy a file used for testing
 COPY Renviron.based_on_bioc /app/
@@ -156,7 +156,3 @@ ENTRYPOINT ["R"]
 
 ## Debugging errors: for example, start as
 ## sudo docker run -it --entrypoint bash evamshiny
-
-
-
-

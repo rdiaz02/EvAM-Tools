@@ -1,12 +1,10 @@
-FROM rocker/rstudio:4.4.1
+FROM rocker/rstudio:4.4.3
 
 ######################################################################
 ######################################################################
 #####
 #####     Common to the two Dockerfiles
-#####     ## FIXME: now, we are moving the rstudio docker version,
-#####     ## but not the shiny one, to use R-4.4.1
-#####     ## and OncoSimulR as in BioC devel (i.e., 3.20)
+#####
 ######################################################################
 ######################################################################
 
@@ -69,8 +67,8 @@ RUN R -e "install.packages('devtools')"
 RUN R -e "install.packages('igraph')"
 RUN R -e "BiocManager::install('OncoSimulR')"
 ## Force devel version
-RUN R -e "BiocManager::install(version = '3.20', ask = FALSE)"
-# RUN R -e "BiocManager::install('OncoSimulR', version = 'devel', ask = FALSE)"
+## RUN R -e "BiocManager::install(version = '3.20', ask = FALSE)"
+## RUN R -e "BiocManager::install('OncoSimulR', version = 'devel', ask = FALSE)"
 RUN R -e "library(devtools);devtools::install_github('phillipnicol/OncoBN')"
 RUN R -e "install.packages('prompter')"
 RUN R -e "install.packages('shinyBS')"
