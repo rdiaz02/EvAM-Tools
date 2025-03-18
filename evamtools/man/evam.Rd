@@ -48,7 +48,8 @@ evam(x,
                      adaptive = TRUE,
                      thrds = 1L,
                      verbose = FALSE,
-                     seed = NULL)
+                     seed = NULL),
+     only_used_methods = TRUE
 )
 }
 \arguments{
@@ -142,7 +143,9 @@ multiple evams in parallel.}
     Note: do not pass \code{thrds} > 1 with \code{cores} > 1: as with
   MHN, do not use OpenMP threads from forked process from
   \code{\link[parallel]{mclapply}}.
-  }
+}
+\item{only_used_methods}{If TRUE, do not return list components that
+  contain only an NA (for example, the list components for not-used methods). }
 }
 
 \value{A list with named components (that should be self-explanatory). The pattern is method_component.

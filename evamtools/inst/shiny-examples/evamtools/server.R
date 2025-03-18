@@ -2388,9 +2388,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                        , cbn_opts = cbn_opts
                                                        , hesbcn_opts = hesbcn_opts
                                                        , oncobn_opts = oncobn_opts
-                                                       , mccbn_opts = mccbn_opts)},
-                                                   elapsed = EVAM_MAX_ELAPSED, 
-                                                   timeout = EVAM_MAX_ELAPSED, 
+                                                       , mccbn_opts = mccbn_opts
+                                                         ## FIXME: remove next?
+                                                         ## This is just in case shiny's code
+                                                         ## depends on NA entries
+                                                       , only_used_methods = FALSE
+                                                         )},
+                                                   elapsed = EVAM_MAX_ELAPSED,
+                                                   timeout = EVAM_MAX_ELAPSED,
                                                    cpu = Inf,
                                                    onTimeout = "silent")
 
