@@ -66,7 +66,7 @@ evam(x,
   the default. If you use mclapply, MHN and MCCBN should not use OMP
   (i.e., the number of threads for OMP for MHN and MCCBN should be 1).}
 
-\item{paths_max}{If TRUE, return all paths to the maxim/maxima, with
+\item{paths_max}{If TRUE, return all paths to the maximum/maxima, with
   their probabilities. See details for how they are computed.}
 
 \item{mhn_opts}{A list with two named arguments.
