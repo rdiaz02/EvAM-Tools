@@ -883,13 +883,13 @@ evam <- function(x,
                 })["elapsed"]
         }
         message(paste0("time ", method, ": ", round(time_out, 3)))
-        out
+        return(c(out, elapsed_time = time_out[["elapsed"]]))
     }
 
     all_out <- mclapply(methods, do_method, mc.cores = cores)
     names(all_out) <- methods
 
-    
+
     ## f_graph: remember this is the transition rate matrix
     ## for CBN, MCCBN, HESBCN
     ## For OT ... well, it is something else, but not really probabilities
@@ -925,7 +925,8 @@ evam <- function(x,
         OT_eps = get_output("OT", "eps"),
         OT_fit = get_output("OT", "ot_fit"),
         OT_paths_max = get_paths_max("OT"),
-       
+        OT_elapsed_time = get_output("OT", "elapsed_time"),
+
         CBN_model = get_output("CBN", "edges"),
         CBN_trans_rate_mat = get_output("CBN", "weighted_fgraph"),
         CBN_trans_mat = get_output("CBN", "trans_mat_genots"),
@@ -933,7 +934,8 @@ evam <- function(x,
         CBN_predicted_genotype_freqs = get_output("CBN",
                                                   "predicted_genotype_freqs"),
         CBN_paths_max = get_paths_max("CBN"),
-        
+        CBN_elapsed_time = get_output("CBN", "elapsed_time"),
+
         MCCBN_model = get_output("MCCBN", "edges"),
         MCCBN_trans_rate_mat = get_output("MCCBN", "weighted_fgraph"),
         MCCBN_trans_mat = get_output("MCCBN", "trans_mat_genots"),
@@ -941,7 +943,8 @@ evam <- function(x,
         MCCBN_predicted_genotype_freqs = get_output("MCCBN",
                                                     "predicted_genotype_freqs"),
         MCCBN_paths_max = get_paths_max("MCCBN"),
-        
+        MCCBN_elapsed_time = get_output("MCCBN", "elapsed_time"),
+
         MHN_theta = get_output("MHN", "theta"),
         MHN_trans_rate_mat = get_output("MHN", "transitionRateMatrix"),
         MHN_trans_mat = get_output("MHN", "transitionMatrixCompExp"),
@@ -950,10 +953,11 @@ evam <- function(x,
         MHN_predicted_genotype_freqs = get_output("MHN",
                                                   "predicted_genotype_freqs"),
         MHN_paths_max = get_paths_max("MHN"),
-        
+        MHN_elapsed_time = get_output("MHN", "elapsed_time"),
+
         OncoBN_model = get_output("OncoBN", "edges"),
         OncoBN_likelihood = get_output("OncoBN", "likelihood"),
-        OncoBN_f_graph = get_output("OncoBN", "weighted_fgraph"), 
+        OncoBN_f_graph = get_output("OncoBN", "weighted_fgraph"),
         OncoBN_trans_mat = get_output("OncoBN", "trans_mat_genots"),
         OncoBN_predicted_genotype_freqs = get_output("OncoBN",
                                                      "predicted_genotype_freqs"),
@@ -962,7 +966,8 @@ evam <- function(x,
         OncoBN_parent_set = get_output("OncoBN", "parent_set"),
         OncoBN_fit = get_output("OncoBN", "fit"),
         OncoBN_paths_max = get_paths_max("OncoBN"),
-        
+        OncoBN_elapsed_time = get_output("OncoBN", "elapsed_time"),
+
         HESBCN_model = get_output("HESBCN", "edges"),
         HESBCN_parent_set = get_output("HESBCN", "parent_set"),
         HESBCN_trans_rate_mat = get_output("HESBCN", "weighted_fgraph"),
@@ -972,7 +977,8 @@ evam <- function(x,
                                                      "predicted_genotype_freqs"),
         HESBCN_command = get_output("HESBCN", "command"),
         HESBCN_paths_max = get_paths_max("HESBCN"),
-        
+        HESBCN_elapsed_time = get_output("HESBCN", "elapsed_time"),
+
         original_data = xoriginal,
         analyzed_data = x,
         genotype_id_ordered =

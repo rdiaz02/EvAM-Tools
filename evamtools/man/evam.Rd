@@ -158,7 +158,7 @@ multiple evams in parallel.}
         \item{OT_predicted_genotype_freqs}{Probabilities of genotypes from the
   OT model, as a data frame.}
 	\item{OT_paths_max}{If \code{paths_max} is TRUE, a list of two components, \code{paths} and \code{weights}. The \code{paths} list is a list of \code{igraph.vs} (igraph vertex sequences) objects, one for each path; the \code{weights} is vector of log-probabilities of each path. If \code{paths_max} is FALSE, the default, NA.}
-
+       \item{OT_elapsed_time}{Elapsed time to run the method. This includes running the basic method and obtaining transition rate matrices, paths to the maximum, etc.}
 
 
 
@@ -173,7 +173,7 @@ multiple evams in parallel.}
         by the CBN model (under a model where sampling times are
         distributed as an exponential of rate 1).}
       \item{CBN_paths_max}{As for OT.}
-
+      \item{CBN_elapsed_time}{As for OT.}
 
         \item{MCCBN_model}{As for CBN, only with one column of \eqn{\lambda}s.}
         \item{MCCBN_trans_rate_mat}{As for CBN.}
@@ -181,7 +181,7 @@ multiple evams in parallel.}
         \item{MCCBN_td_trans_mat}{As for CBN.}
        \item{MCCBN_predicted_genotype_freqs}{As for CBN.}
        \item{MCCBN_paths_max}{As for OT.}
-
+        \item{MCCBN_elapsed_time}{As for OT.}
 
         \item{MHN_theta}{Matrix of estimated thetas (the log-Theta
         matrix). The values in this matrix can range from minus to plus infinity.}
@@ -194,7 +194,7 @@ multiple evams in parallel.}
         matrix of thetas). These are the multiplicative effects themselves.}
         \item{MHN_predicted_genotype_freqs}{As for CBN.}
 	\item{MHN_paths_max}{As for OT.}
-
+         \item{MHN_elapsed_time}{As for OT.}
 
         \item{OncoBN_model}{Similar to the ones above (but with a
         column named theta, instead of lambdas or edge weights), with the   additional column \dQuote{Relation}, that can take values OR (if fitting model DBN) or AND (if fitting model CBN); Single      indicates nodes with a single ancestor (where OR or AND make no difference).}
@@ -208,7 +208,7 @@ multiple evams in parallel.}
         input data; see below).}
         \item{OncoBN_parent_set}{.}
 	\item{OncoBN_paths_max}{As for OT.}
-
+        \item{OncoBN_elapsed_time}{As for OT.}
 
         \item{HESBCN_model}{As for CBN.}
         \item{HESBCN_parent_set}{As for CBN.}
@@ -217,7 +217,7 @@ multiple evams in parallel.}
         \item{HESBCN_td_trans_mat}{As for CBN.}
 	\item{HESBCN_predicted_genotype_freqs}{As for CBN.}
 	\item{HESBCN_paths_max}{As for OT.}
-
+        \item{HESBCN_elapsed_time}{As for OT.}
 
         \item{original_data}{The original data.}
         \item{analyzed_data}{The data that were actually analyzed. Can
