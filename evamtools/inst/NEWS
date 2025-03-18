@@ -1,3 +1,11 @@
+Changes in version 2.1.20 (2025-03-18):
+	- Bug fix: MCCBN td_trans_mat was actually that from CBN
+	  (and, I guess, would have returned an error if only
+	  MCCBN had been run).
+
+Changes in version 2.1.19 (2025-03-18):
+	- Return elapsed time.
+
 Changes in version 2.1.18 (2025-03-18):
 	- Allow using ct-cbn as initial poset for CBN.
 	- By default, remove empty model components from evam
