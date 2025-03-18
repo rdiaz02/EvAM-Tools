@@ -1,7 +1,7 @@
 ## Build the common base image first
 ## docker build -f Dockerfile-evam-common --tag rdiaz02/evam-common .
 
-FROM rdiaz02/evam-common
+FROM rdiaz02/evam-common:latest
 
 ## Increase build number if you want to force rebuild from here on
 ARG build=1
