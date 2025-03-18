@@ -140,17 +140,21 @@ cbn_proc <- function(x, addname, init.poset = "OT", nboot = 0,
 }
 
 run.cbn <- function(x,
-                    init.poset = "linear", ## could be OT?
+                    init.poset = "OT" ## one of "linear", "OT", "ct-cbn"
                     dirname = NULL,
-                    addname = NULL, 
+                    addname = NULL,
                     temp = 1,
-                    ## as in Hosseini et al., p. i391
+                    ## as in Hosseini et al., 2019, "Estimating the predictability..."
+                    ## p. i391
                     ## but for ncol(x) <= 4 200, not 100
                     steps = ifelse(ncol(x) <= 4, 200,
                             ifelse(ncol(x) == 5, 1000, 10000)),
-                    ## max(200, ncol(x)^2), 
+                    ## max(200, ncol(x)^2),
                     silent = TRUE,
-                    eparam = 0.05, ## 0.05
+                    ## eparam is effectively ignored if we
+                    ## don't estimate the initial poset with ct-cbn
+                    ## (and, by default,  we don't use ct-cbn)
+                    eparam = 0.05,
                     rmfile = TRUE,
                     omp_threads = 1,
                     custom.poset = NULL
@@ -267,9 +271,14 @@ sortAdjMat <- function(am) {
 
 call.external.cbn <- function(data,
                               createdir = FALSE,
-                              dirname = "testcbn", eparam = 0.05,
+                              dirname = "testcbn",
+                              ## eparam is effectively ignored if we
+                              ## don't estimate the initial poset with ct-cbn
+                              ## (and, by default, we don't use ct-cbn)
+                              eparam = 0.05,
                               temp = 1, steps = 200, silent = TRUE,
-                              init.poset = "linear", omp_threads = 1,
+                              init.poset = "OT",
+                              omp_threads = 1,
                               custom.poset = NULL) {
     ## I assume h-cbn and ct-cbn are available
     data2 <- cbind(1, data)
@@ -309,15 +318,15 @@ call.external.cbn <- function(data,
         stop("A previous run in this directory?")
     if(file.exists(paste0(dirname, ".poset")))
         stop("A previous run in this directory?")
-    
-    if(init.poset == "linear") {
+
+    if (init.poset == "linear") {
         write.linear.poset(data, dirname)
     } else if (init.poset == "OT") {
         ##  will OT always return all of the nodes in the poset? Not
         ##  necessarily, but it is not a problem. CBN will start from the
         ##  poset, but explore around.
         ot1 <- try(run.oncotree(data)) ## , type.out = "adjmat"))
-        if(inherits(ot1, "try-error")) {
+        if (inherits(ot1, "try-error")) {
             warning("\n   Error using OT for init poset; using linear.poset\n")
             write.linear.poset(data, dirname)
         } else {
@@ -325,41 +334,42 @@ call.external.cbn <- function(data,
             ## respects the names in the data. So we need to map those names
             ## to a sequence 1:number of columns in the data which is what the
             ## silly poset format understands.
-            
+
             newnames <- c("Root", match(colnames(ot1)[-1], colnames(data)))
             colnames(ot1) <- rownames(ot1) <- newnames
             write.poset(evam_OTtoPoset(ot1),
                         ncol(data), dirname)
         }
-    } ## The next are probably such bad ideas in almost
+    } else if (init.poset == "ct-cbn") {
+        ## Use ct-cbn to search and create starting poset;
+        ##  possibly eternal. NOT RECOMMENDED
+        warning("Using ct-cbn to find an initial poset can take VERY long.")
+        writeLines(as.character(c(ncol(data), 0)),
+                   con = paste(dirname, ".poset", sep = ""))
+        ## First create the lambda file
+        zzz0 <- system(paste(ompt, paste("h-cbn -f",  dirname, "-w")),
+                       ignore.stdout = silent)
+        if (!silent) cat("\n\n")
+        ## this call requires a lambda file
+        zzz0 <- system(paste(ompt,
+                             paste("h-cbn -f",  dirname,
+                                  "-e", format(eparam, scientific = FALSE),
+                                  "-w -m")), ignore.stdout = silent)
+        rm(zzz0)
+        if (!silent) cat("\n\n")
+    }
+    ## The next is probably such a bad idea in almost
     ## any conceivable case that I comment the code
-
     ## else if (init.poset == "custom") {
     ##     write.poset(custom.poset, ncol(data), dirname)
-    ## } else { ## Use ct-cbn to search and create starting poset;
-    ##     ## possibly eternal. NOT RECOMMENDED
-    ##     warning("Not using an initial poset can take VERY long")
-    ##     writeLines(as.character(c(ncol(data), 0)),
-    ##                con = paste(dirname, ".poset", sep = ""))
-    ##     ## First create the lambda file
-    ##     zzz <- system(paste(ompt , paste("h-cbn -f",  dirname, "-w")),
-    ##                   ignore.stdout = silent)
-    ##     if(!silent) cat("\n\n")
-    ##     ## this call requires a lambda file
-    ##     zzz <- system(paste(ompt,
-    ##                         paste("h-cbn -f",  dirname,
-    ##                               "-e", format(eparam, scientific = FALSE),
-    ##                               "-w -m")), ignore.stdout = silent)
-    ##     rm(zzz)
-    ##     if(!silent) cat("\n\n")
-    ## }
-    
-  ## Remove option -m, the printing of most likely path as
-  ##    - we do not use it now
-  ##    - it can lead to strange problems getting millions of ceros printed out
-  
+
+
+    ## Remove option -m, the printing of most likely path as
+    ##    - we do not use it now
+    ##    - it can lead to strange problems getting millions of ceros printed out
+
     zzz <- system(paste(ompt,
-                        paste("h-cbn -f",  dirname, "-s", 
+                        paste("h-cbn -f",  dirname, "-s",
                               "-T", format(temp, scientific = FALSE),
                               "-N", format(round(steps), scientific = FALSE),
                               "-w")), ignore.stdout = silent)

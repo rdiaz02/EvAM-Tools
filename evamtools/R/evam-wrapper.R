@@ -778,9 +778,8 @@ evam_old <- function(x,
     rm(cbn_opts, hesbcn_opts, oncobn_opts, mccbn_opts, mhn_opts)
     rm(d_cbn_opts, d_hesbcn_opts, d_oncobn_opts, d_mccbn_opts, d_mhn_opts)
 
-    if (!(cbn_opts_2$init_poset %in% c("OT", "linear")))
-        stop("CBN's init_poset must be one of OT or linear. ",
-             " Custom not allowed in call from evam.")
+    if (!(cbn_opts_2$init_poset %in% c("OT", "linear", "ct-cbn")))
+        stop("CBN's init_poset must be one of OT or linear or ct-cbn. ")
 
     if ("MCCBN" %in% methods) {
         stopifnot(mccbn_opts_2$model %in% c("OT-CBN", "H-CBN2"))

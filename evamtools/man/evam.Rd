@@ -92,7 +92,8 @@ evam(x,
 speed things much or what is the best number of threads to use; in fact,
 sometimes it can even slow things down, in particular if you run
 multiple evams in parallel.}
-\item{cbn_init_poset: }{Initial poset for CBN; one of "linear" or "OT" (default).}
+\item{cbn_init_poset: }{Initial poset for CBN; one of "linear" or "OT"
+  (default) or "ct-cbn". Using "ct-cbn" can take a very long time.}
 }
 }
 
