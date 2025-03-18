@@ -3388,6 +3388,3 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 ##                         bounce = TRUE,
 ##                         size = "large"
 ##                         )
-
-
-
