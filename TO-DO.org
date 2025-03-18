@@ -3,3 +3,5 @@
 - remove all uses of stringr and replace by stringi, which we are already using
 * In call to evam in server.R (around line 2383), do not use only_used_methods = FALSE
 - I added it for now, in case it was used and to prevent mysterious failures. Remove if we can.
+* We are wasting 0.3 seconds in pre-/post-processing in evam wrapper
+- The timing difference of the analysis itself, as given by $elapsed_time and what the call to evam takes is about 0.3 for individual method calls, in Draco. This is huge.
