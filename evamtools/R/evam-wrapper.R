@@ -650,7 +650,8 @@ evam_old <- function(x,
                      adaptive = TRUE,
                      thrds = 1L,
                      verbose = FALSE,
-                     seed = NULL)
+                     seed = NULL),
+                 only_used_methods = TRUE
                  ) {
 
     ## Sanity check of gene names
@@ -915,7 +916,7 @@ evam_old <- function(x,
             return(NA)
         }
     }
-    return(list(
+    tmpr <- list(
         OT_model = get_output("OT", "edges"),
         OT_f_graph = get_output("OT", "weighted_fgraph"),
         OT_trans_mat = get_output("OT", "trans_mat_genots"),
@@ -985,7 +986,13 @@ evam_old <- function(x,
             oncobn_opts = oncobn_opts_2,
             mccbn_opts = mccbn_opts_2)
     )
-    )
+
+    if (only_used_methods) {
+        tmpr_rm <- lapply(tmpr, function(x) (length(x) == 1) && (is.na(x)))
+        tmpr <- tmpr[which(!unlist(tmpr_rm))]
+    }
+
+    return(tmpr)
 }
 
 ## transition matrix to paths to maximum

@@ -1,3 +1,8 @@
+Changes in version 2.1.18 (2025-03-18):
+	- Allow using ct-cbn as initial poset for CBN.
+	- By default, remove empty model components from evam
+	  returned value.
+
 Changes in version 2.1.17 (2025-02-27):
 	- Fixed .Rd formatting notes.
 	- Miscell documentation and code comments additions.

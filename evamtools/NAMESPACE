@@ -10,6 +10,10 @@ export(
  , "plot_CPMs"
 )
 
+## FIXME: try to bring down deps
+##    - shiny and shinyjs only needed for shiny app, so enhances/suggests
+##    - remove stringr and replace by stringi, which we are already using
+
 importFrom("shiny", "runApp", "Progress", "onStop")
 importFrom("shinyjs", "useShinyjs", "enable", "disable", "disabled")
 importFrom("grDevices", "rgb", "colorRampPalette")

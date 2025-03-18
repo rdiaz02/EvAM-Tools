@@ -49,34 +49,35 @@ test_that("Processing samples & Plotting of CPMs is correct", {
                    sample_evam_output[[paste0(model, "_trans_mat")]])
 
     if(model %in% c("OT", "OncoBN")){
-      expect_equal(model_transitions$data2plot, NULL) 
+      expect_equal(model_transitions$data2plot, NULL)
       expect_equal(model_trm$data2plot,
                    sample_evam_output[[paste0(model, "_trans_rate_mat")]])
     } else {
       tmp <- model_transitions$data2plot
       expect_equal(tmp, samples[[paste0(model, "_obs_genotype_transitions")]])
       expect_equal(model_trm$data2plot,
-                   sample_evam_output[[paste0(model, "_trans_rate_mat")]]) 
+                   sample_evam_output[[paste0(model, "_trans_rate_mat")]])
     }
 
     for(i in c("parent_set", "predicted_genotype_freqs")){
-      expect_equal(model_trm[[i]], sample_evam_output[[paste0(model, "_", i)]]) 
-      expect_equal(model_transitions[[i]], sample_evam_output[[paste0(model, "_", i)]]) 
-      expect_equal(model_probabilities[[i]], sample_evam_output[[paste0(model, "_", i)]]) 
+      expect_equal(model_trm[[i]], sample_evam_output[[paste0(model, "_", i)]])
+      expect_equal(model_transitions[[i]], sample_evam_output[[paste0(model, "_", i)]])
+      expect_equal(model_probabilities[[i]], sample_evam_output[[paste0(model, "_", i)]])
     }
 
     for(i in c("sampled_genotype_counts")){
-      expect_equal(model_trm[[i]], samples[[paste0(model, "_", i)]]) 
-      expect_equal(model_transitions[[i]], samples[[paste0(model, "_", i)]]) 
-      expect_equal(model_probabilities[[i]], samples[[paste0(model, "_", i)]]) 
+      expect_equal(model_trm[[i]], samples[[paste0(model, "_", i)]])
+      expect_equal(model_transitions[[i]], samples[[paste0(model, "_", i)]])
+      expect_equal(model_probabilities[[i]], samples[[paste0(model, "_", i)]])
     }
   }
 })
 
 test_that("how it handles processing missing data", {
   methods <- c("OT", "CBN", "HESBCN", "MHN")
-  
-  sample_evam_output <- evam(examples_csd$csd$AND$data, methods = methods)
+
+  sample_evam_output <- evam(examples_csd$csd$AND$data, methods = methods,
+                             only_used_methods = FALSE)
   out <- process_data(sample_evam_output, "OncoBN", "trans_mat", NULL)
   expect_equal(out$method_info, NULL)
   expect_equal(out$data2plot, NA)

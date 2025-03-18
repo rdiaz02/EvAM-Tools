@@ -140,7 +140,7 @@ cbn_proc <- function(x, addname, init.poset = "OT", nboot = 0,
 }
 
 run.cbn <- function(x,
-                    init.poset = "OT" ## one of "linear", "OT", "ct-cbn"
+                    init.poset = "OT", ## one of "linear", "OT", "ct-cbn"
                     dirname = NULL,
                     addname = NULL,
                     temp = 1,

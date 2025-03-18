@@ -1,6 +1,6 @@
 t1 <- Sys.time()
 
-test_that("Minimal test: we can run", {
+test_that("Minimal test: we can run. And check only_used_methods", {
     data(every_which_way_data)
     Dat1 <- every_which_way_data[[16]][1:40, 2:6]
     MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
@@ -13,10 +13,36 @@ test_that("Minimal test: we can run", {
     out2 <- evam(Dat1[, 1:3],
                  methods = c("OT", "OncoBN",
                              "MHN", "CBN"),
-                 paths_max = TRUE)
-    expect_true(is.na(out2$HESBCN_paths_max))
+                 paths_max = TRUE,
+                 only_used_methods = FALSE)
+
+    expect_true(!is.null(out2$CBN_model))
     expect_true(all(!is.na(out2$CBN_paths_max)))
-})
+
+    expect_true(is.na(out2$HESBCN_paths_max))
+    expect_true(is.na(out2$HESBCN_model))
+
+    expect_true(length(is.na(out2$HESBCN_paths_max)) == 1)
+    expect_true(length(is.na(out2$HESBCN_model)) == 1)
+
+    expect_true(!is.null(out2$HESBCN_paths_max))
+    expect_true(!is.null(out2$HESBCN_model))
+
+    out3 <- evam(Dat1[, 1:3],
+                 methods = c("OT", "OncoBN",
+                             "MHN", "CBN"),
+                 paths_max = TRUE,
+                 only_used_methods = TRUE)
+
+    expect_true(!is.null(out3$CBN_model))
+    expect_true(all(!is.na(out3$CBN_paths_max)))
+
+    expect_true(length(is.na(out3$HESBCN_paths_max)) == 0)
+    expect_true(length(is.na(out3$HESBCN_model)) == 0)
+
+    expect_true(is.null(out3$HESBCN_paths_max))
+    expect_true(is.null(out3$HESBCN_model))
+    })
 
 
 exercise_sample_evam <- function(out) {
