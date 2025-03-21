@@ -1,3 +1,9 @@
+Changes in version 2.1.21 (2025-03-21):
+	- Allow using ct-cbn: really do use ct-cbn as starting
+	  (version 2.1.18, though following my understanding
+	  of the help of h-cbn, was not).
+	- Added comments to CBN code.
+
 Changes in version 2.1.20 (2025-03-18):
 	- Bug fix: MCCBN td_trans_mat was actually that from CBN
 	  (and, I guess, would have returned an error if only
