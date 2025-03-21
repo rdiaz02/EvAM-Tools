@@ -257,5 +257,5 @@ run_method <- function(method, x, opts) {
     out <- result$out
 
     message(paste0("time ", method, ": ", round(time_out, 3)))
-    out
+    return(c(out, elapsed_time = time_out[["elapsed"]]))
 }

@@ -28,7 +28,7 @@ check_valid_methods <- function(methods) {
     return(not_valid_methods)
 }
 check_cbn_opts_init_poset <- function(init_poset) {
-    if (!(cbn_opts_2$init_poset %in% c("OT", "linear", "ct-cbn"))) {
+    if (!(init_poset %in% c("OT", "linear", "ct-cbn"))) {
         stop("CBN's init_poset must be one of OT or linear or ct-cbn. ")
     }
 }
