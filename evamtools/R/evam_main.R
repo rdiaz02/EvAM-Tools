@@ -25,7 +25,8 @@ evam <- function(x,
                  oncobn_opts = list(),
                  mccbn_opts = list(),
                  hyper_traps_opts = list(),
-                 bml_opts = list()
+                 bml_opts = list(),
+                 only_used_methods = FALSE
 ) {
     preprocessed_x <- common_preprocess(x, max_cols)
     x <- preprocessed_x$processed
@@ -103,7 +104,7 @@ evam <- function(x,
             return(NA)
         }
     }
-    return(list(
+    tmpr <- list(
         OT_model = get_output("OT", "edges"),
         OT_f_graph = get_output("OT", "weighted_fgraph"),
         OT_trans_mat = get_output("OT", "trans_mat_genots"),
@@ -196,5 +197,11 @@ evam <- function(x,
             hyper_traps_opts = opts$hyper_traps_opts
             )
     )
-    )
+    
+    if (only_used_methods) {
+        tmpr_rm <- lapply(tmpr, function(x) (length(x) == 1) && (is.na(x)))
+        tmpr <- tmpr[which(!unlist(tmpr_rm))]
+    }
+
+    return(tmpr)
 }

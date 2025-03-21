@@ -229,6 +229,7 @@ run_analysis <- function(data, input, disp_freqs_ret, EVAM_MAX_ELAPSED) {
                 mccbn_opts = opts$mccbn_opts,
                 hyper_traps_opts = opts$hyper_traps_opts,
                 bml_opts = opts$bml_opts,
+                only_used_methods = FALSE
             )
         },
         elapsed = EVAM_MAX_ELAPSED,
