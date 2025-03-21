@@ -47,6 +47,9 @@ RUN R -e "install.packages('httr')"
 RUN R -e "install.packages('openssl')"
 RUN R -e "install.packages('xml2')"
 # RUN R -e "install.packages('usethis')"
+
+RUN R -e "install.packages('remotes')"
+
 RUN R -e "install.packages('credentials')"
 RUN R -e "install.packages('roxygen2')"
 RUN R -e "install.packages('optparse')"
@@ -72,6 +75,10 @@ RUN R -e "library(devtools);devtools::install_github('phillipnicol/OncoBN')"
 RUN R -e "install.packages('prompter')"
 RUN R -e "install.packages('shinyBS')"
 RUN R -e "install.packages('tippy')"
+
+RUN R -e "BiocManager::install('ggtree')"
+RUN R -e "devtools::install_github('https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor')"
+RUN R -e "devtools::install_github('https://github.com/Deschain/BML')"
 
 RUN mkdir -p /app/Sources/
 

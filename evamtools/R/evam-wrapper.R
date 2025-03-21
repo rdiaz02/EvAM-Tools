@@ -604,7 +604,7 @@ transition_fg_sparseM <- function(x, weights) {
 
 
 ## Main function. data frame or matrix -> output
-evam <- function(x,
+evam_old <- function(x,
                  methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN"),
                  max_cols = 15,
                  cores = detectCores(),

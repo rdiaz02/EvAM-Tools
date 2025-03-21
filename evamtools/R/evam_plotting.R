@@ -504,6 +504,7 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
     
     edges_method <- NULL
     igraph_method <- NULL
+    method_info <- NULL
     tryCatch (expr = {
         edges_method <- get(paste(mod, "_model", sep = ""), data)
         igraph_method <- igraph::graph_from_data_frame(edges_method[, c(1, 2)])
@@ -516,6 +517,14 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
     } else if (!is.null(all_data[[paste0(mod, "_theta")]])) {
         method_info <- all_data[[paste0(mod, "_theta")]]
         edges <- NA
+    } 
+    if (mod == "BML" && plot_type == "trans_mat") {
+        tryCatch(expr = {
+            trans_mat_method = get(paste(mod, "_trans_mat", sep = ""), data) 
+            method_info = igraph::graph_from_adjacency_matrix(trans_mat_method, mode = "directed")
+            edges = as.data.frame(igraph::get.edgelist(method_info))
+            colnames(edges) <- c("From", "To")
+        }, error = function(e) {})
     }
     return(list(
         method_info = method_info
