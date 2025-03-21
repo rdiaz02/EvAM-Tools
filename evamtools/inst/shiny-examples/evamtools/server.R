@@ -2295,6 +2295,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             updateRadioButtons(session, "select_cpm", selected = result_name)
             updateTabsetPanel(session, "navbar", selected = "result_viewer")
             updateRadioButtons(session, "select_cpm", selected = result_name)
+          
         }, error = function(e){
             showModal(dataModal(e[[1]]))
         })
