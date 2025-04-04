@@ -158,6 +158,9 @@ run_HyperTraps <- function(x, opts) {
     # Create a transition matrix (initialized as zeros)
     trans_matrix <- Matrix(0, nrow = length(states), ncol = length(states), sparse = TRUE)
 
+    rownames(trans_matrix) <- decoded_states
+    colnames(trans_matrix) <- decoded_states
+
     for (i in 1:nrow(out$dynamics$trans)) {
         from_state <- out$dynamics$trans$From[i]
         to_state <- out$dynamics$trans$To[i]
@@ -166,11 +169,8 @@ run_HyperTraps <- function(x, opts) {
         from_decoded <- decode_state(from_state, num_features, feature_labels)
         to_decoded <- decode_state(to_state, num_features, feature_labels)
   
-        trans_matrix[from_state + 1, to_state + 1] <- probability
+        trans_matrix[from_decoded, to_decoded] <- probability
     }
-
-    rownames(trans_matrix) <- decoded_states
-    colnames(trans_matrix) <- decoded_states
     
     out$predicted_genotype_freqs = probs_from_trm(trans_matrix)
     out$td_trans_mat <- trans_matrix
