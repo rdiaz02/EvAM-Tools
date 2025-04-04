@@ -320,6 +320,7 @@ call.external.cbn <- function(data,
         stop("A previous run in this directory?")
 
     if (init.poset == "linear") {
+        ## A linear poset is what Gerstung et al., 2011 used
         write.linear.poset(data, dirname)
     } else if (init.poset == "OT") {
         ##  will OT always return all of the nodes in the poset? Not
@@ -341,21 +342,52 @@ call.external.cbn <- function(data,
                         ncol(data), dirname)
         }
     } else if (init.poset == "ct-cbn") {
-        ## Use ct-cbn to search and create starting poset;
-        ##  possibly eternal. NOT RECOMMENDED
-        warning("Using ct-cbn to find an initial poset can take VERY long.")
+        ## Use ct-cbn to search and create starting poset; possibly
+        ##  eternal. NOT RECOMMENDED
+
+        ## Hosseini et al., 2019, p. i 391, say they (we) used ct-cbn for
+        ##  initial poset, but there is no code that shows its actual use.
+
+
+        message("Using ct-cbn to find an initial poset can take VERY long.")
+        ## First, the default poset with just number of events/genes
         writeLines(as.character(c(ncol(data), 0)),
                    con = paste(dirname, ".poset", sep = ""))
-        ## First create the lambda file
-        zzz0 <- system(paste(ompt, paste("h-cbn -f",  dirname, "-w")),
-                       ignore.stdout = silent)
-        if (!silent) cat("\n\n")
-        ## this call requires a lambda file
+
+
+        ## h-cbn -h is either wrong or confusing to me as to how to use
+        ## ct-cbn for initial parameter structure.
+        ## The next is based upon that help file, but the call to
+        ## h-cbn with -e
+        ## does not modify 00000.poset
+
+        ## ## Second, create the lambda file. This also creates a 00000.poset
+        ## ## identical to the previous one (and the previous one is not
+        ## ## modified). The lambda file, however, is not
+        ## ## a triviality.
+        ## zzz0 <- system(paste(ompt, paste("h-cbn -f",  dirname, "-w")),
+        ##                ignore.stdout = silent)
+        ## if (!silent) cat("\n\n")
+
+        ## ## Third, ct-cbn (yes, ct-cbn); this call requires a lambda file
+        ## ## This is h-cbn -f foo -e 0.05: Estimate poset according to ct-cbn
+        ## ## in h-cbn -h.
+        ## ## But in all cases I've looked at nothing changes w.r.t. to the
+        ## ## previous call.
+        ## zzz0 <- system(paste(ompt,
+        ##                      paste("h-cbn -f",  dirname,
+        ##                            "-e", format(eparam, scientific = FALSE),
+        ##                            "-w -m")), ignore.stdout = silent)
+        ## rm(zzz0)
+
+        ## Call ct-cbn.
         zzz0 <- system(paste(ompt,
-                             paste("h-cbn -f",  dirname,
-                                  "-e", format(eparam, scientific = FALSE),
-                                  "-w -m")), ignore.stdout = silent)
+                             paste("ct-cbn -f",  dirname,
+                                   "-e",
+                                   format(eparam, scientific = FALSE))),
+                       ignore.stdout = silent)
         rm(zzz0)
+
         if (!silent) cat("\n\n")
     }
     ## The next is probably such a bad idea in almost
@@ -403,13 +435,10 @@ rerun_final_lambda <- function(dirname, omp_threads, verbose = FALSE) {
     ## cp dirname/00000.poset as dirname.poset
     ## call h-cbn -f dirname -w
     ## read the lambda file
-    ## We are not setting OMP_NUM_THREADS here
-    ## I guess we take the one in effect from the shell, it there is one
-    ## In particular, the one set by former call to call.external.cbn
-    ## is probably ignored?
+
     ## Now, when I launch many CPMs that use mclapply, I set
     ## OMP_NUM_THREADS = 1 in the bash script that calls R
-
+    ## Still, set the OMP_NUM_THREADS value
 
     if (is.null(omp_threads)) {
         OMPthreads <- 1
