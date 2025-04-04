@@ -180,6 +180,10 @@ run_HyperTraps <- function(x, opts) {
 
 
 run_BML <- function(x, opts) {
+    if (opts$rep == 0) {
+        opts$rep <- 1
+    } 
+    
     time_out <- system.time({
         opts <- c(list(dataset = x), opts)
         out <- invisible(do.call(
@@ -202,17 +206,19 @@ run_BML <- function(x, opts) {
 
     unname(out$DAG$labels)
 
+    out$adjacency_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
     out$trans_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
-    out$trans_rate_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
  
-    for (i in seq_len(nrow(out$trans_mat))) {
-        for (j in seq_len(ncol(out$trans_mat))) {
-            if (out$trans_mat[i, j] == 1) {
-                # Scale the transition rate by the probability for node i
-                out$trans_rate_mat[i, j] <- out$DAG$probs[i]
+    for (i in seq_len(nrow(out$adjacency_mat))) {
+        for (j in seq_len(ncol(out$adjacency_mat))) {
+            if (out$adjacency_mat[i, j] == 0) {
+                out$trans_mat[i, j] <- 0
             } else {
-                # If no edge exists, transition rate remains 0
-                out$trans_rate_mat[i, j] <- 0
+                name = colnames(out$adjacency_mat)[j]
+                
+                if (name %in% rownames(out$bootstrap$EdgeProbabilities)) {
+                    out$trans_mat[i, j] <- mean(out$bootstrap$EdgeProbabilities[name, ])
+                }
             }
         }
     }
