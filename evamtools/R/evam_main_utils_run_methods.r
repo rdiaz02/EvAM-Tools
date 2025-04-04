@@ -215,7 +215,7 @@ run_BML <- function(x, opts) {
                 out$trans_mat[i, j] <- 0
             } else {
                 name = colnames(out$adjacency_mat)[j]
-                
+
                 if (name %in% rownames(out$bootstrap$EdgeProbabilities)) {
                     out$trans_mat[i, j] <- mean(out$bootstrap$EdgeProbabilities[name, ])
                 }

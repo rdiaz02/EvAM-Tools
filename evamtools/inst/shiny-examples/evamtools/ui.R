@@ -323,6 +323,9 @@ results_simple <- function(){
                       column(10,
                           uiOutput("HyperTrapsSummary")
                         ),
+                      column(10,
+                          uiOutput("BML_bootsrap")
+                        ),
                column(4,
                       ## FIXME zzply
                       uiOutput("original_data")
