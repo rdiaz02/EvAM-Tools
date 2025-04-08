@@ -2469,6 +2469,32 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
 
+
+    output$BML_bootsrap <- renderUI({
+        if ((length(names(all_cpm_out)) > 0) && (!is.null(input$select_cpm))) {
+            tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
+
+            lapply(plot2show(), function(met) {
+                if (met == "BML") {
+                    if (tmp_data$BML_bootsrap) {
+                        output[[sprintf("plot_bml_%s", met)]] <- renderPlot({
+                            data <- t(tmp_data$BML_output$bootstrap$OBS_Probabilities)
+                            
+                            boxplot(data, horizontal = TRUE, yaxt="n", col="red")
+                            axis(2, at = 1:ncol(data), las =2, labels = colnames(data))
+                            title("P(g)")
+                        })
+
+                        return(tagList(
+                                    h3("BML bootsrap"), plotOutput(sprintf("plot_bml_%s", met)))
+                        )
+                    }
+                }
+            })
+        }  
+    })
+
+
     output$customize <- renderUI({
         do_sampling <- tryCatch({
             sampling <- ifelse(

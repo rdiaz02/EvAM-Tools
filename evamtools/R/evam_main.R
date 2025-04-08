@@ -187,6 +187,7 @@ evam <- function(x,
         BML_predicted_genotype_freqs = get_output("BML", "predicted_genotype_freqs"),
         BML_trans_rate_mat = get_output("BML", "trans_rate_mat"),
         BML_elapsed_time = get_output("BML", "elapsed_time"),
+        BML_bootsrap = opts$bml_opts$rep != 0,
         BML_output = all_out$BML,
 
 
