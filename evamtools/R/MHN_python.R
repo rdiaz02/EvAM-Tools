@@ -11,20 +11,7 @@
 library(evamtools)
 library("reticulate")
 
-opts$MHN_python <- list(
-  ##   python = "~/.local/python3.12-venv/bin/python3.12",
-  Type = "cMHN", ## "oMHN" won't be used for now
-  Penalty = "SYM_SPARSE", ## or L1 or L2. We'll use SYM and L1
-  seed = NA,
-  ## FIXME: use the usual apparatus
-  lambda_min = 0.001, ## 0.1/nrow(x),
-  lambda_max = 0.1, ## 100/nrow(x),
-  steps = 4, # 10,
-  nfolds = 3, # 5,
-  ## Default is 5000
-  maxit = 100, ## 5000
-  show_progressbar = "True"
-)
+
 
 ## This is somewhat time consuming, so do it once per session?
 setup_python_MHN <- function(python_version = "~/.local/python3.12-venv/bin/python3.12") {
@@ -39,7 +26,6 @@ setup_python_MHN <- function(python_version = "~/.local/python3.12-venv/bin/pyth
 import numpy as np
 import pandas as pd
 ")
-
 }
 
 ## Might change during session
@@ -53,7 +39,7 @@ set_MHN_python_options <- function(opts) {
 }
 
 ## After reading the data
-set_MHN_python_options_2 <- function(opts) {
+set_run_cv_MHN_python <- function(opts) {
   if(!is.null(opts$seed) && !is.na(opts$seed)) {
     py_run_string(paste0("mhn.set_seed(", opts$seed, ")"))
   }
@@ -105,22 +91,16 @@ opt.load_data_matrix(data_matrix)
 
 
 do_MHN_python <- function(x,
-                          dirname = NULL,
-                          filename = "mhn_input.csv",
-                          silent = TRUE,
-                          rmfile = TRUE) {
+                          opts
+                          ## dirname = NULL,
+                          ## filename = "mhn_input.csv",
+                          ## silent = TRUE,
+                          ## rmfile = TRUE
+                          ) {
   set_MHN_python_options(opts$MHN_python)
   data_2_MHN_load_data_matrix(x)
-  set_MHN_python_options_2(opts$MHN_python)
+  set_run_cv_MHN_python(opts$MHN_python)
   train_MHN_python(opts$MHN_python)
   MHN_result <- py$opt$result
+
 }
-
-
-
-
-
-
-rc <- random_evam(model = "CBN", ngenes = 5)
-rd <- sample_evam(rc, N = 1000, obs_noise = 0.05)
-ddd <- rd[[2]]
