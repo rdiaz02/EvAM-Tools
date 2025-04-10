@@ -38,13 +38,24 @@ set_run_cv_MHN_python <- function(opts) {
   if(!is.null(opts$seed) && !is.na(opts$seed)) {
     py_run_string(paste0("mhn.set_seed(", opts$seed, ")"))
   }
-  py_run_string(paste0("cv_lambda = opt.lambda_from_cv(",
-                       "lambda_min=", opts$lambda_min, ",",
-                       "lambda_max=", opts$lambda_max, ",",
-                       "steps=", opts$steps, ",",
-                       "nfolds=", opts$nfolds, ",",
-                       "show_progressbar=", opts$show_progressbar,
-                       ")"))
+  if (opts$return_lambda_scores == "False") {
+    py_run_string(paste0("cv_lambda = opt.lambda_from_cv(",
+                         "lambda_min=", opts$lambda_min, ",",
+                         "lambda_max=", opts$lambda_max, ",",
+                         "steps=", opts$steps, ",",
+                         "nfolds=", opts$nfolds, ",",
+                         "show_progressbar=", opts$show_progressbar,  ",",
+                         ")"))
+  } else {
+    py_run_string(paste0("cv_lambda, lambda_scores = opt.lambda_from_cv(",
+                         "lambda_min=", opts$lambda_min, ",",
+                         "lambda_max=", opts$lambda_max, ",",
+                         "steps=", opts$steps, ",",
+                         "nfolds=", opts$nfolds, ",",
+                         "show_progressbar=", opts$show_progressbar,  ",",
+                         "return_lambda_scores=", opts$return_lambda_scores,
+                       ")")) }
+
 }
 
 ## matrix, list -> output
@@ -125,7 +136,13 @@ do_MHN_python <- function(x,
   train_MHN_python(opts)
 
   if (opts$verbose) message("Finished run.")
-  return(py$opt$result)
+  browser()
+  ## Also return always cv_lambda
+  if (opts$return_lambda_scores == "False")
+    return(py$opt$result)
+  else
+    return(list(result = py$opt$result,
+                lambda_scores = py$lambda_scores))
 }
 
 
@@ -141,19 +158,20 @@ check_MHN_python_options <- function(opts) {
   stopifnot(is.numeric(opts$reltol))
   stopifnot(is.logical(opts$verbose))
   stopifnot(is.character(opts$round_result))
+  stopifnot(is.character(opts$return_lambda_scores))
 }
 
 
-## The next two make code possibly harder to understand
-## to set lambda_min and lambda_max from the object itself
-eval_MHN_python_opts <- function(opts, x){
-  return(c(opts, lambda_min = 0.1/nrow(x), lambda_max = 100/nrow(x)))
-}
+## ## The next two make code possibly harder to understand
+## ## to set lambda_min and lambda_max from the object itself
+## eval_MHN_python_opts <- function(opts, x){
+##   return(c(opts, lambda_min = 0.1/nrow(x), lambda_max = 100/nrow(x)))
+## }
 
-## wrapper of a single argument
-wrap_run_MHN_python <- function(x, opts) {
-  run_MHN_python(ddd, opts = eval_MHN_python_opts(opts, x))
-}
+## ## wrapper of a single argument
+## wrap_run_MHN_python <- function(x, opts) {
+##   run_MHN_python(x, opts = eval_MHN_python_opts(opts, x))
+## }
 
 
 
@@ -171,8 +189,120 @@ wrap_run_MHN_python <- function(x, opts) {
 ##   round_result = "True", ## Rounding was used in the 2020 paper
 ##                          ## and it is the default in the Python examples
 ##   show_progressbar = "False",
-##   verbose = TRUE
+##   verbose = TRUE,
+##   return_lambda_scores = "False"
 ## )
+
+
+
+
+reset_python_env <- function() {
+  py_run_string('
+# Get all user-defined variables (skip built-ins and modules)
+user_vars = [var for var in globals().keys()
+             if not var.startswith("__")
+                and not var in ("pd", "np", "mhn", "Optimizer")
+                and not callable(globals()[var])]
+
+# Delete all user variables
+for var in user_vars:
+    del globals()[var]
+')
+}
+
+
+
+do_MHN_python <- function(x, opts) {
+  if (opts$verbose) message("Starting.")
+
+  reset_python_env()
+
+  # Make the data available to Python
+  py$x <- x
+  py$colnames_x <- colnames(x)
+
+  # Prepare Python code as a string
+  python_code <- paste0('
+# Import required packages
+import mhn
+import numpy as np
+import pandas as pd
+from mhn.optimizers import Optimizer
+
+# Create optimizer
+opt = Optimizer(Optimizer.MHNType.', opts$Type, ')
+opt.set_penalty(opt.Penalty.', opts$Penalty, ')
+
+# Convert data to Python
+data_matrix = pd.DataFrame(np.array(x, dtype=np.int32), columns=colnames_x)
+opt.load_data_matrix(data_matrix)
+
+# Run CV if needed
+if ', ifelse(opts$lambda_min != opts$lambda_max, "True", "False"), ':')
+
+  # Add the appropriate CV code based on return_lambda_scores
+  if (opts$return_lambda_scores == "False") {
+    python_code <- paste0(python_code, '
+    cv_lambda = opt.lambda_from_cv(
+        lambda_min=', as.character(opts$lambda_min), ',
+        lambda_max=', as.character(opts$lambda_max), ',
+        steps=', as.character(opts$steps), ',
+        nfolds=', as.character(opts$nfolds), ',
+        show_progressbar=', opts$show_progressbar, '
+    )')
+  } else {
+    python_code <- paste0(python_code, '
+    cv_lambda, lambda_scores = opt.lambda_from_cv(
+        lambda_min=', as.character(opts$lambda_min), ',
+        lambda_max=', as.character(opts$lambda_max), ',
+        steps=', as.character(opts$steps), ',
+        nfolds=', as.character(opts$nfolds), ',
+        show_progressbar=', opts$show_progressbar, ',
+        return_lambda_scores=True
+    )')
+  }
+
+  # Complete the Python code
+  python_code <- paste0(python_code, '
+else:
+    cv_lambda = ', as.character(opts$lambda_min), '
+
+# Train
+opt.train(
+    lam=cv_lambda,
+    maxit=', as.character(opts$maxit), ',
+    reltol=', as.character(opts$reltol), ',
+    round_result=', opts$round_result, '
+)')
+
+  browser()
+  # Run the Python code in a local environment
+  py_env <- py_run_string(python_code, local = TRUE)
+
+
+
+  result <- list(
+    result = py_env$opt$result,
+    lambda_scores = ifelse(opts$return_lambda_scores == "False",
+                           NA,
+                           py_env$lambda_scores)
+  )
+
+  # Clean up global Python variables
+  py_run_string("
+if 'x' in globals():
+    del x
+if 'colnames_x' in globals():
+    del colnames_x
+")
+  return(result)
+}
+
+
+
+
+## modify the setup python env function
+
 
 library(codetools)
 checkUsageEnv(env = .GlobalEnv)

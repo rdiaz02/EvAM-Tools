@@ -38,6 +38,56 @@ r1 <- run_MHN_python(ddd[1:1000, ],
 r1$out$lambda_used
 
 
+
+r11 <- run_MHN_python(ddd2[1:100, ],
+                      opts = c(opts0_MHN_python,
+                              lambda_min = 0.1/100,
+                              lambda_max = 0.1))
+r11$out$lambda_used
+r11$out$score
+
+r11 <- run_MHN_python(ddd2[1:100, ],
+                      opts = c(opts0_MHN_python,
+                               lambda_min = 0.1/100,
+                               lambda_max = 0.05))
+r11$out$lambda_used
+r11$out$score
+r11$out$theta
+
+r11 <- run_MHN_python(ddd2[1:100, ],
+                      opts = c(opts0_MHN_python,
+                               lambda_min = 0.1/100,
+                               lambda_max = 1))
+r11$out$lambda_used
+r11$out$score
+r11$out$theta
+
+r11 <- run_MHN_python(ddd2[1:100, ],
+                      opts = c(opts0_MHN_python,
+                               lambda_min = 0.1/100,
+                               lambda_max = 10))
+r11$out$lambda_used
+r11$out$score
+r11$out$theta
+
+r111 <- run_MHN_python(ddd2[1:100, ],
+                       opts = c(opts0_MHN_python,
+                               lambda_min = 1,
+                               lambda_max = 1))
+r111$out$lambda_used
+r111$out$score
+r111$out$theta
+
+r111 <- run_MHN_python(ddd2[1:100, ],
+                       opts = c(opts0_MHN_python,
+                                lambda_min = 10,
+                                lambda_max = 10))
+r111$out$lambda_used
+r111$out$score
+r111$out$theta
+
+
+
 ## This can be slow! 1100 seconds
 system.time(r2 <- run_MHN_python(ddd, opts = c(opts0_MHN_python,
                                                lambda_min = 0.1/nrow(ddd),
