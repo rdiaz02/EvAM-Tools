@@ -164,13 +164,12 @@ wrap_run_MHN_python <- function(x, opts) {
 ##   Type = "cMHN", ## "oMHN" won't be used for now
 ##   Penalty = "SYM_SPARSE", ## SYM_SPARSE, L1 or L2. We'll use SYM and L1
 ##   seed = NA,
-##   steps = 4, # 10,
-##   nfolds = 3, # 5,
-##   ## Default is 5000
-##   maxit = 100, ## 5000
+##   steps = 10,
+##   nfolds = 5,
+##   maxit = 5000,
 ##   reltol = 1e-07,
 ##   round_result = "True", ## Rounding was used in the 2020 paper
-##                          ## and is the defult in the Python examples
+##                          ## and it is the default in the Python examples
 ##   show_progressbar = "False",
 ##   verbose = TRUE
 ## )
