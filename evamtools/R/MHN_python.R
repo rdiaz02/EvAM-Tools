@@ -26,7 +26,6 @@ import pandas as pd
 
 ## Might change during session
 set_MHN_python_options <- function(opts) {
-  ## FIXME: we need error checking for options
   ## Type: one of cMHN or oMHN
   py_run_string(paste0("opt = Optimizer(Optimizer.MHNType.", opts$Type, ")"))
   ## Penalty: one of L1, L2, SYM_SPARSE
@@ -79,13 +78,20 @@ run_MHN_python <- function(x, opts) {
 
 
 train_MHN_python <- function(opts) {
+  if (opts$lambda_min == opts$lambda_max) {
+    ## No CV, single lambda
+    cv_lambda_string <- as.character(opts$lambda_min)
+  } else {
+    cv_lambda_string <- "cv_lambda"
+  }
+
   py_run_string(paste0("opt.train(",
-                       "lam=cv_lambda,",
+                       "lam=", cv_lambda_string, ",",
                        "maxit=", opts$maxit, ",",
-                       "round_result=False,",
+                       "reltol=", opts$reltol, ",",
+                       "round_result=", opts$round_result, ",",
                        ")"
                        ))
-
 }
 
 
@@ -106,14 +112,19 @@ do_MHN_python <- function(x,
   if (opts$verbose) message("Starting.")
   if (opts$verbose) message("     setting options")
   set_MHN_python_options(opts)
+
   if (opts$verbose) message("     loading data")
   data_2_MHN_load_data_matrix(x)
-  if (opts$verbose) message("     starting run_cv")
-  set_run_cv_MHN_python(opts)
+
+  if (opts$lambda_min != opts$lambda_max) {
+    if (opts$verbose) message("     starting run_cv")
+    set_run_cv_MHN_python(opts)
+  }
+
   if (opts$verbose) message("     starting training")
   train_MHN_python(opts)
+
   if (opts$verbose) message("Finished run.")
-  ## MHN_result <- py$opt$result
   return(py$opt$result)
 }
 
@@ -127,7 +138,9 @@ check_MHN_python_options <- function(opts) {
   stopifnot(is.numeric(opts$steps))
   stopifnot(is.numeric(opts$nfolds))
   stopifnot(is.numeric(opts$maxit))
+  stopifnot(is.numeric(opts$reltol))
   stopifnot(is.logical(opts$verbose))
+  stopifnot(is.character(opts$round_result))
 }
 
 
@@ -142,6 +155,25 @@ wrap_run_MHN_python <- function(x, opts) {
   run_MHN_python(ddd, opts = eval_MHN_python_opts(opts, x))
 }
 
+
+
+
+## Sensible opts
+## opts0_MHN_python <- list(
+##   omp_threads = 1, ##
+##   Type = "cMHN", ## "oMHN" won't be used for now
+##   Penalty = "SYM_SPARSE", ## SYM_SPARSE, L1 or L2. We'll use SYM and L1
+##   seed = NA,
+##   steps = 4, # 10,
+##   nfolds = 3, # 5,
+##   ## Default is 5000
+##   maxit = 100, ## 5000
+##   reltol = 1e-07,
+##   round_result = "True", ## Rounding was used in the 2020 paper
+##                          ## and is the defult in the Python examples
+##   show_progressbar = "False",
+##   verbose = TRUE
+## )
 
 library(codetools)
 checkUsageEnv(env = .GlobalEnv)
