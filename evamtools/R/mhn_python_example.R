@@ -1,36 +1,65 @@
 ## Example data generation
-rc <- random_evam(model = "CBN", ngenes = 5)
-rd <- sample_evam(rc, N = 1000, obs_noise = 0.05)
+rc <- random_evam(model = "CBN", ngenes = 8)
+rd <- sample_evam(rc, N = 20000, obs_noise = 0.05)
 ddd <- rd[[2]]
+
+rc2 <- random_evam(model = "MHN", ngenes = 8)
+rd2 <- sample_evam(rc2, N = 20000, obs_noise = 0.05)
+ddd2 <- rd2[[2]]
+
 
 
 ## Session-wide
 setup_python_MHN()
 
 
-
 opts0_MHN_python <- list(
   omp_threads = 1, ##
   Type = "cMHN", ## "oMHN" won't be used for now
-  Penalty = "SYM_SPARSE", ## or L1 or L2. We'll use SYM and L1
+  Penalty = "L1", ## SYM_SPARSE, L1 or L2. We'll use SYM and L1
   seed = NA,
-  steps = 4, # 10,
-  nfolds = 3, # 5,
-  ## Default is 5000
-  maxit = 100, ## 5000
-  show_progressbar = "False",
+  steps = 10,
+  nfolds = 5,
+  maxit = 5000,
+  reltol = 1e-07,
+  round_result = "True", ## Rounding was used in the 2020 paper
+  ## and it is the default in the Python examples
+  show_progressbar = "True",
   verbose = TRUE
 )
 
-## ## Each run
-## do_MHN_python(ddd, opts)
+
+## Interesting it gives a warning if lambda_max is 1
+## but not with other values at the boundary
+r1 <- run_MHN_python(ddd[1:1000, ],
+                     opts = c(opts0_MHN_python,
+                              lambda_min = 0.1/100,
+                              lambda_max = 0.5))
+r1$out$lambda_used
+
+
+## This can be slow! 1100 seconds
+system.time(r2 <- run_MHN_python(ddd, opts = c(opts0_MHN_python,
+                                               lambda_min = 0.1/nrow(ddd),
+                                               lambda_max = 100/nrow(ddd))))
 
 
 
 
-r1 <- run_MHN_python(ddd, opts = c(opts0_MHN_python,
-                                   lambda_min = 0.1/nrow(ddd),
-                                   lambda_max = 100/nrow(ddd)))
+### Running the LUAD data
+##  As in the example here https://github.com/spang-lab/LearnMHN/blob/main/demo/demo.ipynb
+## But note I am using cMHN, not oMHN here
+
+## Download and do
+luad <- read.csv("~/Downloads/LUAD_n12.csv")
+## Or if you already have it, load it from an RData
+
+## 350 seconds
+system.time(
+  rluad <- run_MHN_python(luad, opts = c(opts0_MHN_python,
+                                         lambda_min = 0.1/nrow(luad),
+                                         lambda_max = 100/nrow(luad))))
+
 
 
 ### Minimal checks
@@ -41,7 +70,7 @@ r1 <- run_MHN_python(ddd, opts = c(opts0_MHN_python,
 ## with a fixed lambda. Results are not exactly identical
 ## but close enough.
 
-rc <- random_evam(model = "CBN", ngenes = 5)
+rc <- random_evam(model = "CBN", ngenes = 8)
 rd <- sample_evam(rc, N = 10000, obs_noise = 0.05)
 x <- rd[[2]]
 
