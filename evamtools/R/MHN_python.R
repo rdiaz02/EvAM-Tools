@@ -7,12 +7,14 @@
 ## FIXME: pass the path to python
 ## e.g., ~/.local/python3.12-venv/bin/
 
+
+library(evamtools)
 library("reticulate")
 
 opts$MHN_python <- list(
   ##   python = "~/.local/python3.12-venv/bin/python3.12",
-  Type = "cMHN",
-  Penalty = "SYM_SPARSE",
+  Type = "cMHN", ## "oMHN" won't be used for now
+  Penalty = "SYM_SPARSE", ## or L1 or L2. We'll use SYM and L1
   seed = NA,
   ## FIXME: use the usual apparatus
   lambda_min = 0.001, ## 0.1/nrow(x),
@@ -40,23 +42,6 @@ import pandas as pd
 
 }
 
-
-
-run_MHN_python <- function(x, opts) {
-
-  RhpcBLASctl::omp_set_num_threads(opts$omp_threads)
-  time_out <- system.time({
-    out <- do_MHN_python(x, FIXME_lambda = opts$lambda)
-    out <- c(out,
-             predicted_genotype_freqs =
-               list(probs_from_trm(out$transitionRateMatrix))
-             )
-  })["elapsed"]
-
-  return(list(time_out = time_out, out = out))
-}
-
-
 ## Might change during session
 set_MHN_python_options <- function(opts) {
   ## FIXME: we need error checking for options
@@ -81,6 +66,21 @@ set_MHN_python_options_2 <- function(opts) {
                        ")"))
 }
 
+
+run_MHN_python <- function(x, opts) {
+  RhpcBLASctl::omp_set_num_threads(opts$omp_threads)
+  time_out <- system.time({
+    out <- do_MHN_python(x, FIXME_lambda = opts$lambda)
+    out <- c(out,
+             predicted_genotype_freqs =
+               list(probs_from_trm(out$transitionRateMatrix))
+             )
+  })["elapsed"]
+
+  return(list(time_out = time_out, out = out))
+}
+
+
 train_MHN_python <- function(opts) {
   py_run_string(paste0("opt.train(",
                        "lam=cv_lambda,",
@@ -92,22 +92,28 @@ train_MHN_python <- function(opts) {
 }
 
 
+data_2_MHN_load_data_matrix <- function(x) {
+  py <- reticulate::py
+  py$x <- x
+  py$colnames_x <- colnames(x)
+  py_run_string("
+data_matrix = pd.DataFrame(np.array(x, dtype=np.int32), columns=colnames_x)
+opt.load_data_matrix(data_matrix)
+  ")
+}
+
+
 
 do_MHN_python <- function(x,
                           dirname = NULL,
                           filename = "mhn_input.csv",
                           silent = TRUE,
                           rmfile = TRUE) {
-
   set_MHN_python_options(opts$MHN_python)
-
   data_2_MHN_load_data_matrix(x)
-
   set_MHN_python_options_2(opts$MHN_python)
   train_MHN_python(opts$MHN_python)
-
   MHN_result <- py$opt$result
-
 }
 
 
@@ -118,15 +124,3 @@ do_MHN_python <- function(x,
 rc <- random_evam(model = "CBN", ngenes = 5)
 rd <- sample_evam(rc, N = 1000, obs_noise = 0.05)
 ddd <- rd[[2]]
-
-
-
-data_2_MHN_load_data_matrix <- function(x) {
-  py <- reticulate::py
-  py$x <- x
-  py$colnames_x <- colnames(x)
-  py_run_string("
-data_matrix = pd.DataFrame(np.array(x, dtype=np.int32), columns=colnames_x)
-opt.load_data_matrix(data_matrix)
-  ")
-}
