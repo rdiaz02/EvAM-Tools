@@ -117,35 +117,6 @@ opt.load_data_matrix(data_matrix)
 }
 
 
-## matrix, list (this is the MHN_python list component)
-do_MHN_python <- function(x,
-                          opts) {
-  if (opts$verbose) message("Starting.")
-  if (opts$verbose) message("     setting options")
-  set_MHN_python_options(opts)
-
-  if (opts$verbose) message("     loading data")
-  data_2_MHN_load_data_matrix(x)
-
-  if (opts$lambda_min != opts$lambda_max) {
-    if (opts$verbose) message("     starting run_cv")
-    set_run_cv_MHN_python(opts)
-  }
-
-  if (opts$verbose) message("     starting training")
-  train_MHN_python(opts)
-
-  if (opts$verbose) message("Finished run.")
-  browser()
-  ## Also return always cv_lambda
-  if (opts$return_lambda_scores == "False")
-    return(py$opt$result)
-  else
-    return(list(result = py$opt$result,
-                lambda_scores = py$lambda_scores))
-}
-
-
 check_MHN_python_options <- function(opts) {
   stopifnot(is.numeric(opts$omp_threads))
   stopifnot(opts$Type %in% c("oMHN", "cMHN"))
@@ -210,6 +181,205 @@ for var in user_vars:
 ')
 }
 
+
+
+
+do_MHN_python <- function(x, opts) {
+  if (opts$verbose) message("Starting.")
+
+  # Initialize Python environment within each process
+  setup_python_MHN(opts$python_version)
+
+  # Use a fresh local dictionary for each run
+  py_env <- py_run_string("
+import mhn
+import numpy as np
+import pandas as pd
+from mhn.optimizers import Optimizer
+
+opt = None
+cv_lambda = None
+lambda_scores = None
+", local = TRUE)
+
+  # Inject data into Python environment
+  py_env$data_matrix <- pd$DataFrame(np$array(x, dtype=np$int32),
+                                     columns = colnames(x))
+
+  # Configure optimizer
+  py_env$opt <- Optimizer(Optimizer$MHNType[[opts$Type]])
+  py_env$opt$set_penalty(py_env$opt$Penalty[[opts$Penalty]])
+  py_env$opt$load_data_matrix(py_env$data_matrix)
+
+  # Set seed if specified
+  if (!is.null(opts$seed) && !is.na(opts$seed)) {
+    py_run_string(sprintf("mhn.set_seed(%d)", opts$seed))
+  }
+
+  # Cross-validation or single lambda
+  if (opts$lambda_min != opts$lambda_max) {
+    cv_result <- py_env$opt$lambda_from_cv(
+      lambda_min = opts$lambda_min,
+      lambda_max = opts$lambda_max,
+      steps = opts$steps,
+      nfolds = opts$nfolds,
+      show_progressbar = opts$show_progressbar,
+      return_lambda_scores = opts$return_lambda_scores != "False"
+    )
+    if (opts$return_lambda_scores != "False") {
+      py_env$cv_lambda <- cv_result[[1]]
+      py_env$lambda_scores <- cv_result[[2]]
+    } else {
+      py_env$cv_lambda <- cv_result
+    }
+  } else {
+    py_env$cv_lambda <- opts$lambda_min
+  }
+
+  # Training
+  py_env$opt$train(
+    lam = py_env$cv_lambda,
+    maxit = opts$maxit,
+    reltol = opts$reltol,
+    round_result = opts$round_result
+  )
+
+  # Collect results
+  result <- list(
+    log_theta = py_env$opt$result,
+    meta = list(
+      lambda = py_env$cv_lambda,
+      maxit = opts$maxit,
+      reltol = opts$reltol,
+      score = py_env$opt$score,
+      message = py_env$opt$message,
+      status = py_env$opt$status,
+      nit = py_env$opt$nit
+    )
+  )
+
+  if (opts$return_lambda_scores != "False") {
+    result$lambda_scores <- py_env$lambda_scores
+  }
+
+  return(result)
+}
+
+
+
+
+do_MHN_python <- function(x, opts) {
+  if (opts$verbose) message("Starting.")
+
+  reset_python_env()
+
+  python_code <- paste0('
+import mhn
+import numpy as np
+import pandas as pd
+from mhn.optimizers import Optimizer
+
+opt = Optimizer(Optimizer.MHNType.', opts$Type, ')
+opt.set_penalty(opt.Penalty.', opts$Penalty, ')
+
+data_matrix = pd.DataFrame(np.array(x, dtype=np.int32), columns=colnames_x)
+opt.load_data_matrix(data_matrix)
+
+if ', ifelse(opts$lambda_min != opts$lambda_max, "True", "False"), ':')
+
+  if (opts$return_lambda_scores == "False") {
+    python_code <- paste0(python_code, '
+    cv_lambda = opt.lambda_from_cv(
+        lambda_min=', opts$lambda_min, ',
+        lambda_max=', opts$lambda_max, ',
+        steps=', opts$steps, ',
+        nfolds=', opts$nfolds, ',
+        show_progressbar=', opts$show_progressbar, '
+    )')
+  } else {
+    python_code <- paste0(python_code, '
+    cv_lambda, lambda_scores = opt.lambda_from_cv(
+        lambda_min=', opts$lambda_min, ',
+        lambda_max=', opts$lambda_max, ',
+        steps=', opts$steps, ',
+        nfolds=', opts$nfolds, ',
+        show_progressbar=', opts$show_progressbar, ',
+        return_lambda_scores=True
+    )')
+  }
+
+  python_code <- paste0(python_code, '
+else:
+    cv_lambda = ', opts$lambda_min, '
+
+opt.train(
+    lam=cv_lambda,
+    maxit=', opts$maxit, ',
+    reltol=', opts$reltol, ',
+    round_result=', opts$round_result, '
+)')
+
+  local_vars <- list(x = x, colnames_x = colnames(x))
+  py_env <- py_run_string(python_code, local = local_vars)
+
+  result <- list(
+    log_theta = py_env$opt$result,
+    meta = list(
+      lambda = if (opts$lambda_min != opts$lambda_max) py_env$cv_lambda else opts$lambda_min,
+      maxit = opts$maxit,
+      reltol = opts$reltol,
+      score = py_env$opt$score,
+      message = py_env$opt$message,
+      status = py_env$opt$status,
+      nit = py_env$opt$nit
+    )
+  )
+
+  if (opts$return_lambda_scores != "False")
+    result$lambda_scores <- py_env$lambda_scores
+
+  return(result)
+}
+
+
+
+
+## modify the setup python env function
+
+
+library(codetools)
+checkUsageEnv(env = .GlobalEnv)
+
+
+
+
+## matrix, list (this is the MHN_python list component)
+do_MHN_python <- function(x,
+                          opts) {
+  if (opts$verbose) message("Starting.")
+  if (opts$verbose) message("     setting options")
+  set_MHN_python_options(opts)
+
+  if (opts$verbose) message("     loading data")
+  data_2_MHN_load_data_matrix(x)
+
+  if (opts$lambda_min != opts$lambda_max) {
+    if (opts$verbose) message("     starting run_cv")
+    set_run_cv_MHN_python(opts)
+  }
+
+  if (opts$verbose) message("     starting training")
+  train_MHN_python(opts)
+
+  if (opts$verbose) message("Finished run.")
+  browser()
+  ## Also return always cv_lambda
+  if (opts$return_lambda_scores == "False")
+    return(py$opt$result)
+  else
+    return(list(result = py$opt$result,
+                lambda_scores = py$lambda_scores))
+}
 
 
 do_MHN_python <- function(x, opts) {
@@ -297,12 +467,3 @@ if 'colnames_x' in globals():
 ")
   return(result)
 }
-
-
-
-
-## modify the setup python env function
-
-
-library(codetools)
-checkUsageEnv(env = .GlobalEnv)
