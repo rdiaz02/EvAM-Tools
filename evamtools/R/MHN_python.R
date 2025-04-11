@@ -12,43 +12,40 @@ library("reticulate")
 ## Pass the venv you use, most likely 3.12
 setup_python_MHN <- function(python_version = "~/.local/python3.12-venv/bin/python3.12") {
   use_python(python = python_version)
-  ## mhn <- import("mhn")
-  ## mhn_version <- py_get_attr(mhn, "__version__")
-  ## message("Using MHN version ", mhn_version,
-  ##         " with Python ", python_version)
-  ##   py_run_string("from mhn.optimizers import Optimizer")
-  ##   ## For data handling
-  ##   py_run_string("
-  ## import numpy as np
-  ## import pandas as pd
-  ## ")
 }
 
 ## matrix, list -> output
 ##  opts is the opts$MHN_python list
+
+## A wrapper to do_MHN_python with the standard additional
+## manipulations (transition rate matrix and
+## predicted genotype frequencies, mainly)
 run_MHN_python <- function(x, opts) {
   check_MHN_python_options(opts)
   RhpcBLASctl::omp_set_num_threads(opts$omp_threads)
   time_out <- system.time({
-    outp <- do_MHN_python(x, opts)
+    time_py_call <- system.time({
+      outp <- do_MHN_python(x, opts)}, gcFirst = FALSE)["elapsed"]
     out <- list()
-    theta <- outp$log_theta
+    theta <- outp$result$log_theta
     colnames(theta) <- rownames(theta) <- colnames(x)
     out$theta <- theta
     rm(theta)
     out$transitionRateMatrix <- theta_to_trans_rate_3(out$theta)
+
     out <- c(out,
-             lambda_used = outp$meta$lambda,
-             maxit       = outp$meta$maxit,
-             reltol      = outp$meta$reltol,
-             score       = outp$meta$score,
-             message     = outp$meta$message,
-             status      = outp$meta$status,
-             nit         = outp$meta$nit,
+             lambda_used = outp$result$meta$lambda,
+             maxit       = outp$result$meta$maxit,
+             reltol      = outp$result$meta$reltol,
+             score       = outp$result$meta$score,
+             message     = outp$result$meta$message,
+             status      = outp$result$meta$status,
+             nit         = outp$result$meta$nit,
              predicted_genotype_freqs =
                list(probs_from_trm(out$transitionRateMatrix)),
-             opts = opts,
-             lambda_scores = outp$lambda_scores
+             opts = list(opts),
+             lambda_scores = list(outp$lambda_scores),
+             time_py_call = unname(time_py_call)
              )
   })["elapsed"]
 
@@ -73,10 +70,9 @@ check_MHN_python_options <- function(opts) {
 
 
 
-
+## matrix, list -> output
+##  opts is the opts$MHN_python list
 do_MHN_python <- function(x, opts) {
-  if (opts$verbose) message("Starting.")
-
   ## Define a Python function that encapsulates all the logic
   ## This ensures everything runs in a properly scoped environment
   reticulate::py_run_string('
@@ -165,8 +161,9 @@ def run_mhn_analysis(x, colnames_x, opts):
   ## Call the Python function
   py_result <- reticulate::py$run_mhn_analysis(x, colnames(x), py_opts)
 
-   if (opts$return_lambda_scores == "False") {
-     lambda_scores <- NA
+  if ((opts$return_lambda_scores == "False") ||
+        (opts$lambda_min == opts$lambda_max)) {
+    lambda_scores <- NA
   } else {
     lambda_scores <- py_result$lambda_scores
   }
