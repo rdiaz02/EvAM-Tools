@@ -15,15 +15,16 @@ random_evam(ngenes = NULL,
                      ot_oncobn_weight_min = 0,
                      ot_oncobn_weight_max = 1,
                      ot_oncobn_epos = 0.1,
-                     oncobn_model = "DBN"
+                     oncobn_model = "DBN",
+                     cbn_tree = FALSE
                      )
 }
 \arguments{
   \item{ngenes}{Number of genes in the model. Specify this or \code{gene_names}.}
   \item{gene_names}{Gene names.Specify this or \code{ngenes}.}
-  \item{model}{One of OT, CBN, OncoBN, MHN, HESBCN.}
+  \item{model}{One of OT, CBN, OncoBN, MHN, HESBCN, CBN-tree (see Details).}
   \item{graph_density }{Expected number of non-entries in the adjacency
-    matrix (all methods expect MHN) or the theta matrix (MHN). See details.}
+    matrix (all methods expect MHN) or the theta matrix (MHN). See Details.}
   \item{cbn_hesbcn_lambda_min }{ Smallest value of lambda for CBN and HESBCN.}
   \item{cbn_hesbcn_lambda_max }{ Largest value of lambada for CBN and HESBCN.}
   \item{hesbcn_probs }{ For nodes with more than one ancestor, the
@@ -34,6 +35,9 @@ random_evam(ngenes = NULL,
   \item{ot_oncobn_weight_max }{ Largest possible value of the weight or theta  for OT and OncoBN respectively.= 1,}
   \item{ot_oncobn_epos }{ epsilon (OncoBN) or epos (OT) error.}
   \item{oncobn_model }{ One of "DBN" or "CBN".}
+  \item{cbn_tree }{Set it to TRUE if you want all DAGs from CBN (or
+    HESBCN) to be trees, i.e., each descendant to have a single
+    ancestor. See Details.}
 }
 
 
@@ -58,10 +62,18 @@ Random model, with the same structure as returned by function \code{\link{evam}}
   For OT we use a procedure similar to the one for CBN, but edge weights are uniformly distributed between \code{ot_oncobn_weight_min} and \code{ot_oncobn_weight_max}. Since under OT a node can have only one parent, for all nodes that have two or more parents, we randomly keep one of the parents. Thus, \code{graph_density} is often larger than the actual number of non-zero connections in the adjacency matrix.
 
   For OncoBN we do as for CBN. If you specify \code{oncobn_model} to be DBN, all dependencies on two or more parents are  OR dependencies; if you specify CBN, dependencies are AND dependencies. As for OT, thetas are uniformly distributed between \code{ot_oncobn_weight_min} and \code{ot_oncobn_weight_max}.
-  
 
-  For both OT and OncoBN model, \code{ot_oncobn_epos} controls the probability that a gene can mutate if its requirements are not satisfied. (This is thus intrinsic to the model, and independent of observation error; see next).
-  
+
+  For both OT and OncoBN model, \code{ot_oncobn_epos} controls the
+  probability that a gene can mutate if its requirements are not
+  satisfied. (This is thus intrinsic to the model, and independent of
+  observation error; see next).
+
+  The model \code{CBN} with \code{cbn_tree = TRUE} is a CBN (or HESBCN)
+  model where no node has more than one parent. Use this if you want a
+  continuous-time model without conjunctions (AND, OR, XOR): a
+  "continuous-time OT", or a "CBN (or HESBCN) without conjunctions".
+
   In all cases, the predicted distribution of genotypes for a model is done assuming perfect compliance with the model. See the additional documentation for details about the error models. Adding observation error can be done using \code{obs_error > 0} when calling \code{\link{sample_evam}}.
 
 }
@@ -74,7 +86,7 @@ Random model, with the same structure as returned by function \code{\link{evam}}
 
 \seealso{
   \code{\link{sample_evam}}
-  
+
 }
 
 
@@ -82,6 +94,11 @@ Random model, with the same structure as returned by function \code{\link{evam}}
 rmhn <- random_evam(model = "MHN", ngenes = 5)
 rcbn <- random_evam(model = "CBN", ngenes = 5,
                              graph_density = 0.5)
+
+rcbnt <- random_evam(model = "CBN",
+                     ngenes = 5,
+                     graph_density = 0.5,
+                     cbn_tree = TRUE)
 
 ## Now, obtain some data
 ## You can obtain a random sample, with counts of frequencies of

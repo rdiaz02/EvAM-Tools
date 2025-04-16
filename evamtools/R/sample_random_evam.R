@@ -806,6 +806,7 @@ random_evam <- function(ngenes = NULL, gene_names = NULL,
                       , ot_oncobn_weight_max = 1
                       , ot_oncobn_epos = 0.1
                       , oncobn_model = "DBN"
+                      , cbn_tree = FALSE
                         ) {
     stopifnot((graph_density <= 1) && (graph_density >= 0))
     if (!(xor(is.null(ngenes), is.null(gene_names))))
@@ -833,10 +834,14 @@ random_evam <- function(ngenes = NULL, gene_names = NULL,
         colnames(thetas) <- rownames(thetas) <- gene_names
         output <- MHN_from_thetas(thetas)
     } else if (model == "CBN") {
+      if (cbn_tree) {
+        poset <- OT_random_poset(ngenes, graph_density = graph_density)
+      } else {
         poset <- evam_random_poset(ngenes, graph_density = graph_density)
-        lambdas <- runif(ngenes, cbn_hesbcn_lambda_min, cbn_hesbcn_lambda_max)
-        names(lambdas) <-  colnames(poset) <- rownames(poset) <- gene_names
-        output <- CBN_from_poset_lambdas(poset, lambdas)
+      }
+      lambdas <- runif(ngenes, cbn_hesbcn_lambda_min, cbn_hesbcn_lambda_max)
+      names(lambdas) <-  colnames(poset) <- rownames(poset) <- gene_names
+      output <- CBN_from_poset_lambdas(poset, lambdas)
     } else if (model == "HESBCN") {
         hesbcn_probs <- hesbcn_probs/sum(hesbcn_probs)
         poset <- evam_random_poset(ngenes, graph_density = graph_density)
