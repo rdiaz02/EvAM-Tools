@@ -77,7 +77,9 @@ RUN R -e "install.packages('shinyBS')"
 RUN R -e "install.packages('tippy')"
 
 RUN R -e "BiocManager::install('ggtree')"
+## HyperTraps-ct version https://github.com/StochasticBiology/hypertraps-ct/commits/bioconductor/ dcb94e1
 RUN R -e "devtools::install_github('https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor')"
+# BML version https://github.com/Deschain/BML 50e8793
 RUN R -e "devtools::install_github('https://github.com/Deschain/BML')"
 
 RUN mkdir -p /app/Sources/
