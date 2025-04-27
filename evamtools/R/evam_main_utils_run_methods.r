@@ -196,9 +196,9 @@ run_BML <- function(x, opts) {
     out$DAG$labels <- sapply(out$DAG$labels, function(label) {
         # If label is not "WT", sort the components and join them with a comma and space
         if (label != "WT") {
-        label_parts <- strsplit(label, ",")[[1]]
-        sorted_label <- paste(sort(trimws(label_parts)), collapse = ", ")
-        return(sorted_label)
+            label_parts <- strsplit(label, ",")[[1]]
+            sorted_label <- paste(sort(trimws(label_parts)), collapse = ", ")
+            return(sorted_label)
         }
         # If the label is "WT", return it as is
         return(label)
@@ -208,16 +208,22 @@ run_BML <- function(x, opts) {
 
     out$adjacency_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
     out$trans_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
+    out$td_trans_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
+    out$trans_rate_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
  
     for (i in seq_len(nrow(out$adjacency_mat))) {
         for (j in seq_len(ncol(out$adjacency_mat))) {
             if (out$adjacency_mat[i, j] == 0) {
                 out$trans_mat[i, j] <- 0
+                out$trans_rate_mat[i, j] <- 0
             } else {
                 name = colnames(out$adjacency_mat)[j]
 
+                idx <- which(out$DAG$labels == name)
+                out$trans_rate_mat[i, j] = out$DAG$probs[idx]
                 if (name %in% rownames(out$bootstrap$EdgeProbabilities)) {
                     out$trans_mat[i, j] <- mean(out$bootstrap$EdgeProbabilities[name, ])
+                    # out$trans_mat[i, j] <- 1
                 }
             }
         }
