@@ -521,6 +521,7 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
     if (mod == "BML" && plot_type == "trans_mat") {
         tryCatch(expr = {
             trans_mat_method = get(paste(mod, "_trans_mat", sep = ""), data) 
+            trans_mat_method[trans_mat_method != 0] <- 1
             method_info = igraph::graph_from_adjacency_matrix(trans_mat_method, mode = "directed")
             edges = as.data.frame(igraph::get.edgelist(method_info))
             colnames(edges) <- c("From", "To")

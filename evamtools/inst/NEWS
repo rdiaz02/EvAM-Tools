@@ -1,3 +1,7 @@
+Changes in version 2.1.22 (2025-04-13):
+	- Allow generating trees for CBN/HESBCN (i.e., no node
+	  with more than one parent).
+
 Changes in version 2.1.21 (2025-03-21):
 	- Allow using ct-cbn: really do use ct-cbn as starting
 	  (version 2.1.18, though following my understanding

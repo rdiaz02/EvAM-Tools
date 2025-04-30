@@ -2478,11 +2478,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 if (met == "BML") {
                     if (tmp_data$BML_bootsrap) {
                         output[[sprintf("plot_bml_%s", met)]] <- renderPlot({
-                            data <- t(tmp_data$BML_output$bootstrap$OBS_Probabilities)
+                            data <- as.data.frame(t(log(tmp_data$BML_output$bootstrap$OBS_Probabilities)))
                             
                             boxplot(data, horizontal = TRUE, yaxt="n", col="red")
                             axis(2, at = 1:ncol(data), las =2, labels = colnames(data))
-                            title("P(g)")
+                            title("Log(P(g))")
                         })
 
                         return(tagList(
