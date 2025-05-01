@@ -3,7 +3,8 @@
 \title{Runs the CPMs (or evams)}
 \usage{
 evam(x,
-     methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN"),
+     methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN",
+                 "HyperTraps", "BML"),
      max_cols = 15,
      cores = detectCores(),
      paths_max = FALSE,
@@ -11,94 +12,126 @@ evam(x,
                      omp_threads = ifelse(cores > 1, 1, detectCores())),
      ot_opts = list(with_errors_dist_ot = TRUE),
      cbn_opts = list(
-                     omp_threads = 1,
-                     init_poset = "OT"
+       omp_threads = 1,
+       init_poset = "OT"
                  ),
      hesbcn_opts = list(
-                     MCMC_iter = 100000,
-                     seed = NULL,
-                     reg = c("bic", "aic", "loglik"),
-                     silent = TRUE
+       MCMC_iter = 100000,
+       seed = NULL,
+       reg = c("bic", "aic", "loglik"),
+       silent = TRUE
                  ),
      oncobn_opts = list(
-                     model = "DBN",
-                     algorithm = "DP",
-                     k = 3,
-                     epsilon = min(colMeans(x)/2),
-                     silent = TRUE
+       model = "DBN",
+       algorithm = "DP",
+       k = 3,
+       epsilon = min(colMeans(x)/2),
+       silent = TRUE
                  ),
      mccbn_opts = list(
-                     model = "OT-CBN",
-                     tmp_dir = NULL,
-                     addname = NULL,
-                     silent = TRUE,
-                     L = 100,
-                     sampling = c("forward", "add-remove",
-                               "backward", "bernoulli", "pool"),
-                     max.iter = 100L,
-                     update.step.size = 20L,
-                     tol = 0.001,
-                     max.lambda.val = 1e+06,
-                     T0 = 50,
-                     adap.rate = 0.3,
-                     acceptance.rate = NULL,
-                     step.size = NULL,
-                     max.iter.asa = 10000L,
-                     neighborhood.dist = 1L,
-                     adaptive = TRUE,
-                     thrds = 1L,
-                     verbose = FALSE,
-                     seed = NULL),
+       model = "OT-CBN",
+       tmp_dir = NULL,
+       addname = NULL,
+       silent = TRUE,
+       L = 100,
+       sampling = c("forward", "add-remove",
+                    "backward", "bernoulli", "pool"),
+       max.iter = 100L,
+       update.step.size = 20L,
+       tol = 0.001,
+       max.lambda.val = 1e+06,
+       T0 = 50,
+       adap.rate = 0.3,
+       acceptance.rate = NULL,
+       step.size = NULL,
+       max.iter.asa = 10000L,
+       neighborhood.dist = 1L,
+       adaptive = TRUE,
+       thrds = 1L,
+       verbose = FALSE,
+       seed = NULL),
+     hyper_traps_opts = list(
+       initialstates = NULL,
+       priors = NULL,
+       starttimes = NULL,
+       endtimes = NULL,
+       length = 3,
+       kernel = 5,
+       samplegap = -1,
+       losses = 0,
+       apm_type = 0,
+       sa = 0,
+       sgd = 0,
+       sgd_scale = 0.01,
+       seed = 1,
+       outputinput = 0,
+       regularise = 0,
+       penalty = 0,
+       lasso = 0,
+       model = 2,
+       pli = 0,
+       walkers = 200,
+       full_analysis = 1,
+       limited_output = 0,
+       output_transitions = 1,
+       samples_per_row = 10,
+       featurenames = NULL # Replace NULL with the actual character vector if available
+     ),
+     bml_opts = list(
+       ntree = 1,
+       threshold = 0.5,
+       rep = 0
+     ),
      only_used_methods = TRUE
-)
+     )
 }
 \arguments{
 
-\item{x}{cross sectional data}
+  \item{x}{cross sectional data}
 
-\item{methods}{Methods to use. A vector with one or more of the
-  following strings, \dQuote{OT}, \dQuote{OncoBN}, \dQuote{CBN}, \dQuote{MCCBN}, \dQuote{MHN}, \dQuote{HESBCN}.}
+  \item{methods}{Methods to use. A vector with one or more of the
+    following strings, \dQuote{OT}, \dQuote{OncoBN}, \dQuote{CBN}, \dQuote{MCCBN}, \dQuote{MHN}, \dQuote{HESBCN}.}
 
 
-\item{max_cols}{Maximum number of columns to use in the analysis. If x has > max_cols, selected columns are those with the largest number of events.}
+  \item{max_cols}{Maximum number of columns to use in the analysis. If x has > max_cols, selected columns are those with the largest number of events.}
 
-\item{cores}{If larger than 1, use mclapply to run all methods. This is
-  the default. If you use mclapply, MHN and MCCBN should not use OMP
-  (i.e., the number of threads for OMP for MHN and MCCBN should be 1).}
+  \item{cores}{If larger than 1, use mclapply to run all methods. This is
+    the default. If you use mclapply, MHN and MCCBN should not use OMP
+    (i.e., the number of threads for OMP for MHN and MCCBN should be 1).}
 
-\item{paths_max}{If TRUE, return all paths to the maximum/maxima, with
-  their probabilities. See details for how they are computed.}
+  \item{paths_max}{If TRUE, return all paths to the maximum/maxima, with
+    their probabilities. See details for how they are computed.}
 
-\item{mhn_opts}{A list with two named arguments.
-  \describe{
+  \item{mhn_opts}{A list with two named arguments.
+    \describe{
 
- \item{lambda: }{The penalty for MHN. Defaults to 1/nrow(data). (These are not the lambdas as the estimated parameters for the rates of the continuous-time Markov chains for MHN or CBN or HESBCN.) }
+      \item{lambda: }{The penalty for MHN. Defaults to 1/nrow(data). (These are not the lambdas as the estimated parameters for the rates of the continuous-time Markov chains for MHN or CBN or HESBCN.) }
 
- \item{omp_threads: }{Number of OMP threads for MHN. Do not pass
-   \code{thrds} > 1 with \code{cores} > 1: as with MCCBN, do not use OpenMP threads from forked process from \code{\link[parallel]{mclapply}}. }
+      \item{omp_threads: }{Number of OMP threads for MHN. Do not pass
+	\code{thrds} > 1 with \code{cores} > 1: as with MCCBN, do not use OpenMP threads from forked process from \code{\link[parallel]{mclapply}}. }
+    }
+
   }
 
-}
+  \item{ot_opts}{A list with the single named argument \code{with_errors_dist_ot}: value for option with \code{with.errors} in the call to \code{\link[Oncotree]{distribution.oncotree}}. A value of TRUE means to incorporate the false positive and negative errors when returning the probabilities of genotypes under OT. Note that for large models using a value of TRUE can result in very long computing times. Default is TRUE.}
+  \item{cbn_opts}{A named list with arguments passed to CBN.
+    \describe{
+      \item{omp_threads: }{OMP threads to be used by CBN (set via the
+	environment variable OMP_NUM_THREADS). Defaults to 1. In contrast to
+	MCCBN and MHN, you can set
+	this to a number larger than one even if you set \code{cores} to a
+	number larger than one (i.e., if we use
+	\code{\link[parallel]{mclapply}}). It is unclear, though, more than 1
+	thread will
+	speed things much or what is the best number of threads to use; in fact,
+	sometimes it can even slow things down, in particular if you run
+	multiple evams in parallel.}
+      \item{init_poset: }{Initial poset for CBN; one of "linear" or "OT"
+	(default) or "ct-cbn". Using "ct-cbn" can take a very long time.}
+    }
+  }
 
-\item{ot_opts}{A list with the single named argument \code{with_errors_dist_ot}: value for option with \code{with.errors} in the call to \code{\link[Oncotree]{distribution.oncotree}}. A value of TRUE means to incorporate the false positive and negative errors when returning the probabilities of genotypes under OT. Note that for large models using a value of TRUE can result in very long computing times. Default is TRUE.}
-\item{cbn_opts}{A named list with arguments passed to CBN.
-\describe{
-\item{omp_threads: }{OMP threads to be used by CBN (set via the
-  environment variable OMP_NUM_THREADS). Defaults to 1. In contrast to
-  MCCBN and MHN, you can set
-  this to a number larger than one even if you set \code{cores} to a
-  number larger than one (i.e., if we use
-  \code{\link[parallel]{mclapply}}). It is unclear, though, more than 1
-  thread will
-speed things much or what is the best number of threads to use; in fact,
-sometimes it can even slow things down, in particular if you run
-multiple evams in parallel.}
-\item{init_poset: }{Initial poset for CBN; one of "linear" or "OT"
-  (default) or "ct-cbn". Using "ct-cbn" can take a very long time.}
-}
-}
-
-\item{hesbcn_opts}{Named list of arguments used in the fit of
+  \item{hesbcn_opts}{Named list of arguments used in the fit of
   H-ESBCN (details in \url{https://github.com/danro9685/HESBCN}).
   \describe{
     \item{MCMC_iter: }{Number of MCMC iterations to run;
@@ -144,6 +177,17 @@ multiple evams in parallel.}
   MHN, do not use OpenMP threads from forked process from
   \code{\link[parallel]{mclapply}}.
 }
+\item{hyper_traps_opts}{A named list with arguments passed to HyperTraPS.
+    \describe{
+      \item{initialstates: }{Something here. FIXME: to be completed.}
+    }
+  }
+\item{bml_opts}{A named list with arguments passed to BML.
+    \describe{
+      \item{ntree: }{Something here. FIXME: to be completed.}
+    }
+  }
+
 \item{only_used_methods}{If TRUE, do not return list components that
   contain only an NA (for example, the list components for not-used methods). }
 }
