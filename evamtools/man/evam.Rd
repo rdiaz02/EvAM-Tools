@@ -4,7 +4,7 @@
 \usage{
 evam(x,
      methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN",
-                 "HyperTraps", "BML"),
+                 "HyperTraPS", "BML"),
      max_cols = 15,
      cores = detectCores(),
      paths_max = FALSE,
@@ -90,7 +90,10 @@ evam(x,
   \item{x}{cross sectional data}
 
   \item{methods}{Methods to use. A vector with one or more of the
-    following strings, \dQuote{OT}, \dQuote{OncoBN}, \dQuote{CBN}, \dQuote{MCCBN}, \dQuote{MHN}, \dQuote{HESBCN}.}
+    following strings, \dQuote{OT}, \dQuote{OncoBN}, \dQuote{CBN},
+    \dQuote{MCCBN}, \dQuote{MHN}, \dQuote{HESBCN}, \dQuote{HyperTraPS},
+    \dQuote{BML} (if you type \dQuote{HyperTraps} or \dQuote{hypertraps}
+    it will be turned into \dQuote{HyperTraPS}).}
 
 
   \item{max_cols}{Maximum number of columns to use in the analysis. If x has > max_cols, selected columns are those with the largest number of events.}
