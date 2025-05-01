@@ -76,3 +76,5 @@ importFrom("relations", "as.relation",
            "relation_incidence")
 
 importFrom("hypertrapsct", "HyperTraPS")
+
+importFrom("utils", "combn")
