@@ -33,7 +33,7 @@ evam <- function(x,
     xoriginal <- preprocessed_x$original
 
     # Get default parametrs
-    default_opts <- evamtools:::create_default_opts(x)
+    default_opts <- create_default_opts(x)
 
     opts <- list(
         mhn_opts = fill_args_default(mhn_opts, default_opts$mhn_opts),
@@ -48,7 +48,7 @@ evam <- function(x,
 
 
 
-    evamtools:::check_cbn_opts_init_poset(opts$cbn_opts$init_poset)
+    check_cbn_opts_init_poset(opts$cbn_opts$init_poset)
 
     if ("MCCBN" %in% methods) {
         MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
@@ -73,15 +73,15 @@ evam <- function(x,
     }
 
     # Sanity check of gene names
-    evamtools:::sanity_check_colnames(colnames(x), TRUE)
+    sanity_check_colnames(colnames(x), TRUE)
 
-    ## Sanity checks of methods 
-    methods <- evamtools:::sanity_check_methods(methods)
+    ## Sanity checks of methods
+    methods <- sanity_check_methods(methods)
 
 
-    evamtools:::sanity_check_data_dimensions(x)
+    sanity_check_data_dimensions(x)
 
-    all_out <- mclapply(methods, evamtools:::run_method, x=x, opts=opts, mc.cores = cores)
+    all_out <- mclapply(methods, run_method, x=x, opts=opts, mc.cores = cores)
     names(all_out) <- methods
 
     get_output <- function(method, component) {
