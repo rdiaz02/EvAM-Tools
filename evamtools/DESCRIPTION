@@ -9,7 +9,7 @@ Authors@R: c(
             person("Herrera-Nieto", "Pablo",
 	   	   email = "pablo.h.nieto@gmail.com", role = "aut"),
  	    person("Perez de Lema Diez", "Javier",
-	   	   email = "someemail@someemail.com", role = "aut")
+	   	   email = "someemail@someemail.com", role = "aut"),
 	    person("Daniele", "Ramazzotti", role = "ctb",
 	           comment = "import.hesbcn"),
 	    person("Rudolf", "Schill", role = "ctb",
