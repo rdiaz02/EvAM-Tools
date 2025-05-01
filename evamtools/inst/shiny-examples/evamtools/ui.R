@@ -321,7 +321,7 @@ results_simple <- function(){
                       column(12, uiOutput("sims2"))
                       ),
                       column(10,
-                          uiOutput("HyperTrapsSummary")
+                          uiOutput("HyperTraPSSummary")
                         ),
                       column(10,
                           uiOutput("BML_bootsrap")
@@ -725,7 +725,7 @@ user_input <- function() {
                                                                      "MHN",
                                                                      "MCCBN",
                                                                      "H-ESBCN",
-                                                                     "HyperTraps",
+                                                                     "HyperTraPS",
                                                                      "BML"),
                                                                  choiceValues = c(
                                                                      "CBN",
@@ -734,7 +734,7 @@ user_input <- function() {
                                                                      "MHN",
                                                                      "MCCBN",
                                                                      "HESBCN",
-                                                                     "HyperTraps",
+                                                                     "HyperTraPS",
                                                                      "BML"
                                                                  ),
                                                                  selected = c(
@@ -887,17 +887,17 @@ user_input <- function() {
                                                 annealing schedule?: ", c(TRUE, FALSE), selected = TRUE),
                                                 numericInput("MCCBN_seed", "Seed: ", NULL, min=0, width="50%"),
                                               tags$hr(style="border-color: darkgrey;"),
-                                              tags$h4("HyperTraps options"),
-                                              numericInput("HyperTraps_length", "length: Inference chain length: ", 3, min=0),
-                                              numericInput("HyperTraps_kernel", "kernel: Perturbation kernel: ", 5, min=0),
-                                              numericInput("HyperTraps_walkers", "walkers: Number of walkers: ", 200, min=0),
-                                              numericInput("HyperTraps_samplegap", "samplegap: Gap between samples: ", 100, min=0),
-                                              selectInput("HyperTraps_losses", "losses: Gains (0) or losses (1): ", c(0, 1), selected = 0),
-                                              selectInput("HyperTraps_apm", "apm: Use APM (0/1): ", c(0, 1), selected = 0),
-                                              selectInput("HyperTraps_sa", "sa: Use SA (0/1): ", c(0, 1), selected = 0),
-                                              selectInput("HyperTraps_sgd", "sgd: Use SGD (0/1): ", c(0, 1), selected = 0),
-                                              selectInput("HyperTraps_pli", "pli: Use PLI (0/1): ", c(0, 1), selected = 0),
-                                              numericInput("HyperTraps_seed", "Seed: ", NULL, min=0),
+                                              tags$h4("HyperTraPS options"),
+                                              numericInput("HyperTraPS_length", "length: Inference chain length: ", 3, min=0),
+                                              numericInput("HyperTraPS_kernel", "kernel: Perturbation kernel: ", 5, min=0),
+                                              numericInput("HyperTraPS_walkers", "walkers: Number of walkers: ", 200, min=0),
+                                              numericInput("HyperTraPS_samplegap", "samplegap: Gap between samples: ", 100, min=0),
+                                              selectInput("HyperTraPS_losses", "losses: Gains (0) or losses (1): ", c(0, 1), selected = 0),
+                                              selectInput("HyperTraPS_apm", "apm: Use APM (0/1): ", c(0, 1), selected = 0),
+                                              selectInput("HyperTraPS_sa", "sa: Use SA (0/1): ", c(0, 1), selected = 0),
+                                              selectInput("HyperTraPS_sgd", "sgd: Use SGD (0/1): ", c(0, 1), selected = 0),
+                                              selectInput("HyperTraPS_pli", "pli: Use PLI (0/1): ", c(0, 1), selected = 0),
+                                              numericInput("HyperTraPS_seed", "Seed: ", NULL, min=0),
                                               tags$hr(style="border-color: darkgrey;"),
                                               tags$h4("BML options"),
                                               numericInput("BML_ntree", "Number of random restarts for searching the tree space", 1, min=0),

@@ -134,19 +134,19 @@ get_mccbn_args <- function(input) {
 
 get_hyper_traps_args <- function(input) {
     hyper_traps_opts <- list(
-        length = input$HyperTraps_length,
-        kernel = input$HyperTraps_kernel,
-        walkers = input$HyperTraps_walkers,
-        samplegap = input$HyperTraps_samplegap,
-        losses = as.numeric(input$HyperTraps_losses),
-        apm_type = as.numeric(input$HyperTraps_apm),
-        sa = as.numeric(input$HyperTraps_sa),
-        sgd = as.numeric(input$HyperTraps_sgd),
-        pli = as.numeric(input$HyperTraps_pli)
+        length = input$HyperTraPS_length,
+        kernel = input$HyperTraPS_kernel,
+        walkers = input$HyperTraPS_walkers,
+        samplegap = input$HyperTraPS_samplegap,
+        losses = as.numeric(input$HyperTraPS_losses),
+        apm_type = as.numeric(input$HyperTraPS_apm),
+        sa = as.numeric(input$HyperTraPS_sa),
+        sgd = as.numeric(input$HyperTraPS_sgd),
+        pli = as.numeric(input$HyperTraPS_pli)
     )
 
-    if (!is.na(input$HyperTraps_seed)) {
-        hyper_traps_opts$seed <- input$HyperTraps_seed
+    if (!is.na(input$HyperTraPS_seed)) {
+        hyper_traps_opts$seed <- input$HyperTraPS_seed
     }
 
     return(hyper_traps_opts)

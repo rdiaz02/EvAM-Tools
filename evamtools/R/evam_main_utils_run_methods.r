@@ -134,14 +134,14 @@ decode_state <- function(state, num_features, feature_labels) {
 }
 
 
-run_HyperTraps <- function(x, opts) {
-    time_out <- system.time({
-        opts <- c(list(obs = x), opts)
-        out <- invisible(do.call(
-            hypertrapsct::HyperTraPS,
-            opts
-        ))
-    })["elapsed"]
+run_HyperTraPS <- function(x, opts) {
+  time_out <- system.time({
+    opts <- c(list(obs = x), opts)
+    out <- invisible(do.call(
+      hypertrapsct::HyperTraPS,
+      opts
+    ))
+  })["elapsed"]
 
     num_features <- ncol(x)
     feature_labels <- colnames(x)
@@ -258,8 +258,8 @@ run_method <- function(method, x, opts) {
         result <- run_OT(x, opts$ot_opts)
     } else if (method == "OncoBN") {
         result <- run_OncoBN(x, opts$oncobn_opts)
-    } else if (method == "HyperTraps") {
-        result <- run_HyperTraps(x, opts$hyper_traps_opts)
+    } else if (method == "HyperTraPS") {
+      result <- run_HyperTraPS(x, opts$hyper_traps_opts)
     } else if (method == "BML") {
         result <- run_BML(x, opts$bml_opts)
     }

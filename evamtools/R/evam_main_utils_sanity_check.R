@@ -22,7 +22,7 @@ check_WT <- function(x) {
 }
 
 check_valid_methods <- function(methods) {
-    accepted_methods <- c("OT", "OncoBN", "CBN", "MCCBN", "MHN", "HESBCN", "HyperTraps", "BML")
+    accepted_methods <- c("OT", "OncoBN", "CBN", "MCCBN", "MHN", "HESBCN", "HyperTraPS", "BML")
     not_valid_methods <- which(!(methods %in% accepted_methods))
     
     return(not_valid_methods)

@@ -14,7 +14,8 @@ common_preprocess <- function(x, max_cols) {
 }
 
 evam <- function(x,
-                 methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN", "HyperTraps", "BML"),
+                 methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN",
+                             "MCCBN", "HyperTraPS", "BML"),
                  max_cols = 15,
                  cores = detectCores(),
                  paths_max = FALSE,
@@ -94,11 +95,18 @@ evam <- function(x,
                  ),
                  only_used_methods = TRUE
                  ) {
+
     preprocessed_x <- common_preprocess(x, max_cols)
     x <- preprocessed_x$processed
     xoriginal <- preprocessed_x$original
 
-    # Get default parametrs
+    ## Dealing with the multiple spellings of HyperTraPS
+    methods <- gsub("HyperTraps", "HyperTraPS", methods, fixed = TRUE)
+    methods <- gsub("Hypertraps", "HyperTraPS", methods, fixed = TRUE)
+    methods <- gsub("hypertraps", "HyperTraPS", methods, fixed = TRUE)
+
+
+    ## Get default parametrs
     default_opts <- create_default_opts(x)
 
     opts <- list(
@@ -132,7 +140,8 @@ evam <- function(x,
         stopifnot(opts$oncobn_opts$model %in% c("DBN", "CBN"))
     }
 
-    if ("HyperTraps" %in% methods) {
+
+    if ("HyperTraPS" %in% methods) {
         if (is.null(opts$hyper_traps_opts$featurenames)) {
             opts$hyper_traps_opts$featurenames <- colnames(x)
         }
@@ -233,21 +242,21 @@ evam <- function(x,
         HESBCN_paths_max = get_paths_max("HESBCN"),
         HESBCN_elapsed_time = get_output("HESBCN", "elapsed_time"),
 
-        HyperTraps_model = get_output("HyperTraps", "model"),
-        HyperTraps_edges = get_output("HyperTraps", "edges"),
-        HyperTraps_posterior_samples = get_output("HyperTraps", "posterior.samples"),
-        HyperTraps_dynamics = get_output("HyperTraps", "dynamics"),
-        HyperTraps_best = get_output("HyperTraps", "best"),
-        HyperTraps_lik_traces = get_output("HyperTraps", "lik.traces"),
-        HyperTraps_bubbles = get_output("HyperTraps", "bubbles"),
-        HyperTraps_routes = get_output("HyperTraps", "routes"),
-        HyperTraps_times = get_output("HyperTraps", "times"),
-        HyperTraps_timediffs = get_output("HyperTraps", "timediffs"),
-        HyperTraps_timehists = get_output("HyperTraps", "timehists"),
-        HyperTraps_trans_mat = get_output("HyperTraps", "td_trans_mat"),
-        HyperTraps_predicted_genotype_freqs = get_output("HyperTraps", "predicted_genotype_freqs"),
-        HyperTraps_elapsed_time = get_output("HyperTraps", "elapsed_time"),
-        HyperTraps_post = all_out$HyperTraps,
+        HyperTraPS_model = get_output("HyperTraPS", "model"),
+        HyperTraPS_edges = get_output("HyperTraPS", "edges"),
+        HyperTraPS_posterior_samples = get_output("HyperTraPS", "posterior.samples"),
+        HyperTraPS_dynamics = get_output("HyperTraPS", "dynamics"),
+        HyperTraPS_best = get_output("HyperTraPS", "best"),
+        HyperTraPS_lik_traces = get_output("HyperTraPS", "lik.traces"),
+        HyperTraPS_bubbles = get_output("HyperTraPS", "bubbles"),
+        HyperTraPS_routes = get_output("HyperTraPS", "routes"),
+        HyperTraPS_times = get_output("HyperTraPS", "times"),
+        HyperTraPS_timediffs = get_output("HyperTraPS", "timediffs"),
+        HyperTraPS_timehists = get_output("HyperTraPS", "timehists"),
+        HyperTraPS_trans_mat = get_output("HyperTraPS", "td_trans_mat"),
+        HyperTraPS_predicted_genotype_freqs = get_output("HyperTraPS", "predicted_genotype_freqs"),
+        HyperTraPS_elapsed_time = get_output("HyperTraPS", "elapsed_time"),
+        HyperTraPS_post = all_out$HyperTraPS,
 
         BML_trans_mat = get_output("BML", "trans_mat"),
         # BML_predicted_genotype_freqs = get_output("BML", "predicted_genotype_freqs"),

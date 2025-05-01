@@ -2325,15 +2325,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                        ifelse(length(plot2show()) <=0, 1, length(plot2show())))
 
             lapply(plot2show(), function(met) {
-                if (met == "HyperTraps") {
+                if (met == "HyperTraPS") {
                     output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
-                        pl <- hypertrapsct:::plotHypercube.influences(tmp_data$HyperTraps_post)
+                        pl <- hypertrapsct:::plotHypercube.influences(tmp_data$HyperTraPS_post)
                         pl
                     })
                     return(
                         column(number_of_columns,
                             tagList(
-                                h5("HyperTraps"),
+                                h5("HyperTraPS"),
                                 plotOutput(sprintf("plot_sims_%s", met))
                             )
                         )
@@ -2448,20 +2448,20 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
 
-    output$HyperTrapsSummary <- renderUI({
+    output$HyperTraPSSummary <- renderUI({
         if ((length(names(all_cpm_out)) > 0) && (!is.null(input$select_cpm))) {
             tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
 
             lapply(plot2show(), function(met) {
-                if (met == "HyperTraps") {
+                if (met == "HyperTraPS") {
                     output[[sprintf("plot_hypertraps_%s", met)]] <- renderPlot({
-                        pl <- hypertrapsct:::plotHypercube.summary(tmp_data$HyperTraps_post)
+                        pl <- hypertrapsct:::plotHypercube.summary(tmp_data$HyperTraPS_post)
 
                         pl 
                     })
 
                     return(tagList(
-                                h3("HyperTraps summary"), plotOutput(sprintf("plot_hypertraps_%s", met)))
+                                h3("HyperTraPS summary"), plotOutput(sprintf("plot_hypertraps_%s", met)))
                     )
                 }
             })
