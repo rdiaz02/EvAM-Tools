@@ -85,8 +85,8 @@ create_default_opts <- function(x) {
             featurenames = NULL # Replace NULL with the actual character vector if available
         ),
         bml_opts = list(
-            ntree = 1,
-            threshold = 0.5,
+          ntree = 100,
+          threshold = 0.3,
             rep = 0
         )
     )

@@ -89,10 +89,10 @@ evam <- function(x,
                    featurenames = NULL # Replace NULL with the actual character vector if available
                  ),
                  bml_opts = list(
-                   ntree = 1,
+                   ntree = 100, ## what they used in the paper
                    ## 0.3 is what they said, in their README, they used in the ms.
                    threshold = 0.3,
-                   rep = 0
+                   rep = 0 ## In the paper, 1000. That is way too many for webapp
                  ),
                  only_used_methods = TRUE
                  ) {

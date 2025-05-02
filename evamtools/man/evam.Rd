@@ -78,7 +78,7 @@ evam(x,
        featurenames = NULL # Replace NULL with the actual character vector if available
      ),
      bml_opts = list(
-       ntree = 1,
+       ntree = 100,
        threshold = 0.3,
        rep = 0
      ),
@@ -187,7 +187,14 @@ evam(x,
   }
 \item{bml_opts}{A named list with arguments passed to BML.
     \describe{
-      \item{ntree: }{Something here. FIXME: to be completed.}
+       \item{ntree: }{Number or random restarts for searching the tree
+	space. In the original Misra et al. 2014 paper 100 were used.}
+      \item{threshold: }{Threshold for inferring paths; a value between
+  0 and 1. Smaller values give more detail. In the original paper,
+  0.3 was used. }
+      \item{rep: }{The number of bootstrap replicates. Set it to 0 for
+  no bootstrap. Without bootstrap, figs like Fig. 3 a and b of the
+  manuscript are not possible. The value used in the original paper was 1000.}
     }
   }
 
