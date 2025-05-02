@@ -994,7 +994,7 @@ plot_BML_all <- function(x) {
                                 ncol = 1,
                                 nrow = 2,
                                 heights = c(0.3, 0.8),
-                                padding = unit(2, "lines")
+                                padding = grid::unit(2, "lines")
                                 )
     } else {
         grid::grid.newpage()

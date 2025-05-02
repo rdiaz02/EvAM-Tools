@@ -479,6 +479,7 @@ test_that("Miscell error conditions", {
 
 ## FIXME: extend this properly
 test_that("Minimal examples of HyperTraPS and BML", {
+
   dB_c1 <- matrix(
     c(
       rep(c(1, 0, 0, 0, 0), 30) #A
@@ -520,7 +521,8 @@ test_that("Minimal examples of HyperTraPS and BML", {
                methods = c("HyperTraPS"),
                hyper_traps_opts = list(length = 2,
                                        model = -1))
-  expect_true(exists("HyperTraPS_post$lik.traces", out4))
+
+  expect_true(exists("lik.traces", out4$HyperTraPS_post))
   expect_true(out4$HyperTraPS_post$L == 5)
 
   ## And, to avoid re-running, do some minimal testing of plots
