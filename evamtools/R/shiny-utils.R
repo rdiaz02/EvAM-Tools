@@ -400,11 +400,13 @@ create_tabular_data <- function(data) {
                     }
                 }
             }
-            
+            ## If BML is the only method, the next fails
+            if (method != "BML") {
             all_counts <-
                 data.frame(Index = standard_rank_genots_1(all_counts$Genotype),
                            all_counts)
             tabular_data[[attr]] <- all_counts[order(all_counts$Index), ]
+            }
 
         } else if (attr %in% c("trans_rate_mat",
                                ## "obs_genotype_transitions",
@@ -647,4 +649,3 @@ to_stnd_csd_all_datasets <- function(datasets){
 ##     return(freqs[freqs$Counts > 0, , drop = FALSE])
 
 ##     }
-
