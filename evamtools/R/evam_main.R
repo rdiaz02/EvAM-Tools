@@ -164,7 +164,12 @@ evam <- function(x,
         if (!exists(component, all_out[[method]])) return(NA)
         return(all_out[[method]][[component]])
     }
-    
+
+    get_all_method_output <- function(method) {
+        if (!exists(method, all_out)) return(NA)
+        return(all_out[[method]])
+    }
+
     ## To avoid repeating code
     get_paths_max <- function(method) {
         if (paths_max) {
@@ -242,6 +247,9 @@ evam <- function(x,
         HESBCN_paths_max = get_paths_max("HESBCN"),
         HESBCN_elapsed_time = get_output("HESBCN", "elapsed_time"),
 
+        ## FIXME: For HyperTraPS and BML we return
+        ## pieces, and then all output. So some things
+        ## are returned in two places.
         HyperTraPS_model = get_output("HyperTraPS", "model"),
         HyperTraPS_edges = get_output("HyperTraPS", "edges"),
         HyperTraPS_posterior_samples = get_output("HyperTraPS", "posterior.samples"),
@@ -256,14 +264,14 @@ evam <- function(x,
         HyperTraPS_trans_mat = get_output("HyperTraPS", "td_trans_mat"),
         HyperTraPS_predicted_genotype_freqs = get_output("HyperTraPS", "predicted_genotype_freqs"),
         HyperTraPS_elapsed_time = get_output("HyperTraPS", "elapsed_time"),
-        HyperTraPS_post = all_out$HyperTraPS,
+        HyperTraPS_post = get_all_method_output("HyperTraPS"),
 
         BML_trans_mat = get_output("BML", "trans_mat"),
         # BML_predicted_genotype_freqs = get_output("BML", "predicted_genotype_freqs"),
         BML_trans_rate_mat = get_output("BML", "trans_rate_mat"),
         BML_elapsed_time = get_output("BML", "elapsed_time"),
         BML_bootsrap = opts$bml_opts$rep != 0,
-        BML_output = all_out$BML,
+        BML_output = get_all_method_output("BML"),
 
 
         original_data = xoriginal,
