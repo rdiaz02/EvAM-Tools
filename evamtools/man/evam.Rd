@@ -80,7 +80,7 @@ evam(x,
      bml_opts = list(
        ntree = 100,
        threshold = 0.3,
-       rep = 0
+       rep = 10
      ),
      only_used_methods = TRUE
      )

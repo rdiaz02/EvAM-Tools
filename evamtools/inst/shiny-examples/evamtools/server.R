@@ -2471,24 +2471,35 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
 
 
-    output$BML_bootsrap <- renderUI({
+    output$BML_bootstrap <- renderUI({
         if ((length(names(all_cpm_out)) > 0) && (!is.null(input$select_cpm))) {
             tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
 
             lapply(plot2show(), function(met) {
                 if (met == "BML") {
-                  if (tmp_data$BML_bootsrap) {
+            if (tmp_data$BML_bootstrap) {
                     ## Like Figure 3.b in Misra et al.
                     output[[sprintf("plot_bml_%s", met)]] <- renderPlot({
                       ## data <- as.data.frame(t(log(tmp_data$BML_output$bootstrap$OBS_Probabilities)))
                       ## boxplot(data, horizontal = TRUE, yaxt="n", col="red")
                       ## axis(2, at = 1:ncol(data), las =2, labels = colnames(data))
                       ## title("P(g)")
-                      evamtools:::plot_BML(tmp_data$BML_output$bootstrap)
+                evamtools:::plot_BML_Fig3(tmp_data$BML_output$bootstrap)
                     })
 
                     return(tagList(
-                      h3("BML bootsrap"), plotOutput(sprintf("plot_bml_%s", met)))
+                h3(
+                  span("BML bootstrap. "),
+                  br(),
+                  span(
+                    paste(
+                      "Number of bootstrap replicates = ",
+                      tmp_data$BML_bootstrap, "."
+                    ),
+                    style = "font-size: smaller;"
+                  )
+                ),
+                plotOutput(sprintf("plot_bml_%s", met)))
                       )
                     }
                 }

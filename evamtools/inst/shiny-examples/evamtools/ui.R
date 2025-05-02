@@ -339,7 +339,7 @@ results_simple <- function(){
                           uiOutput("HyperTraPSSummary")
                         ),
                       column(10,
-                          uiOutput("BML_bootsrap")
+                             uiOutput("BML_bootstrap")
                         ),
                column(4,
                       ## FIXME zzply
@@ -927,7 +927,7 @@ user_input <- function() {
                                               tags$h4("BML options"),
                                               numericInput("BML_ntree", "Number of random restarts for searching the tree space", 100, min=0),
                                               numericInput("BML_threshold", "Threshold for inferring paths", 0.3, min=0, max=1),
-                                              numericInput("BML_rep", "Number of bootstrap replicates, if nrep = 0 (default) no bootstrap will be performed", 0, min=0),
+                                              numericInput("BML_rep", "Number of bootstrap replicates, if nrep = 0 no bootstrap will be performed. The default, 10, is way too small for real use.", 10, min=0),
                     ),
                                   
                     )

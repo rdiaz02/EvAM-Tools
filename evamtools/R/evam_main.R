@@ -109,7 +109,7 @@ evam <- function(x,
                    ntree = 100, ## what they used in the paper
                    ## 0.3 is what they said, in their README, they used in the ms.
                    threshold = 0.3,
-                   rep = 0 ## In the paper, 1000. That is way too many for webapp
+                   rep = 10 ## In the paper, 1000. That is way too many for webapp
                  ),
                  only_used_methods = TRUE
                  ) {
@@ -288,7 +288,8 @@ evam <- function(x,
         ## BML_predicted_genotype_freqs = get_output("BML", "predicted_genotype_freqs"),
         ## BML_trans_rate_mat = get_output("BML", "trans_rate_mat"),
         BML_elapsed_time = get_output("BML", "elapsed_time"),
-        BML_bootsrap = opts$bml_opts$rep != 0,
+    ## BML_bootstrap = opts$bml_opts$rep != 0,
+    BML_bootstrap = ifelse(exists("BML", all_out), opts$bml_opts$rep, NA),
         BML_output = get_all_method_output("BML"),
 
 
