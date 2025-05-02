@@ -202,6 +202,7 @@ evam <- function(x,
             return(NA)
         }
     }
+
     tmpr <- list(
         OT_model = get_output("OT", "edges"),
         OT_f_graph = get_output("OT", "weighted_fgraph"),
