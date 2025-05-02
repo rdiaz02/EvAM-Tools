@@ -105,10 +105,8 @@ In the bottom row plots, non-observed genotypes are shown in light
 green, to differentiate them from the observed genotypes (shown in orange).
 
 
-For BML, we are using, for the moment, a temporary kludge.
-
-
-
+For BML, we are using, for the moment, a temporary kludge. It returns
+figs as in Fig. 2 and Fig. 3a and 3b in Misra et al., 2014.
 
 }
 
@@ -148,7 +146,10 @@ the last gene mutated.
   Greenbury, S. F., Barahona, M., & Johnston, I. G. (2020). HyperTraPS:
   Inferring Probabilistic Patterns of Trait Acquisition in Evolutionary
   and Disease Progression Pathways. Cell Systems, 10(1),
-  39–51–10. http://dx.doi.org/10.1016/j.cels.2019.10.009
+  39–51–10. \url{http://dx.doi.org/10.1016/j.cels.2019.10.009}
+
+  Misra, N., Szczurek, E., & Vingron, M. (2014). Inferring the paths of somatic evolution in cancer. Bioinformatics (Oxford, England), 30(17), 2456–2463. \url{https://doi.org/10.1093/bioinformatics/btu319}
+
 }
 \examples{
 dB_c1 <- matrix(
