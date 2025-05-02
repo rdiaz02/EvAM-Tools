@@ -387,6 +387,23 @@ Executes all CPMS given a cross sectional data set.
   Bayesian networks. Computational and Systems Oncology, 1(2),
   1027. \url{http://dx.doi.org/10.1002/cso2.1027}
 
+
+\bold{BML}
+
+- Misra, N., Szczurek, E., & Vingron, M. (2014). Inferring the paths of somatic evolution in cancer. Bioinformatics (Oxford, England), 30(17), 2456–2463. \url{https://doi.org/10.1093/bioinformatics/btu319}
+
+
+\bold{HyperTraPS-CT}
+
+- Aga, O. N. L., Brun, M., Dauda, K. A., Diaz-Uriarte, R., Giannakis,
+  K., & Johnston, I. G. (2024). Hypertraps-ct: Inference and prediction
+  for accumulation pathways with flexible data and model structures.
+  Plos Computational Biology, 20(9), e1012393.
+  \url{https://doi.org/10.1371/journal.pcbi.1012393}
+
+
+
+
 \bold{Conditional prediction of genotypes and probabilities of paths from CPMs}
 
 - Hosseini, S., Diaz-Uriarte, Ramon, Markowetz, F., & Beerenwinkel,
