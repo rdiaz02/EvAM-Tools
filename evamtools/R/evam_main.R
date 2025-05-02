@@ -285,30 +285,30 @@ evam <- function(x,
         HyperTraPS_elapsed_time = get_output("HyperTraPS", "elapsed_time"),
         HyperTraPS_post = get_all_method_output("HyperTraPS"),
 
-    BML_model = get_output("BML", "model"),
-    BML_trans_mat = NA,
-    BML_predicted_genotype_freqs = NA,
+        BML_model = get _output("BML", "model"),
+        BML_trans_mat = NA,
+        BML_predicted_genotype_freqs = NA,
         BML_elapsed_time = get_output("BML", "elapsed_time"),
-    BML_bootstrap = ifelse(exists("BML", all_out), opts$bml_opts$rep, NA),
+        BML_bootstrap = ifelse(exists("BML", all_out), opts$bml_opts$rep, NA),
         BML_output = get_all_method_output("BML"),
 
-    methods = methods,
+        methods = methods,
         original_data = xoriginal,
         analyzed_data = x,
         genotype_id_ordered =
-            stats::setNames(1:(2^ncol(x)),
-                            genotypes_standard_order(colnames(x))),
+          stats::setNames(1:(2^ncol(x)),
+                          genotypes_standard_order(colnames(x))),
         all_options = list(
-            mhn_opts = opts$mhn_opts,
-            ot_opts = opts$ot_opts,
-            cbn_opts = opts$cbn_opts,
-            hesbcn_opts = opts$hesbcn_opts,
-            oncobn_opts = opts$oncobn_opts,
-            mccbn_opts = opts$mccbn_opts,
-            hyper_traps_opts = opts$hyper_traps_opts
-            )
+          mhn_opts = opts$mhn_opts,
+          ot_opts = opts$ot_opts,
+          cbn_opts = opts$cbn_opts,
+          hesbcn_opts = opts$hesbcn_opts,
+          oncobn_opts = opts$oncobn_opts,
+          mccbn_opts = opts$mccbn_opts,
+          hyper_traps_opts = opts$hyper_traps_opts
+        )
     )
-    
+
     if (only_used_methods) {
         tmpr_rm <- lapply(tmpr, function(x) (length(x) == 1) && (is.na(x)))
         tmpr <- tmpr[which(!unlist(tmpr_rm))]
