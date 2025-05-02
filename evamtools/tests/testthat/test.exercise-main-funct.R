@@ -477,6 +477,58 @@ test_that("Miscell error conditions", {
                  fixed = TRUE)
 })
 
+## FIXME: extend this properly
+test_that("Minimal examples of HyperTraPS and BML", {
+  dB_c1 <- matrix(
+    c(
+      rep(c(1, 0, 0, 0, 0), 30) #A
+    , rep(c(0, 0, 1, 0, 0), 30) #C
+    , rep(c(1, 1, 0, 0, 0), 20) #AB
+    , rep(c(0, 0, 1, 1, 0), 20) #CD
+    , rep(c(1, 1, 1, 0, 0), 10) #ABC
+    , rep(c(1, 0, 1, 1, 0), 10) #ACD
+    , rep(c(1, 1, 0, 0, 1), 10) #ABE
+    , rep(c(0, 0, 1, 1, 1), 10) #CDE
+    , rep(c(1, 1, 1, 0, 1), 10) #ABCE
+    , rep(c(1, 0, 1, 1, 1), 10) #ACDE
+    , rep(c(1, 1, 1, 1, 0), 5) # ABCD
+    , rep(c(0, 0, 0, 0, 0), 1) # WT
+    ), ncol = 5, byrow = TRUE
+  )
+  colnames(dB_c1) <- LETTERS[1:5]
+
+  out3 <- evam(dB_c1,
+               methods = c("BML"),
+               bml_opts = list(ntree = 3, rep = 7))
+
+  expect_true(exists("BML_output", out3))
+  expect_true(ncol(out3$BML_output$bootstrap$EdgeProbabilities) == 7)
+
+
+  out3_nb <- evam(dB_c1,
+                  methods = c("BML"),
+                  bml_opts = list(ntree = 3, rep = 0))
+  expect_true(exists("BML_output", out3_nb))
+  expect_true(!exists("BML_output$bootstrap", out3_nb))
+
+
+  out33 <- evam(dB_c1,
+                methods = c("BML", "OT"),
+                bml_opts = list(ntree = 3, rep = 7))
+
+  out4 <- evam(dB_c1,
+               methods = c("HyperTraPS"),
+               hyper_traps_opts = list(length = 2,
+                                       model = -1))
+  expect_true(exists("HyperTraPS_post$lik.traces", out4))
+  expect_true(out4$HyperTraPS_post$L == 5)
+
+  ## And, to avoid re-running, do some minimal testing of plots
+  ## Moved to the Rd file
+  ## plot_BML_all(out3)
+  ## plot_BML_all(out3_nb)
+  ## plot_BML_all(out33)
+})
 
 cat("\n Done test.exercise-main-funct.R. Seconds = ",
     as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")
