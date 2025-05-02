@@ -403,11 +403,22 @@ create_tabular_data <- function(data) {
                     }
                 }
             }
+
+      ## BML has none of the sampled_genotype_counts or
+      ## predicted_genotype_freqs and those are the first tabulated
+      ## things. If we do not skip here, it fails in the call
+      ## to standard_rank_genots_1
+      if ((length(data$methods) == 1) &&
+            (data$methods == "BML")) {
+        stopifnot(nrow(all_counts) == 0)
+        stopifnot(ncol(all_counts) == 0)
+        tabular_data[[attr]] <- NA
+      } else {
             all_counts <-
                 data.frame(Index = standard_rank_genots_1(all_counts$Genotype),
                            all_counts)
             tabular_data[[attr]] <- all_counts[order(all_counts$Index), ]
-
+      }
         } else if (attr %in% c("trans_rate_mat",
                                ## "obs_genotype_transitions",
                                "trans_mat")) {

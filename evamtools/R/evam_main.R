@@ -292,7 +292,7 @@ evam <- function(x,
     BML_bootstrap = ifelse(exists("BML", all_out), opts$bml_opts$rep, NA),
         BML_output = get_all_method_output("BML"),
 
-
+    methods = methods,
         original_data = xoriginal,
         analyzed_data = x,
         genotype_id_ordered =
