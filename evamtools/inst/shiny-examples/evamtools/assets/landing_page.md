@@ -193,6 +193,11 @@ The results include:
 
 	* Sampled genotype counts: Counts, or absolute genotype frequencies obtained by generating a finite sample (of the size you chose) with the probabilities given by the predicted genotype frequencies. If you add noise, the sampled genotype counts include observational (e.g., genotyping) noise.
 
+
+     * For BML, if you used bootstrap, we show plots like Fig. 3a and 3b of Misra et al. 2014:
+	    - On the left, similar to Fig 3a, we plot `Edge probabilities`; from the `README.txt` file of the original code (https://bml.molgen.mpg.de/) "[this figure shows] the evolutionary probabilities and departures from independence (multiplicative for P(g), additive for logP(g)) for each pair of genes that had an edge between them in the inferred Bayes net. Each edge is associated with 4 rows, two for the probability of each gene being mutated all by itself, a third row for the pair of genes being mutated and a fourth for the estimate in the absence of correlation for the mutation probabilities." We color the probability of each gene by itself in red, the pair in blue and the estimate in the absence of correlation in gray.
+        - On the right, similar to Fig 3b in Misra et al. 2014, we plot `Tree_OBS_Probabilities`: "the evolutionary probabilities for the top ordered genes during OBS [ordering-based search] for each bootstrap replicate using the tree based search. Each row gives the probability for a given gene being mutated and all other genes being normal."
+
   <!-- * Observed genotype transitions (counts): if you choose to *Sample for observed genotype transitions* (under ```Advanced options and CPMs to use```), for models that return a transition rate matrix (CBN, H-ESBCN, MHN), we obtain the observed sampled of genotypes by simulating sampling from the continuous-time Markov chain; this provides also observed transition counts between genotypes. -->
   <!-- See remove_note_sogt_1 -->
 
