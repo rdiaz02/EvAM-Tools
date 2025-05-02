@@ -2310,15 +2310,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         gsub("H-ESBCN", "HESBCN", input$cpm2show, fixed = TRUE)
     }),  900)
 
-    ## ## No delay showing plots. 
-    ## Here is where we output the upper row of plots: the DAGs of
-    ## restrictions, or the MHN matrix, or the HyperTraPS matrix.
+    ## ## No delay showing plots.
     ## plot2show <- reactive({
     ##     gsub("H-ESBCN", "HESBCN", input$cpm2show, fixed = TRUE)
     ##     input$cpm2show
     ## })
 
-    
+
+    ## Here is where we output the upper row of plots: the DAGs of
+    ## restrictions, or the MHN matrix, or the HyperTraPS matrix.
     output$sims <- renderUI({
         if ((length(names(all_cpm_out)) > 0) && (!is.null(input$select_cpm))) {
             tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
