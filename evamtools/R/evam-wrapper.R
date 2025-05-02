@@ -1102,8 +1102,8 @@ parent_set_from_edges <- function(edges) {
 # uuu <-  runif((2^20) * (2^20))
 
 # ## Yes, there are no memory limits in the machines
-# ## install.packages("devtools", dependencies = TRUE)
-# ##devtools::install_github("krlmlr/ulimit")
+# ## install.packages("remotes", dependencies = TRUE)
+# ##remotes::install_github("krlmlr/ulimit")
 # library(ulimit)
 # ulimit::memory_limit()
 

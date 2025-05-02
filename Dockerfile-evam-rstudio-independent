@@ -65,23 +65,23 @@ RUN R -e "install.packages('R.utils')"
 RUN R -e "install.packages('plotly')"
 RUN R -e "install.packages('magrittr')"
 RUN R -e "BiocManager::install('Rgraphviz')"
-RUN R -e "install.packages('devtools')"
+RUN R -e "install.packages('remotes')"
 RUN R -e "install.packages('igraph')"
 RUN R -e "BiocManager::install('OncoSimulR')"
 ## Force devel version
 ## RUN R -e "BiocManager::install(version = '3.20', ask = FALSE)"
 ## RUN R -e "BiocManager::install('OncoSimulR', version = 'devel', ask = FALSE)"
 RUN R -e "install.packages('remotes')"
-RUN R -e "library(devtools);devtools::install_github('phillipnicol/OncoBN')"
+RUN R -e "library(remotes);remotes::install_github('phillipnicol/OncoBN')"
 RUN R -e "install.packages('prompter')"
 RUN R -e "install.packages('shinyBS')"
 RUN R -e "install.packages('tippy')"
 
 RUN R -e "BiocManager::install('ggtree')"
 ## HyperTraps-ct version https://github.com/StochasticBiology/hypertraps-ct/commits/bioconductor/ dcb94e1
-RUN R -e "devtools::install_github('https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor')"
+RUN R -e "remotes::install_github('StochasticBiology/hypertraps-ct/tree/bioconductor')"
 ## BML version https://github.com/Deschain/BML 50e8793
-RUN R -e "devtools::install_github('https://github.com/Deschain/BML')"
+RUN R -e "remotes::install_github('Deschain/BML')"
 
 RUN mkdir -p /app/Sources/
 
