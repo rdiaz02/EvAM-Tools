@@ -365,7 +365,10 @@ generate_sample_from_dag <- function(data, parent_set, noise = 0, N = 10000,
 }
 
 create_tabular_data <- function(data) {
-    available_methods <- c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN", "HyperTraPS", "BML")
+  available_methods <- c("OT", "OncoBN", "CBN", "MHN", "HESBCN", "MCCBN",
+                         "HyperTraPS"
+                         ##, "BML" ## Nope, BML is not here
+                         )
     attr_to_make_tabular <- c("trans_mat", "trans_rate_mat",
                               "predicted_genotype_freqs"
                               )
@@ -400,13 +403,10 @@ create_tabular_data <- function(data) {
                     }
                 }
             }
-            ## If BML is the only method, the next fails
-            if (method != "BML") {
             all_counts <-
                 data.frame(Index = standard_rank_genots_1(all_counts$Genotype),
                            all_counts)
             tabular_data[[attr]] <- all_counts[order(all_counts$Index), ]
-            }
 
         } else if (attr %in% c("trans_rate_mat",
                                ## "obs_genotype_transitions",
@@ -420,7 +420,8 @@ create_tabular_data <- function(data) {
                              MCCBN = numeric(), 
                              MHN = numeric(),
                              HyperTraPS = numeric(),
-                             BML = numeric(),
+                       ## No, BML is never here
+                       ## BML = numeric(),
                              stringsAsFactors = FALSE) 
 
             for (method in available_methods){
