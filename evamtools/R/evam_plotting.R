@@ -936,3 +936,28 @@ plot_genotype_counts_plly <- function(data) {
 ##    , main = method)
 
 
+
+
+## list with named components Tree_OBS_probabilities and
+##      EdgeProbabilities -> boxplots like Fig. 3 a and b
+##      in Misra
+plot_BML <- function(x) {
+  dataA <- as.data.frame(t(x$EdgeProbabilities))
+  cnA <- colnames(dataA)
+  dataA <- dataA[, rev(1:ncol(dataA))]
+  colnames(dataA) <- cnA[rev(1:ncol(dataA))]
+
+  dataB <- as.data.frame(t(x$Tree_OBS_Probabilities))
+  cnB <- colnames(dataB)
+  dataB <- dataB[, rev(1:ncol(dataB))]
+  colnames(dataB) <- cnB[rev(1:ncol(dataB))]
+
+  op <- par(mfrow = c(1, 2), las = 1, oma = c(1, 5, 3, 1))
+
+  boxplot(dataA, horizontal = TRUE, col = c("grey", "blue", "red", "red"),
+          main = expression(italic("log(P)")))
+
+  boxplot(dataB, horizontal = TRUE, col = c("red"),
+          main = expression(italic("P(g)")))
+  par(op)
+}
