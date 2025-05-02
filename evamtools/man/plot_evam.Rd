@@ -1,6 +1,7 @@
 \name{plot_evam}
 \alias{plot_evam}
 \alias{plot_CPMs}
+\alias{plot_BML_all}
 \title{Plot results from EvAMs (CPMs)}
 \description{Plots fitted EvAMs (CPMs), both fitted model and custom
   plots for transition rates and transition probabilities.}
@@ -28,6 +29,9 @@ plot_CPMs(
   top_paths = NULL
 )
 
+## This is a temporary kludge
+
+plot_BML_all(x)
 
 }
 \arguments{
@@ -70,6 +74,8 @@ will plot all paths. See below, Description, for details about
 relevance. With many genes, and particularly for MHN (or other methods,
 when there are no restrictions in the order of accumulation of
 mutations), using NULL can lead to a very long time to plot.}
+
+\item{x}{An object that contains the output from runs that used BML.}
 }
 
 \value{
@@ -99,7 +105,7 @@ In the bottom row plots, non-observed genotypes are shown in light
 green, to differentiate them from the observed genotypes (shown in orange).
 
 
-
+For BML, we are using, for the moment, a temporary kludge.
 
 
 
@@ -229,4 +235,23 @@ plot_evam(out_AND_OR_XOR, methods = c("MHN", "HESBCN"),
 plot_evam(out_AND_OR_XOR, methods = c("MHN", "HESBCN"),
           plot_type = "trans_mat", label_type="genotype"
           , top_paths=3)
+
+
+## Three BML examples
+out_B1 <- evam(dB_c1,
+               methods = c("BML"),
+             bml_opts = list(ntree = 3, rep = 7))
+
+out_B_nb <- evam(dB_c1,
+                 methods = c("BML"),
+                bml_opts = list(ntree = 3, rep = 0))
+
+out_B_OT <- evam(dB_c1,
+                 methods = c("BML", "OT"),
+              bml_opts = list(ntree = 3, rep = 7))
+
+plot_BML_all(out_B1)
+plot_BML_all(out_B_nb)
+plot_BML_all(out_B_OT)
+
 }

@@ -50,6 +50,7 @@ Imports: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree
     , relations
     , hypertrapsct
     , BML
+    , grid, gridExtra, gridGraphics
 Suggests: testthat (>= 3.0.0)
 Enhances: mccbn
 Config/testthat/parallel: true

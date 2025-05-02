@@ -975,3 +975,29 @@ plot_BML_dot <- function(x) {
     img     <- png::readPNG(raw_png)
     grid::grid.raster(img)
 }
+
+## Single plot for BML
+## Not great: it is not fast and you see the rendering of each one
+## Work on it later.
+plot_BML_all <- function(x) {
+    grid::grid.newpage()
+    plot_BML_dot(x$BML_output)
+    dot_grob <- grid::grid.grab()
+
+    fig3_grob <- NULL
+    if (x$BML_bootstrap) {
+        grid.newpage()
+        capture.output(gridGraphics::grid.echo(function() plot_BML_Fig3(x$BML_output$bootstrap)))
+        fig3_grob <- grid::grid.grab()
+        grid::grid.newpage()
+        gridExtra::grid.arrange(dot_grob, fig3_grob,
+                                ncol = 1,
+                                nrow = 2,
+                                heights = c(0.3, 0.8),
+                                padding = unit(2, "lines")
+                                )
+    } else {
+        grid::grid.newpage()
+        grid::grid.draw(dot_grob)
+    }
+}

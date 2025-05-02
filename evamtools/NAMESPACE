@@ -78,3 +78,7 @@ importFrom("relations", "as.relation",
 importFrom("hypertrapsct", "HyperTraPS")
 
 importFrom("utils", "combn")
+
+importFrom("grid", "grid.newpage", "grid.grab", "grid.draw")
+importFrom("gridGraphics", "grid.echo")
+importFrom("gridExtra", "grid.arrange")
