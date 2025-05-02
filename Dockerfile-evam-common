@@ -1,4 +1,4 @@
-FROM rocker/rstudio:4.4.3
+FROM rocker/rstudio:4.5.0
 
 ## Taggin of this file: R-version_evamtools-version
 
