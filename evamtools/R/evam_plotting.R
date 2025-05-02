@@ -942,7 +942,7 @@ plot_genotype_counts_plly <- function(data) {
 ##      EdgeProbabilities -> boxplots like Fig. 3 a and b
 ##      in Misra
 plot_BML <- function(x) {
-  dataA <- as.data.frame(t(x$EdgeProbabilities))
+  dataA <- as.data.frame(t(log(x$EdgeProbabilities)))
   cnA <- colnames(dataA)
   dataA <- dataA[, rev(1:ncol(dataA))]
   colnames(dataA) <- cnA[rev(1:ncol(dataA))]
