@@ -22,11 +22,14 @@
   * [Dockerfiles](#dockerfiles)
   * [evamtools](#evamtools)
 - [References](#references)
+  * [Overview paper on CPMs and EvAMs](#overview-paper-on-cpms-and-evams)
   * [OT](#ot)
   * [CBN and MCCBN](#cbn-and-mccbn)
   * [MHN](#mhn)
   * [H-ESBCN (PMCE)](#h-esbcn-pmce)
   * [OncoBN (DBN)](#oncobn-dbn)
+  * [HyperTraPS-CT](#hypertraps-ct)
+  * [BML](#bml)
   * [Conditional prediction of genotypes and probabilities of paths from CPMs](#conditional-prediction-of-genotypes-and-probabilities-of-paths-from-cpms)
 - [Additional documentation](#additional-documentation)
 - [Citing EvAM-Tools](#citing-evam-tools)
@@ -38,7 +41,7 @@ Tools for evolutionary accumulation, or event accumulation, models. We use code 
 
 We provide an R package, evamtools, that can also launch a GUI as a Shiny (https://shiny.rstudio.com/) web app (running on https://www.iib.uam.es/evamtools/) that allows you to:
 
-  * Run state-of-the-art CPM methods, including Conjuntive Bayesian Networks (CBN ---and their MC-CBN version---), Oncogenetic trees (OT), Mutual Hazard Networks (MHN), Hidden Extended Suppes-Bayes Causal Networks (H-ESBCNs ---PMCE---), and Disjunctive Bayesian Networks (DBN, from the OncoBN package) with a single function call.
+  * Run state-of-the-art CPM methods, including Conjuntive Bayesian Networks (CBN ---and their MC-CBN version---), Oncogenetic trees (OT), Mutual Hazard Networks (MHN), Hidden Extended Suppes-Bayes Causal Networks (H-ESBCNs ---PMCE---), Disjunctive Bayesian Networks (DBN, from the OncoBN package), Hypercubic transition path sampling (HyperTraPS-CT), and Bayesian Mutational Landscape (BML), with a single function call.
   * From the fitted models, represent, graphically, the fitted models (DAGs of restrictions or matrix of hazards, as appropriate), the transition matrices and transition rate matrices (where appropriate) between genotypes and show frequencies of genotypes sampled from the fitted models.
   * Using the shiny app, easily visualize the effects of changes in genotype composition on the fitted models by entering user-defined cross-sectional data using a GUI.
 
@@ -105,7 +108,7 @@ Furthermore, note that in all cases, when data are analyzed, in addition to retu
 
 ### Copyright and origin of files under evamtools/R ###
 
-- All files under evamtools/R are copyright Pablo Herrera Nieto and Ramon Diaz-Uriarte (and released under the GNU Affero General Public License (AGPL) v3 license) except for the following:
+- All files under evamtools/R are copyright Pablo Herrera Nieto, Ramon Diaz-Uriarte, and Javier Pérez de Lema Díez (and released under the GNU Affero General Public License (AGPL) v3 license) except for the following:
 
 - File HESBCN__import.hesbcn.R:
    This file contains function import.hesbcn (with a minor modification to return "Best Lambdas").
@@ -208,7 +211,15 @@ You can also build your own Docker image and you might want to run the Shiny app
 
   * Install OncoBN
     - OncoBN is available from https://github.com/phillipnicol/OncoBN
-    - But this should work: start R, install the devtools package if you don't have it, and then issue `devtools::install_github("phillipnicol/OncoBN")`.
+    - But this should work: start R, install the remotes package if you don't have it, and then issue `remotes::install_github("phillipnicol/OncoBN")`.
+
+  *	Install HyperTraPS-CT
+    - HyperTraPS-CT is available from https://github.com/StochasticBiology/hypertraps-ct . We are using the bioconductor branch.
+	- This is what we do: start R, install the remotes package if you don't have it, and then issue `remotes::install_github("StochasticBiology/hypertraps-ct/tree/bioconductor")`
+
+  *	Install BML
+    - An R wrapper for BML is available from https://github.com/Deschain/BML
+	- This is what we do: start R, install the remotes package if you don't have it, and then issue `remotes::install_github("Deschain/BML")`
 
   * Install MC-CBN: this is optional.
     - Installing MC-CBN used to be complicated, because it required old versions of Boost (see https://github.com/cbg-ethz/MC-CBN/issues/5). This is no longer the case (see github issue) as of 2022-12-12, but MC-CBN is optional for EvAM-Tools. Of course, if you do not have MC-CBN, you will not be able to run MC-CBN. (MC-CBN is included in the methods available both from the web app and the Docker images).
@@ -219,7 +230,7 @@ You can also build your own Docker image and you might want to run the Shiny app
 
   * Install the evamtools package
      - Make sure you have the required dependencies and imports, as listed in the DESCRIPTION file: igraph, OncoSimulR, stringr, Matrix, parallel, Oncotree , gtools , plot.matrix , DT, shinyjs, shiny, RhpcBLASctl, Rlinsolve, fastmatrix, graph, Rgraphviz, R.utils.
-         - Note that we list, as imports, OncoBN, mccbn. You need those (from above).
+         - Note that we list, as imports, OncoBN, hypertracpst and BML. You need those (from above). Under Enhances we list mccbn: install it if you want to use it (see above).
      - Build (R CMD build evamtools) and install (R CMD INSTALL evamtools_x.y.z.tar.gz, with x.y.z replaced by the current version number). File `build-test.sh` builds, tests, and installs the package (and takes care of the version number).
 
 	   Testing is, by default, parallelized and will use all CPUs except 1 (up to 20, the number of test files): the package includes over 1400 tests, with a test coverage of more than 90%. If you want to use fewer CPUs modify variable `TESTTHAT_CPUS` in script `build-test.sh` (see also https://testthat.r-lib.org/articles/parallel.html).
@@ -318,6 +329,12 @@ The R package itself with standard organization. Directories and files under ins
 
 ## References ##
 
+### Overview paper on CPMs and EvAMs ###
+
+- Diaz-Uriarte, R., & Johnston, I. G. (2025). A picture guide to cancer progression and evolutionary accumulation models: Systematic critique, plausible interpretations, and alternative uses. Ieee Access, 13, 62306–62340. https://doi.org/10.1109/ACCESS.2025.3558392
+
+
+
 ### OT ###
 
 
@@ -378,6 +395,19 @@ The R package itself with standard organization. Directories and files under ins
   1027. http://dx.doi.org/10.1002/cso2.1027
 
 
+### HyperTraPS-CT ###
+
+- Aga, O. N. L., Brun, M., Dauda, K. A., Diaz-Uriarte, R., Giannakis,
+  K., & Johnston, I. G. (2024). Hypertraps-ct: Inference and prediction
+  for accumulation pathways with flexible data and model structures.
+  Plos Computational Biology, 20(9), e1012393.
+  https://doi.org/10.1371/journal.pcbi.1012393
+
+
+
+### BML ###
+
+- Misra, N., Szczurek, E., & Vingron, M. (2014). Inferring the paths of somatic evolution in cancer. Bioinformatics (Oxford, England), 30(17), 2456–2463. https://doi.org/10.1093/bioinformatics/btu319
 
 
 ### Conditional prediction of genotypes and probabilities of paths from CPMs ###
