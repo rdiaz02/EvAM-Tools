@@ -1,5 +1,7 @@
 <center><h1>EvAM-Tools</h1></center>
 
+
+
 &nbsp;
 ****
 #### Table of contents <a id="evamtools"></a>
@@ -19,8 +21,8 @@
 <br>&nbsp;&nbsp;- [Default options and default CPMs run](#cpms2run)
 <br>&nbsp;&nbsp;- [References and related repositories](#refs)
 - [Where is the code? Terms of use. Citing. Copyright](#code)
-<br>&nbsp;&nbsp;- [Authors, contact and bug reports](#authors) 
-<br>&nbsp;&nbsp;- [Citing EvAM-Tools](#citation) 
+<br>&nbsp;&nbsp;- [Authors, contact and bug reports](#authors)
+<br>&nbsp;&nbsp;- [Citing EvAM-Tools](#citation)
 - [Funding](#funding)
 - [Cookies](#cookies)
 
@@ -29,7 +31,7 @@
 ## EvAM-Tools <a id="evamtools"></a>
 ****
 
-```EvAM-Tools``` is an R package and Shiny web app that provides tools for evolutionary accumulation, or event accumulation, models. We use code from  "Cancer Progression Models" (CPM) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost). ```EvAM-Tools``` is  also available as an R package (see https://github.com/rdiaz02/EvAM-Tools).
+EvAM-Tools is an R package and Shiny web app that provides tools for evolutionary accumulation, or event accumulation, models. We use code from  "Cancer Progression Models" (CPM) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost). EvAM-Tools is  also available as an R package (see https://github.com/rdiaz02/EvAM-Tools).
 
 
 This web interface provides a GUI to the package and focuses on allowing fast construction, manipulation, and exploration of CPM models, and making it easy to gain an intuitive understanding of what these methods infer from different data sets as well as what kind of data are to be expected under these models. You can analyze your data, create cross-sectional data from scratch (by giving genotype frequencies), or generate synthetic data under different CPMs. You can compare results from different methods/models, as well as experiment and understand the consequences of changes in the input data on the returned inferences. You can also examine how a given method performs when data have been generated under another (or its own) model. Additional examples of use are discussed in  https://github.com/rdiaz02/EvAM-Tools#some-examples-of-use and in the ["EvAM-Tools: examples" additional documentation file](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf).
@@ -45,7 +47,7 @@ This web interface provides a GUI to the package and focuses on allowing fast co
 </center>
 
 &nbsp;
-### A two-paragraph summary about _cross-sectional_ data and CPMs<a id="helpcsd"></a> 
+### A two-paragraph summary about _cross-sectional_ data and CPMs<a id="helpcsd"></a>
 ***
 
 In cross-sectional data a single sample is obtained from each subject or patient. That single sample represents the "observed genotype" of, for example, the tumor of that patient. Genotype can refer to single point mutations, insertions, deletions, or any other genetic modification. In this app, as is often done by CPM software, we store cross-sectional data in a matrix, where rows are patients or subjects, and columns are genes; the data is a 1 if the event was observed and 0 if it was not.
@@ -84,12 +86,12 @@ The web app encompasses, thus, different major functionalities and workflows, ma
 
 2. Exploration of the inferences that different CPM methods yield from manually constructed synthetic data.
 
-3. Construction of CPM models (DAGs with their rates/probabilities and MHN models) and simulation of synthetic data from them. 
+3. Construction of CPM models (DAGs with their rates/probabilities and MHN models) and simulation of synthetic data from them.
 
-    3.1. Examination of the consequences of different CPM models and their parameters on the simulated data. 
+    3.1. Examination of the consequences of different CPM models and their parameters on the simulated data.
 
     3.2. Analysis of data simulated under one model with methods that have different models (e.g., data simulated from CBN analyzed with OT and OncoBN).
-	
+
 	3.3. Analysis of data simulated under one model with manual modification of specific genotype frequencies prior to analyses (e.g., data simulated under CBN but where, prior to analysis, we remove all observations with the WT genotype and the genotype with all loci mutated).
 
 
@@ -123,7 +125,7 @@ To start using the web app, go first to the ```User input``` tab (on top of the 
         		&nbsp;
    - Generate cross-sectional data from CPM models. Follow these steps:
        1. Specify the CPM model first. You can use:
-	   
+
 	       1.1. Models that use DAGs to specify restrictions: OT, OncoBN (in both its conjunctive and disjunctive versions), CBN and H-ESBCN (H-ESBCN allows you to model AND, OR, and XOR dependency relationships). You will specify the DAG and the rates (CBN, H-ESBCN)/conditional probabilities (OT, OncoBN) of events conditional on their parents.<br/>
 
 		   1.2. MHN, that models inhibiting/facilitating relationships between genes using baseline hazard rates and multiplicative effects between genes (specified in the log-&Theta; matrix).
@@ -132,8 +134,8 @@ To start using the web app, go first to the ```User input``` tab (on top of the 
 	   &nbsp;
 
            Note that simulating data from CPMs allows you to get an intuitive feeling for what different CPM models and their parameters mean in terms of the genotype frequency data they produce.
-	   
-	   
+
+
 &nbsp;
 &nbsp;
 
@@ -150,7 +152,7 @@ To make it easier to play with the tool, we provide predefined cross-sectional d
 ***
 
 1. Change, if you want, the options under "Advanced options and CPMs to use" (on the right of the screen). These options include what CPM methods to use as well as parameters of the methods.
-2. Click on "Run evamtools". 
+2. Click on "Run evamtools".
 3.  Results will be shown in the ```Results``` tab.
 
 
@@ -180,32 +182,32 @@ The results include:
  &nbsp;
   * The fitted CPMs themselves, including the DAGs with their rates/conditional probabilities (depending on the model) and the MHN log-&Theta; matrix.
 	 &nbsp;
-	 
+
   * Predictions derived from the fitted models, including:
 	&nbsp;
     * Transition probabilities: conditional probability of transition to a genotype (obtained using competing exponentials from the transition rate matrix for all methods except OT and OncoBN). For OT and OncoBN this is actually an abuse of the untimed oncogenetic tree model; see the [Evamtools: methods' details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf) for details.
 
     * Transition rates: for models that provide them (CBN, H-ESBCN, MHN) transition rates of the continuous-time Markov chain that models the transition from one genotype to another. This option is not available for OT and OncoBN, as these do not return rates.
 
-	* Predicted genotype relative frequencies: the predicted genotype frequencies from the fitted models. 
+	* Predicted genotype relative frequencies: the predicted genotype frequencies from the fitted models.
 
 	* Sampled genotype counts: Counts, or absolute genotype frequencies obtained by generating a finite sample (of the size you chose) with the probabilities given by the predicted genotype frequencies. If you add noise, the sampled genotype counts include observational (e.g., genotyping) noise.
-	
+
   <!-- * Observed genotype transitions (counts): if you choose to *Sample for observed genotype transitions* (under ```Advanced options and CPMs to use```), for models that return a transition rate matrix (CBN, H-ESBCN, MHN), we obtain the observed sampled of genotypes by simulating sampling from the continuous-time Markov chain; this provides also observed transition counts between genotypes. -->
-	<!-- See remove_note_sogt_1 -->	
-	
-&nbsp;	
-	
+  <!-- See remove_note_sogt_1 -->
+
+&nbsp;
+
 The results are displayed using a combination of figures and tabular output. Specifically:
 
   * The first row of figures shows the fitted CPMs: DAGs with their rates/probabilities and MHN log-&Theta; matrix.
-	
+
      * The edges of the DAGs are annotated with the lambda (CBN, HESBCN),  weight (OT) or &theta; (OncoBN).
-		 
+
      * Remember: for DAGs, these are DAGs that have *genes (not genotypes) as nodes*. They represent the order restrictions of the events.
-	 
+
      * For MHN there is no DAG of restrictions; we show the fitted log-&Theta; matrix rounded to two decimal places. The diagonal entries are the log-baseline rates, and the off-diagonal the log of the multiplicative effects of the effector event (the columns) on the affected event (rows).
-		 
+
 	 * You can represent the results of all the fitted models or only of a subset (select those using "CPMs to show").
 &nbsp;&nbsp;&nbsp;&nbsp;
 
@@ -252,7 +254,7 @@ In https://github.com/rdiaz02/EvAM-Tools/tree/main/examples_for_upload there are
 ### Session timeouts, RAM and elapsed time execution limits, aborting a run<a id="limits"></a>
 ***
 
-* **Timeouts:** Inactive connections will timeout after 2 hours. The page will become gray, and if you refresh (e.g., F5 in most browsers) after this time, you will not get back your results, figures, etc, but start another session. 
+* **Timeouts:** Inactive connections will timeout after 2 hours. The page will become gray, and if you refresh (e.g., F5 in most browsers) after this time, you will not get back your results, figures, etc, but start another session.
 
 
 * **RAM and time limits:** Maximum RAM of any process is limited to 2 GB. Likewise, the analyses should be aborted after 1.5 hours of elapsed (not CPU ---we parallelize the runs) time. If you want to use the Shiny app without these limits, install a local copy. (To modify the time limit, change the value of variable EVAM_MAX_ELAPSED, in the definition of function "server", in file "server.R".  The RAM limit is imposed on the Docker containers we use; to remove it, run Docker without the memory limit.) Note: because of what we do to enforce these limits, running over limits might not be signalled by an explicit error, but rather by a graying out or a complete refresh of the session.
@@ -261,7 +263,7 @@ In https://github.com/rdiaz02/EvAM-Tools/tree/main/examples_for_upload there are
 
   To continue using EvAM-Tools you can try one or more of these:
 
-    - Force a refresh or reload of the page (e.g., "Ctrl + Shift + r", "Ctrl + F5"). 
+    - Force a refresh or reload of the page (e.g., "Ctrl + Shift + r", "Ctrl + F5").
 	- Close the browser, and open it again.
     - Start a new connection from a different web browser.
     - Start a new connection from an incognito session of the same web browser.
@@ -295,14 +297,17 @@ It depends on the number of genes or features and methods used. For six genes, a
 *  **Conjuntive Bayesian Networks (CBN):** This model generalizes the tree-based restriction of OT to a directed acyclic graph (DAG). A node can have multiple parents, and it denotes that all of the parents have to be present for the children to appear. Therefore, relationships are conjuntive (AND relationships between the parents). These are timed models, and the parameters of the models are rates given that all parents have been observed. We include both H-CBN as well as MC-CBN.
 
 *  **Hidden Extended Suppes-Bayes Causal Networks (H-ESBCN):** Somewhat similar to CBN, but it includes automatic detection of logical formulas AND, OR, and XOR. H-ESBCN is used by its authors as part of Progression Models of Cancer Evolution (PMCE). Like CBN, it returns rates.
-  
+
 *  **OncoBN**: Similar to OT, in the sense of being an untimed oncogenetic model, but allows both AND (the conjunctive or CBN model) and OR relationships (the disjunctive or DBN model).
 
-  
+
 *  **Mutual Hazard networks (MHN):** With MHN dependencies are not deterministic and events can make other events more like or less likely (inhibiting influence). The fitted parameters are multiplicative hazards that represent how one event influences other events.
 
+*  **HyperTraPS-CT:** HyperTraPS-CT is also a stochastic dependencies model, like MHN, where events can have an inhibiting or promoting effect on other events. HyperTraPS-CT allows modelling in continuous or discrete time and model structures can include pairwise interactions between events, as well as higher-order interactions.
 
-For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf).
+*  **Bayesian Mutation Landscape (BML):** tries to reconstruct evolutionary progression paths and ancestral genotypes. It can highlight epistatic interactions between genes.
+
+For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf); see also the review paper Diaz-Uriarte, R., & Johnston, I. G. (2025), https://doi.org/10.1109/ACCESS.2025.3558392 .
 
 &nbsp;
 
@@ -321,6 +326,13 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 ****
 ### References and related repositories<a id="refs"></a>
 ***
+
+##### Overview paper of CPMs and EvAMs ####
+
+- Diaz-Uriarte, R., & Johnston, I. G. (2025). A picture guide to cancer progression and evolutionary accumulation models: Systematic critique, plausible interpretations, and alternative uses. Ieee Access, 13, 62306–62340. https://doi.org/10.1109/ACCESS.2025.3558392
+
+&nbsp;
+
 
 ##### OT ####
 
@@ -347,10 +359,10 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
   2809–2815. http://dx.doi.org/10.1093/bioinformatics/btp505
 
 
-- Gerstung, M., Eriksson, N., Lin, J., Vogelstein, B., & Beerenwinkel, N. (2011). The Temporal Order of Genetic and Pathway Alterations in Tumorigenesis. PLoS ONE, 6(11), 27136. http://dx.doi.org/10.1371/journal.pone.0027136 
+- Gerstung, M., Eriksson, N., Lin, J., Vogelstein, B., & Beerenwinkel, N. (2011). The Temporal Order of Genetic and Pathway Alterations in Tumorigenesis. PLoS ONE, 6(11), 27136. http://dx.doi.org/10.1371/journal.pone.0027136
 
-- Montazeri, H., Kuipers, J., Kouyos, R., B\"oni, J\"urg, Yerly, S., Klimkait, T., Aubert, V., … (2016). Large-scale inference of conjunctive Bayesian networks. Bioinformatics, 32(17), 727–735. http://dx.doi.org/10.1093/bioinformatics/btw459 
-  
+- Montazeri, H., Kuipers, J., Kouyos, R., B\"oni, J\"urg, Yerly, S., Klimkait, T., Aubert, V., … (2016). Large-scale inference of conjunctive Bayesian networks. Bioinformatics, 32(17), 727–735. http://dx.doi.org/10.1093/bioinformatics/btw459
+
 - GitHub repository for MC-CBN: https://github.com/cbg-ethz/MC-CBN
 
 - Source code for h/ct-cbn:  https://bsse.ethz.ch/cbg/software/ct-cbn.html
@@ -361,16 +373,16 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 ##### MHN ####
 
 
-- Schill, R., Solbrig, S., Wettig, T., & Spang, R. (2020). Modelling cancer progression using Mutual Hazard Networks. Bioinformatics, 36(1), 241–249. http://dx.doi.org/10.1093/bioinformatics/btz513 
+- Schill, R., Solbrig, S., Wettig, T., & Spang, R. (2020). Modelling cancer progression using Mutual Hazard Networks. Bioinformatics, 36(1), 241–249. http://dx.doi.org/10.1093/bioinformatics/btz513
 
-- GitHub repository: https://github.com/RudiSchill/MHN  
+- GitHub repository: https://github.com/RudiSchill/MHN
 
 &nbsp;
 
 ##### H-ESBCN (PMCE) ####
 
 
-- Angaroni, F., Chen, K., Damiani, C., Caravagna, G., Graudenzi, A., & Ramazzotti, D. (2021). PMCE: efficient inference of expressive models of cancer evolution with high prognostic power. Bioinformatics, 38(3), 754–762. http://dx.doi.org/10.1093/bioinformatics/btab717 
+- Angaroni, F., Chen, K., Damiani, C., Caravagna, G., Graudenzi, A., & Ramazzotti, D. (2021). PMCE: efficient inference of expressive models of cancer evolution with high prognostic power. Bioinformatics, 38(3), 754–762. http://dx.doi.org/10.1093/bioinformatics/btab717
 
 
 -  Repositories and terminology: we will often refer to H-ESBCN, as that is the program we use, as shown here: https://github.com/danro9685/HESBCN. H-ESBCN is part of the PMCE procedure: https://github.com/BIMIB-DISCo/PMCE.
@@ -379,21 +391,46 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 
 ##### OncoBN (DBN) ####
 
-- Nicol, P. B., Coombes, K. R., Deaver, C., Chkrebtii, O., Paul, S., Toland, A. E., & Asiaee, A. (2021). Oncogenetic network estimation with disjunctive Bayesian networks. Computational and Systems Oncology, 1(2), 1027. http://dx.doi.org/10.1002/cso2.1027 
+- Nicol, P. B., Coombes, K. R., Deaver, C., Chkrebtii, O., Paul, S., Toland, A. E., & Asiaee, A. (2021). Oncogenetic network estimation with disjunctive Bayesian networks. Computational and Systems Oncology, 1(2), 1027. http://dx.doi.org/10.1002/cso2.1027
 
 - GitHub repository: https://github.com/phillipnicol/OncoBN
 
 &nbsp;
 
-##### Conditional prediction of genotypes and probabilities of paths from CPMs ####
 
-- Hosseini, S., Diaz-Uriarte, R., Markowetz, F., & Beerenwinkel, N. (2019). Estimating the predictability of cancer evolution. Bioinformatics, 35(14), 389–397. http://dx.doi.org/10.1093/bioinformatics/btz332 
+##### HyperTraPS-CT ####
 
-- Diaz-Uriarte, R., & Vasallo, C. (2019). Every which way? On predicting tumor evolution using cancer progression models. PLOS Computational Biology, 15(8), 1007246. http://dx.doi.org/10.1371/journal.pcbi.1007246 
+- Aga, O. N. L., Brun, M., Dauda, K. A., Diaz-Uriarte, R., Giannakis,
+  K., & Johnston, I. G. (2024). Hypertraps-ct: Inference and prediction
+  for accumulation pathways with flexible data and model structures.
+  Plos Computational Biology, 20(9), e1012393.
+  https://doi.org/10.1371/journal.pcbi.1012393
 
-- Diaz-Colunga, J., & Diaz-Uriarte, R. (2021). Conditional prediction of consecutive tumor evolution using cancer progression models: What genotype comes next? PLOS Computational Biology, 17(12), 1009055. http://dx.doi.org/10.1371/journal.pcbi.1009055 
+- GitHub repository: https://github.com/StochasticBiology/hypertraps-ct
 
 &nbsp;
+
+##### BML ####
+
+- Misra, N., Szczurek, E., & Vingron, M. (2014). Inferring the paths of somatic evolution in cancer. Bioinformatics (Oxford, England), 30(17), 2456–2463. https://doi.org/10.1093/bioinformatics/btu319
+
+- Source code: https://bml.molgen.mpg.de/
+- An R wrapper to the code (the one we use): https://github.com/Deschain/BML
+
+
+&nbsp;
+
+##### Conditional prediction of genotypes and probabilities of paths from CPMs ####
+
+- Hosseini, S., Diaz-Uriarte, R., Markowetz, F., & Beerenwinkel, N. (2019). Estimating the predictability of cancer evolution. Bioinformatics, 35(14), 389–397. http://dx.doi.org/10.1093/bioinformatics/btz332
+
+- Diaz-Uriarte, R., & Vasallo, C. (2019). Every which way? On predicting tumor evolution using cancer progression models. PLOS Computational Biology, 15(8), 1007246. http://dx.doi.org/10.1371/journal.pcbi.1007246
+
+- Diaz-Colunga, J., & Diaz-Uriarte, R. (2021). Conditional prediction of consecutive tumor evolution using cancer progression models: What genotype comes next? PLOS Computational Biology, 17(12), 1009055. http://dx.doi.org/10.1371/journal.pcbi.1009055
+
+&nbsp;
+
+
 
 
 ****
@@ -403,14 +440,14 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 The complete source code for the package and the shiny app, as well information about how to run the shiny app locally, is available from https://github.com/rdiaz02/EvAM-Tools.
 
 
-This app is free to use, but please **cite it** if you use it; see [Citing EvAM-Tools](#citation). Confidentiality and security: if you have confidential data, you might want not to upload it here, and instead install the package locally. 
+This app is free to use, but please **cite it** if you use it; see [Citing EvAM-Tools](#citation). Confidentiality and security: if you have confidential data, you might want not to upload it here, and instead install the package locally.
 
 
 
 &nbsp;
 ### Authors, contact and bug reports<a id="authors"></a>
 
-Most of the files for this app (and the package) are copyright Ramon Diaz-Uriarte and Pablo Herrera-Nieto (and released under the Affero GPL v3 license ---https://www.gnu.org/licenses/agpl-3.0.html) except some files for HESBCN, MHN, and the CBN code; see full details in https://github.com/rdiaz02/EvAM-Tools#copyright-and-origin-of-files.
+Most of the files for this app (and the package) are copyright Ramon Diaz-Uriarte, Pablo Herrera-Nieto, and Javier Pérez de Lema Díez (and released under the Affero GPL v3 license — https://www.gnu.org/licenses/agpl-3.0.html ) except some files for HESBCN, MHN, and the CBN code; see full details in https://github.com/rdiaz02/EvAM-Tools#copyright-and-origin-of-files.
 
 
 For bug reports, please, submit them using the repository https://github.com/rdiaz02/EvAM-Tools.
@@ -423,9 +460,9 @@ If you use EvAM-Tools (the package or the web app), please **cite** the Bioinfor
 
    - Diaz-Uriarte, R & Herrera-Nieto, P. 2022. EvAM-Tools: tools for evolutionary accumulation and cancer progression models. _Bioinformatics_.  https://doi.org/10.1093/bioinformatics/btac710 .
 
- 
-In addition, if possible, also provide a link to the web app itself, https://iib.uam.es/evamtools  (if you used the web app) or the code repository, https://github.com/rdiaz02/EvAM-Tools. 
- 
+
+In addition, if possible, also provide a link to the web app itself, https://iib.uam.es/evamtools  (if you used the web app) or the code repository, https://github.com/rdiaz02/EvAM-Tools.
+
 
 
 &nbsp;
@@ -443,5 +480,3 @@ Supported by grant PID2019-111256RB-I00 funded by MCIN/AEI/10.13039/501100011033
 ## Cookies<a id="cookies"></a>
 ***
 We use cookies to keep "sticky sessions" to the pool of servers (load balanced using [HAproxy](https://www.haproxy.org/)). By using the app, you confirm you are OK with this.
-
-
