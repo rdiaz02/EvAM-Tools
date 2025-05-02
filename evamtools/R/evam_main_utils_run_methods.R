@@ -180,9 +180,11 @@ run_HyperTraPS <- function(x, opts) {
 
 
 run_BML <- function(x, opts) {
-    if (opts$rep == 0) {
-        opts$rep <- 1
-    } 
+  ## FIXME: rm when settled
+  ## FIXME: why do this? Just to obtain EdgeProbabilities?
+  ## if (opts$rep == 0) {
+  ##   opts$rep <- 1
+  ## }
     
     time_out <- system.time({
         opts <- c(list(dataset = x), opts)
@@ -208,27 +210,40 @@ run_BML <- function(x, opts) {
 
     out$adjacency_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
     out$trans_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
-    out$td_trans_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
-    out$trans_rate_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
+  ## out$td_trans_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
+  ## Misra does not give a transition rate matrix
+  ## out$trans_rate_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
  
     for (i in seq_len(nrow(out$adjacency_mat))) {
         for (j in seq_len(ncol(out$adjacency_mat))) {
             if (out$adjacency_mat[i, j] == 0) {
                 out$trans_mat[i, j] <- 0
-                out$trans_rate_mat[i, j] <- 0
+        ## out$trans_rate_mat[i, j] <- 0
             } else {
                 name = colnames(out$adjacency_mat)[j]
 
                 idx <- which(out$DAG$labels == name)
-                out$trans_rate_mat[i, j] = out$DAG$probs[idx]
-                if (name %in% rownames(out$bootstrap$EdgeProbabilities)) {
-                    out$trans_mat[i, j] <- mean(out$bootstrap$EdgeProbabilities[name, ])
-                    # out$trans_mat[i, j] <- 1
-                }
+        ## The next is most likely right
+        ## the probs come from the BML code that
+        ## already divides by max, max2 and max3.
+        ## But the sum for all descendants can sometimes be > 1.
+        ## Makes no sense but this happens with the original
+        ## software too. I think those P(g)/m_k are for
+        ## coloring the figures; one is not supposed to use
+        ## the P(g) directly from these figures.
+        out$trans_mat[i, j] = out$DAG$probs[idx]
+        ## FIXME: rm later
+        ## This makes no sense: EdgeProbabilites are only for pairs
+        ## and singletons
+        ## if (name %in% rownames(out$bootstrap$EdgeProbabilities)) {
+        ##     out$trans_mat[i, j] <- mean(out$bootstrap$EdgeProbabilities[name, ])
+        ##     # out$trans_mat[i, j] <- 1
+        ## }
             }
         }
     }
 
+  ## This is done so that all predicted genotype frequencies are 0.
     genotype_names = colnames(x)
     combinations = c("WT", unlist(lapply(1:length(genotype_names), function(n) combn(genotype_names, n, FUN = function(x) paste(x, collapse = ", "))), use.names = FALSE))
     freqs = rep(0, length(combinations))
