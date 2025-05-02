@@ -965,7 +965,7 @@ plot_BML_Fig3 <- function(x) {
 
 
 ## x: the "BML_output" object -> a png
-## Trying to use the dot graph
+## Trying to use the dot graph. This is like their Fig. 2
 plot_BML_dot <- function(x) {
     dotfile <- tempfile(fileext = ".dot")
     BML::writeDotFile(x, dotfile)

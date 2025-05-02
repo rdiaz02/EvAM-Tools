@@ -41,12 +41,22 @@ This web interface provides a GUI to the package and focuses on allowing fast co
 
 <!-- You add/remove images by adding HTML code. The usual img block. But do not leave that commented code around or shiny might break. -->
 
+
+<span style="font-size: 1.15em;"><b>New as of May 2025:</b></span> We have added two new methods: <b>HyperTraPS-CT</b> and <b>BML</b>.
+
+&nbsp;
+
 <b>Funding:</b> Supported by grant PID2019-111256RB-I00 funded by MCIN/AEI/10.13039/501100011033 and Comunidad de Madrid's PEJ-2019-AI/BMD-13961 to R. Diaz-Uriarte.
 <center>
 <img src="micin-aei.png" alt="micin-aei logo" width=200>
 </center>
 
 &nbsp;
+
+
+&nbsp;
+
+
 ### A two-paragraph summary about _cross-sectional_ data and CPMs<a id="helpcsd"></a>
 ***
 
@@ -193,11 +203,6 @@ The results include:
 
 	* Sampled genotype counts: Counts, or absolute genotype frequencies obtained by generating a finite sample (of the size you chose) with the probabilities given by the predicted genotype frequencies. If you add noise, the sampled genotype counts include observational (e.g., genotyping) noise.
 
-
-     * For BML, if you used bootstrap, we show plots like Fig. 3a and 3b of Misra et al. 2014:
-	    - On the left, similar to Fig 3a, we plot `Edge probabilities`; from the `README.txt` file of the original code (https://bml.molgen.mpg.de/) "[this figure shows] the evolutionary probabilities and departures from independence (multiplicative for P(g), additive for logP(g)) for each pair of genes that had an edge between them in the inferred Bayes net. Each edge is associated with 4 rows, two for the probability of each gene being mutated all by itself, a third row for the pair of genes being mutated and a fourth for the estimate in the absence of correlation for the mutation probabilities." We color the probability of each gene by itself in red, the pair in blue and the estimate in the absence of correlation in gray.
-        - On the right, similar to Fig 3b in Misra et al. 2014, we plot `Tree_OBS_Probabilities`: "the evolutionary probabilities for the top ordered genes during OBS [ordering-based search] for each bootstrap replicate using the tree based search. Each row gives the probability for a given gene being mutated and all other genes being normal."
-
   <!-- * Observed genotype transitions (counts): if you choose to *Sample for observed genotype transitions* (under ```Advanced options and CPMs to use```), for models that return a transition rate matrix (CBN, H-ESBCN, MHN), we obtain the observed sampled of genotypes by simulating sampling from the continuous-time Markov chain; this provides also observed transition counts between genotypes. -->
   <!-- See remove_note_sogt_1 -->
 
@@ -214,9 +219,14 @@ The results are displayed using a combination of figures and tabular output. Spe
      * For MHN there is no DAG of restrictions; we show the fitted log-&Theta; matrix rounded to two decimal places. The diagonal entries are the log-baseline rates, and the off-diagonal the log of the multiplicative effects of the effector event (the columns) on the affected event (rows).
 
 	 * You can represent the results of all the fitted models or only of a subset (select those using "CPMs to show").
+
+     * For BML, we do not show DAGs of restrictions (nor matrices as for MHN and HyperTraPS), since BML does not return these. Instead, we show plots as in Fig. 2 of Misra et al., 2014. These show the most likely paths of progression. As explained in that paper (p. 2460, legend Fig. 2) "Color for a genotype <i>g</i> with <i>k</i> mutations is scaled according to its relative probability <i>P</i>(<i>g</i>)/<i>m<sub>k</sub></i> (decreasing from darker shade to light), where <i>m<sub>k</sub></i> is the maximum probability for a node with <i>k</i> mutations (Section 3)." [As explained in pp. 2456 and ff., <i>P</i>(<i>g</i>) is the probability "that a particular combination of mutations (denoted by genotype <i>g</i>) reaches fixation in a cell population that has evolved from a normal cell genotype and will eventually attain a tumor cell genotype. (...) [it is]  the evolutionary probability of genotype <i>g</i>.  <i>P</i>(<i>g</i>) equals the sum of path probabilities for every mutation path from the normal genotype that passes through <i>g</i> and ends as atumor genotype."]
+
+
 &nbsp;&nbsp;&nbsp;&nbsp;
 
-  * The second row of figures shows the predictions derived from the fitted models. These same predictions are also displayed in tabular output on the bottom right. On the left side panel ("Customize the visualization"), you choose what predictions you want to display.
+  * The second row of figures shows the predictions derived from the fitted models. These same predictions are also displayed in tabular output on the bottom right. On the left side panel ("Customize the visualization"), you choose what predictions you want to display.  Not all predictions are available for all methods (e.g., none of transition matrix, transition rate matrix, or predicted genotypes are available for BML; transition rate matrices are not available for OncoBN or OT).
+
 &nbsp;&nbsp;
 
   * The plots that show Transition probabilities and Transition rates (again, on the second row of figures) have *genotypes (not genes) as nodes*.
@@ -224,6 +234,12 @@ The results are displayed using a combination of figures and tabular output. Spe
     * These plots might include genotypes never observed in the sample; these are shown in light green.
     * For easier visualization, in very busy plots, instead of the Genotypes you might want to show the last gene (or event) mutated or gained; change this options under "Type of label".
     * (As visualizing the acquisition of mutations in a complex network can be challenging, for the transition probabilities/rates plots we use the representation of the hypergraph transition graph from HyperTraPS --- Greenbury et al., 2020. HyperTraPS: Inferring probabilistic patterns of trait acquisition in evolutionary and disease progression pathways. Cell systems, 10, 39–51, https://doi.org/10.1016/j.cels.2019.10.009)
+
+&nbsp;&nbsp;
+
+  * For BML, if you used bootstrap, we show plots like Fig. 3a and 3b of Misra et al. 2014:
+	  * On the left, similar to Fig 3a, we plot "Edge probabilities"; from the "README.txt" file of the original code (https://bml.molgen.mpg.de/) "[this figure shows] the evolutionary probabilities and departures from independence (multiplicative for P(g), additive for logP(g)) for each pair of genes that had an edge between them in the inferred Bayes net. Each edge is associated with 4 rows, two for the probability of each gene being mutated all by itself, a third row for the pair of genes being mutated and a fourth for the estimate in the absence of correlation for the mutation probabilities." We color the probability of each gene by itself in red, the pair in blue and the estimate in the absence of correlation in gray.
+	  * On the right, similar to Fig 3b in Misra et al. 2014, we plot "Tree_OBS_Probabilities": "the evolutionary probabilities for the top ordered genes during OBS [ordering-based search] for each bootstrap replicate using the tree based search. Each row gives the probability for a given gene being mutated and all other genes being normal."
 
 
 
