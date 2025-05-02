@@ -1,4 +1,5 @@
-## Copyright 2016, 2017, 2018, 2020, 2022 Ramon Diaz-Uriarte
+## Copyright 2016, 2017, 2018, 2020, 2022, 2025 Ramon Diaz-Uriarte,
+## Javier Pérez de Lema Díez
 
 ## This program is free software: you can redistribute it and/or modify it under
 ## the terms of the GNU Affero General Public License (AGPLv3.0) as published by

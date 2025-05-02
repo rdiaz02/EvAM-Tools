@@ -1,4 +1,5 @@
-## Copyright 2021, 2022 Pablo Herrera Nieto, Ramon Diaz-Uriarte
+## Copyright 2021, 2022, 2025 Pablo Herrera Nieto, Ramon Diaz-Uriarte,
+## Javier Pérez de Lema Díez
 
 ## This program is free software: you can redistribute it and/or modify it under
 ## the terms of the GNU Affero General Public License (AGPLv3.0) as published by

@@ -1,4 +1,5 @@
-- All files under evamtools/R are copyright Pablo Herrera Nieto and Ramon Diaz-Uriarte, except for the following:
+- All files under evamtools/R are copyright Pablo Herrera Nieto, Ramon Diaz-Uriarte,
+and Javier Pérez de Lema Díez, except for the following:
 
 - File HESBCN__import.hesbcn.R: 
    This file contains function import.hesbcn (with a minor modification to return "Best Lambdas").
@@ -41,7 +42,6 @@
   Authors of project: Hesam Montazeri, Susana Posada-Cespedes.
 
 - This information is also provided under evamtools/inst/COPYRIGHTS and in the header of the files themselves, as comments.
-
 
 - This repository (though not the files under the R package itself) includes ct-​cbn-0.1.04b, from https://bsse.ethz.ch/cbg/software/ct-cbn.html, whose authors are Niko Beerenwinkel, Moritz Gerstung, and Seth Sullivant. It is released under the GNU GPL ("either version 2 of the License, or (at your option) any later version").
 
