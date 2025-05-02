@@ -215,7 +215,7 @@ You can also build your own Docker image and you might want to run the Shiny app
 
   *	Install HyperTraPS-CT
     - HyperTraPS-CT is available from https://github.com/StochasticBiology/hypertraps-ct . We are using the bioconductor branch.
-	- This is what we do: start R, install the remotes package if you don't have it, and then issue `remotes::install_github("StochasticBiology/hypertraps-ct/tree/bioconductor")`
+	- This is what we do: start R, install the remotes package if you don't have it, and then issue `remotes::install_github("StochasticBiology/hypertraps-ct", ref = "bioconductor")`
 
   *	Install BML
     - An R wrapper for BML is available from https://github.com/Deschain/BML
