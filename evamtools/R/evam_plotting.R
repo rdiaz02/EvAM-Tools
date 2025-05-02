@@ -942,7 +942,7 @@ plot_genotype_counts_plly <- function(data) {
 ## list with named components Tree_OBS_probabilities and
 ##      EdgeProbabilities -> boxplots like Fig. 3 a and b
 ##      in Misra
-plot_BML <- function(x) {
+plot_BML_Fig3 <- function(x) {
   dataA <- as.data.frame(t(log(x$EdgeProbabilities)))
   cnA <- colnames(dataA)
   dataA <- dataA[, rev(1:ncol(dataA))]
@@ -961,4 +961,17 @@ plot_BML <- function(x) {
   boxplot(dataB, horizontal = TRUE, col = c("red"),
           main = expression(italic("P(g)")))
   par(op)
+}
+
+
+## x: the "BML_output" object -> a png
+## Trying to use the dot graph
+plot_BML_dot <- function(x) {
+    dotfile <- tempfile(fileext = ".dot")
+    BML::writeDotFile(x, dotfile)
+    con     <- pipe(sprintf("dot -Tpng %s", shQuote(dotfile)), "rb")
+    raw_png <- readBin(con, what="raw", n=5e6)
+    close(con)
+    img     <- png::readPNG(raw_png)
+    grid::grid.raster(img)
 }

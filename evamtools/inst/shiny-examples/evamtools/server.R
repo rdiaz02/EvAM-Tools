@@ -2256,7 +2256,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     output$dag_plot <- renderPlot({
         data2plot <- NULL
         edges <- NULL
-
         if (input$input2build %in% c("dag")
             && sum(data$dag) > 0
             && !is.null(input$gene_number)
@@ -2312,6 +2311,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     }),  900)
 
     ## ## No delay showing plots. 
+    ## Here is where we output the upper row of plots: the DAGs of
+    ## restrictions, or the MHN matrix, or the HyperTraPS matrix.
     ## plot2show <- reactive({
     ##     gsub("H-ESBCN", "HESBCN", input$cpm2show, fixed = TRUE)
     ##     input$cpm2show
@@ -2339,7 +2340,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             )
                         )
                     )
+                } else if (met == "BML") {
+                  output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
+                    pl <- evamtools:::plot_BML_dot(tmp_data$BML_output)
+                    pl
+                  })
+                  return(
+                    column(number_of_columns,
+                           plotOutput(sprintf("plot_sims_%s", met)))
+                  )
                 } else {
+
                     method_data <- evamtools:::process_data(tmp_data, met,
                                                             plot_type = "trans_mat")
                     output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
@@ -2486,7 +2497,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                       ## title("P(g)")
                 evamtools:::plot_BML_Fig3(tmp_data$BML_output$bootstrap)
                     })
-
                     return(tagList(
                 h3(
                   span("BML bootstrap. "),

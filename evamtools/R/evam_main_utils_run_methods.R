@@ -215,6 +215,10 @@ run_BML <- function(x, opts) {
         if (label != "WT") {
             label_parts <- strsplit(label, ",")[[1]]
             sorted_label <- paste(sort(trimws(label_parts)), collapse = ", ")
+    ## There are, I think, cleaner ways of getting this probs
+    ## which are, actually P(g)/m_k
+    ## We could hack BML and not divide, but watch out for
+    ## possible partial sums.
             return(sorted_label)
         }
         # If the label is "WT", return it as is
@@ -223,40 +227,53 @@ run_BML <- function(x, opts) {
 
     unname(out$DAG$labels)
 
+  ## This is about right, but it is much better to provide
+  ## their native output instead of try to get right the
+  ## transition matrix. We could recover this code if we wanted.
+  ## But NOT the transition rate matrix, as
+  ## that makes no sense. To rm code later but not rm the useful things
+  ## I make this dead code.
+
+  if (FALSE) {
     out$adjacency_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
     out$trans_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
-  ## out$td_trans_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
-  ## Misra does not give a transition rate matrix
-  ## out$trans_rate_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
- 
-    for (i in seq_len(nrow(out$adjacency_mat))) {
-        for (j in seq_len(ncol(out$adjacency_mat))) {
-            if (out$adjacency_mat[i, j] == 0) {
-                out$trans_mat[i, j] <- 0
-        ## out$trans_rate_mat[i, j] <- 0
-            } else {
-                name = colnames(out$adjacency_mat)[j]
+    ## out$td_trans_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
+    ## Misra does not give a transition rate matrix
+    ## out$trans_rate_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
 
-                idx <- which(out$DAG$labels == name)
-        ## The next is most likely right
-        ## the probs come from the BML code that
-        ## already divides by max, max2 and max3.
-        ## But the sum for all descendants can sometimes be > 1.
-        ## Makes no sense but this happens with the original
-        ## software too. I think those P(g)/m_k are for
-        ## coloring the figures; one is not supposed to use
-        ## the P(g) directly from these figures.
-        out$trans_mat[i, j] = out$DAG$probs[idx]
-        ## FIXME: rm later
-        ## This makes no sense: EdgeProbabilites are only for pairs
-        ## and singletons
-        ## if (name %in% rownames(out$bootstrap$EdgeProbabilities)) {
-        ##     out$trans_mat[i, j] <- mean(out$bootstrap$EdgeProbabilities[name, ])
-        ##     # out$trans_mat[i, j] <- 1
-        ## }
-            }
+    ## There are, I think, cleaner ways of getting this probs
+    ## which are, actually P(g)/m_k
+    ## We could hack BML and not divide, but watch out for
+    ## possible partial sums.
+    for (i in seq_len(nrow(out$adjacency_mat))) {
+      for (j in seq_len(ncol(out$adjacency_mat))) {
+        if (out$adjacency_mat[i, j] == 0) {
+          out$trans_mat[i, j] <- 0
+          ## out$trans_rate_mat[i, j] <- 0
+        } else {
+          name = colnames(out$adjacency_mat)[j]
+
+          idx <- which(out$DAG$labels == name)
+          ## The next is most likely right
+          ## the probs come from the BML code that
+          ## already divides by max, max2 and max3.
+          ## But the sum for all descendants can sometimes be > 1.
+          ## Makes no sense but this happens with the original
+          ## software too. I think those P(g)/m_k are for
+          ## coloring the figures; one is not supposed to use
+          ## the P(g) directly from these figures.
+          out$trans_mat[i, j] = out$DAG$probs[idx]
+          ## FIXME: rm later
+          ## This makes no sense: EdgeProbabilites are only for pairs
+          ## and singletons
+          ## if (name %in% rownames(out$bootstrap$EdgeProbabilities)) {
+          ##     out$trans_mat[i, j] <- mean(out$bootstrap$EdgeProbabilities[name, ])
+          ##     # out$trans_mat[i, j] <- 1
+          ## }
         }
+      }
     }
+  } ## end dead code block
 
   ## This is done so that all predicted genotype frequencies are 0.
   ## But I think this ain't needed. FIXME: rm when settled not needed.
