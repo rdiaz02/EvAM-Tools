@@ -244,18 +244,19 @@ run_BML <- function(x, opts) {
     }
 
   ## This is done so that all predicted genotype frequencies are 0.
-    genotype_names = colnames(x)
-    combinations = c("WT", unlist(lapply(1:length(genotype_names), function(n) combn(genotype_names, n, FUN = function(x) paste(x, collapse = ", "))), use.names = FALSE))
-    freqs = rep(0, length(combinations))
-    out$predicted_genotype_freqs <- as.data.frame(t(freqs))
-    colnames(out$predicted_genotype_freqs) <- combinations
+  ## But I think this ain't needed. FIXME: rm when settled not needed.
+  ## genotype_names = colnames(x)
+  ## combinations = c("WT", unlist(lapply(1:length(genotype_names), function(n) combn(genotype_names, n, FUN = function(x) paste(x, collapse = ", "))), use.names = FALSE))
+  ## freqs = rep(0, length(combinations))
+  ## out$predicted_genotype_freqs <- as.data.frame(t(freqs))
+  ## colnames(out$predicted_genotype_freqs) <- combinations
 
-   for (i in seq_along(out$DAG$labels)) {
-        label <- out$DAG$labels[i]
-        prob <- 0
-  
-        out$predicted_genotype_freqs[label] <- prob
-    } 
+  ##  for (i in seq_along(out$DAG$labels)) {
+  ##       label <- out$DAG$labels[i]
+  ##       prob <- 0
+
+  ##       out$predicted_genotype_freqs[label] <- prob
+  ##   }
 
     return(list(time_out = time_out, out = out))
 }
