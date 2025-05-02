@@ -90,7 +90,8 @@ evam <- function(x,
                  ),
                  bml_opts = list(
                    ntree = 1,
-                   threshold = 0.5,
+                   ## 0.3 is what they said, in their README, they used in the ms.
+                   threshold = 0.3,
                    rep = 0
                  ),
                  only_used_methods = TRUE
