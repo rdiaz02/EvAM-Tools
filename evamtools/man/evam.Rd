@@ -336,7 +336,7 @@ Executes all CPMS given a cross sectional data set.
 
 - Szabo, A., & Boucher, K. M. (2008). Oncogenetic Trees. In W. Tan, & L. Hanin
   (Eds.), Handbook of Cancer Models with Applications (pp. 1–24). : World
-  Scientific.
+  Scientific. \url{https://doi.org/10.1142/9789812779489_0001}
 
 
 - Desper, R., Jiang, F., Kallioniemi, O. P., Moch, H., Papadimitriou, C. H., &

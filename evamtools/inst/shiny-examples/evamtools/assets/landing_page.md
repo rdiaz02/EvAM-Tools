@@ -327,7 +327,7 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 ### References and related repositories<a id="refs"></a>
 ***
 
-##### Overview paper of CPMs and EvAMs ####
+##### Overview paper on CPMs and EvAMs ####
 
 - Diaz-Uriarte, R., & Johnston, I. G. (2025). A picture guide to cancer progression and evolutionary accumulation models: Systematic critique, plausible interpretations, and alternative uses. Ieee Access, 13, 62306–62340. https://doi.org/10.1109/ACCESS.2025.3558392
 
@@ -343,7 +343,7 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 
 - Szabo, A., & Boucher, K. M. (2008). Oncogenetic Trees. In W. Tan, & L. Hanin
   (Eds.), Handbook of Cancer Models with Applications (pp. 1–24). : World
-  Scientific.
+  Scientific.  https://doi.org/10.1142/9789812779489_0001
 
 - Oncotree R package: https://CRAN.R-project.org/package=Oncotree
 
