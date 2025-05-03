@@ -517,13 +517,25 @@ test_that("Minimal examples of HyperTraPS and BML", {
                 methods = c("BML", "OT"),
                 bml_opts = list(ntree = 3, rep = 7))
 
-  out4 <- evam(dB_c1,
+  out_h_1 <- evam(dB_c1,
                methods = c("HyperTraPS"),
                hyper_traps_opts = list(length = 2,
-                                       model = -1))
+                                       model = -1,
+                                       seed = -1))
 
-  expect_true(exists("lik.traces", out4$HyperTraPS_post))
-  expect_true(out4$HyperTraPS_post$L == 5)
+  out_h_3 <- evam(dB_c1,
+                  methods = c("HyperTraPS"),
+               hyper_traps_opts = list(length = 2,
+                                       model = 3,
+                                       seed = -1))
+
+
+  expect_true(exists("lik.traces", out_h_1$HyperTraPS_post))
+  expect_true(out_h_1$HyperTraPS_post$L == 5)
+
+  ## And they can be plotted
+  plotHypercube.influencegraph(out_h_3$HyperTraPS_post)
+  plotHypercube.motifs(out_h_1$HyperTraPS_post)
 
   ## And, to avoid re-running, do some minimal testing of plots
   ## Moved to the Rd file

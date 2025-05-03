@@ -151,21 +151,32 @@ get_mccbn_args <- function(input) {
 
 get_hyper_traps_args <- function(input) {
     hyper_traps_opts <- list(
-        length = input$HyperTraPS_length,
-        kernel = input$HyperTraPS_kernel,
-        walkers = input$HyperTraPS_walkers,
-        samplegap = input$HyperTraPS_samplegap,
+    model = as.numeric(input$HyperTraPS_model),
+
+    walkers = as.numeric(input$HyperTraPS_walkers),
+    length = as.numeric(input$HyperTraPS_length),
+    kernel = as.numeric(input$HyperTraPS_kernel),
+
+    seed = as.numeric(input$HyperTraPS_seed),
+
         losses = as.numeric(input$HyperTraPS_losses),
         apm_type = as.numeric(input$HyperTraPS_apm),
         sa = as.numeric(input$HyperTraPS_sa),
         sgd = as.numeric(input$HyperTraPS_sgd),
-        pli = as.numeric(input$HyperTraPS_pli)
-    )
+    pli = as.numeric(input$HyperTraPS_pli),
+    samplegap = as.numeric(input$HyperTraPS_samplegap),
 
-    if (!is.na(input$HyperTraPS_seed)) {
-        hyper_traps_opts$seed <- input$HyperTraPS_seed
-    }
+    penalty = as.numeric(input$HyperTraPS_penalty),
 
+    lasso = as.numeric(input$HyperTraPS_LASSO),
+    regularise = as.numeric(input$HyperTraPS_regul),
+    samples_per_row = as.numeric(input$HyperTraPS_samprow),
+    outputinput = as.numeric(input$HyperTraPS_outtrans)
+  )
+  message("options entered are ",
+          paste(names(hyper_traps_opts),
+                hyper_traps_opts, sep = " =  ",
+                collapse = ";"))
     return(hyper_traps_opts)
 }
 

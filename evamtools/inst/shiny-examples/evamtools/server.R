@@ -859,7 +859,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         ## BEWARE!!! Never, ever, add this without isolate.
         ## Without isolate, it forces the slider
         ## of Number of genes back. And creates a mess.
-        ## A simple example belos: even that code below screws things up. 
+        ## A simple example below: even that code below screws things up.
         ## Yes, this is the gene number slider. 
         if ((!is.null(isolate(data$data)) ||
              (nrow(isolate(data$csd_counts)) > 0))) {
@@ -2328,8 +2328,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
             lapply(plot2show(), function(met) {
                 if (met == "HyperTraPS") {
+
                     output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
+                  if (tmp_data$all_options$hyper_traps_opts$model == 2) {
                         pl <- hypertrapsct::plotHypercube.influences(tmp_data$HyperTraPS_post)
+                  } else if (tmp_data$all_options$hyper_traps_opts$model == 3) {
+                    pl <- hypertrapsct::plotHypercube.influencegraph(tmp_data$HyperTraPS_post,
+                                                                     label.size = 4)
+                  } else {
+                    pl <- hypertrapsct::plotHypercube.motifs(tmp_data$HyperTraPS_post,
+                                                             label.size = 4)
+                  }
                         pl
                     })
                     return(
@@ -2466,14 +2475,16 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
             lapply(plot2show(), function(met) {
                 if (met == "HyperTraPS") {
+
                     output[[sprintf("plot_hypertraps_%s", met)]] <- renderPlot({
                         pl <- hypertrapsct::plotHypercube.summary(tmp_data$HyperTraPS_post)
 
                         pl 
-                    })
+                }, height = 600)
 
                     return(tagList(
-                                h3("HyperTraPS summary"), plotOutput(sprintf("plot_hypertraps_%s", met)))
+                  h3("HyperTraPS summary"),
+                  plotOutput(sprintf("plot_hypertraps_%s", met), height="600px"))
                     )
                 }
             })
@@ -2502,7 +2513,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                   span("BML bootstrap. "),
                   br(),
                   span(
-                    paste(
+                    paste0(
                       "Number of bootstrap replicates = ",
                       tmp_data$BML_bootstrap, "."
                     ),
@@ -2715,8 +2726,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     output$cpm_freqs <- DT::renderDT({
         d1 <- all_cpm_out[[input$select_cpm]]$tabular_data[[input$data2plot]]
-
         if (input$data2plot == "predicted_genotype_freqs") {
+          if (!all(is.na(d1))) {
             d2 <-
                 evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data)
             d2$Counts <- round(d2$Counts/sum(d2$Counts), 3)
@@ -2727,6 +2738,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             d3 <- dplyr::full_join(d1, d2, by = "Genotype")
             d3 <- evamtools:::reorder_to_standard_order_arbitrary_df(d3)
             d1 <- d3
+          } else {
+            d1 <- data.frame(Index = integer(),
+                             Genotype = character(),
+                             Method = numeric()
+                             )
+          }
         }
         d1
     },

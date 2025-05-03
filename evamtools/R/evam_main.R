@@ -83,26 +83,26 @@ evam <- function(x,
                    priors = NULL,
                    starttimes = NULL,
                    endtimes = NULL,
+                   model = 2,
+                   walkers = 200,
                    length = 3,
                    kernel = 5,
-                   samplegap = -1,
+                   seed = -1,
                    losses = 0,
                    apm_type = 0,
                    sa = 0,
                    sgd = 0,
-                   sgd_scale = 0.01,
-                   seed = 1,
-                   outputinput = 0,
-                   regularise = 0,
+                   pli = 0,
+                   samplegap = 10,
                    penalty = 0,
                    lasso = 0,
-                   model = 2,
-                   pli = 0,
-                   walkers = 200,
+                   samples_per_row = 10,
+                   regularise = 0,
+                   output_transitions = 1,
+                   sgd_scale = 0.01,
+                   outputinput = 0,
                    full_analysis = 1,
                    limited_output = 0,
-                   output_transitions = 1,
-                   samples_per_row = 10,
                    featurenames = NULL # Replace NULL with the actual character vector if available
                  ),
                  bml_opts = list(
@@ -136,7 +136,7 @@ evam <- function(x,
         mccbn_opts = fill_args_default(mccbn_opts, default_opts$mccbn_opts),
         hyper_traps_opts = fill_args_default(hyper_traps_opts, default_opts$hyper_traps_opts),
         bml_opts = fill_args_default(bml_opts, default_opts$bml_opts)
-    ) 
+    )
 
 
 
@@ -144,7 +144,7 @@ evam <- function(x,
 
     if ("MCCBN" %in% methods) {
         MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
-        
+
         if (!MCCBN_INSTALLED) {
             warning("MCCBN method requested, but mccbn packaged not installed. ",
                     "Removing MCCBN from list of requested methods.")
@@ -203,116 +203,116 @@ evam <- function(x,
         }
     }
 
-    tmpr <- list(
-        OT_model = get_output("OT", "edges"),
-        OT_f_graph = get_output("OT", "weighted_fgraph"),
-        OT_trans_mat = get_output("OT", "trans_mat_genots"),
-        OT_predicted_genotype_freqs = get_output("OT",
+  tmpr <- list(
+    OT_model = get_output("OT", "edges"),
+    OT_f_graph = get_output("OT", "weighted_fgraph"),
+    OT_trans_mat = get_output("OT", "trans_mat_genots"),
+    OT_predicted_genotype_freqs = get_output("OT",
+                                             "predicted_genotype_freqs"),
+    OT_eps = get_output("OT", "eps"),
+    OT_fit = get_output("OT", "ot_fit"),
+    OT_paths_max = get_paths_max("OT"),
+    OT_elapsed_time = get_output("OT", "elapsed_time"),
+
+    CBN_model = get_output("CBN", "edges"),
+    CBN_trans_rate_mat = get_output("CBN", "weighted_fgraph"),
+    CBN_trans_mat = get_output("CBN", "trans_mat_genots"),
+    CBN_td_trans_mat = get_output("CBN", "td_trans_mat"),
+    CBN_predicted_genotype_freqs = get_output("CBN",
+                                              "predicted_genotype_freqs"),
+    CBN_paths_max = get_paths_max("CBN"),
+    CBN_elapsed_time = get_output("CBN", "elapsed_time"),
+
+    MCCBN_model = get_output("MCCBN", "edges"),
+    MCCBN_trans_rate_mat = get_output("MCCBN", "weighted_fgraph"),
+    MCCBN_trans_mat = get_output("MCCBN", "trans_mat_genots"),
+    MCCBN_td_trans_mat = get_output("MCCBN", "td_trans_mat"),
+    MCCBN_predicted_genotype_freqs = get_output("MCCBN",
+                                                "predicted_genotype_freqs"),
+    MCCBN_paths_max = get_paths_max("MCCBN"),
+    MCCBN_elapsed_time = get_output("MCCBN", "elapsed_time"),
+
+    MHN_theta = get_output("MHN", "theta"),
+    MHN_trans_rate_mat = get_output("MHN", "transitionRateMatrix"),
+    MHN_trans_mat = get_output("MHN", "transitionMatrixCompExp"),
+    MHN_td_trans_mat = get_output("MHN", "transitionMatrixTimeDiscretized"),
+    MHN_exp_theta = exp(get_output("MHN", "theta")),
+    MHN_predicted_genotype_freqs = get_output("MHN",
+                                              "predicted_genotype_freqs"),
+    MHN_paths_max = get_paths_max("MHN"),
+    MHN_elapsed_time = get_output("MHN", "elapsed_time"),
+
+    OncoBN_model = get_output("OncoBN", "edges"),
+    OncoBN_likelihood = get_output("OncoBN", "likelihood"),
+    OncoBN_f_graph = get_output("OncoBN", "weighted_fgraph"),
+    OncoBN_trans_mat = get_output("OncoBN", "trans_mat_genots"),
+    OncoBN_predicted_genotype_freqs = get_output("OncoBN",
                                                  "predicted_genotype_freqs"),
-        OT_eps = get_output("OT", "eps"),
-        OT_fit = get_output("OT", "ot_fit"),
-        OT_paths_max = get_paths_max("OT"),
-        OT_elapsed_time = get_output("OT", "elapsed_time"),
-       
-        CBN_model = get_output("CBN", "edges"),
-        CBN_trans_rate_mat = get_output("CBN", "weighted_fgraph"),
-        CBN_trans_mat = get_output("CBN", "trans_mat_genots"),
-        CBN_td_trans_mat = get_output("CBN", "td_trans_mat"),
-        CBN_predicted_genotype_freqs = get_output("CBN",
-                                                  "predicted_genotype_freqs"),
-        CBN_paths_max = get_paths_max("CBN"),
-        CBN_elapsed_time = get_output("CBN", "elapsed_time"),
-        
-        MCCBN_model = get_output("MCCBN", "edges"),
-        MCCBN_trans_rate_mat = get_output("MCCBN", "weighted_fgraph"),
-        MCCBN_trans_mat = get_output("MCCBN", "trans_mat_genots"),
-        MCCBN_td_trans_mat = get_output("MCCBN", "td_trans_mat"),
-        MCCBN_predicted_genotype_freqs = get_output("MCCBN",
-                                                    "predicted_genotype_freqs"),
-        MCCBN_paths_max = get_paths_max("MCCBN"),
-        MCCBN_elapsed_time = get_output("MCCBN", "elapsed_time"),
-        
-        MHN_theta = get_output("MHN", "theta"),
-        MHN_trans_rate_mat = get_output("MHN", "transitionRateMatrix"),
-        MHN_trans_mat = get_output("MHN", "transitionMatrixCompExp"),
-        MHN_td_trans_mat = get_output("MHN", "transitionMatrixTimeDiscretized"),
-        MHN_exp_theta = exp(get_output("MHN", "theta")),
-        MHN_predicted_genotype_freqs = get_output("MHN",
-                                                  "predicted_genotype_freqs"),
-        MHN_paths_max = get_paths_max("MHN"),
-        MHN_elapsed_time = get_output("MHN", "elapsed_time"),
-        
-        OncoBN_model = get_output("OncoBN", "edges"),
-        OncoBN_likelihood = get_output("OncoBN", "likelihood"),
-        OncoBN_f_graph = get_output("OncoBN", "weighted_fgraph"), 
-        OncoBN_trans_mat = get_output("OncoBN", "trans_mat_genots"),
-        OncoBN_predicted_genotype_freqs = get_output("OncoBN",
-                                                     "predicted_genotype_freqs"),
-        OncoBN_fitted_model = get_output("OncoBN", "model"),
-        OncoBN_epsilon = get_output("OncoBN", "epsilon"),
-        OncoBN_parent_set = get_output("OncoBN", "parent_set"),
-        OncoBN_fit = get_output("OncoBN", "fit"),
-        OncoBN_paths_max = get_paths_max("OncoBN"),
-        OncoBN_elapsed_time = get_output("OncoBN", "elapsed_time"),
-        
-        HESBCN_model = get_output("HESBCN", "edges"),
-        HESBCN_parent_set = get_output("HESBCN", "parent_set"),
-        HESBCN_trans_rate_mat = get_output("HESBCN", "weighted_fgraph"),
-        HESBCN_trans_mat = get_output("HESBCN", "trans_mat_genots"),
-        HESBCN_td_trans_mat = get_output("HESBCN", "td_trans_mat"),
-        HESBCN_predicted_genotype_freqs = get_output("HESBCN",
-                                                     "predicted_genotype_freqs"),
-        HESBCN_command = get_output("HESBCN", "command"),
-        HESBCN_paths_max = get_paths_max("HESBCN"),
-        HESBCN_elapsed_time = get_output("HESBCN", "elapsed_time"),
+    OncoBN_fitted_model = get_output("OncoBN", "model"),
+    OncoBN_epsilon = get_output("OncoBN", "epsilon"),
+    OncoBN_parent_set = get_output("OncoBN", "parent_set"),
+    OncoBN_fit = get_output("OncoBN", "fit"),
+    OncoBN_paths_max = get_paths_max("OncoBN"),
+    OncoBN_elapsed_time = get_output("OncoBN", "elapsed_time"),
 
-        ## FIXME: For HyperTraPS and BML we return
-        ## pieces, and then all output. So some things
-        ## are returned in two places.
-        HyperTraPS_model = get_output("HyperTraPS", "model"),
-        HyperTraPS_edges = get_output("HyperTraPS", "edges"),
-        HyperTraPS_posterior_samples = get_output("HyperTraPS", "posterior.samples"),
-        HyperTraPS_dynamics = get_output("HyperTraPS", "dynamics"),
-        HyperTraPS_best = get_output("HyperTraPS", "best"),
-        HyperTraPS_lik_traces = get_output("HyperTraPS", "lik.traces"),
-        HyperTraPS_bubbles = get_output("HyperTraPS", "bubbles"),
-        HyperTraPS_routes = get_output("HyperTraPS", "routes"),
-        HyperTraPS_times = get_output("HyperTraPS", "times"),
-        HyperTraPS_timediffs = get_output("HyperTraPS", "timediffs"),
-        HyperTraPS_timehists = get_output("HyperTraPS", "timehists"),
-        HyperTraPS_trans_mat = get_output("HyperTraPS", "td_trans_mat"),
-        HyperTraPS_predicted_genotype_freqs = get_output("HyperTraPS", "predicted_genotype_freqs"),
-        HyperTraPS_elapsed_time = get_output("HyperTraPS", "elapsed_time"),
-        HyperTraPS_post = get_all_method_output("HyperTraPS"),
+    HESBCN_model = get_output("HESBCN", "edges"),
+    HESBCN_parent_set = get_output("HESBCN", "parent_set"),
+    HESBCN_trans_rate_mat = get_output("HESBCN", "weighted_fgraph"),
+    HESBCN_trans_mat = get_output("HESBCN", "trans_mat_genots"),
+    HESBCN_td_trans_mat = get_output("HESBCN", "td_trans_mat"),
+    HESBCN_predicted_genotype_freqs = get_output("HESBCN",
+                                                 "predicted_genotype_freqs"),
+    HESBCN_command = get_output("HESBCN", "command"),
+    HESBCN_paths_max = get_paths_max("HESBCN"),
+    HESBCN_elapsed_time = get_output("HESBCN", "elapsed_time"),
 
-        BML_model = get _output("BML", "model"),
-        BML_trans_mat = NA,
-        BML_predicted_genotype_freqs = NA,
-        BML_elapsed_time = get_output("BML", "elapsed_time"),
-        BML_bootstrap = ifelse(exists("BML", all_out), opts$bml_opts$rep, NA),
-        BML_output = get_all_method_output("BML"),
+    ## FIXME: For HyperTraPS and BML we return
+    ## pieces, and then all output. So some things
+    ## are returned in two places.
+    HyperTraPS_model = get_output("HyperTraPS", "model"),
+    HyperTraPS_edges = get_output("HyperTraPS", "edges"),
+    HyperTraPS_posterior_samples = get_output("HyperTraPS", "posterior.samples"),
+    HyperTraPS_dynamics = get_output("HyperTraPS", "dynamics"),
+    HyperTraPS_best = get_output("HyperTraPS", "best"),
+    HyperTraPS_lik_traces = get_output("HyperTraPS", "lik.traces"),
+    HyperTraPS_bubbles = get_output("HyperTraPS", "bubbles"),
+    HyperTraPS_routes = get_output("HyperTraPS", "routes"),
+    HyperTraPS_times = get_output("HyperTraPS", "times"),
+    HyperTraPS_timediffs = get_output("HyperTraPS", "timediffs"),
+    HyperTraPS_timehists = get_output("HyperTraPS", "timehists"),
+    HyperTraPS_trans_mat = get_output("HyperTraPS", "trans_mat"),
+    ## HyperTraPS_predicted_genotype_freqs = get_output("HyperTraPS", "predicted_genotype_freqs"),
+    HyperTraPS_elapsed_time = get_output("HyperTraPS", "elapsed_time"),
+    HyperTraPS_post = get_all_method_output("HyperTraPS"),
 
-        methods = methods,
-        original_data = xoriginal,
-        analyzed_data = x,
-        genotype_id_ordered =
-          stats::setNames(1:(2^ncol(x)),
-                          genotypes_standard_order(colnames(x))),
-        all_options = list(
-          mhn_opts = opts$mhn_opts,
-          ot_opts = opts$ot_opts,
-          cbn_opts = opts$cbn_opts,
-          hesbcn_opts = opts$hesbcn_opts,
-          oncobn_opts = opts$oncobn_opts,
-          mccbn_opts = opts$mccbn_opts,
-          hyper_traps_opts = opts$hyper_traps_opts
-        )
+    BML_model = get_output("BML", "model"),
+    BML_trans_mat = NA,
+    BML_predicted_genotype_freqs = NA,
+    BML_elapsed_time = get_output("BML", "elapsed_time"),
+    BML_bootstrap = ifelse(exists("BML", all_out), opts$bml_opts$rep, NA),
+    BML_output = get_all_method_output("BML"),
+
+    methods = methods,
+    original_data = xoriginal,
+    analyzed_data = x,
+    genotype_id_ordered =
+      stats::setNames(1:(2^ncol(x)),
+                      genotypes_standard_order(colnames(x))),
+    all_options = list(
+      mhn_opts = opts$mhn_opts,
+      ot_opts = opts$ot_opts,
+      cbn_opts = opts$cbn_opts,
+      hesbcn_opts = opts$hesbcn_opts,
+      oncobn_opts = opts$oncobn_opts,
+      mccbn_opts = opts$mccbn_opts,
+      hyper_traps_opts = opts$hyper_traps_opts
     )
+  )
 
-    if (only_used_methods) {
-        tmpr_rm <- lapply(tmpr, function(x) (length(x) == 1) && (is.na(x)))
-        tmpr <- tmpr[which(!unlist(tmpr_rm))]
-    }
+  if (only_used_methods) {
+    tmpr_rm <- lapply(tmpr, function(x) (length(x) == 1) && (is.na(x)))
+    tmpr <- tmpr[which(!unlist(tmpr_rm))]
+  }
 
-    return(tmpr)
+  return(tmpr)
 }

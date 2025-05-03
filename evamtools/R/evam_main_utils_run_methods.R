@@ -150,6 +150,7 @@ decode_state <- function(state, num_features, feature_labels) {
 
 
 run_HyperTraPS <- function(x, opts) {
+  if (opts$seed == -1) opts$seed <- round(runif(1, 1, 1e9))
   time_out <- system.time({
     opts <- c(list(obs = x), opts)
     out <- invisible(do.call(
@@ -170,8 +171,11 @@ run_HyperTraPS <- function(x, opts) {
         stringsAsFactors = FALSE
     )
 
-    # Create a transition matrix (initialized as zeros)
-    trans_matrix <- Matrix(0, nrow = length(states), ncol = length(states), sparse = TRUE)
+  ## Create a transition matrix (initialized as zeros)
+  trans_matrix <- Matrix(0,
+                         nrow = length(states),
+                         ncol = length(states),
+                         sparse = TRUE)
 
     rownames(trans_matrix) <- decoded_states
     colnames(trans_matrix) <- decoded_states
@@ -187,8 +191,8 @@ run_HyperTraPS <- function(x, opts) {
         trans_matrix[from_decoded, to_decoded] <- probability
     }
     
-    out$predicted_genotype_freqs = probs_from_trm(trans_matrix)
-    out$td_trans_mat <- trans_matrix
+  ## out$predicted_genotype_freqs = probs_from_trm(trans_matrix)
+  out$trans_mat <- trans_matrix
 
     return(list(time_out = time_out, out = out))
 }

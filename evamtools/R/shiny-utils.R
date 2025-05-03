@@ -404,12 +404,18 @@ create_tabular_data <- function(data) {
                 }
             }
 
+
       ## BML has none of the sampled_genotype_counts or
       ## predicted_genotype_freqs and those are the first tabulated
       ## things. If we do not skip here, it fails in the call
       ## to standard_rank_genots_1
-      if ((length(data$methods) == 1) &&
-            (data$methods == "BML")) {
+            ## HyperTraPS as of now neither.
+            if ( (length(data$methods) == 1) &&
+                   ((data$methods == "BML") ||
+                      ((data$methods == "HyperTraPS") &&
+                         (attr %in% c("predicted_genotype_freqs",
+                                      "sampled_genotype_counts"))
+                      ))) {
         stopifnot(nrow(all_counts) == 0)
         stopifnot(ncol(all_counts) == 0)
         tabular_data[[attr]] <- NA

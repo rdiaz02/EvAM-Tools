@@ -974,6 +974,10 @@ plot_BML_dot <- function(x) {
     close(con)
     img     <- png::readPNG(raw_png)
     grid::grid.raster(img)
+    grid::grid.newpage()
+    grid::grid.raster(img)
+    grid::grid.text("BML", x = 0.5, y = unit(0.98, "npc"),
+                    gp = grid::gpar(fontsize = 16))
 }
 
 ## Single plot for BML

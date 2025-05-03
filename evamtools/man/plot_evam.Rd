@@ -108,6 +108,13 @@ green, to differentiate them from the observed genotypes (shown in orange).
 For BML, we are using, for the moment, a temporary kludge. It returns
 figs as in Fig. 2 and Fig. 3a and 3b in Misra et al., 2014.
 
+
+What about HyperTraPS? Use the plots provided by the hypertrapsct
+package with the component \code{$HyperTraPS_post}. For example,
+\code{\link[hypertrapsct:plotHypercube.influencegraph]{plotHypercube.influencegraph}}
+or
+\code{\link[hypertrapsct:plotHypercube.summary]{plotHypercube.summary}},
+etc. See an example below.
 }
 
 
@@ -255,4 +262,10 @@ plot_BML_all(out_B1)
 plot_BML_all(out_B_nb)
 plot_BML_all(out_B_OT)
 
+out_h_1 <- evam(dB_c1,
+                methods = c("HyperTraPS"),
+                hyper_traps_opts = list(length = 2,
+                                        model = -1,
+                                        seed = -1))
+plotHypercube.summary(out_h_1$HyperTraPS_post)
 }
