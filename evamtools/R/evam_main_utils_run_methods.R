@@ -235,24 +235,6 @@ run_BML <- function(x, opts) {
         ))
     })["elapsed"]
 
-    out$DAG$labels <- sub("Normal", "WT", out$DAG$labels)
-    out$DAG$labels <- sapply(out$DAG$labels, function(label) {
-        # If label is not "WT", sort the components and join them with a comma and space
-        if (label != "WT") {
-            label_parts <- strsplit(label, ",")[[1]]
-            sorted_label <- paste(sort(trimws(label_parts)), collapse = ", ")
-    ## There are, I think, cleaner ways of getting this probs
-    ## which are, actually P(g)/m_k
-    ## We could hack BML and not divide, but watch out for
-    ## possible partial sums.
-            return(sorted_label)
-        }
-        # If the label is "WT", return it as is
-        return(label)
-    }) 
-
-    unname(out$DAG$labels)
-
   ## This is about right, but it is much better to provide
   ## their native output instead of try to get right the
   ## transition matrix. We could recover this code if we wanted.
@@ -271,6 +253,21 @@ run_BML <- function(x, opts) {
     ## which are, actually P(g)/m_k
     ## We could hack BML and not divide, but watch out for
     ## possible partial sums.
+
+        ## This breaks the primary output, I think. Watch out
+        out$DAG$labels <- sub("Normal", "WT", out$DAG$labels)
+        out$DAG$labels <- sapply(out$DAG$labels, function(label) {
+            ## If label is not "WT", sort the components and join them with a comma and space
+            if (label != "WT") {
+                label_parts <- strsplit(label, ",")[[1]]
+                sorted_label <- paste(sort(trimws(label_parts)), collapse = ", ")
+                return(sorted_label)
+            }
+                                        # If the label is "WT", return it as is
+            return(label)
+        })
+        out$DAG$labels <- unname(out$DAG$labels)
+
     for (i in seq_len(nrow(out$adjacency_mat))) {
       for (j in seq_len(ncol(out$adjacency_mat))) {
         if (out$adjacency_mat[i, j] == 0) {
@@ -316,7 +313,7 @@ run_BML <- function(x, opts) {
   ##       out$predicted_genotype_freqs[label] <- prob
   ##   }
 
-    return(list(time_out = time_out, out = out))
+    return(list(time_out = time_out, out = c(primary_output = list(out))))
 }
 
 run_method <- function(method, x, opts) {
