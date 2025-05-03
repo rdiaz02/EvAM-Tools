@@ -275,6 +275,23 @@ evam(x,
 	\item{HESBCN_paths_max}{As for OT.}
         \item{HESBCN_elapsed_time}{As for OT.}
 
+	\item{HyperTraPS_elapsed_time}{As for other methods.}
+	\item{HyperTraPS_trans_mat}{Transition matrix. Obtained from the
+	\code{dynamics$trans} output of the call to
+	\code{\link[hypertrapsct:HyperTraPS]{HyperTraPS}}. This is just
+	a renaming and restructuring of that output, which are the
+	"Probabilities for individual transitions", from \url{https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#output}.}
+	\item{HyperTraPS_all_output}{All the ouput, as provided by the
+	\code{\link[hypertrapsct:HyperTraPS]{HyperTraPS}} function. See
+	there for details.}
+
+	\item{BML_elapsed_time}{As for other methods.}
+	\item{BML_bootstrap}{The number of bootstrap replicates.}
+	\item{BML_all_output}{All the ouput, as provided by the
+	  \code{\link[BML]{bml}} function. See there for details.}
+
+	\item{methods}{The methods argument to the function: methods
+        actually used in the run.}
         \item{original_data}{The original data.}
         \item{analyzed_data}{The data that were actually analyzed. Can
         differ from the original data because of the data pre-processing

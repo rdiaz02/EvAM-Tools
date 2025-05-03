@@ -163,7 +163,9 @@ run_HyperTraPS <- function(x, opts) {
     feature_labels <- colnames(x)
 
     states <- unique(c(out$dynamics$trans$From, out$dynamics$trans$To))
-    decoded_states <- sapply(states, decode_state, num_features = num_features, feature_labels = feature_labels)
+  decoded_states <- sapply(states, decode_state,
+                           num_features = num_features,
+                           feature_labels = feature_labels)
 
     state_mapping <- data.frame(
         State = states,
@@ -172,13 +174,13 @@ run_HyperTraPS <- function(x, opts) {
     )
 
   ## Create a transition matrix (initialized as zeros)
-  trans_matrix <- Matrix(0,
+  trans_mat <- Matrix(0,
                          nrow = length(states),
                          ncol = length(states),
                          sparse = TRUE)
 
-    rownames(trans_matrix) <- decoded_states
-    colnames(trans_matrix) <- decoded_states
+  rownames(trans_mat) <- decoded_states
+  colnames(trans_mat) <- decoded_states
 
     for (i in 1:nrow(out$dynamics$trans)) {
         from_state <- out$dynamics$trans$From[i]
@@ -188,11 +190,11 @@ run_HyperTraPS <- function(x, opts) {
         from_decoded <- decode_state(from_state, num_features, feature_labels)
         to_decoded <- decode_state(to_state, num_features, feature_labels)
   
-        trans_matrix[from_decoded, to_decoded] <- probability
+      trans_mat[from_decoded, to_decoded] <- probability
     }
     
-  ## out$predicted_genotype_freqs = probs_from_trm(trans_matrix)
-  out$trans_mat <- trans_matrix
+  ## out$predicted_genotype_freqs = probs_from_trm(trans_mat)
+  out$trans_mat <- trans_mat
 
     return(list(time_out = time_out, out = out))
 }

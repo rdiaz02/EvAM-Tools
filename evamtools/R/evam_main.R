@@ -266,28 +266,31 @@ evam <- function(x,
     HESBCN_paths_max = get_paths_max("HESBCN"),
     HESBCN_elapsed_time = get_output("HESBCN", "elapsed_time"),
 
-    ## FIXME: For HyperTraPS and BML we return
+    ## FIXME: For HyperTraPS we return
     ## pieces, and then all output. So some things
-    ## are returned in two places.
-    HyperTraPS_model = get_output("HyperTraPS", "model"),
-    HyperTraPS_edges = get_output("HyperTraPS", "edges"),
-    HyperTraPS_posterior_samples = get_output("HyperTraPS", "posterior.samples"),
-    HyperTraPS_dynamics = get_output("HyperTraPS", "dynamics"),
-    HyperTraPS_best = get_output("HyperTraPS", "best"),
-    HyperTraPS_lik_traces = get_output("HyperTraPS", "lik.traces"),
-    HyperTraPS_bubbles = get_output("HyperTraPS", "bubbles"),
-    HyperTraPS_routes = get_output("HyperTraPS", "routes"),
-    HyperTraPS_times = get_output("HyperTraPS", "times"),
-    HyperTraPS_timediffs = get_output("HyperTraPS", "timediffs"),
-    HyperTraPS_timehists = get_output("HyperTraPS", "timehists"),
+    ## are returned in two places. I comment all of this out, since
+    ## it is simpler, and safer, to just provide the full fitted object
+    ## and not repeat entries.
+    ## HyperTraPS_model = get_output("HyperTraPS", "model"),
+    ## HyperTraPS_edges = get_output("HyperTraPS", "edges"),
+    ## HyperTraPS_posterior_samples = get_output("HyperTraPS", "posterior.samples"),
+    ## HyperTraPS_dynamics = get_output("HyperTraPS", "dynamics"),
+    ## HyperTraPS_best = get_output("HyperTraPS", "best"),
+    ## HyperTraPS_lik_traces = get_output("HyperTraPS", "lik.traces"),
+    ## HyperTraPS_bubbles = get_output("HyperTraPS", "bubbles"),
+    ## HyperTraPS_routes = get_output("HyperTraPS", "routes"),
+    ## HyperTraPS_times = get_output("HyperTraPS", "times"),
+    ## HyperTraPS_timediffs = get_output("HyperTraPS", "timediffs"),
+    ## HyperTraPS_timehists = get_output("HyperTraPS", "timehists"),
     HyperTraPS_trans_mat = get_output("HyperTraPS", "trans_mat"),
     ## HyperTraPS_predicted_genotype_freqs = get_output("HyperTraPS", "predicted_genotype_freqs"),
     HyperTraPS_elapsed_time = get_output("HyperTraPS", "elapsed_time"),
     HyperTraPS_all_output = get_all_method_output("HyperTraPS"),
 
-    BML_model = get_output("BML", "model"),
-    BML_trans_mat = NA,
-    BML_predicted_genotype_freqs = NA,
+    ## Why do we even give this?
+    ## BML_model = get_output("BML", "model"),
+    ## BML_trans_mat = NA,
+    ## BML_predicted_genotype_freqs = NA,
     BML_elapsed_time = get_output("BML", "elapsed_time"),
     BML_bootstrap = ifelse(exists("BML", all_out), opts$bml_opts$rep, NA),
     BML_all_output = get_all_method_output("BML"),
