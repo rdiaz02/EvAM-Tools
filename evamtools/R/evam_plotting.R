@@ -964,7 +964,7 @@ plot_BML_Fig3 <- function(x) {
 }
 
 
-## x: the "BML_output" object -> a png
+## x: the "BML_all_output" object -> a png
 ## Trying to use the dot graph. This is like their Fig. 2
 plot_BML_dot <- function(x) {
     dotfile <- tempfile(fileext = ".dot")
@@ -985,13 +985,13 @@ plot_BML_dot <- function(x) {
 ## Work on it later.
 plot_BML_all <- function(x) {
     grid::grid.newpage()
-    plot_BML_dot(x$BML_output)
+    plot_BML_dot(x$BML_all_output)
     dot_grob <- grid::grid.grab()
 
     fig3_grob <- NULL
     if (x$BML_bootstrap) {
         grid.newpage()
-        capture.output(gridGraphics::grid.echo(function() plot_BML_Fig3(x$BML_output$bootstrap)))
+        capture.output(gridGraphics::grid.echo(function() plot_BML_Fig3(x$BML_all_output$bootstrap)))
         fig3_grob <- grid::grid.grab()
         grid::grid.newpage()
         gridExtra::grid.arrange(dot_grob, fig3_grob,

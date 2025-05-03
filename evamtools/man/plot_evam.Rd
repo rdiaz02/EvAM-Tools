@@ -143,7 +143,7 @@ the last gene mutated.
 
 What about HyperTraPS? Use the plots provided by the
 \code{\link[hypertrapsct:hypertrapsct]{hypertrapsct}}
-package (see also \url{https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor}) passing it the component \code{$HyperTraPS_post} of the evam object. For example,
+package (see also \url{https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor}) passing it the component \code{$HyperTraPS_all_output} of the evam object. For example,
 \code{\link[hypertrapsct:plotHypercube.influencegraph]{plotHypercube.influencegraph}}
 or
 \code{\link[hypertrapsct:plotHypercube.summary]{plotHypercube.summary}},
@@ -272,5 +272,5 @@ out_h_1 <- evam(dB_c1,
                 hyper_traps_opts = list(length = 2,
                                         model = -1,
                                         seed = -1))
-hypertrapsct::plotHypercube.summary(out_h_1$HyperTraPS_post)
+hypertrapsct::plotHypercube.summary(out_h_1$HyperTraPS_all_output)
 }

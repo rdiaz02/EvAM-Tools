@@ -502,15 +502,15 @@ test_that("Minimal examples of HyperTraPS and BML", {
                methods = c("BML"),
                bml_opts = list(ntree = 3, rep = 7))
 
-  expect_true(exists("BML_output", out3))
-  expect_true(ncol(out3$BML_output$bootstrap$EdgeProbabilities) == 7)
+  expect_true(exists("BML_all_output", out3))
+  expect_true(ncol(out3$BML_all_output$bootstrap$EdgeProbabilities) == 7)
 
 
   out3_nb <- evam(dB_c1,
                   methods = c("BML"),
                   bml_opts = list(ntree = 3, rep = 0))
-  expect_true(exists("BML_output", out3_nb))
-  expect_true(!exists("BML_output$bootstrap", out3_nb))
+  expect_true(exists("BML_all_output", out3_nb))
+  expect_true(!exists("BML_all_output$bootstrap", out3_nb))
 
 
   out33 <- evam(dB_c1,
@@ -530,12 +530,12 @@ test_that("Minimal examples of HyperTraPS and BML", {
                                        seed = -1))
 
 
-  expect_true(exists("lik.traces", out_h_1$HyperTraPS_post))
-  expect_true(out_h_1$HyperTraPS_post$L == 5)
+  expect_true(exists("lik.traces", out_h_1$HyperTraPS_all_output))
+  expect_true(out_h_1$HyperTraPS_all_output$L == 5)
 
   ## And they can be plotted
-  hypertrapsct::plotHypercube.influencegraph(out_h_3$HyperTraPS_post)
-  hypertrapsct::plotHypercube.motifs(out_h_1$HyperTraPS_post)
+  hypertrapsct::plotHypercube.influencegraph(out_h_3$HyperTraPS_all_output)
+  hypertrapsct::plotHypercube.motifs(out_h_1$HyperTraPS_all_output)
 
   ## And, to avoid re-running, do some minimal testing of plots
   ## Moved to the Rd file
