@@ -77,7 +77,9 @@ importFrom("relations", "as.relation",
            "relation_incidence")
 
 importFrom("hypertrapsct", "HyperTraPS",
-           "plotHypercube.summary")
+           "plotHypercube.summary",
+           "plotHypercube.influencegraph",
+           "plotHypercube.motifs")
 
 importFrom("utils", "combn")
 

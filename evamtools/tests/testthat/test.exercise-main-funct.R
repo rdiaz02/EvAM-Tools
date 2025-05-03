@@ -534,8 +534,8 @@ test_that("Minimal examples of HyperTraPS and BML", {
   expect_true(out_h_1$HyperTraPS_post$L == 5)
 
   ## And they can be plotted
-  plotHypercube.influencegraph(out_h_3$HyperTraPS_post)
-  plotHypercube.motifs(out_h_1$HyperTraPS_post)
+  hypertrapsct::plotHypercube.influencegraph(out_h_3$HyperTraPS_post)
+  hypertrapsct::plotHypercube.motifs(out_h_1$HyperTraPS_post)
 
   ## And, to avoid re-running, do some minimal testing of plots
   ## Moved to the Rd file
