@@ -88,3 +88,5 @@ importFrom("grid", "grid.newpage", "grid.grab", "grid.draw", "unit")
 importFrom("gridGraphics", "grid.echo")
 importFrom("gridExtra", "grid.arrange")
 importFrom("png", "readPNG")
+
+importFrom("data.table", "rbindlist", "dcast", "setDT", "setnames")
