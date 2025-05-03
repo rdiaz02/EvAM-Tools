@@ -232,7 +232,11 @@ The results include:
 
 	* Predicted genotype relative frequencies: the predicted genotype frequencies from the fitted models.
 
-	* Sampled genotype counts: Counts, or absolute genotype frequencies obtained by generating a finite sample (of the size you chose) with the probabilities given by the predicted genotype frequencies. If you add noise, the sampled genotype counts include observational (e.g., genotyping) noise.
+	  The predicted genotype frequencies for CBN, HESBCN and MHN, HyperTraPS are obtained assuming sampling time is exponentially distributed with rate 1.  For CBN, MHN, and HESBCN the predicted probabilities are obtained directly from the transition rate matrix. For HyperTraPS we average over a collection of samples, where the time to sample is exponentially distributed with rate 1 (use parameter `nsampl` to change how many time samples we take ---for speed, we use a small number, but you will probably want to increase it for real).
+
+	  For OncoBN and OT, the predicted frequency of genotypes corresponds to the predicted frequency on the sample collection (these are untimed models, and sampling time is not assumed to follow any specific distribution).
+
+	* Sampled genotype counts: Counts, or absolute genotype frequencies obtained by generating a finite sample (of the size you chose) with the probabilities given by the predicted genotype frequencies. If you add noise, the sampled genotype counts include observational (e.g., genotyping) noise. (To generate sampled genotype counts, you have to select the option from "Advanced options", as this is disabled by default.)
 
 	* Note that not all predictions are available for all methods. (No transition rate matrices are available for OT and OncoBN, since those are untimed models; HyperTraPS does not give as output transition rate matrices <i>per se</i>; BML does not provide transition matrices nor transition rate matrices nor predicted genotype frequencies.)
 
@@ -260,7 +264,7 @@ The results are displayed using a combination of figures and tabular output. Spe
 
 &nbsp;&nbsp;&nbsp;&nbsp;
 
-  * The second row of figures shows the predictions derived from the fitted models. These same predictions are also displayed in tabular output on the bottom right. On the left side panel ("Customize the visualization"), you choose what predictions you want to display.  Not all predictions are available for all methods (e.g., none of transition matrix, transition rate matrix, or predicted genotypes are available for BML; transition rate matrices are not available for OncoBN or OT). Note that for HyperTraPS, the transition matrix shown here is showing the same information as shown by the hypercube graph shown in the summary figures underneath.
+  * The second row of figures shows the predictions derived from the fitted models. These same predictions are also displayed in tabular output on the bottom right. On the left side panel ("Customize the visualization"), you choose what predictions you want to display.  Not all predictions are available for all methods (e.g., none of them are  available for BML; transition rate matrices are not available for OncoBN or OT, nor as such for HyperTraPS). Note that for HyperTraPS, the transition matrix shown here is showing the same information as shown by the hypercube graph shown in the summary figures underneath.
 
 &nbsp;&nbsp;
 
