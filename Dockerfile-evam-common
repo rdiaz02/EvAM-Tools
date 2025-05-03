@@ -76,6 +76,13 @@ RUN R -e "library(remotes);remotes::install_github('phillipnicol/OncoBN')"
 RUN R -e "install.packages('prompter')"
 RUN R -e "install.packages('shinyBS')"
 RUN R -e "install.packages('tippy')"
+RUN R -e "install.packages('data.table')"
+RUN R -e "install.packages('gridExtra')"
+RUN R -e "install.packages('gridGraphics')"
+RUN R -e "install.packages('png')"
+
+
+
 
 RUN R -e "BiocManager::install('ggtree')"
 ## HyperTraps-ct version https://github.com/StochasticBiology/hypertraps-ct/commits/bioconductor/ dcb94e1
