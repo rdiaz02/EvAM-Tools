@@ -1005,3 +1005,19 @@ plot_BML_all <- function(x) {
         grid::grid.draw(dot_grob)
     }
 }
+
+
+## cpm output with HyperTraPS output -> transition matrix plot
+plot_HT_as_evam_trans_mat <- function(cpm_output,
+                                      label_type = "genotype",
+                                              fixed_vertex_size = FALSE,
+                                              top_paths = NULL) {
+  d1 <- process_data(cpm_output, mod = "HyperTraPS",
+                     plot_type = "trans_mat")
+  plot_genot_fg(d1$data2plot, plot_type = "trans_mat",
+                label_type = label_type,
+                top_paths = top_paths,
+                fixed_vertex_size = fixed_vertex_size,
+                observations = cpm_output$original_data
+                )
+}

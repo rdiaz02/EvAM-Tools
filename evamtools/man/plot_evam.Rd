@@ -2,6 +2,7 @@
 \alias{plot_evam}
 \alias{plot_CPMs}
 \alias{plot_BML_all}
+\alias{plot_HT_as_evam_trans_mat}
 \title{Plot results from EvAMs (CPMs)}
 \description{Plots fitted EvAMs (CPMs), both fitted model and custom
   plots for transition rates and transition probabilities.}
@@ -34,21 +35,30 @@ plot_BML_all(x)
 
 ## What about HyperTraPS? Use the plotting functions provided
 ## by the hypertrapsct package. See Note and examples.
+## But if you want to see the transition matrix as for the rest of evam you can use
+
+plot_HT_as_evam_trans_mat(
+  cpm_output,
+  label_type = "genotype",
+  fixed_vertex_size = FALSE,
+  top_paths = NULL
+)
+
 
 }
 \arguments{
-\item{cpm_output}{Output from the cpm}
+  \item{cpm_output}{Output from the cpm}
 
-\item{samples}{Output from a call to \link{sample_evam}. Necessary if
+  \item{samples}{Output from a call to \link{sample_evam}. Necessary if
   you request plot type \code{transitions}.}
 
-\item{orientation}{String. If it is not "vertical" it will be displayed with an horizontal layout. Optional.}
+  \item{orientation}{String. If it is not "vertical" it will be displayed with an horizontal layout. Optional.}
 
-\item{methods}{Vector of strings with the names of methods that we want to plot. If NULL, all
+  \item{methods}{Vector of strings with the names of methods that we want to plot. If NULL, all
   methods with output in cpm_output. The list of available methods is
   OT, OncoBN, CBN, MCCBN, MHN, HESBCN.}
 
-\item{plot_type}{One of:
+  \item{plot_type}{One of:
   \describe{
     \item{trans_mat: }{Transition matrix between genotypes (see
   supporting information for OT and OncoBN). This plots the object of
@@ -250,6 +260,16 @@ plot_evam(out_AND_OR_XOR, methods = c("MHN", "HESBCN"),
           , top_paths=3)
 
 
+## HyperTraPS: using hypertrapsct package function
+## and showing the transition matris like the rest of evam
+out_h_1 <- evam(dB_c1,
+                methods = c("HyperTraPS"),
+                hyper_traps_opts = list(length = 2,
+                                        model = -1,
+                                        seed = -1))
+hypertrapsct::plotHypercube.summary(out_h_1$HyperTraPS_all_output)
+plot_HT_as_evam_trans_mat(out_h_1, top_paths = 4)
+
 ## Three BML examples
 out_B1 <- evam(dB_c1,
                methods = c("BML"),
@@ -267,10 +287,5 @@ plot_BML_all(out_B1)
 plot_BML_all(out_B_nb)
 plot_BML_all(out_B_OT)
 
-out_h_1 <- evam(dB_c1,
-                methods = c("HyperTraPS"),
-                hyper_traps_opts = list(length = 2,
-                                        model = -1,
-                                        seed = -1))
-hypertrapsct::plotHypercube.summary(out_h_1$HyperTraPS_all_output)
+
 }

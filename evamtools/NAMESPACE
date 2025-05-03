@@ -9,7 +9,8 @@ export(
  , "sample_CPMs"
  , "plot_CPMs"
  , "plot_BML_all"
-)
+ , "plot_HT_as_evam_trans_mat"
+  )
 
 ## FIXME: try to bring down deps
 ##    - shiny and shinyjs only needed for shiny app, so enhances/suggests
