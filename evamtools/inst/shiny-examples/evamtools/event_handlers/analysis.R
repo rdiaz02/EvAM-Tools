@@ -171,7 +171,9 @@ get_hyper_traps_args <- function(input) {
     lasso = as.numeric(input$HyperTraPS_LASSO),
     regularise = as.numeric(input$HyperTraPS_regul),
     samples_per_row = as.numeric(input$HyperTraPS_samprow),
-    outputinput = as.numeric(input$HyperTraPS_outtrans)
+    outputinput = as.numeric(input$HyperTraPS_outtrans),
+    nsampl = as.numeric(input$HyperTraPS_nsampl),
+    cores = as.numeric(input$HyperTraPS_cores)
   )
   message("options entered are ",
           paste(names(hyper_traps_opts),

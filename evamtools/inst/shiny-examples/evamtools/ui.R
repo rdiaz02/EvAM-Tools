@@ -932,7 +932,8 @@ user_input <- function() {
                                               selectInput("HyperTraPS_regul", "regularise: Stepwise regularise model after best parameterisation: ", c(0, 1), selected = 0),
                                               numericInput("HyperTraPS_samprow", "samples_per_row: Number of simulations per parameter sample: ", 10, min=1),
                                               selectInput("HyperTraPS_outtrans", "output_transitions: Output exact transitions: ", c(0, 1), selected = 1),
-
+                                              numericInput("HyperTraPS_nsampl", "nsample: Number of samples from an exponential distribution to estimate the predicted genotype frequencies; make it larger if you want more accurate estimates: ", 1000, min=10),
+                                              numericInput("HyperTraPS_cores", "cores: Number of cores to use when estimating the predicted genotype frequencies: ", 1, min=1),
                                               tags$hr(style="border-color: darkgrey;"),
                                               tags$h4("BML options"),
                                               numericInput("BML_ntree", "Number of random restarts for searching the tree space", 100, min=0),

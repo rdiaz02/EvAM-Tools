@@ -152,10 +152,13 @@ decode_state <- function(state, num_features, feature_labels) {
 run_HyperTraPS <- function(x, opts) {
   if (opts$seed == -1) opts$seed <- round(runif(1, 1, 1e9))
   time_out <- system.time({
-    opts <- c(list(obs = x), opts)
+        opts_rm <- which(names(opts) %in% c("nsampl",
+                                            "cores") )
+        opts_call <- opts[-opts_rm]
+        opts_call <- c(list(obs = x), opts_call)
     out <- invisible(do.call(
       hypertrapsct::HyperTraPS,
-      opts
+            opts_call
     ))
   })["elapsed"]
 
@@ -163,7 +166,8 @@ run_HyperTraPS <- function(x, opts) {
     feature_labels <- colnames(x)
 
     states <- unique(c(out$dynamics$trans$From, out$dynamics$trans$To))
-  decoded_states <- sapply(states, decode_state,
+    decoded_states <- vapply(states, decode_state,
+                             character(1),
                            num_features = num_features,
                            feature_labels = feature_labels)
 
@@ -194,9 +198,25 @@ run_HyperTraPS <- function(x, opts) {
     }
     
   ## out$predicted_genotype_freqs = probs_from_trm(trans_mat)
-  out$trans_mat <- trans_mat
 
-    return(list(time_out = time_out, out = out))
+
+    ## This could be inside the first loop, but this is simpler
+    ## for now.
+
+    time2 <- system.time({
+        predicted_genotype_freqs <- probs_from_HT(out,
+                                                  gene_names = colnames(x),
+                                                      nsampl = opts$nsampl,
+                                                      cores = opts$cores)
+    })["elapsed"]
+
+    message("HyperTraPS times: time_out = ",  round(time_out, 3),
+            ". time2 = ", round(time2, 3))
+
+    return(list(time_out = time_out + time2,
+                out = c(primary_output = list(out),
+                        trans_mat = list(trans_mat),
+                        predicted_genotype_freqs = list(predicted_genotype_freqs))))
 }
 
 

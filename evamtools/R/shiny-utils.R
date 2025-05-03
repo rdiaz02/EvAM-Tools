@@ -409,13 +409,14 @@ create_tabular_data <- function(data) {
       ## predicted_genotype_freqs and those are the first tabulated
       ## things. If we do not skip here, it fails in the call
       ## to standard_rank_genots_1
-            ## HyperTraPS as of now neither.
-            if ( (length(data$methods) == 1) &&
-                   ((data$methods == "BML") ||
-                      ((data$methods == "HyperTraPS") &&
-                         (attr %in% c("predicted_genotype_freqs",
-                                      "sampled_genotype_counts"))
-                      ))) {
+            ## HyperTraPS I think should work now.
+            if ( (length(data$methods) == 1) && (data$methods == "BML")) {
+              ## FIXME: As soon as we see HyperTraPS running, rm this
+              ## ((data$methods == "BML") ||
+              ##         ((data$methods == "HyperTraPS") &&
+              ##            (attr %in% c("predicted_genotype_freqs",
+              ##                         "sampled_genotype_counts"))
+              ##         ))) {
         stopifnot(nrow(all_counts) == 0)
         stopifnot(ncol(all_counts) == 0)
         tabular_data[[attr]] <- NA

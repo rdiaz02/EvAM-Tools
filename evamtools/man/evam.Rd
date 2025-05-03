@@ -75,7 +75,9 @@ evam(x,
        outputinput = 0,
        full_analysis = 1,
        limited_output = 0,
-       featurenames = NULL
+       featurenames = NULL,
+       nsampl = 1e3,
+       cores = 1
      ),
      bml_opts = list(
        ntree = 100,
@@ -182,10 +184,16 @@ evam(x,
 }
 \item{hyper_traps_opts}{A named list with arguments passed to
   HyperTraPS. See the help for
-  \code{\link[hypertrapsct:HyperTraPS]{HyperTraPS}} and \url{https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#arguments-to-hypertraps}
-    %% \describe{
-    %%   \item{initialstates: }{Something here. FIXME: to be completed.}
-    %% }
+  \code{\link[hypertrapsct:HyperTraPS]{HyperTraPS}} and
+  \url{https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#arguments-to-hypertraps}.
+  In addition:
+  \describe{
+  \item{nsampl: }{The number of samples from an exponential distribution
+  with parameter 1 to use to compute predicted genotype frequencies (see
+  Details).}
+  \item{cores: }{Number of cores to use when computing the predicted
+    genotype frequencies.}
+   }
   }
 \item{bml_opts}{A named list with arguments passed to BML.
     \describe{
@@ -281,13 +289,15 @@ evam(x,
 	\code{\link[hypertrapsct:HyperTraPS]{HyperTraPS}}. This is just
 	a renaming and restructuring of that output, which are the
 	"Probabilities for individual transitions", from \url{https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#output}.}
-	\item{HyperTraPS_all_output}{All the ouput, as provided by the
+	\item{HyperTraPS_primary_output}{All the ouput, as provided by the
 	\code{\link[hypertrapsct:HyperTraPS]{HyperTraPS}} function. See
 	there for details.}
+       \item{HyperTraPS_predicted_genotype_freqs}{As for CBN, but see
+	Details for how it is obtained.}
 
 	\item{BML_elapsed_time}{As for other methods.}
 	\item{BML_bootstrap}{The number of bootstrap replicates.}
-	\item{BML_all_output}{All the ouput, as provided by the
+	\item{BML_primary_output}{All the ouput, as provided by the
 	  \code{\link[BML]{bml}} function. See there for details.}
 
 	\item{methods}{The methods argument to the function: methods
@@ -342,7 +352,26 @@ can grow very quickly with number of genotypes and you only need them if, well, 
 
   \bold{Probabilities of evolutionary paths or paths of tumor progression}
 
-  Details and examples on how probabilities of paths are computed are given in Diaz-Uriarte and Vasallo, 2019 (specifically, see section 3 of file S4_Text, \url{https://doi.org/10.1371/journal.pcbi.1007246.s006}); see also Hosseini et al., 2019. The models used in those papers all had a single local maximum. Here we follow the same procedure also for models with possibly more than one maximum, such as H-ESBCN. Note that in all cases we assume evolution can only move uphill in fitness and never crosses fitness valleys (which excludes, for example, the scenarios considered in Weinreich and Chao, 2005).
+  Details and examples on how probabilities of paths are computed are
+  given in Diaz-Uriarte and Vasallo, 2019 (specifically, see section 3
+  of file S4_Text,
+  \url{https://doi.org/10.1371/journal.pcbi.1007246.s006}); see also
+  Hosseini et al., 2019. The models used in those papers all had a
+  single local maximum. Here we follow the same procedure also for
+  models with possibly more than one maximum, such as H-ESBCN. Note that
+  in all cases we assume evolution can only move uphill in fitness and
+  never crosses fitness valleys (which excludes, for example, the
+  scenarios considered in Weinreich and Chao, 2005).
+
+  \bold{Predicted genotype frequencies for HyperTraPS}
+
+  To obtain predicted genotype frequencies for HyperTraPS that are
+  obtained under a similar sampling scheme as for CBN, MHN, and HESBCN
+  (i.e., sampling time exponentially distributed with rate 1), we do
+  this: sample a large (\code{nsampl}) number of times, and at each one
+  of them evaluate the non-exported function
+  \code{hypertrapsct:::prob.by.time} from
+  	\code{\link[hypertrapsct:hypertrapsct]{hypertrapsct}}.
 }
 
 \description{

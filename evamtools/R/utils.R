@@ -212,3 +212,21 @@ generate_pD_sorted_genotypes <- function(n_genes, gene_names = NULL,
 
     return(sorted_genotypes)
 }
+
+
+## Like binary2str, but genes names are not assumed to be
+## from letters; you pass them.
+binary2str_labels <- function(binary_state,
+                              labels,
+                              sep = ", ", wt = "WT"){
+  if(length(binary_state) == 0) stop("Empty state")
+
+  if(sum(!(binary_state %in% c(0, 1)))){
+    stop("Binary state should only contain 0 and 1")
+  }
+
+  if(sum(binary_state) == 0) return(wt)
+  return(paste(labels[
+    which(binary_state == 1)
+  ], collapse = sep))
+}

@@ -435,7 +435,7 @@ sample_evam <- function(cpm_output
     } else {
         methods <- names(which(vapply(c("OT", "OncoBN",
                             "CBN", "MCCBN",
-                            "MHN", "HESBCN"),
+                            "MHN", "HESBCN", "HyperTraPS"),
                           function(m) {
                               outn <- paste0(m, "_predicted_genotype_freqs")
                               return(!(is.null(cpm_output[[outn]])) &&
@@ -443,7 +443,8 @@ sample_evam <- function(cpm_output
                           }, logical(1)
                           )))
     }
-
+    ## FIXME: get "obs_genotype_transitions" and "state_counts"
+    ## for HyperTraPS. This is in the output already.
     output <- unique(output)
     valid_output <- c("sampled_genotype_counts",
                       "obs_genotype_transitions",
@@ -494,6 +495,7 @@ sample_evam <- function(cpm_output
                     ## I think this is dead code. Unreachable now
                     stop("How are we here??!! (length(trm) == 1) && is.na(trm)")
                 } else { ## transition rate matrix present
+                  ## FIXME: this will fail with HyperTraPS for now.
                     sims <- population_sample_from_trm(trm, n_samples = N)
 
                     psamples <-
@@ -1442,4 +1444,71 @@ sample_to_named_pD_ordered_out <- function(the_sample, ngenes, gene_names,
     } else {
         stop("Incorrect out option")
     }
+}
+
+
+## Emulate the probs_from_trm. Do this very hackish thing:
+## get a huge sample from an exponential so we get many weights
+## It could be more efficient if we binned, but then
+## we discretize time.
+## Repeated runs will generate slightly different results.
+## We use the object from HyperTraPS, not from evam, so missing genenames
+## and data.
+probs_from_HT <- function(x,
+                          gene_names,
+                          nsampl = 1e4,
+                          all_genotypes = TRUE,
+                          cores = parallel::detectCores()) {
+  ## gene_names are the same as feature_labels in decode_state
+  times <- rexp(nsampl, rate = 1)
+  ## This will somewhat slow
+  out <- mclapply(times,
+                  function(t)
+                    hypertrapsct:::prob.by.time(x,
+                                                tau = t),
+                  mc.cores = cores)
+
+  out <- lapply(out, data.table::setDT)
+  combined <- data.table::rbindlist(out, idcol = "source_df")
+  result <- data.table::dcast(combined,
+                              State ~ source_df,
+                              value.var = "Probability", fill = 0)
+  data.table::setnames(result,
+                       old = setdiff(names(result), "State"),
+           new = paste0("Probability_", seq_along(out)))
+
+  probs <- data.frame(result$State,
+                      rowMeans(result[, -1]))
+  ## Minimal sanity check
+  if (!(all.equal(sum(probs[, 2]), 1.0))) {
+    stop("Sum of probabilities != 1")
+  }
+
+  binary_state <- lapply(strsplit(as.character(probs$result.State), ""),
+                         as.numeric)
+
+  decoded_states <- unlist(lapply(binary_state, binary2str_labels,
+                                  labels = gene_names))
+  ## In case I need to check
+  ## out <- data.frame(Genotype = decoded_states,
+  ##                   Binary_state = probs$result.State,
+  ##                   Probs = probs[, "rowMeans.result....1.."])
+  ## out <- reorder_to_standard_order_arbitrary_df(out)
+
+  p <-  probs[, "rowMeans.result....1.."]
+  names(p) <- decoded_states
+
+  ## No guarantees this will be in standard order
+  if(!all_genotypes) return(p)
+
+  number_genes <- length(gene_names)
+  num_genots <- 2^number_genes
+
+  if (length(p) == num_genots) return(reorder_to_standard_order(p))
+
+  allGts <- genotypes_standard_order(gene_names)
+  p_all <- rep(0.0, length = length(allGts))
+  names(p_all) <- allGts
+  p_all[names(p)] <- p
+  return(p_all)
 }
