@@ -756,7 +756,8 @@ user_input <- function() {
                                                                      "CBN",
                                                                      "OT",
                                                                      "OncoBN",
-                                                                     "MHN"
+                                                                     "MHN",
+                                                                     "HyperTraPS"
                                                                  ),
                                                                  inline = FALSE),
                                               tags$h5("Beware: MCCBN may take hours to run. ",
@@ -913,7 +914,7 @@ user_input <- function() {
                                                 numericInput("MCCBN_seed", "Seed: ", NULL, min=0, width="50%"),
                                               tags$hr(style="border-color: darkgrey;"),
                                               tags$h4("HyperTraPS options"),
-                                              selectInput("HyperTraPS_model", "model: Model structure: ",
+                                              selectInput("HyperTraPS_model", "model: Model structure (-1: arbitrary; 1: main effect, no interaction; 2: pairwise; 3: 3-way; 4: 4-way): ",
                                                           choices = c(-1, 1:4), selected = 2),
                                               numericInput("HyperTraPS_walkers", "walkers: Number of walkers: ", 200, min=0),
                                               numericInput("HyperTraPS_length", "length: Inference chain length: ", 3, min=0),

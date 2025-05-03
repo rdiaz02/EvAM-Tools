@@ -75,7 +75,7 @@ evam(x,
        outputinput = 0,
        full_analysis = 1,
        limited_output = 0,
-       featurenames = NULL # Replace NULL with the actual character vector if available
+       featurenames = NULL
      ),
      bml_opts = list(
        ntree = 100,
@@ -180,10 +180,12 @@ evam(x,
   MHN, do not use OpenMP threads from forked process from
   \code{\link[parallel]{mclapply}}.
 }
-\item{hyper_traps_opts}{A named list with arguments passed to HyperTraPS.
-    \describe{
-      \item{initialstates: }{Something here. FIXME: to be completed.}
-    }
+\item{hyper_traps_opts}{A named list with arguments passed to
+  HyperTraPS. See the help for
+  \code{\link[hypertrapsct:HyperTraPS]{HyperTraPS}} and \url{https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#arguments-to-hypertraps}
+    %% \describe{
+    %%   \item{initialstates: }{Something here. FIXME: to be completed.}
+    %% }
   }
 \item{bml_opts}{A named list with arguments passed to BML.
     \describe{

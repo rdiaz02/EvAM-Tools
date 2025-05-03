@@ -8,7 +8,8 @@
 ****
 - [EvAM-Tools](#evamtools)
 <br>&nbsp;&nbsp;- [A two-paragraph summary about cross-sectional data and CPMs](#helpcsd)
-- [How to use this web interface?](#input)
+<br>&nbsp;&nbsp;- [What CPMs are included in ```EvAM-Tools```?](#cpms)
+- [User's Manual: How to use this web interface?](#input)
 <br>&nbsp;&nbsp;- [Web app: overview of workflow and functionality](#overview)
 <br>&nbsp;&nbsp;- [```User input```](#userinput)
 <br>&nbsp;&nbsp;- [Analyze data: ```Run evamtools```](#running)
@@ -17,7 +18,6 @@
 <br>&nbsp;&nbsp;- [Example files for upload](#example_files)
 <br>&nbsp;&nbsp;- [Session timeouts, RAM and elapsed time execution limits, aborting a run](#limits)
 <br>&nbsp;&nbsp;- [How long does it take to run?](#timetorun)
-- [What CPMs are included in ```EvAM-Tools```?](#cpms)
 <br>&nbsp;&nbsp;- [Default options and default CPMs run](#cpms2run)
 <br>&nbsp;&nbsp;- [References and related repositories](#refs)
 - [Where is the code? Terms of use. Citing. Copyright](#code)
@@ -34,7 +34,12 @@
 EvAM-Tools is an R package and Shiny web app that provides tools for evolutionary accumulation, or event accumulation, models. We use code from  "Cancer Progression Models" (CPM) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost). EvAM-Tools is  also available as an R package (see https://github.com/rdiaz02/EvAM-Tools).
 
 
-This web interface provides a GUI to the package and focuses on allowing fast construction, manipulation, and exploration of CPM models, and making it easy to gain an intuitive understanding of what these methods infer from different data sets as well as what kind of data are to be expected under these models. You can analyze your data, create cross-sectional data from scratch (by giving genotype frequencies), or generate synthetic data under different CPMs. You can compare results from different methods/models, as well as experiment and understand the consequences of changes in the input data on the returned inferences. You can also examine how a given method performs when data have been generated under another (or its own) model. Additional examples of use are discussed in  https://github.com/rdiaz02/EvAM-Tools#some-examples-of-use and in the ["EvAM-Tools: examples" additional documentation file](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf).
+This Shiny web interface provides a GUI to the package and focuses on allowing fast construction, manipulation, and exploration of CPM models, and making it easy to gain an intuitive understanding of what these methods infer from different data sets as well as what kind of data are to be expected under these models. You can analyze your data, create cross-sectional data from scratch (by giving genotype frequencies), or generate synthetic data under different CPMs. You can compare results from different methods/models, as well as experiment and understand the consequences of changes in the input data on the returned inferences. You can also examine how a given method performs when data have been generated under another (or its own) model.
+
+
+This landing page is the main documentation for the use of the web interface. Additional examples of use are discussed in  https://github.com/rdiaz02/EvAM-Tools#some-examples-of-use and in the ["EvAM-Tools: examples" additional documentation file](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf) (though they do not ---yet--- include HyperTraPS-CT nor BML). The R package itself contains documentation using standard R mechanisms, and gives you access to some additional functionality not exposed via the web app.
+
+
 
 <!-- * In the ```User input``` tab (on top of the page) you can upload data or define cross-sectional data, or simulate cross-sectional data from models. These are then submitted to run. -->
 <!-- * In the ```Results``` tab you can see the output. -->
@@ -64,14 +69,37 @@ In cross-sectional data a single sample is obtained from each subject or patient
 
 Cancer progression models (CPMs) or, more generally, event accumulation models, use these cross-sectional data to try to infer restrictions in the order of accumulation of events; for example, that a mutation on gene B is always preceded by a mutation in gene A (maybe because mutating B when A is not mutated). Some cancer progression models, such as MHN, instead of modeling deterministic restrictions, model facilitating/inhibiting interactions between genes, for example that having a mutation in gene A makes it very likely to gain a mutation in gene B. A longer explanation is provided in [What CPMs are included in ```EvAM-Tools```?](#cpms), below, and many more details in  [EvAM-Tools: methods' details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf ).  Finally, note we have talked about  "genotype" and "mutation", but CPMs have been used with non-genetic data too, and thus our preference for the expression "event accumulation models"; as said above, the key idea is that events are gained one by one, but not lost, and that we can consider the different subjects/patients in the cross-sectional data as replicate evolutionary experiments or runs where all individuals are under the same constraints (e.g., genetic constraints if we are dealing with mutations).
 
+&nbsp;
 
 
-
-
-&nbsp;&nbsp;
 
 ****
-## How to use this web interface? <a id="input"></a>
+### What CPMs are included in ```EvAM-Tools```?<a id="cpms"></a>
+***
+
+*  **Oncogenetic Trees (OT):** Restrictions in the accumulation of mutations (or events) are represented as a tree. Hence, a parent node can have many children, but children have a single parent. OTs are untimed (edge weights represent conditional probabilities of observing a given mutation, when the sample is taken, given the parents are observed).
+
+*  **Conjuntive Bayesian Networks (CBN):** This model generalizes the tree-based restriction of OT to a directed acyclic graph (DAG). A node can have multiple parents, and it denotes that all of the parents have to be present for the children to appear. Therefore, relationships are conjuntive (AND relationships between the parents). These are timed models, and the parameters of the models are rates given that all parents have been observed. We include both H-CBN as well as MC-CBN.
+
+*  **Hidden Extended Suppes-Bayes Causal Networks (H-ESBCN):** Somewhat similar to CBN, but it includes automatic detection of logical formulas AND, OR, and XOR. H-ESBCN is used by its authors as part of Progression Models of Cancer Evolution (PMCE). Like CBN, it returns rates.
+
+*  **OncoBN**: Similar to OT, in the sense of being an untimed oncogenetic model, but allows both AND (the conjunctive or CBN model) and OR relationships (the disjunctive or DBN model).
+
+
+*  **Mutual Hazard networks (MHN):** With MHN dependencies are not deterministic and events can make other events more like or less likely (inhibiting influence). The fitted parameters are multiplicative hazards that represent how one event influences other events.
+
+*  **Hypercubic transition path sampling (HyperTraPS-CT):** HyperTraPS-CT is also a stochastic dependencies model, like MHN, where events can have an inhibiting or promoting effect on other events. HyperTraPS-CT allows modelling in continuous or discrete time and model structures can include pairwise interactions between events, like MHN, but also lower-order (no interactions between events) and  higher-order interactions (three-way, four-way, and arbitrary) (set this with the "model" argument). (HyperTraPS-CT also allows for phylogenetically- and longitudinally-related samples, but this is not ---yet--- available via the Shiny app).
+
+*  **Bayesian Mutation Landscape (BML):** tries to reconstruct evolutionary progression paths and ancestral genotypes. It can highlight epistatic interactions between genes.
+
+For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf); see also the review paper Diaz-Uriarte, R., & Johnston, I. G. (2025), https://doi.org/10.1109/ACCESS.2025.3558392 .
+
+&nbsp; &nbsp;
+
+
+
+****
+## User's manual: How to use this web interface? <a id="input"></a>
 ***
 
 
@@ -80,7 +108,7 @@ Cancer progression models (CPMs) or, more generally, event accumulation models, 
 ***
 
 
-The figure below provides an overview of the major workflows with the web app:
+The figure below provides an overview of the major workflows with the web app (that figure does not include HyperTraPS nor BML, but the workflow is similar for those methods):
 
 <br>
 <img src="figure-overview.png" alt="Overview EvAM-Tools web app" width="100%" style="border:1px solid black;">
@@ -140,6 +168,9 @@ To start using the web app, go first to the ```User input``` tab (on top of the 
 
 		   1.2. MHN, that models inhibiting/facilitating relationships between genes using baseline hazard rates and multiplicative effects between genes (specified in the log-&Theta; matrix).
 		   &nbsp;
+
+		   (1.3. This is not available for HyperTraPS or BML.)
+
 	   2. Simulate data from the CPM model. In addition to the number of samples, you can specify the amount of observational noise (and, for OT and OncoBN, deviations from the model).<br/>
 	   &nbsp;
 
@@ -203,6 +234,8 @@ The results include:
 
 	* Sampled genotype counts: Counts, or absolute genotype frequencies obtained by generating a finite sample (of the size you chose) with the probabilities given by the predicted genotype frequencies. If you add noise, the sampled genotype counts include observational (e.g., genotyping) noise.
 
+	* Note that not all predictions are available for all methods. (No transition rate matrices are available for OT and OncoBN, since those are untimed models; HyperTraPS does not give as output transition rate matrices <i>per se</i>; BML does not provide transition matrices nor transition rate matrices nor predicted genotype frequencies.)
+
   <!-- * Observed genotype transitions (counts): if you choose to *Sample for observed genotype transitions* (under ```Advanced options and CPMs to use```), for models that return a transition rate matrix (CBN, H-ESBCN, MHN), we obtain the observed sampled of genotypes by simulating sampling from the continuous-time Markov chain; this provides also observed transition counts between genotypes. -->
   <!-- See remove_note_sogt_1 -->
 
@@ -220,12 +253,14 @@ The results are displayed using a combination of figures and tabular output. Spe
 
 	 * You can represent the results of all the fitted models or only of a subset (select those using "CPMs to show").
 
-     * For BML, we do not show DAGs of restrictions (nor matrices as for MHN and HyperTraPS), since BML does not return these. Instead, we show plots as in Fig. 2 of Misra et al., 2014. These show the most likely paths of progression. As explained in that paper (p. 2460, legend Fig. 2) "Color for a genotype <i>g</i> with <i>k</i> mutations is scaled according to its relative probability <i>P</i>(<i>g</i>)/<i>m<sub>k</sub></i> (decreasing from darker shade to light), where <i>m<sub>k</sub></i> is the maximum probability for a node with <i>k</i> mutations (Section 3)." [As explained in pp. 2456 and ff., <i>P</i>(<i>g</i>) is the probability "that a particular combination of mutations (denoted by genotype <i>g</i>) reaches fixation in a cell population that has evolved from a normal cell genotype and will eventually attain a tumor cell genotype. (...) [it is]  the evolutionary probability of genotype <i>g</i>.  <i>P</i>(<i>g</i>) equals the sum of path probabilities for every mutation path from the normal genotype that passes through <i>g</i> and ends as atumor genotype."]
+	 * For HyperTraPS the output in the first row depends on the model. For models with pairwise interactions (`model = 2`), we show the pairwise influences between features (this is similar to the output from MHN), calling hypertraps' package `plotHypercube.influences` function. For models with 3-way interactions (`model = 3`) we show "how each feature acquisition influences the rate of acquisition of other features as a network" (from https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output), calling hypertraps' package `plotHypercube.influencegraph` function. For other models (unrestricted ---`model = -1`---, main-effects only ---`model = 1`---, and four-way interactions ---`model = 4`---), we show a "motif plot of feature acquisition probabilities at discrete orderings", calling hypertraps' package `plotHypercube.motifs` function.
+
+     * For BML, we do not show DAGs of restrictions (nor matrices as for MHN and HyperTraPS), since BML does not return these. Instead, we show plots as in Fig. 2 of Misra et al., 2014. These plots show the most likely paths of progression. As explained in that paper (p. 2460, legend Fig. 2) "Color for a genotype <i>g</i> with <i>k</i> mutations is scaled according to its relative probability <i>P</i>(<i>g</i>)/<i>m<sub>k</sub></i> (decreasing from darker shade to light), where <i>m<sub>k</sub></i> is the maximum probability for a node with <i>k</i> mutations (Section 3)." [As explained in pp. 2456 and ff., <i>P</i>(<i>g</i>) is the probability "that a particular combination of mutations (denoted by genotype <i>g</i>) reaches fixation in a cell population that has evolved from a normal cell genotype and will eventually attain a tumor cell genotype. (...) [it is]  the evolutionary probability of genotype <i>g</i>.  <i>P</i>(<i>g</i>) equals the sum of path probabilities for every mutation path from the normal genotype that passes through <i>g</i> and ends as atumor genotype."]
 
 
 &nbsp;&nbsp;&nbsp;&nbsp;
 
-  * The second row of figures shows the predictions derived from the fitted models. These same predictions are also displayed in tabular output on the bottom right. On the left side panel ("Customize the visualization"), you choose what predictions you want to display.  Not all predictions are available for all methods (e.g., none of transition matrix, transition rate matrix, or predicted genotypes are available for BML; transition rate matrices are not available for OncoBN or OT).
+  * The second row of figures shows the predictions derived from the fitted models. These same predictions are also displayed in tabular output on the bottom right. On the left side panel ("Customize the visualization"), you choose what predictions you want to display.  Not all predictions are available for all methods (e.g., none of transition matrix, transition rate matrix, or predicted genotypes are available for BML; transition rate matrices are not available for OncoBN or OT). Note that for HyperTraPS, the transition matrix shown here is showing the same information as shown by the hypercube graph shown in the summary figures underneath.
 
 &nbsp;&nbsp;
 
@@ -234,6 +269,14 @@ The results are displayed using a combination of figures and tabular output. Spe
     * These plots might include genotypes never observed in the sample; these are shown in light green.
     * For easier visualization, in very busy plots, instead of the Genotypes you might want to show the last gene (or event) mutated or gained; change this options under "Type of label".
     * (As visualizing the acquisition of mutations in a complex network can be challenging, for the transition probabilities/rates plots we use the representation of the hypergraph transition graph from HyperTraPS --- Greenbury et al., 2020. HyperTraPS: Inferring probabilistic patterns of trait acquisition in evolutionary and disease progression pathways. Cell systems, 10, 39–51, https://doi.org/10.1016/j.cels.2019.10.009)
+
+&nbsp;&nbsp;
+    * For HyperTraPS, we show below summary plots as provided by  hypertraps' package `plotHypercube.summary` function. The plots provided are, from left to right and from top to bottom:
+	  * A trace of the likelihood ("re-calculated twice with different samples (to show consistency or lack thereof), along with current "in use" likelihood" ---from https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output ; the reamining verbatime quotations are from this source).
+	  * A "'Bubble plot' of probability of acquiring trait <i>i</i> at ordinal step <i>j</i>".
+      * "Transition graph with edge weights showing probability flux (from sampled paths), with mean and s.d. of absolute timings for each step."
+      * "Histograms of absolute timings for each trait's acquisition" (we use the default settings, so the threshold time for the histogram on the bottom right is 20).
+      * See https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output for details.
 
 &nbsp;&nbsp;
 
@@ -310,33 +353,10 @@ It depends on the number of genes or features and methods used. For six genes, a
 
 
 ****
-## What CPMs are included in ```EvAM-Tools```?<a id="cpms"></a>
-***
-
-*  **Oncogenetic Trees (OT):** Restrictions in the accumulation of mutations (or events) are represented as a tree. Hence, a parent node can have many children, but children have a single parent. OTs are untimed (edge weights represent conditional probabilities of observing a given mutation, when the sample is taken, given the parents are observed).
-
-*  **Conjuntive Bayesian Networks (CBN):** This model generalizes the tree-based restriction of OT to a directed acyclic graph (DAG). A node can have multiple parents, and it denotes that all of the parents have to be present for the children to appear. Therefore, relationships are conjuntive (AND relationships between the parents). These are timed models, and the parameters of the models are rates given that all parents have been observed. We include both H-CBN as well as MC-CBN.
-
-*  **Hidden Extended Suppes-Bayes Causal Networks (H-ESBCN):** Somewhat similar to CBN, but it includes automatic detection of logical formulas AND, OR, and XOR. H-ESBCN is used by its authors as part of Progression Models of Cancer Evolution (PMCE). Like CBN, it returns rates.
-
-*  **OncoBN**: Similar to OT, in the sense of being an untimed oncogenetic model, but allows both AND (the conjunctive or CBN model) and OR relationships (the disjunctive or DBN model).
-
-
-*  **Mutual Hazard networks (MHN):** With MHN dependencies are not deterministic and events can make other events more like or less likely (inhibiting influence). The fitted parameters are multiplicative hazards that represent how one event influences other events.
-
-*  **HyperTraPS-CT:** HyperTraPS-CT is also a stochastic dependencies model, like MHN, where events can have an inhibiting or promoting effect on other events. HyperTraPS-CT allows modelling in continuous or discrete time and model structures can include pairwise interactions between events, as well as higher-order interactions.
-
-*  **Bayesian Mutation Landscape (BML):** tries to reconstruct evolutionary progression paths and ancestral genotypes. It can highlight epistatic interactions between genes.
-
-For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf); see also the review paper Diaz-Uriarte, R., & Johnston, I. G. (2025), https://doi.org/10.1109/ACCESS.2025.3558392 .
-
-&nbsp;
-
-****
 ### Default options and default CPMs run<a id="cpms2run"></a>
 ***
 
-- In the Shiny app, by default we run CBN, OT, OncoBN, and MHN. If you want to run H-ESBCN or MC-CBN, or not run some of the above methods, (de)select them under ```Advanced options and CPMs to use```. (H-ESBCN or MC-CBN are not run by default, as they can take a long time).
+- In the Shiny app, by default we run CBN, OT, OncoBN, MHN, and HyperTraPS. If you want to run H-ESBCN, MC-CBN, or BML, or not run some of the above methods, (de)select them under ```Advanced options and CPMs to use```. (H-ESBCN or MC-CBN are not run by default, as they can take a long time).
 - OncoBN can be run using a conjunctive or a disjunctive model. The default used in the Shiny app (and the ```evam``` function in the package) is the disjunctive model. You can use the conjunctive one by selecting it under ```Advanced options and CPMs to use```, in ```OncoBN options```, ```Model```.
 - Most methods have other options that can be modified. Again, check ```Advanced options and CPMs to use```.
 
@@ -345,17 +365,17 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 
 
 ****
-### References and related repositories<a id="refs"></a>
+## References and related repositories<a id="refs"></a>
 ***
 
-##### Overview paper on CPMs and EvAMs ####
+#### Overview paper on CPMs and EvAMs ####
 
 - Diaz-Uriarte, R., & Johnston, I. G. (2025). A picture guide to cancer progression and evolutionary accumulation models: Systematic critique, plausible interpretations, and alternative uses. Ieee Access, 13, 62306–62340. https://doi.org/10.1109/ACCESS.2025.3558392
 
 &nbsp;
 
 
-##### OT ####
+#### OT ####
 
 
 - Desper, R., Jiang, F., Kallioniemi, O. P., Moch, H., Papadimitriou, C. H., &
@@ -370,7 +390,7 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 
 &nbsp;
 
-##### H-CBN and MC-CBN ####
+#### H-CBN and MC-CBN ####
 
 - Beerenwinkel, N., & Sullivant, S. (2009). Markov models for accumulating
   mutations. Biometrika, 96(3), 645.
@@ -391,7 +411,7 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 
 &nbsp;
 
-##### MHN ####
+#### MHN ####
 
 
 - Schill, R., Solbrig, S., Wettig, T., & Spang, R. (2020). Modelling cancer progression using Mutual Hazard Networks. Bioinformatics, 36(1), 241–249. http://dx.doi.org/10.1093/bioinformatics/btz513
@@ -400,7 +420,7 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 
 &nbsp;
 
-##### H-ESBCN (PMCE) ####
+#### H-ESBCN (PMCE) ####
 
 
 - Angaroni, F., Chen, K., Damiani, C., Caravagna, G., Graudenzi, A., & Ramazzotti, D. (2021). PMCE: efficient inference of expressive models of cancer evolution with high prognostic power. Bioinformatics, 38(3), 754–762. http://dx.doi.org/10.1093/bioinformatics/btab717
@@ -410,7 +430,7 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 
 &nbsp;
 
-##### OncoBN (DBN) ####
+#### OncoBN (DBN) ####
 
 - Nicol, P. B., Coombes, K. R., Deaver, C., Chkrebtii, O., Paul, S., Toland, A. E., & Asiaee, A. (2021). Oncogenetic network estimation with disjunctive Bayesian networks. Computational and Systems Oncology, 1(2), 1027. http://dx.doi.org/10.1002/cso2.1027
 
@@ -419,10 +439,10 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 &nbsp;
 
 
-##### HyperTraPS-CT ####
+#### HyperTraPS-CT ####
 
 - Aga, O. N. L., Brun, M., Dauda, K. A., Diaz-Uriarte, R., Giannakis,
-  K., & Johnston, I. G. (2024). Hypertraps-ct: Inference and prediction
+  K., & Johnston, I. G. (2024). HyperTraPS-CT: Inference and prediction
   for accumulation pathways with flexible data and model structures.
   Plos Computational Biology, 20(9), e1012393.
   https://doi.org/10.1371/journal.pcbi.1012393
@@ -431,7 +451,7 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 
 &nbsp;
 
-##### BML ####
+#### BML ####
 
 - Misra, N., Szczurek, E., & Vingron, M. (2014). Inferring the paths of somatic evolution in cancer. Bioinformatics (Oxford, England), 30(17), 2456–2463. https://doi.org/10.1093/bioinformatics/btu319
 
@@ -441,7 +461,7 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 
 &nbsp;
 
-##### Conditional prediction of genotypes and probabilities of paths from CPMs ####
+#### Conditional prediction of genotypes and probabilities of paths from CPMs ####
 
 - Hosseini, S., Diaz-Uriarte, R., Markowetz, F., & Beerenwinkel, N. (2019). Estimating the predictability of cancer evolution. Bioinformatics, 35(14), 389–397. http://dx.doi.org/10.1093/bioinformatics/btz332
 

@@ -29,9 +29,11 @@ plot_CPMs(
   top_paths = NULL
 )
 
-## This is a temporary kludge
-
+## This is a temporary kludge for BML
 plot_BML_all(x)
+
+## What about HyperTraPS? Use the plotting functions provided
+## by the hypertrapsct package. See Note and examples.
 
 }
 \arguments{
@@ -109,12 +111,7 @@ For BML, we are using, for the moment, a temporary kludge. It returns
 figs as in Fig. 2 and Fig. 3a and 3b in Misra et al., 2014.
 
 
-What about HyperTraPS? Use the plots provided by the hypertrapsct
-package with the component \code{$HyperTraPS_post}. For example,
-\code{\link[hypertrapsct:plotHypercube.influencegraph]{plotHypercube.influencegraph}}
-or
-\code{\link[hypertrapsct:plotHypercube.summary]{plotHypercube.summary}},
-etc. See an example below.
+
 }
 
 
@@ -143,6 +140,14 @@ Plots can be more readable with a combination of top_paths and
 label_type. If \code{label_type = 'acquisition'} node labels will dissapear
 and edge label will be shown instead. They will display the information of
 the last gene mutated.
+
+What about HyperTraPS? Use the plots provided by the
+\code{\link[hypertrapsct:hypertrapsct]{hypertrapsct}}
+package (see also \url{https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor}) passing it the component \code{$HyperTraPS_post} of the evam object. For example,
+\code{\link[hypertrapsct:plotHypercube.influencegraph]{plotHypercube.influencegraph}}
+or
+\code{\link[hypertrapsct:plotHypercube.summary]{plotHypercube.summary}},
+etc. See an example below.
 
 
 \strong{plot_CPMs has been deprecated}. Use plot_evam.
