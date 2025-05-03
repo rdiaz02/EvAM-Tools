@@ -267,5 +267,5 @@ out_h_1 <- evam(dB_c1,
                 hyper_traps_opts = list(length = 2,
                                         model = -1,
                                         seed = -1))
-plotHypercube.summary(out_h_1$HyperTraPS_post)
+hypertrapsct::plotHypercube.summary(out_h_1$HyperTraPS_post)
 }

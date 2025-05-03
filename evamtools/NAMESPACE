@@ -34,7 +34,7 @@ importFrom("stringi", "stri_count", "stri_count_fixed", "stri_count_regex",
 importFrom("parallel", "detectCores", "mclapply")
 importFrom("DT", "renderDT", "DTOutput", "editData")
 importFrom("Oncotree", "oncotree.fit", "marginal.distr",
-           "distribution.oncotree", "bootstrap.oncotree")    
+           "distribution.oncotree", "bootstrap.oncotree")
 importFrom("gtools", "combinations")
 importFrom("igraph", "V", "E", "graph.data.frame", "layout.reingold.tilford"
          , "get.adjacency", "all_simple_paths", "decompose", "is_dag",
@@ -76,7 +76,8 @@ importFrom("relations", "as.relation",
            "transitive_reduction",
            "relation_incidence")
 
-importFrom("hypertrapsct", "HyperTraPS")
+importFrom("hypertrapsct", "HyperTraPS",
+           "plotHypercube.summary")
 
 importFrom("utils", "combn")
 
