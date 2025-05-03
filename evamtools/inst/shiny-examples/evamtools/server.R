@@ -2331,12 +2331,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
                     output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
                   if (tmp_data$all_options$hyper_traps_opts$model == 2) {
-                    pl <- hypertrapsct::plotHypercube.influences(tmp_data$HyperTraPS_all_output)
+                    pl <- hypertrapsct::plotHypercube.influences(tmp_data$HyperTraPS_primary_output)
                   } else if (tmp_data$all_options$hyper_traps_opts$model == 3) {
-                    pl <- hypertrapsct::plotHypercube.influencegraph(tmp_data$HyperTraPS_all_output,
+                    pl <- hypertrapsct::plotHypercube.influencegraph(tmp_data$HyperTraPS_primary_output,
                                                                      label.size = 4)
                   } else {
-                    pl <- hypertrapsct::plotHypercube.motifs(tmp_data$HyperTraPS_all_output,
+                    pl <- hypertrapsct::plotHypercube.motifs(tmp_data$HyperTraPS_primary_output,
                                                              label.size = 4)
                   }
                         pl
@@ -2351,7 +2351,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     )
                 } else if (met == "BML") {
                   output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
-                    pl <- evamtools:::plot_BML_dot(tmp_data$BML_all_output)
+                    pl <- evamtools:::plot_BML_dot(tmp_data$BML_primary_output)
                     pl
                   })
                   return(
@@ -2475,9 +2475,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
             lapply(plot2show(), function(met) {
                 if (met == "HyperTraPS") {
-                  HT_model <- tmp_data$HyperTraPS_all_output$model
+                  HT_model <- tmp_data$HyperTraPS_primary_output$model
                     output[[sprintf("plot_hypertraps_%s", met)]] <- renderPlot({
-                      pl <- hypertrapsct::plotHypercube.summary(tmp_data$HyperTraPS_all_output)
+                    pl <- hypertrapsct::plotHypercube.summary(tmp_data$HyperTraPS_primary_output)
 
                         pl 
                 }, height = 600)
@@ -2522,11 +2522,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             if (tmp_data$BML_bootstrap) {
                     ## Like Figure 3.b in Misra et al.
                     output[[sprintf("plot_bml_%s", met)]] <- renderPlot({
-                      ## data <- as.data.frame(t(log(tmp_data$BML_all_output$bootstrap$OBS_Probabilities)))
+                      ## data <- as.data.frame(t(log(tmp_data$BML_primary_output$bootstrap$OBS_Probabilities)))
                       ## boxplot(data, horizontal = TRUE, yaxt="n", col="red")
                       ## axis(2, at = 1:ncol(data), las =2, labels = colnames(data))
                       ## title("P(g)")
-                      evamtools:::plot_BML_Fig3(tmp_data$BML_all_output$bootstrap)
+                      evamtools:::plot_BML_Fig3(tmp_data$BML_primary_output$bootstrap)
                     })
                     return(tagList(
                 h3(

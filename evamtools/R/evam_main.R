@@ -183,9 +183,9 @@ evam <- function(x,
         return(all_out[[method]][[component]])
     }
 
-    get_all_method_output <- function(method) {
+  get_primary_output <- function(method) {
         if (!exists(method, all_out)) return(NA)
-        return(all_out[[method]])
+    return(all_out[[method]]$primary_output)
     }
 
     ## To avoid repeating code
@@ -283,9 +283,9 @@ evam <- function(x,
     ## HyperTraPS_timediffs = get_output("HyperTraPS", "timediffs"),
     ## HyperTraPS_timehists = get_output("HyperTraPS", "timehists"),
     HyperTraPS_trans_mat = get_output("HyperTraPS", "trans_mat"),
-    ## HyperTraPS_predicted_genotype_freqs = get_output("HyperTraPS", "predicted_genotype_freqs"),
+    HyperTraPS_predicted_genotype_freqs = get_output("HyperTraPS", "predicted_genotype_freqs"),
     HyperTraPS_elapsed_time = get_output("HyperTraPS", "elapsed_time"),
-    HyperTraPS_all_output = get_all_method_output("HyperTraPS"),
+    HyperTraPS_primary_output = get_primary_output("HyperTraPS"),
 
     ## Why do we even give this?
     ## BML_model = get_output("BML", "model"),
@@ -293,7 +293,7 @@ evam <- function(x,
     ## BML_predicted_genotype_freqs = NA,
     BML_elapsed_time = get_output("BML", "elapsed_time"),
     BML_bootstrap = ifelse(exists("BML", all_out), opts$bml_opts$rep, NA),
-    BML_all_output = get_all_method_output("BML"),
+    BML_primary_output = get_primary_output("BML"),
 
     methods = methods,
     original_data = xoriginal,
