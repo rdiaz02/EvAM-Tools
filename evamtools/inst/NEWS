@@ -1,3 +1,9 @@
+Changes in version 3.2.1 (2025-05-03):
+	- Many additions/modifications to HyperTraPS-CT plotting,
+	  default arguments, input of arguments via Shiny app,
+	  and documentation.
+	- Fixed issues that prevented running HyperTraPS or BML on their own.
+
 Changes in version 3.1.1 (2025-05-02):
 	- Many additions/modifications to BML plotting.
 	- Documentation of HyperTraPS and, mainly, BML.
