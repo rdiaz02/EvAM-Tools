@@ -2316,7 +2316,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     ##     input$cpm2show
     ## })
 
-
+    ## OUTPUT starts here
     ## Here is where we output the upper row of plots: the DAGs of
     ## restrictions, or the MHN matrix, or the HyperTraPS matrix.
     output$sims <- renderUI({
@@ -2475,7 +2475,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
             lapply(plot2show(), function(met) {
                 if (met == "HyperTraPS") {
-
+                  HT_model <- tmp_data$HyperTraPS_all_output$model
                     output[[sprintf("plot_hypertraps_%s", met)]] <- renderPlot({
                       pl <- hypertrapsct::plotHypercube.summary(tmp_data$HyperTraPS_all_output)
 
@@ -2483,8 +2483,28 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 }, height = 600)
 
                     return(tagList(
-                  h3("HyperTraPS summary"),
-                  plotOutput(sprintf("plot_hypertraps_%s", met), height="600px"))
+                    h3(
+                      span("HyperTraPS summary. "),
+                      br(),
+                      span(
+                        paste0(
+                          "Model = ", HT_model,
+                          " (",
+                          switch(HT_model,
+                                 "-1" = "unrestricted",
+                                 "1"  = "main effects",
+                                 "2"  = "pairwise interactions",
+                                 "3"  = "3-way interactions",
+                                 "4"  = "4-way interactions"),
+                          ")",
+                          "."
+                        ),
+                        style = "font-size: smaller;"
+                      )
+                    ),
+                    plotOutput(sprintf("plot_hypertraps_%s", met), height="600px"),
+                    rm(HT_model)
+                  )
                     )
                 }
             })
