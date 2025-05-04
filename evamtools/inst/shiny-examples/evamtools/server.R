@@ -2527,7 +2527,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                       ## axis(2, at = 1:ncol(data), las =2, labels = colnames(data))
                       ## title("P(g)")
                       evamtools:::plot_BML_Fig3(tmp_data$BML_primary_output$bootstrap)
-                    })
+                    }, height = 600)
                     return(tagList(
                 h3(
                   span("BML bootstrap. "),
