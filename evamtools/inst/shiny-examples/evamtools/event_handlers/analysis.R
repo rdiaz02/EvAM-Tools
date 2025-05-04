@@ -250,6 +250,7 @@ run_analysis <- function(data, input, disp_freqs_ret, EVAM_MAX_ELAPSED) {
         {
             evam(data2run,
                 methods = methods,
+                 cores = input$evam_run_num_cores,
                 paths_max = input$return_paths_max,
                 mhn_opts = opts$mhn_opts,
                 ot_opts = opts$ot_opts,
