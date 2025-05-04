@@ -352,6 +352,108 @@ results_simple <- function(){
     )
 }
 
+## Avoid repeating the same structure. This combines the input function
+## with helper text not in bold. But we need to deal with the annoying
+## arrows on top of short labels.
+## inputWithHelper <- function(inputFunc, inputId, label,  helperText,
+##                             ...) {
+##     helperTag = tags$h5
+##     helperStyle = "margin-top: 0.5em; margin-bottom: 1em;"
+
+##     tagList(
+##         inputFunc(inputId, label, ...),
+##         helperTag(helperText) ##, style = helperStyle)
+##     )
+## }
+
+## This is both a sensible function and a kludge. Avoid repeating the
+## inputWhatever and h5, (that is good). But selectInput boxes
+## can be tiny if label is tiny, so increase label artificially (kludge)
+inputWithHelper <- function(inputFunc, inputId, label,
+                            helperText, ...) {
+
+    ## Add non-breaking spaces to ensure minimum label width
+    ## This forces the input control to have adequate space
+    if (deparse(substitute(inputFunc)) == "selectInput") {
+        min_length <- 15
+        label_length <- nchar(label)
+        if (label_length < min_length) {
+            padding_spaces <- paste(rep("\u00A0", min_length - label_length),
+                                    collapse = "")
+            label <- paste0(label, padding_spaces)
+        }
+    }
+
+    ## Create the input with padded label
+    input_el <- inputFunc(inputId, label, ...)
+
+    ## Return both elements
+    tagList(
+        input_el,
+        tags$h5(helperText)
+    )
+}
+
+
+inputWithHelperUnbold <- function(inputFunc, inputId, label,
+                                  label_unbold = "",
+                                  helperText = "", ...) {
+
+    ## Add non-breaking spaces to ensure minimum label width
+    ## This forces the input control to have adequate space
+    if (deparse(substitute(inputFunc)) == "selectInput") {
+        min_length <- 15
+        label_length <- nchar(label) + nchar(label_unbold)
+        if (label_length < min_length) {
+            padding_spaces <- paste(rep("\u00A0", min_length - label_length),
+                                    collapse = "")
+            label_unbold <- paste0(label_unbold, padding_spaces)
+        }
+    }
+
+    mixedLabel <- HTML(paste0(
+        label, " ",
+        "<span style='font-weight: normal;'>", label_unbold, "\u00A0 </span>"))
+
+
+    ## Create the input with padded label
+    input_el <- inputFunc(inputId, mixedLabel,  ...)
+
+    width_hack <- TRUE
+    if (!width_hack) {
+        ## Return both elements
+        tagList(
+            input_el,
+            tags$h5(helperText)
+        )
+    } else {
+        uniqueID <- paste0(inputId, "-container")
+        ## Add custom CSS for this specific input
+
+        ## Superkludge: for the few cases where the above ain't enough
+        if (inputId %in% c("MCCBN_model", "MCCBN_sampling", "MCCBN_adaptive")) {
+            select_box_width <- 110
+        } else {
+            select_box_width <- 60
+        }
+
+        customCSS <- tags$style(HTML(paste0(
+                              "#", uniqueID, " .selectize-input, #", uniqueID, " select {",
+                              "  min-width: ", select_box_width, "px !important;",
+                              "  width: ", select_box_width,"px !important;",
+                              "}"
+                          )))
+
+        tags$div(
+                 id = uniqueID,
+                 customCSS,
+                 input_el,
+                 tags$h5(helperText)
+             )
+    }
+}
+
+
 user_input <- function() {
     fluidPage(
         ## require(shinyBS),
@@ -624,10 +726,10 @@ user_input <- function() {
         width: 50%;
       }
 
-        ") # end HTML
-     ) # end tags$style
-     ),
-     column(width = 12,
+") # end HTML
+) # end tags$style
+),
+column(width = 12,
             
             sidebarLayout(
                 column(width = 1,
@@ -780,6 +882,21 @@ user_input <- function() {
                                                       "'Inference chain length' and 'Model structure'."),
                                               tags$hr(style="border-color: darkgrey;"),
 
+                                           inputWithHelper(numericInput,
+                                                           "evam_run_num_cores", "Number of cores",
+                                                           paste("Number of cores used for the evam call. Using ",
+                                                                 "more than the number of methods selected is pointless. ",
+                                                                 "Setting it to 1 will run methods sequentially instead of ",
+                                                                 "in parallel."),
+                                                           8, min = 1, max = 10, step = 1),
+                                           ## numericInput("evam_run_num_cores",
+                                           ##              "Number of cores", 8, min = 1, max = 10,
+                                           ##              step = 1),
+                                           ## tags$h5("Number of cores used for the evam call. Using ",
+                                           ##         "more than the number of methods selected is pointless. ",
+                                           ##          "Setting it to 1 will run methods sequentially instead of ",
+                                           ##         "in parallel."),
+                                           tags$hr(style="border-color: darkgrey;"),
                                               selectInput("return_paths_max",
                                                           "Return paths to maximum(a)",
                                                           c(TRUE, FALSE),
@@ -884,61 +1001,89 @@ user_input <- function() {
                                                       "different from the default)."),
                                               tags$hr(style="border-color: darkgrey;"),
                                               tags$h4("MCCBN options"),
-                                              selectInput("MCCBN_model", "Model: ",
+                                           inputWithHelperUnbold(selectInput, "MCCBN_model", "Model: ", "", "",
                                                           c("OT-CBN" = "OT-CBN", "H-CBN2" = "H-CBN2"),
                                                           selected = "OT-CBN"),
-                                              numericInput("MCCBN_L",
-                                                           "L: Number of samples to be drawn from the proposal in the E-step: ", 100, min=0),
-                                              selectInput("MCCBN_sampling", "Sampling: ", c("forward", "add-remove", "backward", "bernoulli", "pool"), selected = "forward"),
-                                              numericInput("MCCBN_max_iter",
-                                                           "max.iter: Maximum number of EM iterations: ", 100, min=0, max=100000),
-                                              numericInput("MCCBN_update_step_size",
-                                                           "update.step.size: Number of EM steps after which the number of samples, ‘L’, is doubled: ", 20L, min=0, max=100000),
-                                              numericInput("MCCBN_tol",
-                                                           "tol: Convergence tolerance: ", 0.001, min=0, max=100),
-                                              numericInput("MCCBN_max_lambda_val",
-                                                           "max.lambda.val: Upper bound on the value of the rate parameters: ", 1e6, min=0, max=1e9),
-                                              numericInput("MCCBN_T0",
-                                                           "T0: Initial value of the temperature: ", 50, min=0, max=1000),
-                                              numericInput("MCCBN_adapt_rate",
-                                                           "adap.rate: Constant adaptation rate: ", 0.3, min=0, max=1000),
-                                              numericInput("MCCBN_acceptance_rate",
-                                                           "acceptance.rate: Desirable acceptance rate: (if NULL, defaults to 1/number of mutations)",
+                                           inputWithHelperUnbold(numericInput, "MCCBN_L",
+                                                                 "L", " (number of samples to be drawn from the proposal in the E-step: )", "", 100, min=0),
+                                           inputWithHelperUnbold(selectInput, "MCCBN_sampling", "Sampling: ", "", "", c("forward", "add-remove", "backward", "bernoulli", "pool"), selected = "forward"),
+                                           inputWithHelperUnbold(numericInput, "MCCBN_max_iter",
+                                                                 "max.iter", " (maximum number of EM iterations)", "", 100, min=0, max=100000),
+                                           inputWithHelperUnbold(numericInput, "MCCBN_update_step_size",
+                                                                 "update.step.size ", "(number of EM steps after which the number of samples, ‘L’, is doubled): ", "", 20L, min=0, max=100000),
+                                           inputWithHelperUnbold(numericInput, "MCCBN_tol",
+                                                                 "tol", " (convergence tolerance):", "", 0.001, min=0, max=100),
+                                           inputWithHelperUnbold(numericInput, "MCCBN_max_lambda_val",
+                                                                 "max.lambda.val", " (upper bound on the value of the rate parameters):", "", 1e6, min=0, max=1e9),
+                                           inputWithHelperUnbold(numericInput, "MCCBN_T0",
+                                                                 "T0", " (initial value of the temperature):", "", 50, min=0, max=1000),
+                                           inputWithHelperUnbold(numericInput, "MCCBN_adapt_rate",
+                                                                 "adap.rate", " (constant adaptation rate):", "", 0.3, min=0, max=1000),
+                                           inputWithHelperUnbold(numericInput, "MCCBN_acceptance_rate",
+                                                                 "acceptance.rate", " (desirable acceptance rate: (if NULL, defaults to 1/number of mutations):", "",
                                                            NULL, min=0, max=1000),
-                                              numericInput("MCCBN_step_size",
-                                                           "step.size: Number of iterations after which the temperature should be updated: (if NULL, defaults to 50)", NULL, min=0, max=1000),
-                                              numericInput("MCCBN_max_iter_asa", "max.iter.asa: Maximun number of iterations: ", 10000L, min=0, max=1000000L),
-                                              numericInput("MCCBN_neighborhood_dist", "neighborhood.dist: Hamming distance between the observation and the samples generated by backward sampling: ", 1L, min=0, max=1000000L),
-                                              selectInput("MCCBN_adaptive", "adaptive: Use an adaptive
-                                                annealing schedule?: ", c(TRUE, FALSE), selected = TRUE),
+                                           inputWithHelperUnbold(numericInput, "MCCBN_step_size", "step.size", " (number of iterations after which the temperature should be updated; if NULL, defaults to 50):", "", NULL, min=0, max=1000),
+                                           inputWithHelperUnbold(numericInput, "MCCBN_max_iter_asa", "max.iter.asa", " (maximun number of iterations):", "", 10000L, min=0, max=1000000L),
+                                           inputWithHelperUnbold(numericInput, "MCCBN_neighborhood_dist", "neighborhood.dist", " (hamming distance between the observation and the samples generated by backward sampling):", "", 1L, min=0, max=1000000L),
+                                           inputWithHelperUnbold(selectInput, "MCCBN_adaptive", "adaptive", " (use an adaptive annealing schedule?):", "", c(TRUE, FALSE), selected = TRUE),
                                                 numericInput("MCCBN_seed", "Seed: ", NULL, min=0, width="50%"),
                                               tags$hr(style="border-color: darkgrey;"),
+
                                               tags$h4("HyperTraPS options"),
-                                              selectInput("HyperTraPS_model", "model: Model structure (-1: arbitrary; 1: main effect, no interaction; 2: pairwise; 3: 3-way; 4: 4-way): ",
-                                                          choices = c(-1, 1:4), selected = 2),
-                                              numericInput("HyperTraPS_walkers", "walkers: Number of walkers: ", 200, min=0),
-                                              numericInput("HyperTraPS_length", "length: Inference chain length: ", 3, min=0),
-                                              numericInput("HyperTraPS_kernel", "kernel: Perturbation kernel: ", 5, min=0),
-                                              numericInput("HyperTraPS_seed", "seed: A value of -1 means use a random seed:", -1, min=-1),
-                                              selectInput("HyperTraPS_losses", "losses: Gains (0) or losses (1): ", c(0, 1), selected = 0),
-                                              selectInput("HyperTraPS_apm", "apm: Use APM (0/1): ", c(0, 1), selected = 0),
-                                              selectInput("HyperTraPS_sa", "sa: Use SA (0/1): ", c(0, 1), selected = 0),
-                                              selectInput("HyperTraPS_sgd", "sgd: Use SGD (0/1): ", c(0, 1), selected = 0),
-                                              selectInput("HyperTraPS_pli", "pli: Use PLI (0/1): ", c(0, 1), selected = 0),
-                                              numericInput("HyperTraPS_samplegap", "samplegap: Gap between samples: ", 10, min = -1),
-                                              numericInput("HyperTraPS_penalty", "penalty: Regularisation by penalised likelihood: ", 0, min=0, step = "any"),
-                                              numericInput("HyperTraPS_LASSO", "lasso: Regularisation by LASSO: ", 0, min=0,
+
+                                           inputWithHelperUnbold(selectInput, "HyperTraPS_model", "model ",
+                                                                 "(-1: arbitrary; 1: main effect, no interaction; 2: pairwise; 3: 3-way; 4: 4-way):", "", choices = c(-1, 1:4), selected = 2),
+                                           inputWithHelperUnbold(numericInput, "HyperTraPS_walkers", "walkers ",
+                                                                 "(number of walkers): ", "", 200, min=0),
+                                           inputWithHelperUnbold(numericInput, "HyperTraPS_length", "length ",
+                                                                 "(inference chain length): ", "", 3, min=0),
+                                           inputWithHelperUnbold(numericInput, "HyperTraPS_kernel", "kernel ",
+                                                                 "(perturbation kernel): ", "", 5, min=0),
+                                           inputWithHelperUnbold(numericInput, "HyperTraPS_seed", "seed ",
+                                                                 "(random number seed; a value of -1 means use a random seed): ",
+                                                                 "", -1, min=-1),
+                                           inputWithHelperUnbold(selectInput, "HyperTraPS_losses", "losses ",
+                                                                 "(gains = 0, losses = 1): ", "",
+                                                                 choices = c(0, 1), selected = 0),
+                                           inputWithHelperUnbold(selectInput, "HyperTraPS_apm", "apm ",
+                                                                 "(use APM; No = 0, Yes = 1): ", "",
+                                                                 c(0, 1), selected = 0),
+                                           inputWithHelperUnbold(selectInput, "HyperTraPS_sa", "sa    ",
+                                                                 "(use SA: 0/1):", "", c(0, 1), selected = 0),
+                                           inputWithHelperUnbold(selectInput, "HyperTraPS_sgd", "sgd ",
+                                                                 "(use SGD 0/1):", "", c(0, 1), selected = 0),
+                                           inputWithHelperUnbold(selectInput, "HyperTraPS_pli", "pli ",
+                                                                 "(use PLI 0/1):", "", c(0, 1), selected = 0),
+                                           inputWithHelperUnbold(numericInput, "HyperTraPS_samplegap", "samplegap ",
+                                                                 "(gap between samples):", "", 10, min = -1),
+                                           inputWithHelperUnbold(numericInput, "HyperTraPS_penalty", "penalty ",
+                                                                 "(penalty for regularisation by penalised likelihood):", "", 0,
+                                                                 min=0, step = "any"),
+                                           inputWithHelperUnbold(numericInput, "HyperTraPS_LASSO", "lasso ",
+                                                                 "(regularisation by LASSO):", "", 0, min=0,
                                                            step = 1),
-                                              selectInput("HyperTraPS_regul", "regularise: Stepwise regularise model after best parameterisation: ", c(0, 1), selected = 0),
-                                              numericInput("HyperTraPS_samprow", "samples_per_row: Number of simulations per parameter sample: ", 10, min=1),
-                                              selectInput("HyperTraPS_outtrans", "output_transitions: Output exact transitions: ", c(0, 1), selected = 1),
-                                              numericInput("HyperTraPS_nsampl", "nsample: Number of samples from an exponential distribution to estimate the predicted genotype frequencies; make it larger if you want more accurate estimates: ", 1000, min=10),
-                                              numericInput("HyperTraPS_cores", "cores: Number of cores to use when estimating the predicted genotype frequencies: ", 1, min=1),
+                                           inputWithHelperUnbold(selectInput, "HyperTraPS_regul", "regularise ",
+                                                                 "(stepwise regularise model after best parameterisation):", "", c(0, 1), selected = 0),
+                                           inputWithHelperUnbold(numericInput, "HyperTraPS_samprow", "samples_per_row ",
+                                                                 "(number of simulations per parameter sample):", "", 10, min=1),
+                                           inputWithHelperUnbold(selectInput, "HyperTraPS_outtrans", "output_transitions ",
+                                                                 "(output exact transitions):", "", c(0, 1), selected = 1),
+                                           inputWithHelperUnbold(numericInput, "HyperTraPS_nsampl", "nsample ",
+                                                                 "(number of samples from an exponential distribution to estimate the predicted genotype frequencies; make it larger if you want more accurate estimates):", "", 1000, min=10),
+                                           inputWithHelperUnbold(numericInput, "HyperTraPS_cores", "cores ",
+                                                                 "(number of cores to use when estimating the predicted genotype frequencies):", "", 10, min=1, max = 15, step = 1),
                                               tags$hr(style="border-color: darkgrey;"),
                                               tags$h4("BML options"),
-                                              numericInput("BML_ntree", "Number of random restarts for searching the tree space", 100, min=0),
-                                              numericInput("BML_threshold", "Threshold for inferring paths", 0.3, min=0, max=1),
-                                              numericInput("BML_rep", "Number of bootstrap replicates, if nrep = 0 no bootstrap will be performed. The default, 10, is way too small for real use.", 10, min=0),
+                                           inputWithHelper(numericInput,
+                                                           "BML_ntree", "ntree: ",
+                                                           "Number of random restarts for searching the tree space.",
+                                                           100, min=0),
+                                           inputWithHelper(numericInput, "BML_threshold", "threshold:      ",
+                                                           "Threshold for inferring paths.", 0.3, min=0, max=1, step = 0.1),
+                                           inputWithHelper(numericInput,
+                                                           "BML_rep", "Bootstrap replicates: ",
+                                                           "Number of bootstrap replicates, if nrep = 0 no bootstrap will be performed. The default, 10, is way too small for real use.",
+                                                           10, min=0),
                     ),
                                   
                     )
@@ -948,7 +1093,7 @@ user_input <- function() {
                     )
             )
             )
-  )
+)
 }
 ui <- 
   navbarPage( 
