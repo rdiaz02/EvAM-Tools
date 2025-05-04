@@ -175,10 +175,10 @@ get_hyper_traps_args <- function(input) {
     nsampl = as.numeric(input$HyperTraPS_nsampl),
     cores = as.numeric(input$HyperTraPS_cores)
   )
-  message("options entered are ",
+  message("DEBUG: options entered for HyperTraPS are ",
           paste(names(hyper_traps_opts),
                 hyper_traps_opts, sep = " =  ",
-                collapse = ";"))
+                collapse = "; "))
     return(hyper_traps_opts)
 }
 

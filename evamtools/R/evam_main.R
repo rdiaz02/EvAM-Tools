@@ -116,7 +116,7 @@ evam <- function(x,
                  ),
                  only_used_methods = TRUE
                  ) {
-
+  message("DEBUG: I am running with cores = ", cores)
     preprocessed_x <- common_preprocess(x, max_cols)
     x <- preprocessed_x$processed
     xoriginal <- preprocessed_x$original
