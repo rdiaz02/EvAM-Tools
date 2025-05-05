@@ -63,7 +63,7 @@ sanity_file_name <- function(x) {
              "Yours don't; that is not allowed.")
 
     gn_space <- stringi::stri_count_regex(x,  "[^a-zA-z0-9_-]+")
-    
+
     if (any(gn_space))
         stop("Use only letters, numbers, the hyphen - and the underscore _ .",
              "The name you provided contains other characters.")
@@ -72,19 +72,19 @@ sanity_file_name <- function(x) {
 
 sanity_new_gene_names <- function(x) {
     ## From similar code in evam-wrapper
-    gn_backslash <- stringi::stri_count_fixed(x, "\\") 
+    gn_backslash <- stringi::stri_count_fixed(x, "\\")
     if (any(gn_backslash))
         stop("At least one of your new gene names has a backslash. That is not allowed.")
 
-    gn_space <- stringi::stri_count_regex(x, "[\\s]") 
+    gn_space <- stringi::stri_count_regex(x, "[\\s]")
     if (any(gn_space))
         stop("At least one of your new gene names has a space. That is not allowed.")
 
-    gn_space <- stringi::stri_count_regex(x, "[-]") 
+    gn_space <- stringi::stri_count_regex(x, "[-]")
     if (any(gn_space))
         stop("At least one of your new gene names has a hyphen. That is not allowed.")
 
-    gn_space <- stringi::stri_count_regex(x, "^\\d") 
+    gn_space <- stringi::stri_count_regex(x, "^\\d")
     if (any(gn_space))
         stop("At least one of your new gene names starts with a number. That is not allowed.")
 
@@ -96,7 +96,7 @@ sanity_new_gene_names <- function(x) {
     if (any(gn_space))
         stop("Use only letters, numbers, and the underscore _ .",
              "The gene names you provided contain other characters.")
-    
+
     if (any(x == "WT"))
         stop("One of your new gene names is called WT. That is not allowed.")
 }
@@ -202,7 +202,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         do_gc(1)
     })
 
-    ## FIXME: a lot of this defaults logic sucks: values depend on 
+    ## FIXME: a lot of this defaults logic sucks: values depend on
     ## the object .ev_SHINY_dflt, which would need to be regenerated
     ## separately, which is a PITA. Those defaults should be here.
     ## I make these deps explicit. Needed for shinytests
@@ -224,7 +224,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     default_num_samples <- 100
     default_obs_noise <- 0
     default_epos <- 0
-    
+
     ## We could hack this, and use a global variable, as we did in the past,
     ## and assign via "<<-" but this is arguably a reactive value:
     ## we do/did last_visited_pages["upload"] <<- dataset_name
@@ -242,14 +242,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
     ## But we do not really use the reactivity functionality anyway. So...
     ## might as well just use a variable, and use "<<-"
-    reactive_last_visited_pages <- list( 
+    reactive_last_visited_pages <- list(
         upload = "Empty",
         csd    = "Empty",
         dag    = "DAG_Fork_4",
         matrix = "MHN_all_0"
     )
 
-    reactive_last_visited_cpm <- list( 
+    reactive_last_visited_cpm <- list(
         ## As above. We assign to last_visited_cpm <- result_name
         ## where result_name is a function of an input, input$select_csd
         the_last_visited_cpm = ""
@@ -272,7 +272,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         dag_obs_noise   = default_obs_noise,
         mhn_num_samples = default_num_samples,
         mhn_obs_noise   = default_obs_noise,
-        epos            = default_epos 
+        epos            = default_epos
     )
 
     resample_trigger_from_data_change <- function() {
@@ -282,7 +282,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             return(FALSE)
         }
     }
-    
+
     data <- reactiveValues(
         csd_counts = .ev_SHINY_dflt$template_data$csd_counts
       , data = .ev_SHINY_dflt$template_data$data
@@ -303,18 +303,18 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     )
 
 
-    
+
     ## Things that could avoid repeating, but I give up
     ## With DAGs, if we do a resample trigger, no need for a gene number trigger.
     ##  but it is cheap, since no resampling when we do number trigger.
     ##  Problem is it creates another figure.
     ## In many DAGs, calling the plot function twice or even thrice.
-    
-    
+
+
     display_freqs <- reactive({
         ## Remember this is called whenever changes in many places
         ## happen.
-        
+
         ## This is often called when there is no need for it. So when you change
         ## the type of data entering (go from MHN to upload, for example) this is
         ## called again and returns the data but for nothing since what we will
@@ -323,7 +323,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
         ## For paranoia, we return always things in standard order. Probably
         ## unnecessary, but just in case.
-        
+
         mymessage("At display_freqs")
 
         ## provide_gene_names is being enabled somewhere I can't locate
@@ -333,7 +333,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
              (nrow(data$csd_counts) > 0))) {
             mymessage("    disabled provide_gene_names under display_freqs")
             shinyjs::disable("provide_gene_names")
-        }  
+        }
 
         ## If no data to display, return empty data frame
         thisd <- input$input2build
@@ -361,7 +361,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     observeEvent(input$gene_number, {
         ## id: here_we_change_gene_number
         mymessage("at gene_number trigger")
-        
+
         datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <-
             input$gene_number
         if (input$input2build == "csd") {
@@ -372,7 +372,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## in display_freqs enough?
             ## Needed to prevent bug BUG_Create_Add_E_Decrease
             ## DAG does not, as it continuously monitors genes in the DAG model
-            
+
             current_data <- datasets$all_csd[[input$input2build]][[input$select_csd]]
             new_gnames <-
                 set_gene_names_after_resize(current_data$data,
@@ -444,7 +444,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
                 tmp_data$n_genes <- ncol(tmp_data$data)
                 datasets$all_csd[["upload"]][[dataset_name]] <- tmp_data
-                
+
                 ## last_visited_pages["upload"] <<- dataset_name
                 reactive_last_visited_pages$upload <<- dataset_name
                 updateRadioButtons(session, "input2build", selected = "upload")
@@ -509,7 +509,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               ##              "the data as data frame; ",
                               ##              "if you built a DAG or MHN model, ",
                               ##              "also the model built."
-                              ##              )),  
+                              ##              )),
                               downloadButton("download_csd", "Download your data")
                               )
                  )
@@ -532,7 +532,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                 names(datasets$all_csd$csd),
                                 names(datasets$all_csd$dag),
                                 names(datasets$all_csd$matrix))
-            
+
             if (input$dataset_name %in% existing_names) {
                 stop("That name is already in use for other data ",
                      "(if not in this input type, maybe in one ",
@@ -552,10 +552,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     stop("This should not be possible",
                          "These are not data with only WT and yet ",
                          "(nrow(data$csd_counts) > 0 ) && all(is.na(data$data))"
-                         ) 
+                         )
                 }
             }
-            
+
             ## A couple of paranoid consistency checks
             if (nrow(data$csd_counts) > 0) {
                 ddtmp <- evamtools:::genotypeCounts_to_data(data$csd_counts,
@@ -582,7 +582,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             n_genes <- ifelse(input$input2build == "upload",
                        ifelse(is.null(data$data), 0, ncol(data$data)),
                        input$gene_number)
-            
+
             tmp_data <- list(
                 data = data$data
               , dag = data$dag
@@ -688,10 +688,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     toListen <- reactive({
         list(input$input2build, input$select_csd)
     })
-    
+
     observeEvent(toListen(), {
         tryCatch({
-            
+
             mymessage("At observeEvent toListen")
 
             ## Cleaning stuff
@@ -713,7 +713,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             mymessage("At observeEvent toListen, b")
             mymessage("    disabled provide_gene_names under toListen")
             shinyjs::disable("provide_gene_names")
-            
+
             data$dag <- tmp_data$dag
             data$DAG_parent_set <- tmp_data$DAG_parent_set
             data$lambdas <- tmp_data$lambdas
@@ -730,10 +730,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 n_genes <- data$n_genes
                 if (is.null(n_genes)) {
                     n_genes <- default_number_genes
-                } 
+                }
             } else if (input$input2build %in% c("csd", "upload")) {
                 if (!is.null(data$data))  {
-                    n_genes <- ncol(data$data)  
+                    n_genes <- ncol(data$data)
                 } else { ## data$data is null
                     if (input$input2build == "csd") {
                         n_genes <- default_number_genes
@@ -753,7 +753,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 updateNumericInput(session, "gene_number", value = NULL)
             }
 
-            
+
             if (input$input2build %in% c("csd")) {
                 ## Where we "Add genotypes" manually. This selects mutation (genotype)
                 ##         If we only have WT, n_genes is 0, and it breaks
@@ -818,7 +818,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$h5(paste0("Format: csv ---comma separated values---,",
                                     "with subjects in rows and gens in columns. ",
                                     "Use 0 or 1 for ",
-                                    "altered/not-altered (mutated/not-mutated). ", 
+                                    "altered/not-altered (mutated/not-mutated). ",
                                     "The first row should contain ",
                                     " the gene names ",
                                     "and there should be no subject names ",
@@ -844,8 +844,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         )
     })
 
-    
-    
+
+
     ## Advanced option for running evamtools
     observeEvent(input$advanced_options, {
         shinyjs::toggle("all_advanced_options")
@@ -860,14 +860,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         ## Without isolate, it forces the slider
         ## of Number of genes back. And creates a mess.
         ## A simple example below: even that code below screws things up.
-        ## Yes, this is the gene number slider. 
+        ## Yes, this is the gene number slider.
         if ((!is.null(isolate(data$data)) ||
              (nrow(isolate(data$csd_counts)) > 0))) {
             mymessage("    disabled provide_gene_names renderUI")
             shinyjs::disable("provide_gene_names")
         }
-        
-        ## This breaks things. 
+
+        ## This breaks things.
         ## if ((!is.null(data$data)) ||
         ##     (nrow(data$csd_counts) > 0)) {
         ##     uu <- 3 + 2
@@ -875,7 +875,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         ##     ## shinyjs::disable("provide_gene_names")
         ## }
 
-        
+
         if (input$input2build %in% c("csd","dag", "matrix")) {
             tags$div(class = "frame flex",
                      tags$h3("Set the number of genes"),
@@ -890,7 +890,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                           step = 1),
                               ## The action that takes place is
                               ## id: here_we_change_gene_number
-                              
+
                               ),
                      tags$h4(HTML("<br/>")),
                      tags$div(class="inlin",
@@ -924,7 +924,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
     observeEvent(input$provide_gene_names, {
-        
+
         showModal(modalDialog(
             title = tags$h3("Use different gene names"),
             tags$div(class = "inlin2",
@@ -970,7 +970,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                               ),
                      ),
             easyClose = TRUE
-        ))  
+        ))
     })
 
 
@@ -994,7 +994,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      "you need to delete all data first. ",
                      "We will abort this operation.")
             }
-            
+
             old_gene_names <- data$gene_names
             new_gene_names <-
                 strsplit(gsub(" ", "", input$new_gene_names), ",")[[1]]
@@ -1011,8 +1011,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 }
             }
             data$gene_names <- new_gene_names
-            
-            ## Use a simple lookup-dictionary and 
+
+            ## Use a simple lookup-dictionary and
             ## avoid to_stnd_csd_dataset which is a function from hell.
 
             names_dict <- new_gene_names
@@ -1026,7 +1026,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             new_data$lambdas <- data$lambdas
             new_data$DAG_parent_set <- data$DAG_parent_set
             new_data$this_d_dag_model <- data$this_d_dag_model
-            
+
             ## BEWARE! If we do not do this, new_data$dag,
             ## because of partial matching, gets DAG_parent_set
             ## Not anymore, as I rewrote as DAG_parent_set. Anyway.
@@ -1080,9 +1080,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         })
     })
 
-    
 
-    
+
+
     output$define_genotype <- renderUI({
         n_genes <- ifelse(is.null(input$gene_number), default_number_genes,
                           input$gene_number)
@@ -1145,7 +1145,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 mymessage("    disabled provide_gene_names under select_csd")
                 shinyjs::disable("provide_gene_names")
             }
-            
+
             current_dag_data <- dag_data()
             if (is.null(current_dag_data)) mymessage("   current_dag_data is NULL")
             genes_in_dag <- setdiff(unique(c(current_dag_data$From,
@@ -1159,7 +1159,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             } else {
                 dag_gene_options <- evamtools:::evam_string_sort(genes_in_dag)
             }
-            tags$div(                    
+            tags$div(
                      tags$div(class = "flex",
                               tags$h3("Define a Directed Acyclic Graph (DAG) ",
                                       "and generate data from it."),
@@ -1205,7 +1205,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   actionButton("add_edge", "Add edge"),
                                   actionButton("remove_edge", "Remove edge"),
                                   tags$h5(HTML("If you want to decrease the number of genes ",
-                                               "first remove edges and nodes from the DAG ", 
+                                               "first remove edges and nodes from the DAG ",
                                                "and only then modify ",
                                                "'Set the number of genes'.",
                                                "(We cannot know which edges/nodes ",
@@ -1242,13 +1242,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                    width = "22em"),
                                       ),
                                   tags$h3(HTML("<br/>")),
-                                  div(style = "white-space: nowrap;", 
+                                  div(style = "white-space: nowrap;",
                                       numericInput("dag_obs_noise",
                                                    HTML("Observational noise <br>(genotyping error)"),
                                                    value = generate_data$dag_obs_noise,
                                                    min = 0, max = 0.95,
                                                    step = 0.02500, width = "18em"),
-                                      ), 
+                                      ),
                                   tippy::tippy_this("dag_obs_noise",
                                                     paste("<span style='font-size:1.5em; text-align:left;'>",
                                                           "A proportion between 0 and 1 ",
@@ -1302,7 +1302,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                   tags$h3(HTML("<br/>")),
                                   tags$h4(HTML("<u>2. Generate data from the MHN model</u>")),
                                   tags$h4(HTML("<br/>")),
-                                  div(style = "white-space: nowrap;", 
+                                  div(style = "white-space: nowrap;",
                                       numericInput("mhn_num_samples",
                                                    HTML("Number of genotypes<br>to sample"),
                                                    value = generate_data$mhn_num_samples,
@@ -1372,11 +1372,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                         value = "Uploaded_data"
                                         )
                               ),
-                     
+
                      ## tags$h5(paste0("Format: csv ---comma separated values---,",
                      ##                "with subjects in rows and gens in columns. ",
                      ##                "Use 0 or 1 for ",
-                     ##                "altered/not-altered (mutated/not-mutated).", 
+                     ##                "altered/not-altered (mutated/not-mutated).",
                      ##                "The first row should contain ",
                      ##                " the gene names ",
                      ##                "and there should be no subject names. "
@@ -1402,7 +1402,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      )
         }
     })
-    
+
     ## With data modification for upload
     output$change_counts <- renderUI({
         ## if (input$input2build %in% c("upload", "csd", "dag", "matrix")) {
@@ -1424,7 +1424,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                  if (input$input2build %in% c("csd")) {
                      actionButton("clear_genotype", "Delete all genotype data")
                  } else if (input$input2build %in% c("matrix")) {
-                     
+
                      tags$h5(HTML("To delete all genotype data, use",
                                   "'Reset log-&Theta; matrix and delete genotype data'",
                                   "above. ",
@@ -1500,7 +1500,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     stop(HTML("The OT model is only for trees."))
                 }
             }
-            
+
             if (can_change_dag_model) {
                 changed_dag_model$invalidate <- !changed_dag_model$invalidate
                 data$this_d_dag_model <- input$dag_model
@@ -1511,13 +1511,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 changed_dag_model$invalidate <- FALSE
                 updateRadioButtons(session, "dag_model", selected = former_dag_model)
             }
-        }, 
+        },
         error = function(e) {
             showModal(dataModal(e[[1]]))
         })
     })
 
-    
+
     ## DAG builder
     ## Controling dag builder
     toListen2 <- reactive({
@@ -1527,7 +1527,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ## because add_edge and remove_edge modify
             ## DAG_parent_set and the dag, leaving
             ## this in a possibly inconsistent state
-            ## unless we recreate it 
+            ## unless we recreate it
             data$DAG_parent_set,
             data$dag,
             data$lambdas,
@@ -1551,7 +1551,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         edges <- which(data$dag == 1, arr.ind = TRUE)
         tmp_DAG_parent_set <- data$DAG_parent_set
         x <- length(tmp_DAG_parent_set)
-        
+
         dag_dataset_names <- unlist(lapply(datasets$all_csd$dag,
                                            function(x) x$name))
 
@@ -1560,7 +1560,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             return(NULL)
         }
         mymessage("    dag_data_reactive, position 3")
-        
+
         names(tmp_DAG_parent_set) <- all_gene_names[seq(2, x + 1)]
         dag_data <- data.frame(From = all_gene_names[edges[, "row"]]
                              , To = all_gene_names[edges[, "col"]]
@@ -1676,7 +1676,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             ##  For being kinda of a side issue makes the function
             ## very complicated.
             tryCatch({
-                
+
                 if (any(info$value == 0L)) {
                     mymessage("At dag_table_cell_edit, passed a 0 value; ",
                               "trying to remove the edge")
@@ -1706,7 +1706,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     for (nd in lambda_val_0) {
                         from_gene <- info_from[nd]
                         to_gene   <- info_to[nd]
-                        
+
                         post_delete <- evamtools:::modify_dag(data$dag, from_gene, to_gene,
                                                               operation = "remove",
                                                               parent_set = data$DAG_parent_set,
@@ -1788,7 +1788,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      "cannot be ",
                      "less than 0 or greater than (or equal to) 1 ",
                      "(to prevent numerical problems, no larger than 0.99999999).")
-            
+
             tmp_dag_data <-
                 evamtools:::generate_sample_from_dag(the_dag_data
                                                    , data$DAG_parent_set[gene_names]
@@ -1796,7 +1796,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                    , N = input$dag_num_samples
                                                    , dag_model = data$this_d_dag_model
                                                    , epos = input$epos)
-            
+
             data$csd_counts <-
                 tmp_dag_data$csd_counts[tmp_dag_data$csd_counts[, 2] > 0, ]
             data$data <- tmp_dag_data$data
@@ -1809,17 +1809,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             datasets$all_csd[[input$input2build]][[input$select_csd]]$lambdas <- data$lambdas
             datasets$all_csd[[input$input2build]][[input$select_csd]]$DAG_parent_set <- data$DAG_parent_set
             datasets$all_csd[[input$input2build]][[input$select_csd]]$this_d_dag_model <- data$this_d_dag_model
-            
+
             generate_data$dag_num_samples <- input$dag_num_samples
             generate_data$dag_obs_noise   <- input$dag_obs_noise
             generate_data$mhn_num_samples <- input$dag_num_samples
             generate_data$mhn_obs_noise   <- input$dag_obs_noise
             generate_data$epos        <- input$epos
-            
+
             shinyjs::enable("analysis")
             ## The next is not really necessary, but we do it for consistency
             shinyjs::disable("provide_gene_names")
-            
+
         }, error = function(e) {
             showModal(dataModal(e[[1]]))
         })
@@ -1847,14 +1847,14 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         ## sometimes the tooltips misbehave
         ## shinyBS::removeTooltip(session, "table_out3")
         ## shinyBS::removeTooltip(session, "freq2label")
-        
+
         showModal(modalDialog(
             easyClose = TRUE,
             title = tags$h3("Downloading CPMs results and analyzed data"),
             tags$div(
                      tags$p(HTML("Format and contents: rds file with ",
                                  "two lists: <ul>")),
-                     tags$li(" cpm_output:  ", 
+                     tags$li(" cpm_output:  ",
                              "the concatenated output from ",
                              "evam and sample_evam. ",
                              "The analyzed data are in ",
@@ -1891,7 +1891,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$li(HTML("Removing edges might restructure the DAG."),
                              "If a node has no parent, " ,
                              "it will be assigned as descendant of Root."),
-                     
+
                      tags$p(HTML("</ul>")),
                      tags$p(HTML("2. To <strong>change the value of a lambda/theta/Weight</strong> ",
                                  "click on the cell, ",
@@ -1931,12 +1931,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                  "the <strong>'Number of genotypes to sample'</strong> ",
                                  "(the size of the sample) and ",
                                  "the <strong>Observational noise</strong> (genotyping error) ",
-                                 "and, for OT and OncoBN, the <strong>epos</strong>, ",   
+                                 "and, for OT and OncoBN, the <strong>epos</strong>, ",
                                  "and click on <strong>'Generate data from DAG'</strong> to generate a sample. ")),
                      tags$p(HTML("<br>")),
                      tags$p(HTML("You can create, and simulate from, ",
                                  "<b>non-transitively reduced DAGs</b> ",
-                                 "(not for OT, of course) ", 
+                                 "(not for OT, of course) ",
                                  "but CBN only estimates transitively ",
                                  "reduced graphs. ",
                                  "More discussion about this issue is ",
@@ -1997,7 +1997,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             datasets$all_csd[[input$input2build]][[input$select_csd]]$n_genes <- input$gene_number
             ## Resample based on changes
             if (resample_trigger_from_data_change()) shinyjs::click("resample_mhn")
-            shinyjs::disable("provide_gene_names")            
+            shinyjs::disable("provide_gene_names")
         }, error = function(e){
             showModal(dataModal(e[[1]]))
         })
@@ -2017,10 +2017,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                           "cannot be ",
                                                           "less than 0 or greater than 1",
                                                           "(for numerical issues, no larger than 0.99999999).")
-            
+
             mhn_data <- evamtools:::get_mhn_data(data$thetas[1:input$gene_number
                                                            , 1:input$gene_number]
-                                               , noise = input$mhn_obs_noise 
+                                               , noise = input$mhn_obs_noise
                                                , N = input$mhn_num_samples)
             data$csd_counts <- mhn_data$csd_counts
             data$data <- mhn_data$data
@@ -2030,7 +2030,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             generate_data$mhn_obs_noise   <- input$mhn_obs_noise
             generate_data$dag_num_samples <- input$mhn_num_samples
             generate_data$dag_obs_noise   <- input$mhn_obs_noise
-            
+
             shinyjs::enable("analysis")
             ## The next is not really necessary, but we do it for consistency
             shinyjs::disable("provide_gene_names")
@@ -2154,8 +2154,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                 data$data <-
                     datasets$all_csd[[input$input2build]][[input$select_csd]]$data <-
                         evamtools:::genotypeCounts_to_data(data$csd_counts, e = 0)
-                
-                
+
+
                 shinyjs::enable("analysis")
                 shinyjs::disable("provide_gene_names")
             } else {
@@ -2196,7 +2196,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         d1
     }
   , selection = 'none', server = TRUE,
-    editable = list(target = "column", 
+    editable = list(target = "column",
                     disable = list(columns = c(0, 1)))
   , rownames = FALSE,
     options = list(
@@ -2265,7 +2265,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             edges <- igraph::as_data_frame(data2plot)
             colnames(edges) <- c("From", "To")
             if (!is.null(data$DAG_parent_set)) edges$Relation <- data$DAG_parent_set[edges$To]
-        } else if (input$input2build %in% c("matrix") 
+        } else if (input$input2build %in% c("matrix")
                    && !is.null(data$thetas)
                    && !is.null(input$gene_number)
                    && length(data$thetas[1:input$gene_number, 1:input$gene_number])>0
@@ -2280,7 +2280,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         ## Calculate TRM for DAG and for matrices
         tryCatch({
             all_evam_output <- run_analysis(data, input, display_freqs(), EVAM_MAX_ELAPSED)
-            
+
             ##CPM output name
             result_index <- length(grep(sprintf("^%s", input$select_csd),
                                         names(all_cpm_out)))
@@ -2289,13 +2289,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                 , sprintf("%s__%s", input$select_csd, result_index))
 
             all_cpm_out[[result_name]] <- all_evam_output
-            
+
             ## last_visited_cpm <<- result_name
             reactive_last_visited_cpm$the_last_visited_cpm <<- result_name
             updateRadioButtons(session, "select_cpm", selected = result_name)
             updateTabsetPanel(session, "navbar", selected = "result_viewer")
             updateRadioButtons(session, "select_cpm", selected = result_name)
-          
+
         }, error = function(e){
             showModal(dataModal(e[[1]]))
         })
@@ -2377,7 +2377,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
     })
 
-    
+
 
     output$sims2 <- renderUI({
         if ((length(names(all_cpm_out)) > 0)  && (!is.null(input$select_cpm))) {
@@ -2403,7 +2403,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                 pl <-
                                     try(evamtools:::plot_genot_fg(method_data$data2plot,
                                                                   ## We use it to define "Observed" and "Not Observed" genotypes
-                                                                  observations = tmp_data$original_data, 
+                                                                  observations = tmp_data$original_data,
                                                                   sampled_counts = method_data$sampled_genotype_counts,
                                                                   top_paths = input$freq2label,
                                                                   label_type = input$label2plot,
@@ -2427,12 +2427,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                                 plot_type = selected_plot_type)$data2plot
 
                         if(selected_plot_type %in% c("predicted_genotype_freqs")){
-                            data2plot <- data.frame("Genotype" = names(method_data), 
+                            data2plot <- data.frame("Genotype" = names(method_data),
                                                     "Freq" = as.vector(method_data))
 
                         }
                         if(selected_plot_type %in% c("sampled_genotype_counts")){
-                            data2plot <- data.frame("Genotype" = names(method_data), 
+                            data2plot <- data.frame("Genotype" = names(method_data),
                                                     "Counts" = as.vector(method_data))
                         }
                         output[[sprintf("plot_sims2_%s", met)]] <- renderPlot(
@@ -2455,7 +2455,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                         ## )
 
                     })
-                } 
+                }
             } else {
                 ## Disabling donwload button
                 shinyjs::disable(selector = "#download_cpm")
@@ -2479,7 +2479,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     output[[sprintf("plot_hypertraps_%s", met)]] <- renderPlot({
                     pl <- hypertrapsct::plotHypercube.summary(tmp_data$HyperTraPS_primary_output)
 
-                        pl 
+                        pl
                 }, height = 600)
 
                     return(tagList(
@@ -2508,7 +2508,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     )
                 }
             })
-        }  
+        }
     })
 
 
@@ -2528,21 +2528,21 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                       ## title("P(g)")
                       evamtools:::plot_BML_Fig3(tmp_data$BML_primary_output$bootstrap)
                     }, height = 600)
-                    return(tagList(
-                h3(
-                  span("BML bootstrap. "),
-                  br(),
-                  span(
-                    paste0(
-                      "Number of bootstrap replicates = ",
-                      tmp_data$BML_bootstrap, "."
+                return(tagList(
+                    h3(
+                        span("BML bootstrap. "),
+                        br(),
+                        span(
+                            paste0(
+                                "Number of bootstrap replicates = ",
+                                tmp_data$BML_bootstrap, "."
+                            ),
+                            style = "font-size: smaller;"
+                        )
                     ),
-                    style = "font-size: smaller;"
-                  )
-                ),
-                plotOutput(sprintf("plot_bml_%s", met)))
-                      )
-                    }
+                    plotOutput(sprintf("plot_bml_%s", met), height="600px"))
+                    )
+            }
                 }
             })
         }
@@ -2569,7 +2569,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  ## "<h5>(Some or all of those used to analyze the data; ",
                                                  ##              "use 'Modify data' ---below--- to go back ",
                                                  ##              "and click on 'Advanced options' if you",
-                                                 ##              "want to use other methods)</h5>"), 
+                                                 ##              "want to use other methods)</h5>"),
                                                  choices = gsub("HESBCN", "H-ESBCN",
                                                                 input$cpm_methods, fixed = TRUE),
                                                  selected = gsub("HESBCN", "H-ESBCN",
@@ -2602,26 +2602,26 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                        radioButtons(inputId = "data2plot",
                                                     label = HTML("Predictions from fitted models to display"
                                                                  ),
-                                                    choiceNames = 
+                                                    choiceNames =
                                                         if (do_sampling) {
-                                                            c("Transition probabilities", 
+                                                            c("Transition probabilities",
                                                               "Transition rates",
                                                               "Predicted genotype relative frequencies",
                                                               "Sampled genotype counts")
-                                                        } else {         
-                                                            c("Transition probabilities", 
+                                                        } else {
+                                                            c("Transition probabilities",
                                                               "Transition rates",
                                                               "Predicted genotype relative frequencies")
                                                         }
                                                    ,
-                                                    choiceValues = 
+                                                    choiceValues =
                                                         if (do_sampling) {
-                                                            c("trans_mat", 
+                                                            c("trans_mat",
                                                               "trans_rate_mat",
                                                               "predicted_genotype_freqs",
                                                               "sampled_genotype_counts")
                                                         } else {
-                                                            c("trans_mat", 
+                                                            c("trans_mat",
                                                               "trans_rate_mat",
                                                               "predicted_genotype_freqs")
                                                         }
@@ -2695,7 +2695,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                               , placement = "right")
                               )
                      ),
-            
+
             )
     })
 
@@ -2704,12 +2704,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         for (i in names(all_cpm_out)) {
             all_names <- c(all_names, all_cpm_out[[i]]$orig_data$name)
         }
-        
+
         ## if ((length(all_names) > 0) && (last_visited_cpm != "")) {
         if ((length(all_names) > 0) &&
             (reactive_last_visited_cpm$the_last_visited_cpm != "")) {
             selected <- names(all_cpm_out)
-            
+
             tagList(
                 radioButtons(
                     inputId = "select_cpm",
@@ -2723,7 +2723,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     })
 
     output$original_data <- renderUI({
-        ## To see if I disable original data        
+        ## To see if I disable original data
         if (length(names(all_cpm_out)) > 0) {
             tags$div(class="frame max_height", tags$h3("Original data"),
                      plotly::renderPlotly(
@@ -2736,7 +2736,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      ## Go to first analysis, click on "Modify data" and .. you
                      ## are shown the 10 samples.
                      ## Even worse, you can modify the model in between.
-                     
+
                      ## tags$div(class = "download_button",
                      ##          actionButton("modify_data", "Modify data")
                      ##          )
@@ -2781,7 +2781,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$div(class=" max_height",
                               ## A hack to get the tooltip to only show on hover
                               ## over heading of table
-                              id = "table_out3", 
+                              id = "table_out3",
                               tags$h3(paste("Tabular output of predictions from fitted models: ",
                                             switch(ifelse(is.null(input$data2plot),
                                                           "not_valid_or_not_yet_existent",
@@ -2794,7 +2794,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                    )))
                               ) , ## prompter does not work here
                      tippy::tippy_this("table_out3",
-                                       ## message = 
+                                       ## message =
                                        HTML("<span style='font-size:1.5em; text-align:left;'><p>This output is also displayed as the second row of figures. ",
                                             "Choose the output to display from the left radio buttons ",
                                             "\"Predictions from models to display\".</p>",
@@ -2817,7 +2817,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      )
         }
     })
-    
+
     ## Download button
     output$download_cpm <- downloadHandler(
         filename = function() sprintf("%s_cpm.rds", input$select_cpm),
@@ -2840,7 +2840,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 ######################################################################
 ######################################################################
 #########
-#########    Old code  
+#########    Old code
 #########
 ######################################################################
 ######################################################################
@@ -2898,7 +2898,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 ## Old consistency checks in dag_table_cell_edit
 ## but catching them here is a little bit late.
 ## And this problem can no longer exist here, I think.
-## 
+##
 ## cnames <- colnames(dag_data())
 ## if (data$this_d_dag_model == "OT") {
 ##     if ( (any(c("Lambdas", "theta", "Relation") %in% cnames)) ||
@@ -2937,7 +2937,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 ##             stop("Number of old and new gene names differs.")
 ##         }
 
-##         ## Use a simple lookup-dictionary and 
+##         ## Use a simple lookup-dictionary and
 ##         ## avoid to_stnd_csd_dataset which is a function from hell.
 ##         old_gene_names <- data$gene_names
 ##         new_gene_names <- c(new_gene_names,
@@ -3074,15 +3074,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 ##         }
 ##     } else {
 ##         ## default_dag_model <<- input$dag_model
-##         the_dag_model$stored_dag_model <- input$dag_model 
+##         the_dag_model$stored_dag_model <- input$dag_model
 ##     }
-##     the_dag_model$stored_dag_model <- input$dag_model 
+##     the_dag_model$stored_dag_model <- input$dag_model
 ## })
 
 
 
 ## Older version. Contains comments about A21_gnn_numfix
-## display_freqs <- reactive({        
+## display_freqs <- reactive({
 ##     ## Remember this is called whenever changes in many places
 ##     ## happen.
 
@@ -3103,7 +3103,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 ##          (nrow(data$csd_counts) > 0))) {
 ##         mymessage("    disabled provide_gene_names under display_freqs")
 ##         shinyjs::disable("provide_gene_names")
-##     }  
+##     }
 
 ##     ## If no data to display, return empty data frame
 ##     thisd <- input$input2build
@@ -3120,7 +3120,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 ##                       "Returning a 0-rows data frame")
 ##             return(data.frame(Genotype = character(), Counts = integer()))
 ##         }
-##     } 
+##     }
 
 ##     if (input$input2build == "dag") {
 ##         ## With the DAG we always return all the genotypes
@@ -3323,7 +3323,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 ##                         ),
 ##                    "right", options = list(container = "body")
 ##                    )
-## |> prompter::add_prompt(message = 
+## |> prompter::add_prompt(message =
 ##                             HTML("This output is also displayed in tabular form on the bottom right.",
 ##                                  "                   ",
 ##                                  paste("<p>\"Sampled genotype counts\" is only available if you selected ",
