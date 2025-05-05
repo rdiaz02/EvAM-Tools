@@ -2327,7 +2327,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                        ifelse(length(plot2show()) <=0, 1, length(plot2show())))
 
             lapply(plot2show(), function(met) {
-                if (met == "HyperTraPS") {
+                if (met == "HyperTraPS" && 
+                    !is.null(tmp_data$HyperTraPS_primary_output) && 
+                    !all(is.na(tmp_data$HyperTraPS_primary_output))) {
 
                     output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
                   if (tmp_data$all_options$hyper_traps_opts$model == 2) {
@@ -2349,7 +2351,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             )
                         )
                     )
-                } else if (met == "BML") {
+                } else if (met == "BML" &&
+                    !is.null(tmp_data$BML_primary_output) &&
+                    !all(is.na(tmp_data$BML_primary_output))) {
                   output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
                     pl <- evamtools:::plot_BML_dot(tmp_data$BML_primary_output)
                     pl
@@ -2474,7 +2478,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
 
             lapply(plot2show(), function(met) {
-                if (met == "HyperTraPS") {
+                if (met == "HyperTraPS" && 
+                    !is.null(tmp_data$HyperTraPS_primary_output) && 
+                    !all(is.na(tmp_data$HyperTraPS_primary_output))) {
                   HT_model <- tmp_data$HyperTraPS_primary_output$model
                     output[[sprintf("plot_hypertraps_%s", met)]] <- renderPlot({
                     pl <- hypertrapsct::plotHypercube.summary(tmp_data$HyperTraPS_primary_output)
@@ -2518,7 +2524,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
 
             lapply(plot2show(), function(met) {
-                if (met == "BML") {
+                if (met == "BML"&&
+                    !is.null(tmp_data$BML_primary_output) &&
+                    !all(is.na(tmp_data$BML_primary_output)))  {
             if (tmp_data$BML_bootstrap) {
                     ## Like Figure 3.b in Misra et al.
                     output[[sprintf("plot_bml_%s", met)]] <- renderPlot({
@@ -2571,9 +2579,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  ##              "and click on 'Advanced options' if you",
                                                  ##              "want to use other methods)</h5>"),
                                                  choices = gsub("HESBCN", "H-ESBCN",
-                                                                input$cpm_methods, fixed = TRUE),
+                                                                all_cpm_out[[input$select_cpm]]$cpm_output$methods, fixed = TRUE),
                                                  selected = gsub("HESBCN", "H-ESBCN",
-                                                                 input$cpm_methods, fixed = TRUE)
+                                                                 all_cpm_out[[input$select_cpm]]$cpm_output$methods, fixed = TRUE)
                                                  ),
                               tippy::tippy_this("cpm2show",
                                                 HTML("<span style='font-size:1.5em; text-align:left;'>",
