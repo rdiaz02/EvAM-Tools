@@ -37,11 +37,11 @@
 <!-- tocstop -->
 
 ## EvAM Tools: purpose
-Tools for evolutionary accumulation, or event accumulation, models. We use code from what are usually referred to as "Cancer Progression Models" (CPM) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost).
+Tools for evolutionary accumulation models (EvAMs). We use code from what are usually referred to as "Cancer Progression Models" (CPM) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost).
 
 We provide an R package, evamtools, that can also launch a GUI as a Shiny (https://shiny.rstudio.com/) web app (running on https://www.iib.uam.es/evamtools/) that allows you to:
 
-  * Run state-of-the-art CPM methods, including Conjuntive Bayesian Networks (CBN ---and their MC-CBN version---), Oncogenetic trees (OT), Mutual Hazard Networks (MHN), Hidden Extended Suppes-Bayes Causal Networks (H-ESBCNs ---PMCE---), Disjunctive Bayesian Networks (DBN, from the OncoBN package), Hypercubic transition path sampling (HyperTraPS-CT), and Bayesian Mutational Landscape (BML), with a single function call.
+  * Run state-of-the-art EvAM methods, including Conjuntive Bayesian Networks (CBN ---and their MC-CBN version---), Oncogenetic trees (OT), Mutual Hazard Networks (MHN), Hidden Extended Suppes-Bayes Causal Networks (H-ESBCNs ---PMCE---), Disjunctive Bayesian Networks (DBN, from the OncoBN package), Hypercubic transition path sampling (HyperTraPS-CT), and Bayesian Mutational Landscape (BML), with a single function call.
   * From the fitted models, represent, graphically, the fitted models (DAGs of restrictions or matrix of hazards, as appropriate), the transition matrices and transition rate matrices (where appropriate) between genotypes and show frequencies of genotypes sampled from the fitted models.
   * Using the shiny app, easily visualize the effects of changes in genotype composition on the fitted models by entering user-defined cross-sectional data using a GUI.
 
@@ -64,11 +64,11 @@ Diaz-Uriarte, R & Herrera-Nieto, P. 2022. EvAM-Tools: tools for evolutionary acc
 
 What can EvAM-Tools be used for?
 
-   * To understand CPMs and how different inputs (which can be easily modified interactively in the web app) affect the fitted models. For example, change the genotype frequencies according to sensible models of dependencies and run the CPMs.
+   * To understand EvAMs and CPMs and how different inputs (which can be easily modified interactively in the web app) affect the fitted models. For example, change the genotype frequencies according to sensible models of dependencies and run the EvAMs.
 
    * To understand what different models imply about how the cross-sectional data looks like. Create the dependency structures (DAGs or MHN log-Theta matrix) and generate data from them, possibly playing with the amount of noise. This does not even require to run the methods themselves.
 
-   * As a research tool to analyze cross-sectional data with state-of-the-art CPMs.
+   * As a research tool to analyze cross-sectional data with state-of-the-art EvAMs.
 
    * As a research tool in methodological work. For example:
        * We can examine how well a method can recover the true structure when the data fulfills the assumptions of a method. We would generate data under a particular model and see if the method that implements that model can recover the true structure under different sample sizes. (The web app only allows for playing with this; for serious work one would use the package itself and build code using the package functions).
@@ -77,18 +77,18 @@ What can EvAM-Tools be used for?
 
 
 
-The web app in particular should allow for easy exploration of CPM models without the need for installing any software. Details about the use of the web app are provided in https://www.iib.uam.es/evamtools/#input. The following figure provides an overview of the workflow with the web app:
+The web app in particular should allow for easy exploration of EvAM models without the need for installing any software. Details about the use of the web app are provided in https://www.iib.uam.es/evamtools/#input. The following figure provides an overview of the workflow with the web app:
 
 ![Overview EvAM-Tools web app](./evamtools/inst/shiny-examples/evamtools/assets/figure-overview.png?raw=true)
 
 As can be seen, the web app workflows encompass different major functionalities and use cases, mainly:
 
 
-1. Inference of CPMs from user uploaded from a file.
+1. Inference of EvAMs from user uploaded from a file.
 
-2. Exploration of the inferences that different CPM methods yield from manually constructed synthetic data.
+2. Exploration of the inferences that different EvAM methods yield from manually constructed synthetic data.
 
-3. Construction of CPM models (DAGs and rates/probabilities or MHN models) and simulation of synthetic data from them.
+3. Construction of EvAM models (DAGs and rates/probabilities or MHN models) and simulation of synthetic data from them.
 
     3.1. Examination of the consequences of different models and their parameters on the simulated data.
 
@@ -97,7 +97,7 @@ As can be seen, the web app workflows encompass different major functionalities 
 	3.3. Analysis of the data simulated under model after manual modification of specific genotype frequencies (e.g., data simulated under CBN but where, prior to analysis, we remove all observations with the WT genotype and the genotype with all loci mutated).
 
 
-Furthermore, note that in all cases, when data are analyzed, in addition to returning the fitted models, the web app returns the analysis of the CPMs in terms of their predictions such as predicted genotype frequencies and transition probabilities between genotypes. Some of the above use cases (e.g., exhaustive examination of the performance of one method under data generated by a very different model) are probably better served using the R package directly; still, the web app makes it particularly easy to gain intuition about what these methods do with different data sets.
+Furthermore, note that in all cases, when data are analyzed, in addition to returning the fitted models, the web app returns the analysis of the EvAMs in terms of their predictions such as predicted genotype frequencies and transition probabilities between genotypes. Some of the above use cases (e.g., exhaustive examination of the performance of one method under data generated by a very different model) are probably better served using the R package directly; still, the web app makes it particularly easy to gain intuition about what these methods do with different data sets.
 
 
 ---
@@ -158,7 +158,7 @@ Furthermore, note that in all cases, when data are analyzed, in addition to retu
 - The authors of the above code have been added to the DESCRIPTION file, under "Auhor".
 
 
-- Some of the code for transition rate matrices, input from different CPMs, tests, etc (authored by Ramon Diaz-Uriarte, released under the GPL-3) has been previously used in Diaz-Uriarte and Vasallo, 2019 (all code available from https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1007246#sec019, files S1 Dataset and S2 Dataset) and Diaz-Colunga and Diaz-Uriarte, 2021 (repository: https://github.com/rdiaz02/what_genotype_next).
+- Some of the code for transition rate matrices, input from different EvAMs, tests, etc (authored by Ramon Diaz-Uriarte, released under the GPL-3) has been previously used in Diaz-Uriarte and Vasallo, 2019 (all code available from https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1007246#sec019, files S1 Dataset and S2 Dataset) and Diaz-Colunga and Diaz-Uriarte, 2021 (repository: https://github.com/rdiaz02/what_genotype_next).
 
 
 ### ct-cbn ###

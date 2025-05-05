@@ -1,6 +1,6 @@
 \name{evam}
 \alias{evam}
-\title{Runs the CPMs (or evams)}
+\title{Runs the EvAMs (or CPMs)}
 \usage{
 evam(x,
      methods = c("CBN", "OT", "HESBCN", "MHN", "OncoBN", "MCCBN",

@@ -315,7 +315,7 @@ results_simple <- function(){
                                ),
                       uiOutput("customize"),
                       tags$div(class = "frame",
-                               tags$h3(HTML("Download CPM results <br> and analyzed data")),
+                               tags$h3(HTML("Download EvAM results <br> and analyzed data")),
                                actionButton("how2downloadcpm", "Help", class = "btn-info"),
                                tags$div(class = "download_button",
                                         downloadButton("download_cpm", "Download")
@@ -760,7 +760,7 @@ column(width = 12,
                                         
                                         tags$footer(tags$script(HTML("
               tmp_label = document.createElement('p');
-              tmp_label.innerHTML = '<hr style=\"height:1px; width:70px; background-color:black;text-align:left;margin-left:-10px\"> <h4 style=\"margin-left:-30px\">Generate<br>cross-sectional data from CPM models:</h4>';
+              tmp_label.innerHTML = '<hr style=\"height:1px; width:70px; background-color:black;text-align:left;margin-left:-10px\"> <h4 style=\"margin-left:-30px\">Generate<br>cross-sectional data from EvAM models:</h4>';
               document.querySelectorAll('#input2build div.radio')[1].after(tmp_label)
               document.querySelectorAll('#input2build div.radio')[1].after(tmp_label)
               "))),
@@ -821,7 +821,7 @@ column(width = 12,
                             ##                  bounce = TRUE,
                             ##                  size = "medium"),
                             tags$div(class = "download_button",
-                                     actionButton("advanced_options", "Advanced options and CPMs to use")
+                                     actionButton("advanced_options", "Advanced options and EvAMs to use")
                                      ),
                             tags$div(id="all_advanced_options", 
                                      tags$div(class="inlin",
@@ -833,7 +833,7 @@ column(width = 12,
                                                            "Additional documentation</a>).")),
                                               tags$hr(style="border-color: darkgrey;"),
                                               checkboxGroupInput("cpm_methods",
-                                                                 "CPMs to use", 
+                                                                 "EvAMs to use",
                                                                  width = "100%",
                                                                  choiceNames = c(
                                                                      "CBN",

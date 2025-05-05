@@ -7,8 +7,8 @@
 #### Table of contents <a id="evamtools"></a>
 ****
 - [EvAM-Tools](#evamtools)
-<br>&nbsp;&nbsp;- [A two-paragraph summary about cross-sectional data and CPMs](#helpcsd)
-<br>&nbsp;&nbsp;- [What CPMs are included in ```EvAM-Tools```?](#cpms)
+<br>&nbsp;&nbsp;- [A two-paragraph summary about cross-sectional data and EvAMs (or CPMs)](#helpcsd)
+<br>&nbsp;&nbsp;- [What EvAMs are included in ```EvAM-Tools```?](#cpms)
 - [User's Manual: How to use this web interface?](#input)
 <br>&nbsp;&nbsp;- [Web app: overview of workflow and functionality](#overview)
 <br>&nbsp;&nbsp;- [```User input```](#userinput)
@@ -18,7 +18,7 @@
 <br>&nbsp;&nbsp;- [Example files for upload](#example_files)
 <br>&nbsp;&nbsp;- [Session timeouts, RAM and elapsed time execution limits, aborting a run](#limits)
 <br>&nbsp;&nbsp;- [How long does it take to run?](#timetorun)
-<br>&nbsp;&nbsp;- [Default options and default CPMs run](#cpms2run)
+<br>&nbsp;&nbsp;- [Default options and default EvAMs run](#cpms2run)
 <br>&nbsp;&nbsp;- [References and related repositories](#refs)
 - [Where is the code? Terms of use. Citing. Copyright](#code)
 <br>&nbsp;&nbsp;- [Authors, contact and bug reports](#authors)
@@ -31,10 +31,10 @@
 ## EvAM-Tools <a id="evamtools"></a>
 ****
 
-EvAM-Tools is an R package and Shiny web app that provides tools for evolutionary accumulation, or event accumulation, models. We use code from  "Cancer Progression Models" (CPM) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost). EvAM-Tools is  also available as an R package (see https://github.com/rdiaz02/EvAM-Tools).
+EvAM-Tools is an R package and Shiny web app that provides tools for evolutionary accumulation models (EvAMs). We use code from  "Cancer Progression Models" (CPMs) but these are not limited to cancer (the key idea is that events are gained one by one, but not lost). EvAM-Tools is  also available as an R package (see https://github.com/rdiaz02/EvAM-Tools).
 
 
-This Shiny web interface provides a GUI to the package and focuses on allowing fast construction, manipulation, and exploration of CPM models, and making it easy to gain an intuitive understanding of what these methods infer from different data sets as well as what kind of data are to be expected under these models. You can analyze your data, create cross-sectional data from scratch (by giving genotype frequencies), or generate synthetic data under different CPMs. You can compare results from different methods/models, as well as experiment and understand the consequences of changes in the input data on the returned inferences. You can also examine how a given method performs when data have been generated under another (or its own) model.
+This Shiny web interface provides a GUI to the package and focuses on allowing fast construction, manipulation, and exploration of EvAM/CPM models, and making it easy to gain an intuitive understanding of what these methods infer from different data sets as well as what kind of data are to be expected under these models. You can analyze your data, create cross-sectional data from scratch (by giving genotype frequencies), or generate synthetic data under different EvAMs/CPMs. You can compare results from different methods/models, as well as experiment and understand the consequences of changes in the input data on the returned inferences. You can also examine how a given method performs when data have been generated under another (or its own) model.
 
 
 This landing page is the main documentation for the use of the web interface. Additional examples of use are discussed in  https://github.com/rdiaz02/EvAM-Tools#some-examples-of-use and in the ["EvAM-Tools: examples" additional documentation file](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf) (though they do not ---yet--- include HyperTraPS-CT nor BML). The R package itself contains documentation using standard R mechanisms, and gives you access to some additional functionality not exposed via the web app.
@@ -62,19 +62,19 @@ This landing page is the main documentation for the use of the web interface. Ad
 &nbsp;
 
 
-### A two-paragraph summary about _cross-sectional_ data and CPMs<a id="helpcsd"></a>
+### A two-paragraph summary about _cross-sectional_ data and EvAMs (or CPMs)<a id="helpcsd"></a>
 ***
 
-In cross-sectional data a single sample is obtained from each subject or patient. That single sample represents the "observed genotype" of, for example, the tumor of that patient. Genotype can refer to single point mutations, insertions, deletions, or any other genetic modification. In this app, as is often done by CPM software, we store cross-sectional data in a matrix, where rows are patients or subjects, and columns are genes; the data is a 1 if the event was observed and 0 if it was not.
+In cross-sectional data a single sample is obtained from each subject or patient. That single sample represents the "observed genotype" of, for example, the tumor of that patient. Genotype can refer to single point mutations, insertions, deletions, or any other genetic modification. In this app, as is often done by EvAM software, we store cross-sectional data in a matrix, where rows are patients or subjects, and columns are genes; the data is a 1 if the event was observed and 0 if it was not.
 
-Cancer progression models (CPMs) or, more generally, event accumulation models, use these cross-sectional data to try to infer restrictions in the order of accumulation of events; for example, that a mutation on gene B is always preceded by a mutation in gene A (maybe because mutating B when A is not mutated). Some cancer progression models, such as MHN, instead of modeling deterministic restrictions, model facilitating/inhibiting interactions between genes, for example that having a mutation in gene A makes it very likely to gain a mutation in gene B. A longer explanation is provided in [What CPMs are included in ```EvAM-Tools```?](#cpms), below, and many more details in  [EvAM-Tools: methods' details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf ).  Finally, note we have talked about  "genotype" and "mutation", but CPMs have been used with non-genetic data too, and thus our preference for the expression "event accumulation models"; as said above, the key idea is that events are gained one by one, but not lost, and that we can consider the different subjects/patients in the cross-sectional data as replicate evolutionary experiments or runs where all individuals are under the same constraints (e.g., genetic constraints if we are dealing with mutations).
+Cancer progression models (CPMs) or, more generally, evolutionary accumulation models (EvAMs), use these cross-sectional data to try to infer restrictions in the order of accumulation of events; for example, that a mutation on gene B is always preceded by a mutation in gene A (maybe because mutating B when A is not mutated). Some cancer progression models, such as MHN, instead of modeling deterministic restrictions, model facilitating/inhibiting interactions between genes, for example that having a mutation in gene A makes it very likely to gain a mutation in gene B. A longer explanation is provided in [What EvAMs are included in ```EvAM-Tools```?](#cpms), below, and many more details in  [EvAM-Tools: methods' details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf ).  Finally, note we have talked about  "genotype" and "mutation", but EvAMs have been used with non-genetic data too, and thus our preference for the expression "event accumulation models"; as said above, the key idea is that events are gained one by one, but not lost, and that we can consider the different subjects/patients in the cross-sectional data as replicate evolutionary experiments or runs where all individuals are under the same constraints (e.g., genetic constraints if we are dealing with mutations).
 
 &nbsp;
 
 
 
 ****
-### What CPMs are included in ```EvAM-Tools```?<a id="cpms"></a>
+### What EvAMs are included in ```EvAM-Tools```?<a id="cpms"></a>
 ***
 
 *  **Oncogenetic Trees (OT):** Restrictions in the accumulation of mutations (or events) are represented as a tree. Hence, a parent node can have many children, but children have a single parent. OTs are untimed (edge weights represent conditional probabilities of observing a given mutation, when the sample is taken, given the parents are observed).
@@ -120,20 +120,20 @@ The figure below provides an overview of the major workflows with the web app (t
 The web app encompasses, thus, different major functionalities and workflows, mainly:
 
 
-1. Inference of CPMs from user data uploaded from a file.
+1. Inference of EvAMs from user data uploaded from a file.
 
-2. Exploration of the inferences that different CPM methods yield from manually constructed synthetic data.
+2. Exploration of the inferences that different EvAM methods yield from manually constructed synthetic data.
 
-3. Construction of CPM models (DAGs with their rates/probabilities and MHN models) and simulation of synthetic data from them.
+3. Construction of EvAM models (DAGs with their rates/probabilities and MHN models) and simulation of synthetic data from them.
 
-    3.1. Examination of the consequences of different CPM models and their parameters on the simulated data.
+    3.1. Examination of the consequences of different EvAM models and their parameters on the simulated data.
 
     3.2. Analysis of data simulated under one model with methods that have different models (e.g., data simulated from CBN analyzed with OT and OncoBN).
 
 	3.3. Analysis of data simulated under one model with manual modification of specific genotype frequencies prior to analyses (e.g., data simulated under CBN but where, prior to analysis, we remove all observations with the WT genotype and the genotype with all loci mutated).
 
 
-Furthermore, note that in all cases, when data are analyzed, in addition to returning the fitted models, the web app also returns the analysis of the CPMs in terms of their predictions such as predicted genotype frequencies and transition probabilities between genotypes.
+Furthermore, note that in all cases, when data are analyzed, in addition to returning the fitted models, the web app also returns the analysis of the EvAMs in terms of their predictions such as predicted genotype frequencies and transition probabilities between genotypes.
 
 
 
@@ -161,8 +161,8 @@ To start using the web app, go first to the ```User input``` tab (on top of the 
        - Uploading a file.
        - Entering genotype frequencies manually<br/>
         		&nbsp;
-   - Generate cross-sectional data from CPM models. Follow these steps:
-       1. Specify the CPM model first. You can use:
+   - Generate cross-sectional data from EvAM models. Follow these steps:
+       1. Specify the EvAM model first. You can use:
 
 	       1.1. Models that use DAGs to specify restrictions: OT, OncoBN (in both its conjunctive and disjunctive versions), CBN and H-ESBCN (H-ESBCN allows you to model AND, OR, and XOR dependency relationships). You will specify the DAG and the rates (CBN, H-ESBCN)/conditional probabilities (OT, OncoBN) of events conditional on their parents.<br/>
 
@@ -171,16 +171,16 @@ To start using the web app, go first to the ```User input``` tab (on top of the 
 
 		   (1.3. This is not available for HyperTraPS or BML.)
 
-	   2. Simulate data from the CPM model. In addition to the number of samples, you can specify the amount of observational noise (and, for OT and OncoBN, deviations from the model).<br/>
+	   2. Simulate data from the EvAM model. In addition to the number of samples, you can specify the amount of observational noise (and, for OT and OncoBN, deviations from the model).<br/>
 	   &nbsp;
 
-           Note that simulating data from CPMs allows you to get an intuitive feeling for what different CPM models and their parameters mean in terms of the genotype frequency data they produce.
+           Note that simulating data from EvAMs allows you to get an intuitive feeling for what different EvAM models and their parameters mean in terms of the genotype frequency data they produce.
 
 
 &nbsp;
 &nbsp;
 
-Cross-sectional data that have been uploaded or simulated from CPM models can be further modified by altering genotype counts. Moreover, it is possible to specify cross-sectional data and DAG/MHN models with user-specified gene names. Finally, from the "User input" tab you can also save the cross-sectional data.
+Cross-sectional data that have been uploaded or simulated from EvAM models can be further modified by altering genotype counts. Moreover, it is possible to specify cross-sectional data and DAG/MHN models with user-specified gene names. Finally, from the "User input" tab you can also save the cross-sectional data.
 
 
 To make it easier to play with the tool, we provide predefined cross-sectional data sets under "Enter genotype frequencies manually", as well as predefined DAG and MHN models (from which you can generate data by clicking on "Generate data from DAG [MHN model]"). You can also modify the predefined DAGs and MHNs before generating data.
@@ -192,7 +192,7 @@ To make it easier to play with the tool, we provide predefined cross-sectional d
 ### Analyze data: ```Run evamtools```<a id="running"></a>
 ***
 
-1. Change, if you want, the options under "Advanced options and CPMs to use" (on the right of the screen). These options include what CPM methods to use as well as parameters of the methods.
+1. Change, if you want, the options under "Advanced options and EvAMs to use" (on the right of the screen). These options include what EvAM methods to use as well as parameters of the methods.
 2. Click on "Run evamtools".
 3.  Results will be shown in the ```Results``` tab.
 
@@ -221,7 +221,7 @@ To make it easier to play with the tool, we provide predefined cross-sectional d
 
 The results include:
  &nbsp;
-  * The fitted CPMs themselves, including the DAGs with their rates/conditional probabilities (depending on the model) and the MHN log-&Theta; matrix.
+  * The fitted EvAMs (or CPMs) themselves, including the DAGs with their rates/conditional probabilities (depending on the model) and the MHN log-&Theta; matrix.
 	 &nbsp;
 
   * Predictions derived from the fitted models, including:
@@ -247,7 +247,7 @@ The results include:
 
 The results are displayed using a combination of figures and tabular output. Specifically:
 
-  * The first row of figures shows the fitted CPMs: DAGs with their rates/probabilities and MHN log-&Theta; matrix.
+  * The first row of figures shows the fitted EvAMs: DAGs with their rates/probabilities and MHN log-&Theta; matrix.
 
      * The edges of the DAGs are annotated with the lambda (CBN, HESBCN),  weight (OT) or &theta; (OncoBN).
 
@@ -255,7 +255,7 @@ The results are displayed using a combination of figures and tabular output. Spe
 
      * For MHN there is no DAG of restrictions; we show the fitted log-&Theta; matrix rounded to two decimal places. The diagonal entries are the log-baseline rates, and the off-diagonal the log of the multiplicative effects of the effector event (the columns) on the affected event (rows).
 
-	 * You can represent the results of all the fitted models or only of a subset (select those using "CPMs to show").
+	 * You can represent the results of all the fitted models or only of a subset (select those using "EvAMs to show").
 
 	 * For HyperTraPS the output in the first row depends on the model. For models with pairwise interactions (`model = 2`), we show the pairwise influences between features (this is similar to the output from MHN), calling hypertraps' package `plotHypercube.influences` function. For models with 3-way interactions (`model = 3`) we show "how each feature acquisition influences the rate of acquisition of other features as a network" (from https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output), calling hypertraps' package `plotHypercube.influencegraph` function. For other models (unrestricted ---`model = -1`---, main-effects only ---`model = 1`---, and four-way interactions ---`model = 4`---), we show a "motif plot of feature acquisition probabilities at discrete orderings", calling hypertraps' package `plotHypercube.motifs` function.
 
@@ -275,7 +275,7 @@ The results are displayed using a combination of figures and tabular output. Spe
     * (As visualizing the acquisition of mutations in a complex network can be challenging, for the transition probabilities/rates plots we use the representation of the hypergraph transition graph from HyperTraPS --- Greenbury et al., 2020. HyperTraPS: Inferring probabilistic patterns of trait acquisition in evolutionary and disease progression pathways. Cell systems, 10, 39–51, https://doi.org/10.1016/j.cels.2019.10.009)
 
 &nbsp;&nbsp;
-    * For HyperTraPS, we show below summary plots as provided by  hypertraps' package `plotHypercube.summary` function. The plots provided are, from left to right and from top to bottom:
+  * For HyperTraPS, we show summary plots as provided by  hypertraps' package `plotHypercube.summary` function. The plots provided are, from left to right and from top to bottom:
       * A trace of the likelihood ("re-calculated twice with different samples (to show consistency or lack thereof), along with current "in use" likelihood" ---from https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output ; the reamining verbatime quotations are from this source).
     	  * A "'Bubble plot' of probability of acquiring trait <i>i</i> at ordinal step <i>j</i>".
       * "Transition graph with edge weights showing probability flux (from sampled paths), with mean and s.d. of absolute timings for each step."
@@ -300,12 +300,12 @@ Finally, you can also *download* the tabular results, fitted models, and the ana
 
 
 ****
-### Default options and default CPMs run<a id="cpms2run"></a>
+### Default options and default EvAMs run<a id="cpms2run"></a>
 ***
 
-- In the Shiny app, by default we run CBN, OT, OncoBN, MHN, and HyperTraPS. If you want to run H-ESBCN, MC-CBN, or BML, or not run some of the above methods, (de)select them under ```Advanced options and CPMs to use```. (H-ESBCN or MC-CBN are not run by default, as they can take a long time).
-- OncoBN can be run using a conjunctive or a disjunctive model. The default used in the Shiny app (and the ```evam``` function in the package) is the disjunctive model. You can use the conjunctive one by selecting it under ```Advanced options and CPMs to use```, in ```OncoBN options```, ```Model```.
-- Most methods have other options that can be modified. Again, check ```Advanced options and CPMs to use```.
+- In the Shiny app, by default we run CBN, OT, OncoBN, MHN, and HyperTraPS. If you want to run H-ESBCN, MC-CBN, or BML, or not run some of the above methods, (de)select them under ```Advanced options and EvAMs to use```. (H-ESBCN or MC-CBN are not run by default, as they can take a long time).
+- OncoBN can be run using a conjunctive or a disjunctive model. The default used in the Shiny app (and the ```evam``` function in the package) is the disjunctive model. You can use the conjunctive one by selecting it under ```Advanced options and EvAMs to use```, in ```OncoBN options```, ```Model```.
+- Most methods have other options that can be modified. Again, check ```Advanced options and EvAMs to use```.
 
 &nbsp;&nbsp;
 

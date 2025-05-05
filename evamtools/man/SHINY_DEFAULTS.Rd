@@ -13,7 +13,7 @@ Defaults values of the shiny app
 
   \item{cpm_samples:}{Number of patients to samples to generate csd data from a matrix using with CPM outputs}
 
-  \item{all_cpms:}{All CPMs in evamtools}
+  \item{all_cpms:}{All EvAMs (or CPMs) in evamtools}
 
   \item{csd_samples:}{Number of patients to samples to generate csd data from a matrix or a dag}
 

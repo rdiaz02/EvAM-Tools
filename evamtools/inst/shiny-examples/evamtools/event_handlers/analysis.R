@@ -44,8 +44,8 @@ method_validation <- function(methods, stop_if_empty = FALSE) {
         if (is.null(methods) || (length(methods) == 1 && is.na(methods))) { 
             stop(
                 "You must use at least one method ",
-                "(check 'CPMs to use' under 'Advanced options ",
-                "and CPMs to use')."
+                "(check 'EvAMs to use' under 'Advanced options ",
+                "and EvAMs to use')."
             )
         }
     }
@@ -244,7 +244,7 @@ run_analysis <- function(data, input, disp_freqs_ret, EVAM_MAX_ELAPSED) {
 
     validate_data(data2run)
 
-    progress$inc(2 / 5, detail = "Running CPMs")
+    progress$inc(2 / 5, detail = "Running EvAMs")
     
     cpm_output <- R.utils::withTimeout(
         {

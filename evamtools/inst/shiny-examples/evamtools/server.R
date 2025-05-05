@@ -478,7 +478,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tags$div(class = "frame inlin2",
                      tags$h3("Rename the data"),
                      tags$h5(HTML("Give the (modified) data a different name ",
-                                  "that will also be used to save the CPM ",
+                                  "that will also be used to save the EvAM ",
                                   "output.",
                                   "Names should start with a letter, ",
                                   "and can contain only letters, numbers, ",
@@ -1095,11 +1095,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$h5("WT is added by not clicking on any mutations. "),
                      tags$h5("Any gene without mutations is excluded from the data, ",
                              "regardless of the setting for number of genes. "),
-                     tags$h5("For the CPM analysis, if any gene is always observed mutated ",
+                     tags$h5("For the EvAM (or CPM) analysis, if any gene is always observed mutated ",
                              "(i.e., has a constant value of 1 for all observations), ",
                              "one observation with no genes mutated is added ",
                              "to the sample before the analysis."),
-                     tags$h5("For the CPM analysis, genes that have identical patterns",
+                     tags$h5("For the EvAM analysis, genes that have identical patterns",
                              "(i.e., that lead to identical columns in the data matrix), ",
                              "are fused into",
                              "a single gene."),
@@ -1850,7 +1850,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
         showModal(modalDialog(
             easyClose = TRUE,
-            title = tags$h3("Downloading CPMs results and analyzed data"),
+            title = tags$h3("Downloading EvAMs results and analyzed data"),
             tags$div(
                      tags$p(HTML("Format and contents: rds file with ",
                                  "two lists: <ul>")),
@@ -2565,7 +2565,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                      tags$h3("Customize the visualization"),
                      tags$div(class = "inline",
                               checkboxGroupInput(inputId = "cpm2show",
-                                                 label = HTML("CPMs to show"),
+                                                 label = HTML("EvAMs to show"),
                                                  ## "<h5>(Some or all of those used to analyze the data; ",
                                                  ##              "use 'Modify data' ---below--- to go back ",
                                                  ##              "and click on 'Advanced options' if you",
@@ -2577,7 +2577,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  ),
                               tippy::tippy_this("cpm2show",
                                                 HTML("<span style='font-size:1.5em; text-align:left;'>",
-                                                     "<p>Show graphical output of the CPMs used to analyze the data.  "
+                                                     "<p>Show graphical output of the EvAMs used to analyze the data.  "
                                                    , "Go back to \"User input\" "
                                                    , "and click on \"Advanced options\" if you"
                                                    , "want to use other methods.</p>"
