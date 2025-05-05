@@ -111,7 +111,7 @@ For details, please see the [EvAM-Tools: methods' details and FAQ](https://rdiaz
 The figure below provides an overview of the major workflows with the web app (that figure does not include HyperTraPS nor BML, but the workflow is similar for those methods):
 
 <br>
-<img src="figure-overview.png" alt="Overview EvAM-Tools web app" width="100%" style="border:1px solid black;">
+<img src="figure-overview-2.png" alt="Overview EvAM-Tools web app" width="100%" style="border:1px solid black;">
 <br>
 <br>
 
@@ -142,7 +142,7 @@ The figure below highlights the different major functionalities and workflows, a
 
 
 <br>
-<img src="figure-overview-paths.png" alt="Overview EvAM-Tools web app, with main functionalities highlighted." width="100%" style="border:1px solid black;">
+<img src="figure-overview-paths-2.png" alt="Overview EvAM-Tools web app, with main functionalities highlighted." width="100%" style="border:1px solid black;">
 <br>
 <br>
 
@@ -276,8 +276,8 @@ The results are displayed using a combination of figures and tabular output. Spe
 
 &nbsp;&nbsp;
     * For HyperTraPS, we show below summary plots as provided by  hypertraps' package `plotHypercube.summary` function. The plots provided are, from left to right and from top to bottom:
-	  * A trace of the likelihood ("re-calculated twice with different samples (to show consistency or lack thereof), along with current "in use" likelihood" ---from https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output ; the reamining verbatime quotations are from this source).
-	  * A "'Bubble plot' of probability of acquiring trait <i>i</i> at ordinal step <i>j</i>".
+      * A trace of the likelihood ("re-calculated twice with different samples (to show consistency or lack thereof), along with current "in use" likelihood" ---from https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output ; the reamining verbatime quotations are from this source).
+    	  * A "'Bubble plot' of probability of acquiring trait <i>i</i> at ordinal step <i>j</i>".
       * "Transition graph with edge weights showing probability flux (from sampled paths), with mean and s.d. of absolute timings for each step."
       * "Histograms of absolute timings for each trait's acquisition" (we use the default settings, so the threshold time for the histogram on the bottom right is 20).
       * See https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output for details.
