@@ -2327,7 +2327,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                        ifelse(length(plot2show()) <=0, 1, length(plot2show())))
 
             lapply(plot2show(), function(met) {
-                if (met == "HyperTraPS") {
+                if (met == "HyperTraPS" && 
+                    !is.null(tmp_data$HyperTraPS_primary_output) && 
+                    !all(is.na(tmp_data$HyperTraPS_primary_output))) {
 
                     output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
                   if (tmp_data$all_options$hyper_traps_opts$model == 2) {
@@ -2474,7 +2476,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
 
             lapply(plot2show(), function(met) {
-                if (met == "HyperTraPS") {
+                if (met == "HyperTraPS" && 
+                    !is.null(tmp_data$HyperTraPS_primary_output) && 
+                    !all(is.na(tmp_data$HyperTraPS_primary_output))) {
                   HT_model <- tmp_data$HyperTraPS_primary_output$model
                     output[[sprintf("plot_hypertraps_%s", met)]] <- renderPlot({
                     pl <- hypertrapsct::plotHypercube.summary(tmp_data$HyperTraPS_primary_output)
