@@ -2351,7 +2351,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             )
                         )
                     )
-                } else if (met == "BML") {
+                } else if (met == "BML" &&
+                    !is.null(tmp_data$BML_primary_output) &&
+                    !all(is.na(tmp_data$BML_primary_output))) {
                   output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
                     pl <- evamtools:::plot_BML_dot(tmp_data$BML_primary_output)
                     pl
@@ -2522,7 +2524,9 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
 
             lapply(plot2show(), function(met) {
-                if (met == "BML") {
+                if (met == "BML"&&
+                    !is.null(tmp_data$BML_primary_output) &&
+                    !all(is.na(tmp_data$BML_primary_output)))  {
             if (tmp_data$BML_bootstrap) {
                     ## Like Figure 3.b in Misra et al.
                     output[[sprintf("plot_bml_%s", met)]] <- renderPlot({
