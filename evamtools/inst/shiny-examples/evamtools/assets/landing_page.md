@@ -297,19 +297,19 @@ Finally, you can also *download* the tabular results, fitted models, and the ana
 
 
 &nbsp;&nbsp;
+
+
+****
+### Default options and default CPMs run<a id="cpms2run"></a>
 ***
-### Additional documentation<a id="additional_docs"></a>
-***
 
-Additional documents are available from https://rdiaz02.github.io/EvAM-Tools .
-
-For users of the web app, the most relevant are: [EvAM-Tools: examples](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf) and [EvAM-Tools: methods' details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf).
-
-
-<!-- (If you install the R package or the RStudio Docker image with the package, you also have access to the documentation of the package, which is included in this pdf). -->
-
+- In the Shiny app, by default we run CBN, OT, OncoBN, MHN, and HyperTraPS. If you want to run H-ESBCN, MC-CBN, or BML, or not run some of the above methods, (de)select them under ```Advanced options and CPMs to use```. (H-ESBCN or MC-CBN are not run by default, as they can take a long time).
+- OncoBN can be run using a conjunctive or a disjunctive model. The default used in the Shiny app (and the ```evam``` function in the package) is the disjunctive model. You can use the conjunctive one by selecting it under ```Advanced options and CPMs to use```, in ```OncoBN options```, ```Model```.
+- Most methods have other options that can be modified. Again, check ```Advanced options and CPMs to use```.
 
 &nbsp;&nbsp;
+
+
 ***
 ### Example files for upload <a id="example_files"></a>
 ***
@@ -318,14 +318,24 @@ In https://github.com/rdiaz02/EvAM-Tools/tree/main/examples_for_upload there are
 
 &nbsp;&nbsp;
 
+
 ****
-### Session timeouts, RAM and elapsed time execution limits, aborting a run<a id="limits"></a>
+### How long does it take to run? <a id="timetorun"></a>
+***
+
+It depends on the number of genes or features and methods used. For six genes, and if you do not use H-ESBCN nor MC-CBN, it should take about 20 seconds. If you do not use CBN either (i.e., if you only use MHN, OT, and OncoBN) it should run in less than 8 seconds. Model fitting itself is parallelized, but other parts of the program cannot be (e.g., displaying the final figures).
+
+&nbsp;&nbsp;
+
+
+****
+### Session timeouts, RAM and elapsed time execution limits, aborting a run, reporting crashes<a id="limits"></a>
 ***
 
 * **Timeouts:** Inactive connections will timeout after 2 hours. The page will become gray, and if you refresh (e.g., F5 in most browsers) after this time, you will not get back your results, figures, etc, but start another session.
 
 
-* **RAM and time limits:** Maximum RAM of any process is limited to 2 GB. Likewise, the analyses should be aborted after 1.5 hours of elapsed (not CPU ---we parallelize the runs) time. If you want to use the Shiny app without these limits, install a local copy. (To modify the time limit, change the value of variable EVAM_MAX_ELAPSED, in the definition of function "server", in file "server.R".  The RAM limit is imposed on the Docker containers we use; to remove it, run Docker without the memory limit.) Note: because of what we do to enforce these limits, running over limits might not be signalled by an explicit error, but rather by a graying out or a complete refresh of the session.
+* **RAM and time limits:** Maximum RAM of any process is limited to 4 GB. Likewise, the analyses should be aborted after 1.5 hours of elapsed (not CPU ---we parallelize the runs) time. If you want to use the Shiny app without these limits, install a local copy. (To modify the time limit, change the value of variable EVAM_MAX_ELAPSED, in the definition of function "server", in file "server.R".  The RAM limit is imposed on the Docker containers we use; to remove it, run Docker without the memory limit.) Note: because of the way we enforce these limits, running over limits might not be signalled by an explicit error, but rather by a graying out or a complete refresh of the session.
 
 * **Aborting a run:** Sometimes you might want to abort a run (e.g., you might have accidentally sent a run that will take a very long time). This is not possible if you run in our servers. What if you do not care about the long running, not-yet-fished run, and want to start a new one? If, from the same computer and browser, you open a new tab to https://iib.uam.es/evamtools it is very likely that the request will be served by the exact same session and docker process as the previous run; thus, if R has not finished running, you would have to wait for the previous session to finish (and even connecting to a Shiny session might not work).
 
@@ -341,31 +351,26 @@ In https://github.com/rdiaz02/EvAM-Tools/tree/main/examples_for_upload there are
 
   None of those will abort the old process; that old process will eventually finish or be aborted. But you will be able to continue using EvAM-Tools. (That said, please make considerate use of this service: it is provided free of charge, so do not abuse it.)
 
-
+* **Crashes:** Sometimes, the R process might crash (e.g., a segfault). If this happens, you will most likely only see a graying out of the page. If this happens, please let us know (solving this is complicated, because we have not been able to reliably generate these crashes), giving as much detail as possible.
 
 
 
 &nbsp;&nbsp;
 
-****
-### How long does it take to run? <a id="timetorun"></a>
+
+***
+### Additional documentation<a id="additional_docs"></a>
 ***
 
-It depends on the number of genes or features and methods used. For six genes, and if you do not use H-ESBCN nor MC-CBN, it should take about 20 seconds. If you do not use CBN either (i.e., if you only use MHN, OT, and OncoBN) it should run in less than 8 seconds. Model fitting itself is parallelized, but other parts of the program cannot be (e.g., displaying the final figures).
+Additional documents are available from https://rdiaz02.github.io/EvAM-Tools .
+
+For users of the web app, the most relevant are: [EvAM-Tools: examples](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_examples.pdf) and [EvAM-Tools: methods' details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf).
+
+
+<!-- (If you install the R package or the RStudio Docker image with the package, you also have access to the documentation of the package, which is included in this pdf). -->
+
 
 &nbsp;&nbsp;
-
-
-****
-### Default options and default CPMs run<a id="cpms2run"></a>
-***
-
-- In the Shiny app, by default we run CBN, OT, OncoBN, MHN, and HyperTraPS. If you want to run H-ESBCN, MC-CBN, or BML, or not run some of the above methods, (de)select them under ```Advanced options and CPMs to use```. (H-ESBCN or MC-CBN are not run by default, as they can take a long time).
-- OncoBN can be run using a conjunctive or a disjunctive model. The default used in the Shiny app (and the ```evam``` function in the package) is the disjunctive model. You can use the conjunctive one by selecting it under ```Advanced options and CPMs to use```, in ```OncoBN options```, ```Model```.
-- Most methods have other options that can be modified. Again, check ```Advanced options and CPMs to use```.
-
-
-
 
 
 ****

@@ -247,7 +247,7 @@ https://hub.docker.com/r/rdiaz02/evamrstudio ; the first for running the Shiny a
 
 
 Details about Docker are available here: https://docs.docker.com/get-docker/ .
-Details about R with Docker and Rocker project here: https://www.rocker-project.org/ . Our images are based on the r-ver (https://hub.docker.com/r/rocker/r-ver) and rstudio (https://hub.docker.com/r/rocker/rstudio) Docker images from the Rocker project (https://www.rocker-project.org/).
+Details about R with Docker and Rocker project here: https://www.rocker-project.org/ . Our images are based on the <!-- r-ver (https://hub.docker.com/r/rocker/r-ver) and --> rstudio (https://hub.docker.com/r/rocker/rstudio) Docker images from the Rocker project (https://www.rocker-project.org/).
 
 
 More details about building and modifying the Docker images are provided in the FAQ available at [EvAM-Tools: method's details and FAQ](https://rdiaz02.github.io/EvAM-Tools/pdfs/evamtools_methods_details_faq.pdf) .
