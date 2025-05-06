@@ -22,8 +22,8 @@ test_that("Minimal test: we can run. And check only_used_methods", {
     expect_true(is.na(out2$HESBCN_paths_max))
     expect_true(is.na(out2$HESBCN_model))
 
-    expect_true(length(is.na(out2$HESBCN_paths_max)) == 1)
-    expect_true(length(is.na(out2$HESBCN_model)) == 1)
+    expect_true(sum(is.na(out2$HESBCN_paths_max)) == 1)
+    expect_true(sum(is.na(out2$HESBCN_model)) == 1)
 
     expect_true(!is.null(out2$HESBCN_paths_max))
     expect_true(!is.null(out2$HESBCN_model))
@@ -37,8 +37,8 @@ test_that("Minimal test: we can run. And check only_used_methods", {
     expect_true(!is.null(out3$CBN_model))
     expect_true(all(!is.na(out3$CBN_paths_max)))
 
-    expect_true(length(is.na(out3$HESBCN_paths_max)) == 0)
-    expect_true(length(is.na(out3$HESBCN_model)) == 0)
+    expect_true(sum(is.na(out3$HESBCN_paths_max)) == 0)
+    expect_true(sum(is.na(out3$HESBCN_model)) == 0)
 
     expect_true(is.null(out3$HESBCN_paths_max))
     expect_true(is.null(out3$HESBCN_model))

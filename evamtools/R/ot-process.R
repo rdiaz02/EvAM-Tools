@@ -184,6 +184,7 @@ ot_proc <- function(datax, nboot = 1000,
 
         ## ## If with.errors = FALSE, there can be missing genotypes
         ## est_genots <- reorder_to_standard_order(est_genots)
+        ## WTF??!! this length(is.na is idiotic. Anyway, commented
         ## if (length(is.na(est_genots)))
         ##     est_genots[is.na(est_genots)] <- 0
         
@@ -238,9 +239,10 @@ dist_oncotree_output_2_named_genotypes <- function(odt) {
     odt <- as.vector(odt[, "Prob"])
     names(odt) <- gpn_names
 
+
     ## If with.errors = FALSE, there can be missing genotypes
     odt <- reorder_to_standard_order(odt)
-    if (length(is.na(odt)))
+
         odt[is.na(odt)] <- 0
     return(odt)
 }
