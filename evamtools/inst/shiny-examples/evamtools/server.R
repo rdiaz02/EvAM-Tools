@@ -2524,7 +2524,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             tmp_data <- all_cpm_out[[input$select_cpm]]$cpm_output
 
             lapply(plot2show(), function(met) {
-                if (met == "BML"&&
+                if (met == "BML" &&
                     !is.null(tmp_data$BML_primary_output) &&
                     !all(is.na(tmp_data$BML_primary_output)))  {
             if (tmp_data$BML_bootstrap) {
@@ -2579,9 +2579,13 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  ##              "and click on 'Advanced options' if you",
                                                  ##              "want to use other methods)</h5>"),
                                                  choices = gsub("HESBCN", "H-ESBCN",
-                                                                all_cpm_out[[input$select_cpm]]$cpm_output$methods, fixed = TRUE),
+                                                                if(is.null(input$select_cpm))
+                                                                    input$cpm_methods else  all_cpm_out[[input$select_cpm]]$cpm_output$methods,
+                                                                fixed = TRUE),
                                                  selected = gsub("HESBCN", "H-ESBCN",
-                                                                 all_cpm_out[[input$select_cpm]]$cpm_output$methods, fixed = TRUE)
+                                                                 if (is.null(input$select_cpm))
+                                                                     input$cpm_methods else all_cpm_out[[input$select_cpm]]$cpm_output$methods,
+                                                                 fixed = TRUE)
                                                  ),
                               tippy::tippy_this("cpm2show",
                                                 HTML("<span style='font-size:1.5em; text-align:left;'>",
