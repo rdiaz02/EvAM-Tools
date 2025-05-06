@@ -2391,12 +2391,15 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
             ## Main display
             selected_plot_type <- input$data2plot
-
             number_of_columns <- floor(12 /
                                        ifelse(length(plot2show()) <=0, 1, length(plot2show())))
             if(!(is.null(selected_plot_type))){
                 if(selected_plot_type %in% c("trans_mat", "trans_rate_mat")){
                     lapply(plot2show(), function(met) {
+                        ## FIXME: it is here where we see the DataTables warning?
+                        ## when we previously asked for predicted_genotype_freqs
+                        ## if browsing, on the third round
+                        ## browser()
                         method_data <- evamtools:::process_data(tmp_data, met,
                                                                 plot_type = selected_plot_type)
                         output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
@@ -2404,6 +2407,10 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             ## so try up to max_plot_tries
                             max_plot_tries <- 5
                             for (i in 1:max_plot_tries) {
+                                ## mymessage("DT warning ",
+                                ##           " selected_plot_type ", selected_plot_type,
+                                ##           " plot try ", i,
+                                ##           " \n")
                                 pl <-
                                     try(evamtools:::plot_genot_fg(method_data$data2plot,
                                                                   ## We use it to define "Observed" and "Not Observed" genotypes
@@ -2425,23 +2432,25 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                    plotOutput(sprintf("plot_sims2_%s", met)))
                         )
                     })
-                } else if(selected_plot_type %in% c("predicted_genotype_freqs", "sampled_genotype_counts")){
+                } else if (selected_plot_type %in% c("predicted_genotype_freqs", "sampled_genotype_counts")){
                     lapply(plot2show(), function(met){
                         method_data <- evamtools:::process_data(tmp_data, met,
                                                                 plot_type = selected_plot_type)$data2plot
 
-                        if(selected_plot_type %in% c("predicted_genotype_freqs")){
+                        if (selected_plot_type %in% c("predicted_genotype_freqs")){
                             data2plot <- data.frame("Genotype" = names(method_data),
                                                     "Freq" = as.vector(method_data))
 
                         }
-                        if(selected_plot_type %in% c("sampled_genotype_counts")){
+                        if (selected_plot_type %in% c("sampled_genotype_counts")){
                             data2plot <- data.frame("Genotype" = names(method_data),
                                                     "Counts" = as.vector(method_data))
                         }
+
                         output[[sprintf("plot_sims2_%s", met)]] <- renderPlot(
                             pl <- evamtools:::plot_genotype_counts(data2plot)
                         )
+
                         return(
                             column(number_of_columns,
                                    plotOutput(sprintf("plot_sims2_%s", met)))
@@ -2579,7 +2588,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                                                  ##              "and click on 'Advanced options' if you",
                                                  ##              "want to use other methods)</h5>"),
                                                  choices = gsub("HESBCN", "H-ESBCN",
-                                                                if(is.null(input$select_cpm))
+                                                                if (is.null(input$select_cpm))
                                                                     input$cpm_methods else  all_cpm_out[[input$select_cpm]]$cpm_output$methods,
                                                                 fixed = TRUE),
                                                  selected = gsub("HESBCN", "H-ESBCN",
