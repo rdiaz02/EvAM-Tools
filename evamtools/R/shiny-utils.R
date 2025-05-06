@@ -17,6 +17,7 @@
 ## but just for the genotype names
 ## and no NA returned
 ## This could be done better or faster
+## FIXME: zz-rank use standard_rank_genots_1 that was created for this!!
 reorder_genotypes <- function(x) {
     x <- canonicalize_genotype_names(x)
     names(x) <- x
@@ -48,6 +49,7 @@ reorder_to_standard_order_count_df <- function(x) {
 reorder_to_standard_order_arbitrary_df <- function(x) {
     if (nrow(x) <= 1) return(x)
 
+    ## FIXME: zz-rank use standard_rank_genots_1 that was created for this!!
     ordered_Genotype <- reorder_genotypes(x$Genotype)
     ret_tmp <- x
     ret_tmp$Genotype <- rownames(ret_tmp) <- canonicalize_genotype_names(ret_tmp$Genotype)
