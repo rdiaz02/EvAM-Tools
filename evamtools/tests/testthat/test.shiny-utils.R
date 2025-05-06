@@ -472,6 +472,39 @@ test_that("Create tabular data from CPM output works correctly", {
   }
 })
 
+test_that("reorder_to_standard_order_arbitrary_df", {
+    df1 <- data.frame(Genotype = c("A, B", "WT", "A", "A, B, C"),
+                      Column_1 = c(19, 2, 3, 4),
+                      Column_2 = c(11, 12, 99, 80))
+
+    df1o <- data.frame(Genotype = c("WT", "A", "A, B", "A, B, C"),
+                       Column_1 = c(2, 3, 19, 4),
+                       Column_2 = c(12, 99, 11, 80))
+
+    expect_true(identical(reorder_to_standard_order_arbitrary_df(df1)[, -1],
+                          df1o))
+
+
+    df2 <- data.frame(A = c(9, 5, 3, 2, 8),
+                      B = letters[1:5],
+                      Genotype = c("PLK, AM1", "ATP2B2, RB1", "BMN, ORT", "TUV", "SDN, CK9"))
+
+    df2o <- data.frame(Genotype = c("TUV", "AM1, PLK", "ATP2B2, RB1", "BMN, ORT", "CK9, SDN"),
+                       A = c(2, 9, 5, 3, 8),
+                       B = c("d", "a", "b", "c", "e"))
+    expect_true(identical(reorder_to_standard_order_arbitrary_df(df2)[, -1],
+                          df2o))
+
+
+    df3 <- data.frame(A = c(9, 5, 3, 2, 8),
+                      B = letters[1:5],
+                      Genotype = c("PLK, AM1", "ATP2B2, RB1", "AM1, PLK", "TUV", "SDN, CK9"))
+
+    expect_error(reorder_to_standard_order_arbitrary_df(df3),
+                 "x has duplicated genotype names;")
+})
+
+
 rm(generate_old)
 cat("\n Done test.shiny-utils.R. Seconds = ",
     as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

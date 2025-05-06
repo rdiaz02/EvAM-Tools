@@ -13,6 +13,19 @@
 ## You should have received a copy of the GNU Affero General Public License along
 ## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+## Like reorder_to_standard_order,
+## but just for the genotype names
+## and no NA returned
+## This could be done better or faster
+reorder_genotypes <- function(x) {
+    x <- canonicalize_genotype_names(x)
+    names(x) <- x
+    x <- reorder_to_standard_order(x)
+    x <- na.omit(x)
+    return(names(x))
+}
+
+
 ## Given the Genotype, Count data.frame, return it in standard order.
 ## If single row, or empty, do nothing.
 reorder_to_standard_order_count_df <- function(x) {
@@ -25,22 +38,22 @@ reorder_to_standard_order_count_df <- function(x) {
                                   Counts = counts_tmp))
     attributes(ret_tmp)$na.action <- NULL
     stopifnot(nrow(ret_tmp) == nrow(x))
-    ## rownames(ret_tmp) <- 1:nrow(ret_tmp)
     return(ret_tmp)
 }
 
+
+
+
 ## Given a data.frame that contains column Genotype, return it in standard order.
-## This could be done much more efficiently (we could just put the genotypes
-## in standard order, instead of creating all, etc). 
 reorder_to_standard_order_arbitrary_df <- function(x) {
     if (nrow(x) <= 1) return(x)
-    counts_tmp <- x$Genotype
-    names(counts_tmp) <- x$Genotype
-    counts_tmp <- na.omit(reorder_to_standard_order(counts_tmp))
-    ret_tmp <- data.frame(Genotype = names(counts_tmp), x)
-    stopifnot(isTRUE(all(ret_tmp$Genotype == ret_tmp$Genotype.1)))
-    rm_cols <- which(colnames(ret_tmp) == "Genotype.1")
-    ret_tmp <- ret_tmp[, -rm_cols]
+
+    ordered_Genotype <- reorder_genotypes(x$Genotype)
+    ret_tmp <- x
+    ret_tmp$Genotype <- rownames(ret_tmp) <- canonicalize_genotype_names(ret_tmp$Genotype)
+    ret_tmp <- ret_tmp[ordered_Genotype, ]
+    stopifnot(isTRUE(all(ret_tmp$Genotype == rownames(ret_tmp))))
+
     ## There might, or might not, be an Index column. We create it/overwrite it
     ret_tmp$Index <- seq_len(nrow(ret_tmp))
     g_index <- which(colnames(ret_tmp) == "Genotype")
@@ -48,6 +61,7 @@ reorder_to_standard_order_arbitrary_df <- function(x) {
     col_order <- c(i_index, g_index, (1:ncol(ret_tmp))[-c(i_index, g_index)])
     ret_tmp <- ret_tmp[, col_order]
     stopifnot(nrow(ret_tmp) == nrow(x))
+    rownames(ret_tmp) <- NULL
     return(ret_tmp)
 }
 

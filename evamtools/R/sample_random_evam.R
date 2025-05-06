@@ -660,10 +660,13 @@ canonicalize_genotype_names <- function(x) {
     return(pasted_sorted)
 }
 
+## Genes -> Genotypes in standard order
 ## Genotypes in what for me is their "standard, sensible, order"
 ## By number of mutations, and within number of mutations, ordered
 ## as given by order.
 genotypes_standard_order <- function(gene_names) {
+    if (any(stringi::stri_count_fixed(gene_names, ",")))
+        stop("At least one comma in gene_names")
     gene_names <- evam_string_sort(gene_names)
     allgt <- allGenotypes_3(length(gene_names))$mutated
     gtn <- vapply(allgt, function(v) paste(gene_names[v], collapse = ", "),
@@ -675,6 +678,8 @@ genotypes_standard_order <- function(gene_names) {
 ## Given a named vector, where names are genotypes,
 ## return the same vector sorted in the same order as genotypes_standard_order
 ## Like reorder_to_pD, but in what for me is much more sensible
+## This returns NAs if any missing combination of the possible
+## ones; why?
 reorder_to_standard_order <- function(x) {
     if (is.null(names(x))) stop("x must be a named vector")
     ## If only WT, return immediately
@@ -683,6 +688,15 @@ reorder_to_standard_order <- function(x) {
     genots_n <- names(x)
     ## Ensure genotype names are canonical
     genots_n <- canonicalize_genotype_names(genots_n)
+    if (length(genots_n) != length(unique(genots_n))) {
+        which_dups <- which(duplicated(genots_n))
+        stop("x has duplicated genotype names; ",
+             "at least these positions ",
+             paste(which_dups, collapse = ", "),
+             "; corresponding to these genotype names ",
+             paste(genots_n[which_dups], collapse = "; "),
+             "are duplicated.")
+    }
     names(x) <- genots_n
 
     ## Get gene names
@@ -699,7 +713,8 @@ reorder_to_standard_order <- function(x) {
     ## Sort to original, return
     x2 <- x[sorted_genots]
     names(x2) <- sorted_genots
-
+    if (length(x2) < length(x))
+        stop("length of order vector < original vector")
     return(x2)
 }
 
