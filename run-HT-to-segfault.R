@@ -13,9 +13,11 @@ while (TRUE) {
             mcpm <- ifelse(i %% 2, "CBN", "MHN")
             the_seed <- round(runif(1, 1, 1e9))
             cat("\n\n\n ***************** i = ", i,
-                "the_seed = ", the_seed,
-                "model = ", model,
-                "penalty = ", penalty,
+                "; the_seed = ", the_seed,
+                "; model = ", model,
+                "; penalty = ", penalty,
+                "; length = ", length,
+                "; mcpm = ", mcpm,
                 "*******************\n\n")
             the_N <- runif(1, 50, 500)
             data <- sample_evam((random_evam(6, model = mcpm)),
