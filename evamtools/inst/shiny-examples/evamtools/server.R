@@ -2762,10 +2762,18 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             colnames(d2)[2] <- "Original_data"
             ## Yes, set to NA for easier visualization.
             ## They will also be NA in the Original data if not present
-            d1[d1 == 0] <- NA
+            ## d1[d1 == 0] <- NA
             d3 <- dplyr::full_join(d1, d2, by = "Genotype")
+            ## rm empty rows
+            d3[is.na(d3)] <- 0.0
+            no_cols <- which(names(d3) %in% c("Index", "Genotype"))
+            rm_rows <- which(rowSums(d3[, -no_cols]) == 0.0)
+            if (length(rm_rows)) d3 <- d3[-rm_rows, ]
             d3 <- evamtools:::reorder_to_standard_order_arbitrary_df(d3)
+            ## set to NA for easier visualization
+            d3[d3 == 0] <- NA
             d1 <- d3
+
           } else {
             d1 <- data.frame(Index = integer(),
                              Genotype = character(),
