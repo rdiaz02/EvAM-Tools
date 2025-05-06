@@ -1513,7 +1513,7 @@ probs_from_HT <- function(x,
 
   binary_state <- lapply(strsplit(as.character(probs$result.State), ""),
                          as.numeric)
-
+    ## Recall gene_names need not be in order.
   decoded_states <- unlist(lapply(binary_state, binary2str_labels,
                                   labels = gene_names))
   ## In case I need to check
@@ -1525,17 +1525,11 @@ probs_from_HT <- function(x,
   p <-  probs[, "rowMeans.result....1.."]
   names(p) <- decoded_states
 
-  ## No guarantees this will be in standard order
-  if(!all_genotypes) return(p)
+    if (any(is.na(p))) stop("NAs in p?")
 
-  number_genes <- length(gene_names)
-  num_genots <- 2^number_genes
+    p <- reorder_to_standard_order(p)
+    if (!all_genotypes) return(na.omit(p))
 
-  if (length(p) == num_genots) return(reorder_to_standard_order(p))
-
-  allGts <- genotypes_standard_order(gene_names)
-  p_all <- rep(0.0, length = length(allGts))
-  names(p_all) <- allGts
-  p_all[names(p)] <- p
-  return(p_all)
+    p[is.na(p)] <- 0
+    return(p)
 }
