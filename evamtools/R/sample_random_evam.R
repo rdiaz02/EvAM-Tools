@@ -787,11 +787,23 @@ probs_from_trm <- function(x,
 
     if (length(p) == num_genots) return(p)
 
+    ## These are two procedures of doing the same.
+    ## I was once bitten by a similar issue when dealing with HyperTraPS
+    ## So this is a paranoid procedure. rm one of the procedures eventually
+    ## Procedure 1
     allGts <- genotypes_standard_order(gene_names)
     p_all <- rep(0.0, length = length(allGts))
     names(p_all) <- allGts
+    ## Next line should preclude any possible errors
+    if (!(all(names(p) %in% allGts))) stop("mismatch in gene names")
     p_all[names(p)] <- p
-    return(p_all)
+    ## return(p_all)
+
+    ## Procedure 2. Probably slightly slower?
+    p <- reorder_to_standard_order(p)
+    p[is.na(p)] <- 0
+    stopifnot(identical(p, p_all))
+    return(p)
 }
 
 
