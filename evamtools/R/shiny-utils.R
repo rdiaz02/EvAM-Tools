@@ -16,57 +16,61 @@
 ## Like reorder_to_standard_order,
 ## but just for the genotype names
 ## and no NA returned
-## This could be done better or faster
-## FIXME: zz-rank use standard_rank_genots_1 that was created for this!!
 reorder_genotypes <- function(x) {
     x <- canonicalize_genotype_names(x)
-    names(x) <- x
-    x <- reorder_to_standard_order(x)
-    x <- na.omit(x)
-    return(names(x))
+    if (length(x) != length(unique(x)))
+        stop("x has duplicated genotype names")
+    return(x[standard_order_genots_1(x)])
 }
 
 
-## Given the Genotype, Count data.frame, return it in standard order.
-## If single row, or empty, do nothing.
-reorder_to_standard_order_count_df <- function(x) {
-    x <- x[x$Counts > 0, ]
-    if (nrow(x) <= 1) return(x)
-    counts_tmp <- x$Counts
-    names(counts_tmp) <- x$Genotype
-    counts_tmp <- reorder_to_standard_order(counts_tmp)
-    ret_tmp <- na.omit(data.frame(Genotype = names(counts_tmp),
-                                  Counts = counts_tmp))
-    attributes(ret_tmp)$na.action <- NULL
-    stopifnot(nrow(ret_tmp) == nrow(x))
-    return(ret_tmp)
-}
-
-
-
-
-## Given a data.frame that contains column Genotype, return it in standard order.
-reorder_to_standard_order_arbitrary_df <- function(x) {
+## Given a data.frame that contains column Genotype, return it in standard order
+## If return_index = TRUE,
+##   with an Index column added (if one exists, it is overwritten)
+## Index is first column, next Genotype
+reorder_to_standard_order_arbitrary_df <- function(x, return_index = TRUE) {
     if (nrow(x) <= 1) return(x)
 
-    ## FIXME: zz-rank use standard_rank_genots_1 that was created for this!!
-    ordered_Genotype <- reorder_genotypes(x$Genotype)
-    ret_tmp <- x
-    ret_tmp$Genotype <- rownames(ret_tmp) <- canonicalize_genotype_names(ret_tmp$Genotype)
-    ret_tmp <- ret_tmp[ordered_Genotype, ]
-    stopifnot(isTRUE(all(ret_tmp$Genotype == rownames(ret_tmp))))
-
-    ## There might, or might not, be an Index column. We create it/overwrite it
-    ret_tmp$Index <- seq_len(nrow(ret_tmp))
+    i_index <- which(colnames(x) == "Index")
+    if (length(i_index)) x <- x[, -i_index]
+    x$Genotype <- canonicalize_genotype_names(x$Genotype)
+    ii <- standard_order_genots_1(x$Genotype)
+    ret_tmp <- x[ii, ]
     g_index <- which(colnames(ret_tmp) == "Genotype")
-    i_index <- which(colnames(ret_tmp) == "Index")
-    col_order <- c(i_index, g_index, (1:ncol(ret_tmp))[-c(i_index, g_index)])
+    col_order <- c(g_index, (1:ncol(ret_tmp))[-c(g_index)])
     ret_tmp <- ret_tmp[, col_order]
     stopifnot(nrow(ret_tmp) == nrow(x))
     rownames(ret_tmp) <- NULL
+    if (return_index) {
+        Index <- data.frame(Index = seq_len(nrow(ret_tmp)))
+        ret_tmp <- cbind(Index, ret_tmp)
+    }
     return(ret_tmp)
 }
 
+reorder_to_standard_order_count_df <- function(x) {
+    stopifnot(identical(colnames(x), c("Genotype", "Counts")))
+    reorder_to_standard_order_arbitrary_df(x, return_index = FALSE)
+}
+
+## ## Given the Genotype, Counts data.frame, return it in standard order.
+## ## If single row, or empty, do nothing.
+## reorder_to_standard_order_count_df <- function(x) {
+##     stopifnot(identical(colnames(x), c("Genotype", "Counts")))
+##     x <- x[x$Counts > 0, ]
+##     if (nrow(x) <= 1) return(x)
+
+##     ii <- standard_order_genots_1(x$Genotype)
+##     return(x[ii, ])
+##     ## counts_tmp <- x$Counts
+##     ## names(counts_tmp) <- x$Genotype
+##     ## counts_tmp <- reorder_to_standard_order(counts_tmp)
+##     ## ret_tmp <- na.omit(data.frame(Genotype = names(counts_tmp),
+##     ##                               Counts = counts_tmp))
+##     ## attributes(ret_tmp)$na.action <- NULL
+##     ## stopifnot(nrow(ret_tmp) == nrow(x))
+##     ## return(ret_tmp)
+## }
 
 
 

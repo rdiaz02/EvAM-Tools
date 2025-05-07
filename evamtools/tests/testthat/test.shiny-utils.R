@@ -501,7 +501,31 @@ test_that("reorder_to_standard_order_arbitrary_df", {
                       Genotype = c("PLK, AM1", "ATP2B2, RB1", "AM1, PLK", "TUV", "SDN, CK9"))
 
     expect_error(reorder_to_standard_order_arbitrary_df(df3),
-                 "x has duplicated genotype names;")
+                 "x has duplicated genotype names")
+})
+
+test_that("reorder_to_standard_order_count_df", {
+    ## reorder_to_standard_order_count_df
+    ## o loner exists, so use the new incantation
+    df1 <- data.frame(Genotype = c("A, B", "WT", "A", "A, B, C"),
+                      Counts = c(19, 2, 3, 4))
+    df1o <- data.frame(Genotype = c("WT", "A", "A, B", "A, B, C"),
+                       Counts = c(2, 3, 19, 4))
+    expect_true(identical(reorder_to_standard_order_count_df(df1),
+                          df1o))
+})
+
+
+test_that("reorder_genotypes", {
+    g1 <- c("F, B", "B, M", "U, A", "C, F", "H, D, T", "E, A, B", "WT")
+    expect_identical(reorder_genotypes(g1),
+                     c("WT", "A, U", "B, F", "B, M", "C, F", "A, B, E", "D, H, T"))
+
+    g5 <- c("TUV", "PLK, AM1", "RB1, ADP2B2", "ORT, BMN", "CK9, SDN",
+            "F, B", "B, M", "I, C", "J, H", "H, I")
+    expect_identical(reorder_genotypes(g5),
+                     c("TUV", "ADP2B2, RB1", "AM1, PLK", "B, F",
+                       "B, M", "BMN, ORT", "C, I", "CK9, SDN",  "H, I", "H, J"))
 })
 
 

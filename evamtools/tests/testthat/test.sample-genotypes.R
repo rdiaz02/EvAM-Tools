@@ -91,22 +91,44 @@ test_that("Exercise random_evam and sampling and check N is respected", {
         rhe <- random_evam(model = "HESBCN", ngenes = 5,
                            graph_density = 0.325)
         
-        sample_mhn <- sample_evam(rmhn, N = 1000)
+        sample_mhn <- sample_evam(rmhn, N = 333)
         sample_cbn <- sample_evam(rcbn, N = 40)
         sample_ot <- sample_evam(rot, N = 55)
         sample_obn <- sample_evam(robn, N = 71)
         sample_he <- sample_evam(rhe, N = 102)
 
-        expect_equal(nrow(sample_mhn$MHN_sampled_genotype_counts_as_data), 1000)
+        expect_equal(nrow(sample_mhn$MHN_sampled_genotype_counts_as_data), 333)
         expect_equal(nrow(sample_cbn$CBN_sampled_genotype_counts_as_data), 40)
         expect_equal(nrow(sample_ot$OT_sampled_genotype_counts_as_data), 55)
         expect_equal(nrow(sample_obn$OncoBN_sampled_genotype_counts_as_data), 71)
         expect_equal(nrow(sample_he$HESBCN_sampled_genotype_counts_as_data), 102)
 
-        sample_mhne <- sample_evam(rmhn, N = 1000, obs_noise = 0.2)
+        sample_mhne <- sample_evam(rmhn, N = 333, obs_noise = 0.2)
         sample_cbne <- sample_evam(rcbn, N = 40, obs_noise = 0.1)
     }
 })
+
+
+test_that("standard_rank/order_genots", {
+    g1 <- c("F, B", "B, M", "U, A", "C, F", "H, D, T", "E, A, B", "WT")
+    expect_identical(standard_rank_genots_1(g1),
+                     as.integer(c(3, 4, 2, 5, 7, 6, 1)))
+    expect_identical(standard_order_genots_1(g1),
+                     as.integer(c(7, 3, 1, 2, 4, 6, 5)))
+    expect_identical(canonicalize_genotype_names(g1)[standard_order_genots_1(g1)],
+                     c("WT", "A, U", "B, F", "B, M", "C, F", "A, B, E", "D, H, T"))
+
+
+    g5 <- c("TUV", "PLK, AM1", "RB1, ADP2B2", "ORT, BMN", "CK9, SDN",
+            "F, B", "B, M", "I, C", "J, H", "H, I")
+    expect_identical(standard_rank_genots_1(g5),
+                     as.integer(c(1, 3, 2, 6, 8, 4, 5, 7, 10, 9)))
+    expect_identical(standard_order_genots_1(g5),
+                     as.integer(c(1, 3, 2, 6, 7, 4, 8, 5, 10, 9)))
+
+    ## Also tested in shiny utils, the code for reorder_genotypes
+})
+
 
 cat("\n Done test.sample-genotypes.R. Seconds = ",
     as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

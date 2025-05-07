@@ -364,19 +364,39 @@ sparse_transM_from_genotypes <- function(genots) {
                         dimnames = list(genots, genots)))
 }
 
+
+## Genotypes -> permutation that puts genotypes in standard order
+standard_order_genots_1 <- function(x) {
+    x <- canonicalize_genotype_names(x)
+    if (length(x) != length(unique(x)))
+        stop("x has duplicated genotype names")
+    muts <- stringi::stri_count_fixed(x, ",")
+    xwt <- which(x == "WT")
+    if (length(xwt)) muts[xwt] <- -1
+    return(order(muts, x))
+}
+
+
 ## Return vector of ranks (not order) so we can generate
 ## an "Index" column, or similar, so that ordering according to it
 ## gives us standard order.
 ## x: genotype names
 standard_rank_genots_1 <- function(x) {
+    x <- canonicalize_genotype_names(x)
+    if (length(x) != length(unique(x)))
+        stop("x has duplicated genotype names")
     muts <- stringi::stri_count_fixed(x, ",")
     xwt <- which(x == "WT")
     if (length(xwt)) muts[xwt] <- -1
     return(order(order(muts, x)))
 }
 
+
+
 ## Like version _1, but for two sets of genotypes, such as "From" and "To"
 standard_rank_genots_2 <- function(x, y) {
+    x <- canonicalize_genotype_names(x)
+    y <- canonicalize_genotype_names(y)
     mutsx <- stringi::stri_count_fixed(x, ",")
     xwt <- which(x == "WT")
     if (length(xwt)) mutsx[xwt] <- -1
@@ -664,6 +684,8 @@ canonicalize_genotype_names <- function(x) {
 ## Genotypes in what for me is their "standard, sensible, order"
 ## By number of mutations, and within number of mutations, ordered
 ## as given by order.
+## Use standard_order_genots_1 if you want the permutation
+## that puts give genotypes in standard order
 genotypes_standard_order <- function(gene_names) {
     if (any(stringi::stri_count_fixed(gene_names, ",")))
         stop("At least one comma in gene_names")
