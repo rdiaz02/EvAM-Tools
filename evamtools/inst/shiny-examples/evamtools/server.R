@@ -46,9 +46,6 @@ source("event_handlers/analysis.R")
 mymessage <- function(...) message(...)
 # mymessage <- function(...) invisible(NULL)
 
-
-
-
 sanity_file_name <- function(x) {
     if (gsub(" ", "", x, fixed = TRUE) == "") {
         stop("Name of data or file name cannot be an empty string.")
@@ -301,6 +298,55 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
     changed_dag_model <- reactiveValues(
         invalidate = FALSE
     )
+
+    ## For the poltergeist of DataTables warning ... The column name ...
+    ## On its own, this does not solve it, but is cleaner code.
+    ## FIXME rm the above shitty comments once this is clearly solved.
+    df_for_freq_table <- reactive({
+        req(input$select_cpm, input$data2plot, all_cpm_out)
+
+        d1 <- all_cpm_out[[input$select_cpm]]$tabular_data[[input$data2plot]]
+        mymessage("The DT poltergeist (in df_for_freq): ",
+                  ". data2plot = ", input$data2plot,
+                  ".  colnames(d1) = ",
+                  paste(colnames(d1), collapse = ", "))
+        if (is.null(d1)) {
+            mymessage("Prepared_data: Initial data fetch (d1_current) is NULL for ",
+                      input$data2plot, ". Returning empty data.frame.")
+            return(data.frame(stringsAsFactors = FALSE)) ## Return a basic empty data.frame
+        }
+
+        if (input$data2plot == "predicted_genotype_freqs") {
+            if (!all(is.na(d1))) {
+                d2 <-
+                    evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data)
+                d2$Counts <- round(d2$Counts/sum(d2$Counts), 3)
+                colnames(d2)[2] <- "Original_data"
+                ## Yes, set to NA for easier visualization.
+                ## They will also be NA in the Original data if not present
+                ## d1[d1 == 0] <- NA
+                d3 <- dplyr::full_join(d1, d2, by = "Genotype")
+                ## rm empty rows
+                d3[is.na(d3)] <- 0.0
+                no_cols <- which(names(d3) %in% c("Index", "Genotype"))
+                rm_rows <- which(rowSums(d3[, -no_cols]) == 0.0)
+                if (length(rm_rows)) d3 <- d3[-rm_rows, ]
+                d3 <- evamtools:::reorder_to_standard_order_arbitrary_df(d3)
+                ## set to NA for easier visualization
+                d3[d3 == 0] <- NA
+                d1 <- d3
+            } else {
+                d1 <- data.frame(Index = integer(),
+                                 Genotype = character(),
+                                 Method = numeric()
+                                 )
+            }
+        }
+        ncols <- ncol(d1)
+        mymessage("The DT poltergeist: ", ". data2plot = ", input$data2plot,
+                  ". colnamaes(d1) = ", paste(colnames(d1), collapse = ", "))
+        return(d1)
+    })
 
 
 
@@ -2396,10 +2442,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
             if(!(is.null(selected_plot_type))){
                 if(selected_plot_type %in% c("trans_mat", "trans_rate_mat")){
                     lapply(plot2show(), function(met) {
-                        ## FIXME: it is here where we see the DataTables warning?
-                        ## when we previously asked for predicted_genotype_freqs
-                        ## if browsing, on the third round
-                        ## browser()
                         method_data <- evamtools:::process_data(tmp_data, met,
                                                                 plot_type = selected_plot_type)
                         output[[sprintf("plot_sims2_%s", met)]] <- renderPlot({
@@ -2407,10 +2449,6 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                             ## so try up to max_plot_tries
                             max_plot_tries <- 5
                             for (i in 1:max_plot_tries) {
-                                ## mymessage("DT warning ",
-                                ##           " selected_plot_type ", selected_plot_type,
-                                ##           " plot try ", i,
-                                ##           " \n")
                                 pl <-
                                     try(evamtools:::plot_genot_fg(method_data$data2plot,
                                                                   ## We use it to define "Observed" and "Not Observed" genotypes
@@ -2765,43 +2803,96 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
         }
     })
 
-    output$cpm_freqs <- DT::renderDT({
-        d1 <- all_cpm_out[[input$select_cpm]]$tabular_data[[input$data2plot]]
-        if (input$data2plot == "predicted_genotype_freqs") {
-          if (!all(is.na(d1))) {
-            d2 <-
-                evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data)
-            d2$Counts <- round(d2$Counts/sum(d2$Counts), 3)
-            colnames(d2)[2] <- "Original_data"
-            ## Yes, set to NA for easier visualization.
-            ## They will also be NA in the Original data if not present
-            ## d1[d1 == 0] <- NA
-            d3 <- dplyr::full_join(d1, d2, by = "Genotype")
-            ## rm empty rows
-            d3[is.na(d3)] <- 0.0
-            no_cols <- which(names(d3) %in% c("Index", "Genotype"))
-            rm_rows <- which(rowSums(d3[, -no_cols]) == 0.0)
-            if (length(rm_rows)) d3 <- d3[-rm_rows, ]
-            d3 <- evamtools:::reorder_to_standard_order_arbitrary_df(d3)
-            ## set to NA for easier visualization
-            d3[d3 == 0] <- NA
-            d1 <- d3
 
-          } else {
-            d1 <- data.frame(Index = integer(),
-                             Genotype = character(),
-                             Method = numeric()
-                             )
+    ##  #### poltergeist no genotype in table #####
+
+    ## "DataTables warning: table id=DataTables_Table_15 - Error in FUN(X[[i]], ...): The column name 'Genotype' is not found in data."
+    ## This only happens if the last thing you asked for were "predicted_genotype_freqs"
+    ## not with sampled_genotype_freqs.
+    ## Sampled genotype counts already has the whole structure.
+    ## We cannot do the same with predicted_genotype_freqs, becasue we
+    ## want to add the column of actual genotype frequencies, and that
+    ## info is not necessarily known to sample_evam.
+    ## The problem seems to be related to
+    ## the state management of DataTables' server-side processing mode when
+    ## column structures change for a fixed output ID.
+
+    ## How I think I solve it:
+    ## Create a df_for_freq_table. That by itself is not enough unless server = FALSE.
+    ##   But it is cleaner, better shiny style.
+    ## The key is server = FALSE, which forces processing on the client
+    ## and that is OK for this sized tables, and actually faster later if
+    ## user resorts, etc.
+
+    ##   Original code, up to 2025-05-07. This avoids the issue if
+    ## server = FALSE. But I now move to using the second block, as it
+    ## is better shiny style (according to Gemini :-)
+
+    ##  output$cpm_freqs <- DT::renderDT({
+    ##       d1 <- all_cpm_out[[input$select_cpm]]$tabular_data[[input$data2plot]]
+    ##       if (input$data2plot == "predicted_genotype_freqs") {
+    ##           if (!all(is.na(d1))) {
+    ##               d2 <-
+    ##                   evamtools:::get_csd(all_cpm_out[[input$select_cpm]]$cpm_output$analyzed_data)
+    ##               d2$Counts <- round(d2$Counts/sum(d2$Counts), 3)
+    ##               colnames(d2)[2] <- "Original_data"
+    ##               ## Yes, set to NA for easier visualization.
+    ##               ## They will also be NA in the Original data if not present
+    ##               ## d1[d1 == 0] <- NA
+    ##               d3 <- dplyr::full_join(d1, d2, by = "Genotype")
+    ##               ## rm empty rows
+    ##               d3[is.na(d3)] <- 0.0
+    ##               no_cols <- which(names(d3) %in% c("Index", "Genotype"))
+    ##               rm_rows <- which(rowSums(d3[, -no_cols]) == 0.0)
+    ##               if (length(rm_rows)) d3 <- d3[-rm_rows, ]
+    ##               d3 <- evamtools:::reorder_to_standard_order_arbitrary_df(d3)
+    ##               ## set to NA for easier visualization
+    ##               d3[d3 == 0] <- NA
+    ##               d1 <- d3
+    ##           } else {
+    ##               d1 <- data.frame(Index = integer(),
+    ##                                Genotype = character(),
+    ##                                Method = numeric()
+    ##                                )
+    ##           }
+    ##       }
+    ##       ncols <- ncol(d1)
+    ##       mymessage("The DT poltergeist: ", ". data2plot = ", input$data2plot,
+    ##                 ". colnamaes(d1) = ", paste(colnames(d1), collapse = ", "))
+    ##       d1
+    ##   }
+    ## , selection = 'none'
+    ## , server = FALSE
+    ## , rownames = FALSE
+    ## , options = list(
+    ##       columnDefs = list(list(className = 'dt-center', targets = "_all")),
+    ##       info = FALSE, paginate = FALSE)
+    ##   )
+
+    output$cpm_freqs <- DT::renderDT({
+        data_to_display <- df_for_freq_table()
+
+        if (!is.data.frame(data_to_display)) {
+            mymessage("RenderDT: data_to_display is not a data.frame. ",
+                      "This is highly unexpected. Using empty data.frame.")
+            data_to_display <- data.frame(stringsAsFactors = FALSE)
           }
+
+        mymessage("The DT poltergeist (in renderDT): ", ". data2plot = ",
+                  input$data2plot,
+                  ". colnames(data_to_display) = ",
+                  paste(colnames(data_to_display), collapse = ", "))
+        data_to_display
         }
-        d1
-    },
-    selection = 'none', server = TRUE
+  , selection = 'none'
+  , server = FALSE ## with TRUE we get the poltergeist
   , rownames = FALSE
   , options = list(
         columnDefs = list(list(className = 'dt-center', targets = "_all")),
-        info = FALSE, paginate= FALSE)
+        info = FALSE, paginate = FALSE)
     )
+
+    ## End poltergeist. Eventually, rm the old code. FIXME
 
     output$tabular_data <- renderUI({
         if (length(names(all_cpm_out)) > 0) {
