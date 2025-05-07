@@ -240,7 +240,7 @@ You can also build your own Docker image and you might want to run the Shiny app
 We provide two Docker images, one for running the Shiny app, and another with  RStudio to run the evamtools package directly.  They are available from
 https://hub.docker.com/r/rdiaz02/evamshiny
 and
-https://hub.docker.com/r/rdiaz02/evamrstudio ; the first for running the Shiny app, the second for using the package from RStudio. Pull the one you need (`docker pull rdiaz02/evamshiny` or `docker pull rdiaz02/evamrstudio`). (When creating those, I first create a common one, evam-common, but you should be able to pull just the evamshiny or the evamrstudio, independently.)
+https://hub.docker.com/r/rdiaz02/evamrstudio ; the first for running the Shiny app, the second for using the package from RStudio. Pull the one you need (`docker pull rdiaz02/evamshiny` or `docker pull rdiaz02/evamrstudio`). (When creating those, I first create a common one, with R and dependencies, evam-common-0, then one with the package  evam-common ---that depends on evam-common-0--; evamshiny and evamrstudio use evam-common, but you should be able to pull just the evamshiny or the evamrstudio images, independently.)
 
 <!-- (Note: as of 2024-10-22, the docker image for using the package from RStudio is using R-4.4.1 and OncoSimulR 4.7.8, whereas the one for running the Shiny app is still using R-4.2.2 and OncoSimulR 4.0. I have updated the RStudio image because of internal lab needs ---access to the latest functionality in OncoSimulR--- but have not updated the Shiny app image since it is working and thus there is no need for updates). -->
 
