@@ -141,7 +141,7 @@ evam <- function(x,
         bml_opts = fill_args_default(bml_opts, default_opts$bml_opts)
     )
 
-  message("DEBUG: got here ")
+
 
     check_cbn_opts_init_poset(opts$cbn_opts$init_poset)
 
@@ -181,7 +181,7 @@ evam <- function(x,
     names(all_out) <- methods
 
 
-  message("DEBUG: got here 2")
+
 
     get_output <- function(method, component) {
         if (!exists(method, all_out)) return(NA)
