@@ -673,6 +673,7 @@ reorder_to_pD <- function(x) {
 ##  - sort gene names
 ##  - separate gene names by ", "
 canonicalize_genotype_names <- function(x) {
+    if (length(x) == 0) return(character(0))
     no_space <- stringi::stri_replace_all_regex(x, pattern = "[\\s]", "")
 
     pasted_sorted <- unlist(lapply(strsplit(no_space, split = ",", fixed = TRUE),

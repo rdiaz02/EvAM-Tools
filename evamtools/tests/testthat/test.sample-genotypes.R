@@ -130,5 +130,14 @@ test_that("standard_rank/order_genots", {
 })
 
 
+test_that("Miscell corner cases", {
+    expect_identical(canonicalize_genotype_names(character(0)),
+                     character(0))
+    expect_identical(standard_rank_genots_2(character(0), character(0)),
+                     integer(0))
+    expect_identical(standard_rank_genots_1(character(0)),
+                     integer(0))
+})
+
 cat("\n Done test.sample-genotypes.R. Seconds = ",
     as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")
