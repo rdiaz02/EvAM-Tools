@@ -283,15 +283,17 @@ results_simple <- function(){
                   white-space: nowrap;
                   overflow: hidden;
                   text-overflow: ellipsis;
-
+                    }
+                 #select_cpm .radio label {
+                     white-space: normal !important;
+                     overflow-wrap: break-word !important;
+                     text-align: left !important;
                     }
                     "
       )
       )
       ),
       tags$div(class = "row",
-                                        # column(1,
-                                        # column(11,
                column(2,
                       tags$div(id="dummy_data_name",
                                class = "frame",
