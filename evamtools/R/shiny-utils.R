@@ -463,19 +463,19 @@ create_tabular_data <- function(data) {
                              stringsAsFactors = FALSE) 
 
             for (method in available_methods){
-                                        #1 Matrix to vector
+                ##1 Matrix to vector
                 tmp_data <- data[[paste0(method, "_", attr)]]
                 if (!is.null(tmp_data)) {
                     indexes <- which(as.matrix(tmp_data) > 0, arr.ind = TRUE)
                     genotypes <- colnames(tmp_data)
                     transitions <- mapply(function(x, y) paste0(x, " -> ", y)
                                         , genotypes[indexes[, "row"]], genotypes[indexes[, "col"]])
-                                        # counts <- tmp_data[tmp_data > 0]
+                    ## counts <- tmp_data[tmp_data > 0]
                     counts <- mapply(function(x, y) tmp_data[x, y]
                                    , genotypes[indexes[, "row"]], genotypes[indexes[, "col"]])
                     names(counts) <- transitions
 
-                                        #2 Adding empty row for each transitions
+                    ##2 Adding empty row for each transitions
                     for(transition in transitions){
                         ## New row
                         if(all(is.na(df[transition, ]))){
@@ -495,7 +495,6 @@ create_tabular_data <- function(data) {
                 if (sum(abs(tmp_col)) == 0) df[[method]] <- NULL
                 else df[[method]] <- round(tmp_col, 3)
             }
-
             df <- data.frame(Index = standard_rank_genots_2(df$From, df$To),
                              df)
             ## Sorting 
