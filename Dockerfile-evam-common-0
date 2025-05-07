@@ -1,0 +1,156 @@
+FROM rocker/rstudio:4.5.0
+
+## Taggin of this file: R-version_evamtools-version
+
+######################################################################
+######################################################################
+#####
+#####     Common to the two Dockerfiles
+#####     This installs R and the dependencies, not the
+#####     evamtools package (that is built by Dockerfile-evam-common)
+#####
+######################################################################
+######################################################################
+
+RUN apt-get update && \
+    apt-get install -f -y software-properties-common && \
+    rm -rf /var/lib/apt/lists/* && \
+    add-apt-repository universe && \
+    apt-get update && \
+    apt-get install -y libboost-all-dev && \
+    apt-get install -y libgsl-dev && \
+    apt-get install -y libfftw3-bin && \
+    apt-get install -y libfftw3-dev && \
+    apt-get install -y libfftw3-single3 && \
+    apt-get install -y libfftw3-double3 && \
+    apt-get install -y libfftw3-long3 && \
+    apt-get install -y libfftw3-quad3 && \
+    apt-get install -y libtiff-dev && \
+    apt-get install -y libglpk-dev && \
+    apt-get install -y libgmp-dev && \
+    apt-get install -y libx11-dev && \
+    apt-get install -y git && \
+    apt-get install -y libxt6 && \
+    apt-get install -y graphviz && \
+    apt-get install -y pkg-config
+
+## R packages
+RUN R -e "install.packages('BiocManager')"
+RUN R -e "install.packages('relations')"
+RUN R -e "install.packages('RhpcBLASctl')"
+RUN R -e "install.packages('inline')"
+RUN R -e "install.packages('Oncotree')"
+RUN R -e "install.packages('pryr')"
+RUN R -e "install.packages('readr')"
+RUN R -e "install.packages('testthat')"
+RUN R -e "install.packages('plot.matrix')"
+RUN R -e "install.packages('httr')"
+RUN R -e "install.packages('openssl')"
+RUN R -e "install.packages('xml2')"
+# RUN R -e "install.packages('usethis')"
+RUN R -e "install.packages('credentials')"
+RUN R -e "install.packages('roxygen2')"
+RUN R -e "install.packages('optparse')"
+RUN R -e "install.packages('rversions')"
+RUN R -e "install.packages('imager')"
+RUN R -e "install.packages('DT')"
+RUN R -e "install.packages('shinyjs')"
+RUN R -e "install.packages('markdown')"
+RUN R -e "install.packages('Rlinsolve')"
+RUN R -e "install.packages('fastmatrix')"
+RUN R -e "install.packages('shiny')"
+RUN R -e "install.packages('Matrix')"
+RUN R -e "install.packages('stringi')"
+RUN R -e "install.packages('foreach')"
+RUN R -e "install.packages('R.utils')"
+RUN R -e "install.packages('plotly')"
+RUN R -e "install.packages('magrittr')"
+RUN R -e "BiocManager::install('Rgraphviz')"
+RUN R -e "install.packages('remotes')"
+RUN R -e "install.packages('igraph')"
+RUN R -e "BiocManager::install('OncoSimulR')"
+## Force devel version
+## RUN R -e "BiocManager::install(version = '3.20', ask = FALSE)"
+## RUN R -e "BiocManager::install('OncoSimulR', version = 'devel', ask = FALSE)"
+RUN R -e "install.packages('remotes')"
+
+RUN R -e "library(remotes);remotes::install_github('phillipnicol/OncoBN')"
+RUN R -e "install.packages('prompter')"
+RUN R -e "install.packages('shinyBS')"
+RUN R -e "install.packages('tippy')"
+RUN R -e "install.packages('data.table')"
+RUN R -e "install.packages('gridExtra')"
+RUN R -e "install.packages('gridGraphics')"
+RUN R -e "install.packages('png')"
+
+
+
+
+RUN R -e "BiocManager::install('ggtree')"
+## HyperTraps-ct version https://github.com/StochasticBiology/hypertraps-ct/commits/bioconductor/ dcb94e1
+RUN R -e "remotes::install_github('StochasticBiology/hypertraps-ct', ref = 'bioconductor')"
+## BML version https://github.com/Deschain/BML 50e8793
+RUN R -e "remotes::install_github('Deschain/BML')"
+
+RUN mkdir -p /app/Sources/
+
+## Install HESBCN
+RUN cd /app/Sources && \
+    git clone https://github.com/danro9685/HESBCN && \
+    cd HESBCN && \
+    make && \
+    cp h-esbcn /usr/local/bin/
+
+## Install MCCBN
+RUN cd /app/Sources && \
+    git clone https://github.com/cbg-ethz/MC-CBN
+
+RUN cd /app/Sources && \
+    cd MC-CBN  && \
+    apt-get install -y dh-autoreconf autoconf automake autotools-dev autoconf autoconf-archive
+
+## For MC-CBN and this issue
+## https://github.com/cbg-ethz/MC-CBN/issues/13
+RUN mkdir ~/.R
+RUN echo 'CXXFLAGS = -g -O2 -Wall -Wrestrict' >> ~/.R/Makevars && \
+    echo 'CFLAGS = -g -O2 -Wall -Wrestrict' >> ~/.R/Makevars && \
+    echo 'CXX11FLAGS = -g -O2 -Wall -Wrestrict' >> ~/.R/Makevars
+
+## RUN R -e 'tools::makevars_user()'
+## RUN R -e 'tools::makevars_site()'
+
+## This will not do. Use ~/.R/Makevars
+## RUN export CXXFLAGS="-g -O2 -g -fopenmp"
+## RUN export CFLAGS="-g -O2 -g -fopenmp"
+## RUN export CXX11FLAGS="-g -O2 -g -fopenmp"
+
+## Just to see what we have set
+RUN R CMD config CFLAGS
+RUN R CMD config CXXFLAGS
+RUN R CMD config CPPFLAGS
+RUN R CMD config CXX11FLAGS
+
+RUN cd /app/Sources && \
+    cd MC-CBN  && \
+    autoreconf -vif  && \
+    R CMD build . && \
+    V_MCCBN=$(cat DESCRIPTION | grep Version | cut -d' ' -f2) && \
+    R CMD INSTALL mccbn_$V_MCCBN.tar.gz
+
+## Install cbn
+COPY ct-cbn-0.1.04b-RDU.tar.gz /app/Sources/
+RUN cd /app/Sources && \
+    tar -xvzf ct-cbn-0.1.04b-RDU.tar.gz && \
+    cd ct-cbn-0.1.04b-RDU && \
+    ./configure && \
+    make && \
+    cp -t /usr/local/bin/ ct-cbn h-cbn
+
+
+######################################################################
+######################################################################
+#####
+#####     End common-0 Dockerfiles
+#####
+######################################################################
+######################################################################
