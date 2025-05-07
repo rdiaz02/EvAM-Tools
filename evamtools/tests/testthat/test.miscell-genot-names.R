@@ -194,5 +194,20 @@ test_that("reorder_to_standard_order minimal tests", {
 })
 
 
+test_that("Original decode_state is the same as decode_state_ht", {
+    ## Just in case coding changed.
+    for (i in 3:10) {
+        genenames <- LETTERS[1:i]
+        states <- seq.int(from = 0, to = (2^i - 1))
+        dsout <- vapply(states, decode_state, character(1),
+                        num_features = i, feature_labels = genenames)
+        dshtout <- vapply(states, decode_state_ht, character(1),
+                          num_features = i, feature_labels = genenames)
+        expect_identical(dsout, dshtout)
+        rm(genenames, states, dsout, dshtout)
+    }
+})
+
+
 cat("\n Done test.miscell-genot-names.R. Seconds = ",
     as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

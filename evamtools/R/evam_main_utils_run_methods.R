@@ -142,10 +142,21 @@ run_OncoBN <- function(x, opts) {
 }
 
 decode_state <- function(state, num_features, feature_labels) {
-    binary_rep <- intToBits(state)[1:num_features]  # Convert to binary
-    active_features <- feature_labels[as.logical(rev(as.numeric(binary_rep)))]  # Extract active features
-    if (length(active_features) == 0) return("WT")  # If no active features, return "WT"
-    return(paste(active_features, collapse = ", "))  # Return active features
+    binary_rep <- intToBits(state)[1:num_features]
+    active_features <- feature_labels[as.logical(rev(as.numeric(binary_rep)))]
+    if (length(active_features) == 0) return("WT")
+    return(paste(active_features, collapse = ", "))
+}
+
+## Like decode state, but using the same logic as
+## hypertrapsct (e.g., see function hypertrapsct:::prob.by.time )
+## They should give identical output. I am not using this function per se,
+## but I am testing decode_state gives the same as this.
+decode_state_ht <- function(state, num_features, feature_labels) {
+    binary_string <- hypertrapsct:::DecToBin(state, num_features)
+    binary_vector <- as.numeric(strsplit(binary_string, "")[[1]])
+    if (sum(binary_vector) == 0) return("WT")
+    return(paste(feature_labels[which(binary_vector == 1)], collapse = ", "))
 }
 
 
@@ -156,10 +167,7 @@ run_HyperTraPS <- function(x, opts) {
                                             "cores") )
         opts_call <- opts[-opts_rm]
         opts_call <- c(list(obs = x), opts_call)
-    out <- invisible(do.call(
-      hypertrapsct::HyperTraPS,
-            opts_call
-    ))
+        out <- invisible(do.call(hypertrapsct::HyperTraPS, opts_call))
   })["elapsed"]
 
     num_features <- ncol(x)

@@ -226,7 +226,5 @@ binary2str_labels <- function(binary_state,
   }
 
   if(sum(binary_state) == 0) return(wt)
-  return(paste(labels[
-    which(binary_state == 1)
-  ], collapse = sep))
+  return(paste(labels[which(binary_state == 1)], collapse = sep))
 }
