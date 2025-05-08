@@ -88,7 +88,7 @@ Cancer progression models (CPMs) or, more generally, evolutionary accumulation m
 
 *  **Mutual Hazard networks (MHN):** With MHN dependencies are not deterministic and events can make other events more like or less likely (inhibiting influence). The fitted parameters are multiplicative hazards that represent how one event influences other events.
 
-*  **Hypercubic transition path sampling (HyperTraPS-CT):** HyperTraPS-CT is also a stochastic dependencies model, like MHN, where events can have an inhibiting or promoting effect on other events. HyperTraPS-CT allows using models with pairwise interactions between events, like MHN, but also lower-order (no interactions between events) and  higher-order interactions (three-way, four-way, and arbitrary) (set this with the "model" argument). For the cross-sectional data we use here, HyperTraPS-CT uses discrete-time modelling, but HyperTraPS-CT allows using continuous time and also allows for phylogenetically- and longitudinally-related samples, but this is not ---yet--- available via the Shiny app.
+*  **Hypercubic transition path sampling (HyperTraPS-CT):** HyperTraPS-CT is also a stochastic dependencies model, like MHN, where events can have an inhibiting or promoting effect on other events. HyperTraPS-CT can use models with pairwise interactions between events, like MHN, but also models of lower-order (no interactions between events) and  higher-order interactions (three-way, four-way, and full parameterisation ---set this with the "model" argument). For the cross-sectional data we use here, HyperTraPS-CT uses discrete-time modelling, but HyperTraPS-CT also supports continuous time models as well as phylogenetically- and longitudinally-related samples, but this is not ---yet--- available via the Shiny app.
 
 *  **Bayesian Mutation Landscape (BML):** tries to reconstruct evolutionary progression paths and ancestral genotypes. It can highlight epistatic interactions between genes.
 
@@ -279,7 +279,7 @@ The results are displayed using a combination of figures and tabular output. Spe
 &nbsp;&nbsp;
   * For HyperTraPS, we show summary plots as provided by a custom modification of hypertraps' package `plotHypercube.summary` function. The plots provided are, from left to right and from top to bottom:
       * A trace of the likelihood ("re-calculated twice with different samples (to show consistency or lack thereof), along with current "in use" likelihood" ---from https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output ; the remaining verbatim quotations are from this source).
-    	  * A "'Bubble plot' of probability of acquiring trait <i>i</i> at ordinal step <i>j</i>".
+      * A "'Bubble plot' of probability of acquiring trait <i>i</i> at ordinal step <i>j</i>".
       * "Transition graph with edge weights showing probability flux (from sampled paths)." This is very similar to the "Transition probabilities" plot on the second row.
 	  * A "motif plot of feature acquisition probabilities at discrete orderings", calling hypertraps' package `plotHypercube.motifs` function. (If you used a model different from 2 or 3, you will also see this plot in the first row.)
       * See https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output for details.

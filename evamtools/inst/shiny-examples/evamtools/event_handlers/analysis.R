@@ -41,7 +41,7 @@ large_gene_number_check <- function(data, max_genes, warn = FALSE) {
 
 method_validation <- function(methods, stop_if_empty = FALSE) {
     if (stop_if_empty) {
-        if (is.null(methods) || (length(methods) == 1 && is.na(methods))) { 
+        if (is.null(methods) || (length(methods) == 1 && is.na(methods))) {
             stop(
                 "You must use at least one method ",
                 "(check 'EvAMs to use' under 'Advanced options ",
@@ -70,7 +70,7 @@ get_mhn_args <- function(input) {
 
 get_ot_args <- function(input) {
     ot_opts <- list()
-    
+
     if (input$OT_with_error == "TRUE") {
         ot_opts$with_errors_dist_ot <- TRUE
     } else {
@@ -82,7 +82,7 @@ get_ot_args <- function(input) {
 
 get_cbn_args <- function(input) {
     cbn_opts <- list(init_poset = input$CBN_init_poset,
-                                 omp_threads = input$CBN_omp_threads) 
+                                 omp_threads = input$CBN_omp_threads)
 
     return(cbn_opts)
 }
@@ -145,7 +145,7 @@ get_mccbn_args <- function(input) {
     } else {
         mccbn_opts$adaptive <- FALSE
     }
- 
+
     return(mccbn_opts)
 }
 
@@ -174,7 +174,7 @@ get_hyper_traps_args <- function(input) {
     outputinput = as.numeric(input$HyperTraPS_outtrans)
     ## nsampl = as.numeric(input$HyperTraPS_nsampl),
     ##    cores = as.numeric(input$HyperTraPS_cores)
-  )
+    )
   message("DEBUG: options entered for HyperTraPS are ",
           paste(names(hyper_traps_opts),
                 hyper_traps_opts, sep = " =  ",
@@ -245,7 +245,7 @@ run_analysis <- function(data, input, disp_freqs_ret, EVAM_MAX_ELAPSED) {
     validate_data(data2run)
 
     progress$inc(2 / 5, detail = "Running EvAMs")
-    
+
     cpm_output <- R.utils::withTimeout(
         {
             evam(data2run,
@@ -319,13 +319,13 @@ run_analysis <- function(data, input, disp_freqs_ret, EVAM_MAX_ELAPSED) {
     )
 
     tabular_data <- evamtools:::create_tabular_data(c(cpm_output, sampled_from_CPMs))
-    
+
     all_evam_output <- list("cpm_output" = c(cpm_output, sampled_from_CPMs)
                                       , "orig_data" = orig_data
                                       , "tabular_data" = tabular_data
                                       , "do_sampling" = do_sampling
-                                        ) 
-    
+                                        )
+
     progress$inc(5/5, detail = "You can see your result by going to the Results tab")
 
     shinyjs::enable("analysis")

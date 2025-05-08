@@ -166,8 +166,8 @@ run_HyperTraPS <- function(x, opts) {
       ## opts_rm <- which(names(opts) %in% c("cores") )
       ## opts_call <- opts[-opts_rm]
       opts_call <- opts
-        opts_call <- c(list(obs = x), opts_call)
-        out <- invisible(do.call(hypertrapsct::HyperTraPS, opts_call))
+      opts_call <- c(list(obs = x), opts_call)
+      out <- invisible(do.call(hypertrapsct::HyperTraPS, opts_call))
   })["elapsed"]
 
     num_features <- ncol(x)
@@ -198,13 +198,13 @@ run_HyperTraPS <- function(x, opts) {
         from_state <- out$dynamics$trans$From[i]
         to_state <- out$dynamics$trans$To[i]
         probability <- out$dynamics$trans$Probability[i]
-  
+
         from_decoded <- decode_state(from_state, num_features, feature_labels)
         to_decoded <- decode_state(to_state, num_features, feature_labels)
-  
-      trans_mat[from_decoded, to_decoded] <- probability
+
+        trans_mat[from_decoded, to_decoded] <- probability
     }
-    
+
   ## out$predicted_genotype_freqs = probs_from_trm(trans_mat)
 
 
@@ -234,9 +234,9 @@ run_BML <- function(x, opts) {
   ## FIXME: rm when settled
   ## FIXME: why do this? Just to obtain EdgeProbabilities?
   ## if (opts$rep == 0) {
-  ##   opts$rep <- 1
-  ## }
-    
+    ##   opts$rep <- 1
+    ## }
+
     time_out <- system.time({
         opts <- c(list(dataset = x), opts)
         out <- invisible(do.call(
@@ -245,24 +245,24 @@ run_BML <- function(x, opts) {
         ))
     })["elapsed"]
 
-  ## This is about right, but it is much better to provide
-  ## their native output instead of try to get right the
-  ## transition matrix. We could recover this code if we wanted.
-  ## But NOT the transition rate matrix, as
-  ## that makes no sense. To rm code later but not rm the useful things
-  ## I make this dead code.
+    ## This is about right, but it is much better to provide
+    ## their native output instead of try to get right the
+    ## transition matrix. We could recover this code if we wanted.
+    ## But NOT the transition rate matrix, as
+    ## that makes no sense. To rm code later but not rm the useful things
+    ## I make this dead code.
 
-  if (FALSE) {
-    out$adjacency_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
-    out$trans_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
-    ## out$td_trans_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
-    ## Misra does not give a transition rate matrix
-    ## out$trans_rate_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
+    if (FALSE) {
+        out$adjacency_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
+        out$trans_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
+        ## out$td_trans_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
+        ## Misra does not give a transition rate matrix
+        ## out$trans_rate_mat <- Matrix::Matrix(BML::adjacency_matrix(out))
 
-    ## There are, I think, cleaner ways of getting this probs
-    ## which are, actually P(g)/m_k
-    ## We could hack BML and not divide, but watch out for
-    ## possible partial sums.
+        ## There are, I think, cleaner ways of getting this probs
+        ## which are, actually P(g)/m_k
+        ## We could hack BML and not divide, but watch out for
+        ## possible partial sums.
 
         ## This breaks the primary output, I think. Watch out
         out$DAG$labels <- sub("Normal", "WT", out$DAG$labels)
@@ -278,50 +278,50 @@ run_BML <- function(x, opts) {
         })
         out$DAG$labels <- unname(out$DAG$labels)
 
-    for (i in seq_len(nrow(out$adjacency_mat))) {
-      for (j in seq_len(ncol(out$adjacency_mat))) {
-        if (out$adjacency_mat[i, j] == 0) {
-          out$trans_mat[i, j] <- 0
-          ## out$trans_rate_mat[i, j] <- 0
-        } else {
-          name = colnames(out$adjacency_mat)[j]
+        for (i in seq_len(nrow(out$adjacency_mat))) {
+            for (j in seq_len(ncol(out$adjacency_mat))) {
+                if (out$adjacency_mat[i, j] == 0) {
+                    out$trans_mat[i, j] <- 0
+                    ## out$trans_rate_mat[i, j] <- 0
+                } else {
+                    name = colnames(out$adjacency_mat)[j]
 
-          idx <- which(out$DAG$labels == name)
-          ## The next is most likely right
-          ## the probs come from the BML code that
-          ## already divides by max, max2 and max3.
-          ## But the sum for all descendants can sometimes be > 1.
-          ## Makes no sense but this happens with the original
-          ## software too. I think those P(g)/m_k are for
-          ## coloring the figures; one is not supposed to use
-          ## the P(g) directly from these figures.
-          out$trans_mat[i, j] = out$DAG$probs[idx]
-          ## FIXME: rm later
-          ## This makes no sense: EdgeProbabilites are only for pairs
-          ## and singletons
-          ## if (name %in% rownames(out$bootstrap$EdgeProbabilities)) {
-          ##     out$trans_mat[i, j] <- mean(out$bootstrap$EdgeProbabilities[name, ])
-          ##     # out$trans_mat[i, j] <- 1
-          ## }
+                    idx <- which(out$DAG$labels == name)
+                    ## The next is most likely right
+                    ## the probs come from the BML code that
+                    ## already divides by max, max2 and max3.
+                    ## But the sum for all descendants can sometimes be > 1.
+                    ## Makes no sense but this happens with the original
+                    ## software too. I think those P(g)/m_k are for
+                    ## coloring the figures; one is not supposed to use
+                    ## the P(g) directly from these figures.
+                    out$trans_mat[i, j] = out$DAG$probs[idx]
+                    ## FIXME: rm later
+                    ## This makes no sense: EdgeProbabilites are only for pairs
+                    ## and singletons
+                    ## if (name %in% rownames(out$bootstrap$EdgeProbabilities)) {
+                    ##     out$trans_mat[i, j] <- mean(out$bootstrap$EdgeProbabilities[name, ])
+                    ##     # out$trans_mat[i, j] <- 1
+                    ## }
+                }
+            }
         }
-      }
-    }
-  } ## end dead code block
+    } ## end dead code block
 
-  ## This is done so that all predicted genotype frequencies are 0.
-  ## But I think this ain't needed. FIXME: rm when settled not needed.
-  ## genotype_names = colnames(x)
-  ## combinations = c("WT", unlist(lapply(1:length(genotype_names), function(n) combn(genotype_names, n, FUN = function(x) paste(x, collapse = ", "))), use.names = FALSE))
-  ## freqs = rep(0, length(combinations))
-  ## out$predicted_genotype_freqs <- as.data.frame(t(freqs))
-  ## colnames(out$predicted_genotype_freqs) <- combinations
+    ## This is done so that all predicted genotype frequencies are 0.
+    ## But I think this ain't needed. FIXME: rm when settled not needed.
+    ## genotype_names = colnames(x)
+    ## combinations = c("WT", unlist(lapply(1:length(genotype_names), function(n) combn(genotype_names, n, FUN = function(x) paste(x, collapse = ", "))), use.names = FALSE))
+    ## freqs = rep(0, length(combinations))
+    ## out$predicted_genotype_freqs <- as.data.frame(t(freqs))
+    ## colnames(out$predicted_genotype_freqs) <- combinations
 
-  ##  for (i in seq_along(out$DAG$labels)) {
-  ##       label <- out$DAG$labels[i]
-  ##       prob <- 0
+    ##  for (i in seq_along(out$DAG$labels)) {
+    ##       label <- out$DAG$labels[i]
+    ##       prob <- 0
 
-  ##       out$predicted_genotype_freqs[label] <- prob
-  ##   }
+    ##       out$predicted_genotype_freqs[label] <- prob
+    ##   }
 
     return(list(time_out = time_out, out = c(primary_output = list(out))))
 }
@@ -344,7 +344,7 @@ run_method <- function(method, x, opts) {
     } else if (method == "BML") {
         result <- run_BML(x, opts$bml_opts)
     }
-    
+
 
     time_out <- result$time_out
     out <- result$out

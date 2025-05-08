@@ -236,7 +236,7 @@ results_simple <- function(){
         margin-right:0px;
       }
 
-                   
+
                 #select_cpm div.radio{
                   background-color: rgba(200,200,200, 0.5);
                   text-align: center;
@@ -467,9 +467,9 @@ user_input <- function() {
       body{
         font-size: 15px;
       }
-      
+
       .irs-grid-pol.small{
-        height: 0px !important; 
+        height: 0px !important;
       }
 
       #define_genotype>*>*>label{
@@ -484,7 +484,7 @@ user_input <- function() {
 
       .checkbox{
         vertical-align: middle;
-        margin-top: 10px !important; 
+        margin-top: 10px !important;
       }
 
       #genotype  input[type=checkbox] {
@@ -512,7 +512,7 @@ user_input <- function() {
         margin-bottom: 0;
       }
       .upload_file .form-group{
-        width: 500px !important; 
+        width: 500px !important;
       }
       input.formc-control{
         height: 40px !important;
@@ -534,29 +534,29 @@ user_input <- function() {
         margin-right: 20px;
       }
 
-      div.inlin label { 
-        width: 15%; 
+      div.inlin label {
+        width: 15%;
       }
 
-     div.inlin3 label { 
+     div.inlin3 label {
         width: 100%;
         text-align: left;
-        vertical-align: middle; 
+        vertical-align: middle;
       }
-      div.inlin2 label { 
-        width: 100%; 
+      div.inlin2 label {
+        width: 100%;
       }
-      .inlin2>div{ 
-        width: 100% !important; 
+      .inlin2>div{
+        width: 100% !important;
       }
 
       input{
         z-index: 100;
       }
-      .inlin label{ 
-        display: table-cell; 
-        text-align: left; 
-        vertical-align: middle; 
+      .inlin label{
+        display: table-cell;
+        text-align: left;
+        vertical-align: middle;
       }
 
       .inlin>.form-group>.irs--shiny.irs-with-grid{
@@ -567,7 +567,7 @@ user_input <- function() {
       .btn, input.form-control{
         font-size: 15px;
       }
-      .inlin .form-group { 
+      .inlin .form-group {
         display: table-row;
         font-size: 15px;
       }
@@ -576,8 +576,8 @@ user_input <- function() {
         font-size: 15px;
       }
 
-      span [class*='irs'] { 
-        font-size: 15px !important; 
+      span [class*='irs'] {
+        font-size: 15px !important;
       }
 
       .irs-single, .irs-min, .irs-max{
@@ -701,7 +701,7 @@ user_input <- function() {
         overflow: hidden;
         text-overflow: ellipsis;
       }
-      
+
       # #input2build input[type=radio]{
       #   visibility:hidden;
       # }
@@ -732,7 +732,7 @@ user_input <- function() {
 ) # end tags$style
 ),
 column(width = 12,
-            
+
             sidebarLayout(
                 column(width = 1,
                        tags$div(
@@ -759,7 +759,7 @@ column(width = 12,
                                             ## shinyBS::bsTooltip("input2build", "Working example of a tooltip on server.R",
                                             ##                    "right", options = list(container = "body")),
                                         ),
-                                        
+
                                         tags$footer(tags$script(HTML("
               tmp_label = document.createElement('p');
               tmp_label.innerHTML = '<hr style=\"height:1px; width:70px; background-color:black;text-align:left;margin-left:-10px\"> <h4 style=\"margin-left:-30px\">Generate<br>cross-sectional data from EvAM models:</h4>';
@@ -782,13 +782,13 @@ column(width = 12,
               ##               this_string_to_be_replaced_by_git_hash
               ##               ))
               ## substr(system("git rev-parse HEAD", intern=TRUE), 1, 7)))
-              
+
               )
               ## do it with a render UI
               ),
-              
 
-              
+
+
               column(width = 11,
                                         #  titlePanel(HTML("&ensp; Cross-sectional data input")),
                      column(width = 6,
@@ -801,9 +801,9 @@ column(width = 12,
                                    uiOutput("dataset_name"),
                                    uiOutput("download_data")
                                    )
-                            ), 
+                            ),
                      column(width = 6,
-                            
+
                             tags$div(class = "download_button submit_button",
                                      actionButton("analysis", "Run evamtools")
                                      ),
@@ -825,7 +825,7 @@ column(width = 12,
                             tags$div(class = "download_button",
                                      actionButton("advanced_options", "Advanced options and EvAMs to use")
                                      ),
-                            tags$div(id="all_advanced_options", 
+                            tags$div(id="all_advanced_options",
                                      tags$div(class="inlin",
                                               tags$h5(HTML("(See additional details for all options ",
                                                            "in the help of the <tt>evam</tt> and <tt>sample_evam</tt> functions ",
@@ -938,25 +938,25 @@ column(width = 12,
                                               tags$h5("Number of genotypes to generate ",
                                                       "when generating a finite sample of genotypes ",
                                                       "according to the predicted frequencies of ",
-                                                      "from model."),                     
-                                              numericInput("sample_noise", "Observation noise", 0
+                                                      "from model."),
+                                           numericInput("sample_noise", "Observation noise", 0
                                                          , min = 0, max = 1, step = 0.1, width="100%"),
                                               tags$h5("If > 0, the proportion of observations ",
                                                       "in the sampled matrix with error ",
                                                       "(for instance, genotyping error). ",
                                                       "This proportion of observations will have 0s flipped ",
-                                                      "to 1s, and 1s flipped to 0s."),                     
-                                              
-                                              tags$hr(style="border-color: darkgrey;"),
-                                              
-                                              tags$h4("MHN options"),
+                                                      "to 1s, and 1s flipped to 0s."),
+
+                                           tags$hr(style="border-color: darkgrey;"),
+
+                                           tags$h4("MHN options"),
                                               numericInput("MHN_lambda", "Lambda: ", NULL, min=0),
                                               tags$h5("Lambda: penalty term in fitting algorithm. Default = 1/number of rows of data set. ",
                                                       "(Do not enter anything, unless you want to use a value ",
                                                       "different from the default)."),
                                               tags$hr(style="border-color: darkgrey;"),
                                               tags$h4("OT options"),
-                                              selectInput("OT_with_error", "Return errors: ", c("True" = TRUE, 
+                                              selectInput("OT_with_error", "Return errors: ", c("True" = TRUE,
                                                                                                 "False" = FALSE), selected = "True"),
                                               tags$h5("For large models this may take quite some time"),
                                               tags$hr(style="border-color: darkgrey;"),
@@ -1074,7 +1074,7 @@ column(width = 12,
                                            ##                       "(number of samples from an exponential distribution to estimate the predicted genotype frequencies; make it larger if you want more accurate estimates):", "", 1000, min=10),
                                            ## inputWithHelperUnbold(numericInput, "HyperTraPS_cores", "cores ",
                                            ##                       "(number of cores to use when estimating the predicted genotype frequencies):", "", 10, min=1, max = 15, step = 1),
-                                              tags$hr(style="border-color: darkgrey;"),
+                                           tags$hr(style="border-color: darkgrey;"),
                                               tags$h4("BML options"),
                                            inputWithHelper(numericInput,
                                                            "BML_ntree", "ntree: ",
@@ -1087,7 +1087,7 @@ column(width = 12,
                                                            "Number of bootstrap replicates, if nrep = 0 no bootstrap will be performed. The default, 10, is way too small for real use.",
                                                            10, min=0),
                     ),
-                                  
+
                     )
                   , plotly::plotlyOutput("plot") ## and this calls output$plot
                   , plotOutput("dag_plot")
@@ -1097,14 +1097,14 @@ column(width = 12,
             )
 )
 }
-ui <- 
-  navbarPage( 
-    "", ## "Evamtools",
-    id = "navbar",
-    header = tags$head(
-      tags$style(
-        HTML(
-          "
+ui <-
+    navbarPage(
+        "", ## "Evamtools",
+        id = "navbar",
+        header = tags$head(
+                          tags$style(
+                                   HTML(
+                                       "
         h2{
           margin: 0;
           padding: 0;
@@ -1126,22 +1126,22 @@ ui <-
           margin-top: 50px;
         }
         "
-      ))),
-    tabPanel("About EvAM-Tools",
-             cpm_info()
-    ),
-    tabPanel("User input", 
-      value = "csd_builder",
-      user_input()
-    ),
-    tabPanel("Results",
-      value = "result_viewer",
-      results_simple()
-      ),
-    ## tabPanel("Tutorial",
-    ##   tutorial()
-    ## )
-    )
+        ))),
+        tabPanel("About EvAM-Tools",
+                 cpm_info()
+                 ),
+        tabPanel("User input",
+                 value = "csd_builder",
+                 user_input()
+                 ),
+        tabPanel("Results",
+                 value = "result_viewer",
+                 results_simple()
+                 ),
+        ## tabPanel("Tutorial",
+        ##   tutorial()
+        ## )
+        )
 
 ## |> prompter::add_prompt(message =
 ##                             paste("Analyzed data. ",
