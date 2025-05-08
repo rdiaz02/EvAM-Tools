@@ -105,7 +105,7 @@ evam <- function(x,
                    limited_output = 0,
                    ## Replace NULL with the actual character vector if available
                    featurenames = NULL,
-                   nsampl = 1e3,
+                   ## nsampl = 1e3,
                    cores = 1
                  ),
                  bml_opts = list(

@@ -76,7 +76,6 @@ evam(x,
        full_analysis = 1,
        limited_output = 0,
        featurenames = NULL,
-       nsampl = 1e3,
        cores = 1
      ),
      bml_opts = list(
@@ -188,9 +187,9 @@ evam(x,
   \url{https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#arguments-to-hypertraps}.
   In addition:
   \describe{
-  \item{nsampl: }{The number of samples from an exponential distribution
-  with parameter 1 to use to compute predicted genotype frequencies (see
-  Details).}
+  %% \item{nsampl: }{The number of samples from an exponential distribution
+  %% with parameter 1 to use to compute predicted genotype frequencies (see
+  %% Details).}
   \item{cores: }{Number of cores to use when computing the predicted
     genotype frequencies.}
    }
