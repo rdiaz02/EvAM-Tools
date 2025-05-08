@@ -100,9 +100,9 @@ create_default_opts <- function(x) {
             limited_output = 0,
             output_transitions = 1,
             samples_per_row = 10,
-            featurenames = NULL, # Replace NULL with the actual character vector if available
+            featurenames = NULL # Replace NULL with the actual character vector if available
             ## nsampl = 1e3,
-            cores = 1
+            ## cores = 1
         ),
         bml_opts = list(
           ntree = 100,

@@ -163,8 +163,9 @@ decode_state_ht <- function(state, num_features, feature_labels) {
 run_HyperTraPS <- function(x, opts) {
   if (opts$seed == -1) opts$seed <- round(runif(1, 1, 1e9))
   time_out <- system.time({
-        opts_rm <- which(names(opts) %in% c("cores") )
-        opts_call <- opts[-opts_rm]
+      ## opts_rm <- which(names(opts) %in% c("cores") )
+      ## opts_call <- opts[-opts_rm]
+      opts_call <- opts
         opts_call <- c(list(obs = x), opts_call)
         out <- invisible(do.call(hypertrapsct::HyperTraPS, opts_call))
   })["elapsed"]

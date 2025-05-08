@@ -104,9 +104,9 @@ evam <- function(x,
                    full_analysis = 1,
                    limited_output = 0,
                    ## Replace NULL with the actual character vector if available
-                   featurenames = NULL,
+                   featurenames = NULL
                    ## nsampl = 1e3,
-                   cores = 1
+                   ## cores = 1
                  ),
                  bml_opts = list(
                    ntree = 100, ## what they used in the paper
