@@ -2379,10 +2379,12 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
 
                     output[[sprintf("plot_sims_%s", met)]] <- renderPlot({
                   if (tmp_data$all_options$hyper_traps_opts$model == 2) {
-                    pl <- hypertrapsct::plotHypercube.influences(tmp_data$HyperTraPS_primary_output)
+                      ## pl <- hypertrapsct::plotHypercube.influences(tmp_data$HyperTraPS_primary_output)
+                      pl <- plot_HyperTraPS_evam_influences(tmp_data, size = 18)
                   } else if (tmp_data$all_options$hyper_traps_opts$model == 3) {
-                    pl <- hypertrapsct::plotHypercube.influencegraph(tmp_data$HyperTraPS_primary_output,
-                                                                     label.size = 4)
+                      ## pl <- hypertrapsct::plotHypercube.influencegraph(tmp_data$HyperTraPS_primary_output,
+                      ##                                                  label.size = 4)
+                      pl <-plot_HyperTraPS_evam_influencegraph(tmp_data)
                   } else {
                     pl <- hypertrapsct::plotHypercube.motifs(tmp_data$HyperTraPS_primary_output,
                                                              label.size = 4)
@@ -2529,10 +2531,17 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     !is.null(tmp_data$HyperTraPS_primary_output) && 
                     !all(is.na(tmp_data$HyperTraPS_primary_output))) {
                   HT_model <- tmp_data$HyperTraPS_primary_output$model
-                    output[[sprintf("plot_hypertraps_%s", met)]] <- renderPlot({
-                    pl <- hypertrapsct::plotHypercube.summary(tmp_data$HyperTraPS_primary_output)
+                    HT_model_string <-  switch(as.character(HT_model),
+                                               "-1" = "full ---all edges---",
+                                               "1"  = "main effects",
+                                               "2"  = "pairwise interactions",
+                                               "3"  = "3-way interactions",
+                                               "4"  = "4-way interactions")
 
-                        pl
+                    output[[sprintf("plot_hypertraps_%s", met)]] <- renderPlot({
+                        ## pl <- hypertrapsct::plotHypercube.summary(tmp_data$HyperTraPS_primary_output)
+                        ## pl
+                        plot_HyperTraPS_evam_summary(tmp_data)
                 }, height = 600)
 
                     return(tagList(
@@ -2542,14 +2551,7 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                       span(
                         paste0(
                           "Model = ", HT_model,
-                          " (",
-                          switch(HT_model,
-                                 "-1" = "unrestricted",
-                                 "1"  = "main effects",
-                                 "2"  = "pairwise interactions",
-                                 "3"  = "3-way interactions",
-                                 "4"  = "4-way interactions"),
-                          ")",
+                                    " (", HT_model_string, ")",
                           "."
                         ),
                         style = "font-size: smaller;"
@@ -2575,12 +2577,11 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                     !is.null(tmp_data$BML_primary_output) &&
                     !all(is.na(tmp_data$BML_primary_output)))  {
             if (tmp_data$BML_bootstrap) {
+                        bml_boot_message <- ifelse(tmp_data$BML_bootstrap < 200,
+                                                   " This number of bootstrap replicates might be too small.",
+                                                   "")
                     ## Like Figure 3.b in Misra et al.
                     output[[sprintf("plot_bml_%s", met)]] <- renderPlot({
-                      ## data <- as.data.frame(t(log(tmp_data$BML_primary_output$bootstrap$OBS_Probabilities)))
-                      ## boxplot(data, horizontal = TRUE, yaxt="n", col="red")
-                      ## axis(2, at = 1:ncol(data), las =2, labels = colnames(data))
-                      ## title("P(g)")
                       evamtools:::plot_BML_Fig3(tmp_data$BML_primary_output$bootstrap)
                     }, height = 600)
                 return(tagList(
@@ -2590,7 +2591,8 @@ server <- function(input, output, session, EVAM_MAX_ELAPSED = 1.5 * 60 * 60) {
                         span(
                             paste0(
                                 "Number of bootstrap replicates = ",
-                                tmp_data$BML_bootstrap, "."
+                                tmp_data$BML_bootstrap, ".",
+                                bml_boot_message
                             ),
                             style = "font-size: smaller;"
                         )

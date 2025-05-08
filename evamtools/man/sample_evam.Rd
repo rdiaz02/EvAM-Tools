@@ -150,16 +150,4 @@ outS4 <- sample_evam(out, N = 1000, methods = c("CBN", "OT", "MHN"),
 outS5 <- sample_evam(out, N = 1000, methods = "CBN",
                      output = c("obs_genotype_transitions", "sampled_genotype_counts"), obs_noise = 0.1)
 
-
-
-## It works with HyperTraPS too
-out2 <- suppressMessages(evam(Dat1,
-                              methods = c("OT", "MHN", "HyperTraPS")))
-
-## The three methods
-out2S1 <- sample_evam(out2, N = 100)
-
-## Just HyperTraPS
-out2S2 <- sample_evam(out2, N = 100, methods = c("HyperTraPS"))
-
 }

@@ -1,3 +1,8 @@
+Changes in version 3.3.1 (2025-05-08):
+	- HyperTraPS changes:
+	  - We cannot produce, for now, predicted genotype frequencies.
+	  - Created custom plots based on HyperTraPS's ones.
+
 Changes in version 3.2.1 (2025-05-03):
 	- Many additions/modifications to HyperTraPS-CT plotting,
 	  default arguments, input of arguments via Shiny app,

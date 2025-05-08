@@ -1033,8 +1033,8 @@ column(width = 12,
 
                                               tags$h4("HyperTraPS options"),
 
-                                           inputWithHelperUnbold(selectInput, "HyperTraPS_model", "model ",
-                                                                 "(-1: arbitrary; 1: main effect, no interaction; 2: pairwise; 3: 3-way; 4: 4-way):", "", choices = c(-1, 1:4), selected = 2),
+                                           inputWithHelperUnbold(selectInput, "HyperTraPS_model", "model structure",
+                                                                 "(-1: full ---all edges---; 1: main effects, no interaction; 2: pairwise; 3: 3-way; 4: 4-way):", "", choices = c(-1, 1:4), selected = 2),
                                            inputWithHelperUnbold(numericInput, "HyperTraPS_walkers", "walkers ",
                                                                  "(number of walkers): ", "", 200, min=0),
                                            inputWithHelperUnbold(numericInput, "HyperTraPS_length", "length ",

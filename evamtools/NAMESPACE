@@ -9,8 +9,11 @@ export(
  , "sample_CPMs"
  , "plot_CPMs"
  , "plot_BML_all"
- , "plot_HT_as_evam_trans_mat"
-  )
+ , "plot_HyperTraPS_as_evam_trans_mat"
+ , "plot_HyperTraPS_evam_summary"
+ , "plot_HyperTraPS_evam_influences"
+ , "plot_HyperTraPS_evam_influencegraph"
+)
 
 ## FIXME: try to bring down deps
 ##    - shiny and shinyjs only needed for shiny app, so enhances/suggests
@@ -80,7 +83,11 @@ importFrom("relations", "as.relation",
 importFrom("hypertrapsct", "HyperTraPS",
            "plotHypercube.summary",
            "plotHypercube.influencegraph",
-           "plotHypercube.motifs")
+           "plotHypercube.sampledgraph2",
+           "plotHypercube.motifs",
+           "plotHypercube.lik.trace",
+           "plotHypercube.influences",
+           "plotHypercube.bubbles")
 
 importFrom("utils", "combn")
 
@@ -90,3 +97,5 @@ importFrom("gridExtra", "grid.arrange")
 importFrom("png", "readPNG")
 
 importFrom("data.table", "rbindlist", "dcast", "setDT", "setnames")
+importFrom("ggplot2", "theme", "element_text", "ggplot")
+importFrom("ggpubr", "ggarrange")

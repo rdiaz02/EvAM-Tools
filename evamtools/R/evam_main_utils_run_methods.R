@@ -211,21 +211,22 @@ run_HyperTraPS <- function(x, opts) {
     ## This could be inside the first loop, but this is simpler
     ## for now.
     ## Before calling it, a sanity check
-    stopifnot(identical(colnames(x), out$featurenames))
-    time2 <- system.time({
-        predicted_genotype_freqs <- probs_from_HT(out,
-                                                  gene_names = colnames(x),
-                                                      nsampl = opts$nsampl,
-                                                      cores = opts$cores)
-    })["elapsed"]
+    ## stopifnot(identical(colnames(x), out$featurenames))
+    ## time2 <- system.time({
+    ##     predicted_genotype_freqs <- probs_from_HT(out,
+    ##                                               gene_names = colnames(x),
+    ##                                                   nsampl = opts$nsampl,
+    ##                                                   cores = opts$cores)
+    ## })["elapsed"]
 
-    message("HyperTraPS times: time_out = ",  round(time_out, 3),
-            ". time2 = ", round(time2, 3))
+    ## message("HyperTraPS times: time_out = ",  round(time_out, 3),
+    ##         ". time2 = ", round(time2, 3))
 
-    return(list(time_out = time_out + time2,
+    return(list(time_out = time_out, ## + time2,
                 out = c(primary_output = list(out),
-                        trans_mat = list(trans_mat),
-                        predicted_genotype_freqs = list(predicted_genotype_freqs))))
+                        trans_mat = list(trans_mat)
+                        ## , predicted_genotype_freqs = list(predicted_genotype_freqs)
+                        )))
 }
 
 

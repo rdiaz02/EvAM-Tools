@@ -455,7 +455,9 @@ sample_evam <- function(cpm_output
     } else {
         methods <- names(which(vapply(c("OT", "OncoBN",
                             "CBN", "MCCBN",
-                            "MHN", "HESBCN", "HyperTraPS"),
+                            "MHN", "HESBCN"
+                            ## , "HyperTraPS"
+                            ),
                           function(m) {
                               outn <- paste0(m, "_predicted_genotype_freqs")
                               return(!(is.null(cpm_output[[outn]])) &&
@@ -1496,63 +1498,64 @@ sample_to_named_pD_ordered_out <- function(the_sample, ngenes, gene_names,
     }
 }
 
+## ## ONLY for continuous time!!! So not for evamtools
+## ## Emulate the probs_from_trm. Do this very hackish thing:
+## ## get a huge sample from an exponential so we get many weights
+## ## It could be more efficient if we binned, but then
+## ## we discretize time.
+## ## Repeated runs will generate slightly different results.
+## ## We use the object from HyperTraPS, not from evam, so missing genenames
+## ## and data.
+## probs_from_HyperTraPS_continuous <- function(x,
+##                                              gene_names,
+##                           nsampl = 1e4,
+##                           all_genotypes = TRUE,
+##                           cores = parallel::detectCores()) {
+##     warning("This is only for continuous time")
+##     ## gene_names are the same as feature_labels in decode_state
+##     times <- rexp(nsampl, rate = 1)
+##     ## This will somewhat slow
+##     out <- mclapply(times,
+##                     function(t)
+##                         hypertrapsct:::prob.by.time(x,
+##                                                     tau = t),
+##                     mc.cores = cores)
 
-## Emulate the probs_from_trm. Do this very hackish thing:
-## get a huge sample from an exponential so we get many weights
-## It could be more efficient if we binned, but then
-## we discretize time.
-## Repeated runs will generate slightly different results.
-## We use the object from HyperTraPS, not from evam, so missing genenames
-## and data.
-probs_from_HT <- function(x,
-                          gene_names,
-                          nsampl = 1e4,
-                          all_genotypes = TRUE,
-                          cores = parallel::detectCores()) {
-  ## gene_names are the same as feature_labels in decode_state
-  times <- rexp(nsampl, rate = 1)
-  ## This will somewhat slow
-  out <- mclapply(times,
-                  function(t)
-                    hypertrapsct:::prob.by.time(x,
-                                                tau = t),
-                  mc.cores = cores)
+##     out <- lapply(out, data.table::setDT)
+##     combined <- data.table::rbindlist(out, idcol = "source_df")
+##     result <- data.table::dcast(combined,
+##                                 State ~ source_df,
+##                                 value.var = "Probability", fill = 0)
+##     data.table::setnames(result,
+##                          old = setdiff(names(result), "State"),
+##                          new = paste0("Probability_", seq_along(out)))
 
-  out <- lapply(out, data.table::setDT)
-  combined <- data.table::rbindlist(out, idcol = "source_df")
-  result <- data.table::dcast(combined,
-                              State ~ source_df,
-                              value.var = "Probability", fill = 0)
-  data.table::setnames(result,
-                       old = setdiff(names(result), "State"),
-           new = paste0("Probability_", seq_along(out)))
+##     probs <- data.frame(result$State,
+##                         rowMeans(result[, -1]))
+##     ## Minimal sanity check
+##     if (!(all.equal(sum(probs[, 2]), 1.0))) {
+##         stop("Sum of probabilities != 1")
+##     }
 
-  probs <- data.frame(result$State,
-                      rowMeans(result[, -1]))
-  ## Minimal sanity check
-  if (!(all.equal(sum(probs[, 2]), 1.0))) {
-    stop("Sum of probabilities != 1")
-  }
+##     binary_state <- lapply(strsplit(as.character(probs$result.State), ""),
+##                            as.numeric)
+##     ## Recall gene_names need not be in order.
+##     decoded_states <- unlist(lapply(binary_state, binary2str_labels,
+##                                     labels = gene_names))
+##     ## In case I need to check
+##     ## out <- data.frame(Genotype = decoded_states,
+##     ##                   Binary_state = probs$result.State,
+##     ##                   Probs = probs[, "rowMeans.result....1.."])
+##     ## out <- reorder_to_standard_order_arbitrary_df(out)
 
-  binary_state <- lapply(strsplit(as.character(probs$result.State), ""),
-                         as.numeric)
-    ## Recall gene_names need not be in order.
-  decoded_states <- unlist(lapply(binary_state, binary2str_labels,
-                                  labels = gene_names))
-  ## In case I need to check
-  ## out <- data.frame(Genotype = decoded_states,
-  ##                   Binary_state = probs$result.State,
-  ##                   Probs = probs[, "rowMeans.result....1.."])
-  ## out <- reorder_to_standard_order_arbitrary_df(out)
+##     p <-  probs[, "rowMeans.result....1.."]
+##     names(p) <- decoded_states
 
-  p <-  probs[, "rowMeans.result....1.."]
-  names(p) <- decoded_states
+##     if (any(is.na(p))) stop("NAs in p?")
 
-    if (any(is.na(p))) stop("NAs in p?")
+##     p <- reorder_to_standard_order(p)
+##     if (!all_genotypes) return(na.omit(p))
 
-    p <- reorder_to_standard_order(p)
-    if (!all_genotypes) return(na.omit(p))
-
-    p[is.na(p)] <- 0
-    return(p)
-}
+##     p[is.na(p)] <- 0
+##     return(p)
+## }

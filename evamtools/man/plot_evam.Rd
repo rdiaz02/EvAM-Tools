@@ -2,7 +2,10 @@
 \alias{plot_evam}
 \alias{plot_CPMs}
 \alias{plot_BML_all}
-\alias{plot_HT_as_evam_trans_mat}
+\alias{plot_HyperTraPS_as_evam_trans_mat}
+\alias{plot_HyperTraPS_evam_summary}
+\alias{plot_HyperTraPS_evam_influences}
+\alias{plot_HyperTraPS_evam_influencegraph}
 \title{Plot results from EvAMs (CPMs)}
 \description{Plots fitted EvAMs (CPMs), both fitted model and custom
   plots for transition rates and transition probabilities.}
@@ -37,14 +40,23 @@ plot_BML_all(x)
 ## by the hypertrapsct package. See Note and examples.
 ## But if you want to see the transition matrix as for the rest of evam you can use
 
-plot_HT_as_evam_trans_mat(
+plot_HyperTraPS_as_evam_trans_mat(
   cpm_output,
   label_type = "genotype",
   fixed_vertex_size = FALSE,
   top_paths = NULL
 )
 
+plot_HyperTraPS_evam_summary(cpm_output,
+                             f.thresh = 0.05,
+                             edge.label.size = 4,
+                             node.label.size = 4
+                             )
 
+plot_HyperTraPS_evam_influences(cpm_output,
+upper.right = TRUE, size = 12)
+
+plot_HyperTraPS_evam_influencegraph(cpm_output, label.size = 4)
 }
 \arguments{
   \item{cpm_output}{Output from the cpm}
@@ -88,6 +100,25 @@ when there are no restrictions in the order of accumulation of
 mutations), using NULL can lead to a very long time to plot.}
 
 \item{x}{An object that contains the output from runs that used BML.}
+
+\item{f.thresh}{See help of corresponding
+  \code{\link[hypertrapsct:hypertrapsct]{hypertrapsct}} function.}
+
+\item{edge.label.size}{See help of corresponding
+  \code{\link[hypertrapsct:hypertrapsct]{hypertrapsct}} function.}
+
+\item{node.label.size}{See help of corresponding
+  \code{\link[hypertrapsct:hypertrapsct]{hypertrapsct}} function.}
+
+\item{upper.right}{See help of corresponding
+  \code{\link[hypertrapsct:hypertrapsct]{hypertrapsct}} function.}
+
+\item{label.size}{See help of corresponding
+  \code{\link[hypertrapsct:hypertrapsct]{hypertrapsct}} function.}
+
+\item{size}{Font size.}
+
+
 }
 
 \value{
@@ -159,6 +190,9 @@ or
 \code{\link[hypertrapsct:plotHypercube.summary]{plotHypercube.summary}},
 etc. See an example below.
 
+
+\code{plot_HyperTraPS_evam_influence/influencegraph} are for models with
+\code{model = 2/3} respectively.
 
 \strong{plot_CPMs has been deprecated}. Use plot_evam.
 
@@ -262,13 +296,24 @@ plot_evam(out_AND_OR_XOR, methods = c("MHN", "HESBCN"),
 
 ## HyperTraPS: using hypertrapsct package function
 ## and showing the transition matris like the rest of evam
-out_h_1 <- evam(dB_c1,
+out_h_2 <- evam(dB_c1,
                 methods = c("HyperTraPS"),
                 hyper_traps_opts = list(length = 2,
-                                        model = -1,
+                                        model = 2,
                                         seed = -1))
-hypertrapsct::plotHypercube.summary(out_h_1$HyperTraPS_primary_output)
-plot_HT_as_evam_trans_mat(out_h_1, top_paths = 4)
+out_h_3 <- evam(dB_c1,
+                methods = c("HyperTraPS"),
+                hyper_traps_opts = list(length = 2,
+                                        model = 3,
+                                        seed = -1))
+hypertrapsct::plotHypercube.summary(out_h_2$HyperTraPS_primary_output)
+plot_HyperTraPS_as_evam_trans_mat(out_h_2, top_paths = 4)
+plot_HyperTraPS_evam_summary(out_h_2)
+
+plot_HyperTraPS_evam_influences(out_h_2)
+plot_HyperTraPS_evam_influencegraph(out_h_3)
+
+
 
 ## Three BML examples
 out_B1 <- evam(dB_c1,

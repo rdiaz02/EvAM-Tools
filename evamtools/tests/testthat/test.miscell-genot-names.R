@@ -130,7 +130,7 @@ test_that("reorder_to_standard_order minimal tests", {
                  "x has duplicated genotype names; at least these positions 17, 18")
 
     ## Same thing, before ordering. This came from a bug in
-    ## probs_from_HT
+    ## probs_from_HyperTraPS
     v1o <- c(WT = 0.0045379746835443, ATP2B2 = 0.00182784810126582, PIK3CA = 4.30379746835443e-05,
              PNPLA3 = 0.000330379746835443, RB1 = 8.86075949367089e-05, TP53 = 0.328784810126582,
              TRIM6 = 2.78481012658228e-05, `ATP2B2, PIK3CA` = 0, `ATP2B2, PNPLA3` = 0,

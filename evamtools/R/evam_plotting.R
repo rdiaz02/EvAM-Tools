@@ -777,6 +777,9 @@ plot_evam <- function(cpm_output, samples = NULL, orientation = "horizontal",
                     edges = method_data2plot$edges,
                     method = met)
 
+        ## FIXME: but if we get here and we have
+        ## OT or OncoBN, we show the counts for OT and nothing
+        ## for OncoBN. Not sure this is what we want; why show the counts?
         ## Plotting forward graph
         if ((met %in% c("OT")) &&
             (plot_type %in% c("trans_rate_mat", "obs_genotype_transitions"))) {
@@ -1008,7 +1011,7 @@ plot_BML_all <- function(x) {
 
 
 ## cpm output with HyperTraPS output -> transition matrix plot
-plot_HT_as_evam_trans_mat <- function(cpm_output,
+plot_HyperTraPS_as_evam_trans_mat <- function(cpm_output,
                                       label_type = "genotype",
                                               fixed_vertex_size = FALSE,
                                               top_paths = NULL) {
@@ -1020,4 +1023,45 @@ plot_HT_as_evam_trans_mat <- function(cpm_output,
                 fixed_vertex_size = fixed_vertex_size,
                 observations = cpm_output$original_data
                 )
+}
+
+
+## like the summary of hypertraps but we give the labels
+## and we do not produce the transition matrix, since we can get
+## that from plot_HT_as_evam_trans_mat.
+plot_HyperTraPS_evam_summary <- function(cpm_output, f.thresh = 0.05,
+                                         edge.label.size = 4,
+                                         node.label.size = 4) {
+    my.post <- cpm_output$HyperTraPS_primary_output
+    return(ggpubr::ggarrange(plotHypercube.lik.trace(my.post),
+                             plotHypercube.bubbles(my.post),
+                             plotHypercube.sampledgraph2(my.post,
+                                                         thresh = f.thresh,
+                                                         edge.label.size = edge.label.size,
+                                                         node.label.size = node.label.size,
+                                                         no.times = TRUE),
+                             plotHypercube.motifs(my.post, label.size = node.label.size)
+                             ))
+}
+
+## influnce plot, with a few tweaks
+plot_HyperTraPS_evam_influences <- function(cpm_output, upper.right = TRUE, size = 12) {
+    my.post <- cpm_output$HyperTraPS_primary_output
+    regularise <- ifelse(cpm_output$all_options$hyper_traps_opts$regularise,
+                         TRUE, FALSE)
+    pl <- plotHypercube.influences(my.post, upper.right = upper.right,
+                                   use.regularised = regularise)
+    pl + ggplot2::theme(
+                      axis.text.x = element_text(angle = 90, hjust = 1, vjust = 0.50, size = size),
+                      axis.text.y = element_text(angle = 0, size = size)
+                  )
+}
+
+plot_HyperTraPS_evam_influencegraph <- function(cpm_output, label.size = 4) {
+    my.post <- cpm_output$HyperTraPS_primary_output
+    regularise <- ifelse(cpm_output$all_options$hyper_traps_opts$regularise,
+                         TRUE, FALSE)
+    pl <- plotHypercube.influencegraph(my.post, label.size = label.size,
+                                       use.regularised = regularise)
+    pl
 }

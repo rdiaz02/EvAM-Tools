@@ -4,7 +4,7 @@
 ## The binary state shown as 0,1,0,1, for example,
 ## when labels are A, B, C, D, is B, D.
 
-## We use this conversion in probs_from_HT, using binary2str_label,
+## We use this conversion in probs_from_HyperTraPS_continuous, using binary2str_label,
 ## and a different conversion (from the integer coding of HyperTraPS
 ## to the states) is used in run_HyperTraPS, when obtaining the
 ## transition matrix.
@@ -14,7 +14,7 @@
 ##    (shows code to obtain trans mat is right)
 ## b) The genotypes along correspond to the decoding.
 ##    (shows conversion from binary to genotype name
-##     in probs_from_HT is correct).
+##     in probs_from_HyperTraPS is correct).
 
 
 if (FALSE) {

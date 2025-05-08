@@ -88,7 +88,7 @@ Cancer progression models (CPMs) or, more generally, evolutionary accumulation m
 
 *  **Mutual Hazard networks (MHN):** With MHN dependencies are not deterministic and events can make other events more like or less likely (inhibiting influence). The fitted parameters are multiplicative hazards that represent how one event influences other events.
 
-*  **Hypercubic transition path sampling (HyperTraPS-CT):** HyperTraPS-CT is also a stochastic dependencies model, like MHN, where events can have an inhibiting or promoting effect on other events. HyperTraPS-CT allows modelling in continuous or discrete time and model structures can include pairwise interactions between events, like MHN, but also lower-order (no interactions between events) and  higher-order interactions (three-way, four-way, and arbitrary) (set this with the "model" argument). (HyperTraPS-CT also allows for phylogenetically- and longitudinally-related samples, but this is not ---yet--- available via the Shiny app).
+*  **Hypercubic transition path sampling (HyperTraPS-CT):** HyperTraPS-CT is also a stochastic dependencies model, like MHN, where events can have an inhibiting or promoting effect on other events. HyperTraPS-CT allows using models with pairwise interactions between events, like MHN, but also lower-order (no interactions between events) and  higher-order interactions (three-way, four-way, and arbitrary) (set this with the "model" argument). For the cross-sectional data we use here, HyperTraPS-CT uses discrete-time modelling, but HyperTraPS-CT allows using continuous time and also allows for phylogenetically- and longitudinally-related samples, but this is not ---yet--- available via the Shiny app.
 
 *  **Bayesian Mutation Landscape (BML):** tries to reconstruct evolutionary progression paths and ancestral genotypes. It can highlight epistatic interactions between genes.
 
@@ -232,7 +232,7 @@ The results include:
 
 	* Predicted genotype relative frequencies: the predicted genotype frequencies from the fitted models.
 
-	  The predicted genotype frequencies for CBN, HESBCN and MHN, HyperTraPS are obtained assuming sampling time is exponentially distributed with rate 1.  For CBN, MHN, and HESBCN the predicted probabilities are obtained directly from the transition rate matrix. For HyperTraPS we average over a collection of samples, where the time to sample is exponentially distributed with rate 1 (use parameter `nsampl` to change how many time samples we take ---for speed, we use a small number, but you will probably want to increase it for real).
+	  The predicted genotype frequencies for CBN, HESBCN and MHN are obtained assuming sampling time is exponentially distributed with rate 1.  <!-- For CBN, MHN, and HESBCN the predicted probabilities are obtained directly from the transition rate matrix.  -->
 
 	  For OncoBN and OT, the predicted frequency of genotypes corresponds to the predicted frequency on the sample collection (these are untimed models, and sampling time is not assumed to follow any specific distribution).
 
@@ -257,7 +257,9 @@ The results are displayed using a combination of figures and tabular output. Spe
 
 	 * You can represent the results of all the fitted models or only of a subset (select those using "EvAMs to show").
 
-	 * For HyperTraPS the output in the first row depends on the model. For models with pairwise interactions (`model = 2`), we show the pairwise influences between features (this is similar to the output from MHN), calling hypertraps' package `plotHypercube.influences` function. For models with 3-way interactions (`model = 3`) we show "how each feature acquisition influences the rate of acquisition of other features as a network" (from https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output), calling hypertraps' package `plotHypercube.influencegraph` function. For other models (unrestricted ---`model = -1`---, main-effects only ---`model = 1`---, and four-way interactions ---`model = 4`---), we show a "motif plot of feature acquisition probabilities at discrete orderings", calling hypertraps' package `plotHypercube.motifs` function.
+	 * For HyperTraPS the output in the first row depends on the model. For models with pairwise interactions (`model = 2`), we show the pairwise influences between features (this is similar to the output from MHN), calling hypertraps' package `plotHypercube.influences` function. For models with 3-way interactions (`model = 3`) we show "how each feature acquisition influences the rate of acquisition of other features as a network" (from https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output), calling hypertraps' package `plotHypercube.influencegraph` function.
+	   In both cases, if you used regularisation, the output shows the parameters from the regularised model.
+	   For other models (unrestricted ---`model = -1`---, main-effects only ---`model = 1`---, and four-way interactions ---`model = 4`---), we show a "motif plot of feature acquisition probabilities at discrete orderings", calling hypertraps' package `plotHypercube.motifs` function.
 
      * For BML, we do not show DAGs of restrictions (nor matrices as for MHN and HyperTraPS), since BML does not return these. Instead, we show plots as in Fig. 2 of Misra et al., 2014. These plots show the most likely paths of progression. As explained in that paper (p. 2460, legend Fig. 2) "Color for a genotype <i>g</i> with <i>k</i> mutations is scaled according to its relative probability <i>P</i>(<i>g</i>)/<i>m<sub>k</sub></i> (decreasing from darker shade to light), where <i>m<sub>k</sub></i> is the maximum probability for a node with <i>k</i> mutations (Section 3)." [As explained in pp. 2456 and ff., <i>P</i>(<i>g</i>) is the probability "that a particular combination of mutations (denoted by genotype <i>g</i>) reaches fixation in a cell population that has evolved from a normal cell genotype and will eventually attain a tumor cell genotype. (...) [it is]  the evolutionary probability of genotype <i>g</i>.  <i>P</i>(<i>g</i>) equals the sum of path probabilities for every mutation path from the normal genotype that passes through <i>g</i> and ends as atumor genotype."]
 
@@ -275,11 +277,11 @@ The results are displayed using a combination of figures and tabular output. Spe
     * (As visualizing the acquisition of mutations in a complex network can be challenging, for the transition probabilities/rates plots we use the representation of the hypergraph transition graph from HyperTraPS --- Greenbury et al., 2020. HyperTraPS: Inferring probabilistic patterns of trait acquisition in evolutionary and disease progression pathways. Cell systems, 10, 39–51, https://doi.org/10.1016/j.cels.2019.10.009)
 
 &nbsp;&nbsp;
-  * For HyperTraPS, we show summary plots as provided by  hypertraps' package `plotHypercube.summary` function. The plots provided are, from left to right and from top to bottom:
-      * A trace of the likelihood ("re-calculated twice with different samples (to show consistency or lack thereof), along with current "in use" likelihood" ---from https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output ; the reamining verbatime quotations are from this source).
+  * For HyperTraPS, we show summary plots as provided by a custom modification of hypertraps' package `plotHypercube.summary` function. The plots provided are, from left to right and from top to bottom:
+      * A trace of the likelihood ("re-calculated twice with different samples (to show consistency or lack thereof), along with current "in use" likelihood" ---from https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output ; the remaining verbatim quotations are from this source).
     	  * A "'Bubble plot' of probability of acquiring trait <i>i</i> at ordinal step <i>j</i>".
-      * "Transition graph with edge weights showing probability flux (from sampled paths), with mean and s.d. of absolute timings for each step."
-      * "Histograms of absolute timings for each trait's acquisition" (we use the default settings, so the threshold time for the histogram on the bottom right is 20).
+      * "Transition graph with edge weights showing probability flux (from sampled paths)." This is very similar to the "Transition probabilities" plot on the second row.
+	  * A "motif plot of feature acquisition probabilities at discrete orderings", calling hypertraps' package `plotHypercube.motifs` function. (If you used a model different from 2 or 3, you will also see this plot in the first row.)
       * See https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output for details.
 
 &nbsp;&nbsp;
