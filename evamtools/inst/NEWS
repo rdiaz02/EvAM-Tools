@@ -1,3 +1,7 @@
+Changes in version 3.3.2 (2025-05-12):
+	- HyperTraPS: predicted genotype frequencies now
+	  available after updates upstream.
+
 Changes in version 3.3.1 (2025-05-08):
 	- HyperTraPS changes:
 	  - We cannot produce, for now, predicted genotype frequencies.

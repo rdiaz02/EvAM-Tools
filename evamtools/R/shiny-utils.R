@@ -431,13 +431,13 @@ create_tabular_data <- function(data) {
             ## to standard_rank_genots_1.
             ## Same for HyperTraPS
             ## The next is for when we have predicted genotype freqs
-            if ( (length(data$methods) == 1) && ## (data$methods == "BML")) {
+            if ( (length(data$methods) == 1) && (data$methods == "BML")) {
               ## FIXME: As soon as we see HyperTraPS running, rm this
-                 ((data$methods == "BML") ||
-                  ((data$methods == "HyperTraPS") &&
-                   (attr %in% c("predicted_genotype_freqs",
-                                "sampled_genotype_counts"))
-                  ))) {
+                ## ((data$methods == "BML") ||
+                ##  ((data$methods == "HyperTraPS") &&
+                ##   (attr %in% c("predicted_genotype_freqs",
+                ##                "sampled_genotype_counts"))
+                ##  ))) {
         stopifnot(nrow(all_counts) == 0)
         stopifnot(ncol(all_counts) == 0)
         tabular_data[[attr]] <- NA

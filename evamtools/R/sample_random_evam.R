@@ -456,7 +456,7 @@ sample_evam <- function(cpm_output
         methods <- names(which(vapply(c("OT", "OncoBN",
                             "CBN", "MCCBN",
                             "MHN", "HESBCN"
-                            ## , "HyperTraPS"
+                          , "HyperTraPS"
                             ),
                           function(m) {
                               outn <- paste0(m, "_predicted_genotype_freqs")
@@ -517,7 +517,6 @@ sample_evam <- function(cpm_output
                     ## I think this is dead code. Unreachable now
                     stop("How are we here??!! (length(trm) == 1) && is.na(trm)")
                 } else { ## transition rate matrix present
-                  ## FIXME: this will fail with HyperTraPS for now.
                     sims <- population_sample_from_trm(trm, n_samples = N)
 
                     psamples <-
@@ -1559,3 +1558,53 @@ sample_to_named_pD_ordered_out <- function(the_sample, ngenes, gene_names,
 ##     p[is.na(p)] <- 0
 ##     return(p)
 ## }
+
+
+## a wrapper to state.probs that returns
+## genotypes names in our standard format
+probs_from_HyperTraPS_discrete <- function(x,
+                                           gene_names,
+                                           prob.set = NA) {
+
+    if (!isTRUE(all(is.na(prob.set)))) {
+        if (length(prob.set) != (length(gene_names) + 1))
+            stop("prob.set, if not NA, must be equal to number of features + 1")
+        if (sum(prob.set) != 1.0)
+            stop("prob.set, if not NA, must sum to 1.0")
+    }
+    probs <- hypertrapsct::state.probs(x, prob.set)
+
+    binary_state <- lapply(strsplit(as.character(probs$state), ""),
+                           as.numeric)
+    ## Recall gene_names need not be in order.
+    decoded_states <- unlist(lapply(binary_state, binary2str_labels,
+                                    labels = gene_names))
+
+    probs <- cbind(Genotype = decoded_states, probs)
+    probs <- reorder_to_standard_order_arbitrary_df(probs)
+
+    ## Some redundancy, but easier for later
+    predicted_genotype_freqs <- probs$prob
+    conditional_genotype_freqs <- probs$cond.prob
+    names(conditional_genotype_freqs) <-
+        names(predicted_genotype_freqs) <- probs$Genotype
+
+    return(list(
+        ## HyperTraps_Prob_Cond_Prob = probs,
+        predicted_genotype_freqs = predicted_genotype_freqs,
+        conditional_genotype_freqs = conditional_genotype_freqs
+    ))
+}
+
+
+## Give proportion of each number of mutations
+props_num_muts <- function(x) {
+    p1 <- table(rowSums(x))/nrow(x)
+    props <- rep(0, ncol(x) + 1)
+    names(props) <- 0:(ncol(x))
+    props[names(p1)] <- p1
+    if (!isTRUE(all.equal(sum(props), 1))) {
+        stop("sum(props) - 1  = ", sum(props) - 1)
+    }
+    props
+}

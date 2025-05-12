@@ -97,6 +97,7 @@ sample_CPMs(cpm_output,  N,
 \examples{
 
 data(every_which_way_data)
+## Note that the last column of data is all 0's, so it will be dropped
 Dat1 <- every_which_way_data[[16]][1:40, 2:6]
 ## For faster execution, use only some methods
 out <- suppressMessages(evam(Dat1,
@@ -150,4 +151,44 @@ outS4 <- sample_evam(out, N = 1000, methods = c("CBN", "OT", "MHN"),
 outS5 <- sample_evam(out, N = 1000, methods = "CBN",
                      output = c("obs_genotype_transitions", "sampled_genotype_counts"), obs_noise = 0.1)
 
+
+## A few HyperTraPS examples.
+## This is an example; length is probably too short
+outht <- evam(Dat1,
+              methods = c("HyperTraPS"),
+              hyper_traps_opts = list(length = 2,
+                                      model = -1,
+                                      seed = -1))
+
+cbind(cond = outht$HyperTraPS_conditional_genotype_freqs,
+      pred = outht$HyperTraPS_predicted_genotype_freqs)
+
+
+## Recall last column of Dat1 is all 0s, so it is dropped.
+## Thus, prob.set must be of length 5. Obtain
+## predicted probability only at time 0
+outht_t1 <- evam(Dat1,
+                 methods = c("HyperTraPS"),
+                 hyper_traps_opts = list(length = 2,
+                                         model = -1,
+                                         seed = -1,
+                                         prob.set = c(1, rep(0, 4))))
+
+## conditional should be similar to above, but predicted
+## should only show WT
+cbind(cond = outht_t1$HyperTraPS_conditional_genotype_freqs,
+      pred = outht_t1$HyperTraPS_predicted_genotype_freqs)
+
+stopifnot(all.equal(outht_t1$HyperTraPS_predicted_genotype_freqs,
+                    c(1, rep(0, 15)), check.attributes = FALSE))
+
+## Of course, we can obtain a sample at a different time without rerunning
+## All sampled at 0 mutations
+hypertrapsct::state.probs(outht$HyperTraPS_primary_output, c(1, rep(0, 4)))
+## Uniform sampling
+hypertrapsct::state.probs(outht$HyperTraPS_primary_output, NA)
+
+
+outHT_SG <- sample_evam(outht, N = 1000)
+outHT_SG$HyperTraPS_sampled_genotype_counts
 }

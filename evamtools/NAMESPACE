@@ -87,7 +87,8 @@ importFrom("hypertrapsct", "HyperTraPS",
            "plotHypercube.motifs",
            "plotHypercube.lik.trace",
            "plotHypercube.influences",
-           "plotHypercube.bubbles")
+           "plotHypercube.bubbles",
+           "state.probs")
 
 importFrom("utils", "combn")
 

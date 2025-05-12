@@ -172,6 +172,9 @@ get_hyper_traps_args <- function(input) {
     regularise = as.numeric(input$HyperTraPS_regul),
     samples_per_row = as.numeric(input$HyperTraPS_samprow),
     outputinput = as.numeric(input$HyperTraPS_outtrans)
+  , prob.set = ifelse(input$HyperTraPS_prob.set == "NA", NA,
+               ifelse(input$HyperTraPS_prob.set == "observed", "observed",
+                      as.numeric(unlist(strsplit(input$HyperTraPS_prob.set, ",")))))
     ## nsampl = as.numeric(input$HyperTraPS_nsampl),
     ##    cores = as.numeric(input$HyperTraPS_cores)
     )

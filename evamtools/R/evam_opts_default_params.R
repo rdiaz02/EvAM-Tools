@@ -100,7 +100,9 @@ create_default_opts <- function(x) {
             limited_output = 0,
             output_transitions = 1,
             samples_per_row = 10,
-            featurenames = NULL # Replace NULL with the actual character vector if available
+            ## Replace NULL with the actual character vector if available
+            featurenames = NULL ,
+            prob.set = "observed"
             ## nsampl = 1e3,
             ## cores = 1
             ),

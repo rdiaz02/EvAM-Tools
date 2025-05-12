@@ -104,7 +104,8 @@ evam <- function(x,
                    full_analysis = 1,
                    limited_output = 0,
                    ## Replace NULL with the actual character vector if available
-                   featurenames = NULL
+                   featurenames = NULL,
+                   prob.set = "observed"
                    ## nsampl = 1e3,
                    ## cores = 1
                  ),
@@ -290,6 +291,7 @@ evam <- function(x,
     ## HyperTraPS_timehists = get_output("HyperTraPS", "timehists"),
     HyperTraPS_trans_mat = get_output("HyperTraPS", "trans_mat"),
     HyperTraPS_predicted_genotype_freqs = get_output("HyperTraPS", "predicted_genotype_freqs"),
+    HyperTraPS_conditional_genotype_freqs = get_output("HyperTraPS", "conditional_genotype_freqs"),
     HyperTraPS_elapsed_time = get_output("HyperTraPS", "elapsed_time"),
     HyperTraPS_primary_output = get_primary_output("HyperTraPS"),
 

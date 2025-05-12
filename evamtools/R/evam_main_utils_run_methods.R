@@ -163,9 +163,9 @@ decode_state_ht <- function(state, num_features, feature_labels) {
 run_HyperTraPS <- function(x, opts) {
   if (opts$seed == -1) opts$seed <- round(runif(1, 1, 1e9))
   time_out <- system.time({
-      ## opts_rm <- which(names(opts) %in% c("cores") )
-      ## opts_call <- opts[-opts_rm]
-      opts_call <- opts
+      opts_rm <- which(names(opts) %in% c("prob.set") )
+      opts_call <- opts[-opts_rm]
+      ## opts_call <- opts
       opts_call <- c(list(obs = x), opts_call)
       out <- invisible(do.call(hypertrapsct::HyperTraPS, opts_call))
   })["elapsed"]
@@ -205,27 +205,42 @@ run_HyperTraPS <- function(x, opts) {
         trans_mat[from_decoded, to_decoded] <- probability
     }
 
-  ## out$predicted_genotype_freqs = probs_from_trm(trans_mat)
-
-
     ## This could be inside the first loop, but this is simpler
     ## for now.
-    ## Before calling it, a sanity check
-    ## stopifnot(identical(colnames(x), out$featurenames))
-    ## time2 <- system.time({
-    ##     predicted_genotype_freqs <- probs_from_HT(out,
-    ##                                               gene_names = colnames(x),
-    ##                                                   nsampl = opts$nsampl,
-    ##                                                   cores = opts$cores)
-    ## })["elapsed"]
 
-    ## message("HyperTraPS times: time_out = ",  round(time_out, 3),
-    ##         ". time2 = ", round(time2, 3))
+  if ((length(opts$prob.set) == 1) &&
+      (is.character(opts$prob.set))) {
+      if (opts$prob.set == "uniform") {
+          num_prob.set <- NA
+      } else if (opts$prob.set == "observed") {
+          num_prob.set <- props_num_muts(x)
+      } else {
+          stop("Unrecognized prob.set option")
+      }
+  } else {
+      num_prob.set <- opts$prob.set
+  }
+  message("HyperTraPS prob.set option = ",
+          paste(opts$prob.set, collapse = " "),
+          ". Value passed as num_prob.set = ", paste(num_prob.set, collapse = " "))
+  time2 <- system.time({
+      tmp <- probs_from_HyperTraPS_discrete(out,
+                                            gene_names = colnames(x),
+                                            prob.set = num_prob.set
+                                            )
+  })["elapsed"]
 
-    return(list(time_out = time_out, ## + time2,
+
+
+  message("HyperTraPS times: time_out = ",  round(time_out, 3),
+          ". time2 = ", round(time2, 3))
+
+  return(list(time_out = time_out, + time2,
                 out = c(primary_output = list(out),
                         trans_mat = list(trans_mat)
-                        ## , predicted_genotype_freqs = list(predicted_genotype_freqs)
+                    , predicted_genotype_freqs = list(tmp$predicted_genotype_freqs)
+                    , conditional_genotype_freqs = list(tmp$conditional_genotype_freqs)
+                      ## , Prob_Cond_Prob_df = list(tmp$HyperTraps_Prob_Cond_Prob)
                         )))
 }
 

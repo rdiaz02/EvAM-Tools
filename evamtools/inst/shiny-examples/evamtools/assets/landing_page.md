@@ -236,6 +236,10 @@ The results include:
 
 	  For OncoBN and OT, the predicted frequency of genotypes corresponds to the predicted frequency on the sample collection (these are untimed models, and sampling time is not assumed to follow any specific distribution).
 
+      For HyperTraPS, we we use function `state.probs`, which returns P(state | probability that n features have been acquired = P_n).
+	  If you use the default value of `prob.set` (under `Advanced options`), `observed`, we set P_n to the value observed in the input sample (i.e., P_0 = the proportion of observations with 0 mutations in the input sample, P_1 =  the proportion of observations with 1 mutation in the input sample, etc). If you use `NA`, we set P_n = 1/(L+1)), i.e., the sampling model is one where the probability of acquiring 0, 1, ..., features is the same. You can specify a different sampling scheme by modifying `prob.set` and passing a vector of probabilities for 0, 1, ..., features.
+	  <!-- the predicted genotype frequencies are obtained under a sampling model where the proportion of the different number of mutations is the same as the one in the input sample; if you set it to `NA`, the sampling model is one where the probability of acquiring 0, 1, ..., features is the same.  -->
+
 	* Sampled genotype counts: Counts, or absolute genotype frequencies obtained by generating a finite sample (of the size you chose) with the probabilities given by the predicted genotype frequencies. If you add noise, the sampled genotype counts include observational (e.g., genotyping) noise. (To generate sampled genotype counts, you have to select the option from "Advanced options", as this is disabled by default.)
 
 	* Note that not all predictions are available for all methods. (No transition rate matrices are available for OT and OncoBN, since those are untimed models; HyperTraPS does not give as output transition rate matrices <i>per se</i>; BML does not provide transition matrices nor transition rate matrices nor predicted genotype frequencies.)

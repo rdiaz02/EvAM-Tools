@@ -75,7 +75,8 @@ evam(x,
        outputinput = 0,
        full_analysis = 1,
        limited_output = 0,
-       featurenames = NULL
+       featurenames = NULL,
+       prob.set = "observed"
      ),
      bml_opts = list(
        ntree = 100,
@@ -183,7 +184,17 @@ evam(x,
 \item{hyper_traps_opts}{A named list with arguments passed to
   HyperTraPS. See the help for
   \code{\link[hypertrapsct:HyperTraPS]{HyperTraPS}} and
-  \url{https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#arguments-to-hypertraps}.
+\url{https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#arguments-to-hypertraps}.
+
+\code{prob.set} is processed to produce the value of the argument of the
+same name to   function
+\code{\link[hypertrapsct:HyperTraPS]{state.probs}}. If you use NA or a
+vector of numeric values, it is passed as such. If you use the default,
+\code{"observered"}, we pass a vector of probabilities computed from the
+input sample (from \code{x}), so that the prediction is made with the
+probability of numbers of mutations observed in the sample. You can
+  set this value here, but you do not need to rerun evam to change when the
+  sample is taken; see examples \code{\link{sample_evam}}.
   %% In addition:
   %% \describe{
   %% %% \item{nsampl: }{The number of samples from an exponential distribution
