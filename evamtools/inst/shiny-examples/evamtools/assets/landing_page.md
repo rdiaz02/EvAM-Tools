@@ -278,7 +278,7 @@ The results are displayed using a combination of figures and tabular output. Spe
 
 &nbsp;&nbsp;
   * For HyperTraPS, we show summary plots as provided by a custom modification of hypertraps' package `plotHypercube.summary` function. The plots provided are, from left to right and from top to bottom:
-      * A trace of the likelihood ("re-calculated twice with different samples (to show consistency or lack thereof), along with current "in use" likelihood" ---from https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output ; the remaining verbatim quotations are from this source).
+      * A trace of the likelihood ("re-calculated twice with different samples (to show consistency or lack thereof), along with current 'in use' likelihood" [the current 'in use' or 'working' likelihood is the red line] ---from https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output ; the remaining verbatim quotations are from this source). If there is disagreement between the three lines, you probably want to increase the number of walkers.
       * A "'Bubble plot' of probability of acquiring trait <i>i</i> at ordinal step <i>j</i>".
       * "Transition graph with edge weights showing probability flux (from sampled paths)." This is very similar to the "Transition probabilities" plot on the second row.
 	  * A "motif plot of feature acquisition probabilities at discrete orderings", calling hypertraps' package `plotHypercube.motifs` function. (If you used a model different from 2 or 3, you will also see this plot in the first row.)
