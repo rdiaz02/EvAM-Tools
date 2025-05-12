@@ -84,11 +84,6 @@ RUN R -e "install.packages('gridGraphics')"
 RUN R -e "install.packages('png')"
 
 
-
-
-RUN R -e "BiocManager::install('ggtree')"
-## HyperTraps-ct version https://github.com/StochasticBiology/hypertraps-ct/commits/bioconductor/ dcb94e1
-RUN R -e "remotes::install_github('StochasticBiology/hypertraps-ct', ref = 'bioconductor')"
 ## BML version https://github.com/Deschain/BML 50e8793
 RUN R -e "remotes::install_github('Deschain/BML')"
 
@@ -145,6 +140,11 @@ RUN cd /app/Sources && \
     ./configure && \
     make && \
     cp -t /usr/local/bin/ ct-cbn h-cbn
+
+## HyperTraPS is more likely to change than the above. Do last
+RUN R -e "BiocManager::install('ggtree')"
+## HyperTraps-ct version https://github.com/StochasticBiology/hypertraps-ct/commits/bioconductor/ dcb94e1
+RUN R -e "remotes::install_github('StochasticBiology/hypertraps-ct', ref = 'bioconductor')"
 
 
 ######################################################################
