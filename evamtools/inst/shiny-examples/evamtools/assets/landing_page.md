@@ -282,7 +282,9 @@ The results are displayed using a combination of figures and tabular output. Spe
 
 &nbsp;&nbsp;
   * For HyperTraPS, we show summary plots as provided by a custom modification of hypertraps' package `plotHypercube.summary` function. The plots provided are, from left to right and from top to bottom:
-      * A trace of the likelihood ("re-calculated twice with different samples (to show consistency or lack thereof), along with current 'in use' likelihood" [the current 'in use' or 'working' likelihood is the red line] ---from https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output). File `hypertraps-demos.R` (https://github.com/StochasticBiology/hypertraps-ct/blob/bioconductor/demos/hypertraps-demos.R#L70) contains guidance on the use of the likelihood traces, that we copy verbatim with minor edits: "Examine the likelihood traces. These should show:
+      * A trace of the likelihood ("re-calculated twice with different samples (to show consistency or lack thereof), along with current 'in use' likelihood" [the current 'in use' or 'working' likelihood is the red line] ---from https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor#visualising-and-using-output).
+	  	Using the likelihood trace to assess performance is discussed in the [README, section "Assessing performance"](https://github.com/StochasticBiology/hypertraps-ct/blob/bioconductor/README.md#assessing-performance).
+		Examples illustrating issues with estimation and chains, that can be detected from the likelihood trace, are available from [Example 6 of file hypertraps-demos.R](https://github.com/StochasticBiology/hypertraps-ct/blob/bioconductor/demos/hypertraps-demos.R) ([link to actual line here](https://github.com/StochasticBiology/hypertraps-ct/blob/e0075dc64eb5d0fce3eb61a3ec0c66e5edcdd0a4/demos/hypertraps-demos.R#L241 )). That same file `hypertraps-demos.R` (https://github.com/StochasticBiology/hypertraps-ct/blob/bioconductor/demos/hypertraps-demos.R#L70) contains guidance on the use of the likelihood traces, that we copy verbatim with minor edits: "Examine the likelihood traces. These should show:
 	     <ol type="i">
 			<li>Overlap between dashed black and red lines. If not, likelihood estimates aren't converging; use more random walkers. [increase the value of the "walkers" option]</li>
 			<li>Constant mean likelihood (no systematic up or down). If not, MCMC chain isn't converged; use run longer chains. [increase the value of the "length" option]</li>
@@ -296,7 +298,7 @@ The results are displayed using a combination of figures and tabular output. Spe
 &nbsp;&nbsp;
 
   * For BML, if you used bootstrap, we show plots like Fig. 3a and 3b of Misra et al. 2014:
-	  * On the left, similar to Fig 3a, we plot "Edge probabilities"; from the "README.txt" file of the original code (https://bml.molgen.mpg.de/) "[this figure shows] the evolutionary probabilities and departures from independence (multiplicative for P(g), additive for logP(g)) for each pair of genes that had an edge between them in the inferred Bayes net. Each edge is associated with 4 rows, two for the probability of each gene being mutated all by itself, a third row for the pair of genes being mutated and a fourth for the estimate in the absence of correlation for the mutation probabilities." We color the probability of each gene by itself in red, the pair in blue and the estimate in the absence of correlation in gray.
+	  * On the left, similar to Fig 3a, we plot "Edge probabilities"; from the "README.txt" file of the original code (https://bml.molgen.mpg.de/ ) "[this figure shows] the evolutionary probabilities and departures from independence (multiplicative for P(g), additive for logP(g)) for each pair of genes that had an edge between them in the inferred Bayes net. Each edge is associated with 4 rows, two for the probability of each gene being mutated all by itself, a third row for the pair of genes being mutated and a fourth for the estimate in the absence of correlation for the mutation probabilities." We color the probability of each gene by itself in red, the pair in blue and the estimate in the absence of correlation in gray.
 	  * On the right, similar to Fig 3b in Misra et al. 2014, we plot "Tree_OBS_Probabilities": "the evolutionary probabilities for the top ordered genes during OBS [ordering-based search] for each bootstrap replicate using the tree based search. Each row gives the probability for a given gene being mutated and all other genes being normal."
 
 
@@ -467,7 +469,7 @@ For users of the web app, the most relevant are: [EvAM-Tools: examples](https://
   Plos Computational Biology, 20(9), e1012393.
   https://doi.org/10.1371/journal.pcbi.1012393
 
-- GitHub repository: https://github.com/StochasticBiology/hypertraps-ct
+- GitHub repository: https://github.com/StochasticBiology/hypertraps-ct [recall we are using the bioconductor branch: https://github.com/StochasticBiology/hypertraps-ct/tree/bioconductor]
 
 &nbsp;
 
