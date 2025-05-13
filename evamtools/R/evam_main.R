@@ -143,7 +143,11 @@ evam <- function(x,
     )
 
 
-
+    ## FIXME: should only check if using CBN.
+    ## And why have it here and not in the call to CBN?
+    ## It might be simpler to just check in the call as in HyperTraPS
+    ## Think this through: where is it better to do the checking?
+    ## I'd way for methods's specific options in the method call.
     check_cbn_opts_init_poset(opts$cbn_opts$init_poset)
 
     if ("MCCBN" %in% methods) {
@@ -294,6 +298,7 @@ evam <- function(x,
     HyperTraPS_conditional_genotype_freqs = get_output("HyperTraPS", "conditional_genotype_freqs"),
     HyperTraPS_elapsed_time = get_output("HyperTraPS", "elapsed_time"),
     HyperTraPS_primary_output = get_primary_output("HyperTraPS"),
+    HyperTraPS_used_prob.set = get_output("HyperTraPS", "used_prob.set"),
 
     ## Why do we even give this?
     ## BML_model = get_output("BML", "model"),

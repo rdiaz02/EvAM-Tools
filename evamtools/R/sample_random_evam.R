@@ -1563,9 +1563,8 @@ sample_to_named_pD_ordered_out <- function(the_sample, ngenes, gene_names,
 ## a wrapper to state.probs that returns
 ## genotypes names in our standard format
 probs_from_HyperTraPS_discrete <- function(x,
-                                           gene_names,
-                                           prob.set = NA) {
-
+                                           prob.set = NA,
+                                           gene_names = x$featurenames) {
     if (!isTRUE(all(is.na(prob.set)))) {
         if (length(prob.set) != (length(gene_names) + 1))
             stop("prob.set, if not NA, must be equal to number of features + 1")
@@ -1579,7 +1578,6 @@ probs_from_HyperTraPS_discrete <- function(x,
     ## Recall gene_names need not be in order.
     decoded_states <- unlist(lapply(binary_state, binary2str_labels,
                                     labels = gene_names))
-
     probs <- cbind(Genotype = decoded_states, probs)
     probs <- reorder_to_standard_order_arbitrary_df(probs)
 
@@ -1589,8 +1587,9 @@ probs_from_HyperTraPS_discrete <- function(x,
     names(conditional_genotype_freqs) <-
         names(predicted_genotype_freqs) <- probs$Genotype
 
+    ## Some redundancy, but convenient
     return(list(
-        ## HyperTraps_Prob_Cond_Prob = probs,
+        HyperTraps_Prob_Cond_Prob = probs,
         predicted_genotype_freqs = predicted_genotype_freqs,
         conditional_genotype_freqs = conditional_genotype_freqs
     ))

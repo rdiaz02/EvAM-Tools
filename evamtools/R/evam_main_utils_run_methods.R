@@ -225,9 +225,8 @@ run_HyperTraPS <- function(x, opts) {
           ". Value passed as num_prob.set = ", paste(num_prob.set, collapse = " "))
   time2 <- system.time({
       tmp <- probs_from_HyperTraPS_discrete(out,
-                                            gene_names = colnames(x),
-                                            prob.set = num_prob.set
-                                            )
+                                            prob.set = num_prob.set,
+                                            gene_names = colnames(x))
   })["elapsed"]
 
 
@@ -240,6 +239,7 @@ run_HyperTraPS <- function(x, opts) {
                         trans_mat = list(trans_mat)
                     , predicted_genotype_freqs = list(tmp$predicted_genotype_freqs)
                     , conditional_genotype_freqs = list(tmp$conditional_genotype_freqs)
+                    , used_prob.set = list(num_prob.set)
                       ## , Prob_Cond_Prob_df = list(tmp$HyperTraps_Prob_Cond_Prob)
                         )))
 }

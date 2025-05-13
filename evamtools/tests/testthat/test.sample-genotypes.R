@@ -139,5 +139,32 @@ test_that("Miscell corner cases", {
                      integer(0))
 })
 
+
+test_that("A few check HyperTraPS trans mat and predicted", {
+    data(every_which_way_data)
+    ## Note that the last column of data is all 0's, so it will be dropped
+    Dat1 <- every_which_way_data[[16]][1:40, 2:6]
+
+    for (i in 1:5) {
+        outht <- evam(Dat1,
+                      methods = c("HyperTraPS"),
+                      hyper_traps_opts = list(length = 2,
+                                              model = -1,
+                                              seed = -1))
+
+        hcp <- probs_from_HyperTraPS_discrete(outht$HyperTraPS_primary_output,
+                                              NA)$HyperTraps_Prob_Cond_Prob
+
+        pcp1 <- c(1, rep(0, 15)) %*%
+            ( outht$HyperTraPS_trans_mat %*% outht$HyperTraPS_trans_mat)
+
+        pcp2 <- c(1, rep(0, 15)) %*%
+            ( outht$HyperTraPS_trans_mat %*% outht$HyperTraPS_trans_mat %*% outht$HyperTraPS_trans_mat)
+
+        expect_equal(hcp[6:11, "cond.prob"], pcp1[6:11])
+        expect_equal(hcp[12:15, "cond.prob"], pcp2[12:15])
+    }
+})
+
 cat("\n Done test.sample-genotypes.R. Seconds = ",
     as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

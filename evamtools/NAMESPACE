@@ -13,7 +13,8 @@ export(
  , "plot_HyperTraPS_evam_summary"
  , "plot_HyperTraPS_evam_influences"
  , "plot_HyperTraPS_evam_influencegraph"
-)
+ , "probs_from_HyperTraPS_discrete"
+   )
 
 ## FIXME: try to bring down deps
 ##    - shiny and shinyjs only needed for shiny app, so enhances/suggests

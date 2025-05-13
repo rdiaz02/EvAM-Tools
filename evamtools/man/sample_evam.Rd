@@ -1,6 +1,7 @@
 \name{sample_evam}
 \alias{sample_evam}
 \alias{sample_CPMs}
+\alias{probs_from_HyperTraPS_discrete}
 \title{Obtain samples of genotypes from the EvAM (CPM) models and, optionally,
   counts of genotype transitions.}
 \usage{
@@ -17,29 +18,46 @@ sample_CPMs(cpm_output,  N,
                 obs_noise = 0,
                 genotype_freqs_as_data = TRUE
             )
+## Facility to obtain probabilities of genotypes from HyperTraPS
+## with named genotypes in standard order
+probs_from_HyperTraPS_discrete(x,
+                              prob.set = NA,
+                              gene_names = x$featurenames)
 }
 \arguments{
-\item{cpm_output}{Output from calling all_methods2trans_mat}
+  \item{cpm_output}{Output from calling all_methods2trans_mat}
 
-\item{N}{Number of samples to generate}
+  \item{N}{Number of samples to generate}
 
-\item{methods}{Vector of strings with the names of methods that we want to sample. If NULL, all
+  \item{methods}{Vector of strings with the names of methods that we want to sample. If NULL, all
   methods with output in cpm_output. The list of available methods is
   OT, OncoBN, CBN, MCCBN, MHN, HESBCN.}
 
-\item{output}{A vector with one or more of the following possible
+  \item{output}{A vector with one or more of the following possible
   outputs: sampled_genotype_counts, obs_genotype_transitions,
   state_counts. Even if requested, obs_genotype_transitions and
   state_counts are not available for OT and OncoBN. }
 
-\item{obs_noise}{When obtaining a sample, should we add observation
+  \item{obs_noise}{When obtaining a sample, should we add observation
   noise (for example, genotyping error) to the data?   If larger than 0,
   this \code{obs_noise} proportion of entries in the sampled matrix
   will be flipped (i.e., 0s turned to 1s and 1s turned to 0s).}
 
 
-\item{genotype_freqs_as_data}{If TRUE, return a matrix where each row is a "sampled genotype", where 0 denotes no alteration and 1 alteration in the gene of the corresponding column.}
+  \item{genotype_freqs_as_data}{If TRUE, return a matrix where each row is a "sampled genotype", where 0 denotes no alteration and 1 alteration in the gene of the corresponding column.}
 
+  \item{x}{A \code{HyperTraPS_primary_output} object, as returned from
+    \code{\link{evam}}. The object that is returned from
+    \code{\link[hypertrapsct:HyperTraPS]{HyperTraPS}}.}
+
+  \item{prob.set}{Same as argument of the same name to
+  \code{\link[hypertrapsct:HyperTraPS]{state.probs}}. This is the actual
+  vector passed to the underlying
+  \code{\link[hypertrapsct:HyperTraPS]{state.probs}}; in contrast to
+  \code{\link{evam}}, the \code{"observed"} is not a valid value.
+}
+
+  \item{gene_names}{The name of the genes.}
 }
 
 
@@ -189,6 +207,24 @@ hypertrapsct::state.probs(outht$HyperTraPS_primary_output, c(1, rep(0, 4)))
 hypertrapsct::state.probs(outht$HyperTraPS_primary_output, NA)
 
 
+## Or, using evam's wrapper
+hcp <- probs_from_HyperTraPS_discrete(outht$HyperTraPS_primary_output,
+                                      NA)$HyperTraps_Prob_Cond_Prob
+
+## You can also obtain them from transition matrix
+## (the expm package has a %^% for the matrix exponential)
+## E.g., probs at "time" 1
+
+
+pcp1 <- c(1, rep(0, 15)) \%*\% ( outht$HyperTraPS_trans_mat \%*\% outht$HyperTraPS_trans_mat)
+
+hcp[6:11, "cond.prob"]
+pcp1[6:11]
+
+stopifnot(isTRUE(all.equal(hcp[6:11, "cond.prob"],
+                           pcp1[6:11])))
+
+## Get a sample
 outHT_SG <- sample_evam(outht, N = 1000)
 outHT_SG$HyperTraPS_sampled_genotype_counts
 }
