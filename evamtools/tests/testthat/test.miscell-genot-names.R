@@ -206,6 +206,17 @@ test_that("Original decode_state is the same as decode_state_ht", {
         expect_identical(dsout, dshtout)
         rm(genenames, states, dsout, dshtout)
     }
+    ## check canonicalization
+    for (i in 3:10) {
+        genenames <- sample(LETTERS[1:i])
+        states <- seq.int(from = 0, to = (2^i - 1))
+        dsout <- vapply(states, decode_state, character(1),
+                        num_features = i, feature_labels = genenames)
+        dshtout <- vapply(states, decode_state_ht, character(1),
+                          num_features = i, feature_labels = genenames)
+        expect_identical(dsout, dshtout)
+        rm(genenames, states, dsout, dshtout)
+    }
 })
 
 

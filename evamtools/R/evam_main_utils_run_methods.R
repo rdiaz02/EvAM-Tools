@@ -145,7 +145,9 @@ decode_state <- function(state, num_features, feature_labels) {
     binary_rep <- intToBits(state)[1:num_features]
     active_features <- feature_labels[as.logical(rev(as.numeric(binary_rep)))]
     if (length(active_features) == 0) return("WT")
-    return(paste(active_features, collapse = ", "))
+    tmp <- paste(active_features, collapse = ", ")
+    return(canonicalize_genotype_names(tmp))
+    ## return(paste(active_features, collapse = ", "))
 }
 
 ## Like decode state, but using the same logic as
@@ -156,11 +158,18 @@ decode_state_ht <- function(state, num_features, feature_labels) {
     binary_string <- hypertrapsct:::DecToBin(state, num_features)
     binary_vector <- as.numeric(strsplit(binary_string, "")[[1]])
     if (sum(binary_vector) == 0) return("WT")
-    return(paste(feature_labels[which(binary_vector == 1)], collapse = ", "))
+    ## return(paste(feature_labels[which(binary_vector == 1)], collapse = ", "))
+    tmp <- paste(feature_labels[which(binary_vector == 1)], collapse = ", ")
+    return(canonicalize_genotype_names(tmp))
 }
 
-
+## FIXME: why aren't we using a try here?
 run_HyperTraPS <- function(x, opts) {
+    message("run_HyperTraPS; options are: ",
+            paste(names(opts),
+                  opts, sep = " =  ",
+                  collapse = "; "))
+    if (opts$samplegap >= (10^opts$length)) stop("samplegap >= 10^length")
   if (opts$seed == -1) opts$seed <- round(runif(1, 1, 1e9))
   time_out <- system.time({
       opts_rm <- which(names(opts) %in% c("prob.set") )
@@ -191,8 +200,8 @@ run_HyperTraPS <- function(x, opts) {
                          ncol = length(states),
                          sparse = TRUE)
 
-  rownames(trans_mat) <- decoded_states
-  colnames(trans_mat) <- decoded_states
+  rownames(trans_mat) <- colnames(trans_mat) <- reorder_genotypes_2_standard_order(decoded_states)
+
 
     for (i in 1:nrow(out$dynamics$trans)) {
         from_state <- out$dynamics$trans$From[i]
@@ -204,6 +213,7 @@ run_HyperTraPS <- function(x, opts) {
 
         trans_mat[from_decoded, to_decoded] <- probability
     }
+
 
     ## This could be inside the first loop, but this is simpler
     ## for now.
