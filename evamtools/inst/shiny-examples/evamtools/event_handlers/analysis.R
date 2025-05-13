@@ -163,6 +163,7 @@ get_hyper_traps_args <- function(input) {
         apm_type = as.numeric(input$HyperTraPS_apm),
         sa = as.numeric(input$HyperTraPS_sa),
         sgd = as.numeric(input$HyperTraPS_sgd),
+    sgd_scale = as.numeric(input$HyperTraPS_sgd_scale),
     pli = as.numeric(input$HyperTraPS_pli),
     samplegap = as.numeric(input$HyperTraPS_samplegap),
 
@@ -178,7 +179,9 @@ get_hyper_traps_args <- function(input) {
     ## nsampl = as.numeric(input$HyperTraPS_nsampl),
     ##    cores = as.numeric(input$HyperTraPS_cores)
     )
-  message("DEBUG: options entered for HyperTraPS are ",
+    if (hyper_traps_opts$samplegap >= (10^hyper_traps_opts$length))
+        stop("HyperTraPS options error: samplegap >= 10^length of chain")
+    message("get_hyper_traps_args: options entered for HyperTraPS are ",
           paste(names(hyper_traps_opts),
                 hyper_traps_opts, sep = " =  ",
                 collapse = "; "))
