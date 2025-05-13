@@ -234,6 +234,8 @@ run_analysis <- function(data, input, disp_freqs_ret, EVAM_MAX_ELAPSED) {
         stop_if_empty = TRUE
     )
 
+    opts <- parse_opts(input)
+
     shinyjs::disable("analysis")
 
     progress <- shiny::Progress$new()
@@ -241,8 +243,8 @@ run_analysis <- function(data, input, disp_freqs_ret, EVAM_MAX_ELAPSED) {
     on.exit(progress$close())
 
     progress$set(message = "Running evamtools", value = 0)
-
-    opts <- parse_opts(input)
+    ## browser()
+    ## opts <- parse_opts(input)
 
     progress$inc(1 / 5, detail = "Setting up data")
 
