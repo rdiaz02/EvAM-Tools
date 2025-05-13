@@ -16,11 +16,11 @@
 ## Like reorder_to_standard_order,
 ## but just for the genotype names
 ## and no NA returned
-reorder_genotypes <- function(x) {
+reorder_genotypes_2_standard_order <- function(x) {
     x <- canonicalize_genotype_names(x)
     if (length(x) != length(unique(x)))
         stop("x has duplicated genotype names")
-    return(x[standard_order_genots_1(x)])
+    return(x[genots_2_permut_standard_order(x)])
 }
 
 
@@ -34,7 +34,7 @@ reorder_to_standard_order_arbitrary_df <- function(x, return_index = TRUE) {
     i_index <- which(colnames(x) == "Index")
     if (length(i_index)) x <- x[, -i_index]
     x$Genotype <- canonicalize_genotype_names(x$Genotype)
-    ii <- standard_order_genots_1(x$Genotype)
+    ii <- genots_2_permut_standard_order(x$Genotype)
     ret_tmp <- x[ii, ]
     g_index <- which(colnames(ret_tmp) == "Genotype")
     col_order <- c(g_index, (1:ncol(ret_tmp))[-c(g_index)])
@@ -60,7 +60,7 @@ reorder_to_standard_order_count_df <- function(x) {
 ##     x <- x[x$Counts > 0, ]
 ##     if (nrow(x) <= 1) return(x)
 
-##     ii <- standard_order_genots_1(x$Genotype)
+##     ii <- genots_2_permut_standard_order(x$Genotype)
 ##     return(x[ii, ])
 ##     ## counts_tmp <- x$Counts
 ##     ## names(counts_tmp) <- x$Genotype

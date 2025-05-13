@@ -516,14 +516,14 @@ test_that("reorder_to_standard_order_count_df", {
 })
 
 
-test_that("reorder_genotypes", {
+test_that("reorder_genotypes_2_standard_order", {
     g1 <- c("F, B", "B, M", "U, A", "C, F", "H, D, T", "E, A, B", "WT")
-    expect_identical(reorder_genotypes(g1),
+    expect_identical(reorder_genotypes_2_standard_order(g1),
                      c("WT", "A, U", "B, F", "B, M", "C, F", "A, B, E", "D, H, T"))
 
     g5 <- c("TUV", "PLK, AM1", "RB1, ADP2B2", "ORT, BMN", "CK9, SDN",
             "F, B", "B, M", "I, C", "J, H", "H, I")
-    expect_identical(reorder_genotypes(g5),
+    expect_identical(reorder_genotypes_2_standard_order(g5),
                      c("TUV", "ADP2B2, RB1", "AM1, PLK", "B, F",
                        "B, M", "BMN, ORT", "C, I", "CK9, SDN",  "H, I", "H, J"))
 })

@@ -113,9 +113,9 @@ test_that("standard_rank/order_genots", {
     g1 <- c("F, B", "B, M", "U, A", "C, F", "H, D, T", "E, A, B", "WT")
     expect_identical(standard_rank_genots_1(g1),
                      as.integer(c(3, 4, 2, 5, 7, 6, 1)))
-    expect_identical(standard_order_genots_1(g1),
+    expect_identical(genots_2_permut_standard_order(g1),
                      as.integer(c(7, 3, 1, 2, 4, 6, 5)))
-    expect_identical(canonicalize_genotype_names(g1)[standard_order_genots_1(g1)],
+    expect_identical(canonicalize_genotype_names(g1)[genots_2_permut_standard_order(g1)],
                      c("WT", "A, U", "B, F", "B, M", "C, F", "A, B, E", "D, H, T"))
 
 
@@ -123,10 +123,10 @@ test_that("standard_rank/order_genots", {
             "F, B", "B, M", "I, C", "J, H", "H, I")
     expect_identical(standard_rank_genots_1(g5),
                      as.integer(c(1, 3, 2, 6, 8, 4, 5, 7, 10, 9)))
-    expect_identical(standard_order_genots_1(g5),
+    expect_identical(genots_2_permut_standard_order(g5),
                      as.integer(c(1, 3, 2, 6, 7, 4, 8, 5, 10, 9)))
 
-    ## Also tested in shiny utils, the code for reorder_genotypes
+    ## Also tested in shiny utils, the code for reorder_genotypes_2_standard_order
 })
 
 

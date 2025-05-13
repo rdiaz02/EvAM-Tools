@@ -308,7 +308,7 @@ evam <- function(x,
     analyzed_data = x,
     genotype_id_ordered =
       stats::setNames(1:(2^ncol(x)),
-                      genotypes_standard_order(colnames(x))),
+                        genes_2_genotypes_standard_order(colnames(x))),
     all_options = list(
       mhn_opts = opts$mhn_opts,
       ot_opts = opts$ot_opts,

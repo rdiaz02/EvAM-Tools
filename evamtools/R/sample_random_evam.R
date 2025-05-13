@@ -366,7 +366,7 @@ sparse_transM_from_genotypes <- function(genots) {
 
 
 ## Genotypes -> permutation that puts genotypes in standard order
-standard_order_genots_1 <- function(x) {
+genots_2_permut_standard_order <- function(x) {
     x <- canonicalize_genotype_names(x)
     if (length(x) != length(unique(x)))
         stop("x has duplicated genotype names")
@@ -686,9 +686,9 @@ canonicalize_genotype_names <- function(x) {
 ## Genotypes in what for me is their "standard, sensible, order"
 ## By number of mutations, and within number of mutations, ordered
 ## as given by order.
-## Use standard_order_genots_1 if you want the permutation
+## Use genots_2_permut_standard_order if you want the permutation
 ## that puts give genotypes in standard order
-genotypes_standard_order <- function(gene_names) {
+genes_2_genotypes_standard_order <- function(gene_names) {
     if (any(stringi::stri_count_fixed(gene_names, ",")))
         stop("At least one comma in gene_names")
     gene_names <- evam_string_sort(gene_names)
@@ -700,7 +700,7 @@ genotypes_standard_order <- function(gene_names) {
 }
 
 ## Given a named vector, where names are genotypes,
-## return the same vector sorted in the same order as genotypes_standard_order
+## return the same vector sorted in the same order as genes_2_genotypes_standard_order
 ## Like reorder_to_pD, but in what for me is much more sensible
 ## This returns NAs if any missing combination of the possible
 ## ones; why?
@@ -729,7 +729,7 @@ reorder_to_standard_order <- function(x) {
                                       stringi::stri_split_fixed(genots_n, ",")),
                                   " ", ""))
     gene_n <- setdiff(gene_n, "WT")
-    sorted_genots <- genotypes_standard_order(gene_names = gene_n)
+    sorted_genots <- genes_2_genotypes_standard_order(gene_names = gene_n)
 
     if (!all(genots_n %in% sorted_genots))
         stop("At least one genotype name not in sorted_genots")
@@ -830,7 +830,7 @@ probs_from_trm <- function(x,
     ## I was once bitten by a similar issue when dealing with HyperTraPS
     ## So this is a paranoid procedure. rm one of the procedures eventually
     ## Procedure 1
-    allGts <- genotypes_standard_order(gene_names)
+    allGts <- genes_2_genotypes_standard_order(gene_names)
     p_all <- rep(0.0, length = length(allGts))
     names(p_all) <- allGts
     ## Next line should preclude any possible errors
