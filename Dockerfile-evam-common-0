@@ -150,7 +150,7 @@ RUN R -e "BiocManager::install('ggtree')"
 ## remotes::install_github("StochasticBiology/hypertraps-ct@bioconductor")
 ARG REBUILD_TRIGGER=3
 RUN echo "Running command with trigger: $REBUILD_TRIGGER"
-RUN R -e "remotes::install_github('StochasticBiology/hypertraps-ct', ref = 'bioconductor')"
+RUN R -e "remotes::install_github('StochasticBiology/hypertrapsct')"
 
 
 
