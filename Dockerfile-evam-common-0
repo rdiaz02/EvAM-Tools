@@ -143,8 +143,15 @@ RUN cd /app/Sources && \
 
 ## HyperTraPS is more likely to change than the above. Do last
 RUN R -e "BiocManager::install('ggtree')"
-## HyperTraps-ct version https://github.com/StochasticBiology/hypertraps-ct/commits/bioconductor/ dcb94e1
+
+## HyperTraPS is more likely to change than the above. Do last
+## HyperTraps-ct version https://github.com/StochasticBiology/hypertraps-ct/commits/bioconductor/
+## Sometimes I need to rebuild this. Make it simple to force it
+## remotes::install_github("StochasticBiology/hypertraps-ct@bioconductor")
+ARG REBUILD_TRIGGER=3
+RUN echo "Running command with trigger: $REBUILD_TRIGGER"
 RUN R -e "remotes::install_github('StochasticBiology/hypertraps-ct', ref = 'bioconductor')"
+
 
 
 ######################################################################
