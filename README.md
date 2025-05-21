@@ -270,7 +270,7 @@ runShiny()
 Same as https://hub.docker.com/r/rocker/rstudio  (and see further options there):
 
 ```
-docker run --rm -p 8787:8787 -e PASSWORD=yourpasswordhere rdiaz02/evamrstudio
+docker run --rm -p 8787:8787 -e PASSWORD=somerandompasswordhere rdiaz02/evamrstudio
 ```
 
 Go to `localhost:8787` and log in. The password will the password you set above. The username:  If you are running rootless, the username has to be "root" (if you are running rootless, and as explained in https://rocker-project.org/images/versioned/rstudio.html , "the privileges of the root user in the container are already bounded by your regular user permissions in the host system."). Otherwise, the username should be  "rstudio". See https://rocker-project.org/images/versioned/rstudio.html for further options.
