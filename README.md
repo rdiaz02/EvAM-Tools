@@ -273,7 +273,7 @@ Same as https://hub.docker.com/r/rocker/rstudio  (and see further options there)
 docker run --rm -p 8787:8787 -e PASSWORD=yourpasswordhere rdiaz02/evamrstudio
 ```
 
-Go to `localhost:8787` and log in with username "rstudio" and the password you set. See https://hub.docker.com/r/rocker/rstudio for further options.
+Go to `localhost:8787` and log in. The password will the password you set above. The username:  If you are running rootless, the username has to be "root" (if you are running rootless, and as explained in https://rocker-project.org/images/versioned/rstudio.html , "the privileges of the root user in the container are already bounded by your regular user permissions in the host system."). Otherwise, the username should be  "rstudio". See https://rocker-project.org/images/versioned/rstudio.html for further options.
 
 If you want to easily share data between your local file system and the Docker image you can do
 
