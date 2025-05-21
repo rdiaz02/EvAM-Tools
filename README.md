@@ -435,6 +435,8 @@ The R package itself with standard organization. Directories and files under ins
    The Bioinformatics paper "EvAM-Tools: tools for evolutionary accumulation and cancer progression models" is available at
   https://doi.org/10.1093/bioinformatics/btac710 .
 
+   A video presentation of EvAM-Tools at the BCB Hub on 7 May 2025: https://youtu.be/WkqCfMFiJ3E
+
 
 ## Citing EvAM-Tools
 If you use the package or the web app, please **cite** the Bioinformatics paper:
