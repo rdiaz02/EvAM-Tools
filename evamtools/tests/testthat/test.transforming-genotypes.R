@@ -25,7 +25,8 @@ test_that("Transforming 2binary works", {
 
     expect_equal(int2binary(int_state3, n = 5), c(1, 0, 0, 1, 0))
     expect_equal(int2binary(int_state3, n = -5), binary_state3)
-    expect_error(int2binary(int_state4, n = -4, "Only integers >= 0 are valid"))
+    expect_error(int2binary(int_state4, n = -4), "Only integers >= 0 are valid",
+                 fixed = TRUE)
     expect_error(suppressWarnings(int2binary("abc", n = -4)),
                  "Invalid input", fixed = TRUE)
 
