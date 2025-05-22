@@ -92,6 +92,7 @@ evam <- function(x,
                    apm_type = 0,
                    sa = 0,
                    sgd = 0,
+                   sgd_scale = 0.01,
                    pli = 0,
                    samplegap = 10,
                    penalty = 0,
@@ -99,7 +100,6 @@ evam <- function(x,
                    samples_per_row = 10,
                    regularise = 0,
                    output_transitions = 1,
-                   sgd_scale = 0.01,
                    outputinput = 0,
                    full_analysis = 1,
                    limited_output = 0,
@@ -128,18 +128,30 @@ evam <- function(x,
     methods <- gsub("hypertraps", "HyperTraPS", methods, fixed = TRUE)
 
 
+    ## zz:default_opts
+    ## FIXME: this logic is confusing!
+    ## See also evam_opts_default_params.R, line 23
+    ## I think I can just comment out most of this code
+    ## No call to create_default_opts and no call to
+    ## fill_args_default
     ## Get default parametrs
-    default_opts <- create_default_opts(x)
+    ## NOPE: if I only pass SOME options in the lists
+    ## the rest do not have values. So I need this mechanism
+    ## Maybe grabbing the from evam itself not from
+    ## create_default_opts
+
+    default_opts <- formals(evam)
+    ## default_opts <- create_default_opts(x)
 
     opts <- list(
-        mhn_opts = fill_args_default(mhn_opts, default_opts$mhn_opts),
-        ot_opts = fill_args_default(ot_opts, default_opts$ot_opts),
-        cbn_opts = fill_args_default(cbn_opts, default_opts$cbn_opts),
-        hesbcn_opts = fill_args_default(hesbcn_opts, default_opts$hesbcn_opts),
-        oncobn_opts = fill_args_default(oncobn_opts, default_opts$oncobn_opts),
-        mccbn_opts = fill_args_default(mccbn_opts, default_opts$mccbn_opts),
-        hyper_traps_opts = fill_args_default(hyper_traps_opts, default_opts$hyper_traps_opts),
-        bml_opts = fill_args_default(bml_opts, default_opts$bml_opts)
+        mhn_opts = fill_args_default(mhn_opts, (eval(default_opts$mhn_opts))),
+        ot_opts = fill_args_default(ot_opts, (eval(default_opts$ot_opts))),
+        cbn_opts = fill_args_default(cbn_opts, (eval(default_opts$cbn_opts))),
+        hesbcn_opts = fill_args_default(hesbcn_opts, eval(default_opts$hesbcn_opts)),
+        oncobn_opts = fill_args_default(oncobn_opts, eval(default_opts$oncobn_opts)),
+        mccbn_opts = fill_args_default(mccbn_opts, eval(default_opts$mccbn_opts)),
+        hyper_traps_opts = fill_args_default(hyper_traps_opts, eval(default_opts$hyper_traps_opts)),
+        bml_opts = fill_args_default(bml_opts, eval(default_opts$bml_opts))
     )
 
 
@@ -147,7 +159,7 @@ evam <- function(x,
     ## And why have it here and not in the call to CBN?
     ## It might be simpler to just check in the call as in HyperTraPS
     ## Think this through: where is it better to do the checking?
-    ## I'd way for methods's specific options in the method call.
+    ## I'd ay for methods's specific options in the method call.
     check_cbn_opts_init_poset(opts$cbn_opts$init_poset)
 
     if ("MCCBN" %in% methods) {
@@ -184,9 +196,6 @@ evam <- function(x,
 
     all_out <- mclapply(methods, run_method, x=x, opts=opts, mc.cores = cores)
     names(all_out) <- methods
-
-
-
 
     get_output <- function(method, component) {
         if (!exists(method, all_out)) return(NA)
@@ -314,6 +323,7 @@ evam <- function(x,
     genotype_id_ordered =
       stats::setNames(1:(2^ncol(x)),
                         genes_2_genotypes_standard_order(colnames(x))),
+    ## These are the evaluated options
     all_options = list(
       mhn_opts = opts$mhn_opts,
       ot_opts = opts$ot_opts,
@@ -322,7 +332,9 @@ evam <- function(x,
       oncobn_opts = opts$oncobn_opts,
       mccbn_opts = opts$mccbn_opts,
       hyper_traps_opts = opts$hyper_traps_opts
-    )
+    ),
+    call = match.call(),
+    default_opts = default_opts
   )
 
   if (only_used_methods) {

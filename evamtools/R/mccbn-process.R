@@ -110,9 +110,8 @@ do_MCCBN_HCBN2 <- function(x
     
     stopifnot(!is.null(colnames(x)))
     stopifnot(mccbn_hcbn2_opts$max.iter.asa >= 5)
+    sampling <- match.arg(sampling)
 
-    # Setting tmp folder
-    # The functiona create asa.txt and poset.txt
     if (is.null(mccbn_hcbn2_opts$tmp_dir)) {
         tmp_dir <- tempfile()
         dirname0 <- NULL
@@ -130,6 +129,7 @@ do_MCCBN_HCBN2 <- function(x
     } else {
         tmp_dir <- mccbn_hcbn2_opts$tmp_dir
     }
+
     posets <- mccbn::candidate_posets(x, rep(1, nrow(x)), 0.9)
     poset0 <- posets[[length(posets)]]
     fit <- mccbn::adaptive.simulated.annealing(poset = poset0,

@@ -477,7 +477,7 @@ test_that("Miscell error conditions", {
                  fixed = TRUE)
 })
 
-## FIXME: extend this properly
+
 test_that("Minimal examples of HyperTraPS and BML", {
 
   dB_c1 <- matrix(
@@ -543,6 +543,67 @@ test_that("Minimal examples of HyperTraPS and BML", {
   ## plot_BML_all(out3_nb)
   ## plot_BML_all(out33)
 })
+
+test_that("Additional checks option handling post-simplification 2025-05-22: catches wrong args", {
+    data(every_which_way_data)
+    Dat1 <- every_which_way_data[[16]][1:40, 2:6]
+    MCCBN_INSTALLED <- requireNamespace("mccbn", quietly = TRUE)
+    expect_error(suppressWarnings(evam(Dat1,
+                                       methods = c("HESBCN", "OT"),
+                                       hesbcn_opts = list(reg = "bico"),
+                                       cores = 1)),
+                 "'arg' should be one of", fixed = TRUE
+                 )
+    if (MCCBN_INSTALLED) {
+        expect_error(suppressWarnings(evam(Dat1,
+                                           methods = c("MCCBN", "OT"),
+                                           mccbn_opts = list(sampling = "foo"),
+                                           cores = 1)),
+                     "'arg' should be one of", fixed = TRUE
+                     )
+    }
+})
+
+test_that("Additional checks option handling post-simplification 2025-05-22: nrow and ncol from post-processed data", {
+    data(every_which_way_data)
+    Dat1 <- every_which_way_data[[16]][1:40, 2:6]
+    DD1 <- DD2 <- DD3 <- Dat1
+    DD1[, 1] <- c(rep(0, 39), 1) ## OncoBN: epsilon: 1/(40 * 2)
+    DD2[1:15, ] <- 1 ## OncoBN: epsilon: 15/(40 * 2)
+    DD3 <- DD1
+    DD3 <- cbind(DD3, constant = 1) ## a row must be added
+
+    r1 <- suppressWarnings(evam(DD1, methods = c("OncoBN", "MHN", "OT")))
+    r2 <- suppressWarnings(evam(DD2, methods = c("OncoBN", "MHN", "OT")))
+    r3 <- suppressWarnings(evam(DD3, methods = c("OncoBN", "MHN", "OT")))
+    r11 <- suppressWarnings(evam(DD1, methods = c("OncoBN", "MHN", "OT"),
+                                 oncobn_opts = list(epsilon = 0.12345),
+                                 mhn_opts = list(lambda = 0.1645)))
+    r21 <- suppressWarnings(evam(DD2, methods = c("OncoBN", "MHN", "OT"),
+                                 oncobn_opts = list(epsilon = 0.12345),
+                                 mhn_opts = list(lambda = 0.1645)))
+    r31 <- suppressWarnings(evam(DD3, methods = c("OncoBN", "MHN", "OT"),
+                                 oncobn_opts = list(epsilon = 0.12345),
+                                 mhn_opts = list(lambda = 0.1645)))
+
+    expect_equal(r1$all_options$oncobn_opts$epsilon, 1/80, ignore_attr = TRUE)
+    expect_equal(r2$all_options$oncobn_opts$epsilon, 15/80, ignore_attr = TRUE)
+    expect_equal(r3$all_options$oncobn_opts$epsilon, (1/(41 * 2)), ignore_attr = TRUE)
+
+    expect_equal(r1$all_options$mhn_opts$lambda, 1/40, ignore_attr = TRUE)
+    expect_equal(r2$all_options$mhn_opts$lambda, 1/40, ignore_attr = TRUE)
+    expect_equal(r3$all_options$mhn_opts$lambda, 1/41, ignore_attr = TRUE)
+
+    expect_equal(r11$all_options$oncobn_opts$epsilon, 0.12345, ignore_attr = TRUE)
+    expect_equal(r21$all_options$oncobn_opts$epsilon, 0.12345, ignore_attr = TRUE)
+    expect_equal(r31$all_options$oncobn_opts$epsilon, 0.12345, ignore_attr = TRUE)
+
+    expect_equal(r11$all_options$mhn_opts$lambda, 0.1645, ignore_attr = TRUE)
+    expect_equal(r21$all_options$mhn_opts$lambda, 0.1645, ignore_attr = TRUE)
+    expect_equal(r31$all_options$mhn_opts$lambda, 0.1645, ignore_attr = TRUE)
+
+})
+
 
 cat("\n Done test.exercise-main-funct.R. Seconds = ",
     as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")

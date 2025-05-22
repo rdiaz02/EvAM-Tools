@@ -1,3 +1,6 @@
+Changes in version 3.3.3 (2025-05-22):
+	- Better handling of default arguments.
+
 Changes in version 3.3.2 (2025-05-12):
 	- HyperTraPS: predicted genotype frequencies now
 	  available after updates upstream.

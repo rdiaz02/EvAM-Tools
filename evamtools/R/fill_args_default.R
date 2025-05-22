@@ -24,20 +24,34 @@
 
 fill_args_default <- function(inputl, defaults) {
 
-    not_valid <- which(!(names(inputl) %in% names(defaults)))
+    ## not_valid <- which(!(names(inputl) %in% names(defaults)))
 
-    if(length(not_valid)) {
+    ## if (length(not_valid)) {
+    ##     name_input <- deparse(substitute(inputl))
+    ##     not_valid_opt <- names(inputl)[not_valid]
+    ##     warning("Option(s) ", paste(not_valid_opt, sep = ", ", collapse = ", "),
+    ##             " in argument ", name_input, " is(are) invalid.",
+    ##             " They will be ignored.")
+    ##     inputl <- inputl[-not_valid]
+    ## }
+
+    not_valid <- setdiff(names(inputl), names(defaults))
+    if (length(not_valid)) {
         name_input <- deparse(substitute(inputl))
-        not_valid_opt <- names(inputl)[not_valid]
-        warning("Option(s) ", paste(not_valid_opt, sep = ", ", collapse = ", "),
+        warning("Option(s) ", paste(not_valid, sep = ", ", collapse = "; "),
                 " in argument ", name_input, " is(are) invalid.",
                 " They will be ignored.")
-        inputl <- inputl[-not_valid]
+        inputl <- inputl[names(inputl) %in% names(defaults)]
     }
-        
-    not_passed <- vapply(names(defaults),
-                         function(x) !exists(x, where = inputl),
-                         TRUE)
+
+    ## Avoid implicit coercion of list to environment
+    ## and make intent clearer
+    ## not_passed <- vapply(names(defaults),
+    ##                      function(x) !exists(x, where = inputl),
+    ##                      TRUE)
+
+    not_passed <- setdiff(names(defaults), names(inputl))
+
     inputl <- c(inputl, defaults[not_passed])
     return(inputl)
 }
