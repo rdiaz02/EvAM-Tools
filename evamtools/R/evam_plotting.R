@@ -15,7 +15,7 @@
 ## with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ## #' Use plot matrix to plot the sampled genotypes
-## #' 
+## #'
 ## #' @param data data.frame object with cross sectional datas
 plot_sampled_genots <- function(data) {
     d1 <- data_to_counts(data, out = "data.frame", omit_0 = TRUE)
@@ -29,11 +29,11 @@ plot_sampled_genots <- function(data) {
     ##     dwt <- NULL
     ##     dnwt <- d1
     ## }
-    
+
     ## oo <- order(str_count(dnwt[, 1], ","), dnwt[, 1])
     ## dnwt <- dnwt[oo, ]
     ## d1 <- rbind(dwt, dnwt)
-    
+
     m1 <- matrix(d1[, 2], ncol = 1)
     colnames(m1) <- "Counts"
     rownames(m1) <- d1[, 1]
@@ -47,9 +47,9 @@ plot_sampled_genots <- function(data) {
 
 
 ## #' Order paths of a weigthed directd graph
-## #' 
+## #'
 ## #' Computes the relevance of the paths starting on WT based on edge weigth
-## #' 
+## #'
 ## #' @param graph igraph object with genotype transition. The graph is expect to be directed and weighted
 ## #' @return List with all paths sorted in descreasing order of importance
 ##   and weights (log prob of path or sum of the weights)
@@ -75,8 +75,8 @@ rank_paths <- function(graph, log_weights) {
                 weights  = cum_weights[oi]))
 }
 
-## #' Return the labels of most relevant paths starting from WT 
-## #' 
+## #' Return the labels of most relevant paths starting from WT
+## #'
 ## #' @param graph igraph object with genotype transitions
 ## #' @param paths_from_graph List of paths from WT to ending genotype
 ## #' @param top_paths Int > 0. Include labels from vertex present in n top_paths
@@ -96,17 +96,17 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
         stop("You should provide a positive integer for top_paths")
     }
     paths_from_graph <- paths_from_graph[1:top_paths]
-    
+
     nodes_in_top_paths <- unique(unlist(as.vector(sapply(paths_from_graph,
         function(x) x$name
         ))))
-    
+
     if (type == "genotype"){
         vertex_labels <- sapply(igraph::V(graph)$name,
             function(x){
                 if (x %in% nodes_in_top_paths){
                     return(x)
-                } 
+                }
                 else return("")
             })
         edge_labels <- rep("", length(igraph::E(graph)))
@@ -118,7 +118,7 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
             paste(igraph::V(graph)$name[as.vector(x)], collapse="->")
         }), collapse = " ")
 
-        edge_labels <- 
+        edge_labels <-
             unlist(apply(igraph::ends(graph, E(graph)), 1,
                 function(x){
                     from_node <- x[[1]]
@@ -126,14 +126,14 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
                     to_node <- x[[2]]
                     to_node <- gsub(" ", "", to_node, fixed = TRUE)
                     if(from_node == "WT") from_node = ""
-                    gene_acquired <- paste0("+", 
-                        setdiff(strsplit(to_node, ",")[[1]], 
+                    gene_acquired <- paste0("+",
+                        setdiff(strsplit(to_node, ",")[[1]],
                         strsplit(from_node,",")[[1]]))
                     gene_acquired <- gsub(" ", "", gene_acquired, fixed = TRUE)
                     return(gene_acquired)
                 }
             ))
-        
+
     }
     return(list(
         vertex_labels = vertex_labels,
@@ -141,18 +141,18 @@ compute_vertex_labels <- function(graph, paths_from_graph, top_paths = NULL,
     ))
 }
 
-## #' Computes the best layout for a genotype transtion matrix 
-## #' 
-## #' Genotypes are distributed in the x axis according the number 
+## #' Computes the best layout for a genotype transtion matrix
+## #'
+## #' Genotypes are distributed in the x axis according the number
 ## #' of mutated genes they have
 ## #' Distribution in the Y axis in done alphabetically.
-## #' 
+## #'
 ## #' @param graph igraph object with genotype transitions
-## #' 
+## #'
 ## #' @return dataframe the x and y position for each vertex in graph
 cpm_layout <- function(graph){
     num_mutations <- igraph::distances(graph, v="WT", weights=NA)
-    igraph::V(graph)$num_mutations <- num_mutations 
+    igraph::V(graph)$num_mutations <- num_mutations
     lyt <- matrix(0, ncol = 2, nrow = length(V(graph)))
     lyt[, 2] <- num_mutations
 
@@ -163,7 +163,7 @@ cpm_layout <- function(graph){
         gnt_ix <- evam_string_order(igraph::V(graph)$name[level_idx])
         gnt_names <- igraph::V(graph)$name[level_idx]
         gnt_names <- gnt_names[gnt_ix]
-        
+
         spacing <- 6 / (length(level_idx) + 1)
         level_elements <- 1:length(level_idx) * spacing
         level_elements <-  rev(level_elements - max(level_elements))
@@ -196,11 +196,11 @@ compute_matrix_from_top_paths <- function(graph
     adj_matrix <- igraph::as_adjacency_matrix(graph)
     adj_matrix[adj_matrix == 1] <- 0
     adj_matrix2 <- igraph::as_adjacency_matrix(graph, attr = "weight")
-        
+
     for (path in paths_from_graph){
         for (idx in 2:length(path)){
             adj_matrix[path[[idx - 1]]$name
-                , path[[idx]]$name] <- adj_matrix2[path[[idx - 1]]$name, 
+                , path[[idx]]$name] <- adj_matrix2[path[[idx - 1]]$name,
                                                 path[[idx]]$name]
         }
     }
@@ -209,8 +209,8 @@ compute_matrix_from_top_paths <- function(graph
 }
 
 ## #' Plot hypercubic genotype transitions
-## #' 
-## #' @param trans_mat transitions matrix to plot: can contain row counts, probabilities... 
+## #'
+## #' @param trans_mat transitions matrix to plot: can contain row counts, probabilities...
 ## #' Entries will be normalized
 ## #' @param observations Original cross sectional data used to compute the model. Optional.
 ## #' @param freqs DataFrame with column $Genotype and $Freqs with their frequencies. Optional.
@@ -219,7 +219,7 @@ compute_matrix_from_top_paths <- function(graph
 ## #' @param max_edge Int>0. Maximun width of edge. If NULL it will be infered from data.
 ## #' @param min_edge Int>0. Minimum width of edge. If NULL it will be infered from data.
 ## #' @param fixed_vertex_size Boolen. If TRUE, all nodes with all the same size and frequencies or observed data will not be used.
-## #' @examples 
+## #' @examples
 ## #' \dontrun{
 ## #' dB_c2 <- matrix(
 ## #' c(
@@ -272,7 +272,7 @@ plot_genot_fg <- function(trans_mat
 
     num_genes <- length(unique_genes_names)
     graph <- igraph::decompose(graph)[[1]] ## We do not want disconnected nodes
-    
+
     if (!is.null(observations)){
         observations <- data_to_counts(observations, out = "data.frame", omit_0 = TRUE)
         observations$Rel_Freq <- observations$Counts / sum(observations$Counts)
@@ -294,11 +294,11 @@ plot_genot_fg <- function(trans_mat
         if (is.na(plot_type)) stop("plot_type is NA")
         log_weights <- ifelse(plot_type == "trans_mat", TRUE, FALSE)
         paths_from_graph <- rank_paths(graph, log_weights)$paths
-        
+
         new_adj_matrix <- compute_matrix_from_top_paths(graph
             , paths_from_graph, top_paths)
         ## Reworking graph based on top_paths
-        
+
         graph <- igraph::graph_from_adjacency_matrix(new_adj_matrix
             , weighted = TRUE)
         labels <- compute_vertex_labels(graph, paths_from_graph
@@ -319,16 +319,16 @@ plot_genot_fg <- function(trans_mat
 
     ## Vertex colors based on the presence/absence in the original data
     observed_color <- "#ff7b00"
-    not_observed_color <- "lightgreen" ## "#0892d0" 
+    not_observed_color <- "lightgreen" ## "#0892d0"
     if(is.null(observations)){
         ## This seems unreachable code to me.
         not_observed_color <- "#ff7b00"
-    } 
-    colors <- sapply(igraph::V(graph)$name, 
+    }
+    colors <- sapply(igraph::V(graph)$name,
         function(gen){
             if (sum(match(observations$Genotype, gen, nomatch = 0)) == 1){
                 return(observed_color)
-            } 
+            }
             return(not_observed_color)
         })
 
@@ -340,33 +340,33 @@ plot_genot_fg <- function(trans_mat
     max_size <- 40
 
     if(fixed_vertex_size){
-        node_sizes <- vapply(igraph::V(graph)$name, 
+        node_sizes <- vapply(igraph::V(graph)$name,
         function(gen) min_size, numeric(1.0))
     } else if(!is.null(sampled_counts)){
-        node_sizes <- vapply(igraph::V(graph)$name, 
+        node_sizes <- vapply(igraph::V(graph)$name,
             function(gen){
                 if (sum(match(sampled_counts$Genotype, gen, nomatch = 0)) == 1)
                     return(sampled_counts$Rel_Freq[which(sampled_counts$Genotype == gen)])
-                else 
+                else
                     return(min_size)
             }, numeric(1.0))
     } else if(!is.null(observations)){
-        node_sizes <- vapply(igraph::V(graph)$name, 
+        node_sizes <- vapply(igraph::V(graph)$name,
             function(gen){
                 if (sum(match(observations$Genotype, gen, nomatch = 0)) == 1)
                     return(observations$Rel_Freq[which(observations$Genotype == gen)])
-                else 
+                else
                     return(0.001)
             }, numeric(1.0))
-        # node_sizes <- vapply(igraph::V(graph)$name, 
-        #     function(gen) predicted_genotypes[gen], 1) 
+        # node_sizes <- vapply(igraph::V(graph)$name,
+        #     function(gen) predicted_genotypes[gen], 1)
             #     if (sum(match(predicted_genotypes$Genotype, gen, nomatch = 0)) == 1) # Observed
             #         return(predicted_genotypes$Rel_Freq[which(predicted_genotypes$Genotype == gen)])
             #     else # Not Observed
             #         return(0)
             # }, numeric(1.0))
     } else {
-        node_sizes <- vapply(igraph::V(graph)$name, 
+        node_sizes <- vapply(igraph::V(graph)$name,
         function(gen) min_size, numeric(1.0))
     }
 
@@ -382,7 +382,7 @@ plot_genot_fg <- function(trans_mat
     igraph::V(graph)$label.family <- "Helvetica"
 
     opx <- par(mar = c(3, 0, 3, 0))
-    
+
     ## Weights proportional to the number of times they are transited
     w <- igraph::E(graph)$weight
     max_edge <- ifelse(is.null(max_edge), max(w), max_edge)
@@ -406,7 +406,7 @@ plot_genot_fg <- function(trans_mat
     for (idx in nrow(lyt):2){
         y_pos <- lyt[idx,][1]
         x_pos <- lyt[idx,][2]
-        
+
         is_inline <- which(lyt[,1][lyt[,2] == (x_pos - 1)] == y_pos)
         if(length(is_inline) > 0){
             label_dists[idx] <- val
@@ -427,7 +427,7 @@ plot_genot_fg <- function(trans_mat
         # , vertex.label.degree=c(rep(c(3.14, -3.14/2), ceiling(nrow(lyt)/2)))[1:nrow(lyt)]
         , vertex.label.dist = label_dists
         # , edge.color = rgb(0.5, 0.5, 0.5, transparent_w2)
-        , edge.color = rgb(0.5, 0.5, 0.5, 1) 
+        , edge.color = rgb(0.5, 0.5, 0.5, 1)
         ## Some error in my latop because, I cannot add alpha channel
         , edge.label = labels$edge_labels
         , edge.label.font = 2
@@ -457,7 +457,7 @@ plot_genot_fg <- function(trans_mat
        , pos = margin)
     axis(1, tick = FALSE, at = 0, labels = "Number of features acquired",
          pos = margin - 0.15)
-    
+
     if (!(is.null(observations))) {
         legend(-1.25,
                1.3, ## -1.3,
@@ -471,18 +471,18 @@ plot_genot_fg <- function(trans_mat
             , x.intersp = c(0, 0)[2]
             )
     }
-  
+
 }
 
 ## #' Process data of CPMs to make it easier to plot
-## #' 
+## #'
 ## #' Extracts the outpus concerning a single CPM
-## #' 
+## #'
 ## #' @param data Complete CPM output
 ## #' by calling sample_evam with the exact CPM output from data parameter
 ## #' @param mod String for the CPM to process.
 ## #' @param plot_type String for the plot_type to process.
-## #' @param sample_data Data form sampling, this must be generated 
+## #' @param sample_data Data form sampling, this must be generated
 ## #' @returns List with processed output of the CPM
 process_data <- function(data, mod, plot_type, sample_data = NULL) {
 
@@ -491,18 +491,18 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
     }
 
     accepted_plot_types <- c("trans_mat",
-                             "obs_genotype_transitions", 
+                             "obs_genotype_transitions",
                              "trans_rate_mat",
                              "sampled_genotype_counts",
                              "predicted_genotype_freqs")
-    
+
     if (!(plot_type %in% accepted_plot_types))
         stop("Incorrect plot_type. plot_type must be one of ",
              paste(accepted_plot_types, sep = ", ", collapse = ", "))
-    
+
 
     all_data <- c(data, sample_data)
-    
+
     edges_method <- NULL
     igraph_method <- NULL
     method_info <- NULL
@@ -518,10 +518,10 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
     } else if (!is.null(all_data[[paste0(mod, "_theta")]])) {
         method_info <- all_data[[paste0(mod, "_theta")]]
         edges <- NA
-    } 
+    }
     if (mod == "BML" && plot_type == "trans_mat") {
         tryCatch(expr = {
-            trans_mat_method = get(paste(mod, "_trans_mat", sep = ""), data) 
+            trans_mat_method = get(paste(mod, "_trans_mat", sep = ""), data)
             trans_mat_method[trans_mat_method != 0] <- 1
             method_info = igraph::graph_from_adjacency_matrix(trans_mat_method, mode = "directed")
             edges = as.data.frame(igraph::get.edgelist(method_info))
@@ -543,7 +543,7 @@ process_data <- function(data, mod, plot_type, sample_data = NULL) {
 ## Plot the DAG using graphAM objects, from graph package
 DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
                              font_size = 12) {
-    
+
     ## I find the documentation and general working of this
     ## hideous. Documentation difficult to locate, spread between Rgraphviz and
     ## graph, no clear indication that some things have no effect on plots,
@@ -554,7 +554,7 @@ DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
     ## https://www.bioconductor.org/packages/release/bioc/manuals/Rgraphviz/man/Rgraphviz.pdf
     ## go to where "GraphvizAttributes" are documented. We want "general edge attributes"
     ## Or, after library(Rgraphviz), ?GraphvizAttributes
-    
+
     color_relat <- function(relation) {
         if (is.null(relation))  return("cornflowerblue")
         else if (relation == "AND") return("cornflowerblue")
@@ -568,7 +568,7 @@ DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
                       igraph::graph_from_data_frame(edges[, c("From", "To")]))
     g1 <- graph::graphAM(as.matrix(am),
                          edgemode = "directed")
-    
+
     if (!(exists("Relation", edges))) edges$Relation <- "Single"
 
     colors_edges <- vapply(edges$Relation, color_relat, "")
@@ -591,7 +591,7 @@ DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
                 ##format(x, scientific = TRUE)); nope, sometimes ugly
                 else return(as.character(round(x, 2)))
             }
-            
+
             labels_edges <- paste0("   ",
                                    vapply(edges[, wce], the_num_funct, ""))
         } else {
@@ -600,13 +600,13 @@ DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
         }
         return(labels_edges)
     }
-    
+
     labels_edges <- get_edge_label(edges)
     names(labels_edges) <- names(colors_edges)
     ## Leave a single label per node
     dupto <- which(duplicated(edges$To))
     if (length(dupto)) labels_edges <- labels_edges[-dupto]
-    
+
     ## We need edgeAttrs, not edgeData, which is ignored when plotting
     gg1 <- Rgraphviz::layoutGraph(g1,
                 attrs = list(node = list(color = "transparent",
@@ -630,8 +630,8 @@ DAG_plot_graphAM <- function(edges, main, edge_width = 5, arrowsize = 1,
 
 plot_method <- function(method_info, parent_set, edges, method = "") {
     if (typeof(method_info) == "list" & !is.null(edges)) { ## Potting DAGs
-        
-        ## DAG relationships colors 
+
+        ## DAG relationships colors
         standard_relationship <- "cornflowerblue"
         colors_relationships <- c(standard_relationship, standard_relationship,
                                   "#E2D810",
@@ -640,8 +640,8 @@ plot_method <- function(method_info, parent_set, edges, method = "") {
 
         ## Long ago we used igraph for DAGs. Not anymore.
         ## See bottom for old code
-        DAG_plot_graphAM(edges, method)  
-        
+        DAG_plot_graphAM(edges, method)
+
         if (!is.null(parent_set)) {
             legend("topleft", legend = names(colors_relationships),
                    col = colors_relationships, lty = 1, lwd = 5, bty = "n",
@@ -670,11 +670,11 @@ plot_method <- function(method_info, parent_set, edges, method = "") {
            , col = pmcolors
            , breaks = pmbreaks
            , text.cell = list(col = "black")
-           , max.col = 180 ## turn black to white in dark cells. 
+           , max.col = 180 ## turn black to white in dark cells.
            , mgp = c(2, 3, 3)
            , cex.axis = 1.5
            , cex.lab = 1.5
-             
+
              )
         mtext(side = 3, "Effect of this (effector)", line = 1)
         mtext(side = 4, " on this (affected)", srt = 90, las = 0, line = 1)
@@ -686,8 +686,8 @@ plot_method <- function(method_info, parent_set, edges, method = "") {
     }
 }
 
-plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal", 
-                        methods = NULL, 
+plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
+                        methods = NULL,
                         plot_type = "trans_mat", label_type="genotype",
                         fixed_vertex_size = FALSE,
                         top_paths = NULL) {
@@ -695,8 +695,8 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
     plot_evam(
         cpm_output = cpm_output,
         samples = samples,
-        orientation = orientation, 
-        methods = methods, 
+        orientation = orientation,
+        methods = methods,
         plot_type = plot_type,
         label_type = label_type,
         fixed_vertex_size = fixed_vertex_size,
@@ -704,8 +704,8 @@ plot_CPMs <- function(cpm_output, samples = NULL, orientation = "horizontal",
     )
 }
 
-plot_evam <- function(cpm_output, samples = NULL, orientation = "horizontal", 
-                        methods = NULL, 
+plot_evam <- function(cpm_output, samples = NULL, orientation = "horizontal",
+                        methods = NULL,
                         plot_type = "trans_mat", label_type="genotype",
                         fixed_vertex_size = FALSE,
                         top_paths = NULL) {
@@ -719,7 +719,7 @@ plot_evam <- function(cpm_output, samples = NULL, orientation = "horizontal",
              "of a call to sample_evam")
     }
 
-    
+
     ## List of available methods
     if (!is.null(methods)) {
         available_methods <- unique(methods[
@@ -740,7 +740,7 @@ plot_evam <- function(cpm_output, samples = NULL, orientation = "horizontal",
         ])
     }
 
-    
+
     ## Shape of the plot
     l_methods <- length(available_methods)
     if (l_methods < 1) stop("No valid methods or ",
@@ -770,7 +770,7 @@ plot_evam <- function(cpm_output, samples = NULL, orientation = "horizontal",
     for (met in available_methods) {
         ## Processing data
         method_data2plot <- process_data(cpm_output, met, plot_type, samples)
-        
+
         ## Plotting method (DAG or MHN matrix)
         plot_method(method_info = method_data2plot$method_info,
                     parent_set = method_data2plot$parent_set,
@@ -790,7 +790,7 @@ plot_evam <- function(cpm_output, samples = NULL, orientation = "horizontal",
                           ## We use it to define "Observed" and "Not Observed" genotypes
                           observations = cpm_output$analyzed_data,
                           ## To compute node sizes if sampled_counts is NULL
-                          ## predicted_genotypes = method_data2plot$predicted_genotype_freqs, 
+                          ## predicted_genotypes = method_data2plot$predicted_genotype_freqs,
                           sampled_counts = method_data2plot$sampled_genotype_counts,
                           top_paths = top_paths,
                           label_type = label_type,
@@ -833,7 +833,7 @@ plot_genotype_counts <- function(data, max.num = 20) {
     if (inherits(trybp, "try-error")) {
         par(op)
         op <- par(las = 2, cex.main = 1.6, cex.lab = 1.5,
-                  cex.axis = 1.2, 
+                  cex.axis = 1.2,
                   mar = c(5, 5, 5, 1))
         plot(x = c(0, 1), y = c(0, 1), type = "n",
              axes = FALSE, xlab = "", ylab = "")
@@ -889,7 +889,7 @@ plot_genotype_counts_plly <- function(data) {
 ## node_depth <- function(g) {
 ##     node_names <- V(g)$name
 ##     children_names <- setdiff(node_names, "Root")
-    
+
 ##     children_node_depth <-
 ##         vapply(children_names,
 ##                       function(node)
@@ -932,7 +932,7 @@ plot_genotype_counts_plly <- function(data) {
 ##    , font.best = 2
 ##    , vertex.frame.width = 0.5
 ##    , vertex.color = "white"
-##    , vertex.frame.color = "black" 
+##    , vertex.frame.color = "black"
 ##    , vertex.label.cex = 1
 ##    , edge.arrow.size = 1
 ##      ## , edge.arrow.width = 1
@@ -1026,9 +1026,9 @@ plot_HyperTraPS_as_evam_trans_mat <- function(cpm_output,
 }
 
 
-## like the summary of hypertraps but we give the labels
-## and we do not produce the transition matrix, since we can get
-## that from plot_HT_as_evam_trans_mat.
+## like the summary of hypertraps but we give
+## the motifs too and set some defaults to label,
+## node, and edge sizes
 plot_HyperTraPS_evam_summary <- function(cpm_output, f.thresh = 0.05,
                                          edge.label.size = 4,
                                          node.label.size = 4) {
