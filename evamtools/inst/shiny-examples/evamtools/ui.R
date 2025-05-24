@@ -1070,8 +1070,8 @@ column(width = 12,
                                                                  "(stepwise regularise model after best parameterisation; enabling it can considerably increase running time):", "", c(0, 1), selected = 0),
                                            inputWithHelperUnbold(numericInput, "HyperTraPS_samprow", "samples_per_row ",
                                                                  "(number of simulations per parameter sample):", "Number of samples to use for each parameter set when simulating routes and times for output", 10, min=1),
-                                           inputWithHelperUnbold(selectInput, "HyperTraPS_outtrans", "output_transitions ",
-                                                                 "(output exact transitions):", "", c(0, 1), selected = 1),
+                                           ## Always yes, and it is disabled for L > 15 by the code
+                                           ## inputWithHelperUnbold(selectInput, "HyperTraPS_outtrans", "output_transitions ",   "(output exact transitions):", "", c(0, 1), selected = 1),
 
                                            inputWithHelperUnbold(textInput, "HyperTraPS_prob.set", "prob.set ",
                                                                  "(probabilities of each of the sampling times, as a comma separated vector):", 'The default ("observed") means that the probability of genotypes is calculated under a sampling scheme where the proportion of genotypes with 0, 1, ..., up to all the features, is the same as the one in the input sample; the value "NA" means probability of genotypes is calculated under uniform probability of number of features (0, 1, 2, ..., up to all the features); if you want to specify a different sampling scheme, enter those probabilities.', value = "observed"),
