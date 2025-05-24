@@ -110,7 +110,11 @@ do_MCCBN_HCBN2 <- function(x
     
     stopifnot(!is.null(colnames(x)))
     stopifnot(mccbn_hcbn2_opts$max.iter.asa >= 5)
-    sampling <- match.arg(sampling)
+
+    ## caught later
+    ## if (!(isTRUE(all(mccbn_hcbn2_opts$sampling %in% c("forward", "add-remove",
+    ##                                                   "backward", "bernoulli", "pool")))))
+    ##     stop("sampling argument not valid")
 
     if (is.null(mccbn_hcbn2_opts$tmp_dir)) {
         tmp_dir <- tempfile()

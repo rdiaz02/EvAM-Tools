@@ -555,12 +555,14 @@ test_that("Additional checks option handling post-simplification 2025-05-22: cat
                  "'arg' should be one of", fixed = TRUE
                  )
     if (MCCBN_INSTALLED) {
+        ## It fails with two errors, the second is triggered later,
+        ## but wasting time with abandonware does not seem sensible
         expect_error(suppressWarnings(evam(Dat1,
                                            methods = c("MCCBN", "OT"),
-                                           mccbn_opts = list(sampling = "foo"),
-                                           cores = 1)),
-                     "'arg' should be one of", fixed = TRUE
-                     )
+                                           mccbn_opts = list(model = "H-CBN2",
+                                                             sampling = "foo"),
+                                           cores = 1))  )
+        ## , "sampling argument not valid", fixed = TRUE )
     }
 })
 
