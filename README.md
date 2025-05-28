@@ -437,6 +437,7 @@ The R package itself with standard organization. Directories and files under ins
 
    A video presentation of EvAM-Tools at the BCB Hub on 7 May 2025: https://youtu.be/WkqCfMFiJ3E
 
+   A [PDF of an introductory tutorial](./Additional_doc/como-2025-05-intro-tutorial.pdf) given at the [Como School on Cancer Evolution, CSCE 2025, 27-30 May 2025](https://csce.lakecomoschool.org/).
 
 ## Citing EvAM-Tools
 If you use the package or the web app, please **cite** the Bioinformatics paper:
