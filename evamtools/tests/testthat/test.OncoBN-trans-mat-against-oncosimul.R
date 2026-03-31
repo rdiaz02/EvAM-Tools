@@ -47,7 +47,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
                                        model = "CBN", algorithm = "DP")
     ex_dbn_cbn_c4c2 <- do_OncoBN(examples_csd$csd$c4c2$data,
                                          model = "CBN", algorithm = "DP")
-    
+
     all_examples_OR <- list(ex_dbn_and, ex_dbn_linear, ex_dbn_or, ex_dbn_xor,
                          ex_dbn_c1, ex_dbn_c3, ex_dbn_c4c2)
 
@@ -73,12 +73,12 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
         expect_equal(as.matrix(cpm2F2tm(data$edges, max_f = NULL)$transition_matrix),
                     as.matrix(cpm2F2tm(data$edges, max_f = maxff)$transition_matrix))
     }
-    
-   
+
+
     for(i in seq_along(all_ex)) {
         run_test_for_dataset(all_ex[[i]])
     }
-    
+
     ## Repeat with some examples from real data sets
     data(every_which_way_data)
 
@@ -98,7 +98,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
         tmp <- pre_process(tmp, remove.constant = FALSE)
         return(tmp)
     })
-        
+
     out_dd <- lapply(dd, function(d) do_OncoBN(d,
                                                         model = "DBN",
                                                         algorithm = "DP"))
@@ -106,7 +106,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
                                                         model = "CBN",
                                                         algorithm = "DP"))
 
-    
+
     ## The last four are slow tests
     for(i in seq_along(out_dd)) {
         run_test_for_dataset(out_dd[[i]])
@@ -138,7 +138,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
                            F = 0))
     d3 <- d2
     d3$C[(d3$A == 1) & (d3$B == 1)] <- 1
-    
+
     set.seed(22)
     d111 <- data.frame(A = sample(c(1, 0), prob = c(0.7, 0.2), size = 2000, replace = TRUE),
                      B = sample(c(1, 0), prob = c(0.85, 0.2), size = 2000, replace = TRUE))
@@ -162,7 +162,7 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     d333$C[(d333$A == 1) & (d333$B == 1)] <- 1
 
     set.seed(NULL)
-    
+
     d3_1 <- do_OncoBN(d3, model = "DBN", algorithm = "DP")
     d2_1 <- do_OncoBN(d2, model = "DBN", algorithm = "DP")
     d222_1 <- do_OncoBN(d222, model = "DBN", algorithm = "DP")
@@ -173,15 +173,15 @@ OncoSimulR's based cpm_to_trans_mat_oncosimul", {
     d222_1_AND <- do_OncoBN(d222, model = "CBN", algorithm = "DP")
     d333_1_AND <- do_OncoBN(d333, model = "CBN", algorithm = "DP")
 
-    
+
     all_mixed_examples <- list(d3_1, d2_1, d222_1, d333_1,
                                d3_1_AND, d2_1_AND, d222_1_AND, d333_1_AND)
-    
+
     for (ex in all_mixed_examples) {
         run_test_for_dataset(ex)
     }
     set.seed(NULL)
 })
 
-cat("\n Done test.DBN-trans-mat-against-oncosimul.R. Seconds = ",
+cat("\n Done test.OncoBN-trans-mat-against-oncosimul.R. Seconds = ",
     as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")
