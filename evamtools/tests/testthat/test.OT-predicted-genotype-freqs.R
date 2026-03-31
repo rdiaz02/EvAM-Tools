@@ -47,11 +47,11 @@ test_that("Genotype frequency predictions same as from OncoTree" , {
         names_genots <- apply(pred1_no0[, -c(1, ncol(pred1_no0))], 1,
                               function(v) paste(evamtools:::evam_string_sort(gene_names[v == 1])))
         names_genots <- unlist(lapply(names_genots, function(u) paste(u, collapse = ", ")))
-        names_genots[names_genots == ""] <- "WT"
         names_genots <- unname(names_genots)
+        names_genots[names_genots == ""] <- "WT"
 
         ot_preds <- pred1_no0$Prob
-        names(ot_preds) <- unname(names_genots)
+        names(ot_preds) <- names_genots
 
         ## Same genotypes
         expect_true(isTRUE(all.equal(sort(names(pred_manual.ov)),

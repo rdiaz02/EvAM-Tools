@@ -55,11 +55,12 @@ do_OncoBN <- function(data,
     thetas <- fit$theta
 
     ## No longer need
-    names(thetas) <- colnames(data)
+    ## names(thetas) <- colnames(data)
 
     if (is.null(names(thetas))) stop("fit$theta should be named. ",
                                     "You are probably using and old ",
                                     "version of OncoBN.")
+    ## This could not be false, give assignment above.
     stopifnot(identical(names(thetas), colnames(data)))
 
     ## No longer needed, though I do not like that
@@ -71,7 +72,11 @@ do_OncoBN <- function(data,
     adjm <- igraph::as_adjacency_matrix(
                         igraph::make_directed_graph(fit$edgelist))
 
-    
+    ## Contrary to what is claimed in that issue, where
+    ## it is said "the names of the adjacency are in the correct order"
+    ## that need not always be the case. Thus, I create
+    ## an adjacency that is correctly ordered.
+
     gn <- colnames(data)
     adjm <- adjm[c("WT", gn), c("WT", gn)]
     new_graph <- igraph::graph_from_adjacency_matrix(adjm)
@@ -86,10 +91,10 @@ do_OncoBN <- function(data,
 
     dbn_out$Relation <- ifelse(model == "DBN", "OR", "AND")
     dbn_out$Relation[dbn_out$From == "Root"] <- "Single"
-      
+
     ## The parent set is used for plotting
     ps_v <- parent_set_from_edges(dbn_out)
-    
+
     ## And single ORs are confusing
     dbn_out$Relation <- vapply(
         dbn_out$To,
@@ -101,7 +106,7 @@ do_OncoBN <- function(data,
     ir <- which(dbn_out$From == "Root")
     inr <- setdiff(seq_len(nrow(dbn_out)), ir)
     dbn_out <- dbn_out[c(ir, inr), ]
-    
+
     est_genots <- DBN_prob_genotypes(fit, colnames(data))
     ## Give a named vector for the predicted freqs of genotypes
     est_genots <- DBN_est_genots_2_named_genotypes(est_genots)
@@ -126,6 +131,10 @@ DBN_prob_genotypes <- function(fit, gene_names) {
     genotypes <- expand.grid(replicate(n, 0:1, simplify = FALSE))
     colnames(genotypes) <- gene_names
 
+    ## Beware: we have ensured in do_OncoBN thetas (fit$theta)
+    ## and the G have the same order of genes.
+    ## Otherwise, you get a complete mess.
+
     ## No longer needed, as Lik.genotype does the right thing now.
     ## Not quite: it doesn't and I am moving out common ops.
     ## Pre-check same order and proper naming
@@ -133,6 +142,7 @@ DBN_prob_genotypes <- function(fit, gene_names) {
     G <- t(as.matrix(as_adjacency_matrix(fit$graph)))
     stopifnot(colnames(genotypes) == colnames(G)[-1])
     stopifnot(colnames(G)[1] == "WT")
+    stopifnot(colnames(G)[-1] == names(fit$theta))
 
     ## ## Extract that code, and call GA_Likelihood.
     ## genotypes$Prob <- apply(genotypes, 1,
@@ -168,4 +178,3 @@ DBN_est_genots_2_named_genotypes <- function(odt) {
 ##   val <- GA_Likelihood(x, G, theta.in, fit$epsilon, fit$model)
 ##   return(val)
 ## }
-
