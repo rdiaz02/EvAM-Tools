@@ -1,0 +1,66 @@
+# -*- mode: org -*-
+# Emacs, this is an org mode file, though it ends on txt
+
+* MHN:
+- Most direct test: in test.probs-from-trm.R : compares against Schill's code (Generate.pTh). *This tests the function probs_from_trm*.
+  - This tests the probabilities themselves, and therefore also indirectly that the transition rate matrices are constructed correctly.
+
+- Direct for transition rate matrices: test.trans-rates-MHN.R . This  tests construction of transition rate matrices. trm0 is a fully hand-computed reference matrix (every entry built from exp(theta) products), and all algorithm variants are compared against it with expect_identical. There's even a specific numerical spot-check (eme1[3,3] * eme1[3,4] == trm0["D", "C, D"]), plus comparison against Schill's Build.Q.
+
+- Indirect: under evamtools/inst/miscell/tests-sample_genotypes_from_trm: this is a probabilistic comprobation and it does not test probs_from_trm but random samples from the transition rate matrix. So this is another test that the transition rate matrix is constructed correctly. It is not run routinely, though.
+
+- Indirect, not in use: you can run this, but this does not run in the standard checks: in test.probs-from-trm.R we compare, for MHN, CBN, and H-ESBCN, that probs_from_trm and sampling from the transition rate matrix give the same results. I've run it in the past, and things were fine (but terribly slow and this is not an automated test).
+
+* CBN and HESBCN
+- *probs_from_trm* is tested directly above. It is embedded in a test that also depends on constructing the trm correctly for MHN. But for this tests to work when probs_from_trm fails would require cancelling errors. The probability of this happening is essentially null.
+
+- Indirect, not in use: you can run this, but this does not run in the standard checks: in test.probs-from-trm.R we compare, for MHN, CBN, and H-ESBCN, that probs_from_trm and sampling from the transition rate matrix give the same results.
+
+** Tests of construction of transition rate matrices: TODO
+- Recall that the object called "weighted_fgraph" (weighted fitness graph) is "is the same as the transition rate matrix (with 0 in the diagonal)" (evam-wrapper.R).
+*** HESBCN
+- test.HESBCN-transition-rate-matrices.R. This is a direct test.
+- TODO: add another complex structure.
+- test.HESBCN-trans-mat-against-oncosimul.R: indirect test (tests against OncoSimulR). This is not a strong test, as it is conceivable (though very unlikely) that errors that keep ratios of rate constant could creep in undetected.
+*** CBN
+- TODO: add another complex structure. TODO: check test.CBN-transition-rate-matrices.R
+- test.trans-rates-f-graphs.R : this is a somewhat indirect test. weighted_paths_to_max is computed from paths and trans_mat (paths-to-global-max.R) and trans_mat_genotypes is computed from the weighted_fgraph (paths-to-global-max.R). To get weighted_paths_to_max correct when the transition rate matrix computation is wrong we would need cancelling errors.
+  - In this file there is an additional, though much weaker test, that compares against another, older, different version of the algorithm.
+- test.HESBCN-trans-mat-against-oncosimul.R: indirect test (tests against OncoSimulR). This is not a strong test, as it is conceivable (though very unlikely) that errors that keep ratios of rate constant could creep in undetected.
+
+
+* OT
+- Direct: test.OT-predicted-genotype-freqs.R: we test the predictions we give are the same as the ones given by Oncotree, when epos and eneg are 0.
+- Indirect: /evamtools/inst/miscell/OT_generate_data_sample_CPMs.R: what distribution.oncotree does compared to our code under different values of epos and eneg. We mainly compare data (which depends on having the same distribution of genotypes). This is an elaborate exploration of what epos, eneg mean and how sampling works (see section "Predicted genotype frequencies for OT and OncoBN" in EvAM-Tools/Additional_doc/evamtools_methods_details_faq.tex).
+
+
+* OncoBN
+- Direct: test.OncoBN-predicted-genotype-freqs.R: we test the predictions we give are the same as the ones given by OncoBN, both
+  when epsilon = 0, and when we use the epsilon from the fit.
+
+
+--------------------
+
+ How can I make another Claude review this work? If I close and open the session, the memory is left. So if I ask "write a  new implementation" the history is there.
+● The simplest option: I can spawn a review subagent right now using the Agent tool. Subagents get no conversation history —
+  just the prompt I write them. I can instruct it to read the test files cold and critique them.
+
+  Alternatively, in a new session: the conversation history is gone, so Claude starts fresh. The memory files only contain
+  high-level project/user preferences (nothing about what we just built), so they won't bias a review. You could just paste
+  the file paths and ask "review this test for correctness."
+
+  Want me to spawn the review subagent now? I'd give it something like: "Read these two test files and the DAG image. Without   any prior context, assess whether the tests correctly verify what they claim to verify. Look for bugs in the reference
+  implementation, incorrect accessible genotype sets, missing edge cases, and any logical errors."
+
+
+  - So:
+
+- Do this initially with the small just CBN and then with the big test:
+  - spawn subagent to criticize
+
+- Then, large one:
+    - create a new DAG and ask for the same test added to the file.
+    - spawn a subagent and ask to critice, ...
+    - move the file away; start a new session and ask to do the same again
+    - get a new claude to criticize and compare both implementations and to assess if they give identical results
+    - I compare both implementations

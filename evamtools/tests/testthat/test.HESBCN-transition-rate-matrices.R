@@ -192,20 +192,22 @@ against hand-computed ones", {
     compare_hesbcn_trms <- function(computed_trm, manual_trm){
         computed_trm <- computed_trm[rowSums(computed_trm) > 0, ]
         ## Same genotypes
-        computed_genotypes <- rownames(computed_trm)
         expect_equal(length(setdiff(rownames(computed_trm), rownames(manual_trm))), 0)
 
-        
-        ## By element comparison
+        ## By element comparison: check every non-zero entry in computed
+        ## matches the hand-computed reference.
+        ## Bugs in original: loop ran only once (length(nrow(.)) == 1),
+        ## and compared computed_trm against itself instead of manual_trm.
         filled_elements <- summary(computed_trm)[, c("i", "j")]
+        row_genots <- rownames(computed_trm)
+        col_genots <- colnames(computed_trm)
 
-        for (i in (1:length(nrow(filled_elements)))){
-            from_genotype <- computed_genotypes[filled_elements[i, 1]]
-            to_genotype <- computed_genotypes[filled_elements[i, 2]]
-
+        for (k in seq_len(nrow(filled_elements))) {
+            from_genotype <- row_genots[filled_elements[k, 1]]
+            to_genotype   <- col_genots[filled_elements[k, 2]]
             expect_equal(
-                computed_trm[from_genotype, to_genotype] ,
-                computed_trm[from_genotype, to_genotype] 
+                as.numeric(computed_trm[from_genotype, to_genotype]),
+                as.numeric(manual_trm[from_genotype, to_genotype])
             )
         }
         ## Bulk comparison

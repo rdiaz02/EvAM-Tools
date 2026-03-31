@@ -62,8 +62,8 @@ test_that("Genotype frequency predictions same as from OncoTree" , {
         if (!(colnames(G)[1] == "WT")) {
             message("fitCPN: adjacency matrix with WT not in column 1",
                     "recreating adjacency matrix and fit$graph")
-            cat("fitCPN: adjacency matrix with WT not in column 1",
-                "recreating adjacency matrix and fit$graph")
+            warning("fitCPN: adjacency matrix with WT not in column 1",
+                    "recreating adjacency matrix and fit$graph")
 
             adjm <- igraph::as_adjacency_matrix(
                                 igraph::make_directed_graph(fit$edgelist))
@@ -115,7 +115,7 @@ test_that("Genotype frequency predictions same as from OncoTree" , {
 
     ## Doing one should be enough, but we do a few rounds.
     ## The first uses the very original data set in Oncotree
-    ## The rest, change the gene names and some data radomly
+
     iter <- 12
     for (i in 0:iter) {
         if (i == 0) df1 <- ov.cgh
@@ -126,6 +126,7 @@ test_that("Genotype frequency predictions same as from OncoTree" , {
         if (i == 5) df1 <- examples_csd$csd$c1$data
         if (i == 6) df1 <- examples_csd$csd$c4c2$data
         if (i > 6) {
+            ## The rest, change the gene names and some data radomly
             df1 <- ov.cgh
             colnames(df1) <- sample(LETTERS, ncol(df1))
             which_flip <- rbinom(prod(dim(df1)), 1, 0.05)
@@ -191,7 +192,9 @@ test_that("Genotype frequency predictions same as from OncoTree" , {
         expect_true(isTRUE(all.equal(ev_d_p, obn_d_preds_epsilon[names(ev_d_p)])))
 
         ## When comparing the manual preds. with 0 epsilon
-        ## against evamtools fits, things differ
+        ## against evamtools fits, things differ. Note, though,
+        ## one of these could fail if epsilon happens to be exactly 0
+        ## (very unlikely, not impossible).
 
         expect_false(isTRUE(all.equal(ev_c_p[names(obn_c_manual_preds)], obn_c_manual_preds)))
         expect_false(isTRUE(all.equal(ev_d_p[names(obn_d_manual_preds)], obn_d_manual_preds)))

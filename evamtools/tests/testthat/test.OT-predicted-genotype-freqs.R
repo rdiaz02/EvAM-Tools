@@ -8,16 +8,8 @@ test_that("Genotype frequency predictions same as from OncoTree" , {
 
     ## Doing one should be enough, but we do a few rounds.
     ## The first uses the very original data set in Oncotree
-    ## The rest, change the gene names and some data radomly
     iter <- 12
     for (i in 0:iter) {
-        ## if (i > 0) {
-        ##     data(ov.cgh)
-        ##     colnames(ov.cgh) <- sample(LETTERS, ncol(ov.cgh))
-        ##     which_flip <- rbinom(prod(dim(ov.cgh)), 1, 0.05)
-        ##     which_flip <- matrix(which_flip, nrow = nrow(ov.cgh))
-        ##     ov.cgh <- abs(ov.cgh - which_flip)
-        ## }
         if (i == 0) df1 <- ov.cgh
         if (i == 1) df1 <- examples_csd$csd$AND$data
         if (i == 2) df1 <- examples_csd$csd$Linear$data
@@ -26,6 +18,7 @@ test_that("Genotype frequency predictions same as from OncoTree" , {
         if (i == 5) df1 <- examples_csd$csd$c1$data
         if (i == 6) df1 <- examples_csd$csd$c4c2$data
         if (i > 6) {
+            ## The rest, change the gene names and some data radomly
             df1 <- ov.cgh
             colnames(df1) <- sample(LETTERS, ncol(df1))
             which_flip <- rbinom(prod(dim(df1)), 1, 0.05)
