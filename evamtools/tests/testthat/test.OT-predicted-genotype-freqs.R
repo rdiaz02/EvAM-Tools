@@ -3,22 +3,37 @@ t1 <- Sys.time()
 test_that("Genotype frequency predictions same as from OncoTree" , {
     require(Oncotree)
     data(ov.cgh)
-
+    data(examples_csd)
     set.seed(NULL)
 
     ## Doing one should be enough, but we do a few rounds.
     ## The first uses the very original data set in Oncotree
     ## The rest, change the gene names and some data radomly
-    iter <- 3
+    iter <- 12
     for (i in 0:iter) {
-        if (i > 0) {
-            data(ov.cgh)
-            colnames(ov.cgh) <- sample(LETTERS, ncol(ov.cgh))
-            which_flip <- rbinom(prod(dim(ov.cgh)), 1, 0.05)
-            which_flip <- matrix(which_flip, nrow = nrow(ov.cgh))
-            ov.cgh <- abs(ov.cgh - which_flip)
+        ## if (i > 0) {
+        ##     data(ov.cgh)
+        ##     colnames(ov.cgh) <- sample(LETTERS, ncol(ov.cgh))
+        ##     which_flip <- rbinom(prod(dim(ov.cgh)), 1, 0.05)
+        ##     which_flip <- matrix(which_flip, nrow = nrow(ov.cgh))
+        ##     ov.cgh <- abs(ov.cgh - which_flip)
+        ## }
+        if (i == 0) df1 <- ov.cgh
+        if (i == 1) df1 <- examples_csd$csd$AND$data
+        if (i == 2) df1 <- examples_csd$csd$Linear$data
+        if (i == 3) df1 <- examples_csd$csd$OR$data
+        if (i == 4) df1 <- examples_csd$csd$XOR$data
+        if (i == 5) df1 <- examples_csd$csd$c1$data
+        if (i == 6) df1 <- examples_csd$csd$c4c2$data
+        if (i > 6) {
+            df1 <- ov.cgh
+            colnames(df1) <- sample(LETTERS, ncol(df1))
+            which_flip <- rbinom(prod(dim(df1)), 1, 0.05)
+            which_flip <- matrix(which_flip, nrow = nrow(df1))
+            df1 <- abs(df1 - which_flip)
         }
-        ov.tree <- oncotree.fit(ov.cgh)
+
+        ov.tree <- oncotree.fit(df1)
 
         ## force epos and eneg to 0
         ov.tree.e0 <- ov.tree
