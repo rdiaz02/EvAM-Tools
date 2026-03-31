@@ -1,7 +1,7 @@
 Package: evamtools
 Type: Package
 Title: Tools for evolutionary accumulation models or event accumulation models (evam), for now mainly cancer progression models
-Version: 3.3.4-pre
+Version: 3.3.400
 Date: 2025-03-31
 Authors@R: c(
             person("Ramon", "Diaz-Uriarte",

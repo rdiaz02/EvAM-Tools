@@ -55,6 +55,25 @@ test_that("Genotype frequency predictions same as from OncoTree" , {
         ## See https://github.com/phillipnicol/OncoBN/issues/3#issuecomment-1048814030
         G <- t(as.matrix(igraph::as_adjacency_matrix(fit$graph)))
 
+        ## Occasionally, we get runs of fitCPN that
+        ## have WT in a column that is not the first!
+        ## So the bug report is actually not solved.
+        ## If that happens, we have to recreate as in evamtools
+        if (!(colnames(G)[1] == "WT")) {
+            message("fitCPN: adjacency matrix with WT not in column 1",
+                    "recreating adjacency matrix and fit$graph")
+            cat("fitCPN: adjacency matrix with WT not in column 1",
+                "recreating adjacency matrix and fit$graph")
+
+            adjm <- igraph::as_adjacency_matrix(
+                                igraph::make_directed_graph(fit$edgelist))
+            gn <- setdiff(colnames(G), "WT")
+            adjm <- adjm[c("WT", gn), c("WT", gn)]
+            new_graph <- igraph::graph_from_adjacency_matrix(adjm)
+            fit$graph <- new_graph
+            G <- t(as.matrix(igraph::as_adjacency_matrix(fit$graph)))
+        }
+
         n <- ncol(G) - 1
         genotypes <- expand.grid(replicate(n, 0:1, simplify = FALSE))
         colnames(genotypes) <- colnames(G)[-1]
