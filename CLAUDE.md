@@ -28,3 +28,5 @@ This repository contains an R package (evamtools directory) and shiny R applicat
 - Never put 2 or more statements per line separated by a ";".
 
 - Use spaces around "+", "-", "=", "*", etc.
+
+- Please, DO NOT ask for permission to execute R code that tests the files you create. You have my permission.

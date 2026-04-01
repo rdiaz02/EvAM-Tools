@@ -248,3 +248,7 @@ test_that("CBN and HESBCN: comprehensive TRM, 9-gene DAG
 
 cat("\n Done test.CBN-HESBCN-comprehensive-trm.R. Seconds = ",
     as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")
+
+
+## ## the last one is very similar to
+## evamtools:::DAG_plot_graphAM(cbn_input$edges, "cbn_input")
