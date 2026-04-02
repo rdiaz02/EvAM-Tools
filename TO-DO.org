@@ -1,4 +1,7 @@
-* Try to decreased depended upon packages
+* Testing of input
+1. Input validation — the sanity_check_* functions are never tested to confirm they reject bad inputs. This won't produce wrong science (bad inputs would error out or produce garbage visibly), but a  regression could let malformed data through silently.
+2. fill_args_default / evam_opts_default_params — a mismatch between declared defaults and actual parameter names could cause options to be silently ignored, producing correct-looking output with wrong   settings. That one is more insidious.
+* Try to decrease depended upon packages
 - shiny and shinyjs only needed for shiny app, so enhances/suggests, not importFrom
 - remove all uses of stringr and replace by stringi, which we are already using
 * In call to evam in server.R (around line 2383), do not use only_used_methods = FALSE
