@@ -52,3 +52,9 @@ evamtools_1.1.1.tar.gz
 evamtools_1.1.2.tar.gz
 evamtools_1.1.3.tar.gz
 evamtools_1.1.4.tar.gz
+evamtools_*.tar.gz
+*~
+.aider.chat.history.md
+.aider.input.history
+.aider.tags.cache.v4/
+.claude/
