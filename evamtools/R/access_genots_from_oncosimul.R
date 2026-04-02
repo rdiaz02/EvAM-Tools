@@ -236,10 +236,14 @@ genots_2_fgraph_and_trans_mat <- function(x) {
 ##    accessible_genotypes: gives the genotypes and their fitness,
 ##                          computed from the lambdas (thetas) and possibly scaled
 ##   By default, WT has fitness 1.
+## We are using the new cpm_to_fitness_genots that can accept a value of
+## a; to keep the old behavior, we set a = 1.
 cpm_to_trans_mat_oncosimul <- function(x, max_f = NULL, sh = -Inf,
                                        max_genots = 2^15,
-                                       WT_fitness = 1.0) {
-    fitness_all <- cpm_to_fitness_genots(x, max_f = max_f, sh = sh,
+                                       WT_fitness = 1.0,
+                                       a = 1) {
+    fitness_all <- cpm_to_fitness_genots(x, a = a,
+                                         max_f = max_f, sh = sh,
                                          max_genots = max_genots)
 
     ## If we were to use wrap_accessibleGenotypes we would not
