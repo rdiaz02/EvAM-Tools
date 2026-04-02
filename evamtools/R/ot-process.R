@@ -242,13 +242,13 @@ dist_oncotree_output_2_named_genotypes <- function(odt) {
 
     ## If with.errors = FALSE, there can be missing genotypes
     odt <- reorder_to_standard_order(odt)
-
+    if (length(is.na(odt)))
         odt[is.na(odt)] <- 0
     return(odt)
 }
 
-# library(codetools)
-# checkUsageEnv(env = .GlobalEnv)
+## library(codetools)
+## checkUsageEnv(env = .GlobalEnv)
 
 ## Given model with From and To, return it sorted
 ## so that Root nodes on top, and the rest ordered
