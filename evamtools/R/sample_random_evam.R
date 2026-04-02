@@ -1118,7 +1118,7 @@ OT_model_2_output <- function(model, epos) {
     ## using a call in Oncotree, that expects and oncotree.fit object.
     
     if (any(model$OT_edgeWeight > 1) || any(model$OT_edgeWeight < 0))
-        stop("OncoBN's thetas must be between 0 and 1.")
+        stop("OT's weights must be between 0 and 1.")
     
     tmpo <- cpm2tm(list(edges = model))
     output <- list()
@@ -1145,11 +1145,12 @@ OT_model_2_predict_genots <- function(model, epos) {
     ## and weights have genes in same order
     adjm <- igraph::as_adjacency_matrix(
                        igraph::graph_from_data_frame(model[, c("From", "To")]))
-    stopifnot(colnames(adjm)[1] == "Root")
+    stopfinot("Root" %in% colnames(adjm))
     stopifnot(colnames(adjm) == rownames(adjm))
     ## Sort column names
     cnadjm_nor <- evam_string_sort(setdiff(colnames(adjm), "Root"))
     adjm <- adjm[c("Root", cnadjm_nor), c("Root", cnadjm_nor)]
+
     weights <- model$OT_edgeWeight
     names(weights) <- model$To
     weights <- weights[cnadjm_nor]
