@@ -1145,7 +1145,7 @@ OT_model_2_predict_genots <- function(model, epos) {
     ## and weights have genes in same order
     adjm <- igraph::as_adjacency_matrix(
                        igraph::graph_from_data_frame(model[, c("From", "To")]))
-    stopfinot("Root" %in% colnames(adjm))
+    stopifnot("Root" %in% colnames(adjm))
     stopifnot(colnames(adjm) == rownames(adjm))
     ## Sort column names
     cnadjm_nor <- evam_string_sort(setdiff(colnames(adjm), "Root"))
