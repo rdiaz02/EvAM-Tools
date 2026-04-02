@@ -38,21 +38,25 @@
 ######################################################################
 ######################################################################
 
-
 ## fitness, target max fitness. WT fitness always 1.
 scale_fitness_2 <- function(x, max_f) {
     max_x <- max(x)
-    if(max_x > 1e10) {
+    if (max_x > 1e10) {
         warning("Maximum fitness > 1e10. Expect numerical problems.")
     }
     return(1.0 +  (x - 1) * ((max_f - 1) / (max_x - 1)))
 }
 
 
+
+
 ## output from CPMs, sh if restrictions not satisfied ->
 ##                            input for OncoSimulR evalAllGenotypes
-cpm_out_to_oncosimul <- function(x, sh = -Inf) {
-    sh <- sh
+##  a: factor that multiplies lambda or p to give the s_i,
+##     selection coefficient. Generally 0.006 for CBN and HESBCN,
+##     0.02 for OT and OncoBN
+cpm_out_to_oncosimul <- function(x, a = 6e-3,
+                                 sh = -Inf) {
     
     if ("rerun_lambda" %in% names(x)) { ## CBN
         s <- x$rerun_lambda
@@ -62,9 +66,9 @@ cpm_out_to_oncosimul <- function(x, sh = -Inf) {
         typeDep <- "AND"
     } else if ("Relation" %in% names(x)) { ## HESBCN (same thing as PMCE)
         ## Also using this for DBN, as it could return an AND
-        if("Lambdas" %in% names(x) ) ## HESBCN
+        if ("Lambdas" %in% names(x) ) ## HESBCN
             s <- x$Lambdas
-        if("theta" %in% names(x) ) ## DBN
+        if ("theta" %in% names(x) ) ## DBN
             s <- x$theta
         typeDep <- x$Relation
         typeDep[typeDep == "Single"] <- "AND"
@@ -81,7 +85,7 @@ cpm_out_to_oncosimul <- function(x, sh = -Inf) {
     typeDep[typeDep == "XOR"] <- "XMPN"    
     x1 <- data.frame(parent = x$From,
                      child  = x$To,
-                     s = s,
+                     s = a * s,
                      sh = sh,
                      typeDep = typeDep
                      )
@@ -89,14 +93,21 @@ cpm_out_to_oncosimul <- function(x, sh = -Inf) {
 }
 
 
-## output from CPMs, max final fitness, sh when restrictions not stasified,
+
+## output from CPMs, multiplying constant to obtain s_i,
+##         max final fitness, sh when restrictions not stasified,
 ##         max num genots -> fitness of all genotypes
 ##    if max_f is NULL: no rescaling of fitness
 ##       max_f should have no effect in probs transition
 ##    max_genots: argument max of evalAllGenotypes
-cpm_to_fitness_genots <- function(x, max_f = NULL, sh = -Inf, max_genots = 2^15) {
-    x1 <- cpm_out_to_oncosimul(x, sh)
-    x1 <- evalAllGenotypes(fitnessEffects = allFitnessEffects(rT = x1),
+##    a: generally 0.006 for CBN and HESBCN, 0.02 for OT and OncoBN
+##       (see )
+cpm_to_fitness_genots <- function(x,
+                                  a,
+                                  max_f = NULL,
+                                  sh = -Inf, max_genots = 2^15) {
+    x1 <- cpm_out_to_oncosimul(x, a = a, sh = sh)
+    x1 <- OncoSimulR::evalAllGenotypes(fitnessEffects = OncoSimulR::allFitnessEffects(rT = x1),
                            addwt = TRUE, max = max_genots)
 
     ## In newer OncoSimulR, column names for Fitness can now be called Birth
@@ -117,6 +128,7 @@ cpm_to_fitness_genots <- function(x, max_f = NULL, sh = -Inf, max_genots = 2^15)
     }
     return(x1)
 }
+
 
 
 
@@ -270,4 +282,3 @@ cpm_to_trans_mat_oncosimul <- function(x, max_f = NULL, sh = -Inf,
 
 ## shorter
 cpm2F2tm <- cpm_to_trans_mat_oncosimul
-

@@ -162,12 +162,11 @@ DBN_prob_genotypes <- function(fit, gene_names) {
 DBN_est_genots_2_named_genotypes <- function(odt) {
     ## There is no column called Root, unlike OT
     gpnfr <- which(colnames(odt) == "Prob")
-    gpn_names <- genot_matrix_2_vector(odt[, -gpnfr])
+    gpn_names <- genot_matrix_2_vector(odt[, -gpnfr, drop = FALSE])
     odt <- as.vector(odt[, "Prob"])
     names(odt) <- gpn_names
     return(reorder_to_standard_order(odt))
 }
-
 
 
 ## Lik.genotype in commit aa039d3
