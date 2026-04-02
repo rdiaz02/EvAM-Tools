@@ -1042,14 +1042,15 @@ paths_probs_2_df <- function(x, order = c("prob", "path")) {
 ## With OncoBN at least, edges of theta 0 lead to
 ## genotypes that cannot exist. Clean up the adjacency matrix
 adjm_rm_no_access <- function(x) {
-    ## A single loop should be enough, I think.
-    ## But continue until done
+    ## A single loop should be enough for real.
+    ## But see example with cascading removal in tests.
     while (TRUE) {
         nacc <- which(colSums(x) == 0)
         wwt <- which(colnames(x) == "WT")
         nacc <- setdiff(nacc, wwt)
         if (length(nacc)) {
-            x <- x[-nacc, -nacc]
+            x <- x[-nacc, -nacc, drop = FALSE]
+            if (nrow(x) == 1) stop("No transitions from WT to anything in this model.")
         } else {
             break
         }
