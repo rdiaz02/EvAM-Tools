@@ -139,8 +139,8 @@ test_that("adjm_rm_no_access: all non-WT genotypes removed", {
         nrow = 3, ncol = 3, byrow = TRUE,
         dimnames = list(c("WT", "A", "B"), c("WT", "A", "B"))
     )
-    expect_error(evamtools:::adjm_rm_no_access(m),
-                 "No transitions from WT to anything in this model")
+    expect_message(evamtools:::adjm_rm_no_access(m),
+                   "No transitions from WT to anything in this model")
 
 })
 

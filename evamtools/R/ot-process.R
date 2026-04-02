@@ -235,20 +235,20 @@ dist_oncotree_output_2_named_genotypes <- function(odt) {
     ## is a column called Root, unlike OncoBN
     gpnroot <- which(colnames(odt) == "Root")
     gpnfr <- which(colnames(odt) == "Prob")
-    gpn_names <- genot_matrix_2_vector(odt[, -c(gpnroot, gpnfr)])
+    gpn_names <- genot_matrix_2_vector(odt[, -c(gpnroot, gpnfr), drop = FALSE])
     odt <- as.vector(odt[, "Prob"])
     names(odt) <- gpn_names
 
-
     ## If with.errors = FALSE, there can be missing genotypes
     odt <- reorder_to_standard_order(odt)
-
+    if (length(is.na(odt)))
         odt[is.na(odt)] <- 0
     return(odt)
 }
 
-# library(codetools)
-# checkUsageEnv(env = .GlobalEnv)
+
+## library(codetools)
+## checkUsageEnv(env = .GlobalEnv)
 
 ## Given model with From and To, return it sorted
 ## so that Root nodes on top, and the rest ordered

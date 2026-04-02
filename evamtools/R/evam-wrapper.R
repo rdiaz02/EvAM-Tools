@@ -1050,7 +1050,7 @@ adjm_rm_no_access <- function(x) {
         nacc <- setdiff(nacc, wwt)
         if (length(nacc)) {
             x <- x[-nacc, -nacc, drop = FALSE]
-            if (nrow(x) == 1) stop("No transitions from WT to anything in this model.")
+            if (nrow(x) == 1) message("No transitions from WT to anything in this model.")
         } else {
             break
         }
