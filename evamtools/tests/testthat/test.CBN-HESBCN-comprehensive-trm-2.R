@@ -368,6 +368,35 @@ test_that("DAG_6: CBN and HESBCN TRM, 7-gene DAG
     test_one_dag_2(dag6_edges, c("B", "C", "F"), "DAG6")
 })
 
+
+
+
+## ------------------------------------------------------------------
+## DAG_7: 6 genes — stacked multi-parent with shared ancestors
+##   Root -> D(1), E(2), G(3)
+##   {D,E,G} -> B(4)   [3-parent node]
+##   {E,G}   -> C(5)   [2-parent node; E,G shared with B]
+##   {B,C}   -> F(6)   [2-parent node; parents are themselves multi-parent]
+## Multi-parent nodes: B, C, F  ->  3^3 = 27 HESBCN cases
+## ------------------------------------------------------------------
+dag7_edges <- data.frame(
+    From = c("Root", "Root", "Root",
+             "D", "E", "G", "E", "G", "B", "C"),
+    To   = c("D", "E", "G",
+             "B", "B", "B", "C", "C", "F", "F"),
+    rerun_lambda = c(1, 2, 3,
+                     4, 4, 4, 5, 5, 6, 6),
+    stringsAsFactors = FALSE
+)
+
+test_that("DAG_7: CBN and HESBCN TRM, 6-gene DAG
+(stacked 3+2+2-parent nodes, shared ancestors, all AND/OR/XOR)", {
+    test_one_dag_2(dag7_edges, c("B", "C", "F"), "DAG7")
+})
+
+
+
+
 test_that("DAG_7: hand check on the XOR/XOR/AND", {
 
   d7m <- dag7_edges
@@ -411,36 +440,12 @@ test_that("DAG_7: hand check on the XOR/XOR/AND", {
 
 
 
-## ------------------------------------------------------------------
-## DAG_7: 6 genes — stacked multi-parent with shared ancestors
-##   Root -> D(1), E(2), G(3)
-##   {D,E,G} -> B(4)   [3-parent node]
-##   {E,G}   -> C(5)   [2-parent node; E,G shared with B]
-##   {B,C}   -> F(6)   [2-parent node; parents are themselves multi-parent]
-## Multi-parent nodes: B, C, F  ->  3^3 = 27 HESBCN cases
-## ------------------------------------------------------------------
-dag7_edges <- data.frame(
-    From = c("Root", "Root", "Root",
-             "D", "E", "G", "E", "G", "B", "C"),
-    To   = c("D", "E", "G",
-             "B", "B", "B", "C", "C", "F", "F"),
-    rerun_lambda = c(1, 2, 3,
-                     4, 4, 4, 5, 5, 6, 6),
-    stringsAsFactors = FALSE
-)
-
-test_that("DAG_7: CBN and HESBCN TRM, 6-gene DAG
-(stacked 3+2+2-parent nodes, shared ancestors, all AND/OR/XOR)", {
-    test_one_dag_2(dag7_edges, c("B", "C", "F"), "DAG7")
-})
-
-
 cat("\n Done test.CBN-HESBCN-comprehensive-trm-2.R. Seconds = ",
     as.vector(difftime(Sys.time(), t1, units = "secs")), "\n")
 
 
 ## About this testing file. It was written by Claude and
-## reviewd by a subagent. RDU then manually checked a few cases (DAG_6,
+## reviewd by a subagent. RDU then manually checked a few cases (DAG_7,
 ## with XOR, XOR, AND).
 
 ## The production code (cpm2tm) and reference share zero code,
