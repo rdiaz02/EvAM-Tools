@@ -368,6 +368,48 @@ test_that("DAG_6: CBN and HESBCN TRM, 7-gene DAG
     test_one_dag_2(dag6_edges, c("B", "C", "F"), "DAG6")
 })
 
+test_that("DAG_7: hand check on the XOR/XOR/AND", {
+
+  d7m <- dag7_edges
+  colnames(d7m)[3] <- "Lambdas"
+  d7m$Relation <- c(rep("Single", 3), rep("XOR", 5), rep("AND", 2))
+
+  computed_trm <- cpm2tm(list(edges = d7m))$weighted_fgraph
+
+  access_genots <- c("WT",
+                     "D", "E", "G",
+                     "B, D", "B, E", "B, G",
+                     "C, E", "C, G",
+                     "D, E", "D, G", "E, G",
+                     "B, C, E", "B, C, G",
+                     "C, D, E", "C, D, G",
+                     "D, E, G",
+                     "B, C, E, F",
+                     "B, C, F, G")
+
+  expected_trm <- matrix(0, nrow = length(access_genots),
+                         ncol = length(access_genots))
+  row.names(expected_trm) <- colnames(expected_trm) <- access_genots
+
+  expected_trm["WT", c("D", "E", "G")] <- c(1, 2, 3)
+  expected_trm["D", c("D, E", "D, G", "B, D")] <- c(2, 3, 4)
+  expected_trm["E", c("D, E", "E, G", "B, E", "C, E")] <- c(1, 3, 4, 5)
+  expected_trm["G", c("B, G", "E, G", "C, G", "D, G")] <- c(4, 2, 5, 1)
+  expected_trm["B, E", c("B, C, E")] <- c(5)
+  expected_trm["B, G", c("B, C, G")] <- c(5)
+  expected_trm["C, E", c("C, D, E", "B, C, E")] <- c(1, 4)
+  expected_trm["C, G", c("C, D, G", "B, C, G")] <- c(1, 4)
+  expected_trm["D, E", c("D, E, G", "C, D, E")] <- c(3, 5)
+  expected_trm["D, G", c("C, D, G", "D, E, G")] <- c(5, 2)
+  expected_trm["E, G", c("D, E, G")] <- c(1)
+  expected_trm["B, C, E", c("B, C, E, F")] <- c(6)
+  expected_trm["B, C, G", c("B, C, F, G")] <- c(6)
+
+  all.equal(expected_trm, as.matrix(computed_trm))
+
+})
+
+
 
 ## ------------------------------------------------------------------
 ## DAG_7: 6 genes — stacked multi-parent with shared ancestors

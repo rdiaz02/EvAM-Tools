@@ -1,16 +1,5 @@
 t1 <- Sys.time()
 
-## TODO
-## - Fix the multiple statements per line
-## - Fix the no spaces around "="
-## - brute_force_trm: Use sparse matrix
-## - brute_force_trm: Return in the "canonicalized order"
-
-## - Myself, by hand:
-##     - check list of accessible genotypes
-##     - check the entries
-
-
 ## Comprehensive test of CBN and HESBCN transition rate matrices using a
 ## single complex 9-gene DAG with parent-set sizes 4, 3, 2, and 1.
 ##
