@@ -8,3 +8,5 @@
 - I added it for now, in case it was used and to prevent mysterious failures. Remove if we can.
 * We are wasting 0.3 seconds in pre-/post-processing in evam wrapper
 - The timing difference of the analysis itself, as given by $elapsed_time and what the call to evam takes is about 0.3 for individual method calls, in Draco. This is huge.
+* MHN python:
+- Use my WIP wrapper BUT add to it the automatic rerun (for up to 3 times) under the DivisionByZero exception
